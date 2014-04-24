@@ -1,0 +1,14 @@
+packages/
+src/ADAL.WinRT/obj/
+bin/
+src/ADAL.NET.WindowsForms/obj/
+src/ADAL.NET/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
+src/ADAL.NET/obj/
+src/ADAL.WinRT/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
+tests/Test.ADAL.NET.Friend/obj/
+tests/Test.ADAL.NET.Unit/obj/
+tests/Test.ADAL.NET.WindowsForms/obj/
+tests/Test.ADAL.NET/obj/
+tests/Test.ADAL.WinRT.Dashboard/obj/
+tests/Test.ADAL.WinRT.Unit/obj/
+tests/Test.ADAL.WinRT/obj/
