@@ -94,14 +94,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                IHttpWebRequest request = HttpWebRequestFactory.Create(resourceUrl.AbsoluteUri);
+                IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(resourceUrl.AbsoluteUri);
                 request.ContentType = "application/x-www-form-urlencoded";
                 response = await request.GetResponseSyncOrAsync(callState);
                 throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UnauthorizedResponseExpected, ActiveDirectoryAuthenticationErrorMessage.UnauthorizedResponseExpected);
             }
             catch (WebException ex)
             {
-                response = HttpWebResponseFactory.Create(ex.Response);
+                response = NetworkPlugin.HttpWebRequestFactory.CreateResponse(ex.Response);
                 if (response == null)
                 {
                     throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);

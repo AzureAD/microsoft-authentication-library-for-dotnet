@@ -12,3 +12,5 @@ tests/Test.ADAL.NET/obj/
 tests/Test.ADAL.WinRT.Dashboard/obj/
 tests/Test.ADAL.WinRT.Unit/obj/
 tests/Test.ADAL.WinRT/obj/
+build/nuget/Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec
+TestResults/

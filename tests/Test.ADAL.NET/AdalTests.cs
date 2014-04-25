@@ -422,28 +422,5 @@ namespace Test.ADAL.Common
             Log.Comment("Verifying token expiration...");
             Verify.IsGreaterThanOrEqual(expiresIn, (long)0, "Token Expiration");
         }
-
-        private static void VerifySuccessResultAndTokenContent(Sts sts, AuthenticationResultProxy result, bool supportRefreshToken = true, bool supportUserInfo = true)
-        {
-            VerifySuccessResult(sts, result, supportRefreshToken, supportUserInfo);
-            if (supportUserInfo)
-            {
-                VerifyTokenContent(result);
-            }
-        }
-
-        private static void VerifyTokenContent(AuthenticationResultProxy result)
-        {
-
-            // Verify the token content confirms the user in AuthenticationResult.UserInfo
-            var token = new System.IdentityModel.Tokens.JwtSecurityToken(result.AccessToken);
-            foreach (var claim in token.Claims)
-            {
-                if (claim.Type == "upn")
-                {
-                    Verify.AreEqual(result.UserInfo.UserId, claim.Value);
-                }
-            }
-        }
     }
 }

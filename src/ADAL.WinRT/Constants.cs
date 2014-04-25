@@ -28,6 +28,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public const string CannotAccessUserInformation = "Cannot access user information. Check machine's Privacy settings or initialize UserCredential with userId";
         public const string RedirectUriAppIdMismatch = "The return URI provided does not match the app's ID";
+        public const string RedirectUriUnsupportedWithPromptBehaviorNever = "PromptBehavior.Never is supported in SSO mode only (i.e. no redirectUri)";
         public const string UnauthorizedUserInformationAccess = "Unauthorized accessing user information. Check application's 'Enterprise Authentication' capability";
     }
 }

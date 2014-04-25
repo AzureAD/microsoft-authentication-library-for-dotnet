@@ -388,14 +388,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AuthorizationResult authorizationResult = this.AcquireAuthorization(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters, callState);
 #endif
 
-// PromptBehavior.Never is not implemented in WinRT library yet.
-#if ADAL_WINRT
-#else
             if (promptBehavior == PromptBehavior.Never && authorizationResult.Error == OAuthError.LoginRequired)
             {
                 throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UserInteractionRequired, ActiveDirectoryAuthenticationErrorMessage.UserInteractionRequired);
             }
-#endif
 
             if (authorizationResult.Status == AuthorizationStatus.Succeeded)
             {

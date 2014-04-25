@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             set
             {
-                WebAuthenticationDialogFactory.ThrowIfUIAssemblyUnavailable();
+                WebUIFactory.ThrowIfUIAssemblyUnavailable();
                 this.ownerWindow = value;
             }
         }
@@ -852,7 +852,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private IWebUI CreateWebAuthenticationDialog(PromptBehavior promptBehavior)
         {
-            return WebAuthenticationDialogFactory.Create(promptBehavior, this.ownerWindow);
+            return NetworkPlugin.WebUIFactory.Create(promptBehavior, this.ownerWindow);
         }
 
         private AuthorizationResult AcquireAuthorization(string resource, string clientId, Uri redirectUri, string userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)

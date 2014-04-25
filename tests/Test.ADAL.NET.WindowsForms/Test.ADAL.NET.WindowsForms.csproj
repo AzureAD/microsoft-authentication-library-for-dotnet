@@ -70,6 +70,12 @@
     <Compile Include="..\Test.ADAL.Common\AdalTests.cs">
       <Link>Common\AdalTests.cs</Link>
     </Compile>
+    <Compile Include="..\Test.ADAL.Common\AdalTests2.cs">
+      <Link>Common\AdalTests2.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\AuthenticationContextProxy.cs">
+      <Link>Common\AuthenticationContextProxy.cs</Link>
+    </Compile>
     <Compile Include="..\Test.ADAL.Common\AuthenticationParametersProxy.cs">
       <Link>Common\AuthenticationParametersProxy.cs</Link>
     </Compile>
@@ -90,9 +96,6 @@
     </Compile>
     <Compile Include="..\Test.ADAL.Common\RelyingParty.cs">
       <Link>Common\RelyingParty.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.ADAL.Common\ShortLivedTokenCache.cs">
-      <Link>Common\ShortLivedTokenCache.cs</Link>
     </Compile>
     <Compile Include="..\Test.ADAL.Common\Sts.cs">
       <Link>Common\Sts.cs</Link>

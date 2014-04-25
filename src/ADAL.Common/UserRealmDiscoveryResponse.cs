@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             UserRealmDiscoveryResponse userRealmResponse;
             try
             {
-                IHttpWebRequest request = HttpWebRequestFactory.Create(userRealmEndpoint);
+                IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(userRealmEndpoint);
                 request.Method = "GET";
                 request.Accept = "application/json";
                 HttpHelper.AddCorrelationIdHeadersToRequest(request, callState);

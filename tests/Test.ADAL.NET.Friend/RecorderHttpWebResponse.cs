@@ -22,13 +22,39 @@ using System.Net;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
+using Test.ADAL.Common;
+
 namespace Test.ADAL.NET.Friend
 {
     class RecorderHttpWebResponse : IHttpWebResponse
     {
         private Stream responseStream;
 
-        private HttpStatusCode statusCode;
+        private readonly HttpStatusCode statusCode;
+        private readonly WebHeaderCollection headers;
+
+        public RecorderHttpWebResponse(WebResponse response)
+        {
+            this.responseStream = response.GetResponseStream();
+
+            var replayerWebResponse = response as ReplayerWebResponse;
+            var httpWebResponse = response as HttpWebResponse;
+            if (replayerWebResponse != null)
+            {
+                this.statusCode = replayerWebResponse.StatusCode;
+                this.headers = replayerWebResponse.Headers;
+            }
+            else if (httpWebResponse != null)
+            {
+                this.statusCode = httpWebResponse.StatusCode;
+                this.headers = httpWebResponse.Headers;
+            }
+            else
+            {
+                this.statusCode = HttpStatusCode.NotImplemented;
+                this.headers = new WebHeaderCollection();
+            }
+        }
 
         public RecorderHttpWebResponse(string responseString, HttpStatusCode statusCode)
         {
@@ -36,6 +62,7 @@ namespace Test.ADAL.NET.Friend
             SerializationHelper.StringToStream(responseString, responseStream);
             responseStream.Position = 0;
             this.statusCode = statusCode;
+            this.headers = new WebHeaderCollection();
         }
 
         public HttpStatusCode StatusCode
@@ -50,7 +77,7 @@ namespace Test.ADAL.NET.Friend
         {
             get
             {
-                return new WebHeaderCollection();
+                return this.headers;
             }
         }
 

@@ -18,7 +18,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Test.ADAL.WinRT
 {
@@ -33,14 +35,13 @@ namespace Test.ADAL.WinRT
         ClearDefaultTokenCache,
         SetEnvironmentVariable,
         SetCorrelationId,
-        ClearDefaultToSSOMode,
         ClearUseCorporateNetwork,
-        SetDefaultToSSOMode,
         SetUseCorporateNetwork,
         CreateContextA,
         CreateContextAV,
         CreateContextAVC,
         AquireTokenAsyncRC,
+        AquireTokenAsyncRCP,
         AquireTokenAsyncRCUP,
         AquireTokenAsyncRCR,
         AquireTokenAsyncRCRU,

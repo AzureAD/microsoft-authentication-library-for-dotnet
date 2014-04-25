@@ -93,11 +93,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             WebException exception = innerException as WebException;
             if (exception != null)
             {
-                var response = (HttpWebResponse)(exception.Response);
-                if (response != null)
-                {
-                    this.InnerStatusCode = (int)response.StatusCode;
-                }
+                IHttpWebResponse response = NetworkPlugin.HttpWebRequestFactory.CreateResponse(exception.Response);
+                this.InnerStatusCode = (int)response.StatusCode;
             }
         }
 

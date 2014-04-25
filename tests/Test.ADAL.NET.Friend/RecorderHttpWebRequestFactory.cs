@@ -16,10 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Net;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -27,9 +24,14 @@ namespace Test.ADAL.NET.Friend
 {
     class RecorderHttpWebRequestFactory : IHttpWebRequestFactory
     {
-        public IHttpWebRequest CreateInstance(string uri)
+        public IHttpWebRequest Create(string uri)
         {
             return new RecorderHttpWebRequest(uri);
+        }
+
+        public IHttpWebResponse CreateResponse(WebResponse response)
+        {
+            return new RecorderHttpWebResponse(response);
         }
     }
 }

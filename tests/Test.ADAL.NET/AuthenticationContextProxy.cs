@@ -42,28 +42,12 @@ namespace Test.ADAL.Common
         Unknown
     }
 
-    internal class AuthenticationContextProxy
+    internal partial class AuthenticationContextProxy
     {
         private const string NotSpecified = "NotSpecified";
 
         private static string userName;
         private static string password;
-
-        private readonly AuthenticationContext context;
-
-        private const string FixedCorrelationId = "2ddbba59-1a04-43fb-b363-7fb0ae785030";
-
-        public AuthenticationContextProxy(string authority)
-        {
-            this.context = new AuthenticationContext(authority);
-            this.context.CorrelationId = new Guid(FixedCorrelationId);
-        }
-
-        public AuthenticationContextProxy(string authority, bool validateAuthority)
-        {
-            this.context = new AuthenticationContext(authority, validateAuthority);
-            this.context.CorrelationId = new Guid(FixedCorrelationId);
-        }
 
         public AuthenticationContextProxy(string authority, bool validateAuthority, TokenCacheStoreType tokenCacheStoreType)
         {
@@ -71,10 +55,6 @@ namespace Test.ADAL.Common
             if (tokenCacheStoreType == TokenCacheStoreType.InMemory)
             {
                 tokenCacheStore = new Dictionary<TokenCacheKey, string>();
-            }
-            else if (tokenCacheStoreType == TokenCacheStoreType.ShortLived)
-            {
-                tokenCacheStore = new ShortLivedTokenCache();
             }
 
             this.context = new AuthenticationContext(authority, validateAuthority, tokenCacheStore);

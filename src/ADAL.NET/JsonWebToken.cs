@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public JsonWebToken(string audience, string issuer, uint allowedLifetimeInSeconds, string subject = null)
         {
-            DateTime validFrom = NetworkPlugin.DateTimeHelper.UtcNow;
+            DateTime validFrom = NetworkPlugin.RequestCreationHelper.GetJsonWebTokenValidFrom();
 
             DateTime validTo = validFrom + TimeSpan.FromSeconds(allowedLifetimeInSeconds);
 
@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static string EncodeSegment(string segment)
         {
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(segment));
+            return UrlEncodeSegment(Encoding.UTF8.GetBytes(segment));
         }
 
         private static string UrlEncodeSegment(byte[] segment)

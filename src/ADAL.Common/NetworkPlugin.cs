@@ -16,6 +16,9 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Net;
+
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using System;
 
@@ -25,27 +28,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         static NetworkPlugin()
         {
-            DateTimeHelper = new DefaultDateTimeHelper();
+            SetToDefault();
         }
 
-        public static IWebUI WebUI { get; set; }
+        public static IWebUIFactory WebUIFactory { get; set; }
         public static IHttpWebRequestFactory HttpWebRequestFactory { get; set; }
-        public static IDateTimeHelper DateTimeHelper { get; set; }
-    }
+        public static IRequestCreationHelper RequestCreationHelper { get; set; }
 
-    internal interface IDateTimeHelper
-    {
-        DateTime UtcNow { get; }
-    }
-
-    internal class DefaultDateTimeHelper: IDateTimeHelper
-    {
-        public DateTime UtcNow
+        public static void SetToDefault()
         {
-            get
-            {
-                return DateTime.UtcNow; 
-            }
+            WebUIFactory = new WebUIFactory();
+            HttpWebRequestFactory = new HttpWebRequestFactory();
+            RequestCreationHelper = new RequestCreationHelper();            
         }
     }
 }

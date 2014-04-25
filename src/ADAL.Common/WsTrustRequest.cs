@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static async Task<WsTrustResponse> SendRequestAsync(Uri url, UserCredential credential, CallState callState)
         {
-            IHttpWebRequest request = HttpWebRequestFactory.Create(url.AbsoluteUri);
+            IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(url.AbsoluteUri);
             request.ContentType = "application/soap+xml; charset=utf-8";
             if (credential.UserAuthType == UserAuthType.IntegratedAuth)
             {
