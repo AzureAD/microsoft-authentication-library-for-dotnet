@@ -55,7 +55,6 @@ namespace Test.ADAL.NET.WindowsForms
             this.RunTest(AdalTests.AcquireTokenPositiveWithDefaultCacheTest);
             this.RunTest(AdalTests.AcquireTokenPositiveWithInMemoryCache);
             this.RunTest(AdalTests.AcquireTokenPositiveWithNullCache);
-            this.RunTest(AdalTests.AcquireTokenPositiveWithShortLivedCache);
             this.RunTest(AdalTests.UserInfoTest);
             await this.RunTestAsync(AdalTests.MultiResourceRefreshTokenTestAsync);
             this.RunTest(AdalTests.TenantlessTest);

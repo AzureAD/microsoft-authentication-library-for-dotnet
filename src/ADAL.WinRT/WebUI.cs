@@ -28,10 +28,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class WebUI : IWebUI
     {
+        private readonly PromptBehavior promptBehavior;
         private readonly bool useCorporateNetwork;
 
-        public WebUI(bool useCorporateNetwork)
+        public WebUI(PromptBehavior promptBehavior, bool useCorporateNetwork)
         {
+            this.promptBehavior = promptBehavior;
             this.useCorporateNetwork = useCorporateNetwork;
         }
 
@@ -39,34 +41,62 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             WebAuthenticationResult webAuthenticationResult;
 
-            try
+            if (redirectUri.AbsoluteUri == WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri)
             {
-                if (redirectUri.AbsoluteUri == WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri)
+                WebAuthenticationOptions options;
+                if (this.useCorporateNetwork)
                 {
-                    if (this.useCorporateNetwork)
-                    {
-                        // SSO Mode with CorporateNetwork
-                        webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(WebAuthenticationOptions.UseCorporateNetwork, authorizationUri);
-                    }
-                    else
-                    {
-                        // SSO Mode
-                        webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(WebAuthenticationOptions.None, authorizationUri);
-                    }
+                    // SSO Mode with CorporateNetwork
+                    options = WebAuthenticationOptions.UseCorporateNetwork;
                 }
-                else if (redirectUri.Scheme == "ms-app")
-                {
-                    throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.RedirectUriAppIdMismatch, "redirectUri");
+                else if (this.promptBehavior == PromptBehavior.Never)
+                {                
+                    // SSO Mode
+                    options = WebAuthenticationOptions.SilentMode;
                 }
                 else
+                {                
+                    // SSO Mode
+                    options = WebAuthenticationOptions.None;
+                }
+
+                try
+                {
+                        webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri);
+                }
+                catch (FileNotFoundException ex)
+                {
+                    throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.AuthenticationUiFailed, ex);
+                }
+                catch (Exception ex)
+                {
+                    if (this.promptBehavior == PromptBehavior.Never)
+                    {
+                        throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UserInteractionRequired, ex);
+                    }
+
+                    throw;
+                }
+            }
+            else if (this.promptBehavior == PromptBehavior.Never)
+            {
+                throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
+            }
+            else if (redirectUri.Scheme == "ms-app")
+            {
+                throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.RedirectUriAppIdMismatch, "redirectUri");
+            }
+            else
+            {
+                try
                 {
                     // Non-SSO Mode
                     webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(WebAuthenticationOptions.None, authorizationUri, redirectUri);
                 }
-            }
-            catch (FileNotFoundException ex)
-            {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.AuthenticationUiFailed, ex);
+                catch (FileNotFoundException ex)
+                {
+                    throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.AuthenticationUiFailed, ex);
+                }
             }
 
             AuthorizationResult result;

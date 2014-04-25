@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             XDocument mexDocument;
             try
             {
-                IHttpWebRequest request = HttpWebRequestFactory.Create(federationMetadataUrl);
+                IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(federationMetadataUrl);
                 request.Method = "GET";
                 request.ContentType = "application/soap+xml";
                 using (var response = await request.GetResponseSyncOrAsync(callState))

@@ -277,11 +277,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string WsTrustEndpointNotFoundInMetadataDocument = "WS-Trust endpoint not found in metadata document";
     }
 
-    internal static class Constant
-    {
-        public const string ContentTypeHttpHeader = "Content-Type";
-    }
-
     internal static class AuthenticationConstant
     {
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes

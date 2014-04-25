@@ -86,10 +86,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 #if !ADAL_WINRT
             if (callState != null && callState.CallSync)
             {
-                return HttpWebResponseFactory.Create(this.request.GetResponse());
+                return NetworkPlugin.HttpWebRequestFactory.CreateResponse(this.request.GetResponse());
             }
 #endif
-            return HttpWebResponseFactory.Create(await this.request.GetResponseAsync());
+            return NetworkPlugin.HttpWebRequestFactory.CreateResponse(await this.request.GetResponseAsync());
         }
 
         public async Task<Stream> GetRequestStreamSyncOrAsync(CallState callState)

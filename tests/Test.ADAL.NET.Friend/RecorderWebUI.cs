@@ -17,44 +17,36 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.IO;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Test.ADAL.NET.Friend
 {
-    public class RecorderWebUI : IWebUI
+    public class RecorderWebUI : RecorderBase, IWebUI
     {
         private const string Delimiter = ":::";
-        private const string DictionaryFilename = @"recorded_webui.dat";
-        private readonly string dictionaryFilePath;
         private readonly IWebUI internalWebUI;
 
-        private readonly Dictionary<string, string> iOMap;
-        public RecorderWebUI(PromptBehavior promptBehavior)
+        static RecorderWebUI()
         {
-            this.dictionaryFilePath = RecorderSettings.Path + DictionaryFilename;
-            this.internalWebUI = WebAuthenticationDialogFactory.Create(promptBehavior);
-            this.iOMap = (RecorderSettings.Mode == RecorderMode.Replay && File.Exists(this.dictionaryFilePath)) ? 
-                SerializationHelper.DeserializeDictionary(this.dictionaryFilePath) : new Dictionary<string, string>();
+            Initialize();
+        }
+
+        public RecorderWebUI(PromptBehavior promptBehavior, object ownerWindow)
+        {
+            this.internalWebUI = (new WebUIFactory()).Create(promptBehavior, ownerWindow);
         }
 
         public object OwnerWindow { get; set; }
-
-        public void WriteToFile()
-        {
-            SerializationHelper.SerializeDictionary(this.iOMap, this.dictionaryFilePath);            
-        }
 
         public string Authenticate(Uri requestUri, Uri callbackUri)
         {
             string key = requestUri.AbsoluteUri + callbackUri.AbsoluteUri;
             string value = null;
 
-            if (this.iOMap.ContainsKey(key))
+            if (IOMap.ContainsKey(key))
             {
-                value = this.iOMap[key];
+                value = IOMap[key];
                 if (value[0] == 'P')
                 {
                     return value.Substring(1);
@@ -93,7 +85,7 @@ namespace Test.ADAL.NET.Friend
             {
                 if (value != null)
                 {
-                    this.iOMap.Add(key, value);
+                    IOMap.Add(key, value);
                 }
             }
         }

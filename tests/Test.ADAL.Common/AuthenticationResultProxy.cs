@@ -28,8 +28,7 @@ namespace Test.ADAL.Common
     internal enum TokenCacheStoreType
     {
         Null,
-        InMemory,
-        ShortLived
+        InMemory
     }
 
     internal enum PromptBehaviorProxy

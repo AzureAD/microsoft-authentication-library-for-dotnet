@@ -20,9 +20,5 @@ namespace Test.ADAL.Common
 {
     internal partial class AdalTests
     {
-        private static void VerifySuccessResultAndTokenContent(Sts sts, AuthenticationResultProxy result, bool supportRefreshToken = true, bool supportUserInfo = true)
-        {
-            VerifySuccessResult(sts, result, supportRefreshToken, supportUserInfo);
-        }
     }
 }

@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public JsonWebToken(string audience, string issuer, uint allowedLifetimeInSeconds, string subject = null)
         {
-            DateTime validFrom = NetworkPlugin.DateTimeHelper.UtcNow;
+            DateTime validFrom = NetworkPlugin.RequestCreationHelper.GetJsonWebTokenValidFrom();
 
             DateTime validTo = validFrom + TimeSpan.FromSeconds(allowedLifetimeInSeconds);
 

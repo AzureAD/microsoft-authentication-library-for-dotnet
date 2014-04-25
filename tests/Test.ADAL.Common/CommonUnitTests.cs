@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Net;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.Common
@@ -34,7 +35,7 @@ namespace Test.ADAL.Common
 
         public static void AdalIdTest()
         {
-            IHttpWebRequest request = HttpWebRequestFactory.Create("https://test");
+            IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create("https://test");
             AdalIdHelper.AddAsHeaders(request);
 
             Verify.AreEqual(4, request.Headers.Count);

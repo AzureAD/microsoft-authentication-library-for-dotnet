@@ -16,10 +16,14 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Net;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     interface IHttpWebRequestFactory
     {
-        IHttpWebRequest CreateInstance(string uri);
+        IHttpWebRequest Create(string uri);
+
+        IHttpWebResponse CreateResponse(WebResponse response);
     }
 }

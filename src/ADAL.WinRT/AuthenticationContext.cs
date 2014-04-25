@@ -145,6 +145,58 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
+        /// Acquires security token from the authority.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="promptBehavior">If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.</param>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, PromptBehavior promptBehavior)
+        {
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), null, promptBehavior));
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="promptBehavior">If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, PromptBehavior promptBehavior, string extraQueryParameters)
+        {
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), null, promptBehavior, extraQueryParameters));
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="userId">This parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. This parameter can be null.</param>
+        /// <param name="promptBehavior">If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.</param>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, string userId, PromptBehavior promptBehavior)
+        {
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), userId, promptBehavior));
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="userId">This parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. This parameter can be null.</param>
+        /// <param name="promptBehavior">If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, string userId, PromptBehavior promptBehavior, string extraQueryParameters)
+        {
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), userId, promptBehavior, extraQueryParameters));
+        }
+
+        /// <summary>
         /// Acquires a security token from the authority using a Refresh Token previously received.
         /// </summary>
         /// <param name="refreshToken">Refresh Token to use in the refresh flow.</param>
@@ -170,8 +222,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private IWebUI CreateWebAuthenticationDialog(PromptBehavior promptBehavior)
         {
-            // TODO: Pass promptBehavior as well to be used for silent mode
-            return new WebUI(this.UseCorporateNetwork);
+            return NetworkPlugin.WebUIFactory.Create(promptBehavior, this.UseCorporateNetwork);
         }
     
         private async Task<AuthorizationResult> AcquireAuthorizationAsync(string resource, string clientId, Uri redirectUri, string userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)

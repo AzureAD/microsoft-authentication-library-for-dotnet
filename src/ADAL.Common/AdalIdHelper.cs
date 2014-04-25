@@ -61,13 +61,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public static void AddAsQueryParameters(RequestParameters parameters)
         {
-            AddAdalIdParameters(parameters);
+            NetworkPlugin.RequestCreationHelper.AddAdalIdParameters(parameters);
         }
 
         public static void AddAsHeaders(IHttpWebRequest request)
         {
             Dictionary<string, string> headers = new Dictionary<string, string>();
-            AddAdalIdParameters(headers);
+            NetworkPlugin.RequestCreationHelper.AddAdalIdParameters(headers);
             HttpHelper.AddHeadersToRequest(request, headers);
         }
 
@@ -87,24 +87,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return (attribute != null) ? attribute.InformationalVersion : string.Empty;
         }
 
-        private static void AddAdalIdParameters(IDictionary<string, string> parameters)
+        public static string GetProcessorArchitecture()
         {
-            parameters[AdalIdParameter.Product] = PlatformSpecificHelper.GetProductName();
-            parameters[AdalIdParameter.Version] = GetAdalVersion();
-            parameters[AdalIdParameter.CpuPlatform] = NativeMethods.GetProcessorArchitecture();
-
-#if ADAL_WINRT
-            // In WinRT, there is no way to reliably get OS version. All can be done reliably is to check 
-            // for existence of specific features which does not help in this case, so we do not emit OS in WinRT.
-
-            var deviceInformation = new Windows.Security.ExchangeActiveSyncProvisioning.EasClientDeviceInformation();
-            parameters[AdalIdParameter.DeviceModel] = deviceInformation.SystemProductName;
-
-#else
-            parameters[AdalIdParameter.OS] = Environment.OSVersion.ToString();
-
-            // Since ADAL .NET may be used on servers, for security reasons, we do not emit device type.
-#endif
+            return NativeMethods.GetProcessorArchitecture();
         }
 
         private static class NativeMethods
