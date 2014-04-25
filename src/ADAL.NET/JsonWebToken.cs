@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static string EncodeSegment(string segment)
         {
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(segment));
+            return UrlEncodeSegment(Encoding.UTF8.GetBytes(segment));
         }
 
         private static string UrlEncodeSegment(byte[] segment)
