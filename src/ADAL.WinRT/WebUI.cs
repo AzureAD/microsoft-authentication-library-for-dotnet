@@ -49,15 +49,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     // SSO Mode with CorporateNetwork
                     options = WebAuthenticationOptions.UseCorporateNetwork;
                 }
-                else if (this.promptBehavior == PromptBehavior.Never)
-                {                
-                    // SSO Mode
-                    options = WebAuthenticationOptions.SilentMode;
-                }
                 else
                 {                
                     // SSO Mode
                     options = WebAuthenticationOptions.None;
+                }
+
+                if (this.promptBehavior == PromptBehavior.Never)
+                {                
+                    // SSO Mode
+                    options |= WebAuthenticationOptions.SilentMode;
                 }
 
                 try
