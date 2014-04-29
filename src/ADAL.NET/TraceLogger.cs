@@ -18,33 +18,34 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Common;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class Logger
+    internal class TraceLogger : ILogger
     {
-        public static void Verbose(CallState callState, string format, params object[] args)
+        public void Verbose(CallState callState, string format, params object[] args)
         {
             // TODO: This is temporary code. Replace it with correct implementation for Verbose level
             Trace.TraceInformation(PrepareLogMessage(callState, format, args));
         }
 
-        public static void Information(CallState callState, string format, params object[] args)
+        public void Information(CallState callState, string format, params object[] args)
         {
             Trace.TraceInformation(PrepareLogMessage(callState, format, args));
         }
 
-        public static void Warning(CallState callState, string format, params object[] args)
+        public void Warning(CallState callState, string format, params object[] args)
         {
             Trace.TraceWarning(PrepareLogMessage(callState, format, args));
         }
 
-        public static void Error(CallState callState, string format, params object[] args)
+        public void Error(CallState callState, string format, params object[] args)
         {
             Trace.TraceError(PrepareLogMessage(callState, format, args));
         }
 
-        public static string PrepareLogMessage(CallState callState, string format, params object[] args)
+        internal string PrepareLogMessage(CallState callState, string format, params object[] args)
         {
             return string.Format(CultureInfo.CurrentCulture, format, args) + (callState != null ? (". Correlation ID: " + callState.CorrelationId) : string.Empty);
         }

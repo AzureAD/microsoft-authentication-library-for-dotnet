@@ -101,7 +101,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal char[] PasswordToCharArray()
         {
-            return (this.Password != null) ? this.Password.ToCharArray() : this.SecurePassword.ToCharArray();
+            if (this.SecurePassword != null)
+            {
+                return this.SecurePassword.ToCharArray();
+            }
+
+            if (this.Password != null)
+            {
+                return this.Password.ToCharArray();
+            }
+
+            return null;
         }
 #endif
     }

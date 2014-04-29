@@ -22,11 +22,14 @@ using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Common;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static class HttpHelper
     {
+        private static ILogger logger = LoggerFactory.getLogger();
+
         public static async Task<T> SendPostRequestAndDeserializeJsonResponseAsync<T>(string uri, RequestParameters requestParameters, CallState callState)
         {
             try
@@ -162,11 +165,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Guid correlationIdInResponse;
                     if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
                     {
-                        Logger.Information(callState, "Returned correlation id '{0}' is not in GUID format.", correlationIdHeader);
+                        logger.Information(callState, "Returned correlation id '{0}' is not in GUID format.", correlationIdHeader);
                     }
                     else if (correlationIdInResponse != callState.CorrelationId)
                     {
-                        Logger.Information(callState, "Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, callState.CorrelationId);
+                        logger.Information(callState, "Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, callState.CorrelationId);
                     }
 
                     break;

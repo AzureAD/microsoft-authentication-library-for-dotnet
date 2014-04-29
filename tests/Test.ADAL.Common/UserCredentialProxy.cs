@@ -25,7 +25,7 @@ namespace Test.ADAL.Common
     public sealed class UserCredentialProxy
     {
         public UserCredentialProxy(string userId)
-            : this(userId, null)
+            : this(userId, (string)null)
         {
         }
 

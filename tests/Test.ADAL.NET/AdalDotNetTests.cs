@@ -332,6 +332,24 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
+        [Description("Test for password grant flow using secure string")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
+        public async Task AcquireTokenSecureStringUsingPasswordGrant()
+        {
+            await AdalTests.AcquireTokenSecureStringUsingPasswordGrant(Sts);
+        }
+
+        [TestMethod]
+        [Description("Test for password grant flow using string")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
+        public async Task AcquireTokenUsingPasswordGrant()
+        {
+            await AdalTests.AcquireTokenUsingPasswordGrant(Sts);
+        }
+
+        [TestMethod]
         [Description("Test for Confidential Client with self signed jwt")]
         [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]

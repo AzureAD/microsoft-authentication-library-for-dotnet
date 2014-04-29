@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Security;
+
 namespace Test.ADAL.Common
 {
     using System;
@@ -48,6 +50,7 @@ namespace Test.ADAL.Common
 
         private static string userName;
         private static string password;
+        private static SecureString securePassword;
 
         public AuthenticationContextProxy(string authority, bool validateAuthority, TokenCacheStoreType tokenCacheStoreType)
         {
@@ -83,6 +86,23 @@ namespace Test.ADAL.Common
         {
             userName = userNameIn;
             password = passwordIn;
+        }
+
+        public static void SetSecureCredentials(string userNameIn, SecureString passwordIn)
+        {
+            userName = userNameIn;
+            securePassword = passwordIn;
+        }
+
+
+        public static SecureString convertToSecureString(string strPassword)
+        {
+            var secureStr = new SecureString();
+            if (strPassword.Length > 0)
+            {
+                foreach (var c in strPassword.ToCharArray()) secureStr.AppendChar(c);
+            }
+            return secureStr;
         }
 
         public static void Delay(int sleepMilliSeconds)
@@ -164,6 +184,16 @@ namespace Test.ADAL.Common
                 return RunTask(() => this.context.AcquireTokenByRefreshToken(refreshToken, clientId));
 
             return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId));
+        }
+
+        public async Task<AuthenticationResultProxy> AcquireTokenUsingPasswordGrantAsync(string clientId, string resource)
+        {
+            if (securePassword == null)
+            {
+            return await RunTaskAsync(this.context.AcquireTokenAsync(clientId, resource, userName, password));
+            }
+
+            return await RunTaskAsync(this.context.AcquireTokenAsync(clientId, resource, userName, securePassword));
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, string resource)

@@ -19,6 +19,7 @@
 using System.Net;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Common;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -40,6 +41,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = "federation_active_auth_url")]
         public string FederationActiveAuthUrl { get; set; }
 
+        private static ILogger logger = LoggerFactory.getLogger();
+
         internal static async Task<UserRealmDiscoveryResponse> CreateByDiscoveryAsync(string userRealmUri, string userId, CallState callState)
         {
             if (string.IsNullOrWhiteSpace(userId))
@@ -51,7 +54,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             userRealmEndpoint += (userId + "?api-version=1.0");
 
             userRealmEndpoint = HttpHelper.CheckForExtraQueryParameter(userRealmEndpoint);
-            Logger.Information(callState, "Sending user realm discovery request to '{0}'", userRealmEndpoint);
+            logger.Information(callState, "Sending user realm discovery request to '{0}'", userRealmEndpoint);
 
             UserRealmDiscoveryResponse userRealmResponse;
             try

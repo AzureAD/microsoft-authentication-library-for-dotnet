@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,24 +16,16 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Common
 {
-    internal class Logger
+    internal interface ILogger
     {
-        public static void Verbose(CallState callState, string format, params object[] args)
-        {
-        }
+        void Verbose(CallState callState, string format, params object[] args);
 
-        public static void Information(CallState callState, string format, params object[] args)
-        {
-        }
+        void Information(CallState callState, string format, params object[] args);
 
-        public static void Warning(CallState callState, string format, params object[] args)
-        {
-        }
+        void Warning(CallState callState, string format, params object[] args);
 
-        public static void Error(CallState callState, string message, params object[] args)
-        {
-        }
+        void Error(CallState callState, string format, params object[] args);
     }
 }

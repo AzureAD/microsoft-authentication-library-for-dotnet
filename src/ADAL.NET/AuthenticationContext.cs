@@ -18,8 +18,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Common;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -47,6 +49,35 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 WebUIFactory.ThrowIfUIAssemblyUnavailable();
                 this.ownerWindow = value;
             }
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority in SSO mode.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="userId">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="password">Identifier of the client requesting the token.</param>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, string userId, string password)
+        {
+            UserCredential credential = new UserCredential(userId, password);
+            return await this.AcquireTokenCommonAsync(resource, clientId, credential);
+        }
+
+
+        /// <summary>
+        /// Acquires security token from the authority in SSO mode.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="userId">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="password">Identifier of the client requesting the token.</param>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, string userId, SecureString password)
+        {
+            UserCredential credential = new UserCredential(userId, password);
+            return await this.AcquireTokenCommonAsync(resource, clientId, credential);
         }
 
         /// <summary>
@@ -362,7 +393,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
-                Logger.Verbose(callState, "No token matching arguments found in the cache");
+                logger.Verbose(callState, "No token matching arguments found in the cache");
                 throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.FailedToAcquireTokenSilently);
             }
 

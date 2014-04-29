@@ -21,7 +21,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Threading.Tasks;
+using Test.ADAL.Common;
 
 namespace Test.ADAL.Common
 {

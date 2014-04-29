@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Common;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -31,6 +32,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private const int ExpirationMarginInMinutes = 5;
 
         private readonly RefreshAccessTokenAsync refreshAccessTokenAsync;
+
+        private static ILogger logger = LoggerFactory.getLogger();
 
         public TokenCacheManager(string authority, IDictionary<TokenCacheKey, string> tokenCacheStore, RefreshAccessTokenAsync refreshAccessTokenAsync)
         {
@@ -101,7 +104,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (result != null)
             {
-                Logger.Verbose(callState, "A matching token was found in the cache");
+                logger.Verbose(callState, "A matching token was found in the cache");
             }
 
             return result;
