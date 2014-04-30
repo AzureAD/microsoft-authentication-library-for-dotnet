@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Windows.Foundation.Collections;
 using Windows.Storage;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Common;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -55,8 +54,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private const string LocalSettingsPrefix = "ADAL-1-";
 
         private readonly IPropertySet settingValues;
-
-        private static ILogger logger = LoggerFactory.getLogger();
 
         public DefaultTokenCacheStore()
         {
@@ -398,7 +395,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private void RemoveCorruptLocalSettings()
         {
-            logger.Information(null, "Some token cache items were corrupted, so cleaning up those items");
+            Logger.Information(null, "Some token cache items were corrupted, so cleaning up those items");
 
             // Cache contains elements of bad format, so clear cache to start clean.
             foreach (KeyValuePair<string, object> kvp in this.GetAllLocalSettings())
@@ -419,7 +416,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
 
-            logger.Information(null, "Token cache cleanup for corrupted items completed");
+            Logger.Information(null, "Token cache cleanup for corrupted items completed");
         }
     }
 }

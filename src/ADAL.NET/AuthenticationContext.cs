@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Common;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -393,7 +392,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
-                logger.Verbose(callState, "No token matching arguments found in the cache");
+                Logger.Verbose(callState, "No token matching arguments found in the cache");
                 throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.FailedToAcquireTokenSilently);
             }
 

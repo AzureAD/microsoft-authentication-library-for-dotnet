@@ -268,7 +268,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string AuthenticationCanceled = "User canceled authentication";
         public const string UserMismatch = "User '{0}' returned by service does not match user '{1}' in the request";
         public const string UserCredentialAssertionTypeEmpty = "credential.AssertionType cannot be empty";
-        public const string UserCredentialForManagedUsersUnsupported = "UserCredential for Managed Users Unsupported";
         public const string UserInteractionRequired =
             "One of two conditions was encountered: "
             + "1. The PromptBehavior.Never flag was passed, but the constraint could not be honored, because user interaction was required. "

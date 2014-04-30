@@ -16,36 +16,16 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Diagnostics;
+// Content of this file is copied from this MSDN page: http://msdn.microsoft.com/en-us/library/01escwtf(v=vs.100).aspx
+
 using System.Globalization;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Common;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class TraceLogger : ILogger
+    internal static class LogHelper
     {
-        public void Verbose(CallState callState, string format, params object[] args)
-        {
-            // TODO: This is temporary code. Replace it with correct implementation for Verbose level
-            Trace.TraceInformation(PrepareLogMessage(callState, format, args));
-        }
-
-        public void Information(CallState callState, string format, params object[] args)
-        {
-            Trace.TraceInformation(PrepareLogMessage(callState, format, args));
-        }
-
-        public void Warning(CallState callState, string format, params object[] args)
-        {
-            Trace.TraceWarning(PrepareLogMessage(callState, format, args));
-        }
-
-        public void Error(CallState callState, string format, params object[] args)
-        {
-            Trace.TraceError(PrepareLogMessage(callState, format, args));
-        }
-
-        internal string PrepareLogMessage(CallState callState, string format, params object[] args)
+        internal static string PrepareLogMessage(CallState callState, string format, params object[] args)
         {
             return string.Format(CultureInfo.CurrentCulture, format, args) + (callState != null ? (". Correlation ID: " + callState.CorrelationId) : string.Empty);
         }

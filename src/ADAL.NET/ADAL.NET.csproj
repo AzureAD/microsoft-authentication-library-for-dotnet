@@ -83,12 +83,6 @@
     <Compile Include="..\ADAL.Common\Base64UrlEncoder.cs">
       <Link>Common\Base64UrlEncoder.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\ILogger.cs">
-      <Link>Common\ILogger.cs</Link>
-    </Compile>
-    <Compile Include="..\ADAL.Common\LoggerFactory.cs">
-      <Link>Common\LoggerFactory.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\CallState.cs">
       <Link>Common\CallState.cs</Link>
     </Compile>
@@ -133,6 +127,9 @@
     </Compile>
     <Compile Include="..\ADAL.Common\IRequestCreationHelper.cs">
       <Link>Common\IRequestCreationHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\LogHelper.cs">
+      <Link>Common\LogHelper.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\MexParser.cs">
       <Link>Common\MexParser.cs</Link>
@@ -202,7 +199,7 @@
     <Compile Include="FxcopSupressions.cs" />
     <Compile Include="JsonWebToken.cs" />
     <Compile Include="JsonWebTokenConstants.cs" />
-    <Compile Include="TraceLogger.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="OAuth2MessageHelper.cs" />
     <Compile Include="OAuth2Request.cs" />
     <Compile Include="PlatformSpecificHelper.cs" />

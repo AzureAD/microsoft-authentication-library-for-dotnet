@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Common;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -40,11 +39,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly AuthorityType authorityType;
         private readonly TokenCacheManager tokenCacheManager;
-        private static ILogger logger = LoggerFactory.getLogger();
 
         static AuthenticationContext()
         {
-            logger.Information(null, string.Format("ADAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
+            Logger.Information(null, string.Format("ADAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
                 PlatformSpecificHelper.GetProductName(), AdalIdHelper.GetAdalVersion(), AdalIdHelper.GetAssemblyFileVersion(), AdalIdHelper.GetAssemblyInformationalVersion()));
         }
 
@@ -183,7 +181,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     logMessage = string.Format("Access Token with hash '{0}' returned", accessTokenHash);                    
                 }
 
-                logger.Verbose(callState, logMessage);
+                Logger.Verbose(callState, logMessage);
             }
         }
 
@@ -237,7 +235,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 #else
                 credential.UserId = System.DirectoryServices.AccountManagement.UserPrincipal.Current.UserPrincipalName;
 #endif
-                logger.Information(callState, "Logged in user '{0}' detected", credential.UserId);
+                Logger.Information(callState, "Logged in user '{0}' detected", credential.UserId);
             }
 
             await this.CreateAuthenticatorAsync(callState);
@@ -246,14 +244,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (result == null)
             {
                 UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, credential.UserId, callState);
-                logger.Information(callState, "User '{0}' detected as '{1}'", credential.UserId, userRealmResponse.AccountType);
+                Logger.Information(callState, "User '{0}' detected as '{1}'", credential.UserId, userRealmResponse.AccountType);
                 if (string.Compare(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     Uri wsTrustUrl = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, credential.UserAuthType, callState);
-                    logger.Information(callState, "WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustUrl, userRealmResponse.FederationMetadataUrl);
+                    Logger.Information(callState, "WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustUrl, userRealmResponse.FederationMetadataUrl);
 
                     WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustUrl, credential, callState);
-                    logger.Information(callState, "Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType);
+                    Logger.Information(callState, "Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType);
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
                     var samlCredential = new UserAssertion(
@@ -261,7 +259,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
 
                     result = await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, resource, clientId, samlCredential, callState);
-                    logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
+                    Logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
 
                     await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
                     this.tokenCacheManager.StoreToCache(result, resource, clientId);
@@ -273,8 +271,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     //handle password grant flow for the managed user
                     if (credential.PasswordToCharArray() == null)
                     {
-                        throw new ArgumentNullException("password");
+                        throw new ArgumentNullException("Password is required for managed user", (Exception)null);
                     }
+
                     result = await OAuth2Request.SendTokenRequestWithUserCredentialAsync(this.Authenticator.TokenUri, resource, clientId, credential, callState);
                 }
                 else
@@ -313,7 +312,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (result == null)
             {
                 result = await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, resource, clientId, credential, callState);
-                logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
+                Logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
 
                 await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
                 this.tokenCacheManager.StoreToCache(result, resource, clientId);
@@ -423,7 +422,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 (this.authorityType != validAuthorityType2 || validAuthorityType2 == AuthorityType.Unknown) &&
                 (this.authorityType != validAuthorityType3 || validAuthorityType3 == AuthorityType.Unknown))
             {
-                logger.Error(callState, "Invalid authority type '{0}'", this.authorityType);
+                Logger.Error(callState, "Invalid authority type '{0}'", this.authorityType);
                 throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.InvalidAuthorityType, string.Format(CultureInfo.InvariantCulture, ActiveDirectoryAuthenticationErrorMessage.InvalidAuthorityTypeTemplate, this.Authority));
             }
         }

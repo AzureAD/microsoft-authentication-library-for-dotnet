@@ -16,8 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Common;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     using System;
@@ -29,7 +27,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     internal static partial class EncodingHelper
     {
-        private static ILogger logger = LoggerFactory.getLogger();
         public static void AddKeyValueStringsWithUrlEncoding(StringBuilder messageBuilder, Dictionary<string, string> keyValuePairs)
         {
             foreach (KeyValuePair<string, string> kvp in keyValuePairs)
@@ -84,7 +81,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     if (response.ContainsKey(key))
                     {
-                        logger.Warning(callState, "Key/value pair list contains redundant key '{0}'.", key);
+                        Logger.Warning(callState, "Key/value pair list contains redundant key '{0}'.", key);
                     }
 
                     response[key] = value;
