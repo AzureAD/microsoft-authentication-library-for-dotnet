@@ -175,11 +175,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string UserRealmDiscoveryFailed = "user_realm_discovery_failed";
 
         /// <summary>
-        /// UserCredential for Managed Users Unsupported.
-        /// </summary>
-        public const string UserCredentialForManagedUsersUnsupported = "managed_user_credential_unsupported";
-
-        /// <summary>
         /// Accessing WS Metadata Exchange Failed.
         /// </summary>
         public const string AccessingWsMetadataExchangeFailed = "accessing_ws_metadata_exchange_failed";
