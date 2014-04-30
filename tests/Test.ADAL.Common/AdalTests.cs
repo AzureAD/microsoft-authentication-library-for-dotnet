@@ -235,7 +235,7 @@ namespace Test.ADAL.Common
             SetCredential(sts);
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
             List<AuthenticationResultProxy> results = AcquireTokenPositiveWithCache(sts, context);
-            Verify.IsTrue(AreDateTimeOffsetsEqual(results[0].ExpiresOn, results[1].ExpiresOn), "AuthenticationResult.ExpiresOn." + " results[0]: " + results[0].ExpiresOn + ", results[1]: " + results[1].ExpiresOn);
+            VerifyExpiresOnAreEqual(results[0], results[1]);
 
             EndBrowserDialogSession();
             Log.Comment("Waiting 2 seconds before next token request...");
@@ -252,7 +252,7 @@ namespace Test.ADAL.Common
                 sts.ValidateAuthority,
                 TokenCacheStoreType.Null);
             List<AuthenticationResultProxy> results = AcquireTokenPositiveWithCache(sts, context);
-            Verify.AreNotEqual(results[0].ExpiresOn, results[1].ExpiresOn, "AuthenticationResult.ExpiresOn");
+            VerifyExpiresOnAreNotEqual(results[0], results[1]);
         }
 
         public static void AcquireTokenPositiveWithInMemoryCache(Sts sts)
@@ -260,7 +260,7 @@ namespace Test.ADAL.Common
             SetCredential(sts);
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheStoreType.InMemory);
             List<AuthenticationResultProxy> results = AcquireTokenPositiveWithCacheExpectingEqualResults(sts, context);
-            Verify.IsTrue(AreDateTimeOffsetsEqual(results[0].ExpiresOn, results[1].ExpiresOn), "AuthenticationResult.ExpiresOn");
+            VerifyExpiresOnAreEqual(results[0], results[1]);
         }
 
         public static void UserInfoTest(Sts sts)

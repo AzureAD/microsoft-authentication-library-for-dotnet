@@ -43,6 +43,12 @@ namespace Test.ADAL.Common
 
             VerifySuccessResult(sts, result);
 
+            // Test cache usage in AcquireTokenByAuthorizationCodeAsync
+            AuthenticationResultProxy result2 = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential);
+            VerifySuccessResult(sts, result);
+            VerifyExpiresOnAreEqual(result, result2);
+            AuthenticationContextProxy.ClearDefaultCache();
+
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, credential);
             VerifySuccessResult(sts, result, true, false);
 

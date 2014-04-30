@@ -755,12 +755,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             await this.CreateAuthenticatorAsync(callState);
-            clientKey.Audience = this.Authenticator.SelfSignedJwtAudience;
 
-            AuthenticationResult result = await OAuth2Request.SendTokenRequestAsync(this.Authenticator.TokenUri, authorizationCode, redirectUri, resource, clientKey, Authenticator.SelfSignedJwtAudience, callState);
+            // clientId is null if clientKey contains client assertion.
+            string clientId = clientKey.GetClientId();
 
-            await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
-            clientKey.Audience = this.Authenticator.SelfSignedJwtAudience;
+            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId);
+            if (result == null)
+            {
+                clientKey.Audience = this.Authenticator.SelfSignedJwtAudience;
+
+                result = await OAuth2Request.SendTokenRequestAsync(this.Authenticator.TokenUri, authorizationCode, redirectUri, resource, clientKey, Authenticator.SelfSignedJwtAudience, callState);
+
+                await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
+
+                this.tokenCacheManager.StoreToCache(result, resource, clientId);
+            }
 
             LogReturnedToken(result, callState);
             return result;
