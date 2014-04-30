@@ -248,6 +248,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string NullParameterTemplate = "Parameter '{0}' cannot be null";
         public const string ParsingMetadataDocumentFailed = "Parsing WS metadata exchange failed";
         public const string ParsingWsTrustResponseFailed = "Parsing WS-Trust response failed";
+        public const string PasswordRequiredForManagedUserError = "Password is required for managed user";
         public const string RedirectUriContainsFragment = "'redirectUri' must NOT include a fragment component";
         public const string ServiceReturnedError = "Serviced returned error. Check InnerException for more details";
         public const string StsMetadataRequestFailed = "Metadata request to Access Control service failed. Check InnerException for more details";
