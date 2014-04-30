@@ -101,8 +101,6 @@ namespace Test.ADAL.WinRT.Dashboard
                         break;
                     }
 
-// Disabled Non-Interactive Feature
-#if false
                     case CommandType.AquireTokenAsyncRCUP:
                     {
                         UserCredential credential;
@@ -119,7 +117,6 @@ namespace Test.ADAL.WinRT.Dashboard
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, credential);
                         break;
                     }
-#endif
 
                     case CommandType.AquireTokenAsyncRCR:
                     {

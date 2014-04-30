@@ -83,6 +83,9 @@
     <Compile Include="..\Test.ADAL.Common\TokenCacheTests.cs">
       <Link>Common\TokenCacheTests.cs</Link>
     </Compile>
+    <Compile Include="..\Test.ADAL.Common\UserCredentialProxy.cs">
+      <Link>Common\UserCredentialProxy.cs</Link>
+    </Compile>
     <Compile Include="..\Test.ADAL.Common\UserInfoProxy.cs">
       <Link>Common\UserInfoProxy.cs</Link>
     </Compile>

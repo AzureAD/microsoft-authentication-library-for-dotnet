@@ -17,20 +17,18 @@
 //----------------------------------------------------------------------
 
 using System.Diagnostics.Tracing;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class Logger : EventSource
     {
-        private static readonly Logger logger = CreateInstance();
+        private static readonly Logger logger;
 
-        private static Logger CreateInstance()
+        static Logger()
         {
             Logger logger = new Logger();
-            EventListener verboseListener = new StorageFileEventListener("MyListenerVerbose");
-            verboseListener.EnableEvents(logger, EventLevel.Verbose);
-            return logger;
+            EventListener adalListener = new StorageFileEventListener("AdalListener");
+            adalListener.EnableEvents(logger, EventLevel.Verbose);
         }
 
         internal static void Verbose(CallState callState, string format, params object[] args)

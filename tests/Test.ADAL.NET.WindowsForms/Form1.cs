@@ -61,10 +61,8 @@ namespace Test.ADAL.NET.WindowsForms
             await this.RunTestAsync(AdalTests.InstanceDiscoveryTestAsync);
             this.RunTest(AdalTests.ForcePromptTest);
 
-// Disabled Non-Interactive Feature
-#if false
             await this.RunTestAsync(AdalTests.AcquireTokenNonInteractivePositiveTestAsync, StsType.AADFederatedWithADFS3);
-#endif
+
 
             //this.RunTestAsync(AdalTests.AcquireTokenPositiveWithFederatedTenantAsync);
             await this.RunTestAsync(AdalTests.CorrelationIdTestAsync);

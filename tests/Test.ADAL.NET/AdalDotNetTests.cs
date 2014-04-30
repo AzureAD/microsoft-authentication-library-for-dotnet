@@ -256,8 +256,6 @@ namespace Test.ADAL.NET
             AdalTests.ForcePromptTest(Sts);
         }
 
-// Disabled Non-Interactive Feature
-#if false
         [TestMethod]
         [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken non-interactive")]
@@ -266,7 +264,6 @@ namespace Test.ADAL.NET
         {
             await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(Sts);
         }
-#endif
 
         [TestMethod]
         [TestCategory("AdalDotNet")]
@@ -329,24 +326,6 @@ namespace Test.ADAL.NET
         public async Task ClientAssertionWithX509Test()
         {
             await AdalTests.ClientAssertionWithX509TestAsync(Sts);
-        }
-
-        [TestMethod]
-        [Description("Test for password grant flow using secure string")]
-        [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
-        public async Task AcquireTokenSecureStringUsingPasswordGrant()
-        {
-            await AdalTests.AcquireTokenSecureStringUsingPasswordGrant(Sts);
-        }
-
-        [TestMethod]
-        [Description("Test for password grant flow using string")]
-        [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
-        public async Task AcquireTokenUsingPasswordGrant()
-        {
-            await AdalTests.AcquireTokenUsingPasswordGrant(Sts);
         }
 
         [TestMethod]

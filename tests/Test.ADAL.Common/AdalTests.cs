@@ -23,7 +23,6 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading.Tasks;
-using Test.ADAL.Common;
 
 namespace Test.ADAL.Common
 {
@@ -431,8 +430,6 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result);
         }
 
-// Disabled Non-Interactive Feature
-#if false
         public static async Task AcquireTokenNonInteractivePositiveTestAsync(Sts sts)
         {
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
@@ -443,7 +440,6 @@ namespace Test.ADAL.Common
             Verify.IsNotNull(result.UserInfo.UserId);
             Verify.IsTrue(result.UserInfo.IsUserIdDisplayable);
         }
-#endif
 
         public static async Task WebExceptionAccessTestAsync(Sts sts)
         {

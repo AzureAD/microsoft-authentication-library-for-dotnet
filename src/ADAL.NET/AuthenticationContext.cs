@@ -51,42 +51,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Acquires security token from the authority in SSO mode.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="userId">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="password">Identifier of the client requesting the token.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, string userId, string password)
-        {
-            UserCredential credential = new UserCredential(userId, password);
-            return await this.AcquireTokenCommonAsync(resource, clientId, credential);
-        }
-
-
-        /// <summary>
-        /// Acquires security token from the authority in SSO mode.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="userId">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="password">Identifier of the client requesting the token.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, string userId, SecureString password)
-        {
-            UserCredential credential = new UserCredential(userId, password);
-            return await this.AcquireTokenCommonAsync(resource, clientId, credential);
-        }
-
-        /// <summary>
         /// Acquires security token from the authority.
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userCredential">The user credential to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        internal async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, UserCredential userCredential)
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, UserCredential userCredential)
         {
             return await this.AcquireTokenCommonAsync(resource, clientId, userCredential);
         }

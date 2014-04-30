@@ -16,10 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Security;
-using System.Text;
-
 namespace Test.ADAL.Common
 {
     public sealed class UserCredentialProxy

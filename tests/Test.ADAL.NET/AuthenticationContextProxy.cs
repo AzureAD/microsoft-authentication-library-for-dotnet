@@ -142,16 +142,13 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenAsync(resource, (credential != null) ? credential.Credential : null));
         }
 
-// Disabled Non-Interactive Feature
-#if false
         public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, UserCredentialProxy credential)
         {
-            return await RunTask(this.context.AcquireTokenAsync(resource, clientId, 
+            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientId, 
                 (credential.Password == null) ? 
                 new UserCredential(credential.UserId) :
                 new UserCredential(credential.UserId, credential.Password)));
         }
-#endif
 
         public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri)
         {
@@ -186,14 +183,21 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenUsingPasswordGrantAsync(string clientId, string resource)
+        public async Task<AuthenticationResultProxy> AcquireTokenUsingPasswordGrantAsync(string clientId,
+            string resource)
         {
             if (securePassword == null)
             {
-            return await RunTaskAsync(this.context.AcquireTokenAsync(clientId, resource, userName, password));
+                return
+                    await
+                        RunTaskAsync(this.context.AcquireTokenAsync(clientId, resource,
+                            new UserCredential(userName, password)));
             }
 
-            return await RunTaskAsync(this.context.AcquireTokenAsync(clientId, resource, userName, securePassword));
+            return
+                await
+                    RunTaskAsync(this.context.AcquireTokenAsync(clientId, resource,
+                        new UserCredential(userName, securePassword)));
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, string resource)

@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// Credential used for integrated authentication on domain-joined machines.
     /// </summary>
-    internal sealed class UserCredential
+    public sealed class UserCredential
     {
         /// <summary>
         /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user

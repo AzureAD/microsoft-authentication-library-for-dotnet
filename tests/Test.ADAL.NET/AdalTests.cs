@@ -178,17 +178,16 @@ namespace Test.ADAL.Common
         public static async Task AcquireTokenSecureStringUsingPasswordGrant(Sts sts)
         {
             var secureStr = new SecureString();
-            if (sts.ValidPassword.Length > 0)
+            foreach (var c in sts.ValidPassword.ToCharArray())
             {
-                foreach (var c in sts.ValidPassword.ToCharArray())
-                {
-                    secureStr.AppendChar(c);
-                }
-                secureStr.MakeReadOnly();
+                secureStr.AppendChar(c);
             }
+
+            secureStr.MakeReadOnly();
             AuthenticationContextProxy.SetSecureCredentials(sts.ValidUserId, secureStr);
             await AcquireTokenUsingPasswordGrantCommon(sts);
         }
+
         public static async Task AcquireTokenUsingPasswordGrant(Sts sts)
         {
             AuthenticationContextProxy.SetCredentials(sts.ValidUserId, sts.ValidPassword);
