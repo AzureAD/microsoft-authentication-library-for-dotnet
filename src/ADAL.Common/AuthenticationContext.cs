@@ -271,9 +271,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     //handle password grant flow for the managed user
                     if (credential.PasswordToCharArray() == null)
                     {
-                        throw new ArgumentNullException(
-                            ActiveDirectoryAuthenticationErrorMessage.PasswordRequiredForManagedUserError,
-                            (Exception) null);
+                        throw new ArgumentNullException("password",
+                            ActiveDirectoryAuthenticationErrorMessage.PasswordRequiredForManagedUserError);
                     }
 
                     result = await OAuth2Request.SendTokenRequestWithUserCredentialAsync(this.Authenticator.TokenUri, resource, clientId, credential, callState);
