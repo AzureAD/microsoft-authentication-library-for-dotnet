@@ -16,10 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-// Content of this file is copied from this MSDN page: http://msdn.microsoft.com/en-us/library/01escwtf(v=vs.100).aspx
-
 using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
