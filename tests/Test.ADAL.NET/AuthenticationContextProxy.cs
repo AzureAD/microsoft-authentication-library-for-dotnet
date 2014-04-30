@@ -183,23 +183,6 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenUsingPasswordGrantAsync(string clientId,
-            string resource)
-        {
-            if (securePassword == null)
-            {
-                return
-                    await
-                        RunTaskAsync(this.context.AcquireTokenAsync(clientId, resource,
-                            new UserCredential(userName, password)));
-            }
-
-            return
-                await
-                    RunTaskAsync(this.context.AcquireTokenAsync(clientId, resource,
-                        new UserCredential(userName, securePassword)));
-        }
-
         public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, string resource)
         {
             if (CallSync)

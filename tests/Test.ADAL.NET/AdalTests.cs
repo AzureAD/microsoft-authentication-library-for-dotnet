@@ -175,32 +175,6 @@ namespace Test.ADAL.Common
             VerifyErrorResult(result, Sts.UnauthorizedClient, "70001"); // AADSTS70001: Application '87002806-c87a-41cd-896b-84ca5690d29e' is not registered for the account.
         }
 
-        public static async Task AcquireTokenSecureStringUsingPasswordGrant(Sts sts)
-        {
-            var secureStr = new SecureString();
-            foreach (var c in sts.ValidPassword.ToCharArray())
-            {
-                secureStr.AppendChar(c);
-            }
-
-            secureStr.MakeReadOnly();
-            AuthenticationContextProxy.SetSecureCredentials(sts.ValidUserId, secureStr);
-            await AcquireTokenUsingPasswordGrantCommon(sts);
-        }
-
-        public static async Task AcquireTokenUsingPasswordGrant(Sts sts)
-        {
-            AuthenticationContextProxy.SetCredentials(sts.ValidUserId, sts.ValidPassword);
-            await AcquireTokenUsingPasswordGrantCommon(sts);
-        }
-
-        public static async Task AcquireTokenUsingPasswordGrantCommon(Sts sts)
-        {
-            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheStoreType.Null);
-            AuthenticationResultProxy result = await context.AcquireTokenUsingPasswordGrantAsync(sts.ValidResource, sts.ValidClientId);
-            VerifySuccessResult(sts, result);
-        }
-
         public static async Task ConfidentialClientWithJwtTestAsync(Sts sts)
         {
             SetCredential(sts);
