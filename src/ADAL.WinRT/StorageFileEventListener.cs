@@ -52,9 +52,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public StorageFileEventListener(string name)
         {
             this.m_Name = name;
-
             Debug.WriteLine("StorageFileEventListener for {0} has name {1}", GetHashCode(), name);
-
             AssignLocalFile();
         }
 

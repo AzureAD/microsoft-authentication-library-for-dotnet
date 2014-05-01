@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -26,54 +27,90 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         static Logger()
         {
-            Logger logger = new Logger();
-            EventListener adalListener = new StorageFileEventListener("AdalListener");
-            adalListener.EnableEvents(logger, EventLevel.Verbose);
+            logger = new Logger();
+            EnableListener();
+        }
+
+        private static void EnableListener()
+        {
+            if (AdalTrace.TraceEnabled)
+            {
+                EventListener adalListener = new StorageFileEventListener("AdalListener");
+                adalListener.EnableEvents(logger, GetEventLevel(AdalTrace.Level));
+            }
         }
 
         internal static void Verbose(CallState callState, string format, params object[] args)
         {
-            Verbose(LogHelper.PrepareLogMessage(callState, format, args));
+            logger.Verbose(LogHelper.PrepareLogMessage(callState, format, args));
         }
 
         internal static void Information(CallState callState, string format, params object[] args)
         {
-            Information(LogHelper.PrepareLogMessage(callState, format, args));
+            logger.Information(LogHelper.PrepareLogMessage(callState, format, args));
         }
 
         internal static void Warning(CallState callState, string format, params object[] args)
         {
-            Warning(LogHelper.PrepareLogMessage(callState, format, args));
+            logger.Warning(LogHelper.PrepareLogMessage(callState, format, args));
         }
 
         internal static void Error(CallState callState, string format, params object[] args)
         {
-            Error(LogHelper.PrepareLogMessage(callState, format, args));
+            logger.Error(LogHelper.PrepareLogMessage(callState, format, args));
         }
 
         [Event(1, Level = EventLevel.Verbose)]
-        private static void Verbose(string message)
+        private void Verbose(string message)
         {
             logger.WriteEvent(1, message);
         }
 
         [Event(2, Level = EventLevel.Informational)]
-        private static void Information(string message)
+        private void Information(string message)
         {
             logger.WriteEvent(2, message);
         }
 
         [Event(3, Level = EventLevel.Warning)]
-        private static void Warning(string message)
+        private void Warning(string message)
         {
             logger.WriteEvent(3, message);
         }
 
         [Event(4, Level = EventLevel.Error)]
-        private static void Error(string message)
+        private void Error(string message)
         {
             logger.WriteEvent(4, message);
         }
 
+        private static EventLevel GetEventLevel(AdalTraceLevel level)
+        {
+            EventLevel returnLevel = EventLevel.Informational;
+            switch (level)
+            {
+                case AdalTraceLevel.Informational:
+                    returnLevel = EventLevel.Informational;
+                    break;
+                case AdalTraceLevel.Verbose:
+                    returnLevel = EventLevel.Verbose;
+                    break;
+                case AdalTraceLevel.Warning:
+                    returnLevel = EventLevel.Warning;
+                    break;
+                case AdalTraceLevel.Error:
+                    returnLevel = EventLevel.Error;
+                    break;
+                case AdalTraceLevel.Critical:
+                    returnLevel = EventLevel.Critical;
+                    break;
+                case AdalTraceLevel.LogAlways:
+                    returnLevel = EventLevel.LogAlways;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("level");
+            }
+            return returnLevel;
+        }
     }
 }
