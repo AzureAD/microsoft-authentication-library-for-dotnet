@@ -16,13 +16,35 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-namespace Test.ADAL.Common
+using System.Diagnostics.Tracing;
+
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal partial class AdalTests
+    internal class AdalEventSource : EventSource
     {
-        private static void VerifySuccessResultAndTokenContent(Sts sts, AuthenticationResultProxy result, bool supportRefreshToken = true, bool supportUserInfo = true)
+
+        [Event(1, Level = EventLevel.Verbose)]
+        internal void Verbose(string message)
         {
-            VerifySuccessResult(sts, result, supportRefreshToken, supportUserInfo);
+            WriteEvent(1, message);
+        }
+
+        [Event(2, Level = EventLevel.Informational)]
+        internal void Information(string message)
+        {
+            WriteEvent(2, message);
+        }
+
+        [Event(3, Level = EventLevel.Warning)]
+        internal void Warning(string message)
+        {
+            WriteEvent(3, message);
+        }
+
+        [Event(4, Level = EventLevel.Error)]
+        internal void Error(string message)
+        {
+            WriteEvent(4, message);
         }
     }
 }

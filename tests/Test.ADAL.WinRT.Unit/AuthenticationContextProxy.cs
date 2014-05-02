@@ -130,5 +130,15 @@ namespace Test.ADAL.Common
                 Status = (result.Status == AuthenticationStatus.Succeeded) ? AuthenticationStatusProxy.Succeeded : AuthenticationStatusProxy.Failed
             };
         }
+
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string validResource, string validClientId,
+            UserCredentialProxy credential)
+        {
+            return
+                GetAuthenticationResultProxy(
+                    await
+                        this.context.AcquireTokenAsync(validResource, validClientId,
+                            new UserCredential(credential.UserId, credential.Password)));
+        }
     }
 }

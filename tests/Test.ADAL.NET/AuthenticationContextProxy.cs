@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Security;
+
 namespace Test.ADAL.Common
 {
     using System;
@@ -48,6 +50,7 @@ namespace Test.ADAL.Common
 
         private static string userName;
         private static string password;
+        private static SecureString securePassword;
 
         public AuthenticationContextProxy(string authority, bool validateAuthority, TokenCacheStoreType tokenCacheStoreType)
         {
@@ -83,6 +86,23 @@ namespace Test.ADAL.Common
         {
             userName = userNameIn;
             password = passwordIn;
+        }
+
+        public static void SetSecureCredentials(string userNameIn, SecureString passwordIn)
+        {
+            userName = userNameIn;
+            securePassword = passwordIn;
+        }
+
+
+        public static SecureString convertToSecureString(string strPassword)
+        {
+            var secureStr = new SecureString();
+            if (strPassword.Length > 0)
+            {
+                foreach (var c in strPassword.ToCharArray()) secureStr.AppendChar(c);
+            }
+            return secureStr;
         }
 
         public static void Delay(int sleepMilliSeconds)
@@ -122,16 +142,13 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenAsync(resource, (credential != null) ? credential.Credential : null));
         }
 
-// Disabled Non-Interactive Feature
-#if false
         public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, UserCredentialProxy credential)
         {
-            return await RunTask(this.context.AcquireTokenAsync(resource, clientId, 
+            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientId, 
                 (credential.Password == null) ? 
                 new UserCredential(credential.UserId) :
                 new UserCredential(credential.UserId, credential.Password)));
         }
-#endif
 
         public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri)
         {

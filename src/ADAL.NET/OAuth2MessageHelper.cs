@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return parameters;
         }
-
+        
         private static void AddClientKey(RequestParameters parameters, ClientKey clientKey)
         {
             if (clientKey.Credential != null)
@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else
                 {
-                    parameters.AddSecureParamter(OAuthParameter.ClientSecret, clientKey.Credential.SecureClientSecret);
+                    parameters.AddSecureParameter(OAuthParameter.ClientSecret, clientKey.Credential.SecureClientSecret);
                 }
             }
             else if (clientKey.Assertion != null)

@@ -18,9 +18,11 @@
 
 using System;
 using System.Threading.Tasks;
+using Windows.Storage;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Test.ADAL.Common;
+using Logger = Microsoft.IdentityModel.Clients.ActiveDirectory.Logger;
 
 namespace Test.ADAL.WinRT.Unit
 {
@@ -204,6 +206,23 @@ namespace Test.ADAL.WinRT.Unit
         public async Task InstanceDiscoveryTest(string stsType)
         {
             await AdalTests.InstanceDiscoveryTestAsync(SetupStsService(GetStsType(stsType)));
+        }
+
+        [TestMethod]
+        [TestCategory("AdalWinRTUnit")]
+        public async void LoggerTest()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                AdalTrace.Level = AdalTraceLevel.Informational;
+                string guidValue = Guid.NewGuid().ToString();
+                Logger.Information(null, "{0}", guidValue);
+                StorageFolder sf = ApplicationData.Current.LocalFolder;
+                AdalTrace.Level = AdalTraceLevel.None;
+                StorageFile file = await sf.GetFileAsync("AdalListener.log");
+                string content = await FileIO.ReadTextAsync(file);
+                Verify.IsTrue(content.Contains(guidValue));
+            }
         }
 
         private static void SetReplayerNetworkPlugin()

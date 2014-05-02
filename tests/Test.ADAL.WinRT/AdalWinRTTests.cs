@@ -68,8 +68,6 @@ namespace Test.ADAL.WinRT
             AdalTests.ForcePromptTest(Sts);
         }
 
-// Disabled Non-Interactive Feature
-#if false
         [TestMethod]
         [TestCategory("AdalWinRT")]
         [Description("Positive Test for AcquireToken non-interactive")]
@@ -78,7 +76,6 @@ namespace Test.ADAL.WinRT
         {
             await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(Sts);
         }
-#endif
 
         [TestMethod]
         [TestCategory("AdalWinRT")]

@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
@@ -55,8 +56,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userCredential">The user credential to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        internal async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, UserCredential userCredential)
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, UserCredential userCredential)
         {
             return await this.AcquireTokenCommonAsync(resource, clientId, userCredential);
         }

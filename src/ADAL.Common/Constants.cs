@@ -175,11 +175,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string UserRealmDiscoveryFailed = "user_realm_discovery_failed";
 
         /// <summary>
-        /// UserCredential for Managed Users Unsupported.
-        /// </summary>
-        public const string UserCredentialForManagedUsersUnsupported = "managed_user_credential_unsupported";
-
-        /// <summary>
         /// Accessing WS Metadata Exchange Failed.
         /// </summary>
         public const string AccessingWsMetadataExchangeFailed = "accessing_ws_metadata_exchange_failed";
@@ -253,6 +248,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string NullParameterTemplate = "Parameter '{0}' cannot be null";
         public const string ParsingMetadataDocumentFailed = "Parsing WS metadata exchange failed";
         public const string ParsingWsTrustResponseFailed = "Parsing WS-Trust response failed";
+        public const string PasswordRequiredForManagedUserError = "Password is required for managed user";
         public const string RedirectUriContainsFragment = "'redirectUri' must NOT include a fragment component";
         public const string ServiceReturnedError = "Serviced returned error. Check InnerException for more details";
         public const string StsMetadataRequestFailed = "Metadata request to Access Control service failed. Check InnerException for more details";
@@ -268,7 +264,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string AuthenticationCanceled = "User canceled authentication";
         public const string UserMismatch = "User '{0}' returned by service does not match user '{1}' in the request";
         public const string UserCredentialAssertionTypeEmpty = "credential.AssertionType cannot be empty";
-        public const string UserCredentialForManagedUsersUnsupported = "UserCredential for Managed Users Unsupported";
         public const string UserInteractionRequired =
             "One of two conditions was encountered: "
             + "1. The PromptBehavior.Never flag was passed, but the constraint could not be honored, because user interaction was required. "

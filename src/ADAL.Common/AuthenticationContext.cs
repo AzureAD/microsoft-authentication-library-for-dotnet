@@ -268,7 +268,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else if (string.Compare(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UserCredentialForManagedUsersUnsupported);
+                    //handle password grant flow for the managed user
+                    if (credential.PasswordToCharArray() == null)
+                    {
+                        throw new ArgumentNullException("password",
+                            ActiveDirectoryAuthenticationErrorMessage.PasswordRequiredForManagedUserError);
+                    }
+
+                    result = await OAuth2Request.SendTokenRequestWithUserCredentialAsync(this.Authenticator.TokenUri, resource, clientId, credential, callState);
                 }
                 else
                 {

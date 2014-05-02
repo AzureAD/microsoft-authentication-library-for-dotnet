@@ -128,6 +128,9 @@
     <Compile Include="..\ADAL.Common\IRequestCreationHelper.cs">
       <Link>Common\IRequestCreationHelper.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\LogHelper.cs">
+      <Link>Common\LogHelper.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\MexParser.cs">
       <Link>Common\MexParser.cs</Link>
     </Compile>

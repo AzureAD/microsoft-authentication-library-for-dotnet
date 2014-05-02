@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,13 +16,15 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-namespace Test.ADAL.Common
+using System.Globalization;
+
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal partial class AdalTests
+    internal static class LogHelper
     {
-        private static void VerifySuccessResultAndTokenContent(Sts sts, AuthenticationResultProxy result, bool supportRefreshToken = true, bool supportUserInfo = true)
+        internal static string PrepareLogMessage(CallState callState, string format, params object[] args)
         {
-            VerifySuccessResult(sts, result, supportRefreshToken, supportUserInfo);
+            return string.Format(CultureInfo.CurrentCulture, format, args) + (callState != null ? (". Correlation ID: " + callState.CorrelationId) : string.Empty);
         }
     }
 }

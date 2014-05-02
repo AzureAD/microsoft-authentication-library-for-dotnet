@@ -107,10 +107,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     case ActiveDirectoryAuthenticationError.ParsingWsMetadataExchangeFailed:
                         message = ActiveDirectoryAuthenticationErrorMessage.ParsingMetadataDocumentFailed;
                         break;
-
-                    case ActiveDirectoryAuthenticationError.UserCredentialForManagedUsersUnsupported:
-                        message = ActiveDirectoryAuthenticationErrorMessage.UserCredentialForManagedUsersUnsupported;
-                        break;
                 }
             }
 

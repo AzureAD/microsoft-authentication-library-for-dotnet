@@ -51,6 +51,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return result;
         }
 
+        public static async Task<AuthenticationResult> SendTokenRequestWithUserCredentialAsync(string uri, string resource, string clientId, UserCredential credential, CallState callState)
+        {
+            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(resource, clientId, credential);
+            AuthenticationResult result = await SendHttpMessageAsync(uri, requestParameters, callState);
+            return result;
+        }
+
         private static async Task<AuthenticationResult> SendHttpMessageAsync(string uri, RequestParameters requestParameters, CallState callState)
         {
             uri = HttpHelper.CheckForExtraQueryParameter(uri);

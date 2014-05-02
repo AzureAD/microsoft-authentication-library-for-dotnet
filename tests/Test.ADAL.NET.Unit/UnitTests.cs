@@ -71,12 +71,12 @@ namespace Test.ADAL.NET.Unit
 
             param = new RequestParameters();
             param[ClientId] = ComplexString;
-            param.AddSecureParamter(Resource, StringToSecureString(ComplexString2));
+            param.AddSecureParameter(Resource, StringToSecureString(ComplexString2));
             Verify.AreEqual(expectedString, param.ToString());
 
             param = new RequestParameters();
-            param.AddSecureParamter(ClientId, StringToSecureString(ComplexString));
-            param.AddSecureParamter(Resource, StringToSecureString(ComplexString2));
+            param.AddSecureParameter(ClientId, StringToSecureString(ComplexString));
+            param.AddSecureParameter(Resource, StringToSecureString(ComplexString2));
             Verify.AreEqual(expectedString, param.ToString());
 
             param = new RequestParameters(new StringBuilder(expectedString));

@@ -16,24 +16,116 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using System.Diagnostics.Tracing;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class Logger
+    internal class Logger : IDisposable
     {
-        public static void Verbose(CallState callState, string format, params object[] args)
+        private bool disposed = false;
+        private static readonly AdalEventSource adalEventSource;
+        private static EventListener adalListener;
+
+        static Logger()
         {
+            adalEventSource = new AdalEventSource();
         }
 
-        public static void Information(CallState callState, string format, params object[] args)
+        internal static void SetListenerLevel(AdalTraceLevel level)
         {
+            if (level != AdalTraceLevel.None)
+            {
+                if (adalListener == null)
+                {
+                    adalListener = new StorageFileEventListener("AdalListener");
+                }
+                adalListener.EnableEvents(adalEventSource, GetEventLevel(level));
+            }
+            else if (adalListener != null)
+            {
+                adalListener.DisableEvents(adalEventSource);
+                adalListener.Dispose();
+                adalListener = null;
+            }
         }
 
-        public static void Warning(CallState callState, string format, params object[] args)
+        internal static void Verbose(CallState callState, string format, params object[] args)
         {
+            adalEventSource.Verbose(LogHelper.PrepareLogMessage(callState, format, args));
         }
 
-        public static void Error(CallState callState, string message, params object[] args)
+        internal static void Information(CallState callState, string format, params object[] args)
         {
+            adalEventSource.Information(LogHelper.PrepareLogMessage(callState, format, args));
+        }
+
+        internal static void Warning(CallState callState, string format, params object[] args)
+        {
+            adalEventSource.Warning(LogHelper.PrepareLogMessage(callState, format, args));
+        }
+
+        internal static void Error(CallState callState, string format, params object[] args)
+        {
+            adalEventSource.Error(LogHelper.PrepareLogMessage(callState, format, args));
+        }
+
+        private static EventLevel GetEventLevel(AdalTraceLevel level)
+        {
+            EventLevel returnLevel = EventLevel.Informational;
+            switch (level)
+            {
+                case AdalTraceLevel.Informational:
+                    returnLevel = EventLevel.Informational;
+                    break;
+                case AdalTraceLevel.Verbose:
+                    returnLevel = EventLevel.Verbose;
+                    break;
+                case AdalTraceLevel.Warning:
+                    returnLevel = EventLevel.Warning;
+                    break;
+                case AdalTraceLevel.Error:
+                    returnLevel = EventLevel.Error;
+                    break;
+                case AdalTraceLevel.Critical:
+                    returnLevel = EventLevel.Critical;
+                    break;
+                case AdalTraceLevel.LogAlways:
+                    returnLevel = EventLevel.LogAlways;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("level");
+            }
+            return returnLevel;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                if (adalListener != null)
+                {
+                    adalListener.Dispose();
+                    adalListener = null;
+                }
+
+                if (adalEventSource != null)
+                {
+                    adalEventSource.Dispose();
+                }
+                disposed = true;
+            }
         }
     }
 }

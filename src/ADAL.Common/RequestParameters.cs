@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
 #if ADAL_WINRT
 #else
-        public void AddSecureParamter(string key, SecureString value)
+        public void AddSecureParameter(string key, SecureString value)
         {
             if (this.secureParameters == null)
             {

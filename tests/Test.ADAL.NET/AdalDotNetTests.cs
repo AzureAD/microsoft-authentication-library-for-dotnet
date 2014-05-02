@@ -256,8 +256,15 @@ namespace Test.ADAL.NET
             AdalTests.ForcePromptTest(Sts);
         }
 
-// Disabled Non-Interactive Feature
-#if false
+        [TestMethod]
+        [TestCategory("AdalDotNet")]
+        [Description("Positive Test for AcquireToken non-interactive for managed user")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
+        public async Task AcquireTokenNonInteractiveManagedPositiveTest()
+        {
+            await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(Sts);
+        }
+
         [TestMethod]
         [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken non-interactive")]
@@ -266,7 +273,6 @@ namespace Test.ADAL.NET
         {
             await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(Sts);
         }
-#endif
 
         [TestMethod]
         [TestCategory("AdalDotNet")]

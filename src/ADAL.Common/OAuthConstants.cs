@@ -33,6 +33,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string Scope = "scope";
         public const string Assertion = "assertion";
         public const string RequestedTokenUse = "requested_token_use";
+        public const string Username = "username";
+        public const string Password = "password";
     }
 
     internal class OAuthGrantType
@@ -42,7 +44,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string ClientCredentials = "client_credentials";
         public const string Saml11Bearer = "urn:ietf:params:oauth:grant-type:saml1_1-bearer";
         public const string Saml20Bearer = "urn:ietf:params:oauth:grant-type:saml2-bearer";
-        public const string JwtBearer = "urn:ietf:params:oauth:grant-type:jwt-bearer"; 
+        public const string JwtBearer = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+        public const string Password = "password";
     }
 
     internal class OAuthResponseType

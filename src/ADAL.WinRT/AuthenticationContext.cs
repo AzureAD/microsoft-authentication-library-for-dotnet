@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="credential">The credential to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        internal IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, UserCredential credential)
+        public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, UserCredential credential)
         {
             return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, credential));
         }
