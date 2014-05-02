@@ -21,7 +21,7 @@ using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class Logger
+    internal class Logger : IDisposable
     {
         private static readonly AdalEventSource adalEventSource;
         private static EventListener adalListener;
@@ -96,6 +96,30 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     throw new ArgumentOutOfRangeException("level");
             }
             return returnLevel;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+            adalListener.Dispose();
+            adalEventSource.Dispose();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (adalListener != null)
+                {
+                    adalListener.Dispose();
+                }
+
+                if (adalEventSource != null)
+                {
+                    adalEventSource.Dispose();
+                }
+            }
         }
     }
 }
