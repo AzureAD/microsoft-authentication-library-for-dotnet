@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// This class holds properties to enable/disable logging and set tracing levels. To enable tracing, the properties must be set first.
     /// </summary>
-    public sealed class AdalTrace
+    public static class AdalTrace
     {
         /// <summary>
         /// Flag to enable/disable tracing.
