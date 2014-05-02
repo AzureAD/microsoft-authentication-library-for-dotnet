@@ -208,6 +208,20 @@ namespace Test.ADAL.WinRT.Unit
             await AdalTests.InstanceDiscoveryTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
+        [TestMethod]
+        [TestCategory("AdalWinRTUnit")]
+        public async void LoggerTest()
+        {
+            AdalTrace.Level = AdalTraceLevel.Informational;
+            string guidValue = Guid.NewGuid().ToString();
+            Logger.Information(null, "{0}", guidValue);
+            StorageFolder sf = ApplicationData.Current.LocalFolder;
+            AdalTrace.Level = AdalTraceLevel.None;
+            StorageFile file = await sf.GetFileAsync("AdalListener.log");
+            string content = await FileIO.ReadTextAsync(file);
+            Verify.IsTrue(content.Contains(guidValue));
+        }
+
         private static void SetReplayerNetworkPlugin()
         {
             NetworkPlugin.WebUIFactory = new ReplayerWebUIFactory();

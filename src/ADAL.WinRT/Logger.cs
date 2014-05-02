@@ -21,67 +21,52 @@ using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class Logger : EventSource
+    internal class Logger
     {
-        private static readonly Logger logger;
+        private static readonly AdalEventSource adalEventSource;
+        private static EventListener adalListener;
 
         static Logger()
         {
-            logger = new Logger();
-            EnableListener();
+            adalEventSource = new AdalEventSource();
         }
 
-        private static void EnableListener()
+        internal static void SetListenerLevel(AdalTraceLevel level)
         {
-            if (AdalTrace.TraceEnabled)
+            if (level != AdalTraceLevel.None)
             {
-                EventListener adalListener = new StorageFileEventListener("AdalListener");
-                adalListener.EnableEvents(logger, GetEventLevel(AdalTrace.Level));
+                if (adalListener == null)
+                {
+                    adalListener = new StorageFileEventListener("AdalListener");
+                }
+                adalListener.EnableEvents(adalEventSource, GetEventLevel(level));
+            }
+            else if (adalListener != null)
+            {
+                adalListener.DisableEvents(adalEventSource);
+                adalListener.Dispose();
+                adalListener = null;
             }
         }
 
         internal static void Verbose(CallState callState, string format, params object[] args)
         {
-            logger.Verbose(LogHelper.PrepareLogMessage(callState, format, args));
+            adalEventSource.Verbose(LogHelper.PrepareLogMessage(callState, format, args));
         }
 
         internal static void Information(CallState callState, string format, params object[] args)
         {
-            logger.Information(LogHelper.PrepareLogMessage(callState, format, args));
+            adalEventSource.Information(LogHelper.PrepareLogMessage(callState, format, args));
         }
 
         internal static void Warning(CallState callState, string format, params object[] args)
         {
-            logger.Warning(LogHelper.PrepareLogMessage(callState, format, args));
+            adalEventSource.Warning(LogHelper.PrepareLogMessage(callState, format, args));
         }
 
         internal static void Error(CallState callState, string format, params object[] args)
         {
-            logger.Error(LogHelper.PrepareLogMessage(callState, format, args));
-        }
-
-        [Event(1, Level = EventLevel.Verbose)]
-        private void Verbose(string message)
-        {
-            logger.WriteEvent(1, message);
-        }
-
-        [Event(2, Level = EventLevel.Informational)]
-        private void Information(string message)
-        {
-            logger.WriteEvent(2, message);
-        }
-
-        [Event(3, Level = EventLevel.Warning)]
-        private void Warning(string message)
-        {
-            logger.WriteEvent(3, message);
-        }
-
-        [Event(4, Level = EventLevel.Error)]
-        private void Error(string message)
-        {
-            logger.WriteEvent(4, message);
+            adalEventSource.Error(LogHelper.PrepareLogMessage(callState, format, args));
         }
 
         private static EventLevel GetEventLevel(AdalTraceLevel level)
