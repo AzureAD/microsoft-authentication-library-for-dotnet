@@ -16,41 +16,35 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Diagnostics.Tracing;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    /// <summary>
-    /// This class holds properties to enable/disable logging and set tracing levels. To enable tracing, the properties must be set first.
-    /// </summary>
-    public static class AdalTrace
+    internal class AdalEventSource : EventSource
     {
-        private static AdalTraceLevel level = AdalTraceLevel.None;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public static AdalTraceLevel Level
+        [Event(1, Level = EventLevel.Verbose)]
+        internal void Verbose(string message)
         {
-            get { return level; }
-
-            set
-            {
-                level = value;
-                Logger.SetListenerLevel(level);
-            }            
+            WriteEvent(1, message);
         }
-    }
 
-    /// <summary>
-    /// Trace level for logging.
-    /// </summary>
-    public enum AdalTraceLevel
-    {
-        None,
-        Critical,
-        Error,
-        Warning,
-        Informational,
-        Verbose,
-        LogAlways
+        [Event(2, Level = EventLevel.Informational)]
+        internal void Information(string message)
+        {
+            WriteEvent(2, message);
+        }
+
+        [Event(3, Level = EventLevel.Warning)]
+        internal void Warning(string message)
+        {
+            WriteEvent(3, message);
+        }
+
+        [Event(4, Level = EventLevel.Error)]
+        internal void Error(string message)
+        {
+            WriteEvent(4, message);
+        }
     }
 }

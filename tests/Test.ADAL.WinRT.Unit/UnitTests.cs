@@ -48,8 +48,7 @@ namespace Test.ADAL.WinRT.Unit
         [TestCategory("AdalWinRTUnit")]
         public void AdalTraceTest()
         {
-            Verify.IsTrue(AdalTrace.Level == AdalTraceLevel.Informational);
-            Verify.IsFalse(AdalTrace.TraceEnabled);
+            Verify.IsTrue(AdalTrace.Level == AdalTraceLevel.None);
         }
     }
 }

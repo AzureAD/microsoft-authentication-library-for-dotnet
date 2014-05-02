@@ -181,6 +181,7 @@
     <Compile Include="..\ADAL.Common\WsTrustResponse.cs">
       <Link>Common\WsTrustResponse.cs</Link>
     </Compile>
+    <Compile Include="AdalEventSource.cs" />
     <Compile Include="AdalTrace.cs" />
     <Compile Include="AuthenticationContext.cs" />
     <Compile Include="AuthenticationParameters.cs" />
