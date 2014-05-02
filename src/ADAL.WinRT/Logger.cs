@@ -23,6 +23,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class Logger : IDisposable
     {
+        private bool disposed = false;
         private static readonly AdalEventSource adalEventSource;
         private static EventListener adalListener;
 
@@ -102,23 +103,28 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-            adalListener.Dispose();
-            adalEventSource.Dispose();
         }
 
         protected virtual void Dispose(bool disposing)
         {
+            if (disposed)
+            {
+                return;
+            }
+
             if (disposing)
             {
                 if (adalListener != null)
                 {
                     adalListener.Dispose();
+                    adalListener = null;
                 }
 
                 if (adalEventSource != null)
                 {
                     adalEventSource.Dispose();
                 }
+                disposed = true;
             }
         }
     }
