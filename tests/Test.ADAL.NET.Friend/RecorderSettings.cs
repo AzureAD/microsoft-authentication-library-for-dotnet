@@ -39,7 +39,7 @@ namespace Test.ADAL.NET.Friend
         {
             get
             {
-                return (Mode == RecorderMode.Record) ? Directory.GetCurrentDirectory() + @"\..\..\..\tests\Test.ADAL.Common\" : @".\";
+                return (Mode == RecorderMode.Record) ? Directory.GetCurrentDirectory() + @"\..\..\..\test\Test.ADAL.Common\" : @".\";
             }            
         }
 
