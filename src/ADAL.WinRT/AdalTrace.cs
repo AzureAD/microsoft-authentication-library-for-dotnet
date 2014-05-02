@@ -19,7 +19,7 @@
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
-    /// This class enables/disables the logging.
+    /// This class enables/disables tracing. To enable tracing, set TraceLevel to any level other than None which is the default
     /// </summary>
     public static class AdalTrace
     {
