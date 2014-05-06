@@ -165,9 +165,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             this.ThrowIfTransferredException();
 
-            if (String.IsNullOrEmpty(this.result))
+            if (string.IsNullOrEmpty(this.result))
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UserInteractionRequired);
+                throw new AdalException(AdalError.UserInteractionRequired);
             }
 
             return this.result;

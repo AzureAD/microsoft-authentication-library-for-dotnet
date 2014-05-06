@@ -81,8 +81,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static void ThrowAssemlyLoadFailedException(string webAuthenticationDialogAssemblyName, Exception innerException)
         {
-            throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.AssemblyLoadFailed,
-                string.Format(CultureInfo.InvariantCulture, ActiveDirectoryAuthenticationErrorMessage.AssemblyLoadFailedTemplate, webAuthenticationDialogAssemblyName), innerException);
+            throw new AdalException(AdalError.AssemblyLoadFailed,
+                string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.AssemblyLoadFailedTemplate, webAuthenticationDialogAssemblyName), innerException);
         }
     }
 }

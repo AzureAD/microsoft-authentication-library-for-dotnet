@@ -257,17 +257,17 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken non-interactive for managed user")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
         public async Task AcquireTokenNonInteractiveManagedPositiveTest()
         {
             await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(Sts);
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken non-interactive")]
+        [TestCategory("AdalDotNet")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
         public async Task AcquireTokenNonInteractivePositiveTest()
         {
@@ -275,17 +275,17 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken using federated tenant")]
+        [TestCategory("AdalDotNet")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveWithFederatedTenantTest()
         {
-            AdalTests.AcquireTokenPositiveWithFederatedTenant(Sts, false);
+            AdalTests.AcquireTokenPositiveWithFederatedTenant(Sts);
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Correlation Id test")]
+        [TestCategory("AdalDotNet")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "StsSyncAsync", DataAccessMethod.Sequential)]
         public async Task CorrelationIdTest()
         {

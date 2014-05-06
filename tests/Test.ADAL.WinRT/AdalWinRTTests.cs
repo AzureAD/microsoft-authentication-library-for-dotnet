@@ -83,7 +83,7 @@ namespace Test.ADAL.WinRT
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveWithFederatedTenantTest()
         {
-            AdalTests.AcquireTokenPositiveWithFederatedTenant(Sts, false);
+            AdalTests.AcquireTokenPositiveWithFederatedTenant(Sts);
         }
         
         [TestMethod]

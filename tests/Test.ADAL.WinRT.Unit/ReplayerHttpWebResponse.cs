@@ -33,8 +33,16 @@ namespace Test.ADAL.WinRT.Unit
         public ReplayerHttpWebResponse(WebResponse response)
         {
             this.responseStream = response.GetResponseStream();
-            var httpWebResponse = response as HttpWebResponse;
-            this.statusCode = (httpWebResponse != null) ? httpWebResponse.StatusCode : HttpStatusCode.NotImplemented;
+            HttpWebResponse httpWebResponse = response as HttpWebResponse;
+            if (httpWebResponse != null)
+            {
+                this.statusCode = httpWebResponse.StatusCode;
+            }
+            else
+            {
+                ReplayerWebResponse replayerWebResponse = response as ReplayerWebResponse;
+                this.statusCode = (replayerWebResponse != null) ? replayerWebResponse.StatusCode : HttpStatusCode.NotImplemented;
+            }
         }
 
         public ReplayerHttpWebResponse(string responseString, HttpStatusCode statusCode)

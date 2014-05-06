@@ -112,7 +112,8 @@ namespace Test.ADAL.NET.Friend
             {
                 foreach (var kvp in this.internalHttpWebRequest.BodyParameters)
                 {
-                    this.keyElements["Body-" + kvp.Key] = kvp.Value;
+                    string value = (kvp.Key == "password") ? "PASSWORD" : kvp.Value;
+                    this.keyElements["Body-" + kvp.Key] = value;
                 }
             }
 

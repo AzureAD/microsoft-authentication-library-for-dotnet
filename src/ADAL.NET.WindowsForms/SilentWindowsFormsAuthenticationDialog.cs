@@ -136,7 +136,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         private void OnUserInteractionRequired()
         {
             this.SignalDone(
-                new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UserInteractionRequired));
+                new AdalException(AdalError.UserInteractionRequired));
         }
 
         protected override void OnClosingUrl()

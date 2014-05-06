@@ -58,8 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private async void AssignLocalFile()
         {
-            m_StorageFile = await ApplicationData.Current.LocalFolder.CreateFileAsync(m_Name.Replace(" ", "_") + ".log",
-                                                                                      CreationCollisionOption.OpenIfExists);
+            m_StorageFile = await ApplicationData.Current.LocalFolder.CreateFileAsync(m_Name, CreationCollisionOption.OpenIfExists);
         }
 
         private async void WriteToFile(IEnumerable<string> lines)

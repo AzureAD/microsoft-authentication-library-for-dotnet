@@ -67,13 +67,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 catch (FileNotFoundException ex)
                 {
-                    throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.AuthenticationUiFailed, ex);
+                    throw new AdalException(AdalError.AuthenticationUiFailed, ex);
                 }
                 catch (Exception ex)
                 {
                     if (this.promptBehavior == PromptBehavior.Never)
                     {
-                        throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UserInteractionRequired, ex);
+                        throw new AdalException(AdalError.UserInteractionRequired, ex);
                     }
 
                     throw;
@@ -81,11 +81,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else if (this.promptBehavior == PromptBehavior.Never)
             {
-                throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
+                throw new ArgumentException(AdalErrorMessage.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
             }
             else if (redirectUri.Scheme == "ms-app")
             {
-                throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.RedirectUriAppIdMismatch, "redirectUri");
+                throw new ArgumentException(AdalErrorMessage.RedirectUriAppIdMismatch, "redirectUri");
             }
             else
             {
@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 catch (FileNotFoundException ex)
                 {
-                    throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.AuthenticationUiFailed, ex);
+                    throw new AdalException(AdalError.AuthenticationUiFailed, ex);
                 }
             }
 
@@ -108,13 +108,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     result = OAuth2Response.ParseAuthorizeResponse(webAuthenticationResult.ResponseData, callState);
                     break;
                 case WebAuthenticationStatus.ErrorHttp:
-                    result = new AuthorizationResult(ActiveDirectoryAuthenticationError.AuthenticationFailed, webAuthenticationResult.ResponseErrorDetail.ToString());
+                    result = new AuthorizationResult(AdalError.AuthenticationFailed, webAuthenticationResult.ResponseErrorDetail.ToString());
                     break;
                 case WebAuthenticationStatus.UserCancel:
-                    result = new AuthorizationResult(ActiveDirectoryAuthenticationError.AuthenticationCanceled, ActiveDirectoryAuthenticationErrorMessage.AuthenticationCanceled);
+                    result = new AuthorizationResult(AdalError.AuthenticationCanceled, AdalErrorMessage.AuthenticationCanceled);
                     break;
                 default:
-                    result = new AuthorizationResult(ActiveDirectoryAuthenticationError.AuthenticationFailed, ActiveDirectoryAuthenticationErrorMessage.AuthorizationServerInvalidResponse);
+                    result = new AuthorizationResult(AdalError.AuthenticationFailed, AdalErrorMessage.AuthorizationServerInvalidResponse);
                     break;
             }
 

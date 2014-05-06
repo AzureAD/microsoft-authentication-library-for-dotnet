@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (XmlException ex)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.ParsingWsTrustResponseFailed, ex);
+                throw new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
             }
 
             return errorMessage;
@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (XmlException ex)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.ParsingWsTrustResponseFailed, ex);
+                throw new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
             }
         }
 
@@ -120,12 +120,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (XmlException ex)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.ParsingWsTrustResponseFailed, ex);
+                throw new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
             }
 
             if (tokenResponseDictionary.Count == 0)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.ParsingWsTrustResponseFailed);
+                throw new AdalException(AdalError.ParsingWsTrustResponseFailed);
             }
 
             string tokenType = tokenResponseDictionary.ContainsKey(Saml1Assertion) ? Saml1Assertion : tokenResponseDictionary.Keys.First();

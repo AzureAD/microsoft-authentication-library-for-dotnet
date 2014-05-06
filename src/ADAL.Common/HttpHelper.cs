@@ -27,7 +27,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static class HttpHelper
     {
-
         public static async Task<T> SendPostRequestAndDeserializeJsonResponseAsync<T>(string uri, RequestParameters requestParameters, CallState callState)
         {
             try
@@ -47,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (WebException ex)
             {
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response); 
-                throw new ActiveDirectoryAuthenticationException(tokenResponse.Error, tokenResponse.ErrorDescription, ex);
+                throw new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, ex);
             }
         }
 

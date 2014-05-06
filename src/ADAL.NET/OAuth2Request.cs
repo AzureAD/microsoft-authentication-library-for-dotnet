@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (!string.IsNullOrWhiteSpace(redirectUri.Fragment))
             {
-                throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.RedirectUriContainsFragment, "redirectUri");
+                throw new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
 
             Uri authorizationUri = CreateAuthorizationUri(authenticator, resource, redirectUri, clientId, userId, promptBehavior, extraQueryParameters, callState);

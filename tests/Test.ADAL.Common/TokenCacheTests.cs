@@ -186,9 +186,9 @@ namespace Test.ADAL.Common.Unit
                 Verify.Fail("Exception expected");
 #endif
             }
-            catch (ActiveDirectoryAuthenticationException adae)
+            catch (AdalException adae)
             {
-                Verify.IsTrue(adae.ErrorCode == "multiple_matching_tokens_detected" && adae.Message == "The cache contains multiple tokens satisfying the requirements. Call AcquireToken again providing more requirements (e.g. UserId)");
+                Verify.IsTrue(adae.ErrorCode == "multiple_matching_tokens_detected" && adae.Message.Contains("The cache contains multiple tokens satisfying the requirements"));
             }
 
             try
@@ -201,9 +201,9 @@ namespace Test.ADAL.Common.Unit
                 Verify.Fail("Exception expected");
 #endif
             }
-            catch (ActiveDirectoryAuthenticationException adae)
+            catch (AdalException adae)
             {
-                Verify.IsTrue(adae.ErrorCode == "multiple_matching_tokens_detected" && adae.Message == "The cache contains multiple tokens satisfying the requirements. Call AcquireToken again providing more requirements (e.g. UserId)");
+                Verify.IsTrue(adae.ErrorCode == "multiple_matching_tokens_detected" && adae.Message.Contains("The cache contains multiple tokens satisfying the requirements"));
             }
 
             // @resource && @clientId
