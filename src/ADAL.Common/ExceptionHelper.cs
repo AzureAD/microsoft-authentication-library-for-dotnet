@@ -34,29 +34,29 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string message = null;
             switch (errorCode)
             {
-                case ActiveDirectoryAuthenticationError.InvalidCredentialType: 
-                    message = ActiveDirectoryAuthenticationErrorMessage.InvalidCredentialType;
+                case AdalError.InvalidCredentialType: 
+                    message = AdalErrorMessage.InvalidCredentialType;
                     break;
 #if ADAL_WINRT
 #else
-                case ActiveDirectoryAuthenticationError.CertificateKeySizeTooSmall:
-                    message = string.Format(CultureInfo.InvariantCulture, ActiveDirectoryAuthenticationErrorMessage.CertificateKeySizeTooSmallTemplate, X509CertificateCredential.MinKeySizeInBits);
+                case AdalError.CertificateKeySizeTooSmall:
+                    message = string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.CertificateKeySizeTooSmallTemplate, X509CertificateCredential.MinKeySizeInBits);
                     break;
 #endif
-                case ActiveDirectoryAuthenticationError.IdentityProtocolLoginUrlNull:
-                    message = ActiveDirectoryAuthenticationErrorMessage.IdentityProtocolLoginUrlNull;
+                case AdalError.IdentityProtocolLoginUrlNull:
+                    message = AdalErrorMessage.IdentityProtocolLoginUrlNull;
                     break;
 
-                case ActiveDirectoryAuthenticationError.IdentityProtocolMismatch:
-                    message = ActiveDirectoryAuthenticationErrorMessage.IdentityProtocolMismatch;
+                case AdalError.IdentityProtocolMismatch:
+                    message = AdalErrorMessage.IdentityProtocolMismatch;
                     break;
 
-                case ActiveDirectoryAuthenticationError.EmailAddressSuffixMismatch:
-                    message = ActiveDirectoryAuthenticationErrorMessage.EmailAddressSuffixMismatch;
+                case AdalError.EmailAddressSuffixMismatch:
+                    message = AdalErrorMessage.EmailAddressSuffixMismatch;
                     break;
 
-                case ActiveDirectoryAuthenticationError.IdentityProviderRequestFailed:
-                    message = ActiveDirectoryAuthenticationErrorMessage.IdentityProviderRequestFailed;
+                case AdalError.IdentityProviderRequestFailed:
+                    message = AdalErrorMessage.IdentityProviderRequestFailed;
                     break;
             }
 
@@ -65,24 +65,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 switch (errorCode)
                 {
-                    case ActiveDirectoryAuthenticationError.StsTokenRequestFailed:
-                        message = ActiveDirectoryAuthenticationErrorMessage.StsTokenRequestFailed;
+                    case AdalError.StsTokenRequestFailed:
+                        message = AdalErrorMessage.StsTokenRequestFailed;
                         break;
 
-                    case ActiveDirectoryAuthenticationError.EncodedTokenTooLong:
-                        message = ActiveDirectoryAuthenticationErrorMessage.EncodedTokenTooLong;
+                    case AdalError.EncodedTokenTooLong:
+                        message = AdalErrorMessage.EncodedTokenTooLong;
                         break;
 
-                    case ActiveDirectoryAuthenticationError.StsMetadataRequestFailed:
-                        message = ActiveDirectoryAuthenticationErrorMessage.StsMetadataRequestFailed;
+                    case AdalError.StsMetadataRequestFailed:
+                        message = AdalErrorMessage.StsMetadataRequestFailed;
                         break;
 
-                    case ActiveDirectoryAuthenticationError.AuthorityNotInValidList:
-                        message = ActiveDirectoryAuthenticationErrorMessage.AuthorityNotInValidList;
+                    case AdalError.AuthorityNotInValidList:
+                        message = AdalErrorMessage.AuthorityNotInValidList;
                         break;
 
-                    case ActiveDirectoryAuthenticationError.UnknownUserType:
-                        message = ActiveDirectoryAuthenticationErrorMessage.UnknownUserType;
+                    case AdalError.UnknownUserType:
+                        message = AdalErrorMessage.UnknownUserType;
                         break;
                 }
             }
@@ -92,43 +92,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 switch (errorCode)
                 {
-                    case ActiveDirectoryAuthenticationError.UnknownUser:
-                        message = ActiveDirectoryAuthenticationErrorMessage.UnknownUser;
+                    case AdalError.UnknownUser:
+                        message = AdalErrorMessage.UnknownUser;
                         break;
 
-                    case ActiveDirectoryAuthenticationError.UserRealmDiscoveryFailed:
-                        message = ActiveDirectoryAuthenticationErrorMessage.UserRealmDiscoveryFailed;
+                    case AdalError.UserRealmDiscoveryFailed:
+                        message = AdalErrorMessage.UserRealmDiscoveryFailed;
                         break;
 
-                    case ActiveDirectoryAuthenticationError.AccessingWsMetadataExchangeFailed:
-                        message = ActiveDirectoryAuthenticationErrorMessage.AccessingMetadataDocumentFailed;
+                    case AdalError.AccessingWsMetadataExchangeFailed:
+                        message = AdalErrorMessage.AccessingMetadataDocumentFailed;
                         break;
 
-                    case ActiveDirectoryAuthenticationError.ParsingWsMetadataExchangeFailed:
-                        message = ActiveDirectoryAuthenticationErrorMessage.ParsingMetadataDocumentFailed;
-                        break;
-                }
-            }
-
-            // The switch case is divided into two to address the strange behavior of winmdidl tool for generating idl file from winmd for ADAL WinRT.
-            if (message == null)
-            {
-                switch (errorCode)
-                {
-                    case ActiveDirectoryAuthenticationError.WsTrustEndpointNotFoundInMetadataDocument:
-                        message = ActiveDirectoryAuthenticationErrorMessage.WsTrustEndpointNotFoundInMetadataDocument;
-                        break;
-
-                    case ActiveDirectoryAuthenticationError.ParsingWsTrustResponseFailed:
-                        message = ActiveDirectoryAuthenticationErrorMessage.ParsingWsTrustResponseFailed;
-                        break;
-
-                    case ActiveDirectoryAuthenticationError.AuthenticationCanceled:
-                        message = ActiveDirectoryAuthenticationErrorMessage.AuthenticationCanceled;
-                        break;
-
-                    case ActiveDirectoryAuthenticationError.NetworkNotAvailable:
-                        message = ActiveDirectoryAuthenticationErrorMessage.NetworkIsNotAvailable;
+                    case AdalError.ParsingWsMetadataExchangeFailed:
+                        message = AdalErrorMessage.ParsingMetadataDocumentFailed;
                         break;
                 }
             }
@@ -138,20 +115,79 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 switch (errorCode)
                 {
-                    case ActiveDirectoryAuthenticationError.AuthenticationUiFailed:
-                        message = ActiveDirectoryAuthenticationErrorMessage.AuthenticationUiFailed;
+                    case AdalError.WsTrustEndpointNotFoundInMetadataDocument:
+                        message = AdalErrorMessage.WsTrustEndpointNotFoundInMetadataDocument;
                         break;
 
-                    case ActiveDirectoryAuthenticationError.UserInteractionRequired:
-                        message = ActiveDirectoryAuthenticationErrorMessage.UserInteractionRequired;
+                    case AdalError.ParsingWsTrustResponseFailed:
+                        message = AdalErrorMessage.ParsingWsTrustResponseFailed;
                         break;
 
-                    case ActiveDirectoryAuthenticationError.FailedToAcquireTokenSilently:
-                        message = ActiveDirectoryAuthenticationErrorMessage.FailedToAcquireTokenSilently;
+                    case AdalError.AuthenticationCanceled:
+                        message = AdalErrorMessage.AuthenticationCanceled;
+                        break;
+
+                    case AdalError.NetworkNotAvailable:
+                        message = AdalErrorMessage.NetworkIsNotAvailable;
+                        break;
+                }
+            }
+
+            // The switch case is divided into two to address the strange behavior of winmdidl tool for generating idl file from winmd for ADAL WinRT.
+            if (message == null)
+            {
+                switch (errorCode)
+                {
+                    case AdalError.AuthenticationUiFailed:
+                        message = AdalErrorMessage.AuthenticationUiFailed;
+                        break;
+
+                    case AdalError.UserInteractionRequired:
+                        message = AdalErrorMessage.UserInteractionRequired;
+                        break;
+
+                    case AdalError.FailedToAcquireTokenSilently:
+                        message = AdalErrorMessage.FailedToAcquireTokenSilently;
+                        break;
+                }
+            }
+
+#if ADAL_WINRT
+            // The switch case is divided into two to address the strange behavior of winmdidl tool for generating idl file from winmd for ADAL WinRT.
+            if (message == null)
+            {
+                switch (errorCode)
+                {
+                    case AdalError.UnauthorizedUserInformationAccess:
+                        message = AdalErrorMessage.UnauthorizedUserInformationAccess;
+                        break;
+
+                    case AdalError.CannotAccessUserInformation:
+                        message = AdalErrorMessage.CannotAccessUserInformation;
+                        break;
+                }
+            }
+#endif
+
+            // The switch case is divided into two to address the strange behavior of winmdidl tool for generating idl file from winmd for ADAL WinRT.
+            if (message == null)
+            {
+                switch (errorCode)
+                {
+                    case AdalError.UnauthorizedResponseExpected:
+                        message = AdalErrorMessage.UnauthorizedResponseExpected;
+                        break;
+
+                    case AdalError.MultipleTokensMatched:
+                        message = AdalErrorMessage.MultipleTokensMatched;
+                        break;
+
+                    case AdalError.PasswordRequiredForManagedUserError:
+                        message = AdalErrorMessage.PasswordRequiredForManagedUserError;
                         break;
 
                     default:
-                        message = ActiveDirectoryAuthenticationErrorMessage.Unknown;
+                        message = AdalErrorMessage.Unknown;
                         break;
                 }
             }

@@ -214,9 +214,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 // There is more than one resource specific token.  It is 
                 // ambiguous which one to return so throw.
-                throw new ActiveDirectoryAuthenticationException(
-                    ActiveDirectoryAuthenticationError.MultipleTokensMatched,
-                    ActiveDirectoryAuthenticationErrorMessage.MultipleTokensMatched);
+                throw new AdalException(AdalError.MultipleTokensMatched);
             }
 
             return returnValue;

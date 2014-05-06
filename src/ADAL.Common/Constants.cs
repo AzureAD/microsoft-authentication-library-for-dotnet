@@ -21,12 +21,12 @@ using System.Xml.Linq;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
 #if ADAL_WINRT
-    internal static partial class ActiveDirectoryAuthenticationError
+    internal static partial class AdalError
 #else
     /// <summary>
-    /// Error code returned as a property in ActiveDirectoryAuthenticationException
+    /// Error code returned as a property in AdalException
     /// </summary>
-    public static class ActiveDirectoryAuthenticationError
+    public static class AdalError
 #endif
     {
         /// <summary>
@@ -212,12 +212,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         ///    flow from completing in a short enough time frame.
         /// </summary>
         public const string UserInteractionRequired = "user_interaction_required";
+
+        /// <summary>
+        /// Password is required for managed user.
+        /// </summary>
+        public const string PasswordRequiredForManagedUserError = "password_required_for_managed_user";
     }
 
     /// <summary>
     /// The active directory authentication error message.
     /// </summary>
-    internal static partial class ActiveDirectoryAuthenticationErrorMessage
+    internal static partial class AdalErrorMessage
     {
         public const string AccessingMetadataDocumentFailed = "Accessing WS metadata exchange failed";
         public const string AssemblyLoadFailedTemplate = "Loading an assembly required for interactive user authentication failed. Make sure assembly '{0}' exists";

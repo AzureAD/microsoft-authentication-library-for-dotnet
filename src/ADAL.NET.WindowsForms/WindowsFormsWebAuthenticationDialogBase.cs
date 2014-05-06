@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 }
                 else
                 {
-                    throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.InvalidOwnerWindowType,
+                    throw new AdalException(AdalError.InvalidOwnerWindowType,
                         "Invalid owner window type. Expected types are IWin32Window or IntPtr (for window handle).");
                 }
             }
@@ -268,18 +268,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             base.Dispose(disposing);
         }
 
-        protected ActiveDirectoryAuthenticationException CreateExceptionForAuthenticationUiFailed(int statusCode)
+        protected AdalException CreateExceptionForAuthenticationUiFailed(int statusCode)
         {
             if (NavigateErrorStatus.Messages.ContainsKey(statusCode))
             {
-                return new ActiveDirectoryAuthenticationException(
-                    ActiveDirectoryAuthenticationError.AuthenticationUiFailed,
-                    string.Format("The browser based authentication dialog failed to complete. Reason: {0}", NavigateErrorStatus.Messages[statusCode])) { InnerStatusCode = statusCode };
+                return new AdalServiceException(
+                    AdalError.AuthenticationUiFailed,
+                    string.Format("The browser based authentication dialog failed to complete. Reason: {0}", NavigateErrorStatus.Messages[statusCode])) { StatusCode = statusCode };
             }
 
-            return new ActiveDirectoryAuthenticationException(
-                ActiveDirectoryAuthenticationError.AuthenticationUiFailed,
-                string.Format("The browser based authentication dialog failed to complete for an unkown reason. StatusCode: {0}", statusCode)) { InnerStatusCode = statusCode };
+            return new AdalServiceException(
+                AdalError.AuthenticationUiFailed,
+                string.Format("The browser based authentication dialog failed to complete for an unkown reason. StatusCode: {0}", statusCode)) { StatusCode = statusCode };
         }
     }
 }

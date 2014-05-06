@@ -41,8 +41,9 @@ namespace Test.ADAL.Common
 
     internal enum AuthenticationStatusProxy
     {
-        Succeeded = 0,
-        Failed = -1,
+        Success = 0,
+        ClientError = -1,
+        ServiceError = -2
     }
 
     [DataContract]
@@ -86,7 +87,7 @@ namespace Test.ADAL.Common
 
         public Exception Exception { get; set; }
 
-        public int ExceptionInnerStatusCode { get; set; }
+        public int ExceptionStatusCode { get; set; }
 
         internal static AuthenticationResultProxy Deserialize(string obj)
         {

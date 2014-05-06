@@ -18,13 +18,13 @@
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal static partial class ActiveDirectoryAuthenticationError
+    internal static partial class AdalError
     {
         public const string UnauthorizedUserInformationAccess = "unauthorized_user_information_access";
         public const string CannotAccessUserInformation = "user_information_access_failed";
     }
 
-    internal static partial class ActiveDirectoryAuthenticationErrorMessage
+    internal static partial class AdalErrorMessage
     {
         public const string CannotAccessUserInformation = "Cannot access user information. Check machine's Privacy settings or initialize UserCredential with userId";
         public const string RedirectUriAppIdMismatch = "The return URI provided does not match the app's ID";

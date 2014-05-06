@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (certificate.PublicKey.Key.KeySize < MinKeySizeInBits)
             {
-                throw new ArgumentOutOfRangeException("certificate", ExceptionHelper.GetErrorMessage(ActiveDirectoryAuthenticationError.CertificateKeySizeTooSmall));
+                throw new ArgumentOutOfRangeException("certificate", ExceptionHelper.GetErrorMessage(AdalError.CertificateKeySizeTooSmall));
             }
 
             this.ClientId = clientId;

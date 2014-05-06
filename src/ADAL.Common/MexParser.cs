@@ -60,11 +60,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (WebException ex)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.AccessingWsMetadataExchangeFailed, ex);
+                throw new AdalServiceException(AdalError.AccessingWsMetadataExchangeFailed, ex);
             }
             catch (XmlException ex)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.ParsingWsMetadataExchangeFailed, ex);
+                throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
             }
 
             return mexDocument;
@@ -87,12 +87,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else
                 {
-                    throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.WsTrustEndpointNotFoundInMetadataDocument);                    
+                    throw new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument);                    
                 }
             }
             catch (XmlException ex)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.ParsingWsMetadataExchangeFailed, ex);
+                throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
             }
 
             return url;

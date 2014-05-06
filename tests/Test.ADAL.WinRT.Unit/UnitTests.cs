@@ -17,6 +17,8 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Threading.Tasks;
+
 using Windows.Storage;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
@@ -49,6 +51,31 @@ namespace Test.ADAL.WinRT.Unit
         public void AdalTraceTest()
         {
             Verify.IsTrue(AdalTrace.Level == AdalTraceLevel.None);
+        }
+
+        [TestMethod]
+        [TestCategory("AdalWinRTUnit")]
+        public async Task LoggerTest()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                AdalTrace.Level = AdalTraceLevel.Informational;
+                string guidValue = Guid.NewGuid().ToString();
+                Logger.Information(null, "{0}", guidValue);
+                StorageFolder sf = ApplicationData.Current.LocalFolder;
+                AdalTrace.Level = AdalTraceLevel.None;
+                StorageFile file = await sf.GetFileAsync("AdalTraces.log");
+                try
+                {
+                    string content = await FileIO.ReadTextAsync(file);
+                    Log.Comment(content);
+                    Verify.IsTrue(content.Contains(guidValue));
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
         }
     }
 }

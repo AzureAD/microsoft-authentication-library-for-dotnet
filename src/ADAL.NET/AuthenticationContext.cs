@@ -325,7 +325,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws ActiveDirectoryAuthenticationException.</returns>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId)
         {
             return await this.AcquireTokenSilentAsync(resource, clientId, null);
@@ -337,7 +337,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be null.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws ActiveDirectoryAuthenticationException.</returns>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId, string userId)
         {
             CallState callState = this.CreateCallState(false);
@@ -364,7 +364,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             else
             {
                 Logger.Verbose(callState, "No token matching arguments found in the cache");
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.FailedToAcquireTokenSilently);
+                throw new AdalException(AdalError.FailedToAcquireTokenSilently);
             }
 
             return result;

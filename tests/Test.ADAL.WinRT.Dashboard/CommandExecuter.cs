@@ -236,9 +236,9 @@ namespace Test.ADAL.WinRT.Dashboard
                            Error = result.Error,
                            ErrorDescription = result.ErrorDescription,
                            Status =
-                               (result.Status == AuthenticationStatus.Succeeded)
-                                   ? AuthenticationStatusProxy.Succeeded
-                                   : AuthenticationStatusProxy.Failed
+                               (result.Status == AuthenticationStatus.Success)
+                                   ? AuthenticationStatusProxy.Success
+                                   : ((result.Status == AuthenticationStatus.ClientError) ? AuthenticationStatusProxy.ClientError : AuthenticationStatusProxy.ServiceError)
                        };
         }
     }

@@ -402,7 +402,7 @@ namespace Test.ADAL.Common
             catch (Exception ex)
             {
                 resultProxy = GetAuthenticationResultProxy(ex);
-                if (resultProxy.ExceptionInnerStatusCode == 503 && retryCount < 5)
+                if (resultProxy.ExceptionStatusCode == 503 && retryCount < 5)
                 {
                     Thread.Sleep(3000);
                     Log.Comment(string.Format("Retry #{0}...", retryCount + 1));
@@ -480,7 +480,7 @@ namespace Test.ADAL.Common
         {
             return new AuthenticationResultProxy
             {
-                Status = AuthenticationStatusProxy.Succeeded,
+                Status = AuthenticationStatusProxy.Success,
                 AccessToken = result.AccessToken,
                 AccessTokenType = result.AccessTokenType,
                 ExpiresOn = result.ExpiresOn,
@@ -506,25 +506,30 @@ namespace Test.ADAL.Common
                 ErrorDescription = ex.Message,
             };
 
+            output.Status = AuthenticationStatusProxy.ClientError;
             if (ex is ArgumentNullException)
             {
-                output.Error = ActiveDirectoryAuthenticationError.InvalidArgument;
+                output.Error = AdalError.InvalidArgument;
             }
             else if (ex is ArgumentException)
             {
-                output.Error = ActiveDirectoryAuthenticationError.InvalidArgument;
+                output.Error = AdalError.InvalidArgument;
             }
-            else if (ex is ActiveDirectoryAuthenticationException)
+            else if (ex is AdalServiceException)
             {
-                output.Error = ((ActiveDirectoryAuthenticationException)ex).ErrorCode;
-                output.ExceptionInnerStatusCode = ((ActiveDirectoryAuthenticationException)ex).InnerStatusCode;
+                output.Error = ((AdalServiceException)ex).ErrorCode;
+                output.ExceptionStatusCode = ((AdalServiceException)ex).StatusCode;
+                output.Status = AuthenticationStatusProxy.ServiceError;
+            }
+            else if (ex is AdalException)
+            {
+                output.Error = ((AdalException)ex).ErrorCode;
             }
             else
             {
-                output.Error = ActiveDirectoryAuthenticationError.AuthenticationFailed;
+                output.Error = AdalError.AuthenticationFailed;
             }
 
-            output.Status = AuthenticationStatusProxy.Failed;
             output.Exception = ex;
 
             return output;

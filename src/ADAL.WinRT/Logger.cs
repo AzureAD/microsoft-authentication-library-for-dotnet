@@ -23,13 +23,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class Logger : IDisposable
     {
-        private bool disposed = false;
-        private static readonly AdalEventSource adalEventSource;
-        private static EventListener adalListener;
+        private const string LogFilename = "AdalTraces.log";
+        private bool disposed;
+        private static readonly AdalEventSource AdalEventSource;
+        private static StorageFileEventListener adalListener;
 
         static Logger()
         {
-            adalEventSource = new AdalEventSource();
+            AdalEventSource = new AdalEventSource();
         }
 
         internal static void SetListenerLevel(AdalTraceLevel level)
@@ -38,13 +39,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 if (adalListener == null)
                 {
-                    adalListener = new StorageFileEventListener("AdalListener");
+                    adalListener = new StorageFileEventListener(LogFilename);
                 }
-                adalListener.EnableEvents(adalEventSource, GetEventLevel(level));
+
+                adalListener.EnableEvents(AdalEventSource, GetEventLevel(level));
             }
             else if (adalListener != null)
             {
-                adalListener.DisableEvents(adalEventSource);
+                adalListener.DisableEvents(AdalEventSource);
                 adalListener.Dispose();
                 adalListener = null;
             }
@@ -52,22 +54,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal static void Verbose(CallState callState, string format, params object[] args)
         {
-            adalEventSource.Verbose(LogHelper.PrepareLogMessage(callState, format, args));
+            AdalEventSource.Verbose(LogHelper.PrepareLogMessage(callState, format, args));
         }
 
         internal static void Information(CallState callState, string format, params object[] args)
         {
-            adalEventSource.Information(LogHelper.PrepareLogMessage(callState, format, args));
+            AdalEventSource.Information(LogHelper.PrepareLogMessage(callState, format, args));
         }
 
         internal static void Warning(CallState callState, string format, params object[] args)
         {
-            adalEventSource.Warning(LogHelper.PrepareLogMessage(callState, format, args));
+            AdalEventSource.Warning(LogHelper.PrepareLogMessage(callState, format, args));
         }
 
         internal static void Error(CallState callState, string format, params object[] args)
         {
-            adalEventSource.Error(LogHelper.PrepareLogMessage(callState, format, args));
+            AdalEventSource.Error(LogHelper.PrepareLogMessage(callState, format, args));
         }
 
         private static EventLevel GetEventLevel(AdalTraceLevel level)
@@ -107,23 +109,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed)
+            if (!disposed)
             {
-                return;
-            }
-
-            if (disposing)
-            {
-                if (adalListener != null)
+                if (disposing)
                 {
-                    adalListener.Dispose();
-                    adalListener = null;
+                    if (adalListener != null)
+                    {
+                        adalListener.Dispose();
+                        adalListener = null;
+                    }
+
+                    if (AdalEventSource != null)
+                    {
+                        AdalEventSource.Dispose();
+                    }
                 }
 
-                if (adalEventSource != null)
-                {
-                    adalEventSource.Dispose();
-                }
                 disposed = true;
             }
         }

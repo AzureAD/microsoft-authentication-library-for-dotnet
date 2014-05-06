@@ -89,14 +89,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(ex.Response.GetResponseStream());
                     errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument);
                 }
-                catch (ActiveDirectoryAuthenticationException)
+                catch (AdalException)
                 {
                     errorMessage = "See inner exception for detail.";
                 }
 
-                throw new ActiveDirectoryAuthenticationException(
-                    ActiveDirectoryAuthenticationError.FederatedServiceReturnedError,
-                    string.Format(ActiveDirectoryAuthenticationErrorMessage.FederatedServiceReturnedErrorTemplate, url, errorMessage),
+                throw new AdalServiceException(
+                    AdalError.FederatedServiceReturnedError,
+                    string.Format(AdalErrorMessage.FederatedServiceReturnedErrorTemplate, url, errorMessage),
                     ex);
             }
 

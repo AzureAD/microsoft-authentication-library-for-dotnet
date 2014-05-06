@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static AuthenticationResult ProcessServiceError(string error, string errorDescription)
         {
-            throw new ActiveDirectoryAuthenticationException(error, errorDescription);
+            throw new AdalServiceException(error, errorDescription);
         }
 
         public static string PlatformSpecificToLower(this string input)

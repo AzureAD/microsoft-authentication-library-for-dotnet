@@ -127,18 +127,18 @@ namespace Test.ADAL.Common
                     : null,
                 Error = result.Error,
                 ErrorDescription = result.ErrorDescription,
-                Status = (result.Status == AuthenticationStatus.Succeeded) ? AuthenticationStatusProxy.Succeeded : AuthenticationStatusProxy.Failed
+                Status = (result.Status == AuthenticationStatus.Success) ? AuthenticationStatusProxy.Success :
+                    ((result.Status == AuthenticationStatus.ClientError) ? AuthenticationStatusProxy.ClientError : AuthenticationStatusProxy.ServiceError),                
+                ExceptionStatusCode = result.StatusCode
             };
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string validResource, string validClientId,
-            UserCredentialProxy credential)
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string validResource, string validClientId, UserCredentialProxy credential)
         {
-            return
-                GetAuthenticationResultProxy(
-                    await
-                        this.context.AcquireTokenAsync(validResource, validClientId,
-                            new UserCredential(credential.UserId, credential.Password)));
+            return GetAuthenticationResultProxy(await this.context.AcquireTokenAsync(validResource, validClientId,
+                (credential.Password == null) ?
+                new UserCredential(credential.UserId) :
+                new UserCredential(credential.UserId, credential.Password)));
         }
     }
 }

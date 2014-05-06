@@ -209,20 +209,12 @@ namespace Test.ADAL.WinRT.Unit
         }
 
         [TestMethod]
-        [TestCategory("AdalWinRTUnit")]
-        public async void LoggerTest()
+        //[Description("Positive Test for AcquireToken non-interactive for managed user")]
+        [TestCategory("AdalWinRTMock")]
+        [DataRow("AAD")]
+        public async Task AcquireTokenNonInteractiveManagedPositiveTest(string stsType)
         {
-            for (int i = 0; i < 2; i++)
-            {
-                AdalTrace.Level = AdalTraceLevel.Informational;
-                string guidValue = Guid.NewGuid().ToString();
-                Logger.Information(null, "{0}", guidValue);
-                StorageFolder sf = ApplicationData.Current.LocalFolder;
-                AdalTrace.Level = AdalTraceLevel.None;
-                StorageFile file = await sf.GetFileAsync("AdalListener.log");
-                string content = await FileIO.ReadTextAsync(file);
-                Verify.IsTrue(content.Contains(guidValue));
-            }
+            await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         private static void SetReplayerNetworkPlugin()

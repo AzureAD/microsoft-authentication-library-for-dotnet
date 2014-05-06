@@ -59,11 +59,17 @@
     <Compile Include="..\ADAL.Common\ActiveDirectoryAuthenticationAuthority.cs">
       <Link>Common\ActiveDirectoryAuthenticationAuthority.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\ActiveDirectoryAuthenticationException.cs">
-      <Link>Common\ActiveDirectoryAuthenticationException.cs</Link>
+    <Compile Include="..\ADAL.Common\AdalException.cs">
+      <Link>Common\AdalException.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\AdalIdHelper.cs">
       <Link>Common\AdalIdHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AdalServiceException.cs">
+      <Link>Common\AdalServiceException.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AdalUserMismatchException.cs">
+      <Link>Common\AdalUserMismatchException.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\AuthenticationContext.cs">
       <Link>Common\AuthenticationContext.cs</Link>

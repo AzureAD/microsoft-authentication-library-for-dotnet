@@ -55,9 +55,9 @@ namespace Test.ADAL.NET.Friend
                 if (value[0] == 'A')
                 {
                     string []segments = value.Substring(1).Split(new [] { Delimiter }, StringSplitOptions.RemoveEmptyEntries);
-                    throw new ActiveDirectoryAuthenticationException(errorCode: segments[0], message: segments[1])
+                    throw new AdalServiceException(errorCode: segments[0], message: segments[1])
                           {
-                              InnerStatusCode = int.Parse(segments[2])
+                              StatusCode = int.Parse(segments[2])
                           };
                 }
             }
@@ -68,15 +68,17 @@ namespace Test.ADAL.NET.Friend
                 value = 'P' + result;
                 return result;
             }
-            catch (ActiveDirectoryAuthenticationException ex)
+            catch (AdalException ex)
             {
-                if (ex.InnerStatusCode == 503)
+                AdalServiceException serviceException = ex as AdalServiceException;
+                if (serviceException != null && serviceException.StatusCode == 503)
                 {
                     value = null;
                 }
                 else
-                { 
-                    value = 'A' + string.Format("{0}{1}{2}{3}{4}", ex.ErrorCode, Delimiter, ex.Message, Delimiter, ex.InnerStatusCode);
+                {
+                    value = 'A' + string.Format("{0}{1}{2}{3}{4}", ex.ErrorCode, Delimiter, ex.Message, Delimiter, 
+                        (serviceException != null) ? serviceException.StatusCode : 0);
                 }
                 
                 throw;

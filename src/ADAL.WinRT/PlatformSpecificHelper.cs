@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static AuthenticationResult ProcessServiceError(string error, string errorDescription)
         {
-            return new AuthenticationResult(error, errorDescription);
+            return new AuthenticationResult(AuthenticationStatus.ServiceError, error, errorDescription);
         }
 
         public static string PlatformSpecificToLower(this string input)

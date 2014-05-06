@@ -56,6 +56,7 @@ namespace Test.ADAL.WinRT.Unit
             set
             {
                 this.keyElements["Accept"] = value;
+                this.internalHttpWebRequest.Accept = value;
             }
         }
 
@@ -73,6 +74,7 @@ namespace Test.ADAL.WinRT.Unit
             set
             {
                 this.keyElements["Method"] = value;
+                this.internalHttpWebRequest.Method = value;
             }
         }
 
@@ -103,7 +105,8 @@ namespace Test.ADAL.WinRT.Unit
             {
                 foreach (var kvp in this.internalHttpWebRequest.BodyParameters)
                 {
-                    this.keyElements["Body-" + kvp.Key] = kvp.Value;
+                    string value = (kvp.Key == "password") ? "PASSWORD" : kvp.Value;
+                    this.keyElements["Body-" + kvp.Key] = value;
                 }
             }
 
