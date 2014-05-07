@@ -60,11 +60,6 @@ namespace Test.ADAL.Common
                 StsDictionary.Add(stsType, sts);
             }
 
-            if (sts.State != StsState.Started)
-            {
-                sts.Start();
-            }
-
             return sts;
         }
     }
