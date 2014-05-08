@@ -1,20 +1,24 @@
-# Active Directory Authentication Library (ADAL) for .NET and WinRT
+# Active Directory Authentication Library (ADAL) for .NET and Windows Store
 
 Active Directory Authentication Library (ADAL) provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.
+Here you can find the source code for the library. You can find the corresponding releases (both stable and prerelease) on the NuGet gallery at [http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/](http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).
+- The latest stable release is [1.0.3](http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/1.0.3). Note that this is for .NET only.
+- The latest prerelease is [2.6.1-alpha](http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/2.6.1-alpha).
+Please note: as of today the source is not aligned with the latest release. We expect to release an updated prerelease shortly, which will bring back releases and master back in sync.  
 
 ## Projects in this repo
 
 ### ADAL.NET
 
-* The project to build ADAL for .NET client applications.
+* This project contains the source of ADAL .NET.
 
 ### ADAL.NET.WindowsForms
 
-* The project to add browser based interaction to ADAL .NET. The assembly is used internally by the main assembly of ADAL .NET.
+* This project contains the source of the internal component used by ADAL .NET to drive user interaction on the Windows desktop.
 
 ### ADAL.WinRT
 
-* The project to build ADAL for Windows Store applications. The output is a WinRT component with .winmd extension.
+* This project contains the source of ADAL for Windows Store. ADAL for Windows Store is packaged as a Windows Runtime Component (.winmd).
 
 ### Test.ADAL.NET
 
@@ -34,15 +38,15 @@ Active Directory Authentication Library (ADAL) provides easy to use authenticati
 
 ### Test.ADAL.WinRT
 
-* End to end tests for ADAL WinRT. These tests require Test.ADAL.WinRT.Dashboard application running to be able to test interactive scenarios with UI automation.
+* End to end tests for ADAL for Windows Store. These tests require Test.ADAL.WinRT.Dashboard application running to be able to test interactive scenarios with UI automation.
 
 ### Test.ADAL.WinRT.Dashboard
 
-* The Windows Store application used for running ADAL WinRT tests.
+* The Windows Store application used for running ADAL for Windows Store tests.
 
 ### Test.ADAL.WinRT.Unit
 
-* Unit tests for various components in ADAL WinRT as well as mock based tests for ADAL WinRT.
+* Unit tests for various components in ADAL for Windows Store as well as mock based tests for ADAL for Windows Store.
 
 ## How to Run Tests
 
