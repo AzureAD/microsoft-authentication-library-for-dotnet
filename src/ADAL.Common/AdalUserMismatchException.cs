@@ -16,13 +16,12 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
 #if ADAL_WINRT
     class AdalUserMismatchException : AdalException
 #else
+    using System;
     using System.Runtime.Serialization;
 
     /// <summary>

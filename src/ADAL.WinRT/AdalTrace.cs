@@ -45,12 +45,33 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public enum AdalTraceLevel
     {
+        /// <summary>
+        /// None
+        /// </summary>
         None,
+        /// <summary>
+        /// Critical
+        /// </summary>
         Critical,
+        /// <summary>
+        /// Error
+        /// </summary>
         Error,
+        /// <summary>
+        /// Warning
+        /// </summary>
         Warning,
+        /// <summary>
+        /// Informational
+        /// </summary>
         Informational,
+        /// <summary>
+        /// Verbose
+        /// </summary>
         Verbose,
+        /// <summary>
+        /// LogAlways
+        /// </summary>
         LogAlways
     }
 }

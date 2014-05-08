@@ -59,12 +59,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 return this.Credential.ClientId;
             }
 
-            if (this.Certificate != null)
-            {
-                return this.Certificate.ClientId;
-            }
-
-            return null;
+            return (this.Certificate) != null ? this.Certificate.ClientId : null;
         }
 
         public ClientCredential Credential { get; private set; }

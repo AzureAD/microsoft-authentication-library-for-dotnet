@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         private CustomWebBrowserEvent webBrowserEvent;
 
         [ComVisible(true), ComDefaultInterface(typeof(NativeWrapper.IDocHostUIHandler))]
-        protected class CustomSite : WebBrowser.WebBrowserSite, NativeWrapper.IDocHostUIHandler, ICustomQueryInterface
+        protected class CustomSite : WebBrowserSite, NativeWrapper.IDocHostUIHandler, ICustomQueryInterface
         {
             private const int NotImplemented = -2147467263;
 
@@ -160,7 +160,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 WebBrowser host = this.host;
                 if (!host.WebBrowserShortcutsEnabled)
                 {
-                    int num = ((int)msg.wParam) | (int)Control.ModifierKeys;
+                    int num = ((int)msg.wParam) | (int)ModifierKeys;
                     if ((msg.message != WM_CHAR) && Enum.IsDefined(typeof(Shortcut), (Shortcut)num))
                     {
                         return S_OK;

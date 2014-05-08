@@ -16,7 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
 using System.Net;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -24,6 +23,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 #if ADAL_WINRT
     class AdalServiceException : AdalException
 #else
+    using System;
     using System.Net;
     using System.Runtime.Serialization;
 

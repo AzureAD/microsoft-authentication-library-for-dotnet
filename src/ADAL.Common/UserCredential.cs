@@ -106,12 +106,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 return this.SecurePassword.ToCharArray();
             }
 
-            if (this.Password != null)
-            {
-                return this.Password.ToCharArray();
-            }
-
-            return null;
+            return (this.Password != null) ? this.Password.ToCharArray() : null;
         }
 #endif
     }

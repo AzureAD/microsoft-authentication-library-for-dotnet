@@ -90,10 +90,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
                     // The invisible dialog has failed to complete in the allotted time.
                     // Attempt a graceful shutdown.
-                    this.formsSyncContext.Post((state) =>
-                    {
-                        this.dialog.CloseBrowser();
-                    }, null);
+                    this.formsSyncContext.Post(state => this.dialog.CloseBrowser(), null);
                 }
             }
         }

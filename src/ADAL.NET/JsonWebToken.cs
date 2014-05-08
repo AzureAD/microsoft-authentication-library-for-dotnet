@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             string encodedPayload = EncodeSegment(jsonPayload);
 
-            return string.Concat( encodedHeader, ".", encodedPayload);
+            return string.Concat(encodedHeader, ".", encodedPayload);
         }
 
         private string EncodePayloadToJson()
