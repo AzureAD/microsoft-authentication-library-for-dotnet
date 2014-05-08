@@ -16,25 +16,20 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Net;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class HttpWebRequestFactory : IHttpWebRequestFactory
     {
-        internal static readonly HttpWebRequestFactory DefaultFactory = new HttpWebRequestFactory();
-
-        public static IHttpWebRequest Create(string uri)
-        {
-            if (NetworkPlugin.HttpWebRequestFactory != null)
-            {
-                return NetworkPlugin.HttpWebRequestFactory.CreateInstance(uri);
-            }
-
-            return DefaultFactory.CreateInstance(uri);
-        }
-
-        public IHttpWebRequest CreateInstance(string uri)
+        public IHttpWebRequest Create(string uri)
         {
             return new HttpWebRequestWrapper(uri);
+        }
+
+        public IHttpWebResponse CreateResponse(WebResponse response)
+        {
+            return new HttpWebResponseWrapper(response);
         }
     }
 }

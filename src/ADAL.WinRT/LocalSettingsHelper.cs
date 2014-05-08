@@ -18,7 +18,6 @@
 
 using System;
 using System.Text;
-using System.Threading.Tasks;
 using Windows.Storage;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory

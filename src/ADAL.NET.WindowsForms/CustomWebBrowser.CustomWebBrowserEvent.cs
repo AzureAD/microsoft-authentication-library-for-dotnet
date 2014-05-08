@@ -22,11 +22,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
     internal partial class CustomWebBrowser
     {
-        [ClassInterface( ClassInterfaceType.None )]
+        [ClassInterface(ClassInterfaceType.None)]
         private sealed class CustomWebBrowserEvent : StandardOleMarshalObject, NativeWrapper.DWebBrowserEvents2
         {
             // Fields
-            private CustomWebBrowser parent;
+            private readonly CustomWebBrowser parent;
 
             // Methods
             public CustomWebBrowserEvent( CustomWebBrowser parent )
@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 this.parent = parent;
             }
 
-            public void NavigateError( object pDisp, ref object url, ref object frame, ref object statusCode, ref bool cancel )
+            public void NavigateError(object pDisp, ref object url, ref object frame, ref object statusCode, ref bool cancel)
             {
                 string uriString = ( url == null ) ? "" : ( (string)url );
                 string frameString = ( frame == null ) ? "" : ( (string)frame );

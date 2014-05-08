@@ -18,6 +18,7 @@
 
 using System;
 using System.Linq;
+using System.Security;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -47,7 +48,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result, true, false);
 
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, sts.ValidResource);
-            VerifyErrorResult(result, "invalid_request", "90014");    // ACS90014: The request body must contain the following parameter: 'client_secret or client_assertion'.
+            VerifyErrorResult(result, "invalid_request", "90014", 400);    // ACS90014: The request body must contain the following parameter: 'client_secret or client_assertion'.
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(null, sts.ValidRedirectUriForConfidentialClient, credential);
             VerifyErrorResult(result, "invalid_argument", "authorizationCode");
@@ -58,16 +59,17 @@ namespace Test.ADAL.Common
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode + "x", sts.ValidRedirectUriForConfidentialClient, credential);
             VerifyErrorResult(result, "invalid_grant", "authorization code");
 
-            // TODO: AAD team needs to check if this is an appropriate error message
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, new Uri(sts.ValidRedirectUriForConfidentialClient.AbsoluteUri + "x"), credential);
-            VerifyErrorResult(result, "invalid_grant", "access grant is invalid, expired or revoked");
+
+            // TODO: Update status code to 400 once AAD returns it.
+            VerifyErrorResult(result, "invalid_grant", "access grant is invalid or malformed", (sts.Type == StsType.ADFS) ? 400 : 401);
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, (ClientCredentialProxy)null);
             VerifyErrorResult(result, "invalid_argument", "credential");
 
             var invalidCredential = new ClientCredentialProxy(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret + "x");
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, invalidCredential);
-            VerifyErrorResult(result, "invalid_client", "client secret");
+            VerifyErrorResult(result, "invalid_client", "client secret", 401);
         }
 
         public static async Task ConfidentialClientWithX509TestAsync(Sts sts)
@@ -93,7 +95,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result, true, false);
 
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, sts.ValidResource);
-            VerifyErrorResult(result, Sts.InvalidRequest, "90014");   // The request body must contain the following parameter: 'client_secret or client_assertion'.
+            VerifyErrorResult(result, Sts.InvalidRequest, "90014", 400);   // The request body must contain the following parameter: 'client_secret or client_assertion'.
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential, null);
             VerifySuccessResult(sts, result);
@@ -140,7 +142,7 @@ namespace Test.ADAL.Common
 
             invalidCredential = new ClientCredentialProxy(sts.ValidConfidentialClientId.Replace("0", "1"), sts.ValidConfidentialClientSecret + "x");
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
-            VerifyErrorResult(result, Sts.UnauthorizedClient, "70001");
+            VerifyErrorResult(result, Sts.UnauthorizedClient, "70001", 401);
         }
 
         public static async Task ClientAssertionWithX509TestAsync(Sts sts)
@@ -257,9 +259,9 @@ namespace Test.ADAL.Common
             {
                 await context.AcquireTokenSilentAsync(sts.ValidResource, sts.ValidClientId, sts.ValidUserId);
             }
-            catch (ActiveDirectoryAuthenticationException ex)
+            catch (AdalException ex)
             {
-                Verify.AreEqual(ActiveDirectoryAuthenticationError.FailedToAcquireTokenSilently, ex.ErrorCode);
+                Verify.AreEqual(AdalError.FailedToAcquireTokenSilently, ex.ErrorCode);
             }
 
             AuthenticationContextProxy.SetCredentials(sts.Type == StsType.ADFS ? sts.ValidUserId : null, sts.ValidPassword);
@@ -421,29 +423,6 @@ namespace Test.ADAL.Common
             long expiresIn = (long)(result.ExpiresOn - DateTime.UtcNow).TotalSeconds;
             Log.Comment("Verifying token expiration...");
             Verify.IsGreaterThanOrEqual(expiresIn, (long)0, "Token Expiration");
-        }
-
-        private static void VerifySuccessResultAndTokenContent(Sts sts, AuthenticationResultProxy result, bool supportRefreshToken = true, bool supportUserInfo = true)
-        {
-            VerifySuccessResult(sts, result, supportRefreshToken, supportUserInfo);
-            if (supportUserInfo)
-            {
-                VerifyTokenContent(result);
-            }
-        }
-
-        private static void VerifyTokenContent(AuthenticationResultProxy result)
-        {
-
-            // Verify the token content confirms the user in AuthenticationResult.UserInfo
-            var token = new System.IdentityModel.Tokens.JwtSecurityToken(result.AccessToken);
-            foreach (var claim in token.Claims)
-            {
-                if (claim.Type == "upn")
-                {
-                    Verify.AreEqual(result.UserInfo.UserId, claim.Value);
-                }
-            }
         }
     }
 }

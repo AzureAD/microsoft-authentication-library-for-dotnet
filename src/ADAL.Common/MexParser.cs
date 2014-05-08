@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             XDocument mexDocument;
             try
             {
-                IHttpWebRequest request = HttpWebRequestFactory.Create(federationMetadataUrl);
+                IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(federationMetadataUrl);
                 request.Method = "GET";
                 request.ContentType = "application/soap+xml";
                 using (var response = await request.GetResponseSyncOrAsync(callState))
@@ -60,11 +60,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (WebException ex)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.AccessingWsMetadataExchangeFailed, ex);
+                throw new AdalServiceException(AdalError.AccessingWsMetadataExchangeFailed, ex);
             }
             catch (XmlException ex)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.ParsingWsMetadataExchangeFailed, ex);
+                throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
             }
 
             return mexDocument;
@@ -87,12 +87,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else
                 {
-                    throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.WsTrustEndpointNotFoundInMetadataDocument);                    
+                    throw new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument);                    
                 }
             }
             catch (XmlException ex)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.ParsingWsMetadataExchangeFailed, ex);
+                throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
             }
 
             return url;

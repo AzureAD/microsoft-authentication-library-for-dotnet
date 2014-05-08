@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// This class is necessary since there is a loose coupling between this assembly and the assembly containing Windows Forms 
     /// dependencies.
     /// </summary>
-    internal class WebAuthenticationDialogFactory
+    internal class WebUIFactory : IWebUIFactory
     {
         // For security reasons, it is important to have PublicKeyToken mentioned referencing the assembly.
         private const string WebAuthenticationDialogAssemblyNameTemplate = "Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms, Version={0}, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
@@ -41,13 +41,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             InitializeFactoryMethod();
         }
 
-        public static IWebUI Create(PromptBehavior promptBehavior, object ownerWindow = null)
+        public IWebUI Create(PromptBehavior promptBehavior, object ownerWindow)
         {
-            if (NetworkPlugin.WebUI != null)
-            {
-                return NetworkPlugin.WebUI;
-            } 
-            
             InitializeFactoryMethod();
 
             object[] parameters = { promptBehavior };
@@ -86,8 +81,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static void ThrowAssemlyLoadFailedException(string webAuthenticationDialogAssemblyName, Exception innerException)
         {
-            throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.AssemblyLoadFailed,
-                string.Format(CultureInfo.InvariantCulture, ActiveDirectoryAuthenticationErrorMessage.AssemblyLoadFailedTemplate, webAuthenticationDialogAssemblyName), innerException);
+            throw new AdalException(AdalError.AssemblyLoadFailed,
+                string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.AssemblyLoadFailedTemplate, webAuthenticationDialogAssemblyName), innerException);
         }
     }
 }

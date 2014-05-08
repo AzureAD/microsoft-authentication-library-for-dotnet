@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             if (!NetworkInterface.GetIsNetworkAvailable())
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.NetworkNotAvailable);
+                throw new AdalException(AdalError.NetworkNotAvailable);
             }
         }
 

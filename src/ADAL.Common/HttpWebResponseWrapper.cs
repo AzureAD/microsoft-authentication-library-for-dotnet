@@ -35,7 +35,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             get
             {
-                return ((HttpWebResponse)this.response).StatusCode;
+                var httpWebResponse = this.response as HttpWebResponse;
+                return (httpWebResponse != null) ? httpWebResponse.StatusCode : HttpStatusCode.NotImplemented;
             }
         }
 

@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>AuthenticationParameters object containing authentication parameters</returns>
         public static AuthenticationParameters CreateFromUnauthorizedResponse(HttpWebResponse response)
         {
-            return CreateFromUnauthorizedResponseCommon(HttpWebResponseFactory.Create(response));
+            return CreateFromUnauthorizedResponseCommon(NetworkPlugin.HttpWebRequestFactory.CreateResponse(response));
         }
     }
 }

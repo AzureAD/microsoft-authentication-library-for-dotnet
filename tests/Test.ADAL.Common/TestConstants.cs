@@ -36,7 +36,6 @@ namespace Test.ADAL.Common
         public const string Default = "Default";
         public const string Null = "Null";
         public const string Constant = "Constant";
-        public const string ShortLived = "ShortLived";
         public const string InMemory = "InMemory";
     }
 
@@ -52,7 +51,6 @@ namespace Test.ADAL.Common
         NotProvided = 0,
         Default = 1,
         Null = 2,
-        ShortLived = 3,
-        InMemory = 4
+        InMemory = 3
     }
 }

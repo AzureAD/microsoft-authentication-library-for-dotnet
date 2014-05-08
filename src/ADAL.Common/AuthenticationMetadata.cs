@@ -90,14 +90,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (authorityType != AuthorityType.AAD && validateAuthority)
             {
-                throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.UnsupportedAuthorityValidation, "validateAuthority");
+                throw new ArgumentException(AdalErrorMessage.UnsupportedAuthorityValidation, "validateAuthority");
             }
 
             Authenticator authenticator = await GetAuthenticatorAsync(authority, authorityType, validateAuthority, callState);
 
             if (authenticator == null)
             {
-                throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.AuthorityNotInValidList, "authority");
+                throw new ArgumentException(AdalErrorMessage.AuthorityNotInValidList, "authority");
             }
 
             return authenticator;
@@ -123,19 +123,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (!Uri.IsWellFormedUriString(authority, UriKind.Absolute))
             {
                 throw new ArgumentException(
-                    ActiveDirectoryAuthenticationErrorMessage.AuthorityInvalidUriFormat, "authority");
+                    AdalErrorMessage.AuthorityInvalidUriFormat, "authority");
             }
 
             var authorityUri = new Uri(authority);
             if (authorityUri.Scheme != "https")
             {
-                throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.AuthorityUriInsecure, "authority");
+                throw new ArgumentException(AdalErrorMessage.AuthorityUriInsecure, "authority");
             }
 
             string path = authorityUri.AbsolutePath.Substring(1);
             if (string.IsNullOrWhiteSpace(path))
             {
-                throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.AuthorityUriInvalidPath, "authority");
+                throw new ArgumentException(AdalErrorMessage.AuthorityUriInvalidPath, "authority");
             }
 
             string firstPath = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
@@ -215,7 +215,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                IHttpWebRequest request = HttpWebRequestFactory.Create(instanceDiscoveryEndpoint);
+                IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(instanceDiscoveryEndpoint);
                 request.Method = "GET";
                 HttpHelper.AddCorrelationIdHeadersToRequest(request, callState);
                 AdalIdHelper.AddAsHeaders(request);
@@ -230,10 +230,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (WebException ex)
             {
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
-                throw new ActiveDirectoryAuthenticationException(
-                    ActiveDirectoryAuthenticationError.AuthorityNotInValidList,
+                throw new AdalServiceException(
+                    AdalError.AuthorityNotInValidList,
                     string.Format(CultureInfo.InvariantCulture, "{0}. {1} ({2}): {3}", 
-                        ActiveDirectoryAuthenticationErrorMessage.AuthorityNotInValidList, tokenResponse.Error, host, tokenResponse.ErrorDescription), 
+                        AdalErrorMessage.AuthorityNotInValidList, tokenResponse.Error, host, tokenResponse.ErrorDescription), 
                     ex);
             }
         }

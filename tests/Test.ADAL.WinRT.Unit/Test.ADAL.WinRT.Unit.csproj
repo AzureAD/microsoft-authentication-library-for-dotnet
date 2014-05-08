@@ -56,18 +56,53 @@
     <SDKReference Include="TestPlatform, Version=11.0" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Test.ADAL.Common\AdalTests.cs">
+      <Link>Common\AdalTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\AdalTestsBase.cs">
+      <Link>Common\AdalTestsBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\AuthenticationContextProxy.cs">
+      <Link>Common\AuthenticationContextProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\AuthenticationResultProxy.cs">
+      <Link>Common\AuthenticationResultProxy.cs</Link>
+    </Compile>
     <Compile Include="..\Test.ADAL.Common\CommonUnitTests.cs">
       <Link>Common\CommonUnitTests.cs</Link>
     </Compile>
     <Compile Include="..\Test.ADAL.Common\Log.cs">
       <Link>Common\Log.cs</Link>
     </Compile>
+    <Compile Include="..\Test.ADAL.Common\SerializationHelper.cs">
+      <Link>Common\SerializationHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\Sts.cs">
+      <Link>Common\Sts.cs</Link>
+    </Compile>
     <Compile Include="..\Test.ADAL.Common\TokenCacheTests.cs">
       <Link>Common\TokenCacheTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\UserCredentialProxy.cs">
+      <Link>Common\UserCredentialProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\UserInfoProxy.cs">
+      <Link>Common\UserInfoProxy.cs</Link>
     </Compile>
     <Compile Include="..\Test.ADAL.Common\Verify.cs">
       <Link>Common\Verify.cs</Link>
     </Compile>
+    <Compile Include="AdalTests.cs" />
+    <Compile Include="AdalWinRTTests.cs" />
+    <Compile Include="AuthenticationContextProxy.cs" />
+    <Compile Include="ReplayerBase.cs" />
+    <Compile Include="ReplayerHttpWebRequest.cs" />
+    <Compile Include="ReplayerHttpWebRequestFactory.cs" />
+    <Compile Include="ReplayerHttpWebResponse.cs" />
+    <Compile Include="ReplayerRequestCreationHelper.cs" />
+    <Compile Include="ReplayerWebUI.cs" />
+    <Compile Include="ReplayerWebUIFactory.cs" />
+    <Compile Include="SerializationHelper.cs" />
     <Compile Include="TokenCacheUnitTests.cs" />
     <Compile Include="UnitTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -76,6 +111,10 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
+    <Content Include="..\Test.ADAL.Common\recorded_data.dat">
+      <Link>recorded_data.dat</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Test.ADAL.WinRT.Unit_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

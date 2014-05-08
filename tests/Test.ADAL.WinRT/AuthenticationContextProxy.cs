@@ -106,11 +106,6 @@ namespace Test.ADAL.Common
                 new CommandArguments { CorrelationId = correlationId }));
         }
 
-        public async Task<AuthenticationResultProxy> SetDefaultToSSOMode(bool defaultToSSOMode)
-        {
-            return await AddCommandAndRunAsync(defaultToSSOMode ? CommandType.SetDefaultToSSOMode : CommandType.ClearDefaultToSSOMode, null);
-        }
-
         public async Task<AuthenticationResultProxy> SetUseCorporateNetwork(bool useCorporateNetwork)
         {
             return await AddCommandAndRunAsync(useCorporateNetwork ? CommandType.SetUseCorporateNetwork : CommandType.ClearUseCorporateNetwork, null);
@@ -157,6 +152,13 @@ namespace Test.ADAL.Common
             return RunAsyncTask(AddCommandAndRunAsync(
                 CommandType.AquireTokenAsyncRCRUX,
                 new CommandArguments { Resource = resource, ClientId = clientId, RedirectUri = redirectUri, UserId = userId, Extra = extraQueryParameters }));
+        }
+
+        public AuthenticationResultProxy AcquireToken(string resource, string clientId, PromptBehaviorProxy promptBehavior)
+        {
+            return RunAsyncTask(AddCommandAndRunAsync(
+                CommandType.AquireTokenAsyncRCP,
+                new CommandArguments { Resource = resource, ClientId = clientId, PromptBehavior = promptBehavior }));
         }
 
         public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehavior)

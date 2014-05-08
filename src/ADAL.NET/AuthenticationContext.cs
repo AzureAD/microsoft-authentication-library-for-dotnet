@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             set
             {
-                WebAuthenticationDialogFactory.ThrowIfUIAssemblyUnavailable();
+                WebUIFactory.ThrowIfUIAssemblyUnavailable();
                 this.ownerWindow = value;
             }
         }
@@ -55,8 +55,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userCredential">The user credential to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        internal async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, UserCredential userCredential)
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, UserCredential userCredential)
         {
             return await this.AcquireTokenCommonAsync(resource, clientId, userCredential);
         }
@@ -324,7 +324,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws ActiveDirectoryAuthenticationException.</returns>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId)
         {
             return await this.AcquireTokenSilentAsync(resource, clientId, null);
@@ -336,7 +336,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be null.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws ActiveDirectoryAuthenticationException.</returns>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId, string userId)
         {
             CallState callState = this.CreateCallState(false);
@@ -363,7 +363,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             else
             {
                 Logger.Verbose(callState, "No token matching arguments found in the cache");
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.FailedToAcquireTokenSilently);
+                throw new AdalException(AdalError.FailedToAcquireTokenSilently);
             }
 
             return result;
@@ -852,7 +852,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private IWebUI CreateWebAuthenticationDialog(PromptBehavior promptBehavior)
         {
-            return WebAuthenticationDialogFactory.Create(promptBehavior, this.ownerWindow);
+            return NetworkPlugin.WebUIFactory.Create(promptBehavior, this.ownerWindow);
         }
 
         private AuthorizationResult AcquireAuthorization(string resource, string clientId, Uri redirectUri, string userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)

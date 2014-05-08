@@ -78,24 +78,8 @@ namespace Test.ADAL.WinRT.Dashboard
                         {
                             tokenCacheStore = new Dictionary<TokenCacheKey, string>();
                         }
-                        else if (arg.TokenCacheStoreType == TokenCacheStoreType.ShortLived)
-                        {
-                            tokenCacheStore = new ShortLivedTokenCache();
-                        }
 
                         context = new AuthenticationContext(arg.Authority, arg.ValidateAuthority, tokenCacheStore);
-                        break;
-                    }
-
-                    case CommandType.ClearDefaultToSSOMode:
-                    {
-                        //context.DefaultToSSOMode = false;
-                        break;
-                    }
-
-                    case CommandType.SetDefaultToSSOMode:
-                    {
-                        //context.DefaultToSSOMode = true;
                         break;
                     }
 
@@ -117,8 +101,6 @@ namespace Test.ADAL.WinRT.Dashboard
                         break;
                     }
 
-// Disabled Non-Interactive Feature
-#if false
                     case CommandType.AquireTokenAsyncRCUP:
                     {
                         UserCredential credential;
@@ -135,7 +117,6 @@ namespace Test.ADAL.WinRT.Dashboard
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, credential);
                         break;
                     }
-#endif
 
                     case CommandType.AquireTokenAsyncRCR:
                     {
@@ -157,13 +138,25 @@ namespace Test.ADAL.WinRT.Dashboard
 
                     case CommandType.AquireTokenAsyncRCRP:
                     {
-                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always : PromptBehavior.Auto);
+                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, 
+                            (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
+                            (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto);
                         break;
                     }
 
                     case CommandType.AquireTokenAsyncRCRPU:
                     {
-                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always : PromptBehavior.Auto, arg.UserId);
+                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, 
+                            (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
+                            (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto, arg.UserId);
+                        break;
+                    }
+
+                    case CommandType.AquireTokenAsyncRCP:
+                    {
+                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, 
+                            (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
+                            (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto);
                         break;
                     }
 
@@ -243,9 +236,9 @@ namespace Test.ADAL.WinRT.Dashboard
                            Error = result.Error,
                            ErrorDescription = result.ErrorDescription,
                            Status =
-                               (result.Status == AuthenticationStatus.Succeeded)
-                                   ? AuthenticationStatusProxy.Succeeded
-                                   : AuthenticationStatusProxy.Failed
+                               (result.Status == AuthenticationStatus.Success)
+                                   ? AuthenticationStatusProxy.Success
+                                   : ((result.Status == AuthenticationStatus.ClientError) ? AuthenticationStatusProxy.ClientError : AuthenticationStatusProxy.ServiceError)
                        };
         }
     }

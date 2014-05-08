@@ -67,14 +67,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Test.ADAL.Common\SerializationHelper.cs">
+      <Link>Common\SerializationHelper.cs</Link>
+    </Compile>
     <Compile Include="AdalFriend.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RecorderDateTimeHelper.cs" />
+    <Compile Include="RecorderBase.cs" />
     <Compile Include="RecorderHttpWebRequest.cs" />
     <Compile Include="RecorderHttpWebRequestFactory.cs" />
     <Compile Include="RecorderHttpWebResponse.cs" />
+    <Compile Include="RecorderRequestCreationHelper.cs" />
     <Compile Include="RecorderSettings.cs" />
     <Compile Include="RecorderWebUI.cs" />
+    <Compile Include="RecorderWebUIFactory.cs" />
     <Compile Include="SerializationHelper.cs" />
   </ItemGroup>
   <ItemGroup>

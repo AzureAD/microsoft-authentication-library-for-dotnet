@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
-                result = PlatformSpecificHelper.ProcessServiceError(ActiveDirectoryAuthenticationError.Unknown, ActiveDirectoryAuthenticationErrorMessage.Unknown);
+                result = PlatformSpecificHelper.ProcessServiceError(AdalError.Unknown, AdalErrorMessage.Unknown);
             }
 
             return result;
@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else
                 {
-                    result = new AuthorizationResult(ActiveDirectoryAuthenticationError.AuthenticationFailed, ActiveDirectoryAuthenticationErrorMessage.AuthorizationServerInvalidResponse);
+                    result = new AuthorizationResult(AdalError.AuthenticationFailed, AdalErrorMessage.AuthorizationServerInvalidResponse);
                 }
             }
 
@@ -192,8 +192,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 return new TokenResponse 
                     { 
-                        Error = ActiveDirectoryAuthenticationError.ServiceReturnedError,
-                        ErrorDescription = ActiveDirectoryAuthenticationError.ServiceReturnedError 
+                        Error = AdalError.ServiceReturnedError,
+                        ErrorDescription = AdalError.ServiceReturnedError 
                     };
             }
 
@@ -203,8 +203,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 return new TokenResponse 
                     { 
-                        Error = ActiveDirectoryAuthenticationError.Unknown, 
-                        ErrorDescription = ActiveDirectoryAuthenticationErrorMessage.Unknown 
+                        Error = AdalError.Unknown, 
+                        ErrorDescription = AdalErrorMessage.Unknown 
                     };
             }
 
@@ -224,8 +224,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 tokenResponse = new TokenResponse
                 {
                     Error = (((HttpWebResponse)response).StatusCode == HttpStatusCode.ServiceUnavailable) ? 
-                        ActiveDirectoryAuthenticationError.ServiceUnavailable : 
-                        ActiveDirectoryAuthenticationError.Unknown,
+                        AdalError.ServiceUnavailable : 
+                        AdalError.Unknown,
                     ErrorDescription = HttpHelper.ReadStreamContent(responseStream)
                 };
             }

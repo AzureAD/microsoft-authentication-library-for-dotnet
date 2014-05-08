@@ -90,10 +90,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
                     // The invisible dialog has failed to complete in the allotted time.
                     // Attempt a graceful shutdown.
-                    this.formsSyncContext.Post((state) =>
-                    {
-                        this.dialog.CloseBrowser();
-                    }, null);
+                    this.formsSyncContext.Post(state => this.dialog.CloseBrowser(), null);
                 }
             }
         }
@@ -165,9 +162,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             this.ThrowIfTransferredException();
 
-            if (String.IsNullOrEmpty(this.result))
+            if (string.IsNullOrEmpty(this.result))
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UserInteractionRequired);
+                throw new AdalException(AdalError.UserInteractionRequired);
             }
 
             return this.result;

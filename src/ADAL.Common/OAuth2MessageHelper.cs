@@ -95,6 +95,32 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return parameters;
         }
 
+        public static RequestParameters CreateTokenRequest(string resource, string clientId, UserCredential credential)
+        {
+            RequestParameters parameters = new RequestParameters();
+            parameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
+            parameters[OAuthParameter.Resource] = resource;
+            parameters[OAuthParameter.ClientId] = clientId;
+            parameters[OAuthParameter.Username] = credential.UserId;
+#if ADAL_WINRT
+            parameters[OAuthParameter.Password] = credential.Password;
+#else
+            if (credential.SecurePassword != null)
+            {
+                parameters.AddSecureParameter(OAuthParameter.Password, credential.SecurePassword);
+            }
+            else
+            {
+                parameters[OAuthParameter.Password] = credential.Password;
+            }
+#endif
+
+            // To request id_token in response
+            parameters[OAuthParameter.Scope] = ScopeOpenIdValue;
+
+            return parameters;
+        }
+
         public static RequestParameters CreateTokenRequest(string resource, string refreshToken, string clientId)
         {
             RequestParameters parameters = new RequestParameters();

@@ -101,8 +101,14 @@
     <Compile Include="..\Test.ADAL.Common\AdalTests.cs">
       <Link>Common\AdalTests.cs</Link>
     </Compile>
+    <Compile Include="..\Test.ADAL.Common\AdalTests2.cs">
+      <Link>Common\AdalTests2.cs</Link>
+    </Compile>
     <Compile Include="..\Test.ADAL.Common\AdalTestsBase.cs">
       <Link>Common\AdalTestsBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\AuthenticationContextProxy.cs">
+      <Link>Common\AuthenticationContextProxy.cs</Link>
     </Compile>
     <Compile Include="..\Test.ADAL.Common\AuthenticationParametersProxy.cs">
       <Link>Common\AuthenticationParametersProxy.cs</Link>
@@ -124,9 +130,6 @@
     </Compile>
     <Compile Include="..\Test.ADAL.Common\RelyingParty.cs">
       <Link>Common\RelyingParty.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.ADAL.Common\ShortLivedTokenCache.cs">
-      <Link>Common\ShortLivedTokenCache.cs</Link>
     </Compile>
     <Compile Include="..\Test.ADAL.Common\Sts.cs">
       <Link>Common\Sts.cs</Link>
@@ -200,16 +203,8 @@
       <Link>valid_cert.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Test.ADAL.Common\recorded_datetime.dat">
-      <Link>recorded_datetime.dat</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\Test.ADAL.Common\recorded_http.dat">
-      <Link>recorded_http.dat</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\Test.ADAL.Common\recorded_webui.dat">
-      <Link>recorded_webui.dat</Link>
+    <None Include="..\Test.ADAL.Common\recorded_data.dat">
+      <Link>recorded_data.dat</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />

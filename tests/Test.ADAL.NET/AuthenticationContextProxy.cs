@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Security;
+
 namespace Test.ADAL.Common
 {
     using System;
@@ -42,28 +44,13 @@ namespace Test.ADAL.Common
         Unknown
     }
 
-    internal class AuthenticationContextProxy
+    internal partial class AuthenticationContextProxy
     {
         private const string NotSpecified = "NotSpecified";
 
         private static string userName;
         private static string password;
-
-        private readonly AuthenticationContext context;
-
-        private const string FixedCorrelationId = "2ddbba59-1a04-43fb-b363-7fb0ae785030";
-
-        public AuthenticationContextProxy(string authority)
-        {
-            this.context = new AuthenticationContext(authority);
-            this.context.CorrelationId = new Guid(FixedCorrelationId);
-        }
-
-        public AuthenticationContextProxy(string authority, bool validateAuthority)
-        {
-            this.context = new AuthenticationContext(authority, validateAuthority);
-            this.context.CorrelationId = new Guid(FixedCorrelationId);
-        }
+        private static SecureString securePassword;
 
         public AuthenticationContextProxy(string authority, bool validateAuthority, TokenCacheStoreType tokenCacheStoreType)
         {
@@ -71,10 +58,6 @@ namespace Test.ADAL.Common
             if (tokenCacheStoreType == TokenCacheStoreType.InMemory)
             {
                 tokenCacheStore = new Dictionary<TokenCacheKey, string>();
-            }
-            else if (tokenCacheStoreType == TokenCacheStoreType.ShortLived)
-            {
-                tokenCacheStore = new ShortLivedTokenCache();
             }
 
             this.context = new AuthenticationContext(authority, validateAuthority, tokenCacheStore);
@@ -103,6 +86,23 @@ namespace Test.ADAL.Common
         {
             userName = userNameIn;
             password = passwordIn;
+        }
+
+        public static void SetSecureCredentials(string userNameIn, SecureString passwordIn)
+        {
+            userName = userNameIn;
+            securePassword = passwordIn;
+        }
+
+
+        public static SecureString convertToSecureString(string strPassword)
+        {
+            var secureStr = new SecureString();
+            if (strPassword.Length > 0)
+            {
+                foreach (var c in strPassword.ToCharArray()) secureStr.AppendChar(c);
+            }
+            return secureStr;
         }
 
         public static void Delay(int sleepMilliSeconds)
@@ -142,16 +142,13 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenAsync(resource, (credential != null) ? credential.Credential : null));
         }
 
-// Disabled Non-Interactive Feature
-#if false
         public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, UserCredentialProxy credential)
         {
-            return await RunTask(this.context.AcquireTokenAsync(resource, clientId, 
+            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientId, 
                 (credential.Password == null) ? 
                 new UserCredential(credential.UserId) :
                 new UserCredential(credential.UserId, credential.Password)));
         }
-#endif
 
         public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri)
         {
@@ -405,7 +402,7 @@ namespace Test.ADAL.Common
             catch (Exception ex)
             {
                 resultProxy = GetAuthenticationResultProxy(ex);
-                if (resultProxy.ExceptionInnerStatusCode == 503 && retryCount < 5)
+                if (resultProxy.ExceptionStatusCode == 503 && retryCount < 5)
                 {
                     Thread.Sleep(3000);
                     Log.Comment(string.Format("Retry #{0}...", retryCount + 1));
@@ -483,7 +480,7 @@ namespace Test.ADAL.Common
         {
             return new AuthenticationResultProxy
             {
-                Status = AuthenticationStatusProxy.Succeeded,
+                Status = AuthenticationStatusProxy.Success,
                 AccessToken = result.AccessToken,
                 AccessTokenType = result.AccessTokenType,
                 ExpiresOn = result.ExpiresOn,
@@ -509,25 +506,30 @@ namespace Test.ADAL.Common
                 ErrorDescription = ex.Message,
             };
 
+            output.Status = AuthenticationStatusProxy.ClientError;
             if (ex is ArgumentNullException)
             {
-                output.Error = ActiveDirectoryAuthenticationError.InvalidArgument;
+                output.Error = AdalError.InvalidArgument;
             }
             else if (ex is ArgumentException)
             {
-                output.Error = ActiveDirectoryAuthenticationError.InvalidArgument;
+                output.Error = AdalError.InvalidArgument;
             }
-            else if (ex is ActiveDirectoryAuthenticationException)
+            else if (ex is AdalServiceException)
             {
-                output.Error = ((ActiveDirectoryAuthenticationException)ex).ErrorCode;
-                output.ExceptionInnerStatusCode = ((ActiveDirectoryAuthenticationException)ex).InnerStatusCode;
+                output.Error = ((AdalServiceException)ex).ErrorCode;
+                output.ExceptionStatusCode = ((AdalServiceException)ex).StatusCode;
+                output.Status = AuthenticationStatusProxy.ServiceError;
+            }
+            else if (ex is AdalException)
+            {
+                output.Error = ((AdalException)ex).ErrorCode;
             }
             else
             {
-                output.Error = ActiveDirectoryAuthenticationError.AuthenticationFailed;
+                output.Error = AdalError.AuthenticationFailed;
             }
 
-            output.Status = AuthenticationStatusProxy.Failed;
             output.Exception = ex;
 
             return output;

@@ -23,30 +23,23 @@ using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
+using Test.ADAL.Common;
+
 namespace Test.ADAL.NET.Friend
 {
-    internal class RecorderHttpWebRequest : IHttpWebRequest
+    internal class RecorderHttpWebRequest : RecorderBase, IHttpWebRequest
     {
-        private const string DictionaryFilename = @"recorded_http.dat";
-        private readonly static string dictionaryFilePath;
         private readonly IHttpWebRequest internalHttpWebRequest;
         private readonly Dictionary<string, string> keyElements;
-        private readonly static Dictionary<string, string> iOMap;
+
         static RecorderHttpWebRequest()
         {
-            dictionaryFilePath = RecorderSettings.Path + DictionaryFilename;
-            iOMap = (RecorderSettings.Mode == RecorderMode.Replay && File.Exists(dictionaryFilePath)) ?
-                SerializationHelper.DeserializeDictionary(dictionaryFilePath) : new Dictionary<string, string>();
-        }
-
-        public static void WriteToFile()
-        {
-            SerializationHelper.SerializeDictionary(iOMap, dictionaryFilePath);
+            Initialize();
         }
 
         public RecorderHttpWebRequest(string uri)
         {
-            this.internalHttpWebRequest = HttpWebRequestFactory.DefaultFactory.CreateInstance(uri);
+            this.internalHttpWebRequest = (new HttpWebRequestFactory()).Create(uri);
             this.keyElements = new Dictionary<string, string>();
             this.keyElements["Uri"] = uri;
         }
@@ -108,13 +101,6 @@ namespace Test.ADAL.NET.Friend
             }
         }
 
-
-        public void AddHeader(string key, string value)
-        {
-            this.keyElements["Header-" + key] = value;
-            this.internalHttpWebRequest.Headers[key] = value;
-        }
-
         public async Task<IHttpWebResponse> GetResponseSyncOrAsync(CallState callState)
         {
             foreach (var headerKey in this.internalHttpWebRequest.Headers.AllKeys)
@@ -126,7 +112,8 @@ namespace Test.ADAL.NET.Friend
             {
                 foreach (var kvp in this.internalHttpWebRequest.BodyParameters)
                 {
-                    this.keyElements["Body-" + kvp.Key] = kvp.Value;
+                    string value = (kvp.Key == "password") ? "PASSWORD" : kvp.Value;
+                    this.keyElements["Body-" + kvp.Key] = value;
                 }
             }
 
@@ -137,9 +124,9 @@ namespace Test.ADAL.NET.Friend
             }
 
             Stream responseStream;
-            if (iOMap.ContainsKey(key))
+            if (IOMap.ContainsKey(key))
             {
-                string value = iOMap[key];
+                string value = IOMap[key];
                 if (value[0] == 'P')
                 {
                     value = value.Substring(1);
@@ -158,12 +145,12 @@ namespace Test.ADAL.NET.Friend
                 IHttpWebResponse response = await this.internalHttpWebRequest.GetResponseSyncOrAsync(callState);
                 responseStream = response.GetResponseStream();
                 string str = SerializationHelper.StreamToString(responseStream);
-                iOMap.Add(key, 'P' + str);
+                IOMap.Add(key, 'P' + str);
                 return new RecorderHttpWebResponse(str, HttpStatusCode.OK);
             }
             catch (WebException ex)
             {
-                iOMap[key] = 'N' + SerializationHelper.SerializeWebException(ex);
+                IOMap[key] = 'N' + SerializationHelper.SerializeWebException(ex);
                 throw ex;
             }
         }

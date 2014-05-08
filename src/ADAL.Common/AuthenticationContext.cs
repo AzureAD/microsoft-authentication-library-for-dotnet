@@ -160,8 +160,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (!string.IsNullOrWhiteSpace(userId) && result.UserInfo != null && result.UserInfo.IsUserIdDisplayable && RegexUtilities.IsValidEmail(userId) &&
                 string.Compare(result.UserInfo.UserId, userId, StringComparison.OrdinalIgnoreCase) != 0)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UserMismatch,
-                    string.Format(ActiveDirectoryAuthenticationErrorMessage.UserMismatch, result.UserInfo.UserId, userId));
+                throw new AdalUserMismatchException(userId, result.UserInfo.UserId);
             }
         }
 
@@ -212,9 +211,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 #if ADAL_WINRT
                 if (!Windows.System.UserProfile.UserInformation.NameAccessAllowed)
                 {
-                    throw new ActiveDirectoryAuthenticationException(
-                        ActiveDirectoryAuthenticationError.CannotAccessUserInformation,
-                        ActiveDirectoryAuthenticationErrorMessage.CannotAccessUserInformation);                    
+                    throw new AdalException(AdalError.CannotAccessUserInformation);                    
                 }
 
                 try
@@ -222,15 +219,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     credential.UserId = await Windows.System.UserProfile.UserInformation.GetPrincipalNameAsync();
                     if (string.IsNullOrWhiteSpace(credential.UserId))
                     {
-                        throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UnknownUser);
+                        throw new AdalException(AdalError.UnknownUser);
                     }
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    throw new ActiveDirectoryAuthenticationException(
-                        ActiveDirectoryAuthenticationError.UnauthorizedUserInformationAccess,
-                        ActiveDirectoryAuthenticationErrorMessage.UnauthorizedUserInformationAccess,
-                        ex);
+                    throw new AdalException(AdalError.UnauthorizedUserInformationAccess, ex);
                 }
 #else
                 credential.UserId = System.DirectoryServices.AccountManagement.UserPrincipal.Current.UserPrincipalName;
@@ -268,11 +262,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else if (string.Compare(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UserCredentialForManagedUsersUnsupported);
+                    //handle password grant flow for the managed user
+                    if (credential.PasswordToCharArray() == null)
+                    {
+                        throw new AdalException(AdalError.PasswordRequiredForManagedUserError);
+                    }
+
+                    result = await OAuth2Request.SendTokenRequestWithUserCredentialAsync(this.Authenticator.TokenUri, resource, clientId, credential, callState);
                 }
                 else
                 {
-                    throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UnknownUserType);
+                    throw new AdalException(AdalError.UnknownUserType);
                 }
             }
 
@@ -297,7 +297,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (string.IsNullOrWhiteSpace(credential.AssertionType))
             {
-                throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.UserCredentialAssertionTypeEmpty, "credential");
+                throw new ArgumentException(AdalErrorMessage.UserCredentialAssertionTypeEmpty, "credential");
             }
 
             await this.CreateAuthenticatorAsync(callState);
@@ -337,7 +337,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (!string.IsNullOrWhiteSpace(resource) && this.authorityType != AuthorityType.AAD)
             {
-                throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.UnsupportedMultiRefreshToken, "resource");
+                throw new ArgumentException(AdalErrorMessage.UnsupportedMultiRefreshToken, "resource");
             }
 
             AuthenticationResult result = await this.SendOAuth2RequestByRefreshTokenAsync(resource, refreshToken, clientId, callState);
@@ -388,16 +388,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AuthorizationResult authorizationResult = this.AcquireAuthorization(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters, callState);
 #endif
 
-// PromptBehavior.Never is not implemented in WinRT library yet.
-#if ADAL_WINRT
-#else
             if (promptBehavior == PromptBehavior.Never && authorizationResult.Error == OAuthError.LoginRequired)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UserInteractionRequired, ActiveDirectoryAuthenticationErrorMessage.UserInteractionRequired);
+                throw new AdalException(AdalError.UserInteractionRequired);
             }
-#endif
 
-            if (authorizationResult.Status == AuthorizationStatus.Succeeded)
+            if (authorizationResult.Status == AuthorizationStatus.Success)
             {
                 string uri = this.Authenticator.TokenUri;
                 result = await OAuth2Request.SendTokenRequestAsync(uri, authorizationResult.Code, redirectUri, resource, clientId, callState);
@@ -421,7 +417,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 (this.authorityType != validAuthorityType3 || validAuthorityType3 == AuthorityType.Unknown))
             {
                 Logger.Error(callState, "Invalid authority type '{0}'", this.authorityType);
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.InvalidAuthorityType, string.Format(CultureInfo.InvariantCulture, ActiveDirectoryAuthenticationErrorMessage.InvalidAuthorityTypeTemplate, this.Authority));
+                throw new AdalException(AdalError.InvalidAuthorityType, 
+                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.InvalidAuthorityTypeTemplate, this.Authority));
             }
         }
 
@@ -445,7 +442,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     // Id token is not returned by token endpoint when refresh token is redeemed. Therefore, we should copy tenant and user information from the cached token.
                     newResult.UpdateTenantAndUserInfo(result.TenantId, result.UserInfo);
                 }
-                catch (ActiveDirectoryAuthenticationException) 
+                catch (AdalException) 
                 {
                     // TODO: Verify if this is the only exception type
                     newResult = null;

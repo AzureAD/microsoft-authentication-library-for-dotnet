@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             try
             {
-                IHttpWebRequest request = HttpWebRequestFactory.Create(uri);
+                IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(uri);
                 request.ContentType = "application/x-www-form-urlencoded";
                 AddCorrelationIdHeadersToRequest(request, callState);
                 AdalIdHelper.AddAsHeaders(request);
@@ -45,8 +45,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (WebException ex)
             {
-                TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
-                throw new ActiveDirectoryAuthenticationException(tokenResponse.Error, tokenResponse.ErrorDescription, ex);
+                TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response); 
+                throw new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, ex);
             }
         }
 

@@ -43,38 +43,11 @@ namespace Test.ADAL.WinRT
 
         [TestMethod]
         [TestCategory("AdalWinRT")]
-        [Description("Positive Test for AcquireToken")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public void AcquireTokenPositiveTest()
-        {
-            AdalTests.AcquireTokenPositive(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
         [Description("Positive Test for AcquireToken with missing redirectUri and/or userId")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveWithoutRedirectUriOrUserIdAsync()
         {
             AdalTests.AcquireTokenPositiveWithoutRedirectUriOrUserId(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Positive Test for AcquireToken with Refresh Token")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public async Task AcquireTokenPositiveByRefreshTokenTest()
-        {
-            await AdalTests.AcquireTokenPositiveByRefreshTokenTestAsync(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Test for autority validation to AuthenticationContext")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public void AuthenticationContextAuthorityValidationTest()
-        {
-            AdalTests.AuthenticationContextAuthorityValidationTest(Sts);
         }
 
         [TestMethod]
@@ -88,134 +61,6 @@ namespace Test.ADAL.WinRT
 
         [TestMethod]
         [TestCategory("AdalWinRT")]
-        [Description("Negative Test for AcquireToken with invalid authority")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public void AcquireTokenWithInvalidAuthorityTest()
-        {
-            AdalTests.AcquireTokenWithInvalidAuthority(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Negative Test for AcquireToken with invalid resource")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public void AcquireTokenWithInvalidResourceTest()
-        {
-            AdalTests.AcquireTokenWithInvalidResource(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Negative Test for AcquireToken with invalid client id")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public void AcquireTokenWithInvalidClientIdTest()
-        {
-            AdalTests.AcquireTokenWithInvalidClientId(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Negative Test for AcquireToken with incorrect user credential")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public void AcquireTokenWithIncorrectUserCredentialTest()
-        {
-            AdalTests.AcquireTokenWithIncorrectUserCredentialTest(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Positive Test for AcquireToken")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public void ExtraQueryParametersTest()
-        {
-            AdalTests.ExtraQueryParametersTest(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Negative Test for AcquireToken with user canceling authentication")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public void AcquireTokenWithAuthenticationCanceledTest()
-        {
-            // ADFS security dialog hang up
-            AdalTests.AcquireTokenWithAuthenticationCanceledTest(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Positive Test for AcquireToken testing default token cache")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public void AcquireTokenPositiveWithDefaultCacheTest()
-        {
-            AdalTests.AcquireTokenPositiveWithDefaultCacheTest(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Positive Test for AcquireToken testing custom in memory token cache")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public void AcquireTokenPositiveWithInMemoryCacheTest()
-        {
-            AdalTests.AcquireTokenPositiveWithInMemoryCache(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Positive Test for AcquireToken testing default token cache")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public void AcquireTokenPositiveWithNullCacheTest()
-        {
-            AdalTests.AcquireTokenPositiveWithNullCache(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Positive Test for AcquireToken testing custom short lived token cache")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        [Ignore]    // This test does not work with the new feature of refreshing near expiry tokens and need to be either removed of updated.
-        public void AcquireTokenPositiveWithShortLivedCacheTest()
-        {
-            AdalTests.AcquireTokenPositiveWithShortLivedCache(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Test for UserInfo")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public void UserInfoTest()
-        {
-            AdalTests.UserInfoTest(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Test for multi resource refresh token")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public async Task MultiResourceRefreshTokenTest()
-        {
-            await AdalTests.MultiResourceRefreshTokenTestAsync(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Test for acquring token using tenantless endpoint")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
-        public void TenantlessTest()
-        {
-            AdalTests.TenantlessTest(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
-        [Description("Test for STS Instance Discovery")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
-        public async Task InstanceDiscoveryTest()
-        {
-            await AdalTests.InstanceDiscoveryTestAsync(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRT")]
         [Description("Test for Force Prompt")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
         public void ForcePromptTest()
@@ -223,8 +68,6 @@ namespace Test.ADAL.WinRT
             AdalTests.ForcePromptTest(Sts);
         }
 
-// Disabled Non-Interactive Feature
-#if false
         [TestMethod]
         [TestCategory("AdalWinRT")]
         [Description("Positive Test for AcquireToken non-interactive")]
@@ -233,7 +76,6 @@ namespace Test.ADAL.WinRT
         {
             await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(Sts);
         }
-#endif
 
         [TestMethod]
         [TestCategory("AdalWinRT")]
@@ -241,9 +83,9 @@ namespace Test.ADAL.WinRT
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveWithFederatedTenantTest()
         {
-            AdalTests.AcquireTokenPositiveWithFederatedTenant(Sts, false);
+            AdalTests.AcquireTokenPositiveWithFederatedTenant(Sts);
         }
-
+        
         [TestMethod]
         [TestCategory("AdalWinRT")]
         [Description("Correlation Id test")]
@@ -260,6 +102,60 @@ namespace Test.ADAL.WinRT
         public async Task AuthenticationParametersDiscoveryTest()
         {
             await AdalTests.AuthenticationParametersDiscoveryTestAsync(Sts);
+        }
+
+        [TestMethod]
+        [TestCategory("AdalWinRTDomainJoined")]
+        [Description("Negative Test for AcquireToken with PromptBehavior.Never")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
+        public void AcquireTokenWithPromptBehaviorNeverTestAsync()
+        {
+            // TODO: Not fully working at this point due to session cookies being deleted between WAB calls.
+
+            Sts sts = Sts;
+
+            // Should not be able to get a token silently passing redirectUri.
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
+            AuthenticationResultProxy result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Never);
+            AdalTests.VerifyErrorResult(result, Sts.InvalidArgumentError, "SSO");
+
+            AuthenticationContextProxy.SetCredentials(sts.ValidUserId, sts.ValidPassword);
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri);
+            AdalTests.VerifySuccessResult(sts, result);
+
+            AuthenticationContextProxy.ClearDefaultCache();
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri);
+            AdalTests.VerifySuccessResult(sts, result);
+
+            // Should not be able to get a token silently on first try.
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, PromptBehaviorProxy.Never);
+            AdalTests.VerifyErrorResult(result, Sts.UserInteractionRequired, null);
+
+            AuthenticationContextProxy.SetCredentials(sts.ValidUserId, sts.ValidPassword);
+            // Obtain a token interactively.
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId);
+            AdalTests.VerifySuccessResult(sts, result);
+
+            // Obtain a token interactively.
+            AuthenticationContextProxy.ClearDefaultCache();
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId);
+            AdalTests.VerifySuccessResult(sts, result);
+
+            AuthenticationContextProxy.SetCredentials(null, null);
+            // Now there should be a token available in the cache so token should be available silently.
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, PromptBehaviorProxy.Never);
+            AdalTests.VerifySuccessResult(sts, result);
+
+            // Clear the cache and silent auth should work via session cookies.
+            AuthenticationContextProxy.ClearDefaultCache();
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, PromptBehaviorProxy.Never);
+            AdalTests.VerifySuccessResult(sts, result);
+
+            // Clear the cache and cookies and silent auth should fail.
+            AuthenticationContextProxy.ClearDefaultCache();
+            AdalTests.EndBrowserDialogSession();
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, PromptBehaviorProxy.Never);
+            AdalTests.VerifyErrorResult(result, Sts.UserInteractionRequired, null);                
         }
 
         [TestMethod]

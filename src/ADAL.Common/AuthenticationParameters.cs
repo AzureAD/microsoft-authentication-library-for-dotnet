@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 || authenticateHeader.Length < Bearer.Length + 2
                 || !char.IsWhiteSpace(authenticateHeader[Bearer.Length]))
             {
-                throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.InvalidAuthenticateHeaderFormat, "authenticateHeader");
+                throw new ArgumentException(AdalErrorMessage.InvalidAuthenticateHeaderFormat, "authenticateHeader");
             }
 
             authenticateHeader = authenticateHeader.Substring(Bearer.Length).Trim();
@@ -94,17 +94,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                IHttpWebRequest request = HttpWebRequestFactory.Create(resourceUrl.AbsoluteUri);
+                IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(resourceUrl.AbsoluteUri);
                 request.ContentType = "application/x-www-form-urlencoded";
                 response = await request.GetResponseSyncOrAsync(callState);
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UnauthorizedResponseExpected, ActiveDirectoryAuthenticationErrorMessage.UnauthorizedResponseExpected);
+                throw new AdalException(AdalError.UnauthorizedResponseExpected);
             }
             catch (WebException ex)
             {
-                response = HttpWebResponseFactory.Create(ex.Response);
+                response = NetworkPlugin.HttpWebRequestFactory.CreateResponse(ex.Response);
                 if (response == null)
                 {
-                    throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);
+                    throw new AdalServiceException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);
                 }
 
                 authParams = CreateFromUnauthorizedResponseCommon(response);
@@ -139,12 +139,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else
                 {
-                    throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.MissingAuthenticateHeader, "response");
+                    throw new ArgumentException(AdalErrorMessage.MissingAuthenticateHeader, "response");
                 }
             }
             else
             {
-                throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.UnauthorizedHttpStatusCodeExpected, "response");
+                throw new ArgumentException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, "response");
             }
 
             return authParams;

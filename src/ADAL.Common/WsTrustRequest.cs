@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static async Task<WsTrustResponse> SendRequestAsync(Uri url, UserCredential credential, CallState callState)
         {
-            IHttpWebRequest request = HttpWebRequestFactory.Create(url.AbsoluteUri);
+            IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(url.AbsoluteUri);
             request.ContentType = "application/soap+xml; charset=utf-8";
             if (credential.UserAuthType == UserAuthType.IntegratedAuth)
             {
@@ -89,14 +89,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(ex.Response.GetResponseStream());
                     errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument);
                 }
-                catch (ActiveDirectoryAuthenticationException)
+                catch (AdalException)
                 {
                     errorMessage = "See inner exception for detail.";
                 }
 
-                throw new ActiveDirectoryAuthenticationException(
-                    ActiveDirectoryAuthenticationError.FederatedServiceReturnedError,
-                    string.Format(ActiveDirectoryAuthenticationErrorMessage.FederatedServiceReturnedErrorTemplate, url, errorMessage),
+                throw new AdalServiceException(
+                    AdalError.FederatedServiceReturnedError,
+                    string.Format(AdalErrorMessage.FederatedServiceReturnedErrorTemplate, url, errorMessage),
                     ex);
             }
 

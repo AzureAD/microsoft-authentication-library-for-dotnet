@@ -37,9 +37,6 @@
     <Compile Include="..\Test.ADAL.Common\AuthenticationResultProxy.cs">
       <Link>Common\AuthenticationResultProxy.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.Common\ShortLivedTokenCache.cs">
-      <Link>Common\ShortLivedTokenCache.cs</Link>
-    </Compile>
     <Compile Include="..\Test.ADAL.Common\Sts.cs">
       <Link>Common\Sts.cs</Link>
     </Compile>

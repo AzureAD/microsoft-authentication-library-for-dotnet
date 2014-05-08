@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public JsonWebToken(string audience, string issuer, uint allowedLifetimeInSeconds, string subject = null)
         {
-            DateTime validFrom = NetworkPlugin.DateTimeHelper.UtcNow;
+            DateTime validFrom = NetworkPlugin.RequestCreationHelper.GetJsonWebTokenValidFrom();
 
             DateTime validTo = validFrom + TimeSpan.FromSeconds(allowedLifetimeInSeconds);
 
@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // Length check before sign
             if (MaxTokenLength < token.Length)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.EncodedTokenTooLong);
+                throw new AdalException(AdalError.EncodedTokenTooLong);
             }
 
             return new ClientAssertion(string.Concat(token, ".", UrlEncodeSegment(credential.Sign(token))), OAuthAssertionType.JwtBearer);
@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static string EncodeSegment(string segment)
         {
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(segment));
+            return UrlEncodeSegment(Encoding.UTF8.GetBytes(segment));
         }
 
         private static string UrlEncodeSegment(byte[] segment)
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             string encodedPayload = EncodeSegment(jsonPayload);
 
-            return string.Concat( encodedHeader, ".", encodedPayload);
+            return string.Concat(encodedHeader, ".", encodedPayload);
         }
 
         private string EncodePayloadToJson()

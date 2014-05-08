@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal enum AuthorizationStatus
     {
         Failed = -1,
-        Succeeded = 1,
+        Success = 1,
     }
 
     [DataContract]
@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         internal AuthorizationResult(string code)
         {
-            this.Status = AuthorizationStatus.Succeeded;
+            this.Status = AuthorizationStatus.Success;
             this.Code = code;
         }
 

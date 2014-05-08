@@ -59,11 +59,17 @@
     <Compile Include="..\ADAL.Common\ActiveDirectoryAuthenticationAuthority.cs">
       <Link>Common\ActiveDirectoryAuthenticationAuthority.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\ActiveDirectoryAuthenticationException.cs">
-      <Link>Common\ActiveDirectoryAuthenticationException.cs</Link>
+    <Compile Include="..\ADAL.Common\AdalException.cs">
+      <Link>Common\AdalException.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\AdalIdHelper.cs">
       <Link>Common\AdalIdHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AdalServiceException.cs">
+      <Link>Common\AdalServiceException.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AdalUserMismatchException.cs">
+      <Link>Common\AdalUserMismatchException.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\AuthenticationContext.cs">
       <Link>Common\AuthenticationContext.cs</Link>
@@ -125,6 +131,12 @@
     <Compile Include="..\ADAL.Common\IHttpWebResponse.cs">
       <Link>Common\IHttpWebResponse.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\IRequestCreationHelper.cs">
+      <Link>Common\IRequestCreationHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\LogHelper.cs">
+      <Link>Common\LogHelper.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\MexParser.cs">
       <Link>Common\MexParser.cs</Link>
     </Compile>
@@ -148,6 +160,9 @@
     </Compile>
     <Compile Include="..\ADAL.Common\RegexUtilities.cs">
       <Link>Common\RegexUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\RequestCreationHelper.cs">
+      <Link>Common\RequestCreationHelper.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\RequestParameters.cs">
       <Link>Common\RequestParameters.cs</Link>
@@ -198,7 +213,8 @@
     <Compile Include="RegexUtilities.cs" />
     <Compile Include="StaTaskScheduler.cs" />
     <Compile Include="Web\IWebUI.cs" />
-    <Compile Include="Web\WebAuthenticationFactory.cs" />
+    <Compile Include="Web\IWebUIFactory.cs" />
+    <Compile Include="Web\WebUIFactory.cs" />
     <Compile Include="X509CertificateCredential.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

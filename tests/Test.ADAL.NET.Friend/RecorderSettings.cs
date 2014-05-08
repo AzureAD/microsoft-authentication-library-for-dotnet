@@ -17,12 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -36,10 +31,6 @@ namespace Test.ADAL.NET.Friend
 
     public static class RecorderSettings
     {
-        private static RecorderWebUI recorderWebUI;
-        private static RecorderHttpWebRequestFactory recorderHttpWebRequestFactory;
-        private static RecorderDateTimeHelper recorderDateTimeHelper;
-
         public static RecorderMode Mode { get; set; }
 
         public static bool Mock { get; set; }
@@ -48,7 +39,7 @@ namespace Test.ADAL.NET.Friend
         {
             get
             {
-                return (Mode == RecorderMode.Record) ? Directory.GetCurrentDirectory() + @"\..\..\..\test\Test.ADAL.Common\" : @".\";
+                return (Mode == RecorderMode.Record) ? Directory.GetCurrentDirectory() + @"\..\..\..\tests\Test.ADAL.Common\" : @".\";
             }            
         }
 
@@ -75,40 +66,20 @@ namespace Test.ADAL.NET.Friend
 
         public static void WriteRecordersToFile()
         {
-            recorderWebUI.WriteToFile();
-            RecorderHttpWebRequest.WriteToFile();
-            recorderDateTimeHelper.WriteToFile();
+            RecorderBase.WriteToFile();
         }
 
 
         private static void SetRecorderNetworkPlugin()
         {
-            if (recorderWebUI == null)
-            {
-                recorderWebUI = new RecorderWebUI(PromptBehavior.Auto);
-            }
-
-            if (recorderHttpWebRequestFactory == null)
-            {
-                recorderHttpWebRequestFactory = new RecorderHttpWebRequestFactory();
-            }
-
-            if (recorderDateTimeHelper == null)
-            {
-                recorderDateTimeHelper = new RecorderDateTimeHelper();
-            }
-
-            NetworkPlugin.WebUI = recorderWebUI;
-            NetworkPlugin.HttpWebRequestFactory = recorderHttpWebRequestFactory;
-            NetworkPlugin.DateTimeHelper = recorderDateTimeHelper;
+            NetworkPlugin.WebUIFactory = new RecorderWebUIFactory();
+            NetworkPlugin.HttpWebRequestFactory = new RecorderHttpWebRequestFactory();
+            NetworkPlugin.RequestCreationHelper = new RecorderRequestCreationHelper();
         }
 
         private static void ResetRecorderNetworkPlugin()
         {
-            NetworkPlugin.WebUI = null;
-            NetworkPlugin.HttpWebRequestFactory = null;
-            NetworkPlugin.DateTimeHelper = new DefaultDateTimeHelper();
+            NetworkPlugin.SetToDefault();
         }
-
     }
 }

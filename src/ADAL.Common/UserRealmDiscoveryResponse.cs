@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (string.IsNullOrWhiteSpace(userId))
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UnknownUser);
+                throw new AdalException(AdalError.UnknownUser);
             }
 
             string userRealmEndpoint = userRealmUri;
@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             UserRealmDiscoveryResponse userRealmResponse;
             try
             {
-                IHttpWebRequest request = HttpWebRequestFactory.Create(userRealmEndpoint);
+                IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(userRealmEndpoint);
                 request.Method = "GET";
                 request.Accept = "application/json";
                 HttpHelper.AddCorrelationIdHeadersToRequest(request, callState);
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (WebException ex)
             {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.UserRealmDiscoveryFailed, ex);
+                throw new AdalServiceException(AdalError.UserRealmDiscoveryFailed, ex);
             }
 
             return userRealmResponse;

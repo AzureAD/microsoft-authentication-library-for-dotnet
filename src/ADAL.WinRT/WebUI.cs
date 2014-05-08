@@ -28,10 +28,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class WebUI : IWebUI
     {
+        private readonly PromptBehavior promptBehavior;
         private readonly bool useCorporateNetwork;
 
-        public WebUI(bool useCorporateNetwork)
+        public WebUI(PromptBehavior promptBehavior, bool useCorporateNetwork)
         {
+            this.promptBehavior = promptBehavior;
             this.useCorporateNetwork = useCorporateNetwork;
         }
 
@@ -39,34 +41,53 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             WebAuthenticationResult webAuthenticationResult;
 
-            try
+            if (redirectUri.AbsoluteUri == WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri)
             {
-                if (redirectUri.AbsoluteUri == WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri)
-                {
-                    if (this.useCorporateNetwork)
-                    {
-                        // SSO Mode with CorporateNetwork
-                        webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(WebAuthenticationOptions.UseCorporateNetwork, authorizationUri);
-                    }
-                    else
-                    {
-                        // SSO Mode
-                        webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(WebAuthenticationOptions.None, authorizationUri);
-                    }
+                WebAuthenticationOptions options = this.useCorporateNetwork ? WebAuthenticationOptions.UseCorporateNetwork : WebAuthenticationOptions.None;
+
+                if (this.promptBehavior == PromptBehavior.Never)
+                {                
+                    // SSO Mode
+                    options |= WebAuthenticationOptions.SilentMode;
                 }
-                else if (redirectUri.Scheme == "ms-app")
+
+                try
                 {
-                    throw new ArgumentException(ActiveDirectoryAuthenticationErrorMessage.RedirectUriAppIdMismatch, "redirectUri");
+                        webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri);
                 }
-                else
+                catch (FileNotFoundException ex)
+                {
+                    throw new AdalException(AdalError.AuthenticationUiFailed, ex);
+                }
+                catch (Exception ex)
+                {
+                    if (this.promptBehavior == PromptBehavior.Never)
+                    {
+                        throw new AdalException(AdalError.UserInteractionRequired, ex);
+                    }
+
+                    throw;
+                }
+            }
+            else if (this.promptBehavior == PromptBehavior.Never)
+            {
+                throw new ArgumentException(AdalErrorMessage.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
+            }
+            else if (redirectUri.Scheme == "ms-app")
+            {
+                throw new ArgumentException(AdalErrorMessage.RedirectUriAppIdMismatch, "redirectUri");
+            }
+            else
+            {
+                try
                 {
                     // Non-SSO Mode
                     webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(WebAuthenticationOptions.None, authorizationUri, redirectUri);
                 }
-            }
-            catch (FileNotFoundException ex)
-            {
-                throw new ActiveDirectoryAuthenticationException(ActiveDirectoryAuthenticationError.AuthenticationUiFailed, ex);
+                catch (FileNotFoundException ex)
+                {
+                    throw new AdalException(AdalError.AuthenticationUiFailed, ex);
+                }
             }
 
             AuthorizationResult result;
@@ -77,13 +98,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     result = OAuth2Response.ParseAuthorizeResponse(webAuthenticationResult.ResponseData, callState);
                     break;
                 case WebAuthenticationStatus.ErrorHttp:
-                    result = new AuthorizationResult(ActiveDirectoryAuthenticationError.AuthenticationFailed, webAuthenticationResult.ResponseErrorDetail.ToString());
+                    result = new AuthorizationResult(AdalError.AuthenticationFailed, webAuthenticationResult.ResponseErrorDetail.ToString());
                     break;
                 case WebAuthenticationStatus.UserCancel:
-                    result = new AuthorizationResult(ActiveDirectoryAuthenticationError.AuthenticationCanceled, ActiveDirectoryAuthenticationErrorMessage.AuthenticationCanceled);
+                    result = new AuthorizationResult(AdalError.AuthenticationCanceled, AdalErrorMessage.AuthenticationCanceled);
                     break;
                 default:
-                    result = new AuthorizationResult(ActiveDirectoryAuthenticationError.AuthenticationFailed, ActiveDirectoryAuthenticationErrorMessage.AuthorizationServerInvalidResponse);
+                    result = new AuthorizationResult(AdalError.AuthenticationFailed, AdalErrorMessage.AuthorizationServerInvalidResponse);
                     break;
             }
 

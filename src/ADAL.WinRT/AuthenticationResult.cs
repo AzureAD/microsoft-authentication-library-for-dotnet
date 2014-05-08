@@ -21,23 +21,25 @@ using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    using System.Collections.Generic;
-    using System.Net;
-
     /// <summary>
     /// Represents the outcome of one authentication operation.
     /// </summary>
     public enum AuthenticationStatus
     {
         /// <summary>
-        /// Authentication Succeeded.
+        /// Authentication Success.
         /// </summary>
-        Succeeded = 0,
+        Success = 0,
 
         /// <summary>
-        /// Authentication Failed.
+        /// Authentication failed due to error on client side.
         /// </summary>
-        Failed = -1,
+        ClientError = -1,
+
+        /// <summary>
+        /// Authentication failed due to error returned by service.
+        /// </summary>
+        ServiceError = -2,
     }
 
     /// <summary>
@@ -47,45 +49,41 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     [DataContract]
     public sealed partial class AuthenticationResult
     {
-        internal AuthenticationResult(string error, string errorDescription)
+        internal AuthenticationResult(AuthenticationStatus status, string error, string errorDescription)
         {
-            this.Status = AuthenticationStatus.Failed;
+            this.Status = status;
             this.Error = error;
             this.ErrorDescription = errorDescription;
         }
 
         internal AuthenticationResult(Exception ex)
         {
-            this.Status = AuthenticationStatus.Failed;
+            this.Status = AuthenticationStatus.ClientError;
+            this.StatusCode = 0;
             if (ex is ArgumentNullException)
             {
-                this.Error = ActiveDirectoryAuthenticationError.InvalidArgument;
-                this.ErrorDescription = string.Format(ActiveDirectoryAuthenticationErrorMessage.NullParameterTemplate, ((ArgumentNullException)ex).ParamName);
+                this.Error = AdalError.InvalidArgument;
+                this.ErrorDescription = string.Format(AdalErrorMessage.NullParameterTemplate, ((ArgumentNullException)ex).ParamName);
             }
             else if (ex is ArgumentException)
             {
-                this.Error = ActiveDirectoryAuthenticationError.InvalidArgument;
+                this.Error = AdalError.InvalidArgument;
                 this.ErrorDescription = ex.Message;
             }
-            else if (ex is ActiveDirectoryAuthenticationException)
+            else if (ex is AdalException)
             {
-                this.Error = ((ActiveDirectoryAuthenticationException)ex).ErrorCode;
+                this.Error = ((AdalException)ex).ErrorCode;
                 this.ErrorDescription = (ex.InnerException != null) ? ex.Message + ". " + ex.InnerException.Message : ex.Message;
-                WebException webException = ex.InnerException as WebException;
-                if (webException != null && webException.Response != null)
+                AdalServiceException serviceException = ex as AdalServiceException;
+                if (serviceException != null)
                 {
-                    var expectedResponseHeaders = new Dictionary<string, string> 
-                        {
-                            // Set to null to be filled in method SendPostRequestAndDeserializeJsonResponseAsync
-                            { OAuthHeader.CorrelationId, null }
-                        };
-
-                    HttpHelper.CopyHeadersTo(webException.Response.Headers, expectedResponseHeaders);
+                    this.Status = AuthenticationStatus.ServiceError;
+                    this.StatusCode = serviceException.StatusCode;
                 }
             }
             else
             {
-                this.Error = ActiveDirectoryAuthenticationError.AuthenticationFailed;
+                this.Error = AdalError.AuthenticationFailed;
                 this.ErrorDescription = ex.Message;
             }
         }
@@ -107,5 +105,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         [DataMember]
         public string ErrorDescription { get; private set; }
+
+        /// <summary>
+        /// Gets the status code returned from http layer if any error happens. This status code is either the HttpStatusCode in the inner WebException response or
+        /// NavigateError Event Status Code in browser based flow (See http://msdn.microsoft.com/en-us/library/bb268233(v=vs.85).aspx).
+        /// You can use this code for purposes such as implementing retry logic or error investigation.
+        /// </summary>
+        public int StatusCode { get; set; }
     }
 }

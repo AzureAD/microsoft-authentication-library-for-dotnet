@@ -56,9 +56,9 @@ namespace Test.ADAL.NET.Unit
                 await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, null, null);
                 Verify.Fail("Exception expected");
             }
-            catch (ActiveDirectoryAuthenticationException ex)
+            catch (AdalException ex)
             {
-                Verify.IsNotNull(ex.ErrorCode, ActiveDirectoryAuthenticationError.UnknownUser);
+                Verify.IsNotNull(ex.ErrorCode, AdalError.UnknownUser);
             }
 
             try
@@ -66,9 +66,9 @@ namespace Test.ADAL.NET.Unit
                 await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, "ab@cd@ef", null);
                 Verify.Fail("Exception expected");
             }
-            catch (ActiveDirectoryAuthenticationException ex)
+            catch (AdalException ex)
             {
-                Verify.IsNotNull(ex.ErrorCode, ActiveDirectoryAuthenticationError.UserRealmDiscoveryFailed);
+                Verify.IsNotNull(ex.ErrorCode, AdalError.UserRealmDiscoveryFailed);
                 Verify.IsNotNull(ex.InnerException);
             }
 
@@ -77,9 +77,9 @@ namespace Test.ADAL.NET.Unit
                 await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, "#$%@#$(%@#$&%@#$&jahgfk2!#@$%346", null);
                 Verify.Fail("Exception expected");
             }
-            catch (ActiveDirectoryAuthenticationException ex)
+            catch (AdalException ex)
             {
-                Verify.IsNotNull(ex.ErrorCode, ActiveDirectoryAuthenticationError.UserRealmDiscoveryFailed);
+                Verify.IsNotNull(ex.ErrorCode, AdalError.UserRealmDiscoveryFailed);
                 Verify.IsNotNull(ex.InnerException);
             }
         }
@@ -101,9 +101,9 @@ namespace Test.ADAL.NET.Unit
                 await MexParser.FetchMexAsync(userRealmResponse.FederationMetadataUrl + "x", null);
                 Verify.Fail("Exception expected");
             }
-            catch (ActiveDirectoryAuthenticationException ex)
+            catch (AdalException ex)
             {
-                Verify.AreEqual(ex.ErrorCode, ActiveDirectoryAuthenticationError.AccessingWsMetadataExchangeFailed);
+                Verify.AreEqual(ex.ErrorCode, AdalError.AccessingWsMetadataExchangeFailed);
             }
         }
 
@@ -132,9 +132,9 @@ namespace Test.ADAL.NET.Unit
                 MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword);
                 Verify.Fail("Exception expected");
             }
-            catch (ActiveDirectoryAuthenticationException ex)
+            catch (AdalException ex)
             {
-                Verify.AreEqual(ex.ErrorCode, ActiveDirectoryAuthenticationError.WsTrustEndpointNotFoundInMetadataDocument);
+                Verify.AreEqual(ex.ErrorCode, AdalError.WsTrustEndpointNotFoundInMetadataDocument);
             }
 
             try
@@ -144,9 +144,9 @@ namespace Test.ADAL.NET.Unit
                 MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword);
                 Verify.Fail("Exception expected");
             }
-            catch (ActiveDirectoryAuthenticationException ex)
+            catch (AdalException ex)
             {
-                Verify.AreEqual(ex.ErrorCode, ActiveDirectoryAuthenticationError.WsTrustEndpointNotFoundInMetadataDocument);
+                Verify.AreEqual(ex.ErrorCode, AdalError.WsTrustEndpointNotFoundInMetadataDocument);
             }
         }
 
@@ -183,9 +183,9 @@ namespace Test.ADAL.NET.Unit
             {
                 await WsTrustRequest.SendRequestAsync(new Uri(wsTrustAddress.AbsoluteUri + "x"), new UserCredential(federatedSts.ValidUserId, federatedSts.ValidPassword), null);
             }
-            catch (ActiveDirectoryAuthenticationException ex)
+            catch (AdalException ex)
             {
-                Verify.IsNotNull(ex.ErrorCode, ActiveDirectoryAuthenticationError.FederatedServiceReturnedError);
+                Verify.IsNotNull(ex.ErrorCode, AdalError.FederatedServiceReturnedError);
                 Verify.IsNotNull(ex.InnerException);
             }
 
@@ -193,9 +193,9 @@ namespace Test.ADAL.NET.Unit
             {
                 await WsTrustRequest.SendRequestAsync(new Uri(wsTrustAddress.AbsoluteUri), new UserCredential(federatedSts.ValidUserId, "InvalidPassword"), null);
             }
-            catch (ActiveDirectoryAuthenticationException ex)
+            catch (AdalException ex)
             {
-                Verify.IsNotNull(ex.ErrorCode, ActiveDirectoryAuthenticationError.FederatedServiceReturnedError);
+                Verify.IsNotNull(ex.ErrorCode, AdalError.FederatedServiceReturnedError);
                 Verify.IsNotNull(ex.InnerException);
             }
         }

@@ -27,9 +27,7 @@ namespace Test.ADAL.NET
 {
     [TestClass]
     [DeploymentItem("TestMetadata.xml")]
-    [DeploymentItem("recorded_http.dat")]
-    [DeploymentItem("recorded_webui.dat")]
-    [DeploymentItem("recorded_datetime.dat")]
+    [DeploymentItem("recorded_data.dat")]
     [DeploymentItem("valid_cert.pfx")]
     [DeploymentItem("invalid_cert.pfx")]
     [DeploymentItem("Microsoft.Owin.Host.HttpListener.dll")]
@@ -78,9 +76,17 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNet")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
+        public void SmokeTest()
+        {
+            AdalTests.AcquireTokenPositive(Sts);
+        }
+
+        [TestMethod]
+        [Description("Positive Test for AcquireToken")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveTest()
         {
@@ -91,15 +97,14 @@ namespace Test.ADAL.NET
         [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken with missing redirectUri and/or userId")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        public void AcquireTokenPositiveWithoutUserIdTest()
+        public void AcquireTokenPositiveWithoutRedirectUriOrUserIdAsync()
         {
             AdalTests.AcquireTokenPositiveWithoutRedirectUriOrUserId(Sts);
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken by Refresh Token")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
         public async Task AcquireTokenPositiveByRefreshTokenTest()
         {
@@ -107,9 +112,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Test for autority validation to AuthenticationContext")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AuthenticationContextAuthorityValidationTest()
         {
@@ -117,9 +121,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Test for AcquireToken with redirectUri")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenWithRedirectUriTest()
         {
@@ -127,9 +130,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Negative Test for AcquireToken with invalid authority")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenWithInvalidAuthorityTest()
         {
@@ -137,9 +139,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Negative Test for AcquireToken with invalid resource")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenWithInvalidResourceTest()
         {
@@ -147,9 +148,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Negative Test for AcquireToken with invalid client id")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenWithInvalidClientIdTest()
         {
@@ -157,9 +157,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Negative Test for AcquireToken with incorrect user credential")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenWithIncorrectUserCredentialTest()
         {
@@ -167,9 +166,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void ExtraQueryParametersTest()
         {
@@ -177,9 +175,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Negative Test for AcquireToken with user canceling authentication")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenWithAuthenticationCanceledTest()
         {
@@ -188,9 +185,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken testing default token cache")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveWithDefaultCacheTest()
         {
@@ -198,9 +194,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken testing custom in memory token cache")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveWithInMemoryCacheTest()
         {
@@ -208,9 +203,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken testing default token cache")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveWithNullCacheTest()
         {
@@ -218,19 +212,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
-        [Description("Positive Test for AcquireToken testing custom short lived token cache")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
-        [Ignore]    // This test does not work with the new feature of refreshing near expiry tokens and need to be either removed of updated.
-        public void AcquireTokenPositiveWithShortLivedCacheTest()
-        {
-            AdalTests.AcquireTokenPositiveWithShortLivedCache(Sts);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Test for UserInfo")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void UserInfoTest()
         {
@@ -238,9 +221,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Test for multi resource refresh token")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
         public async Task MultiResourceRefreshTokenTest()
         {
@@ -248,9 +230,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Test for acquring token using tenantless endpoint")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
         public void TenantlessTest()
         {
@@ -258,9 +239,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Test for STS Instance Discovery")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
         public async Task InstanceDiscoveryTest()
         {
@@ -276,30 +256,36 @@ namespace Test.ADAL.NET
             AdalTests.ForcePromptTest(Sts);
         }
 
-// Disabled Non-Interactive Feature
-#if false
         [TestMethod]
-        [TestCategory("AdalDotNet")]
+        [Description("Positive Test for AcquireToken non-interactive for managed user")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
+        public async Task AcquireTokenNonInteractiveManagedPositiveTest()
+        {
+            await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(Sts);
+        }
+
+        [TestMethod]
         [Description("Positive Test for AcquireToken non-interactive")]
+        [TestCategory("AdalDotNet")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
         public async Task AcquireTokenNonInteractivePositiveTest()
         {
             await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(Sts);
         }
-#endif
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken using federated tenant")]
+        [TestCategory("AdalDotNet")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveWithFederatedTenantTest()
         {
-            AdalTests.AcquireTokenPositiveWithFederatedTenant(Sts, false);
+            AdalTests.AcquireTokenPositiveWithFederatedTenant(Sts);
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Correlation Id test")]
+        [TestCategory("AdalDotNet")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "StsSyncAsync", DataAccessMethod.Sequential)]
         public async Task CorrelationIdTest()
         {
@@ -307,9 +293,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for discovery of authentication parameters")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
         public async Task AuthenticationParametersDiscoveryTest()
         {
@@ -317,9 +302,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Test for reading WebException as inner exception")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
         public async Task WebExceptionAccessTest()
         {
@@ -327,9 +311,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for Confidential Client")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
         public async Task ConfidentialClientWithX509Test()
         {
@@ -337,9 +320,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Test for Client credential")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
         public async Task ClientCredentialTestAsync()
         {
@@ -347,9 +329,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Test for Client assertion with X509")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
         public async Task ClientAssertionWithX509Test()
         {
@@ -357,9 +338,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Test for Confidential Client with self signed jwt")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public async Task ConfidentialClientWithJwtTest()
         {
@@ -367,9 +347,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for Client assertion with self signed Jwt")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
         public async Task ClientAssertionWithSelfSignedJwtTest()
         {
@@ -377,9 +356,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for Confidential Client")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
         public async Task ConfidentialClientTest()
         {
@@ -396,9 +374,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireTokenOnBehalf with client credential")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task AcquireTokenOnBehalfAndClientCredentialTest()
         {
@@ -406,9 +383,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireTokenOnBehalf with client certificate")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task AcquireTokenOnBehalfAndClientCertificateTest()
         {
@@ -416,9 +392,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireTokenOnBehalf with client assertion")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task AcquireTokenOnBehalfAndClientAssertionTest()
         {
@@ -426,9 +401,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Positive Test for AcquireToken from cache only")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
         public async Task AcquireTokenFromCacheTest()
         {
@@ -454,9 +428,8 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Test for cache expiration margin")]
-        [TestCategory("Mock")]
+        [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void CacheExpirationMarginTest()
         {
