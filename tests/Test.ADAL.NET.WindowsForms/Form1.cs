@@ -60,26 +60,26 @@ namespace Test.ADAL.NET.WindowsForms
             this.RunTest(AdalTests.TenantlessTest);
             await this.RunTestAsync(AdalTests.InstanceDiscoveryTestAsync);
             this.RunTest(AdalTests.ForcePromptTest);
-
+            await this.RunTestAsync(AdalTests.AcquireTokenNonInteractivePositiveTestAsync);
             await this.RunTestAsync(AdalTests.AcquireTokenNonInteractivePositiveTestAsync, StsType.AADFederatedWithADFS3);
-
-
-            //this.RunTestAsync(AdalTests.AcquireTokenPositiveWithFederatedTenantAsync);
+            this.RunTest(AdalTests.AcquireTokenPositiveWithFederatedTenant);
             await this.RunTestAsync(AdalTests.CorrelationIdTestAsync);
             await this.RunTestAsync(AdalTests.AuthenticationParametersDiscoveryTestAsync);
             await this.RunTestAsync(AdalTests.WebExceptionAccessTestAsync);
             await this.RunTestAsync(AdalTests.ConfidentialClientWithX509TestAsync);
+            await this.RunTestAsync(AdalTests.ClientCredentialTestAsync);
             await this.RunTestAsync(AdalTests.ClientAssertionWithX509TestAsync);
             await this.RunTestAsync(AdalTests.ConfidentialClientWithJwtTestAsync);
             await this.RunTestAsync(AdalTests.ClientAssertionWithSelfSignedJwtTestAsync);
             await this.RunTestAsync(AdalTests.ConfidentialClientTestAsync);
             this.RunTest(AdalTests.AcquireTokenWithPromptBehaviorNeverTest);
-
             await this.RunTestAsync(AdalTests.AcquireTokenOnBehalfAndClientCredentialTestAsync);
             await this.RunTestAsync(AdalTests.AcquireTokenOnBehalfAndClientCertificateTestAsync);
             await this.RunTestAsync(AdalTests.AcquireTokenOnBehalfAndClientAssertionTestAsync);
-
             await this.RunTestAsync(AdalTests.AcquireTokenFromCacheTestAsync);
+            this.RunTest(AdalTests.MultiUserCacheTest);
+            this.RunTest(AdalTests.SwitchUserTest);
+            this.RunTest(AdalTests.CacheExpirationMarginTest);
 
             TestButton.Enabled = true;
         }

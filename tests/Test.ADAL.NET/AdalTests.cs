@@ -59,7 +59,6 @@ namespace Test.ADAL.Common
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode + "x", sts.ValidRedirectUriForConfidentialClient, credential);
             VerifyErrorResult(result, "invalid_grant", "authorization code");
 
-            // TODO: AAD team needs to check if this is an appropriate error message
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, new Uri(sts.ValidRedirectUriForConfidentialClient.AbsoluteUri + "x"), credential);
 
             // TODO: Update status code to 400 once AAD returns it.

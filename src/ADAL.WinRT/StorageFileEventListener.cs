@@ -35,41 +35,41 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Storage file to be used to write logs
         /// </summary>
-        private StorageFile m_StorageFile = null;
+        private StorageFile storageFile;
 
         /// <summary>
         /// Name of the current event listener
         /// </summary>
-        private string m_Name;
+        private readonly string name;
 
         /// <summary>
         /// The format to be used by logging.
         /// </summary>
-        private string m_Format = "{0:yyyy-MM-dd HH\\:mm\\:ss\\:ffff}\tType: {1}\tId: {2}\tMessage: '{3}'";
+        private string format = "{0:yyyy-MM-dd HH\\:mm\\:ss\\:ffff}\tType: {1}\tId: {2}\tMessage: '{3}'";
 
-        private SemaphoreSlim m_SemaphoreSlim = new SemaphoreSlim(1);
+        private SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1);
 
         public StorageFileEventListener(string name)
         {
-            this.m_Name = name;
+            this.name = name;
             Debug.WriteLine("StorageFileEventListener for {0} has name {1}", GetHashCode(), name);
             AssignLocalFile();
         }
 
         private async void AssignLocalFile()
         {
-            m_StorageFile = await ApplicationData.Current.LocalFolder.CreateFileAsync(m_Name, CreationCollisionOption.OpenIfExists);
+            storageFile = await ApplicationData.Current.LocalFolder.CreateFileAsync(name, CreationCollisionOption.OpenIfExists);
         }
 
         private async void WriteToFile(IEnumerable<string> lines)
         {
-            await m_SemaphoreSlim.WaitAsync();
+            await semaphoreSlim.WaitAsync();
 
             await Task.Run(async () =>
             {
                 try
                 {
-                    await FileIO.AppendLinesAsync(m_StorageFile, lines);
+                    await FileIO.AppendLinesAsync(storageFile, lines);
                 }
                 catch (Exception ex)
                 {
@@ -77,18 +77,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 finally
                 {
-                    m_SemaphoreSlim.Release();
+                    semaphoreSlim.Release();
                 }
             });
         }
 
         protected override void OnEventWritten(EventWrittenEventArgs eventData)
         {
-            if (m_StorageFile == null) return;
+            if (storageFile == null) return;
 
             var lines = new List<string>();
 
-            var newFormatedLine = string.Format(m_Format, DateTime.Now, eventData.Level, eventData.EventId, eventData.Payload[0]);
+            var newFormatedLine = string.Format(format, DateTime.Now, eventData.Level, eventData.EventId, eventData.Payload[0]);
 
             Debug.WriteLine(newFormatedLine);
 
@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
         protected override void OnEventSourceCreated(EventSource eventSource)
         {
-            Debug.WriteLine("OnEventSourceCreated for Listener {0} - {1} got eventSource {2}", GetHashCode(), m_Name, eventSource.Name);
+            Debug.WriteLine("OnEventSourceCreated for Listener {0} - {1} got eventSource {2}", GetHashCode(), name, eventSource.Name);
         }
     }
 }

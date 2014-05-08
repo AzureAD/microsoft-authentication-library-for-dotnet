@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         private const int UIHeightGap = 310;
 
         private Panel webBrowserPanel;
-        private CustomWebBrowser webBrowser;
+        private readonly CustomWebBrowser webBrowser;
 
         private Uri desiredCallbackUri;
 

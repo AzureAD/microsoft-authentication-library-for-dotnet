@@ -17,14 +17,12 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    using System.Collections.Generic;
-    using System.Net;
-    using System.Reflection;
-    using System.Runtime.InteropServices;
-
     internal static class AdalIdParameter
     {
         /// <summary>

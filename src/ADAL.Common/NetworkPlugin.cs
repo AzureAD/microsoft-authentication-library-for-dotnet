@@ -16,11 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Net;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
-using System;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

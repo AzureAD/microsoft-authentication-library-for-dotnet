@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static EventLevel GetEventLevel(AdalTraceLevel level)
         {
-            EventLevel returnLevel = EventLevel.Informational;
+            EventLevel returnLevel;
             switch (level)
             {
                 case AdalTraceLevel.Informational:

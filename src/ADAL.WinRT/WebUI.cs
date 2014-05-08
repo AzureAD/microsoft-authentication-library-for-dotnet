@@ -43,17 +43,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (redirectUri.AbsoluteUri == WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri)
             {
-                WebAuthenticationOptions options;
-                if (this.useCorporateNetwork)
-                {
-                    // SSO Mode with CorporateNetwork
-                    options = WebAuthenticationOptions.UseCorporateNetwork;
-                }
-                else
-                {                
-                    // SSO Mode
-                    options = WebAuthenticationOptions.None;
-                }
+                WebAuthenticationOptions options = this.useCorporateNetwork ? WebAuthenticationOptions.UseCorporateNetwork : WebAuthenticationOptions.None;
 
                 if (this.promptBehavior == PromptBehavior.Never)
                 {                

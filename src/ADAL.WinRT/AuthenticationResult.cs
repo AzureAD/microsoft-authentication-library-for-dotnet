@@ -21,9 +21,6 @@ using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    using System.Collections.Generic;
-    using System.Net;
-
     /// <summary>
     /// Represents the outcome of one authentication operation.
     /// </summary>
