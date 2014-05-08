@@ -1,5 +1,5 @@
 # Active Directory Authentication Library (ADAL) for .NET and WinRT
-===================================================================
+===========
 
 Active Directory Authentication Library (ADAL) provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.
 
