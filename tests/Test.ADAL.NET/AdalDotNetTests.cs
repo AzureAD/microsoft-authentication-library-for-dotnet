@@ -269,7 +269,7 @@ namespace Test.ADAL.NET
         [Description("Positive Test for AcquireToken non-interactive")]
         [TestCategory("AdalDotNet")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
-        public async Task AcquireTokenNonInteractivePositiveTest()
+        public async Task AcquireTokenNonInteractiveFederatedPositiveTest()
         {
             await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(Sts);
         }
