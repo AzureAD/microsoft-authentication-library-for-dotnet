@@ -622,7 +622,7 @@ namespace Test.ADAL.Common
 
             if (!equal)
             {
-                Log.Comment(result.ExpiresOn.ToString("U") + " <> " + result2.ExpiresOn.ToString("U"));
+                Log.Comment(result.ExpiresOn.ToString("R") + " <> " + result2.ExpiresOn.ToString("R"));
             }
 
             Verify.IsTrue(equal, "AuthenticationResult.ExpiresOn");
@@ -634,7 +634,7 @@ namespace Test.ADAL.Common
 
             if (equal)
             {
-                Log.Comment(result.ExpiresOn.ToString("U") + " <> " + result2.ExpiresOn.ToString("U"));
+                Log.Comment(result.ExpiresOn.ToString("R") + " <> " + result2.ExpiresOn.ToString("R"));
             }
 
             Verify.IsFalse(equal, "AuthenticationResult.ExpiresOn");
