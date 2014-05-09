@@ -618,12 +618,26 @@ namespace Test.ADAL.Common
 
         public static void VerifyExpiresOnAreEqual(AuthenticationResultProxy result, AuthenticationResultProxy result2)
         {
-            Verify.IsTrue(AreDateTimeOffsetsEqual(result.ExpiresOn, result2.ExpiresOn), "AuthenticationResult.ExpiresOn");
+            bool equal = AreDateTimeOffsetsEqual(result.ExpiresOn, result2.ExpiresOn);
+
+            if (!equal)
+            {
+                Log.Comment(result.ExpiresOn.ToString("U") + " <> " + result2.ExpiresOn.ToString("U"));
+            }
+
+            Verify.IsTrue(equal, "AuthenticationResult.ExpiresOn");
         }
 
         public static void VerifyExpiresOnAreNotEqual(AuthenticationResultProxy result, AuthenticationResultProxy result2)
         {
-            Verify.IsFalse(AreDateTimeOffsetsEqual(result.ExpiresOn, result2.ExpiresOn), "AuthenticationResult.ExpiresOn");
+            bool equal = AreDateTimeOffsetsEqual(result.ExpiresOn, result2.ExpiresOn);
+
+            if (equal)
+            {
+                Log.Comment(result.ExpiresOn.ToString("U") + " <> " + result2.ExpiresOn.ToString("U"));
+            }
+
+            Verify.IsFalse(equal, "AuthenticationResult.ExpiresOn");
         }
 
         public static bool AreDateTimeOffsetsEqual(DateTimeOffset time1, DateTimeOffset time2)
