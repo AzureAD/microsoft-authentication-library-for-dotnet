@@ -54,7 +54,7 @@ namespace Test.ADAL.WinRT.Unit
         [TestCategory("AdalWinRTMock")]
         [DataRow("AAD")]
         [DataRow("ADFS")]
-        public async Task AcquireTokenPositiveTest(string stsType)
+        public void AcquireTokenPositiveTest(string stsType)
         {
             AdalTests.AcquireTokenPositive(SetupStsService(GetStsType(stsType)));
         }

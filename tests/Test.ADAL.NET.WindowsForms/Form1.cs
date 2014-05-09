@@ -86,7 +86,7 @@ namespace Test.ADAL.NET.WindowsForms
 
         private void RunTest(TestMethod testMethod, StsType stsType = StsType.AAD)
         {
-            this.RunTestSyncOrAsync(testMethod, NullTestMethodAsync, stsType);
+            this.RunTestSyncOrAsync(testMethod, NullTestMethodAsync, stsType).Wait();
         }
 
         private async Task RunTestAsync(TestMethodAsync testMethodAsync, StsType stsType = StsType.AAD)
