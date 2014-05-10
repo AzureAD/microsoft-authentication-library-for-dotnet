@@ -206,6 +206,7 @@ namespace Test.ADAL.NET
         [Description("Positive Test for AcquireToken testing default token cache")]
         [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
+        [Ignore]    // Enable once the test bug is fixed.
         public void AcquireTokenPositiveWithNullCacheTest()
         {
             AdalTests.AcquireTokenPositiveWithNullCache(Sts);
