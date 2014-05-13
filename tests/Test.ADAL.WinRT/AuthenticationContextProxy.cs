@@ -99,26 +99,16 @@ namespace Test.ADAL.Common
             Task.Run(() => Thread.Sleep(sleepMilliSeconds)).Wait();
         }
 
+        public async static Task DelayAsync(int sleepMilliSeconds)
+        {
+            await Task.Delay(sleepMilliSeconds);
+        }
+
         public void SetCorrelationId(Guid correlationId)
         {
             CommandProxy.AddCommand(new AuthenticationContextCommand(
                 CommandType.SetCorrelationId,
                 new CommandArguments { CorrelationId = correlationId }));
-        }
-
-        public async Task<AuthenticationResultProxy> SetUseCorporateNetwork(bool useCorporateNetwork)
-        {
-            return await AddCommandAndRunAsync(useCorporateNetwork ? CommandType.SetUseCorporateNetwork : CommandType.ClearUseCorporateNetwork, null);
-        }
-
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, X509CertificateCredentialProxy credential)
-        {
-            throw new NotImplementedException("ADAL WinRT does not support X509 Certificate Credential");
-        }
-
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, ClientAssertionProxy credential)
-        {
-            throw new NotImplementedException("ADAL WinRT does not support Assertion Certificate Credential");
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, UserCredentialProxy credential)
@@ -215,7 +205,7 @@ namespace Test.ADAL.Common
             return (appWindow != null);
         }
 
-        private static async Task<PageType> WaitForPage(List<PageType> pageType, int maxSecondsToWait)
+        private static async Task<PageType> WaitForPageAsync(List<PageType> pageType, int maxSecondsToWait)
         {
             const int SleepMilliSeconds = 500;
             int count = maxSecondsToWait * 1000 / SleepMilliSeconds;
@@ -226,7 +216,7 @@ namespace Test.ADAL.Common
                 actualPageType = await DetectPageTypeAsync();
                 if (!pageType.Contains(actualPageType))
                 {
-                    Delay(SleepMilliSeconds);
+                    await DelayAsync(SleepMilliSeconds);
                     count--;
                 }
                 else
@@ -238,9 +228,9 @@ namespace Test.ADAL.Common
             return actualPageType;
         }
 
-        private static async Task<PageType> DetectPageTypeAsync()
+        private async static Task<PageType> DetectPageTypeAsync()
         {
-            Delay(100);
+            await DelayAsync(100);
 
             PageType pageType = PageType.Unknown;
             if (FindAutomationElement("Popup Window") != null)
@@ -306,29 +296,6 @@ namespace Test.ADAL.Common
             }
 
             return pageType;
-        }
-
-        private static async Task<AutomationElement> FindAutomationElementWithRetryAsync(
-            string id,
-            int maxSecondsToWait)
-        {
-            const int SleepMilliSeconds = 100;
-            int count = maxSecondsToWait * 1000 / SleepMilliSeconds;
-            AutomationElement element = null;
-            do
-            {
-                element = appWindow.FindFirst(
-                    TreeScope.Descendants,
-                    new PropertyCondition(AutomationElement.AutomationIdProperty, id, PropertyConditionFlags.IgnoreCase));
-                if (element == null)
-                {
-                    Delay(SleepMilliSeconds);
-                    count--;
-                }
-            }
-            while (element == null && count > 0);
-
-            return element;
         }
 
         private static AutomationElement FindAutomationElement(string id)
@@ -400,7 +367,7 @@ namespace Test.ADAL.Common
 
             if (clickTwice)
             {
-                Delay(200);
+                await DelayAsync(200);
                 MouseHelper.LeftClick();
             }
         }
@@ -418,7 +385,7 @@ namespace Test.ADAL.Common
             FindDashboardApp();
             PageType pageType =
                 await
-                    WaitForPage(
+                    WaitForPageAsync(
                         new List<PageType>
                         {
                             PageType.Wab,
@@ -427,33 +394,33 @@ namespace Test.ADAL.Common
                             PageType.DashboardResponse
                         },
                         5);
-            Delay(500);
+            await DelayAsync(500);
             if (pageType == PageType.Wab || pageType == PageType.WabError)
             {
                 ClickXamlButton(upButton);
-                await WaitForPage(new List<PageType> { PageType.DashboardResponse }, 10);
+                await WaitForPageAsync(new List<PageType> { PageType.DashboardResponse }, 10);
             }
 
-            Delay(500);
+            await DelayAsync(500);
             SendParameters(CommandProxy.Serialize());
             Execute();
-            Delay(500);
+            await DelayAsync(500);
             pageType =
-                await WaitForPage(new List<PageType> { PageType.Wab, PageType.WabError, PageType.DashboardResponse }, 5);
+                await WaitForPageAsync(new List<PageType> { PageType.Wab, PageType.WabError, PageType.DashboardResponse }, 5);
             if (pageType == PageType.Wab)
             {
                 await EnterCredentialAsync(userName, password);
             }
 
-            Delay(500);
-            pageType = await WaitForPage(new List<PageType> { PageType.WabError, PageType.DashboardResponse }, 10);
+            await DelayAsync(500);
+            pageType = await WaitForPageAsync(new List<PageType> { PageType.WabError, PageType.DashboardResponse }, 10);
             if (pageType == PageType.WabError)
             {
                 ClickXamlButton(upButton);
-                await WaitForPage(new List<PageType> { PageType.DashboardResponse }, 10);
+                await WaitForPageAsync(new List<PageType> { PageType.DashboardResponse }, 10);
             }
 
-            Delay(500);
+            await DelayAsync(500);
             CommandProxy.Commands.Clear();
 
             return AuthenticationResultProxy.Deserialize(ReadValue(resultTextBox));
