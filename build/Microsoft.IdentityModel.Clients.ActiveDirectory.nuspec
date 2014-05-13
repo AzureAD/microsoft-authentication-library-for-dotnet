@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+    <metadata>
+        <title>Active Directory Authentication Library</title>
+        <id>Microsoft.IdentityModel.Clients.ActiveDirectory</id>
+        <version>2.6.2-alpha</version>
+        <authors>Microsoft Open Technologies</authors>
+        <licenseUrl>http://go.microsoft.com/fwlink/?LinkId=317295</licenseUrl>
+        <projectUrl>http://go.microsoft.com/fwlink/?LinkId=258232</projectUrl>
+        <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <description>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.</description>
+        <summary>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.</summary>
+        <language>en-US</language>
+        <owners>Microsoft Open Technologies</owners>
+        <tags>Active Directory Authentication Library, ADAL, Active Directory, Windows Azure Active Directory, AD, AAD, Identity, Authentication, .NET, Windows Store</tags>
+        <copyright>(C) Microsoft Open Technologies. All rights reserved.</copyright>
+    </metadata>
+</package>
