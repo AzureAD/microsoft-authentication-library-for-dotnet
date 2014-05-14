@@ -260,7 +260,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Positive Test for AcquireToken non-interactive for managed user")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task AcquireTokenNonInteractiveManagedPositiveTest()
         {
             await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(Sts);

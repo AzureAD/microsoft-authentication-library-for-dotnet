@@ -376,7 +376,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="credential">The credential to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        internal AuthenticationResult AcquireToken(string resource, string clientId, UserCredential credential)
+        public AuthenticationResult AcquireToken(string resource, string clientId, UserCredential credential)
         {
             return RunAsyncTask(this.AcquireTokenCommonAsync(resource, clientId, credential, callSync: true));
         }
@@ -388,7 +388,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userAssertion">The assertion to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        internal AuthenticationResult AcquireToken(string resource, string clientId, UserAssertion userAssertion)
+        public AuthenticationResult AcquireToken(string resource, string clientId, UserAssertion userAssertion)
         {
             return RunAsyncTask(this.AcquireTokenCommonAsync(resource, clientId, userAssertion, callSync: true));
         }

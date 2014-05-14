@@ -144,8 +144,16 @@ namespace Test.ADAL.Common
 
         public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, UserCredentialProxy credential)
         {
-            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientId, 
-                (credential.Password == null) ? 
+            if (CallSync)
+            { 
+                return RunTask(() => this.context.AcquireToken(resource, clientId, 
+                    (credential.Password == null) ? 
+                    new UserCredential(credential.UserId) :
+                    new UserCredential(credential.UserId, credential.Password)));
+            }
+
+            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientId,
+                (credential.Password == null) ?
                 new UserCredential(credential.UserId) :
                 new UserCredential(credential.UserId, credential.Password)));
         }
