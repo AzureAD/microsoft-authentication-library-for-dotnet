@@ -209,26 +209,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (string.IsNullOrWhiteSpace(credential.UserId))
             {
 #if ADAL_WINRT
-                if (!Windows.System.UserProfile.UserInformation.NameAccessAllowed)
+                credential.UserId = await PlatformSpecificHelper.GetUserPrincipalNameAsync();
+#else
+                credential.UserId = PlatformSpecificHelper.GetUserPrincipalName();
+#endif
+                if (string.IsNullOrWhiteSpace(credential.UserId))
                 {
-                    throw new AdalException(AdalError.CannotAccessUserInformation);                    
+                    Logger.Information(callState, "Could not find UPN for logged in user");
+                    throw new AdalException(AdalError.UnknownUser);
                 }
 
-                try
-                {
-                    credential.UserId = await Windows.System.UserProfile.UserInformation.GetPrincipalNameAsync();
-                    if (string.IsNullOrWhiteSpace(credential.UserId))
-                    {
-                        throw new AdalException(AdalError.UnknownUser);
-                    }
-                }
-                catch (UnauthorizedAccessException ex)
-                {
-                    throw new AdalException(AdalError.UnauthorizedUserInformationAccess, ex);
-                }
-#else
-                credential.UserId = System.DirectoryServices.AccountManagement.UserPrincipal.Current.UserPrincipalName;
-#endif
                 Logger.Information(callState, "Logged in user '{0}' detected", credential.UserId);
             }
 

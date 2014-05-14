@@ -18,6 +18,7 @@
 
 using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -46,6 +47,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return input.ToLower(CultureInfo.InvariantCulture);
         }
 
+        public static string GetUserPrincipalName()
+        {
+            string userId = System.DirectoryServices.AccountManagement.UserPrincipal.Current.UserPrincipalName;
+
+            // On some machines, UserPrincipalName returns null
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                const int NameUserPrincipal = 8;
+                uint userNameSize = 0;
+                GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
+                StringBuilder sb = new StringBuilder((int)userNameSize);
+                GetUserNameEx(NameUserPrincipal, sb, ref userNameSize);            
+            }
+
+            return userId;
+        }
+
         internal static string CreateSha256Hash(string input)
         {
             SHA256 sha256 = SHA256Managed.Create();
@@ -55,5 +73,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string hash = Convert.ToBase64String(hashBytes);
             return hash;
         }
+
+        [DllImport("secur32.dll", CharSet = CharSet.Auto)]
+        private static extern int GetUserNameEx(int nameFormat, StringBuilder userName, ref uint userNameSize);
     }
 }

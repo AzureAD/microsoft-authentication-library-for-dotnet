@@ -42,11 +42,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal static async Task<UserRealmDiscoveryResponse> CreateByDiscoveryAsync(string userRealmUri, string userId, CallState callState)
         {
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                throw new AdalException(AdalError.UnknownUser);
-            }
-
             string userRealmEndpoint = userRealmUri;
             userRealmEndpoint += (userId + "?api-version=1.0");
 

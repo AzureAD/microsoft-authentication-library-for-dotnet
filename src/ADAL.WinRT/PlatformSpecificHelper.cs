@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using System.Threading.Tasks;
 using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
 using Windows.Storage;
@@ -45,6 +47,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             // WinRT does not have the overload with CultureInfo parameter
             return input.ToLower();
+        }
+
+        public async static Task<string> GetUserPrincipalNameAsync()
+        {
+            if (!Windows.System.UserProfile.UserInformation.NameAccessAllowed)
+            {
+                throw new AdalException(AdalError.CannotAccessUserInformation);
+            }
+
+            try
+            {
+                return await Windows.System.UserProfile.UserInformation.GetPrincipalNameAsync();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                throw new AdalException(AdalError.UnauthorizedUserInformationAccess, ex);
+            }
         }
 
         internal static string CreateSha256Hash(string input)
