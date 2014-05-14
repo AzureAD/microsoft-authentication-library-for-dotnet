@@ -56,9 +56,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 const int NameUserPrincipal = 8;
                 uint userNameSize = 0;
-                GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
+                NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
                 StringBuilder sb = new StringBuilder((int)userNameSize);
-                GetUserNameEx(NameUserPrincipal, sb, ref userNameSize);            
+                NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize);
+                userId = sb.ToString();
             }
 
             return userId;
@@ -74,7 +75,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return hash;
         }
 
-        [DllImport("secur32.dll", CharSet = CharSet.Auto)]
-        private static extern int GetUserNameEx(int nameFormat, StringBuilder userName, ref uint userNameSize);
+        private static class NativeMethods
+        {
+            [DllImport("secur32.dll", CharSet = CharSet.Unicode)]
+            [return: MarshalAs(UnmanagedType.U1)]
+            public static extern bool GetUserNameEx(int nameFormat, StringBuilder userName, ref uint userNameSize);
+        }
     }
 }
