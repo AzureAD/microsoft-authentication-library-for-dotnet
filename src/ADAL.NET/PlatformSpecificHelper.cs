@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -56,9 +57,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 const int NameUserPrincipal = 8;
                 uint userNameSize = 0;
-                NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
+                if (!NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize))
+                {
+                    throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                }
+
                 StringBuilder sb = new StringBuilder((int)userNameSize);
-                NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize);
+                if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
+                {
+                    throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));                    
+                }
+
                 userId = sb.ToString();
             }
 
@@ -77,7 +86,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static class NativeMethods
         {
-            [DllImport("secur32.dll", CharSet = CharSet.Unicode)]
+            [DllImport("secur32.dll", CharSet = CharSet.Unicode, SetLastError=true)]
             [return: MarshalAs(UnmanagedType.U1)]
             public static extern bool GetUserNameEx(int nameFormat, StringBuilder userName, ref uint userNameSize);
         }

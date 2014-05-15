@@ -186,6 +186,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         message = AdalErrorMessage.PasswordRequiredForManagedUserError;
                         break;
 
+                    case AdalError.GetUserNameFailed:
+                        message = AdalErrorMessage.GetUserNameFailed;
+                        break;
+
                     default:
                         message = AdalErrorMessage.Unknown;
                         break;
