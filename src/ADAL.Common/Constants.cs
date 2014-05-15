@@ -217,6 +217,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Password is required for managed user.
         /// </summary>
         public const string PasswordRequiredForManagedUserError = "password_required_for_managed_user";
+
+        /// <summary>
+        /// Failed to get user name.
+        /// </summary>
+        public const string GetUserNameFailed = "get_user_name_failed";
     }
 
     /// <summary>
@@ -275,6 +280,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             + "2. An error occurred during a silent web authentication that prevented the http authentication flow from completing in a short enough time frame";
         public const string UserRealmDiscoveryFailed = "User realm discovery failed";
         public const string WsTrustEndpointNotFoundInMetadataDocument = "WS-Trust endpoint not found in metadata document";
+        public const string GetUserNameFailed = "Failed to get user name";
     }
 
     internal static class AuthenticationConstant

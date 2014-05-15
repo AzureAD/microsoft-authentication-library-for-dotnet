@@ -17,7 +17,9 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -46,6 +48,32 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return input.ToLower(CultureInfo.InvariantCulture);
         }
 
+        public static string GetUserPrincipalName()
+        {
+            string userId = System.DirectoryServices.AccountManagement.UserPrincipal.Current.UserPrincipalName;
+
+            // On some machines, UserPrincipalName returns null
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                const int NameUserPrincipal = 8;
+                uint userNameSize = 0;
+                if (!NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize))
+                {
+                    throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                }
+
+                StringBuilder sb = new StringBuilder((int)userNameSize);
+                if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
+                {
+                    throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));                    
+                }
+
+                userId = sb.ToString();
+            }
+
+            return userId;
+        }
+
         internal static string CreateSha256Hash(string input)
         {
             SHA256 sha256 = SHA256Managed.Create();
@@ -54,6 +82,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             byte[] hashBytes = sha256.ComputeHash(inputBytes);
             string hash = Convert.ToBase64String(hashBytes);
             return hash;
+        }
+
+        private static class NativeMethods
+        {
+            [DllImport("secur32.dll", CharSet = CharSet.Unicode, SetLastError=true)]
+            [return: MarshalAs(UnmanagedType.U1)]
+            public static extern bool GetUserNameEx(int nameFormat, StringBuilder userName, ref uint userNameSize);
         }
     }
 }
