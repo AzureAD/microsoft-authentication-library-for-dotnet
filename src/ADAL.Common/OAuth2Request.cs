@@ -67,9 +67,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return OAuth2Response.ParseTokenResponse(tokenResponse);
         }
 
-        private static Uri CreateAuthorizationUri(Authenticator authenticator, string resource, Uri redirectUri, string clientId, string userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
+        private static Uri CreateAuthorizationUri(Authenticator authenticator, string resource, Uri redirectUri, string clientId, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
         {
-            RequestParameters requestParameters = OAuth2MessageHelper.CreateAuthorizationRequest(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters, callState);
+            string loginHint = (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId)) 
+                ? userId.Id : null;
+
+            RequestParameters requestParameters = OAuth2MessageHelper.CreateAuthorizationRequest(resource, clientId, redirectUri, loginHint, promptBehavior, extraQueryParameters, callState);
  
             var authorizationUri = new Uri(new Uri(authenticator.AuthorizationUri), "?" + requestParameters);
             authorizationUri = new Uri(HttpHelper.CheckForExtraQueryParameter(authorizationUri.AbsoluteUri));

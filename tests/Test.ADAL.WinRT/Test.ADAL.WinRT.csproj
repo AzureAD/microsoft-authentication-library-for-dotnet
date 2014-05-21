@@ -87,6 +87,12 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="..\..\src\ADAL.Common\UserIdentifier.cs">
+      <Link>Common\UserIdentifier.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\ADAL.Common\UserInfo.cs">
+      <Link>Common\UserInfo.cs</Link>
+    </Compile>
     <Compile Include="..\Test.ADAL.Common\AdalTests.cs">
       <Link>Common\AdalTests.cs</Link>
     </Compile>
@@ -116,9 +122,6 @@
     </Compile>
     <Compile Include="..\Test.ADAL.Common\UserCredentialProxy.cs">
       <Link>Common\UserCredentialProxy.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.ADAL.Common\UserInfoProxy.cs">
-      <Link>Common\UserInfoProxy.cs</Link>
     </Compile>
     <Compile Include="..\Test.ADAL.Common\Verify.cs">
       <Link>Common\Verify.cs</Link>

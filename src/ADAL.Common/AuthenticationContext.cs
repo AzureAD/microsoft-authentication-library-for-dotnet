@@ -155,12 +155,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private static void VerifyUserMatch(string userId, AuthenticationResult result)
+        private static void VerifyUserMatch(UserIdentifier userId, AuthenticationResult result)
         {
-            if (!string.IsNullOrWhiteSpace(userId) && result.UserInfo != null && result.UserInfo.IsUserIdDisplayable && RegexUtilities.IsValidEmail(userId) &&
-                string.Compare(result.UserInfo.UserId, userId, StringComparison.OrdinalIgnoreCase) != 0)
+            if (userId == null || userId.Type == UserIdentifierType.OptionalDisplayableId)
             {
-                throw new AdalUserMismatchException(userId, result.UserInfo.UserId);
+                return;
+            }
+
+            string uniqueId = (result.UserInfo != null && result.UserInfo.UniqueId != null) ? result.UserInfo.UniqueId : "NULL";
+            string displayableId = (result.UserInfo != null) ? result.UserInfo.DisplayableId : "NULL";
+
+            if (userId.Type == UserIdentifierType.UniqueId
+                && string.Compare(uniqueId, userId.Id, StringComparison.Ordinal) != 0)
+            {
+                throw new AdalUserMismatchException(userId.Id, uniqueId);    
+            }
+                
+            if (userId.Type == UserIdentifierType.RequiredDisplayableId
+                && string.Compare(displayableId, userId.Id, StringComparison.OrdinalIgnoreCase) != 0)
+            {
+                throw new AdalUserMismatchException(userId.Id, displayableId);    
             }
         }
 
@@ -206,29 +220,29 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             // We cannot move the following lines to UserCredential as one of these calls in async. 
             // It cannot be moved to constructor or property or a pure sync or async call. This is why we moved it here which is an async call already.
-            if (string.IsNullOrWhiteSpace(credential.UserId))
+            if (string.IsNullOrWhiteSpace(credential.UserName))
             {
 #if ADAL_WINRT
-                credential.UserId = await PlatformSpecificHelper.GetUserPrincipalNameAsync();
+                credential.UserName = await PlatformSpecificHelper.GetUserPrincipalNameAsync();
 #else
-                credential.UserId = PlatformSpecificHelper.GetUserPrincipalName();
+                credential.UserName = PlatformSpecificHelper.GetUserPrincipalName();
 #endif
-                if (string.IsNullOrWhiteSpace(credential.UserId))
+                if (string.IsNullOrWhiteSpace(credential.UserName))
                 {
                     Logger.Information(callState, "Could not find UPN for logged in user");
                     throw new AdalException(AdalError.UnknownUser);
                 }
 
-                Logger.Information(callState, "Logged in user '{0}' detected", credential.UserId);
+                Logger.Information(callState, "Logged in user '{0}' detected", credential.UserName);
             }
 
             await this.CreateAuthenticatorAsync(callState);
 
-            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, credential.UserId);
+            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, credential.UserName);
             if (result == null)
             {
-                UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, credential.UserId, callState);
-                Logger.Information(callState, "User '{0}' detected as '{1}'", credential.UserId, userRealmResponse.AccountType);
+                UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, credential.UserName, callState);
+                Logger.Information(callState, "User '{0}' detected as '{1}'", credential.UserName, userRealmResponse.AccountType);
                 if (string.Compare(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     Uri wsTrustUrl = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, credential.UserAuthType, callState);
@@ -247,8 +261,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
                     this.tokenCacheManager.StoreToCache(result, resource, clientId);
-
-                    VerifyUserMatch(credential.UserId, result);
                 }
                 else if (string.Compare(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase) == 0)
                 {
@@ -292,7 +304,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             await this.CreateAuthenticatorAsync(callState);
 
-            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, credential.UserId);
+            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, credential.UserName);
             if (result == null)
             {
                 result = await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, resource, clientId, credential, callState);
@@ -300,8 +312,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
                 this.tokenCacheManager.StoreToCache(result, resource, clientId);
-
-                VerifyUserMatch(credential.UserId, result);
             }
 
             LogReturnedToken(result, callState);
@@ -335,7 +345,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return result;
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, string userId = null, PromptBehavior promptBehavior = PromptBehavior.Auto, string extraQueryParameters = null, bool callSync = false)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId = null, PromptBehavior promptBehavior = PromptBehavior.Auto, string extraQueryParameters = null, bool callSync = false)
         {
             CallState callState = this.CreateCallState(callSync);
             this.ValidateAuthorityType(callState, AuthorityType.AAD, AuthorityType.ADFS);
@@ -368,7 +378,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return result;
         }
 
-        private async Task<AuthenticationResult> AcquireTokenFromStsAsync(string resource, string clientId, Uri redirectUri, string userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
+        private async Task<AuthenticationResult> AcquireTokenFromStsAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
         {
             AuthenticationResult result;
 #if ADAL_WINRT

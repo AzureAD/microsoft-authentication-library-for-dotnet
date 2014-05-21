@@ -33,10 +33,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string GivenName = "GivenName";
         public const string IdentityProviderName = "IdentityProviderName";
         public const string IsMultipleResourceRefreshToken = "IsMultipleResourceRefreshToken";
-        public const string IsUserIdDisplayable = "IsUserIdDisplayable";
         public const string Resource = "Resource";
         public const string TenantId = "TenantId";
-        public const string UserId = "UserId";
+        public const string UniqueId = "UniqueId";
+        public const string DisplayableId = "DisplayableId";
         public const string CacheValue = "CacheValue";
         public const string CacheValueSegmentCount = "CacheValueSegmentCount";
     }
@@ -324,10 +324,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             compositeValue[CompositeCacheElement.GivenName] = cacheKey.GivenName;
             compositeValue[CompositeCacheElement.IdentityProviderName] = cacheKey.IdentityProviderName;
             compositeValue[CompositeCacheElement.IsMultipleResourceRefreshToken] = cacheKey.IsMultipleResourceRefreshToken;
-            compositeValue[CompositeCacheElement.IsUserIdDisplayable] = cacheKey.IsUserIdDisplayable;
             compositeValue[CompositeCacheElement.Resource] = cacheKey.Resource;
             compositeValue[CompositeCacheElement.TenantId] = cacheKey.TenantId;
-            compositeValue[CompositeCacheElement.UserId] = cacheKey.UserId;
+            compositeValue[CompositeCacheElement.UniqueId] = cacheKey.UniqueId;
+            compositeValue[CompositeCacheElement.DisplayableId] = cacheKey.DisplayableId;
 
             return compositeValue;
         }
@@ -343,10 +343,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     GivenName = (string)compositeValue[CompositeCacheElement.GivenName],
                     IdentityProviderName = (string)compositeValue[CompositeCacheElement.IdentityProviderName],
                     IsMultipleResourceRefreshToken = (bool)compositeValue[CompositeCacheElement.IsMultipleResourceRefreshToken],
-                    IsUserIdDisplayable = (bool)compositeValue[CompositeCacheElement.IsUserIdDisplayable],
                     Resource = (string)compositeValue[CompositeCacheElement.Resource],
                     TenantId = (string)compositeValue[CompositeCacheElement.TenantId],
-                    UserId = (string)compositeValue[CompositeCacheElement.UserId]
+                    UniqueId = (string)compositeValue[CompositeCacheElement.UniqueId],
+                    DisplayableId = (string)compositeValue[CompositeCacheElement.DisplayableId]
                 };
 
             return cacheKey;

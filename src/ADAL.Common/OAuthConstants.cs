@@ -70,6 +70,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
     internal class IdTokenClaim
     {
+        public const string ObjectId = "oid";
         public const string Subject = "sub";
         public const string TenantId = "tid";
         public const string UPN = "upn";

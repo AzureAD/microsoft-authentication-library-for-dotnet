@@ -34,7 +34,7 @@ namespace Test.ADAL.NET.Friend
             return jwtToken.Sign(x509ClientCredential);
         }
 
-        public static string AcquireAccessCode(AuthenticationContext context, string resource, string clientId, Uri redirectUri, string userId)
+        public static string AcquireAccessCode(AuthenticationContext context, string resource, string clientId, Uri redirectUri, UserIdentifier userId)
         {
             context.CreateAuthenticatorAsync(null).Wait();
             AuthorizationResult authorizationResult = context.SendAuthorizeRequest(resource, clientId, redirectUri, userId, PromptBehavior.Auto, null, null);

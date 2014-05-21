@@ -79,7 +79,7 @@ namespace Test.ADAL.WinRT
         public Uri RedirectUri { get; set; }
 
         [DataMember]
-        public string UserId { get; set; }
+        public string UserName { get; set; }
 
         [DataMember]
         public string Password { get; set; }

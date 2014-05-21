@@ -67,12 +67,12 @@ namespace Test.ADAL.Common
         {
             }
 
-        internal AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, string userId)
+        internal AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId)
         {
             return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri, userId).AsTask().Result);
         }
 
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, string userId, string extraQueryParameters)
+        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters)
         {
             return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri, userId, extraQueryParameters).AsTask().Result);
         }
@@ -89,11 +89,11 @@ namespace Test.ADAL.Common
             return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri, promptBehavior).AsTask().Result);
         }
 
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehaviorProxy, string userId)
+        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehaviorProxy promptBehaviorProxy)
         {
             PromptBehavior promptBehavior = (promptBehaviorProxy == PromptBehaviorProxy.Always) ? PromptBehavior.Always : PromptBehavior.Auto;
 
-            return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri, promptBehavior, userId).AsTask().Result);
+            return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri, userId, promptBehavior).AsTask().Result);
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId)
@@ -116,15 +116,7 @@ namespace Test.ADAL.Common
                 IsMultipleResourceRefreshToken = result.IsMultipleResourceRefreshToken,
                 RefreshToken = result.RefreshToken,
                 TenantId = result.TenantId,
-                UserInfo = (result.UserInfo != null) ? new UserInfoProxy
-                    {
-                        FamilyName = result.UserInfo.FamilyName,
-                        GivenName = result.UserInfo.GivenName,
-                        IdentityProvider = result.UserInfo.IdentityProvider,
-                        IsUserIdDisplayable = result.UserInfo.IsUserIdDisplayable,
-                        UserId = result.UserInfo.UserId
-                    }
-                    : null,
+                UserInfo = result.UserInfo,
                 Error = result.Error,
                 ErrorDescription = result.ErrorDescription,
                 Status = (result.Status == AuthenticationStatus.Success) ? AuthenticationStatusProxy.Success :

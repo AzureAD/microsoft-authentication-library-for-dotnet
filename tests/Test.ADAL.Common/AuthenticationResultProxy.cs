@@ -21,6 +21,7 @@ using System.Text;
 
 namespace Test.ADAL.Common
 {
+    using Microsoft.IdentityModel.Clients.ActiveDirectory;
     using System.IO;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Json;
@@ -65,7 +66,7 @@ namespace Test.ADAL.Common
         public string TenantId { get; set; }
 
         [DataMember]
-        public UserInfoProxy UserInfo { get; set; }
+        public UserInfo UserInfo { get; set; }
 
         [DataMember]
         public bool IsMultipleResourceRefreshToken { get; set; }

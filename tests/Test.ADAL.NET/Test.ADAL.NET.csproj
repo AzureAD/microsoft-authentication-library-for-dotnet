@@ -146,9 +146,6 @@
     <Compile Include="..\Test.ADAL.Common\UserCredentialProxy.cs">
       <Link>Common\UserCredentialProxy.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.Common\UserInfoProxy.cs">
-      <Link>Common\UserInfoProxy.cs</Link>
-    </Compile>
     <Compile Include="..\Test.ADAL.Common\Verify.cs">
       <Link>Common\Verify.cs</Link>
     </Compile>
@@ -156,8 +153,6 @@
     <Compile Include="AdalTests.cs" />
     <Compile Include="AuthenticationContextProxy.cs" />
     <Compile Include="AuthenticationParametersProxy.cs" />
-    <Compile Include="ClientAssertionProxy.cs" />
-    <Compile Include="ClientCredentialProxy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StaSynchronizationContext.cs" />
     <Compile Include="X509CertificateCredentialProxy.cs" />

@@ -54,8 +54,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="assertion">Assertion representing the user.</param>
         /// <param name="assertionType">Type of the assertion representing the user.</param>
-        /// <param name="userId">Identity of the user token is requested for. This parameter can be null.</param>
-        public UserAssertion(string assertion, string assertionType, string userId)
+        /// <param name="userName">Identity of the user token is requested for. This parameter can be null.</param>
+        public UserAssertion(string assertion, string assertionType, string userName)
         {
             if (string.IsNullOrWhiteSpace(assertion))
             {
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.AssertionType = assertionType;
             this.Assertion = assertion;
-            this.UserId = userId;
+            this.UserName = userName;
         }
 
         /// <summary>
@@ -83,8 +83,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string AssertionType { get; private set; }
 
         /// <summary>
-        /// Gets identifier of the user.
+        /// Gets name of the user.
         /// </summary>
-        public string UserId { get; internal set; }
+        public string UserName { get; internal set; }
     }
 }
