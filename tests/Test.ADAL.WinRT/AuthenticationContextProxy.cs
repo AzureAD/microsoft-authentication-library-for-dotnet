@@ -136,14 +136,19 @@ namespace Test.ADAL.Common
         {
             return RunAsyncTask(AddCommandAndRunAsync(
                 CommandType.AquireTokenAsyncRCRU,
-                new CommandArguments { Resource = resource, ClientId = clientId, RedirectUri = redirectUri, UserName = userId.Id }));
+                new CommandArguments { Resource = resource, ClientId = clientId, RedirectUri = redirectUri,
+                                       UserName = (userId != null) ? userId.Id : null
+                }));
         }
 
         public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters)
         {
             return RunAsyncTask(AddCommandAndRunAsync(
                 CommandType.AquireTokenAsyncRCRUX,
-                new CommandArguments { Resource = resource, ClientId = clientId, RedirectUri = redirectUri, UserName = userId.Id, Extra = extraQueryParameters }));
+                new CommandArguments { Resource = resource, ClientId = clientId, RedirectUri = redirectUri,
+                                       UserName = (userId != null) ? userId.Id : null,
+                                       Extra = extraQueryParameters
+                }));
         }
 
         public AuthenticationResultProxy AcquireToken(string resource, string clientId, PromptBehaviorProxy promptBehavior)
@@ -164,7 +169,8 @@ namespace Test.ADAL.Common
         {
             return RunAsyncTask(AddCommandAndRunAsync(
                 CommandType.AquireTokenAsyncRCRPU,
-                new CommandArguments { Resource = resource, ClientId = clientId, RedirectUri = redirectUri, PromptBehavior = promptBehavior, UserName = userId.Id }));
+                new CommandArguments { Resource = resource, ClientId = clientId, RedirectUri = redirectUri, PromptBehavior = promptBehavior,
+                                       UserName = (userId != null) ? userId.Id : null }));
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId)

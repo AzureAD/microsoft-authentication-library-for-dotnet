@@ -69,8 +69,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static Uri CreateAuthorizationUri(Authenticator authenticator, string resource, Uri redirectUri, string clientId, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
         {
-            string loginHint = (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId)) 
-                ? userId.Id : null;
+            string loginHint = null;
+
+            if (userId != null
+                && (userId.Type == UserIdentifierType.OptionalDisplayableId
+                    || userId.Type == UserIdentifierType.RequiredDisplayableId))
+            {
+                loginHint = userId.Id;
+            }
 
             RequestParameters requestParameters = OAuth2MessageHelper.CreateAuthorizationRequest(resource, clientId, redirectUri, loginHint, promptBehavior, extraQueryParameters, callState);
  

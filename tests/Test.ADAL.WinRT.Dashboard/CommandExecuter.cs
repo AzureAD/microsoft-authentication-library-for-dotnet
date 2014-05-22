@@ -127,14 +127,14 @@ namespace Test.ADAL.WinRT.Dashboard
                     case CommandType.AquireTokenAsyncRCRU:
                     {
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, 
-                            new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId));
+                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : null);
                         break;
                     }
 
                     case CommandType.AquireTokenAsyncRCRUX:
                     {
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri,
-                            new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId), arg.Extra);
+                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : null, arg.Extra);
                         break;
                     }
 
@@ -148,9 +148,10 @@ namespace Test.ADAL.WinRT.Dashboard
 
                     case CommandType.AquireTokenAsyncRCRPU:
                     {
-                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, 
+                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri,
+                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : null,
                             (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
-                            (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto, arg.UserName);
+                            (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto);
                         break;
                     }
 
