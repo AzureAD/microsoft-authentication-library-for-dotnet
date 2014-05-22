@@ -54,9 +54,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 this.FamilyName = result.UserInfo.FamilyName;
                 this.GivenName = result.UserInfo.GivenName;
-                this.IsUserIdDisplayable = result.UserInfo.IsUserIdDisplayable;
                 this.IdentityProviderName = result.UserInfo.IdentityProvider;
-                this.UserId = result.UserInfo.UserId;
+                this.UniqueId = result.UserInfo.UniqueId;
+                this.DisplayableId = result.UserInfo.DisplayableId;
             }
         }
 
@@ -96,11 +96,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public bool IsMultipleResourceRefreshToken { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the UserId is a displayable.
-        /// </summary>
-        public bool IsUserIdDisplayable { get; set; }
-
-        /// <summary>
         /// Gets or sets the Resource.
         /// </summary>
         public string Resource { get; set; }
@@ -111,9 +106,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string TenantId { get; set; }
 
         /// <summary>
-        /// Gets or sets the UserId.
+        /// Gets or sets the user's unique Id.
         /// </summary>
-        public string UserId { get; set; }
+        public string UniqueId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the user's displayable Id.
+        /// </summary>
+        public string DisplayableId { get; set; }
 
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
@@ -149,10 +149,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                && (other.GivenName == this.GivenName)
                && (other.IdentityProviderName == this.IdentityProviderName)
                && (other.IsMultipleResourceRefreshToken == this.IsMultipleResourceRefreshToken)
-               && (other.IsUserIdDisplayable == this.IsUserIdDisplayable)
                && (other.Resource == this.Resource)
                && (other.TenantId == this.TenantId)
-               && (other.UserId == this.UserId));
+               && (other.UniqueId == this.UniqueId)
+               && (other.DisplayableId == this.DisplayableId));
         }
 
         /// <summary>
@@ -171,10 +171,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 + this.GivenName + Delimiter
                 + this.IdentityProviderName + Delimiter
                 + this.IsMultipleResourceRefreshToken + Delimiter
-                + this.IsUserIdDisplayable + Delimiter
                 + this.Resource + Delimiter
                 + this.TenantId + Delimiter
-                + this.UserId).GetHashCode();
+                + this.UniqueId + Delimiter
+                + this.DisplayableId).GetHashCode();
         }
     }
 }

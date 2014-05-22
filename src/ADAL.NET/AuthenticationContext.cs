@@ -337,7 +337,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be null.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId, string userId)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId, UserIdentifier userId)
         {
             CallState callState = this.CreateCallState(false);
             this.ValidateAuthorityType(callState, AuthorityType.AAD, AuthorityType.ADFS);
@@ -444,9 +444,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <param name="userId">This parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. This parameter can be null.</param>
+        /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
+        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be null.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public AuthenticationResult AcquireToken(string resource, string clientId, Uri redirectUri, string userId)
+        public AuthenticationResult AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId)
         {
             return RunAsyncTask(this.AcquireTokenCommonAsync(resource, clientId, redirectUri, userId, PromptBehavior.Auto, null, callSync: true));
         }
@@ -457,10 +458,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <param name="userId">This parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. This parameter can be null.</param>
+        /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
+        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be null.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public AuthenticationResult AcquireToken(string resource, string clientId, Uri redirectUri, string userId, string extraQueryParameters)
+        public AuthenticationResult AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters)
         {
             return RunAsyncTask(this.AcquireTokenCommonAsync(resource, clientId, redirectUri, userId, PromptBehavior.Auto, extraQueryParameters, callSync: true));
         }
@@ -498,10 +500,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <param name="userId">This parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. This parameter can be null.</param>
+        /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
+        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be null.</param>
         /// <param name="promptBehavior">If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public AuthenticationResult AcquireToken(string resource, string clientId, Uri redirectUri, string userId, PromptBehavior promptBehavior)
+        public AuthenticationResult AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehavior promptBehavior)
         {
             return RunAsyncTask(this.AcquireTokenCommonAsync(resource, clientId, redirectUri, userId, promptBehavior, null, callSync: true));
         }
@@ -512,11 +515,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <param name="userId">This parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. This parameter can be null.</param>
+        /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
+        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be null.</param>
         /// <param name="promptBehavior">If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public AuthenticationResult AcquireToken(string resource, string clientId, Uri redirectUri, string userId, PromptBehavior promptBehavior, string extraQueryParameters)
+        public AuthenticationResult AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters)
         {
             return RunAsyncTask(this.AcquireTokenCommonAsync(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters, callSync: true));
         }
@@ -734,7 +738,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return RunAsyncTask(this.AcquireTokenOnBehalfCommonAsync(resource, userAssertion, new ClientKey(clientAssertion), callSync: true));
         }
 
-        internal AuthorizationResult SendAuthorizeRequest(string resource, string clientId, Uri redirectUri, string userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
+        internal AuthorizationResult SendAuthorizeRequest(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
         {
             return OAuth2Request.SendAuthorizeRequest(this.Authenticator, resource, redirectUri, clientId, userId, promptBehavior, extraQueryParameters, this.CreateWebAuthenticationDialog(promptBehavior), callState);
         }
@@ -841,7 +845,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             // clientId is null if clientKey contains client assertion.
             string clientId = clientKey.GetClientId();
-            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userAssertion.UserId);
+            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userAssertion.UserName);
 
             result = result ?? await OAuth2Request.SendTokenRequestOnBehalfAsync(this.Authenticator.TokenUri, resource, userAssertion, clientKey, callState);
             await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
@@ -855,7 +859,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return NetworkPlugin.WebUIFactory.Create(promptBehavior, this.ownerWindow);
         }
 
-        private AuthorizationResult AcquireAuthorization(string resource, string clientId, Uri redirectUri, string userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
+        private AuthorizationResult AcquireAuthorization(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
         {
             if (redirectUri == null)
             {

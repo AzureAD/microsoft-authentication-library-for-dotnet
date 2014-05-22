@@ -107,11 +107,11 @@ namespace Test.ADAL.WinRT.Dashboard
 
                         if (arg.Password != null)
                         {
-                            credential = new UserCredential(arg.UserId, arg.Password);
+                            credential = new UserCredential(arg.UserName, arg.Password);
                         }
                         else
                         {
-                            credential = new UserCredential(arg.UserId);
+                            credential = new UserCredential(arg.UserName);
                         }
 
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, credential);
@@ -126,13 +126,15 @@ namespace Test.ADAL.WinRT.Dashboard
 
                     case CommandType.AquireTokenAsyncRCRU:
                     {
-                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, arg.UserId);
+                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, 
+                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : null);
                         break;
                     }
 
                     case CommandType.AquireTokenAsyncRCRUX:
                     {
-                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, arg.UserId, arg.Extra);
+                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri,
+                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : null, arg.Extra);
                         break;
                     }
 
@@ -146,9 +148,10 @@ namespace Test.ADAL.WinRT.Dashboard
 
                     case CommandType.AquireTokenAsyncRCRPU:
                     {
-                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, 
+                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri,
+                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : null,
                             (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
-                            (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto, arg.UserId);
+                            (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto);
                         break;
                     }
 
@@ -216,23 +219,7 @@ namespace Test.ADAL.WinRT.Dashboard
                                result.IsMultipleResourceRefreshToken,
                            RefreshToken = result.RefreshToken,
                            TenantId = result.TenantId,
-                           UserInfo =
-                               (result.UserInfo != null)
-                                   ? new UserInfoProxy
-                                     {
-                                         FamilyName =
-                                             result.UserInfo.FamilyName,
-                                         GivenName =
-                                             result.UserInfo.GivenName,
-                                         IdentityProvider =
-                                             result.UserInfo
-                                             .IdentityProvider,
-                                         IsUserIdDisplayable =
-                                             result.UserInfo
-                                             .IsUserIdDisplayable,
-                                         UserId = result.UserInfo.UserId
-                                     }
-                                   : null,
+                           UserInfo = result.UserInfo,
                            Error = result.Error,
                            ErrorDescription = result.ErrorDescription,
                            Status =

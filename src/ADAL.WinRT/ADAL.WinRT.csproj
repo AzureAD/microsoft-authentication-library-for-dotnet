@@ -172,6 +172,9 @@
     <Compile Include="..\ADAL.Common\UserCredential.cs">
       <Link>Common\UserCredential.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\UserIdentifier.cs">
+      <Link>Common\UserIdentifier.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\UserInfo.cs">
       <Link>Common\UserInfo.cs</Link>
     </Compile>

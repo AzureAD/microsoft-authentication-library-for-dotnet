@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 StringBuilder messageCredentialsBuilder = new StringBuilder(MaxExpectedMessageSize);
                 string guid = Guid.NewGuid().ToString();
 
-                messageCredentialsBuilder.AppendFormat("<o:UsernameToken u:Id='uuid-{0}'><o:Username>{1}</o:Username><o:Password>", guid, credential.UserId);
+                messageCredentialsBuilder.AppendFormat("<o:UsernameToken u:Id='uuid-{0}'><o:Username>{1}</o:Username><o:Password>", guid, credential.UserName);
 
                 char[] passwordChars = null;
                 try

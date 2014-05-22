@@ -30,15 +30,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {            
         }
 
-        internal UserInfo(string userId)
-        {
-            this.UserId = userId;
-        }
-
         internal UserInfo(UserInfo other)
         {
-            this.UserId = other.UserId;
-            this.IsUserIdDisplayable = other.IsUserIdDisplayable;
+            this.UniqueId = other.UniqueId;
+            this.DisplayableId = other.DisplayableId;
             this.GivenName = other.GivenName;
             this.FamilyName = other.FamilyName;
             this.IdentityProvider = other.IdentityProvider;
@@ -48,13 +43,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Gets identifier of the user authenticated during token acquisition. 
         /// </summary>
         [DataMember]
-        public string UserId { get; internal set; }
+        public string UniqueId { get; internal set; }
 
         /// <summary>
-        /// Gets a value indicating whether UserId is displayable or not.
+        /// Gets a displayable value in UserPrincipalName (UPN) format. The value can be null.
         /// </summary>
         [DataMember]
-        public bool IsUserIdDisplayable { get; internal set; }
+        public string DisplayableId { get; internal set; }
 
         /// <summary>
         /// Gets given name of the user if provided by the service. If not, the value is null. 
@@ -75,13 +70,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string IdentityProvider { get; internal set; }
 
         internal bool ForcePrompt { get; private set; }
-
-        internal static UserInfo CreateWithForcePrompt(PromptBehavior promptBehavior)
-        {
-            return new UserInfo
-            {
-                ForcePrompt = promptBehavior == PromptBehavior.Always
-            };
-        }
     }
 }

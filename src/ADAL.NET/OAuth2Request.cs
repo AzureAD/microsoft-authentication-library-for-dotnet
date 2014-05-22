@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
     internal static partial class OAuth2Request
     {
-        public static AuthorizationResult SendAuthorizeRequest(Authenticator authenticator, string resource, Uri redirectUri, string clientId, string userId, PromptBehavior promptBehavior, string extraQueryParameters, IWebUI webUi, CallState callState)
+        public static AuthorizationResult SendAuthorizeRequest(Authenticator authenticator, string resource, Uri redirectUri, string clientId, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, IWebUI webUi, CallState callState)
         {
             if (!string.IsNullOrWhiteSpace(redirectUri.Fragment))
             {

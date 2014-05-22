@@ -67,6 +67,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     [DataContract]
     internal class IdToken
     {
+        [DataMember(Name = IdTokenClaim.ObjectId, IsRequired = false)]
+        public string ObjectId { get; set; }
+
         [DataMember(Name = IdTokenClaim.Subject, IsRequired = false)]
         public string Subject { get; set; }
 
@@ -105,43 +108,36 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     };
 
                 IdToken idToken = ParseIdToken(tokenResponse.IdToken);
-                string tenantId = null;
-                string userId = null;
-                bool isUserIdDisplayable = false;
-                string givenName = null;
-                string familyName = null;
-                string identityProvider = null;
                 if (idToken != null)
                 {
-                    tenantId = idToken.TenantId;
-                    if (!string.IsNullOrWhiteSpace(idToken.UPN))
+                    string tenantId = idToken.TenantId;
+                    string uniqueId = null;
+                    string displayableId = null;
+
+                    if (!string.IsNullOrWhiteSpace(idToken.ObjectId))
                     {
-                        userId = idToken.UPN;
-                        isUserIdDisplayable = true;
-                    }
-                    else if (!string.IsNullOrWhiteSpace(idToken.Email))
-                    {
-                        userId = idToken.Email;
-                        isUserIdDisplayable = true;
+                        uniqueId = idToken.ObjectId;
                     }
                     else if (!string.IsNullOrWhiteSpace(idToken.Subject))
                     {
-                        // This could be null (e.g. for MSA)
-                        userId = idToken.Subject;    
-                    }                    
+                        uniqueId = idToken.Subject;
+                    }
 
-                    givenName = idToken.GivenName;
-                    familyName = idToken.FamilyName;
-                    identityProvider = idToken.IdentityProvider;
+                    if (!string.IsNullOrWhiteSpace(idToken.UPN))
+                    {
+                        displayableId = idToken.UPN;
+                    }
+                    else if (!string.IsNullOrWhiteSpace(idToken.Email))
+                    {
+                        displayableId = idToken.Email;
+                    }
+
+                    string givenName = idToken.GivenName;
+                    string familyName = idToken.FamilyName;
+                    string identityProvider = idToken.IdentityProvider;
+
+                    result.UpdateTenantAndUserInfo(tenantId, new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider });
                 }
-
-                if (userId == null)
-                {
-                    // ADAL internally generates this ID as it is only used for cache lookup and is never sent to the service                    
-                    userId = Guid.NewGuid().ToString();  
-                }
-
-                result.UpdateTenantAndUserInfo(tenantId, new UserInfo(userId) { IsUserIdDisplayable = isUserIdDisplayable, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider });
             }
             else if (tokenResponse.Error != null)
             {

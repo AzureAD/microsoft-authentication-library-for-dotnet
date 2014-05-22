@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             parameters[OAuthParameter.ClientId] = clientId;
             parameters[OAuthParameter.RedirectUri] = redirectUri.AbsoluteUri;
 
-            if (!string.IsNullOrWhiteSpace(loginHint) && RegexUtilities.IsValidEmail(loginHint))
+            if (!string.IsNullOrWhiteSpace(loginHint))
             {
                 parameters[LoginHintParameter] = loginHint;
             }
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             parameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
             parameters[OAuthParameter.Resource] = resource;
             parameters[OAuthParameter.ClientId] = clientId;
-            parameters[OAuthParameter.Username] = credential.UserId;
+            parameters[OAuthParameter.Username] = credential.UserName;
 #if ADAL_WINRT
             parameters[OAuthParameter.Password] = credential.Password;
 #else

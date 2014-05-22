@@ -48,6 +48,8 @@ namespace Test.ADAL.Common
     {
         private const string NotSpecified = "NotSpecified";
 
+        private readonly UserIdentifier NotSpecifiedUserId = new UserIdentifier(NotSpecified, UserIdentifierType.UniqueId);
+
         private static string userName;
         private static string password;
         private static SecureString securePassword;
@@ -118,12 +120,12 @@ namespace Test.ADAL.Common
             this.context.CorrelationId = correlationId;
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, ClientCredentialProxy credential)
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, ClientCredential credential)
         {
             if (CallSync)
-                return RunTask(() => this.context.AcquireToken(resource, (credential != null) ? credential.Credential : null));
+                return RunTask(() => this.context.AcquireToken(resource, credential));
             
-            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, (credential != null) ? credential.Credential : null));
+            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, credential));
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, X509CertificateCredentialProxy credential)
@@ -134,12 +136,12 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenAsync(resource, (credential != null) ? credential.Credential : null));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, ClientAssertionProxy credential)
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, ClientAssertion credential)
         {
             if (CallSync)
-                return RunTask(() => this.context.AcquireToken(resource, (credential != null) ? credential.Credential : null));
+                return RunTask(() => this.context.AcquireToken(resource, credential));
 
-            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, (credential != null) ? credential.Credential : null));
+            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, credential));
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, UserCredentialProxy credential)
@@ -160,27 +162,27 @@ namespace Test.ADAL.Common
 
         public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri)
         {
-            return RunTaskInteractive(resource, clientId, redirectUri);
+            return RunTaskInteractive(resource, clientId, redirectUri, PromptBehaviorProxy.NotSpecified, NotSpecifiedUserId, NotSpecified);
         }
 
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, string userId)
+        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId)
         {
-            return RunTaskInteractive(resource, clientId, redirectUri, PromptBehaviorProxy.NotSpecified, userId);
+            return RunTaskInteractive(resource, clientId, redirectUri, PromptBehaviorProxy.NotSpecified, userId, NotSpecified);
         }
 
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, string userId, string extraQueryParameters)
+        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters)
         {
             return RunTaskInteractive(resource, clientId, redirectUri, PromptBehaviorProxy.NotSpecified, userId, extraQueryParameters);
         }
 
         public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehavior)
         {
-            return RunTaskInteractive(resource, clientId, redirectUri, promptBehavior);
+            return RunTaskInteractive(resource, clientId, redirectUri, promptBehavior, NotSpecifiedUserId, NotSpecified);
         }
 
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehavior, string userId)
+        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehaviorProxy promptBehavior)
         {
-            return RunTaskInteractive(resource, clientId, redirectUri, promptBehavior, userId);
+            return RunTaskInteractive(resource, clientId, redirectUri, promptBehavior, userId, NotSpecified);
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId)
@@ -199,12 +201,12 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId, resource));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, ClientCredentialProxy credential)
+        public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, ClientCredential credential)
         {
             if (CallSync)
-                return RunTask(() => this.context.AcquireTokenByRefreshToken(refreshToken, clientId, (credential != null) ? credential.Credential : null));
+                return RunTask(() => this.context.AcquireTokenByRefreshToken(refreshToken, clientId, credential));
 
-            return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId, (credential != null) ? credential.Credential : null));
+            return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId, credential));
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, X509CertificateCredentialProxy credential)
@@ -223,20 +225,20 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId, (credential != null) ? credential.Credential : null, resource));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, ClientAssertionProxy credential, string resource)
+        public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, ClientAssertion credential, string resource)
         {
             if (CallSync)
-                return RunTask(() => this.context.AcquireTokenByRefreshToken(refreshToken, clientId, (credential != null) ? credential.Credential : null, resource));
+                return RunTask(() => this.context.AcquireTokenByRefreshToken(refreshToken, clientId, credential, resource));
 
-            return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId, (credential != null) ? credential.Credential : null, resource));
+            return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId, credential, resource));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, ClientCredentialProxy credential)
+        public async Task<AuthenticationResultProxy> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, ClientCredential credential)
         {
             if (CallSync)
-                return RunTask(() => this.context.AcquireTokenByAuthorizationCode(authorizationCode, redirectUri, (credential != null) ? credential.Credential : null));
+                return RunTask(() => this.context.AcquireTokenByAuthorizationCode(authorizationCode, redirectUri, credential));
 
-            return await RunTaskAsync(this.context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, redirectUri, (credential != null) ? credential.Credential : null));
+            return await RunTaskAsync(this.context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, redirectUri, credential));
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, X509CertificateCredentialProxy credential)
@@ -255,27 +257,27 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, redirectUri, (credential != null) ? credential.Credential : null, resource));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, ClientAssertionProxy credential, string resource)
+        public async Task<AuthenticationResultProxy> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, ClientAssertion credential, string resource)
         {
             if (CallSync)
-                return RunTask(() => this.context.AcquireTokenByAuthorizationCode(authorizationCode, redirectUri, (credential != null) ? credential.Credential : null, resource));
+                return RunTask(() => this.context.AcquireTokenByAuthorizationCode(authorizationCode, redirectUri, credential, resource));
 
-            return await RunTaskAsync(this.context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, redirectUri, (credential != null) ? credential.Credential : null, resource));
+            return await RunTaskAsync(this.context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, redirectUri, credential, resource));
         }
 
-        public string AcquireAccessCode(string resource, string clientId, Uri redirectUri, string userId)
+        public string AcquireAccessCode(string resource, string clientId, Uri redirectUri, UserIdentifier userId)
         {
-            return (RunTaskInteractive(resource, clientId, redirectUri, PromptBehaviorProxy.AccessCodeOnly, userId)).AccessToken;
+            return (RunTaskInteractive(resource, clientId, redirectUri, PromptBehaviorProxy.AccessCodeOnly, userId, NotSpecified)).AccessToken;
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string userAssertion, ClientCredentialProxy clientCredential)
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string userAssertion, ClientCredential clientCredential)
         {
             if (CallSync)
             {
-                return RunTask(() => this.context.AcquireToken(resource, (userAssertion == null) ? null : new UserAssertion(userAssertion), (clientCredential == null) ? null : clientCredential.Credential));
+                return RunTask(() => this.context.AcquireToken(resource, (userAssertion == null) ? null : new UserAssertion(userAssertion), clientCredential));
             }
 
-            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, (userAssertion == null) ? null : new UserAssertion(userAssertion), (clientCredential == null) ? null : clientCredential.Credential));
+            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, (userAssertion == null) ? null : new UserAssertion(userAssertion), clientCredential));
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string userAssertion, X509CertificateCredentialProxy clientCertificate)
@@ -288,14 +290,14 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenAsync(resource, (userAssertion == null) ? null : new UserAssertion(userAssertion), (clientCertificate == null) ? null : clientCertificate.Credential));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string userAssertion, ClientAssertionProxy clientAssertion)
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string userAssertion, ClientAssertion clientAssertion)
         {
             if (CallSync)
             {
-                return RunTask(() => this.context.AcquireToken(resource, (userAssertion == null) ? null : new UserAssertion(userAssertion), (clientAssertion == null) ? null : clientAssertion.Credential));
+                return RunTask(() => this.context.AcquireToken(resource, (userAssertion == null) ? null : new UserAssertion(userAssertion), clientAssertion));
             }
 
-            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, (userAssertion == null) ? null : new UserAssertion(userAssertion), (clientAssertion == null) ? null : clientAssertion.Credential));
+            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, (userAssertion == null) ? null : new UserAssertion(userAssertion), clientAssertion));
         }
 
         private async Task<AuthenticationResultProxy> RunTaskAsync(Task<AuthenticationResult> task)
@@ -332,7 +334,7 @@ namespace Test.ADAL.Common
             return resultProxy;
         }
 
-        private AuthenticationResultProxy RunTaskInteractive(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehaviorProxy = PromptBehaviorProxy.NotSpecified, string userId = NotSpecified, string extraQueryParameters = NotSpecified, int retryCount = 0)
+        private AuthenticationResultProxy RunTaskInteractive(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehaviorProxy, UserIdentifier userId, string extraQueryParameters, int retryCount = 0)
         {
             AuthenticationResultProxy resultProxy;
 
@@ -362,7 +364,7 @@ namespace Test.ADAL.Common
                         PromptBehavior promptBehavior = (promptBehaviorProxy == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
                                         (promptBehaviorProxy == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto;
 
-                        if (userId == NotSpecified)
+                        if (userId != null && userId.Id == NotSpecified)
                         {
                             if (promptBehaviorProxy == PromptBehaviorProxy.NotSpecified)
                             {
@@ -495,15 +497,7 @@ namespace Test.ADAL.Common
                 IsMultipleResourceRefreshToken = result.IsMultipleResourceRefreshToken,
                 RefreshToken = result.RefreshToken,
                 TenantId = result.TenantId,
-                UserInfo = (result.UserInfo != null) ? new UserInfoProxy
-                {
-                    FamilyName = result.UserInfo.FamilyName,
-                    GivenName = result.UserInfo.GivenName,
-                    IdentityProvider = result.UserInfo.IdentityProvider,
-                    IsUserIdDisplayable = result.UserInfo.IsUserIdDisplayable,
-                    UserId = result.UserInfo.UserId
-                }
-                    : null
+                UserInfo = result.UserInfo
             };
         }
 

@@ -48,9 +48,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Constructor to create credential with client id and secret
         /// </summary>
-        /// <param name="userId">Identifier of the user application requests token on behalf.</param>
-        public UserCredential(string userId) 
-            : this(userId, (string)null)
+        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
+        public UserCredential(string userName)
+            : this(userName, (string)null)
         {
             this.UserAuthType = UserAuthType.IntegratedAuth;
         }
@@ -58,11 +58,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Constructor to create credential with client id and secret
         /// </summary>
-        /// <param name="userId">Identifier of the user application requests token on behalf.</param>
+        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
         /// <param name="password">User password.</param>
-        public UserCredential(string userId, string password)
+        public UserCredential(string userName, string password)
         {
-            this.UserId = userId;
+            this.UserName = userName;
             this.Password = password;
             this.UserAuthType = UserAuthType.UsernamePassword;
         }
@@ -72,11 +72,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Constructor to create credential with client id and secret
         /// </summary>
-        /// <param name="userId">Identifier of the user application requests token on behalf.</param>
+        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
         /// <param name="securePassword">User password.</param>
-        public UserCredential(string userId, SecureString securePassword)
+        public UserCredential(string userName, SecureString securePassword)
         {
-            this.UserId = userId;
+            this.UserName = userName;
             this.SecurePassword = securePassword;
             this.UserAuthType = UserAuthType.UsernamePassword;
         }
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Gets identifier of the user.
         /// </summary>
-        public string UserId { get; internal set; }
+        public string UserName { get; internal set; }
 
         internal string Password { get; private set; }
 

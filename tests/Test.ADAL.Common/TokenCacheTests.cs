@@ -43,13 +43,13 @@ namespace Test.ADAL.Common.Unit
             Log.Comment("====== Verifying that cache is empty...");
             VerifyCacheItemCount(cache, 0);
 
-            const string User = "testuser@microsoft.com";
+            const string DisplayableId = "testuser@microsoft.com";
             Log.Comment("====== Creating a set of keys and values for the test...");
-            TokenCacheKey key = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = ValidResource, ClientId = ValidClientId, UserId = User };
+            TokenCacheKey key = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = ValidResource, ClientId = ValidClientId, DisplayableId = DisplayableId };
             Log.Comment(string.Format("Cache Key (with User): {0}", key));
-            TokenCacheKey key2 = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = InvalidResource, ClientId = ValidClientId, UserId = User };
+            TokenCacheKey key2 = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = InvalidResource, ClientId = ValidClientId, DisplayableId = DisplayableId };
             Log.Comment(string.Format("Cache Key (with User): {0}", key));
-            TokenCacheKey incorrectUserKey = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = InvalidResource, ClientId = ValidClientId, UserId = "testuser2@microsoft.com" };
+            TokenCacheKey incorrectUserKey = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = InvalidResource, ClientId = ValidClientId, DisplayableId = "testuser2@microsoft.com" };
             Log.Comment(string.Format("Cache Key (with User): {0}", key));
             TokenCacheKey userlessKey = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = ValidResource, ClientId = ValidClientId };
             Log.Comment(string.Format("Cache Key (withoutUser): {0}", userlessKey));
@@ -156,25 +156,25 @@ namespace Test.ADAL.Common.Unit
             string password = Guid.NewGuid().ToString();
             string resource = Guid.NewGuid().ToString();
             string tenantId = Guid.NewGuid().ToString();
-            string userId = Guid.NewGuid().ToString();
+            string uniqueId = Guid.NewGuid().ToString();
+            string displayableId = Guid.NewGuid().ToString();
             Uri redirectUri = new Uri("https://www.GetJwt.com");
 
-
             authority = authority + tenantId + "/";
-            UserCredential credential = new UserCredential(userId, password);
+            UserCredential credential = new UserCredential(displayableId, password);
             AuthenticationContext tempContext = new AuthenticationContext(authority, false);
             IDictionary<TokenCacheKey, string> localCache = tempContext.TokenCacheStore;
             localCache.Clear();
 
             // @Resource, Credential
-            TokenCacheKey tokenCacheKey = new TokenCacheKey { Authority = authority, Resource = resource, ClientId = clientId, UserId = userId, ExpiresOn = new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)) };
+            TokenCacheKey tokenCacheKey = new TokenCacheKey { Authority = authority, Resource = resource, ClientId = clientId, UniqueId = uniqueId, DisplayableId = displayableId, ExpiresOn = new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)) };
             localCache.Add(tokenCacheKey, authenticationResult);
             AuthenticationContext acWithLocalCache = new AuthenticationContext(authority, false, localCache);
             AuthenticationResult authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, credential);
             Verify.AreEqual(authenticationResult, TokenCacheEncoding.EncodeCacheValue(authenticationResultFromCache));
 
             // Duplicate throws error
-            localCache.Add(new TokenCacheKey { Authority = authority, Resource = resource, ClientId = clientId, UserId = userId, TenantId = tenantId }, authenticationResult);
+            localCache.Add(new TokenCacheKey { Authority = authority, Resource = resource, ClientId = clientId, DisplayableId = displayableId, TenantId = tenantId }, authenticationResult);
 
             try
             {
@@ -212,7 +212,8 @@ namespace Test.ADAL.Common.Unit
             var cacheValue = CreateCacheValue();
             resource = Guid.NewGuid().ToString();
             clientId = Guid.NewGuid().ToString();
-            userId = Guid.NewGuid().ToString();
+            uniqueId = Guid.NewGuid().ToString();
+            displayableId = Guid.NewGuid().ToString();
 
             TokenCacheKey tempKey = new TokenCacheKey { Authority = authority, Resource = resource, ClientId = clientId, ExpiresOn = new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)) };
             localCache.Add(tempKey, cacheValue);
@@ -233,8 +234,12 @@ namespace Test.ADAL.Common.Unit
             cacheValue = CreateCacheValue();
             resource = Guid.NewGuid().ToString();
             clientId = Guid.NewGuid().ToString();
-            userId = Guid.NewGuid().ToString();
-            localCache.Add(new TokenCacheKey { Authority = authority, Resource = resource, ClientId = clientId, UserId = userId, ExpiresOn = new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)) }, cacheValue);
+            uniqueId = Guid.NewGuid().ToString();
+            displayableId = Guid.NewGuid().ToString();
+            localCache.Add(new TokenCacheKey { Authority = authority, Resource = resource, ClientId = clientId, UniqueId = uniqueId, DisplayableId = displayableId, ExpiresOn = new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)) }, cacheValue);
+
+            var userId = new UserIdentifier(uniqueId, UserIdentifierType.UniqueId);
+            var userIdUpper = new UserIdentifier(displayableId.ToUpper(), UserIdentifierType.RequiredDisplayableId);
 
 #if TEST_ADAL_WINRT
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, userId);
@@ -244,9 +249,9 @@ namespace Test.ADAL.Common.Unit
             Verify.AreEqual(cacheValue, TokenCacheEncoding.EncodeCacheValue(authenticationResultFromCache));
 
 #if TEST_ADAL_WINRT
-            authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, userId.ToUpper());
+            authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, userIdUpper);
 #else
-            authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userId.ToUpper());
+            authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userIdUpper);
 #endif
             Verify.AreEqual(cacheValue, TokenCacheEncoding.EncodeCacheValue(authenticationResultFromCache));
 
@@ -264,9 +269,9 @@ namespace Test.ADAL.Common.Unit
             cacheStore.Clear();
 
             DateTimeOffset time = DateTimeOffset.UtcNow;
-            TokenCacheKey key = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = "resourc1", ClientId = "client1", UserId = "user1", ExpiresOn = time };
-            TokenCacheKey key2 = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = "resource1", ClientId = "client1", UserId = "user2" };
-            TokenCacheKey key3 = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = "resourc1", ClientId = "client1", UserId = "user1", ExpiresOn = time.AddTicks(1) };
+            TokenCacheKey key = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = "resourc1", ClientId = "client1", DisplayableId = "user1", ExpiresOn = time };
+            TokenCacheKey key2 = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = "resource1", ClientId = "client1", DisplayableId = "user2" };
+            TokenCacheKey key3 = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = "resourc1", ClientId = "client1", DisplayableId = "user1", ExpiresOn = time.AddTicks(1) };
             Verify.AreNotEqual(key, key3);
 
             string value = CreateCacheValue();
@@ -436,7 +441,7 @@ namespace Test.ADAL.Common.Unit
                     Authority = GenerateRandomString(MaxFieldSize),
                     Resource = GenerateRandomString(MaxFieldSize),
                     ClientId = GenerateRandomString(MaxFieldSize),
-                    UserId = GenerateRandomString(MaxFieldSize),
+                    DisplayableId = GenerateRandomString(MaxFieldSize),
                     FamilyName = GenerateRandomString(MaxFieldSize),
                     GivenName = GenerateRandomString(MaxFieldSize),
                     IdentityProviderName = GenerateRandomString(MaxFieldSize),
@@ -465,7 +470,7 @@ namespace Test.ADAL.Common.Unit
 
         internal static void TokenCacheValueSplitTest(IDictionary<TokenCacheKey, string> cacheStore)
         {
-            TokenCacheKey key = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = "resourc1", ClientId = "client1", UserId = "user1", ExpiresOn = DateTimeOffset.UtcNow };
+            TokenCacheKey key = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = "resourc1", ClientId = "client1", DisplayableId = "user1", ExpiresOn = DateTimeOffset.UtcNow };
 
             cacheStore.Clear();
             cacheStore.Add(key, null);
@@ -497,10 +502,10 @@ namespace Test.ADAL.Common.Unit
                 GivenName = "GivenName",
                 IdentityProviderName = "IdentityProviderName",
                 IsMultipleResourceRefreshToken = false,
-                IsUserIdDisplayable = true,
                 Resource = "Resource",
                 TenantId = "TenantId",
-                UserId = "UserId",
+                UniqueId = "UniqueId",
+                DisplayableId = "DisplayableId",
             };
 
             Verify.IsTrue(tokenCacheKey.Authority == "Authority");
@@ -510,10 +515,10 @@ namespace Test.ADAL.Common.Unit
             Verify.IsTrue(tokenCacheKey.GivenName == "GivenName");
             Verify.IsTrue(tokenCacheKey.IdentityProviderName == "IdentityProviderName");
             Verify.IsTrue(tokenCacheKey.IsMultipleResourceRefreshToken == false);
-            Verify.IsTrue(tokenCacheKey.IsUserIdDisplayable == true);
             Verify.IsTrue(tokenCacheKey.Resource == "Resource");
             Verify.IsTrue(tokenCacheKey.TenantId == "TenantId");
-            Verify.IsTrue(tokenCacheKey.UserId == "UserId");
+            Verify.IsTrue(tokenCacheKey.UniqueId == "UniqueId");
+            Verify.IsTrue(tokenCacheKey.DisplayableId == "DisplayableId");
         }
 
         private static void VerifyCacheValuesAreEqual(string value1, string value2)

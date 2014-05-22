@@ -40,10 +40,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = "federation_active_auth_url")]
         public string FederationActiveAuthUrl { get; set; }
 
-        internal static async Task<UserRealmDiscoveryResponse> CreateByDiscoveryAsync(string userRealmUri, string userId, CallState callState)
+        internal static async Task<UserRealmDiscoveryResponse> CreateByDiscoveryAsync(string userRealmUri, string userName, CallState callState)
         {
             string userRealmEndpoint = userRealmUri;
-            userRealmEndpoint += (userId + "?api-version=1.0");
+            userRealmEndpoint += (userName + "?api-version=1.0");
 
             userRealmEndpoint = HttpHelper.CheckForExtraQueryParameter(userRealmEndpoint);
             Logger.Information(callState, "Sending user realm discovery request to '{0}'", userRealmEndpoint);

@@ -43,9 +43,6 @@
     <Compile Include="..\Test.ADAL.Common\TestTokenCacheStoreBase.cs">
       <Link>Common\TestTokenCacheStoreBase.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.Common\UserInfoProxy.cs">
-      <Link>Common\UserInfoProxy.cs</Link>
-    </Compile>
     <Compile Include="..\Test.ADAL.WinRT\AuthenticationContextCommand.cs">
       <Link>Common\AuthenticationContextCommand.cs</Link>
     </Compile>
