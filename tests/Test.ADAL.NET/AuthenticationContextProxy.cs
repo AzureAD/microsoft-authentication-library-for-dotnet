@@ -16,25 +16,21 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
+using System.Windows.Forms;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Test.ADAL.NET.Friend;
+using Timer = System.Timers.Timer;
 
 namespace Test.ADAL.Common
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using System.Windows.Forms;
-
-    using Microsoft.IdentityModel.Clients.ActiveDirectory;
-    using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
-
-    using Test.ADAL.NET.Friend;
-
-    using Timer = System.Timers.Timer;
-    using System.Timers;
-
     public enum PageType
     {
         Dashboard,

@@ -16,14 +16,14 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Xml;
+using System.Xml.Linq;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Xml;
-    using System.Xml.Linq;
-
     class WsTrustResponse
     {
         public const string Saml1Assertion = "urn:oasis:names:tc:SAML:1.0:assertion";

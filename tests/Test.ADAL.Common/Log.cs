@@ -16,10 +16,10 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Diagnostics;
+
 namespace Test.ADAL.Common
 {
-    using System.Diagnostics;
-
     internal static class Log
     {
         internal static void Comment(string message, params object[] args)

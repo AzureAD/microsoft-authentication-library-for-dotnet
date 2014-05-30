@@ -18,7 +18,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using System.Security;
 using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory

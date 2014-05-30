@@ -18,8 +18,8 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Test.ADAL.Common;
 using Test.ADAL.Common.Unit;
 

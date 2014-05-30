@@ -18,7 +18,6 @@
 
 using System;
 using System.Threading.Tasks;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -33,7 +32,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
 
-            Uri authorizationUri = CreateAuthorizationUri(authenticator, resource, redirectUri, clientId, userId, promptBehavior, extraQueryParameters, callState);
+            Uri authorizationUri = CreateAuthorizationUri(authenticator, resource, redirectUri, clientId, userId, promptBehavior, extraQueryParameters, IncludeFormsAuthParams(), callState);
             string resultUri = webUi.Authenticate(authorizationUri, redirectUri);
             return OAuth2Response.ParseAuthorizeResponse(resultUri, callState);
         }
@@ -72,6 +71,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(resource, userCredential, clientKey);
             AuthenticationResult result = await SendHttpMessageAsync(uri, requestParameters, callState);
             return result;
+        }
+
+        public static bool IncludeFormsAuthParams()
+        {
+            if (PlatformSpecificHelper.IsDomainJoined())
+            {
+                return PlatformSpecificHelper.IsUserLocal();
+            }
+
+            return true;
         }
     }
 }

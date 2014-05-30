@@ -17,15 +17,14 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 using System.Text;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.Common
 {
-    using Microsoft.IdentityModel.Clients.ActiveDirectory;
-    using System.IO;
-    using System.Runtime.Serialization;
-    using System.Runtime.Serialization.Json;
-
     internal enum TokenCacheStoreType
     {
         Null,

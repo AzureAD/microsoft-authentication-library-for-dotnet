@@ -22,7 +22,6 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory

@@ -16,10 +16,10 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Text.RegularExpressions;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    using System.Text.RegularExpressions;
-
     internal static partial class RegexUtilities
     {
         private static string DomainMapper(Match match)

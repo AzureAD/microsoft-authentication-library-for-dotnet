@@ -16,11 +16,11 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using System;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

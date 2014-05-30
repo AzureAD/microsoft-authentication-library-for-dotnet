@@ -17,11 +17,10 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Security;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    using System.Security;
-
     /// <summary>
     /// Credential including client id and secret.
     /// </summary>

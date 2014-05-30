@@ -22,7 +22,6 @@ using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.Common
@@ -44,6 +43,7 @@ namespace Test.ADAL.Common
         {
             AuthenticationContextProxy.InitializeTest();
         }
+
 
         public static void AcquireTokenPositive(Sts sts)
         {

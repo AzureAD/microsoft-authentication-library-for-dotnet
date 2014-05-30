@@ -16,17 +16,16 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Automation;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Test.ADAL.WinRT;
 
 namespace Test.ADAL.Common
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using System.Windows.Automation;
-    using Test.ADAL.WinRT;
-
     public enum PageType
     {
         Dashboard,

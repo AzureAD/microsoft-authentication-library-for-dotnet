@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+#if !ADAL_WINRT
+#endif
 using System;
 using System.Text;
 
@@ -23,13 +25,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static partial class OAuth2MessageHelper
     {
+        private const string FormsAuthParameter = "amr_values";
         private const string LoginHintParameter = "login_hint"; // login_hint is not standard oauth2 parameter
         private const string CorrelationIdParameter = OAuthHeader.CorrelationId; // correlation id is not standard oauth2 parameter
         private const string PromptParameter = "prompt"; // prompt is not standard oauth2 parameter
+        private const string FormsAuthValue = "pwd";
         private const string PromptLoginValue = "login";
         private const string ScopeOpenIdValue = "openid";
 
-        public static RequestParameters CreateAuthorizationRequest(string resource, string clientId, Uri redirectUri, string loginHint, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
+        public static RequestParameters CreateAuthorizationRequest(string resource, string clientId, Uri redirectUri, string loginHint, PromptBehavior promptBehavior, string extraQueryParameters, bool includeFormsAuthParam, CallState callState)
         {
             RequestParameters parameters = new RequestParameters();
             parameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
@@ -63,10 +67,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 parameters.ExtraQueryParameter = extraQueryParameters;
             }
 
+            if (includeFormsAuthParam)
+            {
+                parameters[FormsAuthParameter] = FormsAuthValue;
+            }
+
             AdalIdHelper.AddAsQueryParameters(parameters);
 
             return parameters;
         }
+
 
         public static RequestParameters CreateTokenRequest(string code, Uri redirectUri, string resource, string clientId)
         {

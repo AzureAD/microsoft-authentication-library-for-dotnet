@@ -18,13 +18,10 @@
 
 using System;
 using System.Linq;
-using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-
 using Test.ADAL.NET.Friend;
-using System.Diagnostics;
 
 namespace Test.ADAL.Common
 {

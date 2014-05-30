@@ -17,8 +17,8 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {

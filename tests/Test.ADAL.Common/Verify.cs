@@ -17,7 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-
 #if TEST_ADAL_WINRT
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 #else

@@ -16,13 +16,10 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
 using System.Threading.Tasks;
-using Windows.Storage;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Test.ADAL.Common;
-using Logger = Microsoft.IdentityModel.Clients.ActiveDirectory.Logger;
 
 namespace Test.ADAL.WinRT.Unit
 {
