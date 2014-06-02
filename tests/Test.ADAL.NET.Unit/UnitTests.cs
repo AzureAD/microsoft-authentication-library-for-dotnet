@@ -232,10 +232,10 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("AdalDotNetUnit")]
-        //[Description("Test for ADAL Id")]
+        [Description("Test to verify forms auth parameters.")]
         public void IncludeFormsAuthParamsTest()
         {
-            OAuth2Request.IncludeFormsAuthParams();
+            Assert.IsFalse(OAuth2Request.IncludeFormsAuthParams());
         }
 
         private static void RunAuthenticationParametersPositive(string authenticateHeader, string expectedAuthority, string excepectedResource)

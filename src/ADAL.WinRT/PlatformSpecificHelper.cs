@@ -17,7 +17,9 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Windows.Networking;
 using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
 using Windows.Storage;
@@ -95,7 +97,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static bool IsDomainJoined()
         {
-            var hostNamesList = Windows.Networking.Connectivity.NetworkInformation
+            IReadOnlyList<HostName> hostNamesList = Windows.Networking.Connectivity.NetworkInformation
                 .GetHostNames();
 
             foreach (var entry in hostNamesList)
@@ -105,6 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     return true;
                 }
             }
+
             return false;
         }
     }

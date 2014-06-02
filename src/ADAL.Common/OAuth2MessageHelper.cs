@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 #if !ADAL_WINRT
+using System.Security;
 #endif
 using System;
 using System.Text;

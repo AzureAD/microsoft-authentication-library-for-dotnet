@@ -37,12 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static async Task<bool> IncludeFormsAuthParams()
         {
-            if (PlatformSpecificHelper.IsDomainJoined())
-            {
-                return await PlatformSpecificHelper.IsUserLocal();
-            }
-
-            return true;
+            return PlatformSpecificHelper.IsDomainJoined() && await PlatformSpecificHelper.IsUserLocal();
         }
     }
 }

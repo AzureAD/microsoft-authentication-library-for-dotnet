@@ -47,10 +47,10 @@ namespace Test.ADAL.WinRT.Unit
         
         [TestMethod]
         [TestCategory("AdalWinRTUnit")]
-        //[Description("Test for ADAL Id")]
+        //[Description("Test to verify forms auth parameters.")]
         public async Task IncludeFormsAuthParamsTest()
         {
-            await OAuth2Request.IncludeFormsAuthParams();
+            Verify.IsFalse(await OAuth2Request.IncludeFormsAuthParams());
         }
 
 
