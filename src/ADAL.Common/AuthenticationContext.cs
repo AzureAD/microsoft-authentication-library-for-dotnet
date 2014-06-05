@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="authority">Address of the authority to issue token.</param>
         public AuthenticationContext(string authority)
-            : this(authority, AuthorityValidationType.NotProvided, StaticTokenCacheStore)
+            : this(authority, AuthorityValidationType.NotProvided, TokenCache.DefaultShared)
         {
         }
 
@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="authority">Address of the authority to issue token.</param>
         /// <param name="validateAuthority">Flag to turn address validation ON or OFF.</param>
         public AuthenticationContext(string authority, bool validateAuthority)
-            : this(authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False, StaticTokenCacheStore)
+            : this(authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False, TokenCache.DefaultShared)
         {
         }
 
@@ -74,9 +74,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Using this constructor will turn ON validation of the authority URL by default if validation is supported for the authority address.
         /// </summary>
         /// <param name="authority">Address of the authority to issue token.</param>
-        /// <param name="tokenCacheStore">Token Cache store used to lookup cached tokens on calls to AcquireToken</param>
-        public AuthenticationContext(string authority, IDictionary<TokenCacheKey, string> tokenCacheStore)
-            : this(authority, AuthorityValidationType.NotProvided, tokenCacheStore)
+        /// <param name="tokenCache">Token cache used to lookup cached tokens on calls to AcquireToken</param>
+        public AuthenticationContext(string authority, TokenCache tokenCache)
+            : this(authority, AuthorityValidationType.NotProvided, tokenCache)
         {
         }
 #endif
@@ -87,13 +87,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="authority">Address of the authority to issue token.</param>
         /// <param name="validateAuthority">Flag to turn address validation ON or OFF.</param>
-        /// <param name="tokenCacheStore">Token Cache store used to lookup cached tokens on calls to AcquireToken</param>
-        public AuthenticationContext(string authority, bool validateAuthority, IDictionary<TokenCacheKey, string> tokenCacheStore)
-            : this(authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False, tokenCacheStore)
+        /// <param name="tokenCache">Token cache used to lookup cached tokens on calls to AcquireToken</param>
+        public AuthenticationContext(string authority, bool validateAuthority, TokenCache tokenCache)
+            : this(authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False, tokenCache)
         {
         }
 
-        private AuthenticationContext(string authority, AuthorityValidationType validateAuthority, IDictionary<TokenCacheKey, string> tokenCacheStore)
+        private AuthenticationContext(string authority, AuthorityValidationType validateAuthority, TokenCache tokenCache)
         {
             this.Authority = AuthenticationMetadata.CanonicalizeUri(authority);
 
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // If authorityType is not provided (via first constructor), we validate by default (except for ASG and Office tenants).
             this.ValidateAuthority = (validateAuthority != AuthorityValidationType.False);
 
-            this.tokenCacheManager = new TokenCacheManager(this.Authority, tokenCacheStore, this.RefreshAccessTokenAsync);
+            this.tokenCacheManager = new TokenCacheManager(this.Authority, tokenCache, this.RefreshAccessTokenAsync);
         }
 
         /// <summary>
@@ -117,27 +117,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
 #if ADAL_WINRT
         /// <summary>
-        /// Property to provide storage for ADAL's token cache. By default, TokenCacheStore is set a persistent store based on application's local settings. 
-        /// Library will automatically save tokens in default TokenCacheStore whenever you obtain them. Cached tokens will be available only to the application that saved them. 
-        /// Cached tokens in default TokenCacheStore will outlive the application's execution, and will be available in subsequent runs.
+        /// Property to provide ADAL's token cache. By default, TokenCache is a persistent cache based on application's local settings. 
+        /// Library will automatically save tokens in default TokenCache whenever you obtain them. Cached tokens will be available only to the application that saved them. 
+        /// Cached tokens in default token cache will outlive the application's execution, and will be available in subsequent runs.
         /// To turn OFF token caching, set TokenCacheStore to null. 
         /// </summary>
 #else
         /// <summary>
-        /// Gets the TokenCacheStore 
+        /// Gets the TokenCache
         /// </summary>
         /// <remarks>
-        /// By default, TokenCacheStore is set to a Dictionary which makes the token cache an in-memory collection of key/value pairs. 
+        /// By default, TokenCache is an in-memory collection of key/value pairs. 
         /// Library will automatically save tokens in the cache when AcquireToken is called.  
-        /// The default token cache is static so all tokens will available to all instances of AuthenticationContext. To use a custom TokenCacheStore pass one to the <see cref="AuthenticationContext">.constructor</see>.
-        /// To turn OFF token caching, use the constructor and set TokenCacheStore to null.
+        /// The default token cache is static so all tokens will available to all instances of AuthenticationContext. To use a custom TokenCache pass one to the <see cref="AuthenticationContext">.constructor</see>.
+        /// To turn OFF token caching, use the constructor and set TokenCache to null.
         /// </remarks>
 #endif
-        public IDictionary<TokenCacheKey, string> TokenCacheStore
+        public TokenCache TokenCache
         {
             get
             {
-                return this.tokenCacheManager.TokenCacheStore;
+                return this.tokenCacheManager.TokenCache;
             }
         }
 
@@ -238,48 +238,56 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             await this.CreateAuthenticatorAsync(callState);
 
-            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, credential.UserName);
-            if (result == null)
+            try
             {
-                UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, credential.UserName, callState);
-                Logger.Information(callState, "User '{0}' detected as '{1}'", credential.UserName, userRealmResponse.AccountType);
-                if (string.Compare(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase) == 0)
+                this.NotifyBeforeAccessCache(resource, clientId, null, credential.UserName);
+                AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, credential.UserName);
+                if (result == null)
                 {
-                    Uri wsTrustUrl = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, credential.UserAuthType, callState);
-                    Logger.Information(callState, "WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustUrl, userRealmResponse.FederationMetadataUrl);
-
-                    WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustUrl, credential, callState);
-                    Logger.Information(callState, "Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType);
-
-                    // We assume that if the response token type is not SAML 1.1, it is SAML 2
-                    var samlCredential = new UserAssertion(
-                        wsTrustResponse.Token,
-                        (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
-
-                    result = await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, resource, clientId, samlCredential, callState);
-                    Logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
-
-                    await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
-                    this.tokenCacheManager.StoreToCache(result, resource, clientId);
-                }
-                else if (string.Compare(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    //handle password grant flow for the managed user
-                    if (credential.PasswordToCharArray() == null)
+                    UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, credential.UserName, callState);
+                    Logger.Information(callState, "User '{0}' detected as '{1}'", credential.UserName, userRealmResponse.AccountType);
+                    if (string.Compare(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase) == 0)
                     {
-                        throw new AdalException(AdalError.PasswordRequiredForManagedUserError);
+                        Uri wsTrustUrl = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, credential.UserAuthType, callState);
+                        Logger.Information(callState, "WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustUrl, userRealmResponse.FederationMetadataUrl);
+
+                        WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustUrl, credential, callState);
+                        Logger.Information(callState, "Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType);
+
+                        // We assume that if the response token type is not SAML 1.1, it is SAML 2
+                        var samlCredential = new UserAssertion(
+                            wsTrustResponse.Token,
+                            (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
+
+                        result = await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, resource, clientId, samlCredential, callState);
+                        Logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
+
+                        await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
+                        this.tokenCacheManager.StoreToCache(result, resource, clientId);
                     }
+                    else if (string.Compare(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase) == 0)
+                    {
+                        //handle password grant flow for the managed user
+                        if (credential.PasswordToCharArray() == null)
+                        {
+                            throw new AdalException(AdalError.PasswordRequiredForManagedUserError);
+                        }
 
-                    result = await OAuth2Request.SendTokenRequestWithUserCredentialAsync(this.Authenticator.TokenUri, resource, clientId, credential, callState);
+                        result = await OAuth2Request.SendTokenRequestWithUserCredentialAsync(this.Authenticator.TokenUri, resource, clientId, credential, callState);
+                    }
+                    else
+                    {
+                        throw new AdalException(AdalError.UnknownUserType);
+                    }
                 }
-                else
-                {
-                    throw new AdalException(AdalError.UnknownUserType);
-                }
+
+                LogReturnedToken(result, callState);
+                return result;
             }
-
-            LogReturnedToken(result, callState);
-            return result;
+            finally
+            {
+                this.NotifyAfterAccessCache(resource, clientId, null, credential.UserName);
+            }
         }
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserAssertion credential, bool callSync = false)
@@ -304,18 +312,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             await this.CreateAuthenticatorAsync(callState);
 
-            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, credential.UserName);
-            if (result == null)
+            try
             {
-                result = await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, resource, clientId, credential, callState);
-                Logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
+                this.NotifyBeforeAccessCache(resource, clientId, null, credential.UserName);
+                AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, credential.UserName);
+                if (result == null)
+                {
+                    result = await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, resource, clientId, credential, callState);
+                    Logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
 
-                await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
-                this.tokenCacheManager.StoreToCache(result, resource, clientId);
+                    await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
+                    this.tokenCacheManager.StoreToCache(result, resource, clientId);
+                }
+
+                LogReturnedToken(result, callState);
+                return result;
             }
-
-            LogReturnedToken(result, callState);
-            return result;
+            finally
+            {
+                this.NotifyAfterAccessCache(resource, clientId, null, credential.UserName);
+            }
         }
 
         private async Task<AuthenticationResult> AcquireTokenByRefreshTokenCommonAsync(string refreshToken, string clientId, string resource, bool callSync = false)
@@ -368,14 +384,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             await this.CreateAuthenticatorAsync(callState);
 
             AuthenticationResult result = null;
-            if (promptBehavior != PromptBehavior.Always)
-            {
-                result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
-            }
 
-            result = result ?? await this.AcquireTokenFromStsAsync(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters, callState);
-            LogReturnedToken(result, callState);
-            return result;
+            try
+            {
+                this.NotifyBeforeAccessCache(resource, clientId, (userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null, (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null);
+                if (promptBehavior != PromptBehavior.Always)
+                {
+                    result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
+                }
+
+                result = result ?? await this.AcquireTokenFromStsAsync(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters, callState);
+                LogReturnedToken(result, callState);
+                return result;
+            }
+            finally
+            {
+                this.NotifyAfterAccessCache(resource, clientId, (userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null, (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null);
+            }
         }
 
         private async Task<AuthenticationResult> AcquireTokenFromStsAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
@@ -466,6 +491,36 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             Guid correlationId = (this.CorrelationId != Guid.Empty) ? this.CorrelationId : Guid.NewGuid();
             return new CallState(correlationId, callSync);
+        }
+
+        private void NotifyBeforeAccessCache(string resource, string clientId, string uniqueId, string displayableId)
+        {
+            if (this.TokenCache != null)
+            {
+                this.TokenCache.OnBeforeAccess(new TokenCacheAccessArgs
+                    {
+                        TokenCache = this.TokenCache,
+                        Resource = resource,
+                        ClientId = clientId,
+                        UniqueId = uniqueId,
+                        DisplayableId = displayableId
+                    });
+            }
+        }
+
+        private void NotifyAfterAccessCache(string resource, string clientId, string uniqueId, string displayableId)
+        {
+            if (this.TokenCache != null)
+            {
+                this.TokenCache.OnAfterAccess(new TokenCacheAccessArgs
+                    {
+                        TokenCache = this.TokenCache,
+                        Resource = resource,
+                        ClientId = clientId,
+                        UniqueId = uniqueId,
+                        DisplayableId = displayableId
+                    });
+            }
         }
     }
 }

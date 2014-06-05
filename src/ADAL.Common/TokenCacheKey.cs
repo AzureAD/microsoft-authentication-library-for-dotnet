@@ -24,9 +24,9 @@ using Windows.Foundation.Metadata;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
-    /// <see cref="TokenCacheKey"/> can be used with Linq to access items from the <see cref="AuthenticationContext.TokenCacheStore"/>.
+    /// <see cref="TokenCacheKey"/> can be used with Linq to access items from the TokenCacheStore.
     /// </summary>
-    public sealed class TokenCacheKey
+    internal sealed class TokenCacheKey
     {
         /// <summary>
         /// Default constructor.

@@ -165,8 +165,17 @@
     <Compile Include="..\ADAL.Common\RequestParameters.cs">
       <Link>Common\RequestParameters.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\TokenCache.cs">
+      <Link>Common\TokenCache.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\TokenCacheAccessArgs.cs">
+      <Link>Common\TokenCacheAccessArgs.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\TokenCacheHelper.cs">
       <Link>Common\TokenCacheHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\TokenCacheItem.cs">
+      <Link>Common\TokenCacheItem.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\TokenCacheKey.cs">
       <Link>Common\TokenCacheKey.cs</Link>

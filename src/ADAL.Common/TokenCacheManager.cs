@@ -32,20 +32,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly RefreshAccessTokenAsync refreshAccessTokenAsync;
 
-        public TokenCacheManager(string authority, IDictionary<TokenCacheKey, string> tokenCacheStore, RefreshAccessTokenAsync refreshAccessTokenAsync)
+        public TokenCacheManager(string authority, TokenCache tokenCache, RefreshAccessTokenAsync refreshAccessTokenAsync)
         {
             this.Authority = authority;
-            this.TokenCacheStore = tokenCacheStore;
+            this.TokenCache = tokenCache;
             this.refreshAccessTokenAsync = refreshAccessTokenAsync;
         }
 
         public string Authority { get; set; }
-
-        public IDictionary<TokenCacheKey, string> TokenCacheStore { get; private set; }
+        public TokenCache TokenCache { get; private set; }
 
         public void StoreToCache(AuthenticationResult result, string resource, string clientId = null)
         {
-            if (this.TokenCacheStore == null)
+            if (this.TokenCache == null)
             {
                 return;
             }
@@ -66,7 +65,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public async Task<AuthenticationResult> LoadFromCacheAndRefreshIfNeededAsync(string resource, CallState callState, string clientId = null, UserIdentifier userId = null)
         {
-            if (this.TokenCacheStore == null)
+            if (this.TokenCache == null)
             {
                 return null;
             }
@@ -74,7 +73,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AuthenticationResult result = null;
 
             KeyValuePair<TokenCacheKey, string>? kvp = this.LoadSingleEntryFromCache(resource, clientId, userId);
-
+            
             if (kvp.HasValue)
             {
                 TokenCacheKey cacheKey = kvp.Value.Key;
@@ -88,7 +87,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else if (tokenMarginallyExpired && result.RefreshToken == null)
                 {
-                    this.TokenCacheStore.Remove(cacheKey);
+                    this.TokenCache.TokenCacheStore.Remove(cacheKey);
+                    this.TokenCache.HasStateChanged = true;
                     result = null;
                 }
 
@@ -148,18 +148,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private void StoreToCache(TokenCacheKey key, AuthenticationResult result)
         {
-            if (this.TokenCacheStore == null)
+            if (this.TokenCache == null)
             {
                 return;
             }
 
-            this.TokenCacheStore.Remove(key);
-            this.TokenCacheStore.Add(key, TokenCacheEncoding.EncodeCacheValue(result));
+            this.TokenCache.TokenCacheStore.Remove(key);
+            this.TokenCache.TokenCacheStore.Add(key, TokenCacheEncoding.EncodeCacheValue(result));
+            this.TokenCache.HasStateChanged = true;
         }
 
         private void RemoveFromCache(string resource, string clientId = null, string uniqueId = null, string displayableId = null)
         {
-            if (this.TokenCacheStore == null)
+            if (this.TokenCache == null)
             {
                 return;
             }
@@ -170,8 +171,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             foreach (TokenCacheKey tokenCacheKey in keysToRemove)
             {
-                this.TokenCacheStore.Remove(tokenCacheKey);
+                this.TokenCache.TokenCacheStore.Remove(tokenCacheKey);
             }
+
+            this.TokenCache.HasStateChanged = true;
         }
 
         /// <summary>
@@ -182,7 +185,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private List<KeyValuePair<TokenCacheKey, string>> QueryCache(string clientId, string uniqueId, string displayableId, string resource = null)
         {
             return
-                this.TokenCacheStore.Where(
+                this.TokenCache.TokenCacheStore.Where(
                     p =>
                         p.Key.Authority == this.Authority
                         && (string.IsNullOrWhiteSpace(resource) || (string.Compare(p.Key.Resource, resource, StringComparison.OrdinalIgnoreCase) == 0))
