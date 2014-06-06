@@ -31,11 +31,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
             
-            Uri authorizationUri = CreateAuthorizationUri(authenticator, resource, redirectUri, clientId, userId, promptBehavior, extraQueryParameters, await IncludeFormsAuthParams(), callState);
+            Uri authorizationUri = CreateAuthorizationUri(authenticator, resource, redirectUri, clientId, userId, promptBehavior, extraQueryParameters, await IncludeFormsAuthParamsAsync(), callState);
             return await webUI.AuthenticateAsync(authorizationUri, redirectUri, callState);
         }
 
-        public static async Task<bool> IncludeFormsAuthParams()
+        public static async Task<bool> IncludeFormsAuthParamsAsync()
         {
             return PlatformSpecificHelper.IsDomainJoined() && await PlatformSpecificHelper.IsUserLocal();
         }

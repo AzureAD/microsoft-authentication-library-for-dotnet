@@ -52,16 +52,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static bool IsDomainJoined()
         {
+            bool returnValue = true;
             try
             {
                 Domain.GetComputerDomain();
-                return true;
             }
             catch (ActiveDirectoryObjectNotFoundException)
             {
                 //if the machine is not domain joined or the request times out, this exception is thrown.
+                returnValue = false;
             }
-            return false;
+            return returnValue;
         }
 
         public static bool IsUserLocal()
