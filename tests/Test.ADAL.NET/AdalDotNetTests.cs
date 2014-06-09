@@ -211,7 +211,7 @@ namespace Test.ADAL.NET
         {
             AdalTests.AcquireTokenPositiveWithNullCache(Sts);
         }
-
+        
         [TestMethod]
         [Description("Test for UserInfo")]
         [TestCategory("AdalDotNetMock")]

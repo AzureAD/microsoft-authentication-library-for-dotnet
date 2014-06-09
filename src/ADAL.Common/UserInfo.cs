@@ -37,6 +37,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.GivenName = other.GivenName;
             this.FamilyName = other.FamilyName;
             this.IdentityProvider = other.IdentityProvider;
+            this.PasswordChangeUrl = other.PasswordChangeUrl;
+            this.PasswordExpiration = other.PasswordExpiration;
         }
 
         /// <summary>
@@ -62,6 +64,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         [DataMember]
         public string FamilyName { get; internal set; }
+
+        /// <summary>
+        /// Gets the number of seconds remaining for password expiration. Default value is 0.
+        /// </summary>
+        [DataMember]
+        public long PasswordExpiration { get; internal set; }
+
+        /// <summary>
+        /// Gets the url where the user can change the expiring password. The value can be null.
+        /// </summary>
+        [DataMember]
+        public string PasswordChangeUrl { get; internal set; }
 
         /// <summary>
         /// Gets identity provider if returned by the service. If not, the value is null. 

@@ -88,6 +88,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = IdTokenClaim.Email, IsRequired = false)]
         public string Email { get; set; }
 
+        [DataMember(Name = IdTokenClaim.PasswordExpiration, IsRequired = false)]
+        public long PasswordExpiration { get; set; }
+
+        [DataMember(Name = IdTokenClaim.PasswordChangeUrl, IsRequired = false)]
+        public string PasswordChangeUrl { get; set; }
+
         [DataMember(Name = IdTokenClaim.IdentityProvider, IsRequired = false)]
         public string IdentityProvider { get; set; }
     }
@@ -136,7 +142,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     string familyName = idToken.FamilyName;
                     string identityProvider = idToken.IdentityProvider;
 
-                    result.UpdateTenantAndUserInfo(tenantId, new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider });
+                    result.UpdateTenantAndUserInfo(tenantId, new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider, PasswordExpiration = idToken.PasswordExpiration, PasswordChangeUrl = idToken.PasswordChangeUrl});
                 }
             }
             else if (tokenResponse.Error != null)
