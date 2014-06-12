@@ -265,8 +265,10 @@ namespace Test.ADAL.Common.Unit
 
         }
 
-        internal static void TokenCacheOperationsTest(IDictionary<TokenCacheKey, string> cacheStore)
+        internal static void TokenCacheOperationsTest(TokenCache tokenCache)
         {
+            var cacheStore = tokenCache.TokenCacheStore;
+
             cacheStore.Clear();
 
             DateTimeOffset time = DateTimeOffset.UtcNow;
@@ -425,8 +427,9 @@ namespace Test.ADAL.Common.Unit
             Verify.AreEqual(0, cacheStore.Keys.Count);
         }
 
-        internal static void TokenCacheCapacityTest(IDictionary<TokenCacheKey, string> cacheStore)
+        internal static void TokenCacheCapacityTest(TokenCache tokenCache)
         {
+            var cacheStore = tokenCache.TokenCacheStore;
             cacheStore.Clear();
 
             const int MaxItemCount = 100;
@@ -469,8 +472,10 @@ namespace Test.ADAL.Common.Unit
             cacheStore.Clear();
         }
 
-        internal static void TokenCacheValueSplitTest(IDictionary<TokenCacheKey, string> cacheStore)
+        internal static void TokenCacheValueSplitTest(TokenCache tokenCache)
         {
+            var cacheStore = tokenCache.TokenCacheStore;
+
             TokenCacheKey key = new TokenCacheKey { Authority = "https://localhost/MockSts", Resource = "resourc1", ClientId = "client1", DisplayableId = "user1", ExpiresOn = DateTimeOffset.UtcNow };
 
             cacheStore.Clear();

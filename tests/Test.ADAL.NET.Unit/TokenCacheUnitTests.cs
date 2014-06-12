@@ -48,7 +48,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public void TokenCacheOperationsTest()
         {
-            TokenCacheTests.TokenCacheOperationsTest(new Dictionary<TokenCacheKey, string>());
+            TokenCacheTests.TokenCacheOperationsTest(new TokenCache());
         }
 
         [TestMethod]
@@ -56,7 +56,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public void TokenCacheCapacityTest()
         {
-            TokenCacheTests.TokenCacheCapacityTest(new Dictionary<TokenCacheKey, string>());
+            TokenCacheTests.TokenCacheCapacityTest(new TokenCache());
         }
     }
 }
