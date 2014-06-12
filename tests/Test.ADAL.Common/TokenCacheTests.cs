@@ -38,7 +38,7 @@ namespace Test.ADAL.Common.Unit
         public static void DefaultTokenCacheStoreTest()
         {
             AuthenticationContext context = new AuthenticationContext("https://login.windows.net/dummy", false);
-            var cache = context.TokenCacheStore;
+            var cache = context.TokenCache.TokenCacheStore;
             cache.Clear();
             Log.Comment("====== Verifying that cache is empty...");
             VerifyCacheItemCount(cache, 0);
@@ -163,18 +163,19 @@ namespace Test.ADAL.Common.Unit
             authority = authority + tenantId + "/";
             UserCredential credential = new UserCredential(displayableId, password);
             AuthenticationContext tempContext = new AuthenticationContext(authority, false);
-            IDictionary<TokenCacheKey, string> localCache = tempContext.TokenCacheStore;
-            localCache.Clear();
+            var localCache = tempContext.TokenCache;
+            IDictionary<TokenCacheKey, string> localCacheStore = localCache.TokenCacheStore;
+            localCacheStore.Clear();
 
             // @Resource, Credential
             TokenCacheKey tokenCacheKey = new TokenCacheKey { Authority = authority, Resource = resource, ClientId = clientId, UniqueId = uniqueId, DisplayableId = displayableId, ExpiresOn = new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)) };
-            localCache.Add(tokenCacheKey, authenticationResult);
+            localCacheStore.Add(tokenCacheKey, authenticationResult);
             AuthenticationContext acWithLocalCache = new AuthenticationContext(authority, false, localCache);
             AuthenticationResult authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, credential);
             Verify.AreEqual(authenticationResult, TokenCacheEncoding.EncodeCacheValue(authenticationResultFromCache));
 
             // Duplicate throws error
-            localCache.Add(new TokenCacheKey { Authority = authority, Resource = resource, ClientId = clientId, DisplayableId = displayableId, TenantId = tenantId }, authenticationResult);
+            localCacheStore.Add(new TokenCacheKey { Authority = authority, Resource = resource, ClientId = clientId, DisplayableId = displayableId, TenantId = tenantId }, authenticationResult);
 
             try
             {
@@ -208,7 +209,7 @@ namespace Test.ADAL.Common.Unit
 
             // @resource && @clientId
             acWithLocalCache = new AuthenticationContext(authority, false, localCache);
-            localCache.Clear();
+            localCacheStore.Clear();
             var cacheValue = CreateCacheValue();
             resource = Guid.NewGuid().ToString();
             clientId = Guid.NewGuid().ToString();
@@ -216,10 +217,10 @@ namespace Test.ADAL.Common.Unit
             displayableId = Guid.NewGuid().ToString();
 
             TokenCacheKey tempKey = new TokenCacheKey { Authority = authority, Resource = resource, ClientId = clientId, ExpiresOn = new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)) };
-            localCache.Add(tempKey, cacheValue);
-            localCache.Remove(tempKey);
-            Verify.IsFalse(localCache.ContainsKey(tempKey));
-            localCache.Add(tempKey, cacheValue);
+            localCacheStore.Add(tempKey, cacheValue);
+            localCacheStore.Remove(tempKey);
+            Verify.IsFalse(localCacheStore.ContainsKey(tempKey));
+            localCacheStore.Add(tempKey, cacheValue);
 
 #if TEST_ADAL_WINRT
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri);
@@ -230,13 +231,13 @@ namespace Test.ADAL.Common.Unit
 
             // @resource && @clientId && userId
             acWithLocalCache = new AuthenticationContext(authority, false, localCache);
-            localCache.Clear();
+            localCacheStore.Clear();
             cacheValue = CreateCacheValue();
             resource = Guid.NewGuid().ToString();
             clientId = Guid.NewGuid().ToString();
             uniqueId = Guid.NewGuid().ToString();
             displayableId = Guid.NewGuid().ToString();
-            localCache.Add(new TokenCacheKey { Authority = authority, Resource = resource, ClientId = clientId, UniqueId = uniqueId, DisplayableId = displayableId, ExpiresOn = new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)) }, cacheValue);
+            localCacheStore.Add(new TokenCacheKey { Authority = authority, Resource = resource, ClientId = clientId, UniqueId = uniqueId, DisplayableId = displayableId, ExpiresOn = new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)) }, cacheValue);
 
             var userId = new UserIdentifier(uniqueId, UserIdentifierType.UniqueId);
             var userIdUpper = new UserIdentifier(displayableId.ToUpper(), UserIdentifierType.RequiredDisplayableId);

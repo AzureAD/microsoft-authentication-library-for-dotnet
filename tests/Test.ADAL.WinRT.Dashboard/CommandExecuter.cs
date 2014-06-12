@@ -41,7 +41,7 @@ namespace Test.ADAL.WinRT.Dashboard
                     case CommandType.ClearDefaultTokenCache:
                     {
                         var dummyContext = new AuthenticationContext("https://dummy/dummy", false);
-                        dummyContext.TokenCacheStore.Clear();
+                        dummyContext.TokenCache.Clear();
                         break;
                     }
 
@@ -73,13 +73,18 @@ namespace Test.ADAL.WinRT.Dashboard
 
                     case CommandType.CreateContextAVC:
                     {
-                        IDictionary<TokenCacheKey, string> tokenCacheStore = null;
+                        TokenCache tokenCache = null;
                         if (arg.TokenCacheStoreType == TokenCacheStoreType.InMemory)
                         {
-                            tokenCacheStore = new Dictionary<TokenCacheKey, string>();
+                            tokenCache = new TokenCache()
+                                         {
+                                             // The default token cache in ADAL WinRT is persistent. This is how to make it in-memory only cache.
+                                             BeforeAccess = delegate { },                                          
+                                             AfterAccess = delegate { }                                          
+                                         };
                         }
 
-                        context = new AuthenticationContext(arg.Authority, arg.ValidateAuthority, tokenCacheStore);
+                        context = new AuthenticationContext(arg.Authority, arg.ValidateAuthority, tokenCache);
                         break;
                     }
 

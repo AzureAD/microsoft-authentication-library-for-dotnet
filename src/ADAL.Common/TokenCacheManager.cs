@@ -52,9 +52,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string uniqueId = (result.UserInfo == null) ? null : result.UserInfo.UniqueId;
             string displayableId = (result.UserInfo == null) ? null : result.UserInfo.DisplayableId;
 
-            this.RemoveFromCache(resource, clientId, uniqueId, displayableId);
             TokenCacheKey tokenCacheKey = this.CreateTokenCacheKey(result, resource, clientId);
-            this.StoreToCache(tokenCacheKey, result);
+            this.TokenCache.OnBeforeWrite(new TokenCacheNotificationArgs() 
+                { 
+                    Resource = resource,
+                    ClientId = clientId,
+                    UniqueId = uniqueId,
+                    DisplayableId = displayableId
+                });
+
+            lock (this.TokenCache.TokenCacheStore)
+            {
+                this.RemoveFromCache(resource, clientId, uniqueId, displayableId);
+                this.StoreToCache(tokenCacheKey, result);
+            }
+
             this.UpdateCachedMRRTRefreshTokens(clientId, result);
         }
 

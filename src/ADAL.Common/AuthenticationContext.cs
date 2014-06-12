@@ -387,7 +387,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                this.NotifyBeforeAccessCache(resource, clientId, (userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null, (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null);
+                this.NotifyBeforeAccessCache(resource, clientId,
+                    (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
+                    (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null));
+
                 if (promptBehavior != PromptBehavior.Always)
                 {
                     result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
@@ -399,7 +402,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             finally
             {
-                this.NotifyAfterAccessCache(resource, clientId, (userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null, (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null);
+                this.NotifyAfterAccessCache(resource, clientId,
+                    (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
+                    (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null));
             }
         }
 
@@ -497,7 +502,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (this.TokenCache != null)
             {
-                this.TokenCache.OnBeforeAccess(new TokenCacheAccessArgs
+                this.TokenCache.OnBeforeAccess(new TokenCacheNotificationArgs
                     {
                         TokenCache = this.TokenCache,
                         Resource = resource,
@@ -512,7 +517,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (this.TokenCache != null)
             {
-                this.TokenCache.OnAfterAccess(new TokenCacheAccessArgs
+                this.TokenCache.OnAfterAccess(new TokenCacheNotificationArgs
                     {
                         TokenCache = this.TokenCache,
                         Resource = resource,

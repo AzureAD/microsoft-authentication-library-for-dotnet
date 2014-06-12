@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// Contains parameters used by the ADAL call accessing the cache.
     /// </summary>
-    public sealed class TokenCacheAccessArgs
+    public sealed class TokenCacheNotificationArgs
     {
         /// <summary>
         /// Gets the TokenCache

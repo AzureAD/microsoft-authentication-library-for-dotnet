@@ -160,9 +160,6 @@
     <Compile Include="..\ADAL.Common\TokenCache.cs">
       <Link>Common\TokenCache.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\TokenCacheAccessArgs.cs">
-      <Link>Common\TokenCacheAccessArgs.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\TokenCacheHelper.cs">
       <Link>Common\TokenCacheHelper.cs</Link>
     </Compile>
@@ -174,6 +171,9 @@
     </Compile>
     <Compile Include="..\ADAL.Common\TokenCacheManager.cs">
       <Link>Common\TokenCacheManager.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\TokenCacheNotificationArgs.cs">
+      <Link>Common\TokenCacheNotificationArgs.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\UserAssertion.cs">
       <Link>Common\UserAssertion.cs</Link>

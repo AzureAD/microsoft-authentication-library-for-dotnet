@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 #if ADAL_WINRT
@@ -28,12 +29,13 @@ using System.IO;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
-    /// Delegate to be called before or after any library call accesses the token cache.
+    /// Notification for certian token cache interactions during token acquisition.
     /// </summary>
-    /// <param name="e"></param>
-    public delegate void TokenCacheAccessNotification(TokenCacheAccessArgs e);
+    /// <param name="args"></param>
+    public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
 
     /// <summary>
+    /// Token cache class used by <see cref="AuthenticationContext"/> to store access and refresh tokens.
     /// </summary>
 #if ADAL_WINRT
     public sealed class TokenCache
@@ -62,7 +64,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public TokenCache()
         {
-            this.TokenCacheStore = new Dictionary<TokenCacheKey, string>();
+            this.TokenCacheStore = new ConcurrentDictionary<TokenCacheKey, string>();
         }
 
         /// <summary>
@@ -82,12 +84,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Notification method called before any library method accesses the cache.
         /// </summary>
-        public TokenCacheAccessNotification BeforeAccess { get; set; }
+        public TokenCacheNotification BeforeAccess { get; set; }
+
+
+        /// <summary>
+        /// Notification method called before any library method writes to the cache. This notification can be used to reload
+        /// the cache state from a row in database and lock that row. That database row can then be unlocked in <see cref="AfterAccess"/> notification.
+        /// </summary>
+        public TokenCacheNotification BeforeWrite { get; set; }
 
         /// <summary>
         /// Notification method called after any library method accesses the cache.
         /// </summary>
-        public TokenCacheAccessNotification AfterAccess { get; set; }
+        public TokenCacheNotification AfterAccess { get; set; }
 
         /// <summary>
         /// Gets or sets the flag indicating whether cache state has changed. ADAL methods set this flag after any change. Caller application should reset 
@@ -247,29 +256,37 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Clears the cache by deleting all the items
         /// </summary>
-        public void ClearAll()
+        public void Clear()
         {
             this.TokenCacheStore.Clear();
         }
 
-        internal void OnAfterAccess(TokenCacheAccessArgs e)
+        internal void OnAfterAccess(TokenCacheNotificationArgs args)
         {
             if (AfterAccess != null)
             {
-                AfterAccess(e);
+                AfterAccess(args);
             }
         }
 
-        internal void OnBeforeAccess(TokenCacheAccessArgs e)
+        internal void OnBeforeAccess(TokenCacheNotificationArgs args)
         {
             if (BeforeAccess != null)
             {
-                BeforeAccess(e);
+                BeforeAccess(args);
+            }
+        }
+
+        internal void OnBeforeWrite(TokenCacheNotificationArgs args)
+        {
+            if (BeforeWrite != null)
+            {
+                BeforeWrite(args);
             }
         }
 
 #if ADAL_WINRT
-        private static void DefaultTokenCache_BeforeAccess(TokenCacheAccessArgs e)
+        private static void DefaultTokenCache_BeforeAccess(TokenCacheNotificationArgs args)
         {
             var localSettings = ApplicationData.Current.LocalSettings;
             localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
@@ -286,7 +303,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
         }
-        private static void DefaultTokenCache_AfterAccess(TokenCacheAccessArgs e)
+        private static void DefaultTokenCache_AfterAccess(TokenCacheNotificationArgs args)
         {
             if (DefaultShared.HasStateChanged)
             {

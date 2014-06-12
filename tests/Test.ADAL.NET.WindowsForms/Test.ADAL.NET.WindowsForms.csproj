@@ -100,9 +100,6 @@
     <Compile Include="..\Test.ADAL.Common\Sts.cs">
       <Link>Common\Sts.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.Common\TestTokenCacheStoreBase.cs">
-      <Link>Common\TestTokenCacheStoreBase.cs</Link>
-    </Compile>
     <Compile Include="..\Test.ADAL.Common\UISupplier.cs">
       <Link>Common\UISupplier.cs</Link>
     </Compile>

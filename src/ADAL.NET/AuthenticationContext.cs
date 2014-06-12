@@ -355,7 +355,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                this.NotifyBeforeAccessCache(resource, clientId, (userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null, (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null);
+                this.NotifyBeforeAccessCache(resource, clientId, 
+                    (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
+                    (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId)) ? userId.Id : null);
+
                 AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
 
                 if (result != null)
@@ -372,7 +375,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             finally
             {
-                this.NotifyAfterAccessCache(resource, clientId, (userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null, (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null);
+                this.NotifyAfterAccessCache(resource, clientId,
+                    (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
+                    (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null));
             }
         }
 
