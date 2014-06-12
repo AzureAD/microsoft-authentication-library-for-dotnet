@@ -47,7 +47,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         
         private const string Delimiter = ":::";
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
-        private const string LocalSettingsKey = "TokenCache";
 
         static TokenCache()
         {
@@ -290,17 +289,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             var localSettings = ApplicationData.Current.LocalSettings;
             localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-            if (localSettings.Containers[LocalSettingsContainerName].Values.ContainsKey(LocalSettingsKey))
+            try
             {
-                try
-                {
-                    byte[] state = (byte[])localSettings.Containers[LocalSettingsContainerName].Values[LocalSettingsKey];
-                    DefaultShared.Deserialize(CryptographyHelper.Decrypt(state));
-                }
-                catch
-                {
-                    // Ignore as the cache seems to be corrupt
-                }
+                byte[] state = LocalSettingsHelper.GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
+                DefaultShared.Deserialize(state);
+            }
+            catch
+            {
+                // Ignore as the cache seems to be corrupt
             }
         }
         private static void DefaultTokenCache_AfterAccess(TokenCacheNotificationArgs args)
@@ -309,7 +305,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 var localSettings = ApplicationData.Current.LocalSettings;
                 localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-                localSettings.Containers[LocalSettingsContainerName].Values[LocalSettingsKey] = CryptographyHelper.Encrypt(DefaultShared.Serialize());
+                LocalSettingsHelper.SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values, DefaultShared.Serialize());
                 DefaultShared.HasStateChanged = false;
             }
         }
