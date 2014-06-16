@@ -262,7 +262,7 @@ namespace Test.ADAL.Common
             this.ValidUserName = @"test@bahush.info";
             this.ValidConfidentialClientId = this.ValidClientId;
             this.ValidRedirectUriForConfidentialClient = this.ValidExistingRedirectUri;
-            this.ValidPassword = "<REPLACE>";
+            this.ValidPassword = "pass@word5";
             this.ValidResource = "b7a671d8-a408-42ff-86e0-aaf447fd17c4";
         }
     }

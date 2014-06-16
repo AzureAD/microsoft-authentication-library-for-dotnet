@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -38,7 +39,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.FamilyName = other.FamilyName;
             this.IdentityProvider = other.IdentityProvider;
             this.PasswordChangeUrl = other.PasswordChangeUrl;
-            this.PasswordExpiration = other.PasswordExpiration;
+            this.PasswordExpiresOn = other.PasswordExpiresOn;
         }
 
         /// <summary>
@@ -66,16 +67,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string FamilyName { get; internal set; }
 
         /// <summary>
-        /// Gets the number of seconds remaining for password expiration. Default value is 0.
+        /// Gets the time when the password expires. Default value is 0.
         /// </summary>
         [DataMember]
-        public long PasswordExpiration { get; internal set; }
+        public DateTimeOffset? PasswordExpiresOn { get; internal set; }
 
         /// <summary>
         /// Gets the url where the user can change the expiring password. The value can be null.
         /// </summary>
         [DataMember]
-        public string PasswordChangeUrl { get; internal set; }
+        public Uri PasswordChangeUrl { get; internal set; }
 
         /// <summary>
         /// Gets identity provider if returned by the service. If not, the value is null. 

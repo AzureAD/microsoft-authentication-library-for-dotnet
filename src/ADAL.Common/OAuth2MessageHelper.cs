@@ -32,6 +32,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private const string PromptParameter = "prompt"; // prompt is not standard oauth2 parameter
         private const string FormsAuthValue = "pwd";
         private const string PromptLoginValue = "login";
+        private const string PromptRefreshSessionValue = "refresh_session";
         private const string ScopeOpenIdValue = "openid";
 
         public static RequestParameters CreateAuthorizationRequest(string resource, string clientId, Uri redirectUri, string loginHint, PromptBehavior promptBehavior, string extraQueryParameters, bool includeFormsAuthParam, CallState callState)
@@ -56,6 +57,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (promptBehavior == PromptBehavior.Always)
             {
                 parameters[PromptParameter] = PromptLoginValue;
+            }
+            else if (promptBehavior == PromptBehavior.RefreshSession)
+            {
+                parameters[PromptParameter] = PromptRefreshSessionValue;
             }
 
             if (!string.IsNullOrWhiteSpace(extraQueryParameters))

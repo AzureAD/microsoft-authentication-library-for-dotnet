@@ -141,8 +141,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     string givenName = idToken.GivenName;
                     string familyName = idToken.FamilyName;
                     string identityProvider = idToken.IdentityProvider;
+                    DateTimeOffset? passwordExpiresOffest = null;
+                    if (idToken.PasswordExpiration > 0)
+                    {
+                        passwordExpiresOffest = DateTime.UtcNow + TimeSpan.FromSeconds(idToken.PasswordExpiration);
+                    }
 
-                    result.UpdateTenantAndUserInfo(tenantId, new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider, PasswordExpiration = idToken.PasswordExpiration, PasswordChangeUrl = idToken.PasswordChangeUrl});
+                    Uri changePasswordUri = null;
+                    if (!string.IsNullOrEmpty(idToken.PasswordChangeUrl))
+                    {
+                        changePasswordUri = new Uri(idToken.PasswordChangeUrl);
+                    }
+
+                    result.UpdateTenantAndUserInfo(tenantId, new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider, PasswordExpiresOn = passwordExpiresOffest, PasswordChangeUrl = changePasswordUri });
                 }
             }
             else if (tokenResponse.Error != null)
