@@ -36,7 +36,8 @@ namespace Test.ADAL.Common
         NotSpecified,
         Always,
         AccessCodeOnly,
-        Never
+        Never,
+        RefreshSession
     }
 
     internal enum AuthenticationStatusProxy

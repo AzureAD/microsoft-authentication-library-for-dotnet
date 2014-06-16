@@ -41,7 +41,7 @@ namespace Test.ADAL.NET
             AdalTests.TestType = TestType.DotNet;
 
             // To record request/response with actual service, switch mode to Record
-            RecorderSettings.Mode = RecorderMode.Replay;
+            RecorderSettings.Mode = RecorderMode.Record;
             ConsoleTraceListener myWriter = new ConsoleTraceListener();
             Trace.Listeners.Add(myWriter);
         }
@@ -276,6 +276,15 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
+        [Description("Positive Test for AcquireToken using federated tenant and then refreshing the session")]
+        [TestCategory("AdalDotNet")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
+        public void AcquireTokenAndRefreshSessionTest()
+        {
+            AdalTests.AcquireTokenAndRefreshSession(Sts);
+        }
+
+        [TestMethod]
         [Description("Positive Test for AcquireToken using federated tenant")]
         [TestCategory("AdalDotNet")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
@@ -283,6 +292,7 @@ namespace Test.ADAL.NET
         {
             AdalTests.AcquireTokenPositiveWithFederatedTenant(Sts);
         }
+
 
         [TestMethod]
         [Description("Correlation Id test")]

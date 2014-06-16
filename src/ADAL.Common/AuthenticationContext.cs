@@ -368,7 +368,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             await this.CreateAuthenticatorAsync(callState);
 
             AuthenticationResult result = null;
-            if (promptBehavior != PromptBehavior.Always)
+            if (promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession)
             {
                 result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
             }
