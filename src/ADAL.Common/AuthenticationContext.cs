@@ -392,18 +392,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                this.NotifyBeforeAccessCache(resource, clientId,
-                    (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
-                    (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null));
-
-                if (promptBehavior != PromptBehavior.Always)
+                if (promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession)
                 {
-                    result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
-                }
+                    this.NotifyBeforeAccessCache(resource, clientId,
+                        (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
+                        (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null));
 
-                result = result ?? await this.AcquireTokenFromStsAsync(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters, callState);
-                LogReturnedToken(result, callState);
-                return result;
+                    if (promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession)
+                    {
+                        result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
+                    }
+
+                    result = result ?? await this.AcquireTokenFromStsAsync(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters, callState);
+                    LogReturnedToken(result, callState);
+                    return result;
+                }
             }
             finally
             {

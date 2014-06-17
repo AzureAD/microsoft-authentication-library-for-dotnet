@@ -353,12 +353,18 @@ namespace Test.ADAL.Common
 
                         if (promptBehaviorProxy == PromptBehaviorProxy.AccessCodeOnly)
                         {
-                            string authorizationCode = AdalFriend.AcquireAccessCode(this.context, resource, clientId, redirectUri, userId);
-                            return new AuthenticationResultProxy() { AccessToken = authorizationCode };
+                            string authorizationCode = AdalFriend.AcquireAccessCode(this.context, resource, clientId,
+                                redirectUri, userId);
+                            return new AuthenticationResultProxy() {AccessToken = authorizationCode};
                         }
 
-                        PromptBehavior promptBehavior = (promptBehaviorProxy == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
-                                        (promptBehaviorProxy == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto;
+                        PromptBehavior promptBehavior = (promptBehaviorProxy == PromptBehaviorProxy.RefreshSession)
+                            ? PromptBehavior.RefreshSession
+                            : (promptBehaviorProxy == PromptBehaviorProxy.Always)
+                                ? PromptBehavior.Always
+                                : (promptBehaviorProxy == PromptBehaviorProxy.Never)
+                                    ? PromptBehavior.Never
+                                    : PromptBehavior.Auto;
 
                         if (userId != null && userId.Id == NotSpecified)
                         {
@@ -372,10 +378,11 @@ namespace Test.ADAL.Common
                             }
                             else
                             {
-                                result = context.AcquireToken(resource, clientId, redirectUri, promptBehavior, extraQueryParameters);
+                                result = context.AcquireToken(resource, clientId, redirectUri, promptBehavior,
+                                    extraQueryParameters);
                             }
                         }
-                        else 
+                        else
                         {
                             if (promptBehaviorProxy == PromptBehaviorProxy.NotSpecified)
                             {
@@ -385,7 +392,8 @@ namespace Test.ADAL.Common
                                 }
                                 else
                                 {
-                                    result = context.AcquireToken(resource, clientId, redirectUri, userId, extraQueryParameters);
+                                    result = context.AcquireToken(resource, clientId, redirectUri, userId,
+                                        extraQueryParameters);
                                 }
                             }
                             else if (extraQueryParameters == NotSpecified)
@@ -394,7 +402,8 @@ namespace Test.ADAL.Common
                             }
                             else
                             {
-                                result = context.AcquireToken(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters);
+                                result = context.AcquireToken(resource, clientId, redirectUri, userId, promptBehavior,
+                                    extraQueryParameters);
                             }
                         }
 

@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -786,6 +787,20 @@ namespace Test.ADAL.Common
         {
             [DllImport("wininet.dll", SetLastError = true)]
             public static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int lpdwBufferLength);
+        }
+
+        public static void AcquireTokenAndRefreshSession(Sts sts)
+        {
+            var userId = sts.ValidUserId;
+
+            AuthenticationContextProxy.SetCredentials(userId.Id, sts.ValidPassword);
+            var context = new AuthenticationContextProxy(sts.Authority, false, TokenCacheStoreType.InMemory);
+            AuthenticationResultProxy result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, userId);
+            VerifySuccessResult(sts, result);
+            //Thread.Sleep(TimeSpan.FromSeconds(5));
+            AuthenticationResultProxy result2 = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, userId, PromptBehaviorProxy.RefreshSession);
+            VerifySuccessResult(sts, result2);
+            Verify.AreNotEqual(result.AccessToken, result2.AccessToken);
         }
     }
 }
