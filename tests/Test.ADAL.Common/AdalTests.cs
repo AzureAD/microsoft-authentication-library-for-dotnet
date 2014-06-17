@@ -794,8 +794,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result);
             //Thread.Sleep(TimeSpan.FromSeconds(5));
             AuthenticationResultProxy result2 = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, userId, PromptBehaviorProxy.RefreshSession);
-            VerifySuccessResult(sts, result);
-
+            VerifySuccessResult(sts, result2);
             Verify.AreNotEqual(result.AccessToken, result2.AccessToken);
         }
     }

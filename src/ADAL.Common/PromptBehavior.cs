@@ -46,8 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Re-authorizes (through displaying webview) the resource usage, making sure that the resulting access
         /// token contains updated claims. If user logon cookies are available, the user will not be asked for 
-        /// credentials again and the logon dialog will dismiss automatically. This is equivalent to passing
-        /// prompt=refresh_session as an extra query parameter during the authorization.
+        /// credentials again and the logon dialog will dismiss automatically.
         /// </summary>
         RefreshSession
     }
