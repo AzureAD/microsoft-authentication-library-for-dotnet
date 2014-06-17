@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Gets the IdentityProviderName.
         /// </summary>
-        public string IdentityProviderName { get; internal set; }
+        public string IdentityProvider { get; internal set; }
 
         /// <summary>
         /// Gets a value indicating whether the RefreshToken applies to multiple resources.
@@ -96,5 +96,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Gets the Refresh Token associated with the requested Access Token. Note: not all operations will return a Refresh Token.
         /// </summary>
         public string RefreshToken { get; internal set; }
+
+        /// <summary>
+        /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
+        /// </summary>
+        public string IdToken { get; internal set; }
     }
 }

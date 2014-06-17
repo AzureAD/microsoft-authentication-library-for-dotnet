@@ -59,6 +59,9 @@ namespace Test.ADAL.Common
         public string RefreshToken { get; set; }
 
         [DataMember]
+        public string IdToken { get; set; }
+
+        [DataMember]
         public DateTimeOffset ExpiresOn { get; set; }
 
         [DataMember]

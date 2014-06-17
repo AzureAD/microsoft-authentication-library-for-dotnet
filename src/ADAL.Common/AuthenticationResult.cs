@@ -84,6 +84,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public UserInfo UserInfo { get; private set; }
 
         /// <summary>
+        /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
+        /// </summary>
+        [DataMember]
+        public string IdToken { get; internal set; }
+
+        /// <summary>
         /// Gets a value indicating whether the refresh token can be used for requesting access token for other resources.
         /// </summary>
         [DataMember]

@@ -33,7 +33,7 @@ namespace Test.ADAL.WinRT.Unit
         //[Description("Test to store in default token cache store")]
         public void DefaultTokenCacheStoreTest()
         {
-            TokenCacheTests.DefaultTokenCacheStoreTest();
+            TokenCacheTests.DefaultTokenCacheTest();
         }
 
         [TestMethod]

@@ -168,15 +168,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                                                 ClientId = kvpElements[2],
                                                 ExpiresOn = result.ExpiresOn,
                                                 IsMultipleResourceRefreshToken = result.IsMultipleResourceRefreshToken,
-                                                TenantId = result.TenantId,
                                             };
 
                         if (result.UserInfo != null)
                         {
                             key.DisplayableId = result.UserInfo.DisplayableId;
-                            key.FamilyName = result.UserInfo.FamilyName;
-                            key.GivenName = result.UserInfo.GivenName;
-                            key.IdentityProviderName = result.UserInfo.IdentityProvider;
                             key.UniqueId = result.UserInfo.UniqueId;
                         }
 
@@ -200,17 +196,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     {
                         Authority = kvp.Key.Authority,
                         Resource = kvp.Key.Resource,
-                        TenantId = kvp.Key.TenantId,
+                        TenantId = result.TenantId,
                         UniqueId = kvp.Key.UniqueId,                                    
                         ClientId = kvp.Key.ClientId,
                         DisplayableId = kvp.Key.DisplayableId,
                         ExpiresOn = kvp.Key.ExpiresOn,
-                        FamilyName = kvp.Key.FamilyName,
-                        GivenName = kvp.Key.GivenName,
-                        IdentityProviderName = kvp.Key.IdentityProviderName,
+                        FamilyName = (result.UserInfo != null) ? result.UserInfo.FamilyName : null,
+                        GivenName = (result.UserInfo != null) ? result.UserInfo.GivenName : null,
+                        IdentityProvider = (result.UserInfo != null) ? result.UserInfo.IdentityProvider : null,
                         IsMultipleResourceRefreshToken = kvp.Key.IsMultipleResourceRefreshToken,
                         AccessToken = result.AccessToken,
-                        RefreshToken = result.RefreshToken
+                        RefreshToken = result.RefreshToken,
+                        IdToken = result.IdToken
                     };
 
                 items.Add(item);
@@ -233,12 +230,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     item.ClientId == kvp.Key.ClientId &&
                     item.DisplayableId == kvp.Key.DisplayableId &&
                     item.ExpiresOn == kvp.Key.ExpiresOn &&
-                    item.FamilyName == kvp.Key.FamilyName &&
-                    item.GivenName == kvp.Key.GivenName &&
-                    item.IdentityProviderName == kvp.Key.IdentityProviderName &&
+                    (result.UserInfo == null || item.FamilyName == result.UserInfo.FamilyName) &&
+                    (result.UserInfo == null || item.GivenName == result.UserInfo.GivenName) &&
+                    (result.UserInfo == null || item.IdentityProvider == result.UserInfo.IdentityProvider) &&
                     item.IsMultipleResourceRefreshToken == kvp.Key.IsMultipleResourceRefreshToken &&
                     item.AccessToken == result.AccessToken &&
-                    item.RefreshToken == result.RefreshToken)
+                    item.RefreshToken == result.RefreshToken &&
+                    item.IdToken == result.IdToken)
                 {
                     toRemoveKeys.Add(kvp.Key);
                 }               

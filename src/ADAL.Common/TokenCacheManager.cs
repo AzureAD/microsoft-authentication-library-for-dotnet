@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 result = TokenCacheEncoding.DecodeCacheValue(tokenValue);
                 bool tokenMarginallyExpired = (cacheKey.ExpiresOn <= DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
-                if (cacheKey.Resource != resource && cacheKey.IsMultipleResourceRefreshToken)
+                if (cacheKey.Resource != resource && result.IsMultipleResourceRefreshToken)
                 {
                     result.AccessToken = null;
                 }

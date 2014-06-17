@@ -222,6 +222,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Failed to get user name.
         /// </summary>
         public const string GetUserNameFailed = "get_user_name_failed";
+
+        /// <summary>
+        /// Federation Metadata Url is missing for federated user.
+        /// </summary>
+        public const string MissingFederationMetadataUrl = "missing_federation_metadata_url";
     }
 
     /// <summary>
@@ -281,6 +286,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string UserRealmDiscoveryFailed = "User realm discovery failed";
         public const string WsTrustEndpointNotFoundInMetadataDocument = "WS-Trust endpoint not found in metadata document";
         public const string GetUserNameFailed = "Failed to get user name";
+        public const string MissingFederationMetadataUrl = "Federation Metadata Url is missing for federated user. This user type is unsupported.";
     }
 
     internal static class AuthenticationConstant

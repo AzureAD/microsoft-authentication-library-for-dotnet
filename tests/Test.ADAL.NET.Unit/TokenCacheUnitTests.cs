@@ -28,11 +28,11 @@ namespace Test.ADAL.NET.Unit
     public class TokenCacheUnitTests
     {
         [TestMethod]
-        [Description("Test to store in default token cache store")]
+        [Description("Test to store in default token cache")]
         [TestCategory("AdalDotNetUnit")]
-        public void DefaultTokenCacheStoreTest()
+        public void DefaultTokenCacheTest()
         {
-            TokenCacheTests.DefaultTokenCacheStoreTest();
+            TokenCacheTests.DefaultTokenCacheTest();
         }
 
         [TestMethod]

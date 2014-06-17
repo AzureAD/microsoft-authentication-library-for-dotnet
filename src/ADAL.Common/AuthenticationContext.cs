@@ -248,6 +248,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Logger.Information(callState, "User '{0}' detected as '{1}'", credential.UserName, userRealmResponse.AccountType);
                     if (string.Compare(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase) == 0)
                     {
+                        if (string.IsNullOrWhiteSpace(userRealmResponse.FederationMetadataUrl))
+                        {
+                            throw new AdalException(AdalError.MissingFederationMetadataUrl);
+                        }
+
                         Uri wsTrustUrl = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, credential.UserAuthType, callState);
                         Logger.Information(callState, "WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustUrl, userRealmResponse.FederationMetadataUrl);
 

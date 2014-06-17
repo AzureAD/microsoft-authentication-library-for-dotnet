@@ -137,6 +137,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     string identityProvider = idToken.IdentityProvider;
 
                     result.UpdateTenantAndUserInfo(tenantId, new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider });
+                    result.IdToken = tokenResponse.IdToken;
                 }
             }
             else if (tokenResponse.Error != null)

@@ -223,6 +223,7 @@ namespace Test.ADAL.WinRT.Dashboard
                            IsMultipleResourceRefreshToken =
                                result.IsMultipleResourceRefreshToken,
                            RefreshToken = result.RefreshToken,
+                           IdToken = result.IdToken,
                            TenantId = result.TenantId,
                            UserInfo = result.UserInfo,
                            Error = result.Error,
