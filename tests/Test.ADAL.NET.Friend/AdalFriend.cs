@@ -30,9 +30,9 @@ namespace Test.ADAL.NET.Friend
             // Thirty minutes
             const uint JwtToAcsLifetimeInSeconds = 60 * 30; 
 
-            X509CertificateCredential x509ClientCredential = new X509CertificateCredential(issuer, cert);
+            ClientAssertionCertificate certificate = new ClientAssertionCertificate(issuer, cert);
             JsonWebToken jwtToken = new JsonWebToken(aud, issuer, JwtToAcsLifetimeInSeconds, issuer);
-            return jwtToken.Sign(x509ClientCredential);
+            return jwtToken.Sign(certificate);
         }
 
         public static string AcquireAccessCode(AuthenticationContext context, string resource, string clientId, Uri redirectUri, UserIdentifier userId)

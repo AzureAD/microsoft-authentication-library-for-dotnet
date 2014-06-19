@@ -22,16 +22,16 @@ using System.Security.Cryptography.X509Certificates;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
-    /// Credential type containing X509 certificate.
+    /// Containing certificate used to create client assertion.
     /// </summary>
-    public sealed class X509CertificateCredential
+    public sealed class ClientAssertionCertificate
     {
         /// <summary>
         /// Constructor to create credential with client Id and certificate.
         /// </summary>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="certificate">The certificate used as credential.</param>
-        public X509CertificateCredential(string clientId, X509Certificate2 certificate)
+        public ClientAssertionCertificate(string clientId, X509Certificate2 certificate)
         {
             if (string.IsNullOrWhiteSpace(clientId))
             {

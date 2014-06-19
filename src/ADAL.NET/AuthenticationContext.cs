@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, X509CertificateCredential clientCertificate)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientAssertionCertificate clientCertificate)
         {
             return await this.AcquireTokenCommonAsync(resource, new ClientKey(clientCertificate));
         }
@@ -162,7 +162,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, X509CertificateCredential clientCertificate)
+        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, ClientAssertionCertificate clientCertificate)
         {
             return await this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri, new ClientKey(clientCertificate), null);
         }
@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. It can be null if provided earlier to acquire authorizationCode.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, X509CertificateCredential clientCertificate, string resource)
+        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, ClientAssertionCertificate clientCertificate, string resource)
         {
             return await this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri, new ClientKey(clientCertificate), resource);
         }
@@ -263,7 +263,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Name or ID of the client requesting the token.</param>
         /// <param name="clientCertificate">The client certificate used for token acquisition.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, X509CertificateCredential clientCertificate)
+        public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, ClientAssertionCertificate clientCertificate)
         {
             return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, clientId, new ClientKey(clientCertificate), null);
         }
@@ -277,7 +277,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. If null, token is requested for the same resource refresh token was originally issued for.
         /// If passed, resource should match the original resource used to acquire refresh token unless token service supports refresh token for multiple resources.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, X509CertificateCredential clientCertificate, string resource)
+        public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, ClientAssertionCertificate clientCertificate, string resource)
         {
             return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, clientId, new ClientKey(clientCertificate), null);
         }
@@ -301,7 +301,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, UserAssertion userAssertion, X509CertificateCredential clientCertificate)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, UserAssertion userAssertion, ClientAssertionCertificate clientCertificate)
         {
             return await this.AcquireTokenOnBehalfCommonAsync(resource, userAssertion, new ClientKey(clientCertificate));
         }
@@ -326,7 +326,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId)
         {
-            return await this.AcquireTokenSilentAsync(resource, clientId, null);
+            return await this.AcquireTokenSilentCommonAsync(resource, clientId, null);
         }
 
         /// <summary>
@@ -338,47 +338,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId, UserIdentifier userId)
         {
-            CallState callState = this.CreateCallState(false);
-            this.ValidateAuthorityType(callState, AuthorityType.AAD, AuthorityType.ADFS);
-
-            if (string.IsNullOrWhiteSpace(resource))
-            {
-                throw new ArgumentNullException("resource");
-            }
-
-            if (string.IsNullOrWhiteSpace(clientId))
-            {
-                throw new ArgumentNullException("clientId");
-            }
-
-            await this.CreateAuthenticatorAsync(callState);
-
-            try
-            {
-                this.NotifyBeforeAccessCache(resource, clientId, 
-                    (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
-                    (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId)) ? userId.Id : null);
-
-                AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
-
-                if (result != null)
-                {
-                    LogReturnedToken(result, callState);
-                }
-                else
-                {
-                    Logger.Verbose(callState, "No token matching arguments found in the cache");
-                    throw new AdalException(AdalError.FailedToAcquireTokenSilently);
-                }
-
-                return result;
-            }
-            finally
-            {
-                this.NotifyAfterAccessCache(resource, clientId,
-                    (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
-                    (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null));
-            }
+            return await this.AcquireTokenSilentCommonAsync(resource, clientId, userId);
         }
 
         /// <summary>
@@ -386,11 +346,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="credential">The credential to use for token acquisition.</param>
+        /// <param name="userCredential">The credential to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public AuthenticationResult AcquireToken(string resource, string clientId, UserCredential credential)
+        public AuthenticationResult AcquireToken(string resource, string clientId, UserCredential userCredential)
         {
-            return RunAsyncTask(this.AcquireTokenCommonAsync(resource, clientId, credential, callSync: true));
+            return RunAsyncTask(this.AcquireTokenCommonAsync(resource, clientId, userCredential, callSync: true));
         }
 
         /// <summary>
@@ -422,7 +382,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public AuthenticationResult AcquireToken(string resource, X509CertificateCredential clientCertificate)
+        public AuthenticationResult AcquireToken(string resource, ClientAssertionCertificate clientCertificate)
         {
             return RunAsyncTask(this.AcquireTokenCommonAsync(resource, new ClientKey(clientCertificate), callSync: true));
         }
@@ -594,7 +554,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public AuthenticationResult AcquireTokenByAuthorizationCode(string authorizationCode, Uri redirectUri, X509CertificateCredential clientCertificate)
+        public AuthenticationResult AcquireTokenByAuthorizationCode(string authorizationCode, Uri redirectUri, ClientAssertionCertificate clientCertificate)
         {
             return RunAsyncTask(this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri, new ClientKey(clientCertificate), null, callSync: true));
         }
@@ -607,7 +567,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. It can be null if provided earlier to acquire authorizationCode.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public AuthenticationResult AcquireTokenByAuthorizationCode(string authorizationCode, Uri redirectUri, X509CertificateCredential clientCertificate, string resource)
+        public AuthenticationResult AcquireTokenByAuthorizationCode(string authorizationCode, Uri redirectUri, ClientAssertionCertificate clientCertificate, string resource)
         {
             return RunAsyncTask(this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri, new ClientKey(clientCertificate), resource, callSync: true));
         }
@@ -695,7 +655,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Name or ID of the client requesting the token.</param>
         /// <param name="clientCertificate">The client certificate used for token acquisition.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public AuthenticationResult AcquireTokenByRefreshToken(string refreshToken, string clientId, X509CertificateCredential clientCertificate)
+        public AuthenticationResult AcquireTokenByRefreshToken(string refreshToken, string clientId, ClientAssertionCertificate clientCertificate)
         {
             return RunAsyncTask(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, clientId, new ClientKey(clientCertificate), null, callSync: true));
         }
@@ -709,7 +669,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. If null, token is requested for the same resource refresh token was originally issued for.
         /// If passed, resource should match the original resource used to acquire refresh token unless token service supports refresh token for multiple resources.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public AuthenticationResult AcquireTokenByRefreshToken(string refreshToken, string clientId, X509CertificateCredential clientCertificate, string resource)
+        public AuthenticationResult AcquireTokenByRefreshToken(string refreshToken, string clientId, ClientAssertionCertificate clientCertificate, string resource)
         {
             return RunAsyncTask(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, clientId, new ClientKey(clientCertificate), null, callSync: true));
         }
@@ -733,7 +693,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
-        public AuthenticationResult AcquireToken(string resource, UserAssertion userAssertion, X509CertificateCredential clientCertificate)
+        public AuthenticationResult AcquireToken(string resource, UserAssertion userAssertion, ClientAssertionCertificate clientCertificate)
         {
             return RunAsyncTask(this.AcquireTokenOnBehalfCommonAsync(resource, userAssertion, new ClientKey(clientCertificate), callSync: true));
         }
@@ -748,6 +708,30 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public AuthenticationResult AcquireToken(string resource, UserAssertion userAssertion, ClientAssertion clientAssertion)
         {
             return RunAsyncTask(this.AcquireTokenOnBehalfCommonAsync(resource, userAssertion, new ClientKey(clientAssertion), callSync: true));
+        }
+
+
+        /// <summary>
+        /// Acquires security token without asking for user credential.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
+        public AuthenticationResult AcquireTokenSilent(string resource, string clientId)
+        {
+            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, clientId, null));
+        }
+
+        /// <summary>
+        /// Acquires security token without asking for user credential.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="userId">Identifier of the user token is requested for. This parameter can be null.</param>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
+        public AuthenticationResult AcquireTokenSilent(string resource, string clientId, UserIdentifier userId)
+        {
+            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, clientId, userId));            
         }
 
         internal AuthorizationResult SendAuthorizeRequest(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)

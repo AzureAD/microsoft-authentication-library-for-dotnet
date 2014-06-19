@@ -251,7 +251,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Clears the cache by deleting all the items
+        /// Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
+        /// impact all the instances of <see cref="AuthenticationContext"/> which share that cache.
         /// </summary>
         public void Clear()
         {

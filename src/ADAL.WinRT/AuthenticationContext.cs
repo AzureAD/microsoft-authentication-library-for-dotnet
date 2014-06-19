@@ -212,6 +212,29 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
+        /// Acquires security token without asking for user credential.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
+        public IAsyncOperation<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId)
+        {
+            return RunTaskAsAsyncOperation(this.AcquireTokenSilentCommonAsync(resource, clientId, null));
+        }
+
+        /// <summary>
+        /// Acquires security token without asking for user credential.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="userId">Identifier of the user token is requested for. This parameter can be null.</param>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
+        public IAsyncOperation<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId, UserIdentifier userId)
+        {
+            return RunTaskAsAsyncOperation(this.AcquireTokenSilentCommonAsync(resource, clientId, userId));
+        }
+
+        /// <summary>
         /// Acquires a security token from the authority using a Refresh Token previously received.
         /// </summary>
         /// <param name="refreshToken">Refresh Token to use in the refresh flow.</param>

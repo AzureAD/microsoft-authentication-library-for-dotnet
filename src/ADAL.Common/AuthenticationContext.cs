@@ -449,6 +449,51 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return result;
         }
 
+        private async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string resource, string clientId, UserIdentifier userId)
+        {
+            CallState callState = this.CreateCallState(false);
+            this.ValidateAuthorityType(callState, AuthorityType.AAD, AuthorityType.ADFS);
+
+            if (string.IsNullOrWhiteSpace(resource))
+            {
+                throw new ArgumentNullException("resource");
+            }
+
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                throw new ArgumentNullException("clientId");
+            }
+
+            await this.CreateAuthenticatorAsync(callState);
+
+            try
+            {
+                this.NotifyBeforeAccessCache(resource, clientId,
+                    (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
+                    (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId)) ? userId.Id : null);
+
+                AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
+
+                if (result != null)
+                {
+                    LogReturnedToken(result, callState);
+                }
+                else
+                {
+                    Logger.Verbose(callState, "No token matching arguments found in the cache");
+                    throw new AdalException(AdalError.FailedToAcquireTokenSilently);
+                }
+
+                return result;
+            }
+            finally
+            {
+                this.NotifyAfterAccessCache(resource, clientId,
+                    (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
+                    (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null));
+            }
+        }
+
         private void ValidateAuthorityType(CallState callState, AuthorityType validAuthorityType1, AuthorityType validAuthorityType2 = AuthorityType.Unknown, AuthorityType validAuthorityType3 = AuthorityType.Unknown)
         {
             if ((this.authorityType != validAuthorityType1) &&
