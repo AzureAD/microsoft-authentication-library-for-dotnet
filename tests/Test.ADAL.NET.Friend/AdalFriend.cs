@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -39,6 +40,17 @@ namespace Test.ADAL.NET.Friend
             context.CreateAuthenticatorAsync(null).Wait();
             AuthorizationResult authorizationResult = context.SendAuthorizeRequest(resource, clientId, redirectUri, userId, PromptBehavior.Auto, null, null);
             return authorizationResult.Code;
+        }
+
+        public static void UpdateTokenExpiryOnTokenCache(TokenCache cache, DateTimeOffset newExpiry)
+        {
+            var cacheStore = cache.TokenCacheStore;
+
+            var key = cacheStore.Keys.First();
+            key.ExpiresOn = newExpiry; 
+            var value = cacheStore.Values.First();
+            cache.Clear();
+            cacheStore.Add(key, value);        
         }
     }
 }

@@ -17,7 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Metadata;
@@ -31,8 +30,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public sealed partial class AuthenticationContext
     {
-        private static readonly IDictionary<TokenCacheKey, string> StaticTokenCacheStore = new DefaultTokenCacheStore();
-
         /// <summary>
         /// Gets or Sets flag to enable logged in user authentication. Note that enabling this flag requires some extra application capabilites.
         /// </summary>

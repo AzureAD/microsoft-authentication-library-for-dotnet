@@ -446,5 +446,14 @@ namespace Test.ADAL.NET
         {
             AdalTests.CacheExpirationMarginTest(Sts);
         }
+
+        [TestMethod]
+        [Description("Test for client assertion in multi threaded scenario")]
+        [TestCategory("AdalDotNet")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
+        public async Task MultiThreadedClientAssertionWithX509Test()
+        {
+            await AdalTests.MultiThreadedClientAssertionWithX509Test(Sts);
+        }
     }
 }

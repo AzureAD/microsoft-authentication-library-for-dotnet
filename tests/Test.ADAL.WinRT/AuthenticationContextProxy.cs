@@ -432,5 +432,9 @@ namespace Test.ADAL.Common
 
             return AuthenticationResultProxy.Deserialize(ReadValue(resultTextBox));
         }
+
+        internal void VerifySingleItemInCache(AuthenticationResultProxy result, StsType stsType)
+        {
+        }
     }
 }

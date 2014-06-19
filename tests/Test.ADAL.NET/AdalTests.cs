@@ -45,6 +45,12 @@ namespace Test.ADAL.Common
 
             VerifySuccessResult(sts, result);
 
+            // Test cache usage in AcquireTokenByAuthorizationCodeAsync
+            AuthenticationResultProxy result2 = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential);
+            VerifySuccessResult(sts, result);
+            VerifyExpiresOnAreEqual(result, result2);
+            AuthenticationContextProxy.ClearDefaultCache();
+
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, credential);
             VerifySuccessResult(sts, result, true, false);
 
@@ -295,13 +301,8 @@ namespace Test.ADAL.Common
             VerifyExpiresOnAreEqual(result, result2);
 
             var dummyContext = new AuthenticationContext("https://dummy/dummy", false);
-            var cache = dummyContext.TokenCacheStore;
-            var key = cache.Keys.First();
-            key.ExpiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(4 * 60 + 50);  // less than 5 minues expiration margin
-            var value = cache.Values.First();
-            cache.Clear();
-            cache.Add(key, value);
-
+            AdalFriend.UpdateTokenExpiryOnTokenCache(dummyContext.TokenCache, DateTime.UtcNow + TimeSpan.FromSeconds(4 * 60 + 50));
+                
             result2 = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, userId);
             VerifySuccessResult(sts, result2);
             Verify.AreNotEqual(result.AccessToken, result2.AccessToken);
@@ -415,6 +416,31 @@ namespace Test.ADAL.Common
             AuthenticationResultProxy result3 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken, clientAssertion);
             VerifySuccessResult(sts, result3, false, false);
             VerifyExpiresOnAreEqual(result2, result3);
+        }
+
+        internal static async Task MultiThreadedClientAssertionWithX509Test(Sts sts)
+        {
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
+
+            const int ParallelCount = 20;
+            AuthenticationResultProxy[] result = new AuthenticationResultProxy[ParallelCount];
+
+            var credential = new X509CertificateCredentialProxy(sts.ValidConfidentialClientId, sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword);
+
+            AuthenticationContextProxy.CallSync = true;
+
+            Parallel.For(0, ParallelCount, async (i) =>
+            {
+                result[i] = await context.AcquireTokenAsync(sts.ValidResource, credential);
+                Log.Comment("Error: " + result[i].Error);
+                Log.Comment("Error Description: " + result[i].ErrorDescription);
+                Verify.IsNotNull(result[i].AccessToken);
+            });
+
+            result[0] = await context.AcquireTokenAsync(sts.ValidResource, credential);
+            Log.Comment("Error: " + result[0].Error);
+            Log.Comment("Error Description: " + result[0].ErrorDescription);
+            Verify.IsNotNull(result[0].AccessToken);
         }
 
         private static void VerifySuccessResult(AuthenticationResult result)

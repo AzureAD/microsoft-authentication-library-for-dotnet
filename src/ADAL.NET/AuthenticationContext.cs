@@ -29,7 +29,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public sealed partial class AuthenticationContext
     {
-        private static readonly IDictionary<TokenCacheKey, string> StaticTokenCacheStore = new Dictionary<TokenCacheKey, string>();
         private object ownerWindow;
 
         /// <summary>
@@ -354,19 +353,32 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             await this.CreateAuthenticatorAsync(callState);
 
-            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
-
-            if (result != null)
+            try
             {
-                LogReturnedToken(result, callState);
-            }
-            else
-            {
-                Logger.Verbose(callState, "No token matching arguments found in the cache");
-                throw new AdalException(AdalError.FailedToAcquireTokenSilently);
-            }
+                this.NotifyBeforeAccessCache(resource, clientId, 
+                    (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
+                    (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId)) ? userId.Id : null);
 
-            return result;
+                AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
+
+                if (result != null)
+                {
+                    LogReturnedToken(result, callState);
+                }
+                else
+                {
+                    Logger.Verbose(callState, "No token matching arguments found in the cache");
+                    throw new AdalException(AdalError.FailedToAcquireTokenSilently);
+                }
+
+                return result;
+            }
+            finally
+            {
+                this.NotifyAfterAccessCache(resource, clientId,
+                    (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
+                    (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null));
+            }
         }
 
         /// <summary>
@@ -759,15 +771,32 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             await this.CreateAuthenticatorAsync(callState);
-            clientKey.Audience = this.Authenticator.SelfSignedJwtAudience;
 
-            AuthenticationResult result = await OAuth2Request.SendTokenRequestAsync(this.Authenticator.TokenUri, authorizationCode, redirectUri, resource, clientKey, Authenticator.SelfSignedJwtAudience, callState);
+            // clientId is null if clientKey contains client assertion.
+            string clientId = clientKey.GetClientId();
 
-            await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
-            clientKey.Audience = this.Authenticator.SelfSignedJwtAudience;
+            try
+            {
+                this.NotifyBeforeAccessCache(resource, clientId, null, null);
+                AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId);
+                if (result == null)
+                {
+                    clientKey.Audience = this.Authenticator.SelfSignedJwtAudience;
 
-            LogReturnedToken(result, callState);
-            return result;
+                    result = await OAuth2Request.SendTokenRequestAsync(this.Authenticator.TokenUri, authorizationCode, redirectUri, resource, clientKey, Authenticator.SelfSignedJwtAudience, callState);
+
+                    await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
+
+                    this.tokenCacheManager.StoreToCache(result, resource, clientId);
+                }
+
+                LogReturnedToken(result, callState);
+                return result;
+            }
+            finally
+            {
+                this.NotifyAfterAccessCache(resource, clientId, null, null);
+            }
         }
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, ClientKey clientKey, bool callSync = false)
@@ -785,20 +814,28 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // clientId is null if clientKey contains client assertion.
             string clientId = clientKey.GetClientId();
 
-            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId);
-            if (result == null)
+            try
             {
-                clientKey.Audience = this.Authenticator.SelfSignedJwtAudience;
+                this.NotifyBeforeAccessCache(resource, clientKey.GetClientId(), null, null);
+                AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId);
+                if (result == null)
+                {
+                    clientKey.Audience = this.Authenticator.SelfSignedJwtAudience;
 
-                result = await OAuth2Request.SendTokenRequestAsync(this.Authenticator.TokenUri, resource, clientKey, callState);
+                    result = await OAuth2Request.SendTokenRequestAsync(this.Authenticator.TokenUri, resource, clientKey, callState);
 
-                await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
+                    await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
 
-                this.tokenCacheManager.StoreToCache(result, resource, clientId);
+                    this.tokenCacheManager.StoreToCache(result, resource, clientId);
+                }
+
+                LogReturnedToken(result, callState);
+                return result;
             }
-
-            LogReturnedToken(result, callState);
-            return result;
+            finally
+            {
+                this.NotifyAfterAccessCache(resource, clientKey.GetClientId(), null, null);
+            }
         }
 
         private async Task<AuthenticationResult> AcquireTokenByRefreshTokenCommonAsync(string refreshToken, string clientId, ClientKey clientKey, string resource, bool callSync = false)
@@ -845,13 +882,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             // clientId is null if clientKey contains client assertion.
             string clientId = clientKey.GetClientId();
-            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userAssertion.UserName);
 
-            result = result ?? await OAuth2Request.SendTokenRequestOnBehalfAsync(this.Authenticator.TokenUri, resource, userAssertion, clientKey, callState);
-            await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
-            this.tokenCacheManager.StoreToCache(result, resource, clientId);
-            LogReturnedToken(result, callState);
-            return result;
+            try
+            {
+                this.NotifyBeforeAccessCache(resource, clientKey.GetClientId(), null, userAssertion.UserName);
+                AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userAssertion.UserName);
+
+                result = result ?? await OAuth2Request.SendTokenRequestOnBehalfAsync(this.Authenticator.TokenUri, resource, userAssertion, clientKey, callState);
+                await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
+                this.tokenCacheManager.StoreToCache(result, resource, clientId);
+                LogReturnedToken(result, callState);
+                return result;
+            }
+            finally
+            {
+                this.NotifyAfterAccessCache(resource, clientKey.GetClientId(), null, userAssertion.UserName);
+            }
         }
 
         private IWebUI CreateWebAuthenticationDialog(PromptBehavior promptBehavior)

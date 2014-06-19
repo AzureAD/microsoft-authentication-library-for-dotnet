@@ -154,6 +154,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
 
                     result.UpdateTenantAndUserInfo(tenantId, new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider, PasswordExpiresOn = passwordExpiresOffest, PasswordChangeUrl = changePasswordUri });
+                    result.IdToken = tokenResponse.IdToken;
                 }
             }
             else if (tokenResponse.Error != null)

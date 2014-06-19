@@ -27,13 +27,13 @@ namespace Test.ADAL.Common
     {
         public AuthenticationContextProxy(string authority, bool validateAuthority, TokenCacheStoreType tokenCacheStoreType)
         {
-            IDictionary<TokenCacheKey, string> tokenCacheStore = null;
+            TokenCache tokenCache = null;
             if (tokenCacheStoreType == TokenCacheStoreType.InMemory)
             {
-                tokenCacheStore = new Dictionary<TokenCacheKey, string>();
+                tokenCache = new TokenCache();
             }
 
-            this.context = new AuthenticationContext(authority, validateAuthority, tokenCacheStore);
+            this.context = new AuthenticationContext(authority, validateAuthority, tokenCache);
             this.context.CorrelationId = new Guid(FixedCorrelationId);
         }
 
@@ -55,7 +55,7 @@ namespace Test.ADAL.Common
         public static void ClearDefaultCache()
         {
             var dummyContext = new AuthenticationContext("https://dummy/dummy", false);
-            dummyContext.TokenCacheStore.Clear();
+            dummyContext.TokenCache.Clear();
         }
 
         public static void Delay(int sleepMilliSeconds)
@@ -110,6 +110,7 @@ namespace Test.ADAL.Common
                 ExpiresOn = result.ExpiresOn,
                 IsMultipleResourceRefreshToken = result.IsMultipleResourceRefreshToken,
                 RefreshToken = result.RefreshToken,
+                IdToken = result.IdToken,
                 TenantId = result.TenantId,
                 UserInfo = result.UserInfo,
                 Error = result.Error,

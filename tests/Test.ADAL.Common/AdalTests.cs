@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -242,8 +243,10 @@ namespace Test.ADAL.Common
 
         public static void AcquireTokenPositiveWithDefaultCacheTest(Sts sts)
         {
+            AuthenticationContextProxy.ClearDefaultCache();
+
             SetCredential(sts);
-            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);          
             List<AuthenticationResultProxy> results = AcquireTokenPositiveWithCache(sts, context);
             VerifyExpiresOnAreEqual(results[0], results[1]);
 
@@ -252,6 +255,8 @@ namespace Test.ADAL.Common
             AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
             AuthenticationResultProxy resultWithoutUser = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, null, SecondCallExtraQueryParameter);
             VerifyExpiresOnAreEqual(results[0], resultWithoutUser);
+
+            context.VerifySingleItemInCache(results[0], sts.Type);
         }
 
         public static void AcquireTokenPositiveWithNullCache(Sts sts)

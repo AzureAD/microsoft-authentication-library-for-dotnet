@@ -24,9 +24,9 @@ using Windows.Foundation.Metadata;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
-    /// <see cref="TokenCacheKey"/> can be used with Linq to access items from the <see cref="AuthenticationContext.TokenCacheStore"/>.
+    /// <see cref="TokenCacheKey"/> can be used with Linq to access items from the TokenCacheStore.
     /// </summary>
-    public sealed class TokenCacheKey
+    internal sealed class TokenCacheKey
     {
         /// <summary>
         /// Default constructor.
@@ -47,14 +47,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.ExpiresOn = result.ExpiresOn;
-            this.TenantId = result.TenantId;
             this.IsMultipleResourceRefreshToken = result.IsMultipleResourceRefreshToken;
 
             if (result.UserInfo != null)
             {
-                this.FamilyName = result.UserInfo.FamilyName;
-                this.GivenName = result.UserInfo.GivenName;
-                this.IdentityProviderName = result.UserInfo.IdentityProvider;
                 this.UniqueId = result.UserInfo.UniqueId;
                 this.DisplayableId = result.UserInfo.DisplayableId;
             }
@@ -76,21 +72,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public DateTimeOffset ExpiresOn { get; set; }
 
         /// <summary>
-        /// Gets or sets the FamilyName.
-        /// </summary>
-        public string FamilyName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the GivenName.
-        /// </summary>
-        public string GivenName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the IdentityProviderName.
-        /// </summary>
-        public string IdentityProviderName { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the RefreshToken applies to multiple resources.
         /// </summary>
         public bool IsMultipleResourceRefreshToken { get; set; }
@@ -99,11 +80,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Gets or sets the Resource.
         /// </summary>
         public string Resource { get; set; }
-
-        /// <summary>
-        /// Gets or sets the TenantId.
-        /// </summary>
-        public string TenantId { get; set; }
 
         /// <summary>
         /// Gets or sets the user's unique Id.
@@ -145,12 +121,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                && (other.Authority == this.Authority)
                && (other.ClientId == this.ClientId)
                && (other.ExpiresOn == this.ExpiresOn)
-               && (other.FamilyName == this.FamilyName)
-               && (other.GivenName == this.GivenName)
-               && (other.IdentityProviderName == this.IdentityProviderName)
                && (other.IsMultipleResourceRefreshToken == this.IsMultipleResourceRefreshToken)
                && (other.Resource == this.Resource)
-               && (other.TenantId == this.TenantId)
                && (other.UniqueId == this.UniqueId)
                && (other.DisplayableId == this.DisplayableId));
         }
@@ -167,12 +139,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return (this.Authority + Delimiter 
                 + this.ClientId + Delimiter
                 + this.ExpiresOn + Delimiter
-                + this.FamilyName + Delimiter
-                + this.GivenName + Delimiter
-                + this.IdentityProviderName + Delimiter
                 + this.IsMultipleResourceRefreshToken + Delimiter
                 + this.Resource + Delimiter
-                + this.TenantId + Delimiter
                 + this.UniqueId + Delimiter
                 + this.DisplayableId).GetHashCode();
         }
