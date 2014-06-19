@@ -405,8 +405,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     result = result ?? await this.AcquireTokenFromStsAsync(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters, callState);
                     LogReturnedToken(result, callState);
-                    return result;
                 }
+
+                return result;
             }
             finally
             {

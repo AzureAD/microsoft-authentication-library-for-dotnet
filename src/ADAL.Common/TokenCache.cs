@@ -29,7 +29,7 @@ using System.IO;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
-    /// Notification for certian token cache interactions during token acquisition.
+    /// Notification for certain token cache interactions during token acquisition.
     /// </summary>
     /// <param name="args"></param>
     public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     public class TokenCache
 #endif
     {
-        private const double SchemaVersion = 1.0;
+        private const int SchemaVersion = 1;
         
         private const string Delimiter = ":::";
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
@@ -145,8 +145,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     stream.Position = 0;
 
                     BinaryReader reader = new BinaryReader(stream);
-                    double schemaVersion = reader.ReadDouble();
-                    if (Math.Abs(schemaVersion - SchemaVersion) > 0.001)
+                    int schemaVersion = reader.ReadInt32();
+                    if (schemaVersion != SchemaVersion)
                     {
                         // The version of the serialized cache does not match the current schema
                         return;
