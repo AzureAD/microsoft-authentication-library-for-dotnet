@@ -29,6 +29,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 case PromptBehavior.Auto:
                     return new InteractiveWebUI();
                 case PromptBehavior.Always:
+                case PromptBehavior.RefreshSession:
                     return new InteractiveWebUI();
                 case PromptBehavior.Never:
                     return new SilentWebUI();

@@ -26,7 +26,7 @@ using System.Reflection;
 [assembly: AssemblyCopyright("Copyright (c) Microsoft Open Technologies. All rights reserved.")]
 [assembly: AssemblyTrademark("")]
 
-[assembly: AssemblyVersion("2.6.2.0")]
+[assembly: AssemblyVersion("2.6.3.0")]
 
 // Keep major and minor versions in AssemblyFileVersion in sync with AssemblyVersion.
 // Build and revision numbers are replaced on build machine for official builds.

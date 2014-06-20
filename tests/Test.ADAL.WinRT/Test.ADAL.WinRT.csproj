@@ -135,7 +135,6 @@
     <Compile Include="ClientCredentialProxy.cs" />
     <Compile Include="MouseHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="X509CertificateCredentialProxy.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\Test.ADAL.Common\TestMetadata.xml">

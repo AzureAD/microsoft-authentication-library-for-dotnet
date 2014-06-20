@@ -26,5 +26,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     [DataContract]
     public partial class AuthenticationResult
     {
+        // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
+        // to get it from the STS response.
+        internal string Resource { get; set; }
     }
 }

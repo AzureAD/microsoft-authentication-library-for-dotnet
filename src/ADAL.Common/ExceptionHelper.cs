@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 #if ADAL_WINRT
 #else
                 case AdalError.CertificateKeySizeTooSmall:
-                    message = string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.CertificateKeySizeTooSmallTemplate, X509CertificateCredential.MinKeySizeInBits);
+                    message = string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.CertificateKeySizeTooSmallTemplate, ClientAssertionCertificate.MinKeySizeInBits);
                     break;
 #endif
                 case AdalError.IdentityProtocolLoginUrlNull:

@@ -16,12 +16,18 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+
 namespace Test.ADAL.Common
 {
-    public sealed class X509CertificateCredentialProxy
+    public sealed class ClientAssertionCertificateProxy
     {
-        public X509CertificateCredentialProxy(string clientId, string certificateName, string certificatePassword)
+        public ClientAssertionCertificateProxy(string clientId, string certificateName, string certificatePassword)
         {
+            this.Certificate = new ClientAssertionCertificate(clientId, new X509Certificate2(certificateName + ".pfx", certificatePassword));
         }
+
+        public ClientAssertionCertificate Certificate { get; set; }
     }
 }

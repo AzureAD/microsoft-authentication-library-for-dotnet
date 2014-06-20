@@ -152,7 +152,7 @@
     <Compile Include="AuthenticationParametersProxy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StaSynchronizationContext.cs" />
-    <Compile Include="X509CertificateCredentialProxy.cs" />
+    <Compile Include="ClientAssertionCertificateProxy.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ADAL.NET.WindowsForms\ADAL.NET.WindowsForms.csproj">

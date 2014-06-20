@@ -366,7 +366,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return result;
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId = null, PromptBehavior promptBehavior = PromptBehavior.Auto, string extraQueryParameters = null, bool callSync = false)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior = PromptBehavior.Auto, UserIdentifier userId = null, string extraQueryParameters = null, bool callSync = false)
         {
             CallState callState = this.CreateCallState(callSync);
             this.ValidateAuthorityType(callState, AuthorityType.AAD, AuthorityType.ADFS);
@@ -398,15 +398,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
                         (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null));
 
-                    if (promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession)
-                    {
-                        result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
-                    }
-
-                    result = result ?? await this.AcquireTokenFromStsAsync(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters, callState);
-                    LogReturnedToken(result, callState);
+                    result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
                 }
 
+                result = result ?? await this.AcquireTokenFromStsAsync(resource, clientId, redirectUri, promptBehavior, userId, extraQueryParameters, callState);
+                LogReturnedToken(result, callState);
                 return result;
             }
             finally
@@ -417,7 +413,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private async Task<AuthenticationResult> AcquireTokenFromStsAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
+        private async Task<AuthenticationResult> AcquireTokenFromStsAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, string extraQueryParameters, CallState callState)
         {
             AuthenticationResult result;
 #if ADAL_WINRT
@@ -447,6 +443,51 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return result;
+        }
+
+        private async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string resource, string clientId, UserIdentifier userId)
+        {
+            CallState callState = this.CreateCallState(false);
+            this.ValidateAuthorityType(callState, AuthorityType.AAD, AuthorityType.ADFS);
+
+            if (string.IsNullOrWhiteSpace(resource))
+            {
+                throw new ArgumentNullException("resource");
+            }
+
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                throw new ArgumentNullException("clientId");
+            }
+
+            await this.CreateAuthenticatorAsync(callState);
+
+            try
+            {
+                this.NotifyBeforeAccessCache(resource, clientId,
+                    (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
+                    (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId)) ? userId.Id : null);
+
+                AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
+
+                if (result != null)
+                {
+                    LogReturnedToken(result, callState);
+                }
+                else
+                {
+                    Logger.Verbose(callState, "No token matching arguments found in the cache");
+                    throw new AdalException(AdalError.FailedToAcquireTokenSilently);
+                }
+
+                return result;
+            }
+            finally
+            {
+                this.NotifyAfterAccessCache(resource, clientId,
+                    (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
+                    (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null));
+            }
         }
 
         private void ValidateAuthorityType(CallState callState, AuthorityType validAuthorityType1, AuthorityType validAuthorityType2 = AuthorityType.Unknown, AuthorityType validAuthorityType3 = AuthorityType.Unknown)

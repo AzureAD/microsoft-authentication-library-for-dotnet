@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.Credential = clientCredential;
         }
 
-        public ClientKey(X509CertificateCredential clientCertificate)
+        public ClientKey(ClientAssertionCertificate clientCertificate)
         {
             if (clientCertificate == null)
             {
@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public ClientCredential Credential { get; private set; }
 
-        public X509CertificateCredential Certificate { get; private set; }
+        public ClientAssertionCertificate Certificate { get; private set; }
         
         public string Audience { get; set; }
 
