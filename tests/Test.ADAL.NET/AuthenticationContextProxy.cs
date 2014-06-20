@@ -224,6 +224,22 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId, credential, resource));
         }
 
+        public async Task<AuthenticationResultProxy> AcquireTokenSilentAsync(string resource, string clientId)
+        {
+            if (CallSync)
+                return RunTask(() => this.context.AcquireTokenSilent(resource, clientId));
+
+            return await RunTaskAsync(this.context.AcquireTokenSilentAsync(resource, clientId));
+        }
+
+        public async Task<AuthenticationResultProxy> AcquireTokenSilentAsync(string resource, string clientId, UserIdentifier userId)
+        {
+            if (CallSync)
+                return RunTask(() => this.context.AcquireTokenSilent(resource, clientId, userId));
+
+            return await RunTaskAsync(this.context.AcquireTokenSilentAsync(resource, clientId, userId));
+        }
+
         public async Task<AuthenticationResultProxy> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, ClientCredential credential)
         {
             if (CallSync)

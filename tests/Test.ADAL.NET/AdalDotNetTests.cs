@@ -455,5 +455,14 @@ namespace Test.ADAL.NET
         {
             await AdalTests.MultiThreadedClientAssertionWithX509Test(Sts);
         }
+
+        [TestMethod]
+        [Description("Test for token cache usage in AcquireTokenByAuthorizationCode")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
+        public async Task AcquireTokenByAuthorizationCodeWithCacheTest()
+        {
+            await AdalTests.AcquireTokenByAuthorizationCodeWithCacheTest(Sts);
+        }
     }
 }

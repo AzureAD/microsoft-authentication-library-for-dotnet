@@ -46,9 +46,10 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result);
 
             // Test cache usage in AcquireTokenByAuthorizationCodeAsync
+            // There is no cache lookup, so the results should be different.
             AuthenticationResultProxy result2 = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential);
-            VerifySuccessResult(sts, result);
-            VerifyExpiresOnAreEqual(result, result2);
+            VerifySuccessResult(sts, result2);
+            VerifyExpiresOnAreNotEqual(result, result2);
             AuthenticationContextProxy.ClearDefaultCache();
 
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, credential);
@@ -441,6 +442,36 @@ namespace Test.ADAL.Common
             Log.Comment("Error: " + result[0].Error);
             Log.Comment("Error Description: " + result[0].ErrorDescription);
             Verify.IsNotNull(result[0].AccessToken);
+        }
+
+        internal static async Task AcquireTokenByAuthorizationCodeWithCacheTest(Sts sts)
+        {
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
+
+            AuthenticationContextProxy.SetCredentials(sts.ValidUserName, sts.ValidPassword);
+            string authorizationCode = context.AcquireAccessCode(sts.ValidResource, sts.ValidConfidentialClientId, sts.ValidRedirectUriForConfidentialClient, sts.ValidUserId);
+            EndBrowserDialogSession();
+            AuthenticationContextProxy.SetCredentials(sts.ValidUserName2, sts.ValidPassword2);            
+            string authorizationCode2 = context.AcquireAccessCode(sts.ValidResource, sts.ValidConfidentialClientId, sts.ValidRedirectUriForConfidentialClient, sts.ValidRequiredUserId2);
+
+            var credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
+
+            AuthenticationResultProxy result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential);
+            AuthenticationResultProxy result2 = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode2, sts.ValidRedirectUriForConfidentialClient, credential);
+            VerifySuccessResult(sts, result, true, false);
+            VerifySuccessResult(sts, result2, true, false);
+            VerifyExpiresOnAreNotEqual(result, result2);
+
+            AuthenticationResultProxy result3 = await context.AcquireTokenSilentAsync(sts.ValidResource, sts.ValidConfidentialClientId);
+            VerifyErrorResult(result3, "multiple_matching_tokens_detected", null);
+
+            AuthenticationResultProxy result4 = await context.AcquireTokenSilentAsync(sts.ValidResource, sts.ValidConfidentialClientId, sts.ValidUserId);
+            AuthenticationResultProxy result5 = await context.AcquireTokenSilentAsync(sts.ValidResource, sts.ValidConfidentialClientId, sts.ValidRequiredUserId2);
+            VerifySuccessResult(sts, result4, true, false);
+            VerifySuccessResult(sts, result5, true, false);
+            VerifyExpiresOnAreEqual(result4, result);
+            VerifyExpiresOnAreEqual(result5, result2);
+            VerifyExpiresOnAreNotEqual(result4, result5);
         }
 
         private static void VerifySuccessResult(AuthenticationResult result)
