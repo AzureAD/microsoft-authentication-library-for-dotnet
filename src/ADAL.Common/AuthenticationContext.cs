@@ -366,7 +366,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return result;
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId = null, PromptBehavior promptBehavior = PromptBehavior.Auto, string extraQueryParameters = null, bool callSync = false)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior = PromptBehavior.Auto, UserIdentifier userId = null, string extraQueryParameters = null, bool callSync = false)
         {
             CallState callState = this.CreateCallState(callSync);
             this.ValidateAuthorityType(callState, AuthorityType.AAD, AuthorityType.ADFS);
@@ -398,15 +398,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         (userId != null && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null,
                         (userId != null && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId) ? userId.Id : null));
 
-                    if (promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession)
-                    {
-                        result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
-                    }
-
-                    result = result ?? await this.AcquireTokenFromStsAsync(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters, callState);
-                    LogReturnedToken(result, callState);
+                    result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
                 }
 
+                result = result ?? await this.AcquireTokenFromStsAsync(resource, clientId, redirectUri, promptBehavior, userId, extraQueryParameters, callState);
+                LogReturnedToken(result, callState);
                 return result;
             }
             finally
@@ -417,7 +413,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private async Task<AuthenticationResult> AcquireTokenFromStsAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
+        private async Task<AuthenticationResult> AcquireTokenFromStsAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, string extraQueryParameters, CallState callState)
         {
             AuthenticationResult result;
 #if ADAL_WINRT

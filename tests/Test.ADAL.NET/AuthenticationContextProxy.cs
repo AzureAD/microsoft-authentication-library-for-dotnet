@@ -161,24 +161,19 @@ namespace Test.ADAL.Common
             return RunTaskInteractive(resource, clientId, redirectUri, PromptBehaviorProxy.NotSpecified, NotSpecifiedUserId, NotSpecified);
         }
 
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId)
-        {
-            return RunTaskInteractive(resource, clientId, redirectUri, PromptBehaviorProxy.NotSpecified, userId, NotSpecified);
-        }
-
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters)
-        {
-            return RunTaskInteractive(resource, clientId, redirectUri, PromptBehaviorProxy.NotSpecified, userId, extraQueryParameters);
-        }
-
         public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehavior)
         {
             return RunTaskInteractive(resource, clientId, redirectUri, promptBehavior, NotSpecifiedUserId, NotSpecified);
         }
 
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehaviorProxy promptBehavior)
+        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehavior, UserIdentifier userId)
         {
             return RunTaskInteractive(resource, clientId, redirectUri, promptBehavior, userId, NotSpecified);
+        }
+
+        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehavior, UserIdentifier userId, string extraQueryParameters)
+        {
+            return RunTaskInteractive(resource, clientId, redirectUri, promptBehavior, userId, extraQueryParameters);
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId)
@@ -372,38 +367,20 @@ namespace Test.ADAL.Common
                             {
                                 result = context.AcquireToken(resource, clientId, redirectUri);
                             }
-                            else if (extraQueryParameters == NotSpecified)
+                            else 
                             {
                                 result = context.AcquireToken(resource, clientId, redirectUri, promptBehavior);
-                            }
-                            else
-                            {
-                                result = context.AcquireToken(resource, clientId, redirectUri, promptBehavior,
-                                    extraQueryParameters);
                             }
                         }
                         else
                         {
-                            if (promptBehaviorProxy == PromptBehaviorProxy.NotSpecified)
+                            if (extraQueryParameters == NotSpecified)
                             {
-                                if (extraQueryParameters == NotSpecified)
-                                {
-                                    result = context.AcquireToken(resource, clientId, redirectUri, userId);
-                                }
-                                else
-                                {
-                                    result = context.AcquireToken(resource, clientId, redirectUri, userId,
-                                        extraQueryParameters);
-                                }
-                            }
-                            else if (extraQueryParameters == NotSpecified)
-                            {
-                                result = context.AcquireToken(resource, clientId, redirectUri, userId, promptBehavior);
+                                result = context.AcquireToken(resource, clientId, redirectUri, promptBehavior, userId);
                             }
                             else
                             {
-                                result = context.AcquireToken(resource, clientId, redirectUri, userId, promptBehavior,
-                                    extraQueryParameters);
+                                result = context.AcquireToken(resource, clientId, redirectUri, promptBehavior, userId, extraQueryParameters);
                             }
                         }
 

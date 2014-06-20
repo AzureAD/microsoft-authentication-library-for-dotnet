@@ -166,7 +166,7 @@ namespace Test.ADAL.WinRT
         {
             AuthenticationContextProxy.SetCredentials(null, Sts.ValidPassword);
             var context = new AuthenticationContextProxy(Sts.Authority, Sts.ValidateAuthority);
-            AuthenticationResultProxy result = context.AcquireToken(Sts.ValidResource, Sts.ValidClientId, Sts.ValidDefaultRedirectUri, Sts.ValidUserId);
+            AuthenticationResultProxy result = context.AcquireToken(Sts.ValidResource, Sts.ValidClientId, Sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, Sts.ValidUserId);
             AdalTests.VerifySuccessResult(Sts, result);
 
             AuthenticationContextProxy.ClearDefaultCache();

@@ -106,7 +106,7 @@ namespace Test.ADAL.WinRT.Dashboard
                         break;
                     }
 
-                    case CommandType.AquireTokenAsyncRCUP:
+                    case CommandType.AquireTokenAsyncRCUPa:
                     {
                         UserCredential credential;
 
@@ -129,16 +129,11 @@ namespace Test.ADAL.WinRT.Dashboard
                         break;
                     }
 
-                    case CommandType.AquireTokenAsyncRCRU:
+                    case CommandType.AquireTokenAsyncRCRPUX:
                     {
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, 
-                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : null);
-                        break;
-                    }
-
-                    case CommandType.AquireTokenAsyncRCRUX:
-                    {
-                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri,
+                            (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
+                            (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto,
                             (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : null, arg.Extra);
                         break;
                     }
@@ -153,10 +148,10 @@ namespace Test.ADAL.WinRT.Dashboard
 
                     case CommandType.AquireTokenAsyncRCRPU:
                     {
-                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri,
-                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : null,
+                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri,                            
                             (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
-                            (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto);
+                            (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto,
+                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : null);
                         break;
                     }
 

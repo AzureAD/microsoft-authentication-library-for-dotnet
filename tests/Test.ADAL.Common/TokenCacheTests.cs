@@ -279,14 +279,14 @@ namespace Test.ADAL.Common.Unit
             var userIdUpper = new UserIdentifier(displayableId.ToUpper(), UserIdentifierType.RequiredDisplayableId);
 
 #if TEST_ADAL_WINRT
-            authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, userId);
+            authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, PromptBehavior.Auto, userId);
 #else
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userId);
 #endif
             Verify.AreEqual(cacheValue, TokenCacheEncoding.EncodeCacheValue(authenticationResultFromCache));
 
 #if TEST_ADAL_WINRT
-            authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, userIdUpper);
+            authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, PromptBehavior.Auto, userIdUpper);
 #else
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userIdUpper);
 #endif

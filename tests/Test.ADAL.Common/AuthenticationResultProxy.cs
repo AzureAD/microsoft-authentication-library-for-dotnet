@@ -35,6 +35,7 @@ namespace Test.ADAL.Common
     {
         NotSpecified,
         Always,
+        Auto,
         AccessCodeOnly,
         Never,
         RefreshSession
