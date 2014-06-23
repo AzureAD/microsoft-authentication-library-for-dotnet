@@ -138,9 +138,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return serializedObject;
         }
 
-        internal void UpdateTenantAndUserInfo(string tenantId, UserInfo userInfo)
+        internal void UpdateTenantAndUserInfo(string tenantId, string idToken, UserInfo userInfo)
         {
             this.TenantId = tenantId;
+            this.IdToken = idToken;
             if (userInfo != null)
             {
                 this.UserInfo = new UserInfo(userInfo);

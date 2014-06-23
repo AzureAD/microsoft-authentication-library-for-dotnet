@@ -519,8 +519,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     newResult = await this.SendOAuth2RequestByRefreshTokenAsync(resource, result.RefreshToken, clientId, callState);
 
-                    // Id token is not returned by token endpoint when refresh token is redeemed. Therefore, we should copy tenant and user information from the cached token.
-                    newResult.UpdateTenantAndUserInfo(result.TenantId, result.UserInfo);
+                    if (newResult.IdToken == null)
+                    {
+                        // If Id token is not returned by token endpoint when refresh token is redeemed, we should copy tenant and user information from the cached token.
+                        newResult.UpdateTenantAndUserInfo(result.TenantId, result.IdToken, result.UserInfo);
+                    }
                 }
                 catch (AdalException) 
                 {

@@ -28,14 +28,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static byte[] SignWithCertificate(string message, X509Certificate2 x509Certificate)
         {
             X509AsymmetricSecurityKey x509Key = new X509AsymmetricSecurityKey(x509Certificate);
-            using (RSACryptoServiceProvider rsa = x509Key.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, true) as RSACryptoServiceProvider)
+            RSACryptoServiceProvider rsa = x509Key.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, true) as RSACryptoServiceProvider;
+
+            RSACryptoServiceProvider newRsa = null;
+            try
             {
-                using (RSACryptoServiceProvider newRsa = GetCryptoProviderForSha256(rsa))
+                newRsa = GetCryptoProviderForSha256(rsa);
+                using (SHA256 sha = SHA256.Create())
                 {
-                    using (SHA256 sha = SHA256.Create())
-                    {
-                        return newRsa.SignData(Encoding.UTF8.GetBytes(message), sha);
-                    }
+                    return newRsa.SignData(Encoding.UTF8.GetBytes(message), sha);
+                }
+            }
+            finally
+            {
+                if (newRsa != null && rsa != newRsa)
+                {
+                    newRsa.Dispose();
                 }
             }
         }

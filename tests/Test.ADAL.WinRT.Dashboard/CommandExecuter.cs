@@ -71,7 +71,7 @@ namespace Test.ADAL.WinRT.Dashboard
                         break;
                     }
 
-                    case CommandType.CreateContextAVC:
+                    case CommandType.CreateContextAVT:
                     {
                         TokenCache tokenCache = null;
                         if (arg.TokenCacheStoreType == TokenCacheStoreType.InMemory)
@@ -123,13 +123,13 @@ namespace Test.ADAL.WinRT.Dashboard
                         break;
                     }
 
-                    case CommandType.AquireTokenAsyncRCR:
+                    case CommandType.AquireTokenAsyncRCRe:
                     {
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri);
                         break;
                     }
 
-                    case CommandType.AquireTokenAsyncRCRPUX:
+                    case CommandType.AquireTokenAsyncRCRePUX:
                     {
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, 
                             (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
@@ -138,7 +138,7 @@ namespace Test.ADAL.WinRT.Dashboard
                         break;
                     }
 
-                    case CommandType.AquireTokenAsyncRCRP:
+                    case CommandType.AquireTokenAsyncRCReP:
                     {
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, 
                             (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
@@ -146,7 +146,7 @@ namespace Test.ADAL.WinRT.Dashboard
                         break;
                     }
 
-                    case CommandType.AquireTokenAsyncRCRPU:
+                    case CommandType.AquireTokenAsyncRCRePU:
                     {
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri,                            
                             (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
@@ -169,7 +169,7 @@ namespace Test.ADAL.WinRT.Dashboard
                         break;
                     }
 
-                    case CommandType.AcquireTokenByRefreshTokenAsyncRCR:
+                    case CommandType.AcquireTokenByRefreshTokenAsyncRCRe:
                     {
                         result = await context.AcquireTokenByRefreshTokenAsync(arg.RefreshToken, arg.ClientId, arg.Resource);
                         break;

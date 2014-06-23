@@ -733,17 +733,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
 
+            string uniqueId = (result.UserInfo == null) ? null : result.UserInfo.UniqueId;
+            string displayableId = (result.UserInfo == null) ? null : result.UserInfo.DisplayableId;
+            resource = result.Resource;
+
             try
             {
-                this.NotifyBeforeAccessCache(resource, clientId, null, null);
-                this.tokenCacheManager.StoreToCache(result, result.Resource, clientId);
+                this.NotifyBeforeAccessCache(resource, clientId, uniqueId, displayableId);
+                this.tokenCacheManager.StoreToCache(result, resource, clientId);
 
                 LogReturnedToken(result, callState);
                 return result;
             }
             finally
             {
-                this.NotifyAfterAccessCache(resource, clientId, null, null);
+                this.NotifyAfterAccessCache(resource, clientId, uniqueId, displayableId);
             }
         }
 
