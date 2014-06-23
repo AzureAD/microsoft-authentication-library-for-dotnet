@@ -44,6 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         protected IWin32Window ownerWindow;
 
         private static readonly int UIHeight = Math.Max(Screen.PrimaryScreen.WorkingArea.Height - UIHeightGap, 160);
+        private Keys key = Keys.None;
 
         /// <summary>
         /// Default constructor
@@ -51,8 +52,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         protected WindowsFormsWebAuthenticationDialogBase()
         {
             this.webBrowser = new CustomWebBrowser();
-
+            this.webBrowser.PreviewKeyDown += webBrowser_PreviewKeyDown;
+            this.webBrowser.Navigating +=webBrowser_Navigating;
             this.InitializeComponent();
+        }
+        
+        private void webBrowser_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            if (e.KeyCode == Keys.Back)
+            {
+                key = Keys.Back;
+            }
+        }
+
+        private void webBrowser_Navigating(object sender, WebBrowserNavigatingEventArgs e)
+        {
+            if (key == Keys.Back)
+            {
+                key = Keys.None;
+                e.Cancel = true;
+            }
         }
 
         /// <summary>
@@ -93,11 +112,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                     throw new AdalException(AdalError.InvalidOwnerWindowType,
                         "Invalid owner window type. Expected types are IWin32Window or IntPtr (for window handle).");
                 }
+
+                if (this.ownerWindow != null)
+                {
+                    this.StartPosition = FormStartPosition.CenterParent;
+                }
             }
         }
 
         protected virtual void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
         {
+            if (e.Cancel)
+            {
+                return;
+            }
+
             if (this.webBrowser.IsDisposed)
             {
                 // we cancel all flows in disposed object and just do nothing, let object to close.
@@ -251,8 +280,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             this.webBrowserPanel.ResumeLayout(false);
             this.ResumeLayout(false);
         }
-
-
+        
         private sealed class WindowsFormsWin32Window : IWin32Window
         {
             public IntPtr Handle { get; set; }

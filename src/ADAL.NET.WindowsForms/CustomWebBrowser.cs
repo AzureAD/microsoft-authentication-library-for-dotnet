@@ -167,8 +167,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             public int TranslateAccelerator(ref NativeWrapper.MSG msg, ref Guid group, int nCmdID)
             {
-                WebBrowser host = this.host;
-
                 if (msg.message != WM_CHAR)
                 {
                     if (ModifierKeys == Keys.Shift || ModifierKeys == Keys.Alt || ModifierKeys == Keys.Control)
@@ -181,6 +179,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                         }
                     }
                 }
+
                 return S_FALSE;
             }
 
