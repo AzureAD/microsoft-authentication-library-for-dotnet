@@ -19,7 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.Common;
@@ -27,6 +29,8 @@ using Test.ADAL.Common;
 namespace Test.ADAL.NET.Unit
 {
     [TestClass]
+    [DeploymentItem("valid_cert.pfx")]
+    [DeploymentItem("valid_cert2.pfx")]
     public class UnitTests
     {
         private const string ComplexString = "asdfk+j0a-=skjwe43;1l234 1#$!$#%345903485qrq@#$!@#$!(rekr341!#$%Ekfaآزمايشsdsdfsddfdgsfgjsglk==CVADS";
@@ -273,6 +277,27 @@ namespace Test.ADAL.NET.Unit
         public void IncludeFormsAuthParamsTest()
         {
             Assert.IsFalse(OAuth2Request.IncludeFormsAuthParams());
+        }
+
+        [TestMethod]
+        [TestCategory("AdalDotNetUnit")]
+        [Description("Test to verify CryptographyHelper.SignWithCertificate")]
+        public void SignWithCertificateTest()
+        {
+            const string Message = "This is a test message";
+            string[] certs = { "valid_cert.pfx", "valid_cert2.pfx" };
+            for (int i = 0; i < 2; i++)
+            {
+                X509Certificate2 x509Certificate = new X509Certificate2(certs[i], "password");
+                byte[] signature = CryptographyHelper.SignWithCertificate(Message, x509Certificate);
+                Verify.IsNotNull(signature);
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
+                signature = CryptographyHelper.SignWithCertificate(Message, x509Certificate);
+                Verify.IsNotNull(signature);
+            }
         }
 
         private static void RunAuthenticationParametersPositive(string authenticateHeader, string expectedAuthority, string excepectedResource)

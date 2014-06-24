@@ -158,8 +158,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         changePasswordUri = new Uri(idToken.PasswordChangeUrl);
                     }
 
-                    result.UpdateTenantAndUserInfo(tenantId, new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider, PasswordExpiresOn = passwordExpiresOffest, PasswordChangeUrl = changePasswordUri });
-                    result.IdToken = tokenResponse.IdToken;
+                    result.UpdateTenantAndUserInfo(tenantId, tokenResponse.IdToken, new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider, PasswordExpiresOn = passwordExpiresOffest, PasswordChangeUrl = changePasswordUri });
                 }
             }
             else if (tokenResponse.Error != null)
