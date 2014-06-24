@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             finally
             {
-                if (newRsa != null && rsa != newRsa)
+                if (newRsa != null && !object.ReferenceEquals(rsa, newRsa))
                 {
                     newRsa.Dispose();
                 }
