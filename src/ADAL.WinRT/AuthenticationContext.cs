@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
         internal IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, UserAssertion credential)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, credential));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, new ClientKey(clientId), credential));
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public IAsyncOperation<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenSilentCommonAsync(resource, clientId, null));
+            return RunTaskAsAsyncOperation(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientId), null));
         }
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public IAsyncOperation<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId, UserIdentifier userId)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenSilentCommonAsync(resource, clientId, userId));
+            return RunTaskAsAsyncOperation(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientId), userId));
         }
 
         /// <summary>
@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public IAsyncOperation<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, clientId, null));
+            return RunTaskAsAsyncOperation(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientId), null));
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public IAsyncOperation<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, string resource)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, clientId, resource));
+            return RunTaskAsAsyncOperation(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientId), resource));
         }
 
         private IWebUI CreateWebAuthenticationDialog(PromptBehavior promptBehavior)

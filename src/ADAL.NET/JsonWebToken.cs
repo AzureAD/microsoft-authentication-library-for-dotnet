@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly JWTPayload payload;
 
-        public JsonWebToken(string audience, string issuer, uint allowedLifetimeInSeconds, string subject = null)
+        public JsonWebToken(string audience, string issuer, uint allowedLifetimeInSeconds, string subject)
         {
             DateTime validFrom = NetworkPlugin.RequestCreationHelper.GetJsonWebTokenValidFrom();
 
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new AdalException(AdalError.EncodedTokenTooLong);
             }
 
-            return new ClientAssertion(string.Concat(token, ".", UrlEncodeSegment(credential.Sign(token))), OAuthAssertionType.JwtBearer);
+            return new ClientAssertion(this.payload.Issuer, string.Concat(token, ".", UrlEncodeSegment(credential.Sign(token))));
         }
 
         private static string EncodeSegment(string segment)

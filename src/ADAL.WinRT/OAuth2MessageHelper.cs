@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,18 +16,16 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-
-namespace Test.ADAL.Common
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public sealed class ClientAssertionCertificateProxy
+    internal static partial class OAuth2MessageHelper
     {
-        public ClientAssertionCertificateProxy(string clientId, string certificateName, string certificatePassword)
+        private static void AddClientKey(RequestParameters parameters, ClientKey clientKey, string audience)
         {
-            this.Certificate = new ClientAssertionCertificate(clientId, new X509Certificate2(certificateName + ".pfx", certificatePassword));
+            if (clientKey != null && clientKey.ClientId != null)
+            {
+                parameters[OAuthParameter.ClientId] = clientKey.ClientId;
+            }
         }
-
-        public ClientAssertionCertificate Certificate { get; set; }
     }
 }

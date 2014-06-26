@@ -38,9 +38,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return result;
         }
 
-        public static async Task<AuthenticationResult> SendTokenRequestByRefreshTokenAsync(string uri, string resource, string refreshToken, string clientId, CallState callState)
+        public static async Task<AuthenticationResult> SendTokenRequestByRefreshTokenAsync(string uri, string resource, string refreshToken, ClientKey clientKey, string audience, CallState callState)
         {
-            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(resource, refreshToken, clientId);
+            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(resource, refreshToken, clientKey, audience);
             AuthenticationResult result = await SendHttpMessageAsync(uri, requestParameters, callState);
 
             if (result.RefreshToken == null)

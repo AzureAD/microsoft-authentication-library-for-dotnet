@@ -52,7 +52,7 @@ namespace Test.ADAL.Common
             VerifyExpiresOnAreNotEqual(result, result2);
             AuthenticationContextProxy.ClearDefaultCache();
 
-            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, credential);
+            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, credential);
             VerifySuccessResult(sts, result, true, false);
 
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, sts.ValidResource);
@@ -86,7 +86,7 @@ namespace Test.ADAL.Common
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheStoreType.Null);
 
             string authorizationCode = context.AcquireAccessCode(sts.ValidResource, sts.ValidConfidentialClientId, sts.ValidRedirectUriForConfidentialClient, sts.ValidUserId);
-            var certificate = new ClientAssertionCertificateProxy(sts.ValidConfidentialClientId, sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword);
+            var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             AuthenticationResultProxy result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, certificate, sts.ValidResource);
             if (sts.Type == StsType.ADFS)
             {
@@ -99,7 +99,7 @@ namespace Test.ADAL.Common
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, certificate);
             VerifySuccessResult(sts, result);
 
-            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, certificate, sts.ValidResource);
+            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, certificate, sts.ValidResource);
             VerifySuccessResult(sts, result, true, false);
 
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, sts.ValidResource);
@@ -118,7 +118,7 @@ namespace Test.ADAL.Common
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, null, certificate, sts.ValidResource);
             VerifyErrorResult(result, Sts.InvalidArgumentError, "redirectUri");
 
-            result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, (ClientAssertionCertificateProxy)null, sts.ValidResource);
+            result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, (ClientAssertionCertificate)null, sts.ValidResource);
             VerifyErrorResult(result, Sts.InvalidArgumentError, "clientCertificate");
         }
 
@@ -159,7 +159,7 @@ namespace Test.ADAL.Common
 
             AuthenticationResultProxy result = null;
 
-            var certificate = new ClientAssertionCertificateProxy(sts.ValidConfidentialClientId, sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword);
+            var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             result = await context.AcquireTokenAsync(sts.ValidResource, certificate);
             if (sts.Type == StsType.ADFS)
             {
@@ -172,14 +172,14 @@ namespace Test.ADAL.Common
             result = await context.AcquireTokenAsync(null, certificate);
             VerifyErrorResult(result, Sts.InvalidArgumentError, "resource");
 
-            result = await context.AcquireTokenAsync(sts.ValidResource, (ClientAssertionCertificateProxy)null);
+            result = await context.AcquireTokenAsync(sts.ValidResource, (ClientAssertionCertificate)null);
             VerifyErrorResult(result, Sts.InvalidArgumentError, "clientCertificate");
 
-            var invalidCertificate = new ClientAssertionCertificateProxy(sts.ValidConfidentialClientId, sts.InvalidConfidentialClientCertificateName, sts.InvalidConfidentialClientCertificatePassword);
+            var invalidCertificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.InvalidConfidentialClientCertificateName, sts.InvalidConfidentialClientCertificatePassword));
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCertificate);
             VerifyErrorResult(result, Sts.InvalidClientError, "50012"); // AADSTS50012: Client assertion contains an invalid signature.
 
-            invalidCertificate = new ClientAssertionCertificateProxy(sts.InvalidClientId, sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword);
+            invalidCertificate = new ClientAssertionCertificate(sts.InvalidClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCertificate);
             VerifyErrorResult(result, Sts.UnauthorizedClient, "70001"); // AADSTS70001: Application '87002806-c87a-41cd-896b-84ca5690d29e' is not registered for the account.
         }
@@ -203,7 +203,7 @@ namespace Test.ADAL.Common
 
             VerifySuccessResult(sts, result);
 
-            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, credential, sts.ValidResource);
+            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, credential, sts.ValidResource);
             VerifySuccessResult(sts, result, true, false);
 
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, sts.ValidResource);
@@ -319,35 +319,50 @@ namespace Test.ADAL.Common
 
             ClientCredential clientCredential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
 
-            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(null, result.AccessToken, clientCredential);
+            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(null, clientCredential, result.AccessToken);
             VerifyErrorResult(result2, Sts.InvalidArgumentError, "resource");
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, null, clientCredential);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, clientCredential, null);
             VerifyErrorResult(result2, Sts.InvalidArgumentError, "userAssertion");
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken, (ClientCredential)null);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, (ClientCredential)null, result.AccessToken);
             VerifyErrorResult(result2, Sts.InvalidArgumentError, "clientCredential");
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource + "x", result.AccessToken, clientCredential);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource + "x", clientCredential, result.AccessToken);
             VerifyErrorResult(result2, Sts.InvalidResourceError, null);
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken, clientCredential);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, clientCredential, result.AccessToken);
             VerifySuccessResult(sts, result2, true, false);
 
             // Testing cache
             AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
-            AuthenticationResultProxy result3 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken, clientCredential);
+            AuthenticationResultProxy result3 = await context.AcquireTokenAsync(sts.ValidResource, clientCredential, result.AccessToken);
             VerifySuccessResult(sts, result3, true, false);
             VerifyExpiresOnAreEqual(result2, result3);
 
+            // Using MRRT in cached token to acquire token for a different resource
+            AuthenticationResultProxy result4 = await context.AcquireTokenAsync(sts.ValidResource2, clientCredential, result.AccessToken + "x");
+            VerifySuccessResult(sts, result4, true, false);
+
             AuthenticationContextProxy.ClearDefaultCache();
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken + "x", clientCredential);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, clientCredential, result.AccessToken + "x");
             VerifyErrorResult(result2, "invalid_grant", "invalid signature");
 
             ClientCredential invalidClientCredential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret + "x");
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken, invalidClientCredential);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, invalidClientCredential, result.AccessToken);
             VerifyErrorResult(result2, Sts.InvalidClientError, "Invalid client secret");
+
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, clientCredential, result.AccessToken);
+            VerifySuccessResult(sts, result2, true, false);
+
+            // Using MRRT in cached token to acquire token for a different resource
+            result3 = await context.AcquireTokenSilentAsync(sts.ValidResource2, sts.ValidConfidentialClientId);
+            VerifyErrorResult(result3, "failed_to_refresh_token", "client_secret");
+
+            // Using MRRT in cached token to acquire token for a different resource
+            result3 = await context.AcquireTokenSilentAsync(sts.ValidResource2, clientCredential);
+            VerifySuccessResult(sts, result3, true, false);
         }
 
         internal static async Task AcquireTokenOnBehalfAndClientCertificateTestAsync(Sts sts)
@@ -358,36 +373,51 @@ namespace Test.ADAL.Common
             AuthenticationResultProxy result = context.AcquireToken(sts.ValidConfidentialClientId, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
             VerifySuccessResult(sts, result);
 
-            ClientAssertionCertificateProxy clientCertificate = new ClientAssertionCertificateProxy(sts.ValidConfidentialClientId, sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword);
-            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(null, result.AccessToken, clientCertificate);
+            var clientCertificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
+            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(null, clientCertificate, result.AccessToken);
             VerifyErrorResult(result2, Sts.InvalidArgumentError, "resource");
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, null, clientCertificate);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, clientCertificate, null);
             VerifyErrorResult(result2, Sts.InvalidArgumentError, "userAssertion");
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken, (ClientAssertionCertificateProxy)null);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, (ClientAssertionCertificate)null, result.AccessToken);
             VerifyErrorResult(result2, Sts.InvalidArgumentError, "clientCertificate");
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken, clientCertificate);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, clientCertificate, result.AccessToken);
             VerifySuccessResult(sts, result2, true, false);
 
             // Testing cache
             AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
-            AuthenticationResultProxy result3 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken, clientCertificate);
+            AuthenticationResultProxy result3 = await context.AcquireTokenAsync(sts.ValidResource, clientCertificate, result.AccessToken);
             VerifySuccessResult(sts, result3, true, false);
             VerifyExpiresOnAreEqual(result2, result3);
 
+            // Using MRRT in cached token to acquire token for a different resource
+            AuthenticationResultProxy result4 = await context.AcquireTokenAsync(sts.ValidResource2, clientCertificate, result.AccessToken + "x");
+            VerifySuccessResult(sts, result4, true, false);
+
             AuthenticationContextProxy.ClearDefaultCache();
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource + "x", result.AccessToken, clientCertificate);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource + "x", clientCertificate, result.AccessToken);
             VerifyErrorResult(result2, Sts.InvalidResourceError, null);
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken + "x", clientCertificate);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, clientCertificate, result.AccessToken + "x");
             VerifyErrorResult(result2, "invalid_grant", "invalid signature");
 
-            ClientAssertionCertificateProxy invalidClientCredential = new ClientAssertionCertificateProxy(sts.ValidConfidentialClientId.Replace('1', '2'), sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword);
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken, invalidClientCredential);
+            var invalidClientCredential = new ClientAssertionCertificate(sts.ValidConfidentialClientId.Replace('1', '2'), new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, invalidClientCredential, result.AccessToken);
             VerifyErrorResult(result2, Sts.UnauthorizedClient, "not registered");
+
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, clientCertificate, result.AccessToken);
+            VerifySuccessResult(sts, result2, true, false);
+
+            // Using MRRT in cached token to acquire token for a different resource
+            result3 = await context.AcquireTokenSilentAsync(sts.ValidResource2, sts.ValidConfidentialClientId);
+            VerifyErrorResult(result3, "failed_to_refresh_token", "client_secret");
+
+            // Using MRRT in cached token to acquire token for a different resource
+            result3 = await context.AcquireTokenSilentAsync(sts.ValidResource2, clientCertificate);
+            VerifySuccessResult(sts, result3, true, false);
         }
 
         internal static async Task AcquireTokenOnBehalfAndClientAssertionTestAsync(Sts sts)
@@ -400,23 +430,40 @@ namespace Test.ADAL.Common
 
             ClientAssertion clientAssertion = CreateClientAssertion(sts.Authority, sts.ValidConfidentialClientId, sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword);
 
-            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(null, result.AccessToken, clientAssertion);
+            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(null, clientAssertion, result.AccessToken);
             VerifyErrorResult(result2, Sts.InvalidArgumentError, "resource");
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, null, clientAssertion);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, clientAssertion, null);
             VerifyErrorResult(result2, Sts.InvalidArgumentError, "userAssertion");
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken, (ClientAssertion)null);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, (ClientAssertion)null, result.AccessToken);
             VerifyErrorResult(result2, Sts.InvalidArgumentError, "clientAssertion");
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken, clientAssertion);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, clientAssertion, result.AccessToken);
             VerifySuccessResult(sts, result2, true, false);
 
             // Testing cache
             AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
-            AuthenticationResultProxy result3 = await context.AcquireTokenAsync(sts.ValidResource, result.AccessToken, clientAssertion);
+            AuthenticationResultProxy result3 = await context.AcquireTokenAsync(sts.ValidResource, clientAssertion, result.AccessToken);
             VerifySuccessResult(sts, result3, true, false);
             VerifyExpiresOnAreEqual(result2, result3);
+
+            // Using MRRT in cached token to acquire token for a different resource
+            AuthenticationResultProxy result4 = await context.AcquireTokenAsync(sts.ValidResource2, clientAssertion, result.AccessToken);
+            VerifySuccessResult(sts, result4, true, false);
+
+            AuthenticationContextProxy.ClearDefaultCache();
+
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, clientAssertion, result.AccessToken);
+            VerifySuccessResult(sts, result2, true, false);
+
+            // Using MRRT in cached token to acquire token for a different resource
+            //result3 = await context.AcquireTokenSilentAsync(sts.ValidResource2, sts.ValidConfidentialClientId);
+            //VerifyErrorResult(result3, "failed_to_refresh_token", "client_assertion");
+
+            // Using MRRT in cached token to acquire token for a different resource
+            result3 = await context.AcquireTokenSilentAsync(sts.ValidResource2, clientAssertion);
+            VerifySuccessResult(sts, result3, true, false);
         }
 
         internal static async Task MultiThreadedClientAssertionWithX509Test(Sts sts)
@@ -426,7 +473,7 @@ namespace Test.ADAL.Common
             const int ParallelCount = 20;
             AuthenticationResultProxy[] result = new AuthenticationResultProxy[ParallelCount];
 
-            var certificate = new ClientAssertionCertificateProxy(sts.ValidConfidentialClientId, sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword);
+            var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
 
             AuthenticationContextProxy.CallSync = true;
 
@@ -474,6 +521,36 @@ namespace Test.ADAL.Common
             VerifyExpiresOnAreNotEqual(result4, result5);
         }
 
+        internal static async Task ConfidentialClientTokenRefreshWithMRRTTest(Sts sts)
+        {
+            SetCredential(sts);
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
+
+            string authorizationCode = context.AcquireAccessCode(sts.ValidResource, sts.ValidConfidentialClientId, sts.ValidRedirectUriForConfidentialClient, sts.ValidUserId);
+
+            var credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
+
+            AuthenticationResultProxy result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential);
+            VerifySuccessResult(sts, result);
+
+            AuthenticationResultProxy result2 = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, credential, sts.ValidResource2);
+            VerifySuccessResult(sts, result2, true, false);
+
+            AuthenticationContextProxy.ClearDefaultCache();
+
+            result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential);
+            VerifySuccessResult(sts, result);
+
+            result2 = await context.AcquireTokenSilentAsync(sts.ValidResource, sts.ValidConfidentialClientId);
+            VerifySuccessResult(sts, result2, true, false);
+
+            result2 = await context.AcquireTokenSilentAsync(sts.ValidResource2, sts.ValidConfidentialClientId);
+            VerifyErrorResult(result2, "failed_to_refresh_token", "client_secret");
+
+            result2 = await context.AcquireTokenSilentAsync(sts.ValidResource2, credential);
+            VerifySuccessResult(sts, result2, true, false);
+        }
+
         private static void VerifySuccessResult(AuthenticationResult result)
         {
             Log.Comment("Verifying success result...");
@@ -496,8 +573,8 @@ namespace Test.ADAL.Common
                 authority += @"/";
             }
 
-            ClientAssertion assertion = AdalFriend.CreateJwt(new X509Certificate2(certificateName + ".pfx", certificatePassword), clientId, authority);
-            return new ClientAssertion(assertion.Assertion);
+            ClientAssertion assertion = AdalFriend.CreateJwt(new X509Certificate2(certificateName, certificatePassword), clientId, authority);
+            return new ClientAssertion(clientId, assertion.Assertion);
         }
     }
 }

@@ -20,7 +20,7 @@ using System;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class ClientKey
+    internal partial class ClientKey
     {
         public ClientKey(ClientCredential clientCredential)
         {
@@ -30,6 +30,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.Credential = clientCredential;
+            this.ClientId = clientCredential.ClientId;
         }
 
         public ClientKey(ClientAssertionCertificate clientCertificate)
@@ -40,6 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.Certificate = clientCertificate;
+            this.ClientId = clientCertificate.ClientId;
         }
 
         public ClientKey(ClientAssertion clientAssertion)
@@ -50,23 +52,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.Assertion = clientAssertion;
-        }
-
-        public string GetClientId()
-        {
-            if (this.Credential != null)
-            {
-                return this.Credential.ClientId;
-            }
-
-            return (this.Certificate) != null ? this.Certificate.ClientId : null;
+            this.ClientId = clientAssertion.ClientId;
         }
 
         public ClientCredential Credential { get; private set; }
 
         public ClientAssertionCertificate Certificate { get; private set; }
-        
-        public string Audience { get; set; }
 
         public ClientAssertion Assertion { get; private set; }
     }

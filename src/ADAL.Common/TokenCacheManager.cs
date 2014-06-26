@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class TokenCacheManager
     {
-        public delegate Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result, string resource, string clientId, CallState callState);
+        public delegate Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result, string resource, ClientKey clientKey, string audience, CallState callState);
 
         // We do not want to return near expiry tokens, this is why we use this hard coded setting to refresh tokens which are close to expiration.
         private const int ExpirationMarginInMinutes = 5;
@@ -70,12 +70,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.UpdateCachedMRRTRefreshTokens(clientId, result);
         }
 
-        public async Task<AuthenticationResult> LoadFromCacheAndRefreshIfNeededAsync(string resource, CallState callState, string clientId, string displayableId)
+        public async Task<AuthenticationResult> LoadFromCacheAndRefreshIfNeededAsync(string resource, CallState callState, ClientKey clientKey, string audience, string displayableId)
         {
-            return await LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, (displayableId != null) ? new UserIdentifier(displayableId, UserIdentifierType.RequiredDisplayableId) : null);
+            return await LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientKey, audience, (displayableId != null) ? new UserIdentifier(displayableId, UserIdentifierType.RequiredDisplayableId) : null);
         }
 
-        public async Task<AuthenticationResult> LoadFromCacheAndRefreshIfNeededAsync(string resource, CallState callState, string clientId = null, UserIdentifier userId = null)
+        public async Task<AuthenticationResult> LoadFromCacheAndRefreshIfNeededAsync(string resource, CallState callState, ClientKey clientKey, string audience, UserIdentifier userId)
         {
             if (this.TokenCache == null)
             {
@@ -83,6 +83,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             AuthenticationResult result = null;
+            string clientId = (clientKey != null) ? clientKey.ClientId : null;
 
             KeyValuePair<TokenCacheKey, string>? kvp = this.LoadSingleEntryFromCache(resource, clientId, userId);
             
@@ -106,7 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (result != null && ((result.AccessToken == null || tokenMarginallyExpired) && result.RefreshToken != null))
                 {
-                    AuthenticationResult refreshedResult = await this.refreshAccessTokenAsync(result, resource, clientId, callState);
+                    AuthenticationResult refreshedResult = await this.refreshAccessTokenAsync(result, resource, clientKey, audience, callState);
                     if (refreshedResult != null)
                     {
                         this.StoreToCache(refreshedResult, resource, clientId);
