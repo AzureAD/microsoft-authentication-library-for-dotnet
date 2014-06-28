@@ -46,6 +46,8 @@ namespace Test.ADAL.Common
 
             VerifySuccessResult(sts, result);
 
+            AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
+
             // Test cache usage in AcquireTokenByAuthorizationCodeAsync
             // There is no cache lookup, so the results should be different.
             AuthenticationResultProxy result2 = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential);
