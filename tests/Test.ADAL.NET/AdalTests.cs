@@ -47,6 +47,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result);
 
             AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
+            context.SetCorrelationId(new Guid("2ddbba59-1a04-43fb-b363-7fb0ae785031"));
 
             // Test cache usage in AcquireTokenByAuthorizationCodeAsync
             // There is no cache lookup, so the results should be different.
