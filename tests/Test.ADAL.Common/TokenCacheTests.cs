@@ -563,6 +563,7 @@ namespace Test.ADAL.Common.Unit
                                               Resource = "Resource",
                                               UniqueId = "UniqueId",
                                               DisplayableId = "DisplayableId",
+                                              SubjectType = TokenSubjectType.User
                                           };
 
             Verify.IsTrue(tokenCacheKey.Authority == "Authority");
@@ -572,6 +573,7 @@ namespace Test.ADAL.Common.Unit
             Verify.IsTrue(tokenCacheKey.Resource == "Resource");
             Verify.IsTrue(tokenCacheKey.UniqueId == "UniqueId");
             Verify.IsTrue(tokenCacheKey.DisplayableId == "DisplayableId");
+            Verify.IsTrue(tokenCacheKey.SubjectType == TokenSubjectType.User);
         }
 
         private static void VerifyCacheValuesAreEqual(string value1, string value2)
@@ -596,12 +598,12 @@ namespace Test.ADAL.Common.Unit
 
             if (firstKey != null)
             {
-                VerifyAreEqual(items[0], firstKey);
+                Verify.IsTrue(AreEqual(items[0], firstKey) || AreEqual(items[0], secondKey));
             }
 
             if (secondKey != null)
             {
-                VerifyAreEqual(items[1], secondKey);
+                Verify.IsTrue(AreEqual(items[1], firstKey) || AreEqual(items[1], secondKey));
             }
         }
 
@@ -626,15 +628,15 @@ namespace Test.ADAL.Common.Unit
             return EncodingHelper.Base64Encode(GenerateRandomString(len)).Substring(0, len);
         }
 
-        private static void VerifyAreEqual(TokenCacheItem item, TokenCacheKey key)
+        private static bool AreEqual(TokenCacheItem item, TokenCacheKey key)
         {
-            Verify.AreEqual(item.ClientId, key.ClientId);
-            Verify.AreEqual(item.Resource, key.Resource);
-            Verify.AreEqual(item.Authority, key.Authority);
-            Verify.AreEqual(item.DisplayableId, key.DisplayableId);
-            Verify.AreEqual(item.ExpiresOn, key.ExpiresOn);
-            Verify.AreEqual(item.IsMultipleResourceRefreshToken, key.IsMultipleResourceRefreshToken);
-            Verify.AreEqual(item.UniqueId, key.UniqueId);
+            return (item.ClientId == key.ClientId &&
+                item.Resource == key.Resource &&
+                item.Authority == key.Authority &&
+                item.DisplayableId == key.DisplayableId &&
+                item.ExpiresOn == key.ExpiresOn &&
+                item.IsMultipleResourceRefreshToken == key.IsMultipleResourceRefreshToken &&
+                item.UniqueId == key.UniqueId);
         }
     }
 }

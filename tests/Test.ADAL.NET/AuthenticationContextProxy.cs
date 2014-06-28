@@ -248,28 +248,28 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenSilentAsync(resource, clientId, userId));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenSilentAsync(string resource, ClientCredential clientCredential)
+        public async Task<AuthenticationResultProxy> AcquireTokenSilentAsync(string resource, ClientCredential clientCredential, UserIdentifier userId)
         {
             if (CallSync)
-                return RunTask(() => this.context.AcquireTokenSilent(resource, clientCredential));
+                return RunTask(() => this.context.AcquireTokenSilent(resource, clientCredential, userId));
 
-            return await RunTaskAsync(this.context.AcquireTokenSilentAsync(resource, clientCredential));
+            return await RunTaskAsync(this.context.AcquireTokenSilentAsync(resource, clientCredential, userId));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenSilentAsync(string resource, ClientAssertionCertificate clientcertificate)
+        public async Task<AuthenticationResultProxy> AcquireTokenSilentAsync(string resource, ClientAssertion clientAssertion, UserIdentifier userId)
         {
             if (CallSync)
-                return RunTask(() => this.context.AcquireTokenSilent(resource, clientcertificate));
+                return RunTask(() => this.context.AcquireTokenSilent(resource, clientAssertion, userId));
 
-            return await RunTaskAsync(this.context.AcquireTokenSilentAsync(resource, clientcertificate));
+            return await RunTaskAsync(this.context.AcquireTokenSilentAsync(resource, clientAssertion, userId));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenSilentAsync(string resource, ClientAssertion clientAssertion)
+        public async Task<AuthenticationResultProxy> AcquireTokenSilentAsync(string resource, ClientAssertionCertificate clientCertificate, UserIdentifier userId)
         {
             if (CallSync)
-                return RunTask(() => this.context.AcquireTokenSilent(resource, clientAssertion));
+                return RunTask(() => this.context.AcquireTokenSilent(resource, clientCertificate, userId));
 
-            return await RunTaskAsync(this.context.AcquireTokenSilentAsync(resource, clientAssertion));
+            return await RunTaskAsync(this.context.AcquireTokenSilentAsync(resource, clientCertificate, userId));
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, ClientCredential credential)
@@ -409,7 +409,7 @@ namespace Test.ADAL.Common
                                     ? PromptBehavior.Never
                                     : PromptBehavior.Auto;
 
-                        if (userId != null && userId.Id == NotSpecified)
+                        if (userId != null && !ReferenceEquals(userId, UserIdentifier.AnyUser) && userId.Id == NotSpecified)
                         {
                             if (promptBehaviorProxy == PromptBehaviorProxy.NotSpecified)
                             {

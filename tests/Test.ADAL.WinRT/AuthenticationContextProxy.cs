@@ -150,7 +150,8 @@ namespace Test.ADAL.Common
             return RunAsyncTask(AddCommandAndRunAsync(
                 CommandType.AquireTokenAsyncRCRePU,
                 new CommandArguments { Resource = resource, ClientId = clientId, RedirectUri = redirectUri, PromptBehavior = promptBehavior,
-                                       UserName = (userId != null) ? userId.Id : null }));
+                                       UserName = !ReferenceEquals(userId, UserIdentifier.AnyUser) ? userId.Id : null
+                                     }));
         }
 
         public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehavior, UserIdentifier userId, string extraQueryParameters)
@@ -163,7 +164,7 @@ namespace Test.ADAL.Common
                     ClientId = clientId,
                     RedirectUri = redirectUri,
                     PromptBehavior = promptBehavior,
-                    UserName = (userId != null) ? userId.Id : null,
+                    UserName = !ReferenceEquals(userId, UserIdentifier.AnyUser) ? userId.Id : null,
                     Extra = extraQueryParameters
                 }));
         }

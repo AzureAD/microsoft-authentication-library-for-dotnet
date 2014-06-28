@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             string loginHint = null;
 
-            if (userId != null
+            if (!userId.IsAnyUser
                 && (userId.Type == UserIdentifierType.OptionalDisplayableId
                     || userId.Type == UserIdentifierType.RequiredDisplayableId))
             {

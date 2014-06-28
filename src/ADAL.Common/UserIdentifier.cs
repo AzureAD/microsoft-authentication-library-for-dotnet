@@ -26,15 +26,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     public enum UserIdentifierType
     {
         /// <summary>
-        /// 
+        /// UniqueId
         /// </summary>
         UniqueId,
         /// <summary>
-        /// 
+        /// OptionalDisplayableId
         /// </summary>
         OptionalDisplayableId,
         /// <summary>
-        /// 
+        /// RequiredDisplayableId
         /// </summary>
         RequiredDisplayableId,
     }
@@ -44,6 +44,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public sealed class UserIdentifier
     {
+        private const string AnyUserId = "AnyUser";
+        private static readonly UserIdentifier AnyUserSingleton = new UserIdentifier(AnyUserId, UserIdentifierType.UniqueId);
+
         /// <summary>
         /// 
         /// </summary>
@@ -61,14 +64,32 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// 
+        /// Gets type of the <see cref="UserIdentifier"/>.
         /// </summary>
         public UserIdentifierType Type { get; private set; }
         
         /// <summary>
-        /// 
+        /// Gets Id of the <see cref="UserIdentifier"/>.
         /// </summary>
         public string Id { get; private set; }
+
+        /// <summary>
+        /// Gets an static instance of <see cref="UserIdentifier"/> to represent any user.
+        /// </summary>
+        public static UserIdentifier AnyUser { 
+            get
+            {
+                return AnyUserSingleton;
+            }
+        }
+
+        internal bool IsAnyUser 
+        {
+            get
+            {
+                return ReferenceEquals(this, AnyUser);
+            }            
+        }
     }
 
 }

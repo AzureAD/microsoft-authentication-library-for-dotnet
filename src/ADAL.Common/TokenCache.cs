@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 writer.Write(this.TokenCacheStore.Count);
                 foreach (KeyValuePair<TokenCacheKey, string> kvp in this.TokenCacheStore)
                 {
-                    writer.Write(string.Format("{1}{0}{2}{0}{3}", Delimiter, kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId));
+                    writer.Write(string.Format("{1}{0}{2}{0}{3}{0}{4}", Delimiter, kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId, (int)kvp.Key.SubjectType));
                     writer.Write(kvp.Value);
                 }
 
@@ -166,6 +166,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                                                 Authority = kvpElements[0],
                                                 Resource = kvpElements[1],
                                                 ClientId = kvpElements[2],
+                                                SubjectType = (TokenSubjectType)int.Parse(kvpElements[3]),
                                                 ExpiresOn = result.ExpiresOn,
                                                 IsMultipleResourceRefreshToken = result.IsMultipleResourceRefreshToken,
                                             };
@@ -208,6 +209,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         AccessToken = result.AccessToken,
                         RefreshToken = result.RefreshToken,
                         IdToken = result.IdToken
+                        // We do not add SubjectType to TokenCacheItem
                     };
 
                 items.Add(item);

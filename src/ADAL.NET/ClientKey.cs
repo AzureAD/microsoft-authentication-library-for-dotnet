@@ -31,6 +31,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.Credential = clientCredential;
             this.ClientId = clientCredential.ClientId;
+            this.HasCredential = true;
         }
 
         public ClientKey(ClientAssertionCertificate clientCertificate)
@@ -42,6 +43,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.Certificate = clientCertificate;
             this.ClientId = clientCertificate.ClientId;
+            this.HasCredential = true;
         }
 
         public ClientKey(ClientAssertion clientAssertion)
@@ -53,6 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.Assertion = clientAssertion;
             this.ClientId = clientAssertion.ClientId;
+            this.HasCredential = true;
         }
 
         public ClientCredential Credential { get; private set; }

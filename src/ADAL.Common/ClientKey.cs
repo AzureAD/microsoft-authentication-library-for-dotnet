@@ -30,8 +30,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.ClientId = clientId;
+            this.HasCredential = false;
         }
 
         public string ClientId { get; private set; }
+
+        public bool HasCredential { get; private set; }
     }
 }

@@ -293,6 +293,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string WsTrustEndpointNotFoundInMetadataDocument = "WS-Trust endpoint not found in metadata document";
         public const string GetUserNameFailed = "Failed to get user name";
         public const string MissingFederationMetadataUrl = "Federation Metadata Url is missing for federated user. This user type is unsupported.";
+        public const string SpecifyAnyUser = "If you do not need access token for any specific user, pass userId=UserIdentifier.AnyUser instead of userId=null.";
     }
 
     internal static class AuthenticationConstant

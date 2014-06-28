@@ -134,7 +134,7 @@ namespace Test.ADAL.WinRT.Dashboard
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, 
                             (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
                             (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto,
-                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : null, arg.Extra);
+                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : UserIdentifier.AnyUser, arg.Extra);
                         break;
                     }
 
@@ -151,7 +151,7 @@ namespace Test.ADAL.WinRT.Dashboard
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri,                            
                             (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
                             (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto,
-                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : null);
+                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : UserIdentifier.AnyUser);
                         break;
                     }
 
