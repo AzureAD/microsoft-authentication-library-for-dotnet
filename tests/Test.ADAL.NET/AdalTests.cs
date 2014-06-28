@@ -53,7 +53,7 @@ namespace Test.ADAL.Common
             // There is no cache lookup, so the results should be different.
             AuthenticationResultProxy result2 = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential);
             VerifySuccessResult(sts, result2);
-            VerifyExpiresOnAreNotEqual(result, result2);
+            Verify.AreNotEqual(result.AccessToken, result2.AccessToken);
             AuthenticationContextProxy.ClearDefaultCache();
 
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, credential);
