@@ -53,7 +53,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             this.webBrowser = new CustomWebBrowser();
             this.webBrowser.PreviewKeyDown += webBrowser_PreviewKeyDown;
-            this.webBrowser.Navigating +=webBrowser_Navigating;
             this.InitializeComponent();
         }
         
@@ -62,15 +61,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             if (e.KeyCode == Keys.Back)
             {
                 key = Keys.Back;
-            }
-        }
-
-        private void webBrowser_Navigating(object sender, WebBrowserNavigatingEventArgs e)
-        {
-            if (key == Keys.Back)
-            {
-                key = Keys.None;
-                e.Cancel = true;
             }
         }
 
@@ -122,17 +112,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         protected virtual void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
         {
-            if (e.Cancel)
-            {
-                return;
-            }
-
             if (this.webBrowser.IsDisposed)
             {
                 // we cancel all flows in disposed object and just do nothing, let object to close.
                 // it just for safety.
                 e.Cancel = true;
                 return;
+            }
+
+            if (key == Keys.Back)
+            {
+                //navigation is being done via back key. This needs to be disabled.
+                key = Keys.None;
+                e.Cancel = true;
             }
 
             // we cancel further processing, if we reached final URL.
@@ -274,7 +266,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             // If we don't have an owner we need to make sure that the pop up browser 
             // window is in the task bar so that it can be selected with the mouse.
-            //
             this.ShowInTaskbar = null == this.OwnerWindow;
 
             this.webBrowserPanel.ResumeLayout(false);
