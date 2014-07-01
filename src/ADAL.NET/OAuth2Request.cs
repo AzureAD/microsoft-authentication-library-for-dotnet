@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static bool IncludeFormsAuthParams()
         {
-            return PlatformSpecificHelper.IsDomainJoined() && PlatformSpecificHelper.IsUserLocal();
+            return PlatformSpecificHelper.IsUserLocal() && PlatformSpecificHelper.IsDomainJoined();
         }
     }
 }
