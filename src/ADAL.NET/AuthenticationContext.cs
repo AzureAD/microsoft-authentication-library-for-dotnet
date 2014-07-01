@@ -712,7 +712,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public AuthenticationResult AcquireTokenSilent(string resource, string clientId)
         {
-            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientId), UserIdentifier.AnyUser));
+            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientId), UserIdentifier.AnyUser, callSync: true));
         }
 
         /// <summary>
@@ -724,7 +724,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public AuthenticationResult AcquireTokenSilent(string resource, string clientId, UserIdentifier userId)
         {
-            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientId), userId));            
+            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientId), userId, callSync: true));            
         }
 
         /// <summary>
@@ -736,7 +736,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public AuthenticationResult AcquireTokenSilent(string resource, ClientCredential clientCredential, UserIdentifier userId)
         {
-            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientCredential), userId));
+            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientCredential), userId, callSync: true));
         }
 
         /// <summary>
@@ -748,7 +748,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public AuthenticationResult AcquireTokenSilent(string resource, ClientAssertionCertificate clientCertificate, UserIdentifier userId)
         {
-            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientCertificate), userId));
+            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientCertificate), userId, callSync: true));
         }
 
         /// <summary>
@@ -760,7 +760,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public AuthenticationResult AcquireTokenSilent(string resource, ClientAssertion clientAssertion, UserIdentifier userId)
         {
-            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientAssertion), userId));
+            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientAssertion), userId, callSync: true));
         }
 
         internal AuthorizationResult SendAuthorizeRequest(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)

@@ -153,6 +153,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 this.Authenticator = await AuthenticationMetadata.CreateAuthenticatorAsync(this.ValidateAuthority, this.Authority, callState, this.authorityType);
             }
+
+            if (callState != null)
+            {
+                callState.AuthorityType = this.Authenticator.AuthorityType;
+            }
         }
 
         private static void VerifyUserMatch(UserIdentifier userId, AuthenticationResult result)
@@ -451,9 +456,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return result;
         }
 
-        private async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string resource, ClientKey clientKey, UserIdentifier userId)
+        private async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string resource, ClientKey clientKey, UserIdentifier userId, bool callSync = false)
         {
-            CallState callState = this.CreateCallState(false);
+            CallState callState = this.CreateCallState(callSync);
             this.ValidateAuthorityType(callState, AuthorityType.AAD, AuthorityType.ADFS);
             TokenSubjectType subjectType = clientKey.HasCredential ? TokenSubjectType.UserPlusClient : TokenSubjectType.User;
 

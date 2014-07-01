@@ -60,6 +60,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = OAuthReservedClaim.ErrorDescription, IsRequired = false)]
         public string ErrorDescription { get; set; }
 
+        [DataMember(Name = OAuthReservedClaim.ErrorCodes, IsRequired = false)]
+        public string[] ErrorCodes { get; set; }
+
         [DataMember(Name = CorrelationIdClaim, IsRequired = false)]
         public string CorrelationId { get; set; }
     }

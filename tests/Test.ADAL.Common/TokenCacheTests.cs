@@ -583,7 +583,7 @@ namespace Test.ADAL.Common.Unit
 
         private static void VerifyCacheItemCount(TokenCache cache, int expectedCount)
         {
-            Verify.AreEqual(cache.ReadItems().Count(), expectedCount, null);
+            Verify.AreEqual(cache.Count, expectedCount, null);
         }
 
         private static void VerifyCacheItems(TokenCache cache, int expectedCount, TokenCacheKey firstKey)

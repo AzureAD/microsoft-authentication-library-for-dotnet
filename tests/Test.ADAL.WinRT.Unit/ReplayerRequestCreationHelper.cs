@@ -29,6 +29,11 @@ namespace Test.ADAL.WinRT.Unit
             
         }
 
+        public void AddClientMetricsParameters(IDictionary<string, string> parameters, string lastError, Guid lastCorrelationId, long lastResponseTime)
+        {
+
+        }
+
         public DateTime GetJsonWebTokenValidFrom()
         {
             const string JsonWebTokenValidFrom = "JsonWebTokenValidFrom";

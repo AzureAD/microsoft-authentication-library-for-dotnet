@@ -66,6 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string ExpiresIn = "expires_in";
         public const string Error = "error";
         public const string ErrorDescription = "error_description";
+        public const string ErrorCodes = "error_codes";
     }
 
     internal class IdTokenClaim

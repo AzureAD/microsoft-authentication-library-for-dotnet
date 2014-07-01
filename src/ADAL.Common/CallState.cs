@@ -31,5 +31,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public Guid CorrelationId { get; private set; }
 
         public bool CallSync { get; private set; }
+
+        public AuthorityType AuthorityType { get; internal set; }
     }
 }
