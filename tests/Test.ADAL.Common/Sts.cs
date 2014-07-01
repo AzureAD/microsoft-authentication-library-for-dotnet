@@ -75,8 +75,8 @@ namespace Test.ADAL.Common
             this.ValidDefaultRedirectUri = new Uri("https://non_existing_uri.com/");
             this.InvalidExistingRedirectUri = new Uri("https://skydrive.live.com/");
             this.InvalidNonExistingRedirectUri = new Uri("https://invalid_non_existing_uri.com/");
-            this.ConfidentialClientCertificateName = "valid_cert";
-            this.InvalidConfidentialClientCertificateName = "invalid_cert";
+            this.ConfidentialClientCertificateName = "valid_cert.pfx";
+            this.InvalidConfidentialClientCertificateName = "invalid_cert.pfx";
             this.ConfidentialClientCertificatePassword = "password";
             this.InvalidConfidentialClientCertificatePassword = "password";
         }
@@ -201,7 +201,7 @@ namespace Test.ADAL.Common
             this.ValidNonExistentRedirectUriClientId = this.ValidClientId;
             this.ValidClientIdWithExistingRedirectUri = "5c0986db-8d89-4442-b5f9-d281efae9bad";
             this.ValidConfidentialClientId = "9083ccb8-8a46-43e7-8439-1d696df984ae";
-            this.ValidConfidentialClientSecret = "client_secret";
+            this.ValidConfidentialClientSecret = "n+ZC/7zWCv7JDA+QsujTChJSC/ppt0iWXBFYSsaU+Ws=";
             this.ValidWinRTClientId = "786067bc-40cc-4171-be40-a73b2d05a461";
             this.ValidUserName = "admin@aaltests.onmicrosoft.com";
             this.ValidUserName2 = "user@aaltests.onmicrosoft.com";

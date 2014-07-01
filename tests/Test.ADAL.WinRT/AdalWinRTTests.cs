@@ -42,6 +42,15 @@ namespace Test.ADAL.WinRT
         }
 
         [TestMethod]
+        [Description("Positive Test for AcquireToken")]
+        [TestCategory("AdalWinRT")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
+        public void SmokeTest()
+        {
+            AdalTests.AcquireTokenPositive(Sts);
+        }
+
+        [TestMethod]
         [TestCategory("AdalWinRT")]
         [Description("Positive Test for AcquireToken with missing redirectUri and/or userId")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]

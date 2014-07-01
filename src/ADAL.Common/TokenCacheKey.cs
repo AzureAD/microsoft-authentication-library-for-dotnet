@@ -24,6 +24,25 @@ using Windows.Foundation.Metadata;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
+    /// Determines what type of subject the token was issued for.
+    /// </summary>
+    internal enum TokenSubjectType
+    {
+        /// <summary>
+        /// User
+        /// </summary>
+        User,
+        /// <summary>
+        /// Client
+        /// </summary>
+        Client,
+        /// <summary>
+        /// UserPlusClient
+        /// </summary>
+        UserPlusClient
+    };
+
+    /// <summary>
     /// <see cref="TokenCacheKey"/> can be used with Linq to access items from the TokenCacheStore.
     /// </summary>
     internal sealed class TokenCacheKey
@@ -91,6 +110,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public string DisplayableId { get; set; }
 
+        public TokenSubjectType SubjectType { get; set; }
+
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
         /// </summary>
@@ -124,7 +145,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                && (other.IsMultipleResourceRefreshToken == this.IsMultipleResourceRefreshToken)
                && (other.Resource == this.Resource)
                && (other.UniqueId == this.UniqueId)
-               && (other.DisplayableId == this.DisplayableId));
+               && (other.DisplayableId == this.DisplayableId)
+               && (other.SubjectType == this.SubjectType));
         }
 
         /// <summary>
@@ -142,7 +164,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 + this.IsMultipleResourceRefreshToken + Delimiter
                 + this.Resource + Delimiter
                 + this.UniqueId + Delimiter
-                + this.DisplayableId).GetHashCode();
+                + this.DisplayableId
+                + (int)this.SubjectType).GetHashCode();
         }
     }
 }

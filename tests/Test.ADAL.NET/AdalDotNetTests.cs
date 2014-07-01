@@ -464,5 +464,23 @@ namespace Test.ADAL.NET
         {
             await AdalTests.AcquireTokenByAuthorizationCodeWithCacheTest(Sts);
         }
+
+        [TestMethod]
+        [Description("Test for token refresh for confidnetial client using Multi Resource Refresh Token (MRRT) in cache")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
+        public async Task ConfidentialClientTokenRefreshWithMRRTTest()
+        {
+            await AdalTests.ConfidentialClientTokenRefreshWithMRRTTest(Sts);
+        }
+
+        [TestMethod]
+        [Description("Test for different token subject types (Client, User, ClientPlusUser)")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
+        public async Task TokenSubjectTypeTest()
+        {
+            await AdalTests.TokenSubjectTypeTest(Sts);
+        }
     }
 }

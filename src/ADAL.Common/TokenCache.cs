@@ -55,6 +55,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 #if ADAL_WINRT
             DefaultShared.BeforeAccess = DefaultTokenCache_BeforeAccess;
             DefaultShared.AfterAccess = DefaultTokenCache_AfterAccess;
+
+            DefaultTokenCache_BeforeAccess(null);
 #endif
         }
 
@@ -102,7 +104,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// the flag after serlizaing and persisting the state of the cache.
         /// </summary>
         public bool HasStateChanged { get; set; }
+        
         internal IDictionary<TokenCacheKey, string> TokenCacheStore { get; private set; }
+
+        /// <summary>
+        /// Gets the nunmber of items in the cache.
+        /// </summary>
+        public int Count
+        {
+            get
+            {
+                return this.TokenCacheStore.Count;
+            }
+        }
 
         /// <summary>
         /// Serializes current state of the cache as a blob. Caller application can persist the blob and update the state of the cache later by 
@@ -118,7 +132,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 writer.Write(this.TokenCacheStore.Count);
                 foreach (KeyValuePair<TokenCacheKey, string> kvp in this.TokenCacheStore)
                 {
-                    writer.Write(string.Format("{1}{0}{2}{0}{3}", Delimiter, kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId));
+                    writer.Write(string.Format("{1}{0}{2}{0}{3}{0}{4}", Delimiter, kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId, (int)kvp.Key.SubjectType));
                     writer.Write(kvp.Value);
                 }
 
@@ -166,6 +180,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                                                 Authority = kvpElements[0],
                                                 Resource = kvpElements[1],
                                                 ClientId = kvpElements[2],
+                                                SubjectType = (TokenSubjectType)int.Parse(kvpElements[3]),
                                                 ExpiresOn = result.ExpiresOn,
                                                 IsMultipleResourceRefreshToken = result.IsMultipleResourceRefreshToken,
                                             };
@@ -186,7 +201,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Reads a copy of the list of all items in the cache. 
         /// </summary>
         /// <returns>The items in the cache</returns>
+#if ADAL_WINRT
         public IEnumerable<TokenCacheItem> ReadItems()
+#else
+        public virtual IEnumerable<TokenCacheItem> ReadItems()
+#endif
         {
             List<TokenCacheItem> items = new List<TokenCacheItem>();
             foreach (KeyValuePair<TokenCacheKey, string> kvp in this.TokenCacheStore)
@@ -208,6 +227,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         AccessToken = result.AccessToken,
                         RefreshToken = result.RefreshToken,
                         IdToken = result.IdToken
+                        // We do not add SubjectType to TokenCacheItem
                     };
 
                 items.Add(item);
@@ -220,7 +240,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Deletes an item from the cache.
         /// </summary>
         /// <param name="item">The item to delete from the cache</param>
+#if ADAL_WINRT
         public void DeleteItem(TokenCacheItem item)
+#else
+        public virtual void DeleteItem(TokenCacheItem item)
+#endif
         {
             List<TokenCacheKey> toRemoveKeys = new List<TokenCacheKey>();
             foreach (KeyValuePair<TokenCacheKey, string> kvp in this.TokenCacheStore)
@@ -254,7 +278,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
         /// impact all the instances of <see cref="AuthenticationContext"/> which share that cache.
         /// </summary>
+#if ADAL_WINRT
         public void Clear()
+#else
+        public virtual void Clear()
+#endif
         {
             this.TokenCacheStore.Clear();
         }

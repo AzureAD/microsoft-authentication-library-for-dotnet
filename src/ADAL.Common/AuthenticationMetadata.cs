@@ -86,6 +86,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (authorityType == AuthorityType.Unknown)
             {
                 authorityType = DetectAuthorityType(authority);
+                if (callState != null)
+                {
+                    callState.AuthorityType = authorityType;
+                }
             }
 
             if (authorityType != AuthorityType.AAD && validateAuthority)

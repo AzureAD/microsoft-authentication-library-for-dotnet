@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,18 +16,25 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System;
 
-namespace Test.ADAL.Common
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public sealed class ClientAssertionCertificateProxy
+    internal partial class ClientKey
     {
-        public ClientAssertionCertificateProxy(string clientId, string certificateName, string certificatePassword)
+        public ClientKey(string clientId)
         {
-            this.Certificate = new ClientAssertionCertificate(clientId, new X509Certificate2(certificateName + ".pfx", certificatePassword));
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                throw new ArgumentNullException("clientId");
+            }
+
+            this.ClientId = clientId;
+            this.HasCredential = false;
         }
 
-        public ClientAssertionCertificate Certificate { get; set; }
+        public string ClientId { get; private set; }
+
+        public bool HasCredential { get; private set; }
     }
 }

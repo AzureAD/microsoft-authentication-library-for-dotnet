@@ -16,33 +16,16 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-
-namespace Test.ADAL.WinRT.Unit
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    class ReplayerRequestCreationHelper : ReplayerBase, IRequestCreationHelper
+    internal static partial class OAuth2MessageHelper
     {
-        public void AddAdalIdParameters(IDictionary<string, string> parameters)
+        private static void AddClientKey(RequestParameters parameters, ClientKey clientKey, string audience)
         {
-            
-        }
-
-        public void AddClientMetricsParameters(IDictionary<string, string> parameters, string lastError, Guid lastCorrelationId, long lastResponseTime)
-        {
-
-        }
-
-        public DateTime GetJsonWebTokenValidFrom()
-        {
-            const string JsonWebTokenValidFrom = "JsonWebTokenValidFrom";
-            if (IOMap.ContainsKey(JsonWebTokenValidFrom))
+            if (clientKey != null && clientKey.ClientId != null)
             {
-                return new DateTime(long.Parse(IOMap[JsonWebTokenValidFrom]));
+                parameters[OAuthParameter.ClientId] = clientKey.ClientId;
             }
-
-            throw new InvalidOperationException("Unexpected missing dictionary key");
         }
     }
 }

@@ -62,9 +62,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 return string.IsNullOrEmpty(await Windows.System.UserProfile.UserInformation.GetDomainNameAsync());
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
-                throw new AdalException(AdalError.UnauthorizedUserInformationAccess, ex);
+                // This mostly means Enterprise capability is missing, so WIA cannot be used and
+                // we return true to add form auth parameter in the caller.
+                return true;
             }
         }
 

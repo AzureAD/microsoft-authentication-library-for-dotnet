@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static partial class OAuth2MessageHelper
     {
-        public static RequestParameters CreateTokenRequest(string code, Uri redirectUri, string resource, ClientKey clientKey)
+        public static RequestParameters CreateTokenRequest(string code, Uri redirectUri, string resource, ClientKey clientKey, string audience)
         {
             RequestParameters parameters = new RequestParameters();
             parameters[OAuthParameter.GrantType] = OAuthGrantType.AuthorizationCode;
@@ -30,36 +30,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             parameters[OAuthParameter.RedirectUri] = redirectUri.AbsoluteUri;
 
             AddOptionalParameterResource(parameters, resource);
-            AddClientKey(parameters, clientKey);
+            AddClientKey(parameters, clientKey, audience);
 
             return parameters;
         }
 
-        public static RequestParameters CreateTokenRequest(string resource, ClientKey clientKey)
+        public static RequestParameters CreateTokenRequest(string resource, ClientKey clientKey, string audience)
         {
             RequestParameters parameters = new RequestParameters();
             parameters[OAuthParameter.GrantType] = OAuthGrantType.ClientCredentials;
             parameters[OAuthParameter.Resource] = resource;
 
-            AddClientKey(parameters, clientKey);
+            AddClientKey(parameters, clientKey, audience);
 
             return parameters;
         }
 
-        internal static RequestParameters CreateTokenRequest(string resource, string refreshToken, string clientId, ClientKey clientKey)
-        {
-            RequestParameters parameters = new RequestParameters();
-            parameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
-            parameters[OAuthParameter.RefreshToken] = refreshToken;
-            parameters[OAuthParameter.ClientId] = clientId;
-
-            AddClientKey(parameters, clientKey);
-            AddOptionalParameterResource(parameters, resource);
-
-            return parameters;
-        }
-
-        internal static RequestParameters CreateTokenRequest(string resource, UserAssertion userCredential, ClientKey clientKey)
+        internal static RequestParameters CreateTokenRequest(string resource, UserAssertion userCredential, ClientKey clientKey, string audience)
         {
             RequestParameters parameters = new RequestParameters();
             parameters[OAuthParameter.GrantType] = OAuthGrantType.JwtBearer;
@@ -70,20 +57,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // To request id_token in response
             parameters[OAuthParameter.Scope] = ScopeOpenIdValue;
 
-            AddClientKey(parameters, clientKey);
+            AddClientKey(parameters, clientKey, audience);
 
             return parameters;
         }
         
-        private static void AddClientKey(RequestParameters parameters, ClientKey clientKey)
+        private static void AddClientKey(RequestParameters parameters, ClientKey clientKey, string audience)
         {
+            if (clientKey == null)
+            {
+                return;
+            }
+
+            if (clientKey.ClientId != null)
+            {
+                parameters[OAuthParameter.ClientId] = clientKey.ClientId;
+            }
+
             if (clientKey.Credential != null)
             {
-                if (!parameters.ContainsKey(OAuthParameter.ClientId))
-                {
-                    parameters[OAuthParameter.ClientId] = clientKey.Credential.ClientId;
-                }
-
                 if (clientKey.Credential.ClientSecret != null)
                 {
                     parameters[OAuthParameter.ClientSecret] = clientKey.Credential.ClientSecret;
@@ -100,14 +92,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else if (clientKey.Certificate != null)
             {
-                JsonWebToken jwtToken = new JsonWebToken(clientKey.Audience, clientKey.Certificate.ClientId, AuthenticationConstant.JwtToAadLifetimeInSeconds, clientKey.Certificate.ClientId);
+                JsonWebToken jwtToken = new JsonWebToken(audience, clientKey.Certificate.ClientId, AuthenticationConstant.JwtToAadLifetimeInSeconds, clientKey.Certificate.ClientId);
                 ClientAssertion clientAssertion = jwtToken.Sign(clientKey.Certificate);
                 parameters[OAuthParameter.ClientAssertionType] = clientAssertion.AssertionType;
                 parameters[OAuthParameter.ClientAssertion] = clientAssertion.Assertion;
-            }
-            else
-            {
-                throw new ArgumentException("clientKey");
             }
         }
     }

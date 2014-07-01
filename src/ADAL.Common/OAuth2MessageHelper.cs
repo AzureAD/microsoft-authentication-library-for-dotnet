@@ -137,13 +137,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return parameters;
         }
 
-        public static RequestParameters CreateTokenRequest(string resource, string refreshToken, string clientId)
+        public static RequestParameters CreateTokenRequest(string resource, string refreshToken, ClientKey clientKey, string audience)
         {
             RequestParameters parameters = new RequestParameters();
             parameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
             parameters[OAuthParameter.RefreshToken] = refreshToken;
-            parameters[OAuthParameter.ClientId] = clientId;
 
+            AddClientKey(parameters, clientKey, audience);
             AddOptionalParameterResource(parameters, resource);
 
             return parameters;

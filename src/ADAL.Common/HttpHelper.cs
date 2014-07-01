@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Json;
@@ -27,6 +28,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static class HttpHelper
     {
+        private static bool lastRequestMetricsExist;
+        private static string lastError;
+        private static Guid lastCorrelationId;
+        private static long lastResponseTime;
+        private static readonly Stopwatch MetricsTimer = new Stopwatch();
+
         public static async Task<T> SendPostRequestAndDeserializeJsonResponseAsync<T>(string uri, RequestParameters requestParameters, CallState callState)
         {
             try
@@ -36,17 +43,35 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 AddCorrelationIdHeadersToRequest(request, callState);
                 AdalIdHelper.AddAsHeaders(request);
 
+                if (callState != null && callState.AuthorityType == AuthorityType.AAD)
+                {
+                    AddClientMetricsHeadersToRequest(request);
+                    MetricsTimer.Restart();
+                }
+
                 SetPostRequest(request, requestParameters, callState);
                 using (IHttpWebResponse response = await request.GetResponseSyncOrAsync(callState))
                 {
                     VerifyCorrelationIdHeaderInReponse(response, callState);
-                    return DeserializeResponse<T>(response);                    
+                    lastError = null;
+                    return DeserializeResponse<T>(response);
                 }
             }
             catch (WebException ex)
             {
-                TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response); 
+                TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
+                lastError = (tokenResponse.ErrorCodes != null) ? string.Join(",", tokenResponse.ErrorCodes) : null;
                 throw new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, ex);
+            }
+            finally
+            {
+                if (callState != null && callState.AuthorityType == AuthorityType.AAD)
+                {
+                    MetricsTimer.Stop();
+                    lastResponseTime = MetricsTimer.ElapsedMilliseconds;
+                    lastCorrelationId = callState.CorrelationId;
+                    lastRequestMetricsExist = true;
+                }
             }
         }
 
@@ -183,6 +208,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     request.Headers[kvp.Key] = kvp.Value;
                 }
             }
+        }
+
+        public static void AddClientMetricsHeadersToRequest(IHttpWebRequest request)
+        {
+            if (!lastRequestMetricsExist)
+            {
+                return;
+            }
+
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+            NetworkPlugin.RequestCreationHelper.AddClientMetricsParameters(headers, lastError, lastCorrelationId, lastResponseTime);
+
+            AddHeadersToRequest(request, headers);
+            lastRequestMetricsExist = false;
         }
     }
 }

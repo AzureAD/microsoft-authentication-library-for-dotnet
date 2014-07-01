@@ -23,6 +23,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class RequestCreationHelper : IRequestCreationHelper
     {
+        private const string MetricsHeaderClientLastError = "x-client-last-error";
+        private const string MetricsHeaderClientLastRequest = "x-client-last-request";
+        private const string MetricsHeaderClientLastResponseTime = "x-client-last-response-time";
+
         public void AddAdalIdParameters(IDictionary<string, string> parameters)
         {
             parameters[AdalIdParameter.Product] = PlatformSpecificHelper.GetProductName();
@@ -41,6 +45,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             // Since ADAL .NET may be used on servers, for security reasons, we do not emit device type.
 #endif
+        }
+
+        public void AddClientMetricsParameters(IDictionary<string, string> parameters, string lastError, Guid lastCorrelationId, long lastResponseTime)
+        {
+            parameters[MetricsHeaderClientLastError] = lastError;
+            parameters[MetricsHeaderClientLastRequest] = lastResponseTime.ToString();
+            parameters[MetricsHeaderClientLastResponseTime] = lastResponseTime.ToString();
         }
 
         public DateTime GetJsonWebTokenValidFrom()

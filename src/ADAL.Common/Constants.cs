@@ -227,6 +227,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Federation Metadata Url is missing for federated user.
         /// </summary>
         public const string MissingFederationMetadataUrl = "missing_federation_metadata_url";
+
+        /// <summary>
+        /// Failed to refresh token.
+        /// </summary>
+        public const string FailedToRefreshToken = "failed_to_refresh_token";
     }
 
     /// <summary>
@@ -246,6 +251,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string EmailAddressSuffixMismatch = "No identity provider email address suffix matches the provided address";
         public const string EncodedTokenTooLong = "Encoded token size is beyond the upper limit";
         public const string FailedToAcquireTokenSilently = "Failed to acquire token silently. Call method AcquireToken";
+        public const string FailedToRefreshToken = "Failed to refresh token";
         public const string FederatedServiceReturnedErrorTemplate = "Federated serviced at {0} returned error: {1}";
         public const string IdentityProtocolLoginUrlNull = "The LoginUrl property in identityProvider cannot be null";
         public const string IdentityProtocolMismatch = "No identity provider matches the requested protocol";
@@ -287,6 +293,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string WsTrustEndpointNotFoundInMetadataDocument = "WS-Trust endpoint not found in metadata document";
         public const string GetUserNameFailed = "Failed to get user name";
         public const string MissingFederationMetadataUrl = "Federation Metadata Url is missing for federated user. This user type is unsupported.";
+        public const string SpecifyAnyUser = "If you do not need access token for any specific user, pass userId=UserIdentifier.AnyUser instead of userId=null.";
     }
 
     internal static class AuthenticationConstant

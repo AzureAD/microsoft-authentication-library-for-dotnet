@@ -64,6 +64,10 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result);
 
             result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, null);
+            VerifyErrorResult(result, Sts.InvalidArgumentError, "userId");
+            VerifyErrorResult(result, Sts.InvalidArgumentError, "UserIdentifier.AnyUser");
+
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, UserIdentifier.AnyUser);
             VerifySuccessResult(sts, result);
         }
 
@@ -209,11 +213,11 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result);
 
             result = context.AcquireToken(sts.ValidResource.ToUpper(), sts.ValidClientId.ToUpper(), sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, 
-                (sts.Type == StsType.AAD) ? new UserIdentifier(sts.ValidUserName, UserIdentifierType.RequiredDisplayableId) : null);
+                (sts.Type == StsType.AAD) ? new UserIdentifier(sts.ValidUserName, UserIdentifierType.RequiredDisplayableId) : UserIdentifier.AnyUser);
             VerifySuccessResult(sts, result);
 
-            result = context.AcquireToken(sts.ValidResource.ToUpper(), sts.ValidClientId.ToUpper(), sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, 
-                (result.UserInfo != null) ? new UserIdentifier(result.UserInfo.UniqueId, UserIdentifierType.UniqueId) : null);
+            result = context.AcquireToken(sts.ValidResource.ToUpper(), sts.ValidClientId.ToUpper(), sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto,
+                (result.UserInfo != null) ? new UserIdentifier(result.UserInfo.UniqueId, UserIdentifierType.UniqueId) : UserIdentifier.AnyUser);
             VerifySuccessResult(sts, result);
         }
 
@@ -229,7 +233,7 @@ namespace Test.ADAL.Common
         {
             AuthenticationContextProxy.SetCredentials(sts.InvalidUserName, "invalid_password");
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
-            AuthenticationResultProxy result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, null, "incorrect_user");
+            AuthenticationResultProxy result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, UserIdentifier.AnyUser, "incorrect_user");
             VerifyErrorResult(result, Sts.AuthenticationCanceledError, "canceled");
         }
 
@@ -253,7 +257,7 @@ namespace Test.ADAL.Common
             EndBrowserDialogSession();
             Log.Comment("Waiting 2 seconds before next token request...");
             AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
-            AuthenticationResultProxy resultWithoutUser = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, null, SecondCallExtraQueryParameter);
+            AuthenticationResultProxy resultWithoutUser = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, UserIdentifier.AnyUser, SecondCallExtraQueryParameter);
             VerifyExpiresOnAreEqual(results[0], resultWithoutUser);
 
             context.VerifySingleItemInCache(results[0], sts.Type);
@@ -432,7 +436,7 @@ namespace Test.ADAL.Common
             AuthenticationResultProxy result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, userId);
             VerifySuccessResult(sts, result);
 
-            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, null);
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, UserIdentifier.AnyUser);
             VerifySuccessResult(sts, result);
         }
 
@@ -492,7 +496,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result);
 
             EndBrowserDialogSession();
-            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, null, "login_hint=" + sts.ValidUserName);
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, UserIdentifier.AnyUser, "login_hint=" + sts.ValidUserName);
             VerifySuccessResult(sts, result);
         }
 

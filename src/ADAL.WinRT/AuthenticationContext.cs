@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DefaultOverload]
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri()));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), PromptBehavior.Auto, UserIdentifier.AnyUser));
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DefaultOverload]
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, GetRedirectUri(redirectUri)));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, GetRedirectUri(redirectUri), PromptBehavior.Auto, UserIdentifier.AnyUser));
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DefaultOverload]
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, GetRedirectUri(redirectUri), promptBehavior, null));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, GetRedirectUri(redirectUri), promptBehavior, UserIdentifier.AnyUser));
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, PromptBehavior promptBehavior)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), promptBehavior, null));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), promptBehavior, UserIdentifier.AnyUser));
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public IAsyncOperation<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenSilentCommonAsync(resource, clientId, null));
+            return RunTaskAsAsyncOperation(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientId), UserIdentifier.AnyUser));
         }
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public IAsyncOperation<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId, UserIdentifier userId)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenSilentCommonAsync(resource, clientId, userId));
+            return RunTaskAsAsyncOperation(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientId), userId));
         }
 
         /// <summary>
@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public IAsyncOperation<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, clientId, null));
+            return RunTaskAsAsyncOperation(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientId), null));
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public IAsyncOperation<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, string resource)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, clientId, resource));
+            return RunTaskAsAsyncOperation(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientId), resource));
         }
 
         private IWebUI CreateWebAuthenticationDialog(PromptBehavior promptBehavior)
