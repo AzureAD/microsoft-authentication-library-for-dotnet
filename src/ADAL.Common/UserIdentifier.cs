@@ -90,6 +90,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 return ReferenceEquals(this, AnyUser);
             }            
         }
+
+        internal string UniqueId
+        {
+            get
+            {
+                return (!this.IsAnyUser && this.Type == UserIdentifierType.UniqueId) ? this.Id : null;
+            }
+        }
+
+        internal string DisplayableId
+        {
+            get
+            {
+                return (!this.IsAnyUser && (this.Type == UserIdentifierType.OptionalDisplayableId || this.Type == UserIdentifierType.RequiredDisplayableId)) ? this.Id : null;
+            }
+        }
     }
 
 }

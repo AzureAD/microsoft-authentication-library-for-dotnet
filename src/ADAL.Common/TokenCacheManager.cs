@@ -211,11 +211,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private KeyValuePair<TokenCacheKey, string>? LoadSingleEntryFromCache(string resource, string clientId, UserIdentifier userId, TokenSubjectType subjectType)
         {
             KeyValuePair<TokenCacheKey, string>? returnValue = null;
-            string uniqueId = (!userId.IsAnyUser && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null;
-            string displayableId = (!userId.IsAnyUser && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId)) ? userId.Id : null;
 
             // First identify all potential tokens.
-            List<KeyValuePair<TokenCacheKey, string>> cacheValues = this.QueryCache(clientId, uniqueId, displayableId, subjectType);
+            List<KeyValuePair<TokenCacheKey, string>> cacheValues = this.QueryCache(clientId, userId.UniqueId, userId.DisplayableId, subjectType);
 
             List<KeyValuePair<TokenCacheKey, string>> resourceSpecificCacheValues =
                 cacheValues.Where(p => string.Compare(p.Key.Resource, resource, StringComparison.OrdinalIgnoreCase) == 0).ToList();

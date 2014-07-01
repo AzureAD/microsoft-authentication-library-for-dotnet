@@ -319,7 +319,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (string.IsNullOrWhiteSpace(userAssertion.AssertionType))
             {
-                throw new ArgumentException(AdalErrorMessage.UserCredentialAssertionTypeEmpty, "credential");
+                throw new ArgumentException(AdalErrorMessage.UserCredentialAssertionTypeEmpty, "userAssertion");
             }
 
             await this.CreateAuthenticatorAsync(callState);
@@ -397,8 +397,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
             }
 
-            string uniqueId = (!userId.IsAnyUser && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null;
-            string displayableId = (!userId.IsAnyUser && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId)) ? userId.Id : null;
+            string uniqueId = userId.UniqueId;
+            string displayableId = userId.DisplayableId;
 
             await this.CreateAuthenticatorAsync(callState);
 
@@ -475,8 +475,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             await this.CreateAuthenticatorAsync(callState);
 
             string clientId = clientKey.ClientId;
-            string uniqueId = (!userId.IsAnyUser && userId.Type == UserIdentifierType.UniqueId) ? userId.Id : null;
-            string displayableId = (!userId.IsAnyUser && (userId.Type == UserIdentifierType.OptionalDisplayableId || userId.Type == UserIdentifierType.RequiredDisplayableId)) ? userId.Id : null;
+            string uniqueId = userId.UniqueId;
+            string displayableId = userId.DisplayableId;
 
             try
             {
