@@ -321,8 +321,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 byte[] state = LocalSettingsHelper.GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
                 DefaultShared.Deserialize(state);
             }
-            catch
+            catch(Exception ex)
             {
+                Logger.Information(null, "Failed to load cache: " + ex.Message);
                 // Ignore as the cache seems to be corrupt
             }
         }

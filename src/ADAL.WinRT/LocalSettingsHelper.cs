@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         internal static void SetCacheValue(IPropertySet containerValues, byte[] value)
         {
             byte[] encryptedValue = CryptographyHelper.Encrypt(value);
-            containerValues[CacheValueLength] = value.Length;
+            containerValues[CacheValueLength] = encryptedValue.Length;
             if (encryptedValue == null)
             {
                 containerValues[CacheValueSegmentCount] = 1;
