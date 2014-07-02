@@ -35,6 +35,7 @@
     <DefineConstants>TRACE;NETFX_CORE;ADAL_WINPHONE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>Microsoft.IdentityModel.Clients.ActiveDirectory.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
     <DebugSymbols>true</DebugSymbols>
