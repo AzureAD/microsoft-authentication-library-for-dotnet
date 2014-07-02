@@ -217,6 +217,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             instanceDiscoveryEndpoint = HttpHelper.CheckForExtraQueryParameter(instanceDiscoveryEndpoint);
 
+            ClientMetrics clientMetrics = new ClientMetrics();
+
             try
             {
                 IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(instanceDiscoveryEndpoint);
@@ -224,20 +226,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 HttpHelper.AddCorrelationIdHeadersToRequest(request, callState);
                 AdalIdHelper.AddAsHeaders(request);
 
-                HttpHelper.BeginClientMetricsRecord(request, callState);
+                clientMetrics.BeginClientMetricsRecord(request, callState);
 
                 using (var response = await request.GetResponseSyncOrAsync(callState))
                 {
                     HttpHelper.VerifyCorrelationIdHeaderInReponse(response, callState);
                     InstanceDiscoveryResponse discoveryResponse = HttpHelper.DeserializeResponse<InstanceDiscoveryResponse>(response);
-                    HttpHelper.SetLastError(null); 
+                    clientMetrics.SetLastError(null); 
                     return discoveryResponse.TenantDiscoveryEndpoint;
                 }
             }
             catch (WebException ex)
             {
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
-                HttpHelper.SetLastError(tokenResponse.ErrorCodes);
+                clientMetrics.SetLastError(tokenResponse.ErrorCodes);
                 throw new AdalServiceException(
                     AdalError.AuthorityNotInValidList,
                     string.Format(CultureInfo.InvariantCulture, "{0}. {1} ({2}): {3}", 
@@ -246,7 +248,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             finally
             {
-                HttpHelper.EndClientMetricsRecord("instance", callState);
+                clientMetrics.EndClientMetricsRecord(ClientMetricsEndpointType.InstanceDiscovery, callState);
             }
         }
 

@@ -25,16 +25,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private static void DefaultTokenCache_BeforeAccess(TokenCacheNotificationArgs args)
         {
-            var localSettings = ApplicationData.Current.LocalSettings;
-            localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
             try
             {
+                var localSettings = ApplicationData.Current.LocalSettings;
+                localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
                 byte[] state = LocalSettingsHelper.GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
                 DefaultShared.Deserialize(state);
             }
             catch (Exception ex)
             {
-                Logger.Information(null, "Failed to load cache: " + ex.Message);
+                Logger.Information(null, "Failed to load cache: " + ex);
                 // Ignore as the cache seems to be corrupt
             }
         }
@@ -42,10 +42,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (DefaultShared.HasStateChanged)
             {
-                var localSettings = ApplicationData.Current.LocalSettings;
-                localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-                LocalSettingsHelper.SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values, DefaultShared.Serialize());
-                DefaultShared.HasStateChanged = false;
+                try
+                {
+                    var localSettings = ApplicationData.Current.LocalSettings;
+                    localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
+                    LocalSettingsHelper.SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values, DefaultShared.Serialize());
+                    DefaultShared.HasStateChanged = false;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Information(null, "Failed to save cache: " + ex);
+                }
             }
         }
     }

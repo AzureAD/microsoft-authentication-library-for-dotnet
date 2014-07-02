@@ -23,9 +23,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal interface IRequestCreationHelper
     {
-        void AddAdalIdParameters(IDictionary<string, string> parameters);
+        bool RecordClientMetrics { get; }
 
-        void AddClientMetricsParameters(IDictionary<string, string> parameters);
+        void AddAdalIdParameters(IDictionary<string, string> parameters);
 
         DateTime GetJsonWebTokenValidFrom();
     }

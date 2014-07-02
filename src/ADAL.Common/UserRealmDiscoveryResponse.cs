@@ -49,6 +49,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             Logger.Information(callState, "Sending user realm discovery request to '{0}'", userRealmEndpoint);
 
             UserRealmDiscoveryResponse userRealmResponse;
+            ClientMetrics clientMetrics = new ClientMetrics();
+
             try
             {
                 IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(userRealmEndpoint);
@@ -57,24 +59,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 HttpHelper.AddCorrelationIdHeadersToRequest(request, callState);
                 AdalIdHelper.AddAsHeaders(request);
 
-                HttpHelper.BeginClientMetricsRecord(request, callState);
+                clientMetrics.BeginClientMetricsRecord(request, callState);
 
                 using (var response = await request.GetResponseSyncOrAsync(callState))
                 {
                     HttpHelper.VerifyCorrelationIdHeaderInReponse(response, callState);
                     userRealmResponse = HttpHelper.DeserializeResponse<UserRealmDiscoveryResponse>(response);
-                    HttpHelper.SetLastError(null);
+                    clientMetrics.SetLastError(null);
                 }
             }
             catch (WebException ex)
             {
                 var serviceException = new AdalServiceException(AdalError.UserRealmDiscoveryFailed, ex);
-                HttpHelper.SetLastError(new [] { serviceException.StatusCode.ToString() });
+                clientMetrics.SetLastError(new[] { serviceException.StatusCode.ToString() });
                 throw serviceException;
             }
             finally
             {
-                HttpHelper.EndClientMetricsRecord("user_realm", callState);
+                clientMetrics.EndClientMetricsRecord(ClientMetricsEndpointType.UserRealmDiscovery, callState);
             }
 
             return userRealmResponse;

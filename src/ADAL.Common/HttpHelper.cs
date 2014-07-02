@@ -28,20 +28,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static class HttpHelper
     {
-        private const string ClientMetricsHeaderLastError = "x-client-last-error";
-        private const string ClientMetricsHeaderLastRequest = "x-client-last-request";
-        private const string ClientMetricsHeaderLastResponseTime = "x-client-last-response-time";
-        private const string ClientMetricsHeaderLastEndpoint = "x-client-last-endpoint";
-
-        private static readonly Stopwatch MetricsTimer = new Stopwatch();
-        private static bool lastRequestMetricsExist;
-        private static string lastError;
-        private static Guid lastCorrelationId;
-        private static long lastResponseTime;
-        private static string lastEndpoint;
 
         public static async Task<T> SendPostRequestAndDeserializeJsonResponseAsync<T>(string uri, RequestParameters requestParameters, CallState callState)
         {
+            ClientMetrics clientMetrics = new ClientMetrics();
+
             try
             {
                 IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(uri);
@@ -49,25 +40,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 AddCorrelationIdHeadersToRequest(request, callState);
                 AdalIdHelper.AddAsHeaders(request);
 
-                BeginClientMetricsRecord(request, callState);
+                clientMetrics.BeginClientMetricsRecord(request, callState);
 
                 SetPostRequest(request, requestParameters, callState);
                 using (IHttpWebResponse response = await request.GetResponseSyncOrAsync(callState))
                 {
                     VerifyCorrelationIdHeaderInReponse(response, callState);
-                    SetLastError(null);
+                    clientMetrics.SetLastError(null);
                     return DeserializeResponse<T>(response);
                 }
             }
             catch (WebException ex)
             {
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
-                SetLastError(tokenResponse.ErrorCodes);
+                clientMetrics.SetLastError(tokenResponse.ErrorCodes);
                 throw new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, ex);
             }
             finally
             {
-                EndClientMetricsRecord("token", callState);
+                clientMetrics.EndClientMetricsRecord(ClientMetricsEndpointType.Token, callState);
             }
         }
 
@@ -177,54 +168,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     request.Headers[kvp.Key] = kvp.Value;
                 }
             }
-        }
-
-        public static void AddClientMetricsHeadersToRequest(IHttpWebRequest request)
-        {
-            if (!lastRequestMetricsExist)
-            {
-                return;
-            }
-
-            Dictionary<string, string> headers = new Dictionary<string, string>();
-            NetworkPlugin.RequestCreationHelper.AddClientMetricsParameters(headers);
-
-            AddHeadersToRequest(request, headers);
-            lastRequestMetricsExist = false;
-        }
-
-        public static void BeginClientMetricsRecord(IHttpWebRequest request, CallState callState)
-        {
-            if (callState != null && callState.AuthorityType == AuthorityType.AAD)
-            {
-                AddClientMetricsHeadersToRequest(request);
-                MetricsTimer.Restart();
-            }
-        }
-
-        public static void EndClientMetricsRecord(string endpoint, CallState callState)
-        {
-            if (callState != null && callState.AuthorityType == AuthorityType.AAD)
-            {
-                MetricsTimer.Stop();
-                lastResponseTime = MetricsTimer.ElapsedMilliseconds;
-                lastCorrelationId = callState.CorrelationId;
-                lastEndpoint = endpoint;
-                lastRequestMetricsExist = true;
-            }
-        }
-
-        public static void SetLastError(string[] errorCodes)
-        {
-            lastError = (errorCodes != null) ? string.Join(",", errorCodes) : null;            
-        }
-
-        public static void AddClientMetricsParameters(IDictionary<string, string> parameters)
-        {
-            parameters[ClientMetricsHeaderLastError] = lastError;
-            parameters[ClientMetricsHeaderLastRequest] = lastCorrelationId.ToString();
-            parameters[ClientMetricsHeaderLastResponseTime] = lastResponseTime.ToString();
-            parameters[ClientMetricsHeaderLastEndpoint] = lastEndpoint;
         }
     }
 }

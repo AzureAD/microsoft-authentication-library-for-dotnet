@@ -23,6 +23,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class RequestCreationHelper : IRequestCreationHelper
     {
+        public bool RecordClientMetrics
+        {
+            get { return true; }            
+        }
+
         public void AddAdalIdParameters(IDictionary<string, string> parameters)
         {
             parameters[AdalIdParameter.Product] = PlatformSpecificHelper.GetProductName();
@@ -41,11 +46,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             // Since ADAL .NET may be used on servers, for security reasons, we do not emit device type.
 #endif
-        }
-
-        public void AddClientMetricsParameters(IDictionary<string, string> parameters)
-        {
-            HttpHelper.AddClientMetricsParameters(parameters);
         }
 
         public DateTime GetJsonWebTokenValidFrom()
