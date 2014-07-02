@@ -28,14 +28,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static class HttpHelper
     {
-        private static bool lastRequestMetricsExist;
-        private static string lastError;
-        private static Guid lastCorrelationId;
-        private static long lastResponseTime;
-        private static readonly Stopwatch MetricsTimer = new Stopwatch();
 
         public static async Task<T> SendPostRequestAndDeserializeJsonResponseAsync<T>(string uri, RequestParameters requestParameters, CallState callState)
         {
+            ClientMetrics clientMetrics = new ClientMetrics();
+
             try
             {
                 IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(uri);
@@ -43,57 +40,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 AddCorrelationIdHeadersToRequest(request, callState);
                 AdalIdHelper.AddAsHeaders(request);
 
-                if (callState != null && callState.AuthorityType == AuthorityType.AAD)
-                {
-                    AddClientMetricsHeadersToRequest(request);
-                    MetricsTimer.Restart();
-                }
+                clientMetrics.BeginClientMetricsRecord(request, callState);
 
                 SetPostRequest(request, requestParameters, callState);
                 using (IHttpWebResponse response = await request.GetResponseSyncOrAsync(callState))
                 {
                     VerifyCorrelationIdHeaderInReponse(response, callState);
-                    lastError = null;
+                    clientMetrics.SetLastError(null);
                     return DeserializeResponse<T>(response);
                 }
             }
             catch (WebException ex)
             {
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
-                lastError = (tokenResponse.ErrorCodes != null) ? string.Join(",", tokenResponse.ErrorCodes) : null;
+                clientMetrics.SetLastError(tokenResponse.ErrorCodes);
                 throw new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, ex);
             }
             finally
             {
-                if (callState != null && callState.AuthorityType == AuthorityType.AAD)
-                {
-                    MetricsTimer.Stop();
-                    lastResponseTime = MetricsTimer.ElapsedMilliseconds;
-                    lastCorrelationId = callState.CorrelationId;
-                    lastRequestMetricsExist = true;
-                }
-            }
-        }
-
-        public static void CopyHeadersTo(WebHeaderCollection source, Dictionary<string, string> target)
-        {
-            if (target != null)
-            {
-                foreach (string reponseHeaderKey in source.AllKeys)
-                {
-                    string trimmedKey = reponseHeaderKey.Trim();
-                    if (target.ContainsKey(trimmedKey))
-                    {
-                        if (target[reponseHeaderKey] == null)
-                        {
-                            target[reponseHeaderKey] = source[trimmedKey].Trim();
-                        }
-                        else
-                        {
-                            target[reponseHeaderKey] = target[reponseHeaderKey] + "," + source[trimmedKey].Trim();
-                        }
-                    }
-                }
+                clientMetrics.EndClientMetricsRecord(ClientMetricsEndpointType.Token, callState);
             }
         }
 
@@ -127,11 +92,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 return ((T)serializer.ReadObject(stream));
             }
-        }
-
-        public static string ReadResponse(HttpWebResponse response)
-        {
-            return ReadStreamContent(response.GetResponseStream());
         }
 
         public static string ReadStreamContent(Stream stream)
@@ -208,20 +168,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     request.Headers[kvp.Key] = kvp.Value;
                 }
             }
-        }
-
-        public static void AddClientMetricsHeadersToRequest(IHttpWebRequest request)
-        {
-            if (!lastRequestMetricsExist)
-            {
-                return;
-            }
-
-            Dictionary<string, string> headers = new Dictionary<string, string>();
-            NetworkPlugin.RequestCreationHelper.AddClientMetricsParameters(headers, lastError, lastCorrelationId, lastResponseTime);
-
-            AddHeadersToRequest(request, headers);
-            lastRequestMetricsExist = false;
         }
     }
 }

@@ -31,17 +31,17 @@ namespace Test.ADAL.NET.Friend
             Initialize();
         }
 
+        public bool RecordClientMetrics
+        {
+            get { return false; }
+        }
+
         public RecorderRequestCreationHelper()
         {
             this.internalRequestCreationHelper = new RequestCreationHelper();
         }
 
         public void AddAdalIdParameters(IDictionary<string, string> parameters)
-        {
-            
-        }
-
-        public void AddClientMetricsParameters(IDictionary<string, string> parameters, string lastError, Guid lastCorrelationId, long lastResponseTime)
         {
             
         }

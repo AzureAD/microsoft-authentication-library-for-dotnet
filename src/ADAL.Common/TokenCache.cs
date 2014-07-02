@@ -19,10 +19,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
-#if ADAL_WINRT
-using Windows.Storage;
-#endif
 using System.Collections.Generic;
 using System.IO;
 
@@ -38,7 +34,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// Token cache class used by <see cref="AuthenticationContext"/> to store access and refresh tokens.
     /// </summary>
 #if ADAL_WINRT
-    public sealed class TokenCache
+    public sealed partial class TokenCache
 #else
     public class TokenCache
 #endif
@@ -272,6 +268,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.HasStateChanged = true;
+
+#if ADAL_WINRT
+            DefaultShared.HasStateChanged = true;
+            DefaultTokenCache_AfterAccess(null);
+#endif
         }
 
         /// <summary>
@@ -280,12 +281,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
 #if ADAL_WINRT
         public void Clear()
+        {
+            this.TokenCacheStore.Clear();
+            DefaultShared.HasStateChanged = true;
+            DefaultTokenCache_AfterAccess(null);
+        }
 #else
         public virtual void Clear()
-#endif
         {
             this.TokenCacheStore.Clear();
         }
+#endif
 
         internal void OnAfterAccess(TokenCacheNotificationArgs args)
         {
@@ -310,33 +316,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 BeforeWrite(args);
             }
         }
-
-#if ADAL_WINRT
-        private static void DefaultTokenCache_BeforeAccess(TokenCacheNotificationArgs args)
-        {
-            var localSettings = ApplicationData.Current.LocalSettings;
-            localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-            try
-            {
-                byte[] state = LocalSettingsHelper.GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
-                DefaultShared.Deserialize(state);
-            }
-            catch(Exception ex)
-            {
-                Logger.Information(null, "Failed to load cache: " + ex.Message);
-                // Ignore as the cache seems to be corrupt
-            }
-        }
-        private static void DefaultTokenCache_AfterAccess(TokenCacheNotificationArgs args)
-        {
-            if (DefaultShared.HasStateChanged)
-            {
-                var localSettings = ApplicationData.Current.LocalSettings;
-                localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-                LocalSettingsHelper.SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values, DefaultShared.Serialize());
-                DefaultShared.HasStateChanged = false;
-            }
-        }
-#endif
     }
 }

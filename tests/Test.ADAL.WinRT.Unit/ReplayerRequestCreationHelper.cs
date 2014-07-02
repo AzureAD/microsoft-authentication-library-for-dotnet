@@ -24,14 +24,14 @@ namespace Test.ADAL.WinRT.Unit
 {
     class ReplayerRequestCreationHelper : ReplayerBase, IRequestCreationHelper
     {
+        public bool RecordClientMetrics
+        {
+            get { return false; }
+        }
+
         public void AddAdalIdParameters(IDictionary<string, string> parameters)
         {
             
-        }
-
-        public void AddClientMetricsParameters(IDictionary<string, string> parameters, string lastError, Guid lastCorrelationId, long lastResponseTime)
-        {
-
         }
 
         public DateTime GetJsonWebTokenValidFrom()
