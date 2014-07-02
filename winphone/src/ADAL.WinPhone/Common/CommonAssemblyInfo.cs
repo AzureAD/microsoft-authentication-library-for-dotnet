@@ -17,8 +17,6 @@
 //----------------------------------------------------------------------
 
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 [assembly: AssemblyProduct("Active Directory Authentication Library")]
 [assembly: AssemblyDescription("")]
@@ -28,11 +26,11 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("Copyright (c) Microsoft Technologies. All rights reserved.")]
 [assembly: AssemblyTrademark("")]
 
-[assembly: AssemblyVersion("2.6.2.0")]
+[assembly: AssemblyVersion("2.7.0.0")]
 
 // Keep major and minor versions in AssemblyFileVersion in sync with AssemblyVersion.
 // Build and revision numbers are replaced on build machine for official builds.
-[assembly: AssemblyFileVersion("2.6.10605.1056")]
+[assembly: AssemblyFileVersion("2.7.10701.1955")]
 // On official build, attribute AssemblyInformationalVersionAttribute is added as well
 // with its value equal to the hash of the last commit to the git branch.
 // e.g.: [assembly: AssemblyInformationalVersionAttribute("4392c9835a38c27516fc0cd7bad7bccdcaeab161")]

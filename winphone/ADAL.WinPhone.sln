@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30324.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34FFBC9F-C270-4B10-98C8-F6882606DDFE}"
 EndProject
@@ -42,8 +42,8 @@ Global
 		{BDFC3241-0B81-47E2-94C1-A2D54F066E48}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BDFC3241-0B81-47E2-94C1-A2D54F066E48}.Release|ARM.ActiveCfg = Release|ARM
 		{BDFC3241-0B81-47E2-94C1-A2D54F066E48}.Release|ARM.Build.0 = Release|ARM
-		{BDFC3241-0B81-47E2-94C1-A2D54F066E48}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{BDFC3241-0B81-47E2-94C1-A2D54F066E48}.Release|Mixed Platforms.Build.0 = Release|x86
+		{BDFC3241-0B81-47E2-94C1-A2D54F066E48}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{BDFC3241-0B81-47E2-94C1-A2D54F066E48}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{BDFC3241-0B81-47E2-94C1-A2D54F066E48}.Release|Win32.ActiveCfg = Release|x86
 		{BDFC3241-0B81-47E2-94C1-A2D54F066E48}.Release|Win32.Build.0 = Release|x86
 		{BDFC3241-0B81-47E2-94C1-A2D54F066E48}.Release|x64.ActiveCfg = Release|Any CPU
@@ -67,9 +67,9 @@ Global
 		{B7BBE0BB-863A-41B6-9A3A-8B298DF3FE3E}.Release|ARM.ActiveCfg = Release|ARM
 		{B7BBE0BB-863A-41B6-9A3A-8B298DF3FE3E}.Release|ARM.Build.0 = Release|ARM
 		{B7BBE0BB-863A-41B6-9A3A-8B298DF3FE3E}.Release|ARM.Deploy.0 = Release|ARM
-		{B7BBE0BB-863A-41B6-9A3A-8B298DF3FE3E}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{B7BBE0BB-863A-41B6-9A3A-8B298DF3FE3E}.Release|Mixed Platforms.Build.0 = Release|x86
-		{B7BBE0BB-863A-41B6-9A3A-8B298DF3FE3E}.Release|Mixed Platforms.Deploy.0 = Release|x86
+		{B7BBE0BB-863A-41B6-9A3A-8B298DF3FE3E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B7BBE0BB-863A-41B6-9A3A-8B298DF3FE3E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B7BBE0BB-863A-41B6-9A3A-8B298DF3FE3E}.Release|Mixed Platforms.Deploy.0 = Release|Any CPU
 		{B7BBE0BB-863A-41B6-9A3A-8B298DF3FE3E}.Release|Win32.ActiveCfg = Release|x86
 		{B7BBE0BB-863A-41B6-9A3A-8B298DF3FE3E}.Release|Win32.Build.0 = Release|x86
 		{B7BBE0BB-863A-41B6-9A3A-8B298DF3FE3E}.Release|Win32.Deploy.0 = Release|x86
