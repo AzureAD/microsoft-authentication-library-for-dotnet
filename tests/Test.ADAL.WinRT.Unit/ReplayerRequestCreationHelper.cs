@@ -29,7 +29,7 @@ namespace Test.ADAL.WinRT.Unit
             
         }
 
-        public void AddClientMetricsParameters(IDictionary<string, string> parameters, string lastError, Guid lastCorrelationId, long lastResponseTime)
+        public void AddClientMetricsParameters(IDictionary<string, string> parameters)
         {
 
         }

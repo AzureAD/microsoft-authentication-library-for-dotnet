@@ -224,21 +224,29 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 HttpHelper.AddCorrelationIdHeadersToRequest(request, callState);
                 AdalIdHelper.AddAsHeaders(request);
 
+                HttpHelper.BeginClientMetricsRecord(request, callState);
+
                 using (var response = await request.GetResponseSyncOrAsync(callState))
                 {
                     HttpHelper.VerifyCorrelationIdHeaderInReponse(response, callState);
                     InstanceDiscoveryResponse discoveryResponse = HttpHelper.DeserializeResponse<InstanceDiscoveryResponse>(response);
+                    HttpHelper.SetLastError(null); 
                     return discoveryResponse.TenantDiscoveryEndpoint;
                 }
             }
             catch (WebException ex)
             {
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
+                HttpHelper.SetLastError(tokenResponse.ErrorCodes);
                 throw new AdalServiceException(
                     AdalError.AuthorityNotInValidList,
                     string.Format(CultureInfo.InvariantCulture, "{0}. {1} ({2}): {3}", 
                         AdalErrorMessage.AuthorityNotInValidList, tokenResponse.Error, host, tokenResponse.ErrorDescription), 
                     ex);
+            }
+            finally
+            {
+                HttpHelper.EndClientMetricsRecord("instance", callState);
             }
         }
 

@@ -149,14 +149,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal async Task CreateAuthenticatorAsync(CallState callState)
         {
+            if (callState != null)
+            {
+                callState.AuthorityType = this.authorityType;
+            }
+
             if (this.Authenticator == null)
             {
                 this.Authenticator = await AuthenticationMetadata.CreateAuthenticatorAsync(this.ValidateAuthority, this.Authority, callState, this.authorityType);
-            }
-
-            if (callState != null)
-            {
-                callState.AuthorityType = this.Authenticator.AuthorityType;
             }
         }
 

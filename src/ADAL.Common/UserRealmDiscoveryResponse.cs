@@ -57,15 +57,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 HttpHelper.AddCorrelationIdHeadersToRequest(request, callState);
                 AdalIdHelper.AddAsHeaders(request);
 
+                HttpHelper.BeginClientMetricsRecord(request, callState);
+
                 using (var response = await request.GetResponseSyncOrAsync(callState))
                 {
                     HttpHelper.VerifyCorrelationIdHeaderInReponse(response, callState);
                     userRealmResponse = HttpHelper.DeserializeResponse<UserRealmDiscoveryResponse>(response);
+                    HttpHelper.SetLastError(null);
                 }
             }
             catch (WebException ex)
             {
-                throw new AdalServiceException(AdalError.UserRealmDiscoveryFailed, ex);
+                var serviceException = new AdalServiceException(AdalError.UserRealmDiscoveryFailed, ex);
+                HttpHelper.SetLastError(new [] { serviceException.StatusCode.ToString() });
+                throw serviceException;
+            }
+            finally
+            {
+                HttpHelper.EndClientMetricsRecord("user_realm", callState);
             }
 
             return userRealmResponse;

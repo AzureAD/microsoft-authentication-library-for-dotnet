@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -128,7 +129,7 @@ namespace Test.ADAL.WinRT.Unit
                 }
             }
 
-            return null;
+            throw new Exception("There is no recorded response to replay");
         }
     }
 }

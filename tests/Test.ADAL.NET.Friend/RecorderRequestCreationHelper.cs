@@ -41,7 +41,7 @@ namespace Test.ADAL.NET.Friend
             
         }
 
-        public void AddClientMetricsParameters(IDictionary<string, string> parameters, string lastError, Guid lastCorrelationId, long lastResponseTime)
+        public void AddClientMetricsParameters(IDictionary<string, string> parameters)
         {
             
         }
