@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     returnValue = false;
                 }
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 //if the machine is not domain joined or the request times out, this exception is thrown.
                 returnValue = false;
