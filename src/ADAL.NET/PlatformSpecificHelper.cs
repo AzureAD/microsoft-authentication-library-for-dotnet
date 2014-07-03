@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static bool IsDomainJoined()
         {
-            bool returnValue = true;
+            bool returnValue = false;
             IntPtr pDomain = IntPtr.Zero;
             try
             {
@@ -62,22 +62,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     NativeMethods.NetApiBufferFree(pDomain);
                 }
-                if (result == NativeMethods.ErrorSuccess)
-                {
-                    if (status != NativeMethods.NetJoinStatus.NetSetupDomainName)
-                    {
-                        returnValue = false;
-                    }
-                }
-                else
-                {
-                    returnValue = false;
-                }
+
+                returnValue = result == NativeMethods.ErrorSuccess &&
+                              status == NativeMethods.NetJoinStatus.NetSetupDomainName;
             }
             catch (Exception)
             {
-                //if the machine is not domain joined or the request times out, this exception is thrown.
-                returnValue = false;
+                // ignore the exception as the result is already set to false;
             }
             finally
             {
