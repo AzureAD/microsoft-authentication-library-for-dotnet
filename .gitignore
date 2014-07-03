@@ -18,3 +18,4 @@ TestResults/
 !.nuget/NuGet.exe
 winphone/src/ADAL.WinPhone/obj/
 winphone/tests/Test.ADAL.WinPhone.UnitTest/obj/
+winphone/src/ADAL.WinPhone/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
