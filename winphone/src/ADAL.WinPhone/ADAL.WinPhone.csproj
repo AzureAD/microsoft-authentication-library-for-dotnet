@@ -86,6 +86,9 @@
     <None Include="35MSSharedLib1024.snk" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\src\ADAL.Common\CommonAssemblyInfo.cs">
+      <Link>Common\CommonAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="AdalEventSource.cs" />
     <Compile Include="AdalTrace.cs" />
     <Compile Include="AuthenticationContext.cs" />
@@ -102,7 +105,6 @@
     <Compile Include="Common\AuthorizationResult.cs" />
     <Compile Include="Common\Base64UrlEncoder.cs" />
     <Compile Include="Common\CallState.cs" />
-    <Compile Include="Common\CommonAssemblyInfo.cs" />
     <Compile Include="Common\Constants.cs" />
     <Compile Include="Common\DateTimeHelper.cs" />
     <Compile Include="Common\EncodingHelper.cs" />
