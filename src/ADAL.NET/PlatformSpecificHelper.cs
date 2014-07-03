@@ -52,15 +52,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static bool IsDomainJoined()
         {
-            bool returnValue = true;
+            bool returnValue = false;
+            IntPtr pDomain = IntPtr.Zero;
             try
             {
-                Domain.GetComputerDomain();
+                NativeMethods.NetJoinStatus status = NativeMethods.NetJoinStatus.NetSetupUnknownStatus;
+                int result = NativeMethods.NetGetJoinInformation(null, out pDomain, out status);
+                if (pDomain != IntPtr.Zero)
+                {
+                    NativeMethods.NetApiBufferFree(pDomain);
+                }
+
+                returnValue = result == NativeMethods.ErrorSuccess &&
+                              status == NativeMethods.NetJoinStatus.NetSetupDomainName;
             }
-            catch (ActiveDirectoryObjectNotFoundException)
+            catch (Exception)
             {
-                //if the machine is not domain joined or the request times out, this exception is thrown.
-                returnValue = false;
+                // ignore the exception as the result is already set to false;
+            }
+            finally
+            {
+                pDomain = IntPtr.Zero;
             }
             return returnValue;
         }
@@ -85,10 +97,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
                 }
 
-                StringBuilder sb = new StringBuilder((int)userNameSize);
+                StringBuilder sb = new StringBuilder((int) userNameSize);
                 if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
                 {
-                    throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));                    
+                    throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
                 }
 
                 userId = sb.ToString();
@@ -109,9 +121,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static class NativeMethods
         {
-            [DllImport("secur32.dll", CharSet = CharSet.Unicode, SetLastError=true)]
+            [DllImport("secur32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
             [return: MarshalAs(UnmanagedType.U1)]
             public static extern bool GetUserNameEx(int nameFormat, StringBuilder userName, ref uint userNameSize);
+
+            public const int ErrorSuccess = 0;
+
+            [DllImport("Netapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+            public static extern int NetGetJoinInformation(string server, out IntPtr domain, out NetJoinStatus status);
+
+            [DllImport("Netapi32.dll")]
+            public static extern int NetApiBufferFree(IntPtr Buffer);
+
+            public enum NetJoinStatus
+            {
+                NetSetupUnknownStatus = 0,
+                NetSetupUnjoined,
+                NetSetupWorkgroupName,
+                NetSetupDomainName
+            }
         }
     }
 }
