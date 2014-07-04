@@ -18,7 +18,6 @@
 
 using System;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using Test.ADAL.WinRT;
 

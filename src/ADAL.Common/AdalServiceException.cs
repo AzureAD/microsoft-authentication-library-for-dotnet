@@ -17,7 +17,6 @@
 //----------------------------------------------------------------------
 
 using System.Net;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
 #if ADAL_WINRT

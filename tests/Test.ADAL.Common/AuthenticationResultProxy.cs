@@ -17,14 +17,14 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 using System.Text;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.Common
 {
-    using System.IO;
-    using System.Runtime.Serialization;
-    using System.Runtime.Serialization.Json;
-
     internal enum TokenCacheStoreType
     {
         Null,
@@ -35,8 +35,10 @@ namespace Test.ADAL.Common
     {
         NotSpecified,
         Always,
+        Auto,
         AccessCodeOnly,
-        Never
+        Never,
+        RefreshSession
     }
 
     internal enum AuthenticationStatusProxy
@@ -59,13 +61,16 @@ namespace Test.ADAL.Common
         public string RefreshToken { get; set; }
 
         [DataMember]
+        public string IdToken { get; set; }
+
+        [DataMember]
         public DateTimeOffset ExpiresOn { get; set; }
 
         [DataMember]
         public string TenantId { get; set; }
 
         [DataMember]
-        public UserInfoProxy UserInfo { get; set; }
+        public UserInfo UserInfo { get; set; }
 
         [DataMember]
         public bool IsMultipleResourceRefreshToken { get; set; }

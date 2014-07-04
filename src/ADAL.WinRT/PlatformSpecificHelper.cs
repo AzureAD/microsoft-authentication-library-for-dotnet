@@ -16,6 +16,10 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Windows.Networking;
 using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
 using Windows.Storage;
@@ -47,6 +51,42 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return input.ToLower();
         }
 
+        public async static Task<bool> IsUserLocal()
+        {
+            if (!Windows.System.UserProfile.UserInformation.NameAccessAllowed)
+            {
+                throw new AdalException(AdalError.CannotAccessUserInformation);
+            }
+
+            try
+            {
+                return string.IsNullOrEmpty(await Windows.System.UserProfile.UserInformation.GetDomainNameAsync());
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // This mostly means Enterprise capability is missing, so WIA cannot be used and
+                // we return true to add form auth parameter in the caller.
+                return true;
+            }
+        }
+
+        public async static Task<string> GetUserPrincipalNameAsync()
+        {
+            if (!Windows.System.UserProfile.UserInformation.NameAccessAllowed)
+            {
+                throw new AdalException(AdalError.CannotAccessUserInformation);
+            }
+
+            try
+            {
+                return await Windows.System.UserProfile.UserInformation.GetPrincipalNameAsync();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                throw new AdalException(AdalError.UnauthorizedUserInformationAccess, ex);
+            }
+        }
+
         internal static string CreateSha256Hash(string input)
         {
             IBuffer inputBuffer = CryptographicBuffer.ConvertStringToBinary(input, BinaryStringEncoding.Utf8);
@@ -55,6 +95,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             IBuffer hashed = hasher.HashData(inputBuffer);
 
             return CryptographicBuffer.EncodeToBase64String(hashed);
+        }
+
+        public static bool IsDomainJoined()
+        {
+            IReadOnlyList<HostName> hostNamesList = Windows.Networking.Connectivity.NetworkInformation
+                .GetHostNames();
+
+            foreach (var entry in hostNamesList)
+            {
+                if (entry.Type == Windows.Networking.HostNameType.DomainName)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

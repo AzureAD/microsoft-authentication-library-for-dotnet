@@ -22,7 +22,6 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Timer = System.Windows.Forms.Timer;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {

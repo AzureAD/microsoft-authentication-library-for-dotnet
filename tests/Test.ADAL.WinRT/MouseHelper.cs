@@ -16,10 +16,9 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.Runtime.InteropServices;
 using System.Windows.Automation;
-using System.Windows.Forms;
-using System;
 
 namespace Test.ADAL.WinRT
 {

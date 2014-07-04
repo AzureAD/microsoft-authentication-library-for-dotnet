@@ -46,13 +46,11 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
     <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -91,6 +89,12 @@
     </Compile>
     <Compile Include="..\ADAL.Common\CallState.cs">
       <Link>Common\CallState.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\ClientKey.cs">
+      <Link>Common\ClientKey.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\ClientMetrics.cs">
+      <Link>Common\ClientMetrics.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>Common\CommonAssemblyInfo.cs</Link>
@@ -167,8 +171,14 @@
     <Compile Include="..\ADAL.Common\RequestParameters.cs">
       <Link>Common\RequestParameters.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\TokenCache.cs">
+      <Link>Common\TokenCache.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\TokenCacheHelper.cs">
       <Link>Common\TokenCacheHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\TokenCacheItem.cs">
+      <Link>Common\TokenCacheItem.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\TokenCacheKey.cs">
       <Link>Common\TokenCacheKey.cs</Link>
@@ -176,11 +186,17 @@
     <Compile Include="..\ADAL.Common\TokenCacheManager.cs">
       <Link>Common\TokenCacheManager.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\TokenCacheNotificationArgs.cs">
+      <Link>Common\TokenCacheNotificationArgs.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\UserAssertion.cs">
       <Link>Common\UserAssertion.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\UserCredential.cs">
       <Link>Common\UserCredential.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\UserIdentifier.cs">
+      <Link>Common\UserIdentifier.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\UserInfo.cs">
       <Link>Common\UserInfo.cs</Link>
@@ -198,6 +214,7 @@
     <Compile Include="AuthenticationParameters.cs" />
     <Compile Include="AuthenticationResult.cs" />
     <Compile Include="ClientAssertion.cs" />
+    <Compile Include="ClientAssertionCertificate.cs" />
     <Compile Include="ClientCredential.cs" />
     <Compile Include="ClientKey.cs" />
     <Compile Include="CryptographyHelper.cs" />
@@ -215,7 +232,6 @@
     <Compile Include="Web\IWebUI.cs" />
     <Compile Include="Web\IWebUIFactory.cs" />
     <Compile Include="Web\WebUIFactory.cs" />
-    <Compile Include="X509CertificateCredential.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

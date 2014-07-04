@@ -56,6 +56,30 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, unprotectedBuffer);
         }
 
+        public static byte[] Encrypt(byte[] message)
+        {
+            if (message == null)
+            {
+                return null;
+            }
+
+            DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
+            IBuffer protectedBuffer = RunAsyncTaskAndWait(dataProtectionProvider.ProtectAsync(message.AsBuffer()).AsTask());
+            return protectedBuffer.ToArray(0, (int)protectedBuffer.Length);
+        }
+
+        public static byte[] Decrypt(byte[] encryptedMessage)
+        {
+            if (encryptedMessage == null)
+            {
+                return null;
+            }
+
+            DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
+            IBuffer buffer = RunAsyncTaskAndWait(dataProtectionProvider.UnprotectAsync(encryptedMessage.AsBuffer()).AsTask());
+            return buffer.ToArray(0, (int)buffer.Length);
+        }
+
         private static T RunAsyncTaskAndWait<T>(Task<T> task)
         {
             try

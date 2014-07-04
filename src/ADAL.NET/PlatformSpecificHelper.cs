@@ -17,8 +17,12 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
+using System.DirectoryServices.ActiveDirectory;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Security.Principal;
 using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -46,6 +50,65 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return input.ToLower(CultureInfo.InvariantCulture);
         }
 
+        public static bool IsDomainJoined()
+        {
+            bool returnValue = false;
+            IntPtr pDomain = IntPtr.Zero;
+            try
+            {
+                NativeMethods.NetJoinStatus status = NativeMethods.NetJoinStatus.NetSetupUnknownStatus;
+                int result = NativeMethods.NetGetJoinInformation(null, out pDomain, out status);
+                if (pDomain != IntPtr.Zero)
+                {
+                    NativeMethods.NetApiBufferFree(pDomain);
+                }
+
+                returnValue = result == NativeMethods.ErrorSuccess &&
+                              status == NativeMethods.NetJoinStatus.NetSetupDomainName;
+            }
+            catch (Exception)
+            {
+                // ignore the exception as the result is already set to false;
+            }
+            finally
+            {
+                pDomain = IntPtr.Zero;
+            }
+            return returnValue;
+        }
+
+        public static bool IsUserLocal()
+        {
+            string prefix = WindowsIdentity.GetCurrent().Name.Split('\\')[0].ToUpperInvariant();
+            return prefix.Equals(Environment.MachineName.ToUpperInvariant());
+        }
+
+        public static string GetUserPrincipalName()
+        {
+            string userId = System.DirectoryServices.AccountManagement.UserPrincipal.Current.UserPrincipalName;
+
+            // On some machines, UserPrincipalName returns null
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                const int NameUserPrincipal = 8;
+                uint userNameSize = 0;
+                if (!NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize))
+                {
+                    throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                }
+
+                StringBuilder sb = new StringBuilder((int) userNameSize);
+                if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
+                {
+                    throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                }
+
+                userId = sb.ToString();
+            }
+
+            return userId;
+        }
+
         internal static string CreateSha256Hash(string input)
         {
             SHA256 sha256 = SHA256Managed.Create();
@@ -54,6 +117,29 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             byte[] hashBytes = sha256.ComputeHash(inputBytes);
             string hash = Convert.ToBase64String(hashBytes);
             return hash;
+        }
+
+        private static class NativeMethods
+        {
+            [DllImport("secur32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.U1)]
+            public static extern bool GetUserNameEx(int nameFormat, StringBuilder userName, ref uint userNameSize);
+
+            public const int ErrorSuccess = 0;
+
+            [DllImport("Netapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+            public static extern int NetGetJoinInformation(string server, out IntPtr domain, out NetJoinStatus status);
+
+            [DllImport("Netapi32.dll")]
+            public static extern int NetApiBufferFree(IntPtr Buffer);
+
+            public enum NetJoinStatus
+            {
+                NetSetupUnknownStatus = 0,
+                NetSetupUnjoined,
+                NetSetupWorkgroupName,
+                NetSetupDomainName
+            }
         }
     }
 }

@@ -16,10 +16,11 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+
 namespace Test.ADAL.Common
 {
-    using System;
-
     public enum StsType
     {
         Unknown,
@@ -74,8 +75,8 @@ namespace Test.ADAL.Common
             this.ValidDefaultRedirectUri = new Uri("https://non_existing_uri.com/");
             this.InvalidExistingRedirectUri = new Uri("https://skydrive.live.com/");
             this.InvalidNonExistingRedirectUri = new Uri("https://invalid_non_existing_uri.com/");
-            this.ConfidentialClientCertificateName = "valid_cert";
-            this.InvalidConfidentialClientCertificateName = "invalid_cert";
+            this.ConfidentialClientCertificateName = "valid_cert.pfx";
+            this.InvalidConfidentialClientCertificateName = "invalid_cert.pfx";
             this.ConfidentialClientCertificatePassword = "password";
             this.InvalidConfidentialClientCertificatePassword = "password";
         }
@@ -118,9 +119,25 @@ namespace Test.ADAL.Common
 
         public Uri ValidRedirectUriForConfidentialClient { get; set; }
 
-        public string ValidUserId { get; protected set; }
+        public string ValidUserName { get; protected set; }
 
-        public string ValidUserId2 { get; protected set; }
+        public UserIdentifier ValidUserId
+        {
+            get
+            {
+                return new UserIdentifier(ValidUserName, UserIdentifierType.OptionalDisplayableId);
+            }
+        }
+
+        public string ValidUserName2 { get; protected set; }
+
+        public UserIdentifier ValidRequiredUserId2
+        {
+            get
+            {
+                return new UserIdentifier(ValidUserName2, UserIdentifierType.RequiredDisplayableId);
+            }
+        }
 
         public string ValidPassword { get; set; }
 
@@ -144,9 +161,17 @@ namespace Test.ADAL.Common
 
         public string InvalidConfidentialClientCertificatePassword { get; set; }
 
-        public string InvalidUserId 
+        public string InvalidUserName 
         { 
-            get { return this.ValidUserId + "x"; } 
+            get { return this.ValidUserName + "x"; } 
+        }
+
+        public UserIdentifier InvalidRequiredUserId
+        {
+            get
+            {
+                return new UserIdentifier(InvalidUserName, UserIdentifierType.RequiredDisplayableId);
+            }
         }
 
         public string ValidNonExistentRedirectUriClientId { get; set; }
@@ -176,10 +201,10 @@ namespace Test.ADAL.Common
             this.ValidNonExistentRedirectUriClientId = this.ValidClientId;
             this.ValidClientIdWithExistingRedirectUri = "5c0986db-8d89-4442-b5f9-d281efae9bad";
             this.ValidConfidentialClientId = "9083ccb8-8a46-43e7-8439-1d696df984ae";
-            this.ValidConfidentialClientSecret = "client_secret";
+            this.ValidConfidentialClientSecret = "n+ZC/7zWCv7JDA+QsujTChJSC/ppt0iWXBFYSsaU+Ws=";
             this.ValidWinRTClientId = "786067bc-40cc-4171-be40-a73b2d05a461";
-            this.ValidUserId = "admin@aaltests.onmicrosoft.com";
-            this.ValidUserId2 = "user@aaltests.onmicrosoft.com";
+            this.ValidUserName = "admin@aaltests.onmicrosoft.com";
+            this.ValidUserName2 = "user@aaltests.onmicrosoft.com";
             this.ValidDefaultRedirectUri = new Uri("https://non_existing_uri.com/");
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
             this.ValidRedirectUriForConfidentialClient = new Uri("https://non_existing_uri_for_confidential_client.com/");
@@ -211,7 +236,7 @@ namespace Test.ADAL.Common
             this.ValidNonExistingRedirectUri = new Uri("https://non_existing_uri.com/");
             this.ValidDefaultRedirectUri = new Uri("https://login.live.com/");
             this.ValidExpiresIn = 3600;
-            this.ValidUserId = @"bahush.info\test";
+            this.ValidUserName = @"bahush.info\test";
             this.ValidConfidentialClientId = this.ValidClientId;
             this.ValidRedirectUriForConfidentialClient = this.ValidExistingRedirectUri;
             this.ValidPassword = "<REPLACE>";
@@ -234,7 +259,7 @@ namespace Test.ADAL.Common
             this.ValidNonExistingRedirectUri = new Uri("https://DontApply.com");
             this.ValidDefaultRedirectUri = new Uri("https://login.live.com/");
             this.ValidExpiresIn = 25000;
-            this.ValidUserId = @"test@bahush.info";
+            this.ValidUserName = @"test@bahush.info";
             this.ValidConfidentialClientId = this.ValidClientId;
             this.ValidRedirectUriForConfidentialClient = this.ValidExistingRedirectUri;
             this.ValidPassword = "<REPLACE>";

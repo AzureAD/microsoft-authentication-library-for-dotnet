@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,12 +16,17 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-namespace Test.ADAL.Common
+using Windows.Security.Authentication.Web;
+
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public sealed class X509CertificateCredentialProxy
+    internal class AdalWebAuthenticationResult
     {
-        public X509CertificateCredentialProxy(string clientId, string certificateName, string certificatePassword)
-        {
-        }
+
+        public string ResponseData { get; set; }
+
+        public uint ResponseErrorDetail { get; set; }
+
+        public WebAuthenticationStatus ResponseStatus { get; set; }
     }
 }

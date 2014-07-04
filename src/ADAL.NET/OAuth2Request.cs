@@ -18,7 +18,6 @@
 
 using System;
 using System.Threading.Tasks;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -26,52 +25,44 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
     internal static partial class OAuth2Request
     {
-        public static AuthorizationResult SendAuthorizeRequest(Authenticator authenticator, string resource, Uri redirectUri, string clientId, string userId, PromptBehavior promptBehavior, string extraQueryParameters, IWebUI webUi, CallState callState)
+        public static AuthorizationResult SendAuthorizeRequest(Authenticator authenticator, string resource, Uri redirectUri, string clientId, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, IWebUI webUi, CallState callState)
         {
             if (!string.IsNullOrWhiteSpace(redirectUri.Fragment))
             {
                 throw new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
 
-            Uri authorizationUri = CreateAuthorizationUri(authenticator, resource, redirectUri, clientId, userId, promptBehavior, extraQueryParameters, callState);
+            Uri authorizationUri = CreateAuthorizationUri(authenticator, resource, redirectUri, clientId, userId, promptBehavior, extraQueryParameters, IncludeFormsAuthParams(), callState);
             string resultUri = webUi.Authenticate(authorizationUri, redirectUri);
             return OAuth2Response.ParseAuthorizeResponse(resultUri, callState);
         }
 
         public static async Task<AuthenticationResult> SendTokenRequestAsync(string uri, string code, Uri redirectUri, string resource, ClientKey clientKey, string audience, CallState callState)
         {
-            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(code, redirectUri, resource, clientKey);
+            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(code, redirectUri, resource, clientKey, audience);
 
             AuthenticationResult result = await SendHttpMessageAsync(uri, requestParameters, callState);
             return result;
         }
 
-        public static async Task<AuthenticationResult> SendTokenRequestAsync(string uri, string resource, ClientKey clientKey, CallState callState)
+        public static async Task<AuthenticationResult> SendTokenRequestAsync(string uri, string resource, ClientKey clientKey, string audience, CallState callState)
         {
-            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(resource, clientKey);
+            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(resource, clientKey, audience);
 
             AuthenticationResult result = await SendHttpMessageAsync(uri, requestParameters, callState);
             return result;
         }
 
-        internal static async Task<AuthenticationResult> SendTokenRequestByRefreshTokenAsync(string uri, string resource, string refreshToken, string clientId, ClientKey clientKey, CallState callState)
+        internal static async Task<AuthenticationResult> SendTokenRequestOnBehalfAsync(string uri, string resource, UserAssertion userCredential, ClientKey clientKey, string audience, CallState callState)
         {
-            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(resource, refreshToken, clientId, clientKey);
+            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(resource, userCredential, clientKey, audience);
             AuthenticationResult result = await SendHttpMessageAsync(uri, requestParameters, callState);
-
-            if (result.RefreshToken == null)
-            {
-                result.RefreshToken = refreshToken;
-            }
-
             return result;
         }
 
-        internal static async Task<AuthenticationResult> SendTokenRequestOnBehalfAsync(string uri, string resource, UserAssertion userCredential, ClientKey clientKey, CallState callState)
+        public static bool IncludeFormsAuthParams()
         {
-            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(resource, userCredential, clientKey);
-            AuthenticationResult result = await SendHttpMessageAsync(uri, requestParameters, callState);
-            return result;
+            return PlatformSpecificHelper.IsUserLocal() && PlatformSpecificHelper.IsDomainJoined();
         }
     }
 }

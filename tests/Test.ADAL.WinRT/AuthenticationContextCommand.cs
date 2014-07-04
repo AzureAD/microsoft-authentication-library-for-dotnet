@@ -18,18 +18,28 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Threading.Tasks;
+using Test.ADAL.Common;
 
 namespace Test.ADAL.WinRT
 {
-    using System.IO;
-    using System.Runtime.Serialization;
-    using System.Runtime.Serialization.Json;
-
-    using Test.ADAL.Common;
-
+    /// <summary>
+    /// To indicate what API was called in the test app
+    /// Acronyms used:
+    /// A: Authority
+    /// V: ValidateAuthority
+    /// T: Token Cache
+    /// R: Resource
+    /// C: ClientId
+    /// Re: RedirectUri
+    /// P: PromptBehavior
+    /// U: UserId/UserName
+    /// Pa: Password
+    /// X: ExtraQueryParameters
+    /// </summary>
     enum CommandType
     {
         ClearDefaultTokenCache,
@@ -39,17 +49,16 @@ namespace Test.ADAL.WinRT
         SetUseCorporateNetwork,
         CreateContextA,
         CreateContextAV,
-        CreateContextAVC,
+        CreateContextAVT,
         AquireTokenAsyncRC,
         AquireTokenAsyncRCP,
-        AquireTokenAsyncRCUP,
-        AquireTokenAsyncRCR,
-        AquireTokenAsyncRCRU,
-        AquireTokenAsyncRCRP,
-        AquireTokenAsyncRCRPU,
+        AquireTokenAsyncRCUPa,
+        AquireTokenAsyncRCRe,
+        AquireTokenAsyncRCReP,
+        AquireTokenAsyncRCRePU,
         AcquireTokenByRefreshTokenAsyncRC,
-        AcquireTokenByRefreshTokenAsyncRCR,
-        AquireTokenAsyncRCRUX,
+        AcquireTokenByRefreshTokenAsyncRCRe,
+        AquireTokenAsyncRCRePUX,
         CreateFromResourceUrlAsync,
         CreateFromResponseAuthenticateHeader,
     }
@@ -79,7 +88,7 @@ namespace Test.ADAL.WinRT
         public Uri RedirectUri { get; set; }
 
         [DataMember]
-        public string UserId { get; set; }
+        public string UserName { get; set; }
 
         [DataMember]
         public string Password { get; set; }

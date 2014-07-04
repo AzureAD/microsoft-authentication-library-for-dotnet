@@ -28,27 +28,29 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Constructor to create credential with a jwt token encoded as a base64 url encoded string.
         /// </summary>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="assertion">The jwt used as credential.</param>
-        public ClientAssertion(string assertion)
-            : this(assertion, OAuthAssertionType.JwtBearer)
+        public ClientAssertion(string clientId, string assertion)
         {
-        }
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                throw new ArgumentNullException("clientId");
+            }
 
-        internal ClientAssertion(string assertion, string assertionType)
-        {
             if (string.IsNullOrWhiteSpace(assertion))
             {
                 throw new ArgumentNullException("assertion");
             }
 
-            if (string.IsNullOrWhiteSpace(assertionType))
-            {
-                throw new ArgumentNullException("assertionType");
-            }
-
-            this.AssertionType = assertionType;
+            this.ClientId = clientId;
+            this.AssertionType = OAuthAssertionType.JwtBearer;
             this.Assertion = assertion;
         }
+
+        /// <summary>
+        /// Gets the identifier of the client requesting the token.
+        /// </summary>
+        public string ClientId { get; private set; }
 
         /// <summary>
         /// Gets the assertion.

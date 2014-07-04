@@ -20,9 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-
 using Test.ADAL.Common;
 
 namespace Test.ADAL.NET.Friend

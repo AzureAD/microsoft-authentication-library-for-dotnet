@@ -86,6 +86,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (authorityType == AuthorityType.Unknown)
             {
                 authorityType = DetectAuthorityType(authority);
+                if (callState != null)
+                {
+                    callState.AuthorityType = authorityType;
+                }
             }
 
             if (authorityType != AuthorityType.AAD && validateAuthority)
@@ -213,6 +217,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             instanceDiscoveryEndpoint = HttpHelper.CheckForExtraQueryParameter(instanceDiscoveryEndpoint);
 
+            ClientMetrics clientMetrics = new ClientMetrics();
+
             try
             {
                 IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(instanceDiscoveryEndpoint);
@@ -220,21 +226,29 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 HttpHelper.AddCorrelationIdHeadersToRequest(request, callState);
                 AdalIdHelper.AddAsHeaders(request);
 
+                clientMetrics.BeginClientMetricsRecord(request, callState);
+
                 using (var response = await request.GetResponseSyncOrAsync(callState))
                 {
                     HttpHelper.VerifyCorrelationIdHeaderInReponse(response, callState);
                     InstanceDiscoveryResponse discoveryResponse = HttpHelper.DeserializeResponse<InstanceDiscoveryResponse>(response);
+                    clientMetrics.SetLastError(null); 
                     return discoveryResponse.TenantDiscoveryEndpoint;
                 }
             }
             catch (WebException ex)
             {
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
+                clientMetrics.SetLastError(tokenResponse.ErrorCodes);
                 throw new AdalServiceException(
                     AdalError.AuthorityNotInValidList,
                     string.Format(CultureInfo.InvariantCulture, "{0}. {1} ({2}): {3}", 
                         AdalErrorMessage.AuthorityNotInValidList, tokenResponse.Error, host, tokenResponse.ErrorDescription), 
                     ex);
+            }
+            finally
+            {
+                clientMetrics.EndClientMetricsRecord(ClientMetricsEndpointType.InstanceDiscovery, callState);
             }
         }
 

@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,18 +16,34 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Security.Cryptography.X509Certificates;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text;
+
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace Test.ADAL.Common
+namespace Test.ADAL.WinPhone.UnitTest
 {
-    public sealed class X509CertificateCredentialProxy
+    class ReplayerHttpWebRequestFactory : IHttpWebRequestFactory
     {
-        public X509CertificateCredentialProxy(string clientId, string certificateName, string certificatePassword)
+
+        public ReplayerHttpWebRequest UserProvidedHttpWebRequest { get; set; }
+
+        public IHttpWebRequest Create(string uri)
         {
-            this.Credential = new X509CertificateCredential(clientId, new X509Certificate2(certificateName + ".pfx", certificatePassword));
+            if (UserProvidedHttpWebRequest != null)
+            {
+                return UserProvidedHttpWebRequest;
+            }
+
+            return new ReplayerHttpWebRequest(uri);
         }
 
-        public X509CertificateCredential Credential { get; set; }
+        public IHttpWebResponse CreateResponse(WebResponse response)
+        {
+            return new ReplayerHttpWebResponse(response);
+        }
     }
 }

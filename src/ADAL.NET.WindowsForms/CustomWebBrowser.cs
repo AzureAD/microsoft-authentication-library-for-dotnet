@@ -17,8 +17,9 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Windows.Forms;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
@@ -30,6 +31,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         private AxHost.ConnectionPointCookie webBrowserEventCookie;
         private CustomWebBrowserEvent webBrowserEvent;
+        private static readonly HashSet<Shortcut> shortcutBlacklist = new HashSet<Shortcut>();
+
+        static CustomWebBrowser()
+        {
+            shortcutBlacklist.Add(Shortcut.AltBksp);
+            shortcutBlacklist.Add(Shortcut.AltDownArrow);
+            shortcutBlacklist.Add(Shortcut.AltLeftArrow);
+            shortcutBlacklist.Add(Shortcut.AltRightArrow);
+            shortcutBlacklist.Add(Shortcut.AltUpArrow);
+        }
 
         [ComVisible(true), ComDefaultInterface(typeof(NativeWrapper.IDocHostUIHandler))]
         protected class CustomSite : WebBrowserSite, NativeWrapper.IDocHostUIHandler, ICustomQueryInterface
@@ -136,17 +147,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             public int ShowContextMenu(int dwID, NativeWrapper.POINT pt, object pcmdtReserved, object pdispReserved)
             {
-                WebBrowser host = this.host;
-                if (host.IsWebBrowserContextMenuEnabled)
+                switch (dwID)
                 {
-                    return S_FALSE;
+                    // http://msdn.microsoft.com/en-us/library/aa753264(v=vs.85).aspx
+                    case 0x2: // this is edit CONTEXT_MENU_CONTROL
+                    case 0x4: // selected text CONTEXT_MENU_TEXTSELECT
+                    case 0x9: // CONTEXT_MENU_VSCROLL
+                    case 0x10: //CONTEXT_MENU_HSCROLL
+                         return S_FALSE; // allow to show menu; Host did not display its UI. MSHTML will display its UI.
+                        
                 }
-                if ((pt.x == 0) && (pt.y == 0))
-                {
-                    pt.x = -1;
-                    pt.y = -1;
-                }
-                //host.ShowContextMenu( pt.x, pt.y );
                 return S_OK;
             }
 
@@ -157,15 +167,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             public int TranslateAccelerator(ref NativeWrapper.MSG msg, ref Guid group, int nCmdID)
             {
-                WebBrowser host = this.host;
-                if (!host.WebBrowserShortcutsEnabled)
+                if (msg.message != WM_CHAR)
                 {
-                    int num = ((int)msg.wParam) | (int)ModifierKeys;
-                    if ((msg.message != WM_CHAR) && Enum.IsDefined(typeof(Shortcut), (Shortcut)num))
+                    if (ModifierKeys == Keys.Shift || ModifierKeys == Keys.Alt || ModifierKeys == Keys.Control)
                     {
-                        return S_OK;
+                        int num = ((int) msg.wParam) | (int) ModifierKeys;
+                        Shortcut s = (Shortcut) num;
+                        if (shortcutBlacklist.Contains(s))
+                        {
+                            return S_OK;
+                        }
                     }
                 }
+
                 return S_FALSE;
             }
 
@@ -232,6 +246,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 this.NavigateError(this, e);
             }
         }
+        
 
         public event WebBrowserNavigateErrorEventHandler NavigateError;
     }

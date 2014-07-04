@@ -18,22 +18,26 @@
 
 using System;
 using System.Threading.Tasks;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     static partial class OAuth2Request
     {
-        public static async Task<AuthorizationResult> SendAuthorizeRequestAsync(Authenticator authenticator, string resource, Uri redirectUri, string clientId, string userId, PromptBehavior promptBehavior, string extraQueryParameters, IWebUI webUI, CallState callState)
+        public static async Task<AuthorizationResult> SendAuthorizeRequestAsync(Authenticator authenticator, string resource, Uri redirectUri, string clientId, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, IWebUI webUI, CallState callState)
         {
             if (!string.IsNullOrWhiteSpace(redirectUri.Fragment))
             {
                 throw new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
-
-            Uri authorizationUri = CreateAuthorizationUri(authenticator, resource, redirectUri, clientId, userId, promptBehavior, extraQueryParameters, callState);
+            
+            Uri authorizationUri = CreateAuthorizationUri(authenticator, resource, redirectUri, clientId, userId, promptBehavior, extraQueryParameters, await IncludeFormsAuthParamsAsync(), callState);
             return await webUI.AuthenticateAsync(authorizationUri, redirectUri, callState);
+        }
+
+        public static async Task<bool> IncludeFormsAuthParamsAsync()
+        {
+            return PlatformSpecificHelper.IsDomainJoined() && await PlatformSpecificHelper.IsUserLocal();
         }
     }
 }

@@ -16,12 +16,11 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-
 using Test.ADAL.Common;
 
 namespace Test.ADAL.WinRT.Unit
@@ -130,7 +129,7 @@ namespace Test.ADAL.WinRT.Unit
                 }
             }
 
-            return null;
+            throw new Exception("There is no recorded response to replay");
         }
     }
 }

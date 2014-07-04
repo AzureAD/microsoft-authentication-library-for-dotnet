@@ -18,7 +18,6 @@
 
 using System;
 using System.Threading.Tasks;
-
 using Windows.Storage;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
@@ -45,6 +44,15 @@ namespace Test.ADAL.WinRT.Unit
         {
             CommonUnitTests.AdalIdTest();
         }
+        
+        [TestMethod]
+        [TestCategory("AdalWinRTUnit")]
+        //[Description("Test to verify forms auth parameters.")]
+        public async Task IncludeFormsAuthParamsTest()
+        {
+            Verify.IsFalse(await OAuth2Request.IncludeFormsAuthParamsAsync());
+        }
+
 
         [TestMethod]
         [TestCategory("AdalWinRTUnit")]

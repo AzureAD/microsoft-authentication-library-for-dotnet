@@ -16,34 +16,43 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Test.ADAL.NET.Friend;
+using System;
+using System.Collections.Generic;
 
 namespace Test.ADAL.Common
 {
-    public sealed class ClientAssertionProxy
+    public abstract class AdalTestsBase
     {
-        public ClientAssertionProxy(string assertion)
+        static AdalTestsBase()
         {
-            this.Credential = new ClientAssertion(assertion);
+            StsDictionary = new Dictionary<StsType, Sts>();
         }
 
-        public ClientAssertion Credential { get; set; }
+        public static Dictionary<StsType, Sts> StsDictionary { get; private set; }
 
-        public static ClientAssertionProxy CreateFromCertificate(string authority, string clientId, string certificateName, string certificatePassword)
+        protected Sts Sts { get; set; }
+
+        protected static StsType GetStsType(string stsType)
         {
-            authority = authority.Replace("login", "sts");
+            return (StsType)Enum.Parse(typeof(StsType), stsType);
+        }
 
-            // Test fails with out this
-            if (!authority.EndsWith(@"/"))
+        protected static Sts SetupStsService(StsType stsType)
+        {
+            Sts sts;
+
+            if (!StsDictionary.TryGetValue(stsType, out sts))
             {
-                authority += @"/";
+                sts = StsFactory.CreateSts(stsType);
+                StsDictionary.Add(stsType, sts);
             }
 
-            ClientAssertion credential = AdalFriend.CreateJwt(new X509Certificate2(certificateName + ".pfx", certificatePassword), clientId, authority);
-            return new ClientAssertionProxy(credential.Assertion);
+            if (sts.State != StsState.Started)
+            {
+                sts.Start();
+            }
+
+            return sts;
         }
     }
-
 }

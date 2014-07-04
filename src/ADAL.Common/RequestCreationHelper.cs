@@ -23,6 +23,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class RequestCreationHelper : IRequestCreationHelper
     {
+        public bool RecordClientMetrics
+        {
+            get { return true; }            
+        }
+
         public void AddAdalIdParameters(IDictionary<string, string> parameters)
         {
             parameters[AdalIdParameter.Product] = PlatformSpecificHelper.GetProductName();

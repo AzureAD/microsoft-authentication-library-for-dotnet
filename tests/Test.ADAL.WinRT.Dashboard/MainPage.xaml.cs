@@ -17,10 +17,10 @@
 //----------------------------------------------------------------------
 
 using System;
-using Test.ADAL.Common;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
+using Test.ADAL.Common;
 
 namespace Test.ADAL.WinRT.Dashboard
 {

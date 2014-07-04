@@ -17,8 +17,8 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="authority">Address of the authority to issue token.</param>
         public AuthenticationContext(string authority)
-            : this(authority, AuthorityValidationType.NotProvided, StaticTokenCacheStore)
+            : this(authority, AuthorityValidationType.NotProvided, TokenCache.DefaultShared)
         {
         }
 
@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="authority">Address of the authority to issue token.</param>
         /// <param name="validateAuthority">Flag to turn address validation ON or OFF.</param>
         public AuthenticationContext(string authority, bool validateAuthority)
-            : this(authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False, StaticTokenCacheStore)
+            : this(authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False, TokenCache.DefaultShared)
         {
         }
 
@@ -74,9 +74,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Using this constructor will turn ON validation of the authority URL by default if validation is supported for the authority address.
         /// </summary>
         /// <param name="authority">Address of the authority to issue token.</param>
-        /// <param name="tokenCacheStore">Token Cache store used to lookup cached tokens on calls to AcquireToken</param>
-        public AuthenticationContext(string authority, IDictionary<TokenCacheKey, string> tokenCacheStore)
-            : this(authority, AuthorityValidationType.NotProvided, tokenCacheStore)
+        /// <param name="tokenCache">Token cache used to lookup cached tokens on calls to AcquireToken</param>
+        public AuthenticationContext(string authority, TokenCache tokenCache)
+            : this(authority, AuthorityValidationType.NotProvided, tokenCache)
         {
         }
 #endif
@@ -87,13 +87,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="authority">Address of the authority to issue token.</param>
         /// <param name="validateAuthority">Flag to turn address validation ON or OFF.</param>
-        /// <param name="tokenCacheStore">Token Cache store used to lookup cached tokens on calls to AcquireToken</param>
-        public AuthenticationContext(string authority, bool validateAuthority, IDictionary<TokenCacheKey, string> tokenCacheStore)
-            : this(authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False, tokenCacheStore)
+        /// <param name="tokenCache">Token cache used to lookup cached tokens on calls to AcquireToken</param>
+        public AuthenticationContext(string authority, bool validateAuthority, TokenCache tokenCache)
+            : this(authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False, tokenCache)
         {
         }
 
-        private AuthenticationContext(string authority, AuthorityValidationType validateAuthority, IDictionary<TokenCacheKey, string> tokenCacheStore)
+        private AuthenticationContext(string authority, AuthorityValidationType validateAuthority, TokenCache tokenCache)
         {
             this.Authority = AuthenticationMetadata.CanonicalizeUri(authority);
 
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // If authorityType is not provided (via first constructor), we validate by default (except for ASG and Office tenants).
             this.ValidateAuthority = (validateAuthority != AuthorityValidationType.False);
 
-            this.tokenCacheManager = new TokenCacheManager(this.Authority, tokenCacheStore, this.RefreshAccessTokenAsync);
+            this.tokenCacheManager = new TokenCacheManager(this.Authority, tokenCache, this.RefreshAccessTokenAsync);
         }
 
         /// <summary>
@@ -117,27 +117,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
 #if ADAL_WINRT
         /// <summary>
-        /// Property to provide storage for ADAL's token cache. By default, TokenCacheStore is set a persistent store based on application's local settings. 
-        /// Library will automatically save tokens in default TokenCacheStore whenever you obtain them. Cached tokens will be available only to the application that saved them. 
-        /// Cached tokens in default TokenCacheStore will outlive the application's execution, and will be available in subsequent runs.
+        /// Property to provide ADAL's token cache. By default, TokenCache is a persistent cache based on application's local settings. 
+        /// Library will automatically save tokens in default TokenCache whenever you obtain them. Cached tokens will be available only to the application that saved them. 
+        /// Cached tokens in default token cache will outlive the application's execution, and will be available in subsequent runs.
         /// To turn OFF token caching, set TokenCacheStore to null. 
         /// </summary>
 #else
         /// <summary>
-        /// Gets the TokenCacheStore 
+        /// Gets the TokenCache
         /// </summary>
         /// <remarks>
-        /// By default, TokenCacheStore is set to a Dictionary which makes the token cache an in-memory collection of key/value pairs. 
+        /// By default, TokenCache is an in-memory collection of key/value pairs. 
         /// Library will automatically save tokens in the cache when AcquireToken is called.  
-        /// The default token cache is static so all tokens will available to all instances of AuthenticationContext. To use a custom TokenCacheStore pass one to the <see cref="AuthenticationContext">.constructor</see>.
-        /// To turn OFF token caching, use the constructor and set TokenCacheStore to null.
+        /// The default token cache is static so all tokens will available to all instances of AuthenticationContext. To use a custom TokenCache pass one to the <see cref="AuthenticationContext">.constructor</see>.
+        /// To turn OFF token caching, use the constructor and set TokenCache to null.
         /// </remarks>
 #endif
-        public IDictionary<TokenCacheKey, string> TokenCacheStore
+        public TokenCache TokenCache
         {
             get
             {
-                return this.tokenCacheManager.TokenCacheStore;
+                return this.tokenCacheManager.TokenCache;
             }
         }
 
@@ -149,18 +149,37 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal async Task CreateAuthenticatorAsync(CallState callState)
         {
+            if (callState != null)
+            {
+                callState.AuthorityType = this.authorityType;
+            }
+
             if (this.Authenticator == null)
             {
                 this.Authenticator = await AuthenticationMetadata.CreateAuthenticatorAsync(this.ValidateAuthority, this.Authority, callState, this.authorityType);
             }
         }
 
-        private static void VerifyUserMatch(string userId, AuthenticationResult result)
+        private static void VerifyUserMatch(UserIdentifier userId, AuthenticationResult result)
         {
-            if (!string.IsNullOrWhiteSpace(userId) && result.UserInfo != null && result.UserInfo.IsUserIdDisplayable && RegexUtilities.IsValidEmail(userId) &&
-                string.Compare(result.UserInfo.UserId, userId, StringComparison.OrdinalIgnoreCase) != 0)
+            if (userId.IsAnyUser || userId.Type == UserIdentifierType.OptionalDisplayableId)
             {
-                throw new AdalUserMismatchException(userId, result.UserInfo.UserId);
+                return;
+            }
+
+            string uniqueId = (result.UserInfo != null && result.UserInfo.UniqueId != null) ? result.UserInfo.UniqueId : "NULL";
+            string displayableId = (result.UserInfo != null) ? result.UserInfo.DisplayableId : "NULL";
+
+            if (userId.Type == UserIdentifierType.UniqueId
+                && string.Compare(uniqueId, userId.Id, StringComparison.Ordinal) != 0)
+            {
+                throw new AdalUserMismatchException(userId.Id, uniqueId);    
+            }
+                
+            if (userId.Type == UserIdentifierType.RequiredDisplayableId
+                && string.Compare(displayableId, userId.Id, StringComparison.OrdinalIgnoreCase) != 0)
+            {
+                throw new AdalUserMismatchException(userId.Id, displayableId);    
             }
         }
 
@@ -188,6 +207,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             CallState callState = this.CreateCallState(callSync);
             this.ValidateAuthorityType(callState, AuthorityType.AAD);
+            const TokenSubjectType SubjectType = TokenSubjectType.User;
 
             if (string.IsNullOrWhiteSpace(resource))
             {
@@ -206,119 +226,129 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             // We cannot move the following lines to UserCredential as one of these calls in async. 
             // It cannot be moved to constructor or property or a pure sync or async call. This is why we moved it here which is an async call already.
-            if (string.IsNullOrWhiteSpace(credential.UserId))
+            if (string.IsNullOrWhiteSpace(credential.UserName))
             {
 #if ADAL_WINRT
-                if (!Windows.System.UserProfile.UserInformation.NameAccessAllowed)
+                credential.UserName = await PlatformSpecificHelper.GetUserPrincipalNameAsync();
+#else
+                credential.UserName = PlatformSpecificHelper.GetUserPrincipalName();
+#endif
+                if (string.IsNullOrWhiteSpace(credential.UserName))
                 {
-                    throw new AdalException(AdalError.CannotAccessUserInformation);                    
+                    Logger.Information(callState, "Could not find UPN for logged in user");
+                    throw new AdalException(AdalError.UnknownUser);
                 }
 
-                try
-                {
-                    credential.UserId = await Windows.System.UserProfile.UserInformation.GetPrincipalNameAsync();
-                    if (string.IsNullOrWhiteSpace(credential.UserId))
-                    {
-                        throw new AdalException(AdalError.UnknownUser);
-                    }
-                }
-                catch (UnauthorizedAccessException ex)
-                {
-                    throw new AdalException(AdalError.UnauthorizedUserInformationAccess, ex);
-                }
-#else
-                credential.UserId = System.DirectoryServices.AccountManagement.UserPrincipal.Current.UserPrincipalName;
-#endif
-                Logger.Information(callState, "Logged in user '{0}' detected", credential.UserId);
+                Logger.Information(callState, "Logged in user '{0}' detected", credential.UserName);
             }
 
             await this.CreateAuthenticatorAsync(callState);
 
-            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, credential.UserId);
-            if (result == null)
+            try
             {
-                UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, credential.UserId, callState);
-                Logger.Information(callState, "User '{0}' detected as '{1}'", credential.UserId, userRealmResponse.AccountType);
-                if (string.Compare(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase) == 0)
+                this.NotifyBeforeAccessCache(resource, clientId, null, credential.UserName);
+                AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, new ClientKey(clientId), this.Authenticator.SelfSignedJwtAudience, credential.UserName, SubjectType);
+                if (result == null)
                 {
-                    Uri wsTrustUrl = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, credential.UserAuthType, callState);
-                    Logger.Information(callState, "WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustUrl, userRealmResponse.FederationMetadataUrl);
-
-                    WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustUrl, credential, callState);
-                    Logger.Information(callState, "Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType);
-
-                    // We assume that if the response token type is not SAML 1.1, it is SAML 2
-                    var samlCredential = new UserAssertion(
-                        wsTrustResponse.Token,
-                        (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
-
-                    result = await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, resource, clientId, samlCredential, callState);
-                    Logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
-
-                    await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
-                    this.tokenCacheManager.StoreToCache(result, resource, clientId);
-
-                    VerifyUserMatch(credential.UserId, result);
-                }
-                else if (string.Compare(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    //handle password grant flow for the managed user
-                    if (credential.PasswordToCharArray() == null)
+                    UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, credential.UserName, callState);
+                    Logger.Information(callState, "User '{0}' detected as '{1}'", credential.UserName, userRealmResponse.AccountType);
+                    if (string.Compare(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase) == 0)
                     {
-                        throw new AdalException(AdalError.PasswordRequiredForManagedUserError);
+                        if (string.IsNullOrWhiteSpace(userRealmResponse.FederationMetadataUrl))
+                        {
+                            throw new AdalException(AdalError.MissingFederationMetadataUrl);
+                        }
+
+                        Uri wsTrustUrl = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, credential.UserAuthType, callState);
+                        Logger.Information(callState, "WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustUrl, userRealmResponse.FederationMetadataUrl);
+
+                        WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustUrl, credential, callState);
+                        Logger.Information(callState, "Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType);
+
+                        // We assume that if the response token type is not SAML 1.1, it is SAML 2
+                        var samlCredential = new UserAssertion(
+                            wsTrustResponse.Token,
+                            (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
+
+                        result = await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, resource, clientId, samlCredential, callState);
+                        Logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
+
+                        await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
+                        this.tokenCacheManager.StoreToCache(result, resource, SubjectType, clientId);
                     }
+                    else if (string.Compare(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase) == 0)
+                    {
+                        //handle password grant flow for the managed user
+                        if (credential.PasswordToCharArray() == null)
+                        {
+                            throw new AdalException(AdalError.PasswordRequiredForManagedUserError);
+                        }
 
-                    result = await OAuth2Request.SendTokenRequestWithUserCredentialAsync(this.Authenticator.TokenUri, resource, clientId, credential, callState);
+                        result = await OAuth2Request.SendTokenRequestWithUserCredentialAsync(this.Authenticator.TokenUri, resource, clientId, credential, callState);
+                    }
+                    else
+                    {
+                        throw new AdalException(AdalError.UnknownUserType);
+                    }
                 }
-                else
-                {
-                    throw new AdalException(AdalError.UnknownUserType);
-                }
+
+                LogReturnedToken(result, callState);
+                return result;
             }
-
-            LogReturnedToken(result, callState);
-            return result;
+            finally
+            {
+                this.NotifyAfterAccessCache(resource, clientId, null, credential.UserName);
+            }
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserAssertion credential, bool callSync = false)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserAssertion userAssertion, bool callSync = false)
         {
             CallState callState = this.CreateCallState(callSync);
             this.ValidateAuthorityType(callState, AuthorityType.AAD);
+            const TokenSubjectType SubjectType = TokenSubjectType.User;
 
             if (string.IsNullOrWhiteSpace(resource))
             {
                 throw new ArgumentNullException("resource");
             }
 
-            if (credential == null)
+            if (userAssertion == null)
             {
-                throw new ArgumentNullException("credential");
+                throw new ArgumentNullException("userAssertion");
             }
 
-            if (string.IsNullOrWhiteSpace(credential.AssertionType))
+            if (string.IsNullOrWhiteSpace(userAssertion.AssertionType))
             {
-                throw new ArgumentException(AdalErrorMessage.UserCredentialAssertionTypeEmpty, "credential");
+                throw new ArgumentException(AdalErrorMessage.UserCredentialAssertionTypeEmpty, "userAssertion");
             }
 
             await this.CreateAuthenticatorAsync(callState);
 
-            AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, credential.UserId);
-            if (result == null)
+            ClientKey clientKey = new ClientKey(clientId);
+
+            try
             {
-                result = await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, resource, clientId, credential, callState);
-                Logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
+                this.NotifyBeforeAccessCache(resource, clientId, null, userAssertion.UserName);
+                AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientKey, this.Authenticator.SelfSignedJwtAudience, userAssertion.UserName, SubjectType);
+                if (result == null)
+                {
+                    result = await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, resource, clientId, userAssertion, callState);
+                    Logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
 
-                await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
-                this.tokenCacheManager.StoreToCache(result, resource, clientId);
+                    await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
+                    this.tokenCacheManager.StoreToCache(result, resource, SubjectType, clientId);
+                }
 
-                VerifyUserMatch(credential.UserId, result);
+                LogReturnedToken(result, callState);
+                return result;
             }
-
-            LogReturnedToken(result, callState);
-            return result;
+            finally
+            {
+                this.NotifyAfterAccessCache(resource, clientId, null, userAssertion.UserName);
+            }
         }
 
-        private async Task<AuthenticationResult> AcquireTokenByRefreshTokenCommonAsync(string refreshToken, string clientId, string resource, bool callSync = false)
+        private async Task<AuthenticationResult> AcquireTokenByRefreshTokenCommonAsync(string refreshToken, ClientKey clientKey, string resource, bool callSync = false)
         {
             CallState callState = this.CreateCallState(callSync);
             this.ValidateAuthorityType(callState, AuthorityType.AAD, AuthorityType.ADFS);
@@ -328,11 +358,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentNullException("refreshToken");
             }
 
-            if (string.IsNullOrWhiteSpace(clientId))
-            {
-                throw new ArgumentNullException("clientId");
-            }
-
             await this.CreateAuthenticatorAsync(callState);
 
             if (!string.IsNullOrWhiteSpace(resource) && this.authorityType != AuthorityType.AAD)
@@ -340,15 +365,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentException(AdalErrorMessage.UnsupportedMultiRefreshToken, "resource");
             }
 
-            AuthenticationResult result = await this.SendOAuth2RequestByRefreshTokenAsync(resource, refreshToken, clientId, callState);
+            AuthenticationResult result = await this.SendOAuth2RequestByRefreshTokenAsync(resource, refreshToken, clientKey, this.Authenticator.SelfSignedJwtAudience, callState);
+            await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
             LogReturnedToken(result, callState);
             return result;
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, string userId = null, PromptBehavior promptBehavior = PromptBehavior.Auto, string extraQueryParameters = null, bool callSync = false)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, string extraQueryParameters = null, bool callSync = false)
         {
             CallState callState = this.CreateCallState(callSync);
             this.ValidateAuthorityType(callState, AuthorityType.AAD, AuthorityType.ADFS);
+            const TokenSubjectType SubjectType = TokenSubjectType.User;
 
             if (string.IsNullOrWhiteSpace(resource))
             {
@@ -365,20 +392,38 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentNullException("redirectUri");
             }
 
+            if (userId == null)
+            {
+                throw new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
+            }
+
+            string uniqueId = userId.UniqueId;
+            string displayableId = userId.DisplayableId;
+
             await this.CreateAuthenticatorAsync(callState);
 
             AuthenticationResult result = null;
-            if (promptBehavior != PromptBehavior.Always)
-            {
-                result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientId, userId);
-            }
 
-            result = result ?? await this.AcquireTokenFromStsAsync(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters, callState);
-            LogReturnedToken(result, callState);
-            return result;
+            try
+            {
+                if (promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession)
+                {
+                    this.NotifyBeforeAccessCache(resource, clientId, uniqueId, displayableId);
+
+                    result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, new ClientKey(clientId), this.Authenticator.SelfSignedJwtAudience, userId, SubjectType);
+                }
+
+                result = result ?? await this.AcquireTokenFromStsAsync(resource, clientId, redirectUri, promptBehavior, userId, extraQueryParameters, callState);
+                LogReturnedToken(result, callState);
+                return result;
+            }
+            finally
+            {
+                this.NotifyAfterAccessCache(resource, clientId, uniqueId, displayableId);
+            }
         }
 
-        private async Task<AuthenticationResult> AcquireTokenFromStsAsync(string resource, string clientId, Uri redirectUri, string userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
+        private async Task<AuthenticationResult> AcquireTokenFromStsAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, string extraQueryParameters, CallState callState)
         {
             AuthenticationResult result;
 #if ADAL_WINRT
@@ -388,6 +433,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AuthorizationResult authorizationResult = this.AcquireAuthorization(resource, clientId, redirectUri, userId, promptBehavior, extraQueryParameters, callState);
 #endif
 
+            const TokenSubjectType SubjectType = TokenSubjectType.User;
             if (promptBehavior == PromptBehavior.Never && authorizationResult.Error == OAuthError.LoginRequired)
             {
                 throw new AdalException(AdalError.UserInteractionRequired);
@@ -398,7 +444,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 string uri = this.Authenticator.TokenUri;
                 result = await OAuth2Request.SendTokenRequestAsync(uri, authorizationResult.Code, redirectUri, resource, clientId, callState);
                 await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
-                this.tokenCacheManager.StoreToCache(result, resource, clientId);
+                this.tokenCacheManager.StoreToCache(result, resource, SubjectType, clientId);
 
                 VerifyUserMatch(userId, result);
             }
@@ -408,6 +454,52 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return result;
+        }
+
+        private async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string resource, ClientKey clientKey, UserIdentifier userId, bool callSync = false)
+        {
+            CallState callState = this.CreateCallState(callSync);
+            this.ValidateAuthorityType(callState, AuthorityType.AAD, AuthorityType.ADFS);
+            TokenSubjectType subjectType = clientKey.HasCredential ? TokenSubjectType.UserPlusClient : TokenSubjectType.User;
+
+            if (string.IsNullOrWhiteSpace(resource))
+            {
+                throw new ArgumentNullException("resource");
+            }
+
+            if (userId == null)
+            {
+                throw new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
+            }
+
+            await this.CreateAuthenticatorAsync(callState);
+
+            string clientId = clientKey.ClientId;
+            string uniqueId = userId.UniqueId;
+            string displayableId = userId.DisplayableId;
+
+            try
+            {
+                this.NotifyBeforeAccessCache(resource, clientId, uniqueId, displayableId);
+
+                AuthenticationResult result = await this.tokenCacheManager.LoadFromCacheAndRefreshIfNeededAsync(resource, callState, clientKey, this.Authenticator.SelfSignedJwtAudience, userId, subjectType);
+
+                if (result != null)
+                {
+                    LogReturnedToken(result, callState);
+                }
+                else
+                {
+                    Logger.Verbose(callState, "No token matching arguments found in the cache");
+                    throw new AdalException(AdalError.FailedToAcquireTokenSilently);
+                }
+
+                return result;
+            }
+            finally
+            {
+                this.NotifyAfterAccessCache(resource, clientId, uniqueId, displayableId);
+            }
         }
 
         private void ValidateAuthorityType(CallState callState, AuthorityType validAuthorityType1, AuthorityType validAuthorityType2 = AuthorityType.Unknown, AuthorityType validAuthorityType3 = AuthorityType.Unknown)
@@ -422,29 +514,40 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private async Task<AuthenticationResult> SendOAuth2RequestByRefreshTokenAsync(string resource, string refreshToken, string clientId, CallState callState)
+        private async Task<AuthenticationResult> SendOAuth2RequestByRefreshTokenAsync(string resource, string refreshToken, ClientKey clientKey, string audience, CallState callState)
         {
-            AuthenticationResult result = await OAuth2Request.SendTokenRequestByRefreshTokenAsync(Authenticator.TokenUri, resource, refreshToken, clientId, callState);
+            AuthenticationResult result = await OAuth2Request.SendTokenRequestByRefreshTokenAsync(Authenticator.TokenUri, resource, refreshToken, clientKey, audience, callState);
             await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
             return result;
         }
 
-        private async Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result, string resource, string clientId, CallState callState)
+        private async Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result, string resource, ClientKey clientKey, string audience, CallState callState)
         {
             AuthenticationResult newResult = null;
 
-            if (result != null && resource != null && clientId != null)
+            if (result != null && resource != null && clientKey != null)
             { 
                 try
                 {
-                    newResult = await this.SendOAuth2RequestByRefreshTokenAsync(resource, result.RefreshToken, clientId, callState);
+                    newResult = await this.SendOAuth2RequestByRefreshTokenAsync(resource, result.RefreshToken, clientKey, audience, callState);
 
-                    // Id token is not returned by token endpoint when refresh token is redeemed. Therefore, we should copy tenant and user information from the cached token.
-                    newResult.UpdateTenantAndUserInfo(result.TenantId, result.UserInfo);
+                    if (newResult.IdToken == null)
+                    {
+                        // If Id token is not returned by token endpoint when refresh token is redeemed, we should copy tenant and user information from the cached token.
+                        newResult.UpdateTenantAndUserInfo(result.TenantId, result.IdToken, result.UserInfo);
+                    }
                 }
-                catch (AdalException) 
+                catch (AdalException ex)
                 {
-                    // TODO: Verify if this is the only exception type
+                    AdalServiceException serviceException = ex as AdalServiceException;
+                    if (serviceException != null && serviceException.ErrorCode == "invalid_request")
+                    {
+                        throw new AdalServiceException(
+                            AdalError.FailedToRefreshToken, 
+                            AdalErrorMessage.FailedToRefreshToken + ". " + serviceException.Message, 
+                            (WebException)serviceException.InnerException);
+                    }
+
                     newResult = null;
                 }
             }
@@ -466,6 +569,36 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             Guid correlationId = (this.CorrelationId != Guid.Empty) ? this.CorrelationId : Guid.NewGuid();
             return new CallState(correlationId, callSync);
+        }
+
+        private void NotifyBeforeAccessCache(string resource, string clientId, string uniqueId, string displayableId)
+        {
+            if (this.TokenCache != null)
+            {
+                this.TokenCache.OnBeforeAccess(new TokenCacheNotificationArgs
+                    {
+                        TokenCache = this.TokenCache,
+                        Resource = resource,
+                        ClientId = clientId,
+                        UniqueId = uniqueId,
+                        DisplayableId = displayableId
+                    });
+            }
+        }
+
+        private void NotifyAfterAccessCache(string resource, string clientId, string uniqueId, string displayableId)
+        {
+            if (this.TokenCache != null)
+            {
+                this.TokenCache.OnAfterAccess(new TokenCacheNotificationArgs
+                    {
+                        TokenCache = this.TokenCache,
+                        Resource = resource,
+                        ClientId = clientId,
+                        UniqueId = uniqueId,
+                        DisplayableId = displayableId
+                    });
+            }
         }
     }
 }

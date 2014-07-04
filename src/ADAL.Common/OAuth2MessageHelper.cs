@@ -16,6 +16,9 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+#if !ADAL_WINRT
+using System.Security;
+#endif
 using System;
 using System.Text;
 
@@ -23,13 +26,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static partial class OAuth2MessageHelper
     {
+        private const string FormsAuthParameter = "amr_values";
         private const string LoginHintParameter = "login_hint"; // login_hint is not standard oauth2 parameter
         private const string CorrelationIdParameter = OAuthHeader.CorrelationId; // correlation id is not standard oauth2 parameter
         private const string PromptParameter = "prompt"; // prompt is not standard oauth2 parameter
+        private const string FormsAuthValue = "pwd";
         private const string PromptLoginValue = "login";
+        private const string PromptRefreshSessionValue = "refresh_session";
         private const string ScopeOpenIdValue = "openid";
 
-        public static RequestParameters CreateAuthorizationRequest(string resource, string clientId, Uri redirectUri, string loginHint, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
+        public static RequestParameters CreateAuthorizationRequest(string resource, string clientId, Uri redirectUri, string loginHint, PromptBehavior promptBehavior, string extraQueryParameters, bool includeFormsAuthParam, CallState callState)
         {
             RequestParameters parameters = new RequestParameters();
             parameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
@@ -37,7 +43,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             parameters[OAuthParameter.ClientId] = clientId;
             parameters[OAuthParameter.RedirectUri] = redirectUri.AbsoluteUri;
 
-            if (!string.IsNullOrWhiteSpace(loginHint) && RegexUtilities.IsValidEmail(loginHint))
+            if (!string.IsNullOrWhiteSpace(loginHint))
             {
                 parameters[LoginHintParameter] = loginHint;
             }
@@ -52,6 +58,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 parameters[PromptParameter] = PromptLoginValue;
             }
+            else if (promptBehavior == PromptBehavior.RefreshSession)
+            {
+                parameters[PromptParameter] = PromptRefreshSessionValue;
+            }
 
             if (!string.IsNullOrWhiteSpace(extraQueryParameters))
             {
@@ -63,10 +73,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 parameters.ExtraQueryParameter = extraQueryParameters;
             }
 
+            if (includeFormsAuthParam)
+            {
+                parameters[FormsAuthParameter] = FormsAuthValue;
+            }
+
             AdalIdHelper.AddAsQueryParameters(parameters);
 
             return parameters;
         }
+
 
         public static RequestParameters CreateTokenRequest(string code, Uri redirectUri, string resource, string clientId)
         {
@@ -101,7 +117,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             parameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
             parameters[OAuthParameter.Resource] = resource;
             parameters[OAuthParameter.ClientId] = clientId;
-            parameters[OAuthParameter.Username] = credential.UserId;
+            parameters[OAuthParameter.Username] = credential.UserName;
 #if ADAL_WINRT
             parameters[OAuthParameter.Password] = credential.Password;
 #else
@@ -121,13 +137,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return parameters;
         }
 
-        public static RequestParameters CreateTokenRequest(string resource, string refreshToken, string clientId)
+        public static RequestParameters CreateTokenRequest(string resource, string refreshToken, ClientKey clientKey, string audience)
         {
             RequestParameters parameters = new RequestParameters();
             parameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
             parameters[OAuthParameter.RefreshToken] = refreshToken;
-            parameters[OAuthParameter.ClientId] = clientId;
 
+            AddClientKey(parameters, clientKey, audience);
             AddOptionalParameterResource(parameters, resource);
 
             return parameters;

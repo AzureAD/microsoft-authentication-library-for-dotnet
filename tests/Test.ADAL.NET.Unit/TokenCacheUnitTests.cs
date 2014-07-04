@@ -28,11 +28,11 @@ namespace Test.ADAL.NET.Unit
     public class TokenCacheUnitTests
     {
         [TestMethod]
-        [Description("Test to store in default token cache store")]
+        [Description("Test to store in default token cache")]
         [TestCategory("AdalDotNetUnit")]
-        public void DefaultTokenCacheStoreTest()
+        public void DefaultTokenCacheTest()
         {
-            TokenCacheTests.DefaultTokenCacheStoreTest();
+            TokenCacheTests.DefaultTokenCacheTest();
         }
 
         [TestMethod]
@@ -48,7 +48,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public void TokenCacheOperationsTest()
         {
-            TokenCacheTests.TokenCacheOperationsTest(new Dictionary<TokenCacheKey, string>());
+            TokenCacheTests.TokenCacheOperationsTest(new TokenCache());
         }
 
         [TestMethod]
@@ -56,7 +56,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public void TokenCacheCapacityTest()
         {
-            TokenCacheTests.TokenCacheCapacityTest(new Dictionary<TokenCacheKey, string>());
+            TokenCacheTests.TokenCacheCapacityTest(new TokenCache());
         }
     }
 }

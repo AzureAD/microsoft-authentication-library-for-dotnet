@@ -18,85 +18,70 @@
 
 using System;
 using System.Text;
+
+using Windows.Foundation.Collections;
 using Windows.Storage;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static class LocalSettingsHelper
     {
+        private const string CacheValue = "CacheValue";
+        private const string CacheValueSegmentCount = "CacheValueSegmentCount";
+        private const string CacheValueLength = "CacheValueLength";
         private const int MaxCompositeValueLength = 1024;
 
-        /// <summary>
-        /// Sets cache value as a set of properties in local setting value.
-        /// If the cache value is too large, it would split it into multiple properties of max 1KB.
-        /// The number of segments of the value is stored in a separate property.
-        /// </summary>
-        /// <param name="compositeValue">Value in ApplicationDataCompositeValue format in application's local settings</param>
-        /// <param name="value">string value to store in the cache</param>
-        public static void SetCacheValue(ApplicationDataCompositeValue compositeValue, string value)
+        internal static void SetCacheValue(IPropertySet containerValues, byte[] value)
         {
-            string encryptedValue = CryptographyHelper.Encrypt(value);
-            if (String.IsNullOrEmpty(encryptedValue))
+            byte[] encryptedValue = CryptographyHelper.Encrypt(value);
+            containerValues[CacheValueLength] = encryptedValue.Length;
+            if (encryptedValue == null)
             {
-                compositeValue[CompositeCacheElement.CacheValueSegmentCount] = 1;
-                compositeValue[CompositeCacheElement.CacheValue + 0] = encryptedValue;
+                containerValues[CacheValueSegmentCount] = 1;
+                containerValues[CacheValue + 0] = null;
             }
             else
             {
                 int segmentCount = (encryptedValue.Length / MaxCompositeValueLength) + ((encryptedValue.Length % MaxCompositeValueLength == 0) ? 0 : 1);
+                byte[] subValue = new byte[MaxCompositeValueLength];
                 for (int i = 0; i < segmentCount - 1; i++)
                 {
-                    compositeValue[CompositeCacheElement.CacheValue + i] = encryptedValue.Substring(i * MaxCompositeValueLength, MaxCompositeValueLength);
+                    Array.Copy(encryptedValue, i * MaxCompositeValueLength, subValue, 0, MaxCompositeValueLength);
+                    containerValues[CacheValue + i] = subValue;
                 }
 
-                compositeValue[CompositeCacheElement.CacheValue + (segmentCount - 1)] = encryptedValue.Substring((segmentCount - 1) * MaxCompositeValueLength);
-                compositeValue[CompositeCacheElement.CacheValueSegmentCount] = segmentCount;
+                int copiedLength = (segmentCount - 1) * MaxCompositeValueLength;
+                Array.Copy(encryptedValue, copiedLength, subValue, 0, encryptedValue.Length - copiedLength);
+                containerValues[CacheValue + (segmentCount - 1)] = subValue;
+                containerValues[CacheValueSegmentCount] = segmentCount;
             }
         }
 
-        /// <summary>
-        /// Reads cache value from local settings and merge multiple properties if it is too long.
-        /// The number of segments of the value is stored in a separate property.
-        /// </summary>
-        /// <param name="compositeValue">Value in ApplicationDataCompositeValue format in application's local settings</param>
-        /// <returns></returns>
-        public static string GetCacheValue(ApplicationDataCompositeValue compositeValue)
+        internal static byte[] GetCacheValue(IPropertySet containerValues)
         {
-            int segmentCount = (int)compositeValue[CompositeCacheElement.CacheValueSegmentCount];
+            if (!containerValues.ContainsKey(CacheValueLength))
+            {
+                return null;
+            }
 
-            string encryptedValue;
+            int encyptedValueLength = (int)containerValues[CacheValueLength];
+            int segmentCount = (int)containerValues[CacheValueSegmentCount];
+
+            byte[] encryptedValue = new byte[encyptedValueLength];
             if (segmentCount == 1)
             {
-                encryptedValue = (string)compositeValue[CompositeCacheElement.CacheValue + 0];
+                encryptedValue = (byte[])containerValues[CacheValue + 0];
             }
             else
             {
-                StringBuilder builder = new StringBuilder(segmentCount * MaxCompositeValueLength);
-
-                for (int i = 0; i < segmentCount; i++)
+                for (int i = 0; i < segmentCount - 1; i++)
                 {
-                    builder.Append((string)compositeValue[CompositeCacheElement.CacheValue + i]);
+                    Array.Copy((byte[])containerValues[CacheValue + i], 0, encryptedValue, i * MaxCompositeValueLength, MaxCompositeValueLength); 
                 }
-
-                encryptedValue = builder.ToString();
             }
 
+            Array.Copy((byte[])containerValues[CacheValue + (segmentCount - 1)], 0, encryptedValue, (segmentCount - 1) * MaxCompositeValueLength, encyptedValueLength - (segmentCount - 1) * MaxCompositeValueLength);
             return CryptographyHelper.Decrypt(encryptedValue);
-        }
-
-        public static void RemoveCacheValue(ApplicationDataCompositeValue compositeValue)
-        {
-            if (compositeValue.ContainsKey(CompositeCacheElement.CacheValueSegmentCount))
-            {
-                int segmentCount = (int)compositeValue[CompositeCacheElement.CacheValueSegmentCount];
-
-                for (int i = 0; i < segmentCount; i++)
-                {
-                    compositeValue.Remove(CompositeCacheElement.CacheValue + i);
-                }
-
-                compositeValue.Remove(CompositeCacheElement.CacheValueSegmentCount);
-            }
         }
     }
 }

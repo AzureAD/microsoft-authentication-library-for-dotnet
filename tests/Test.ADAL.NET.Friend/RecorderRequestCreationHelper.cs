@@ -31,6 +31,11 @@ namespace Test.ADAL.NET.Friend
             Initialize();
         }
 
+        public bool RecordClientMetrics
+        {
+            get { return false; }
+        }
+
         public RecorderRequestCreationHelper()
         {
             this.internalRequestCreationHelper = new RequestCreationHelper();

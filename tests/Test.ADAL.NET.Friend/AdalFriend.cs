@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -29,16 +30,27 @@ namespace Test.ADAL.NET.Friend
             // Thirty minutes
             const uint JwtToAcsLifetimeInSeconds = 60 * 30; 
 
-            X509CertificateCredential x509ClientCredential = new X509CertificateCredential(issuer, cert);
+            ClientAssertionCertificate certificate = new ClientAssertionCertificate(issuer, cert);
             JsonWebToken jwtToken = new JsonWebToken(aud, issuer, JwtToAcsLifetimeInSeconds, issuer);
-            return jwtToken.Sign(x509ClientCredential);
+            return jwtToken.Sign(certificate);
         }
 
-        public static string AcquireAccessCode(AuthenticationContext context, string resource, string clientId, Uri redirectUri, string userId)
+        public static string AcquireAccessCode(AuthenticationContext context, string resource, string clientId, Uri redirectUri, UserIdentifier userId)
         {
             context.CreateAuthenticatorAsync(null).Wait();
             AuthorizationResult authorizationResult = context.SendAuthorizeRequest(resource, clientId, redirectUri, userId, PromptBehavior.Auto, null, null);
             return authorizationResult.Code;
+        }
+
+        public static void UpdateTokenExpiryOnTokenCache(TokenCache cache, DateTimeOffset newExpiry)
+        {
+            var cacheStore = cache.TokenCacheStore;
+
+            var key = cacheStore.Keys.First();
+            key.ExpiresOn = newExpiry; 
+            var value = cacheStore.Values.First();
+            cache.Clear();
+            cacheStore.Add(key, value);        
         }
     }
 }

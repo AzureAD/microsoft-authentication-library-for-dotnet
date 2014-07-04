@@ -260,7 +260,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Positive Test for AcquireToken non-interactive for managed user")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task AcquireTokenNonInteractiveManagedPositiveTest()
         {
             await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(Sts);
@@ -276,6 +276,15 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
+        [Description("Positive Test for AcquireToken using federated tenant and then refreshing the session")]
+        [TestCategory("AdalDotNet")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
+        public void AcquireTokenAndRefreshSessionTest()
+        {
+            AdalTests.AcquireTokenAndRefreshSession(Sts);
+        }
+
+        [TestMethod]
         [Description("Positive Test for AcquireToken using federated tenant")]
         [TestCategory("AdalDotNet")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
@@ -283,6 +292,7 @@ namespace Test.ADAL.NET
         {
             AdalTests.AcquireTokenPositiveWithFederatedTenant(Sts);
         }
+
 
         [TestMethod]
         [Description("Correlation Id test")]
@@ -435,6 +445,42 @@ namespace Test.ADAL.NET
         public void CacheExpirationMarginTest()
         {
             AdalTests.CacheExpirationMarginTest(Sts);
+        }
+
+        [TestMethod]
+        [Description("Test for client assertion in multi threaded scenario")]
+        [TestCategory("AdalDotNet")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
+        public async Task MultiThreadedClientAssertionWithX509Test()
+        {
+            await AdalTests.MultiThreadedClientAssertionWithX509Test(Sts);
+        }
+
+        [TestMethod]
+        [Description("Test for token cache usage in AcquireTokenByAuthorizationCode")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
+        public async Task AcquireTokenByAuthorizationCodeWithCacheTest()
+        {
+            await AdalTests.AcquireTokenByAuthorizationCodeWithCacheTest(Sts);
+        }
+
+        [TestMethod]
+        [Description("Test for token refresh for confidnetial client using Multi Resource Refresh Token (MRRT) in cache")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
+        public async Task ConfidentialClientTokenRefreshWithMRRTTest()
+        {
+            await AdalTests.ConfidentialClientTokenRefreshWithMRRTTest(Sts);
+        }
+
+        [TestMethod]
+        [Description("Test for different token subject types (Client, User, ClientPlusUser)")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
+        public async Task TokenSubjectTypeTest()
+        {
+            await AdalTests.TokenSubjectTypeTest(Sts);
         }
     }
 }

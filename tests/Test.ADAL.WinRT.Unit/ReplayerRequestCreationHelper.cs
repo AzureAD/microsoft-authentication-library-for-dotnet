@@ -18,22 +18,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
-using System.Threading.Tasks;
-
-using Windows.ApplicationModel;
-using Windows.Storage;
-using Windows.Storage.Streams;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.WinRT.Unit
 {
     class ReplayerRequestCreationHelper : ReplayerBase, IRequestCreationHelper
     {
+        public bool RecordClientMetrics
+        {
+            get { return false; }
+        }
+
         public void AddAdalIdParameters(IDictionary<string, string> parameters)
         {
             

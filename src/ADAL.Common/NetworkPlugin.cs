@@ -17,7 +17,6 @@
 //----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static class NetworkPlugin

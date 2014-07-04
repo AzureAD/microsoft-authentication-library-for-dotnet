@@ -66,10 +66,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string ExpiresIn = "expires_in";
         public const string Error = "error";
         public const string ErrorDescription = "error_description";
+        public const string ErrorCodes = "error_codes";
     }
 
     internal class IdTokenClaim
     {
+        public const string ObjectId = "oid";
         public const string Subject = "sub";
         public const string TenantId = "tid";
         public const string UPN = "upn";
@@ -77,7 +79,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string GivenName = "given_name";
         public const string FamilyName = "family_name";
         public const string IdentityProvider = "idp";
-        }
+        public const string PasswordExpiration = "pwd_exp";
+        public const string PasswordChangeUrl = "pwd_url";
+    }
 
     internal class OAuthAssertionType
     {
@@ -92,7 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal class OAuthHeader
     {
         public const string CorrelationId = "client-request-id";
-        public const string RequestCorrelationIdInResponse = "return-client-request-id";        
+        public const string RequestCorrelationIdInResponse = "return-client-request-id";
     }
 
     internal class OAuthError

@@ -18,13 +18,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-
-using Test.ADAL.Common;
 
 namespace Test.ADAL.Common
 {
@@ -32,13 +27,13 @@ namespace Test.ADAL.Common
     {
         public AuthenticationContextProxy(string authority, bool validateAuthority, TokenCacheStoreType tokenCacheStoreType)
         {
-            IDictionary<TokenCacheKey, string> tokenCacheStore = null;
+            TokenCache tokenCache = null;
             if (tokenCacheStoreType == TokenCacheStoreType.InMemory)
             {
-                tokenCacheStore = new Dictionary<TokenCacheKey, string>();
+                tokenCache = new TokenCache();
             }
 
-            this.context = new AuthenticationContext(authority, validateAuthority, tokenCacheStore);
+            this.context = new AuthenticationContext(authority, validateAuthority, tokenCache);
             this.context.CorrelationId = new Guid(FixedCorrelationId);
         }
 
@@ -60,21 +55,11 @@ namespace Test.ADAL.Common
         public static void ClearDefaultCache()
         {
             var dummyContext = new AuthenticationContext("https://dummy/dummy", false);
-            dummyContext.TokenCacheStore.Clear();
+            dummyContext.TokenCache.Clear();
         }
 
         public static void Delay(int sleepMilliSeconds)
         {
-            }
-
-        internal AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, string userId)
-        {
-            return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri, userId).AsTask().Result);
-        }
-
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, string userId, string extraQueryParameters)
-        {
-            return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri, userId, extraQueryParameters).AsTask().Result);
         }
 
         internal AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri)
@@ -89,11 +74,18 @@ namespace Test.ADAL.Common
             return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri, promptBehavior).AsTask().Result);
         }
 
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehaviorProxy, string userId)
+        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehaviorProxy, UserIdentifier userId)
         {
             PromptBehavior promptBehavior = (promptBehaviorProxy == PromptBehaviorProxy.Always) ? PromptBehavior.Always : PromptBehavior.Auto;
 
             return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri, promptBehavior, userId).AsTask().Result);
+        }
+
+        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehaviorProxy, UserIdentifier userId, string extraQueryParameters)
+        {
+            PromptBehavior promptBehavior = (promptBehaviorProxy == PromptBehaviorProxy.Always) ? PromptBehavior.Always : PromptBehavior.Auto;
+
+            return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri, promptBehavior, userId, extraQueryParameters).AsTask().Result);
         }
 
         public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId)
@@ -115,16 +107,9 @@ namespace Test.ADAL.Common
                 ExpiresOn = result.ExpiresOn,
                 IsMultipleResourceRefreshToken = result.IsMultipleResourceRefreshToken,
                 RefreshToken = result.RefreshToken,
+                IdToken = result.IdToken,
                 TenantId = result.TenantId,
-                UserInfo = (result.UserInfo != null) ? new UserInfoProxy
-                    {
-                        FamilyName = result.UserInfo.FamilyName,
-                        GivenName = result.UserInfo.GivenName,
-                        IdentityProvider = result.UserInfo.IdentityProvider,
-                        IsUserIdDisplayable = result.UserInfo.IsUserIdDisplayable,
-                        UserId = result.UserInfo.UserId
-                    }
-                    : null,
+                UserInfo = result.UserInfo,
                 Error = result.Error,
                 ErrorDescription = result.ErrorDescription,
                 Status = (result.Status == AuthenticationStatus.Success) ? AuthenticationStatusProxy.Success :

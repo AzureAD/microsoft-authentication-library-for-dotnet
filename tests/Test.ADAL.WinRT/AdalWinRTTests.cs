@@ -42,6 +42,15 @@ namespace Test.ADAL.WinRT
         }
 
         [TestMethod]
+        [Description("Positive Test for AcquireToken")]
+        [TestCategory("AdalWinRT")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
+        public void SmokeTest()
+        {
+            AdalTests.AcquireTokenPositive(Sts);
+        }
+
+        [TestMethod]
         [TestCategory("AdalWinRT")]
         [Description("Positive Test for AcquireToken with missing redirectUri and/or userId")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
@@ -119,7 +128,7 @@ namespace Test.ADAL.WinRT
             AuthenticationResultProxy result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Never);
             AdalTests.VerifyErrorResult(result, Sts.InvalidArgumentError, "SSO");
 
-            AuthenticationContextProxy.SetCredentials(sts.ValidUserId, sts.ValidPassword);
+            AuthenticationContextProxy.SetCredentials(sts.ValidUserName, sts.ValidPassword);
             result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri);
             AdalTests.VerifySuccessResult(sts, result);
 
@@ -131,7 +140,7 @@ namespace Test.ADAL.WinRT
             result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, PromptBehaviorProxy.Never);
             AdalTests.VerifyErrorResult(result, Sts.UserInteractionRequired, null);
 
-            AuthenticationContextProxy.SetCredentials(sts.ValidUserId, sts.ValidPassword);
+            AuthenticationContextProxy.SetCredentials(sts.ValidUserName, sts.ValidPassword);
             // Obtain a token interactively.
             result = context.AcquireToken(sts.ValidResource, sts.ValidClientId);
             AdalTests.VerifySuccessResult(sts, result);
@@ -166,12 +175,12 @@ namespace Test.ADAL.WinRT
         {
             AuthenticationContextProxy.SetCredentials(null, Sts.ValidPassword);
             var context = new AuthenticationContextProxy(Sts.Authority, Sts.ValidateAuthority);
-            AuthenticationResultProxy result = context.AcquireToken(Sts.ValidResource, Sts.ValidClientId, Sts.ValidDefaultRedirectUri, Sts.ValidUserId);
+            AuthenticationResultProxy result = context.AcquireToken(Sts.ValidResource, Sts.ValidClientId, Sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, Sts.ValidUserId);
             AdalTests.VerifySuccessResult(Sts, result);
 
             AuthenticationContextProxy.ClearDefaultCache();
 
-            AuthenticationContextProxy.SetCredentials(Sts.ValidUserId, Sts.ValidPassword);
+            AuthenticationContextProxy.SetCredentials(Sts.ValidUserName, Sts.ValidPassword);
             result = context.AcquireToken(Sts.ValidResource, Sts.ValidClientId);
             AdalTests.VerifySuccessResult(Sts, result);
 

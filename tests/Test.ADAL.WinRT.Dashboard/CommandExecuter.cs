@@ -16,10 +16,10 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Test.ADAL.Common;
 
 namespace Test.ADAL.WinRT.Dashboard
@@ -41,7 +41,7 @@ namespace Test.ADAL.WinRT.Dashboard
                     case CommandType.ClearDefaultTokenCache:
                     {
                         var dummyContext = new AuthenticationContext("https://dummy/dummy", false);
-                        dummyContext.TokenCacheStore.Clear();
+                        dummyContext.TokenCache.Clear();
                         break;
                     }
 
@@ -71,15 +71,20 @@ namespace Test.ADAL.WinRT.Dashboard
                         break;
                     }
 
-                    case CommandType.CreateContextAVC:
+                    case CommandType.CreateContextAVT:
                     {
-                        IDictionary<TokenCacheKey, string> tokenCacheStore = null;
+                        TokenCache tokenCache = null;
                         if (arg.TokenCacheStoreType == TokenCacheStoreType.InMemory)
                         {
-                            tokenCacheStore = new Dictionary<TokenCacheKey, string>();
+                            tokenCache = new TokenCache()
+                                         {
+                                             // The default token cache in ADAL WinRT is persistent. This is how to make it in-memory only cache.
+                                             BeforeAccess = delegate { },                                          
+                                             AfterAccess = delegate { }                                          
+                                         };
                         }
 
-                        context = new AuthenticationContext(arg.Authority, arg.ValidateAuthority, tokenCacheStore);
+                        context = new AuthenticationContext(arg.Authority, arg.ValidateAuthority, tokenCache);
                         break;
                     }
 
@@ -101,42 +106,39 @@ namespace Test.ADAL.WinRT.Dashboard
                         break;
                     }
 
-                    case CommandType.AquireTokenAsyncRCUP:
+                    case CommandType.AquireTokenAsyncRCUPa:
                     {
                         UserCredential credential;
 
                         if (arg.Password != null)
                         {
-                            credential = new UserCredential(arg.UserId, arg.Password);
+                            credential = new UserCredential(arg.UserName, arg.Password);
                         }
                         else
                         {
-                            credential = new UserCredential(arg.UserId);
+                            credential = new UserCredential(arg.UserName);
                         }
 
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, credential);
                         break;
                     }
 
-                    case CommandType.AquireTokenAsyncRCR:
+                    case CommandType.AquireTokenAsyncRCRe:
                     {
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri);
                         break;
                     }
 
-                    case CommandType.AquireTokenAsyncRCRU:
+                    case CommandType.AquireTokenAsyncRCRePUX:
                     {
-                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, arg.UserId);
+                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, 
+                            (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
+                            (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto,
+                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : UserIdentifier.AnyUser, arg.Extra);
                         break;
                     }
 
-                    case CommandType.AquireTokenAsyncRCRUX:
-                    {
-                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, arg.UserId, arg.Extra);
-                        break;
-                    }
-
-                    case CommandType.AquireTokenAsyncRCRP:
+                    case CommandType.AquireTokenAsyncRCReP:
                     {
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, 
                             (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
@@ -144,11 +146,12 @@ namespace Test.ADAL.WinRT.Dashboard
                         break;
                     }
 
-                    case CommandType.AquireTokenAsyncRCRPU:
+                    case CommandType.AquireTokenAsyncRCRePU:
                     {
-                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri, 
+                        result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, arg.RedirectUri,                            
                             (arg.PromptBehavior == PromptBehaviorProxy.Always) ? PromptBehavior.Always :
-                            (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto, arg.UserId);
+                            (arg.PromptBehavior == PromptBehaviorProxy.Never) ? PromptBehavior.Never : PromptBehavior.Auto,
+                            (arg.UserName != null) ? new UserIdentifier(arg.UserName, UserIdentifierType.OptionalDisplayableId) : UserIdentifier.AnyUser);
                         break;
                     }
 
@@ -166,7 +169,7 @@ namespace Test.ADAL.WinRT.Dashboard
                         break;
                     }
 
-                    case CommandType.AcquireTokenByRefreshTokenAsyncRCR:
+                    case CommandType.AcquireTokenByRefreshTokenAsyncRCRe:
                     {
                         result = await context.AcquireTokenByRefreshTokenAsync(arg.RefreshToken, arg.ClientId, arg.Resource);
                         break;
@@ -215,24 +218,9 @@ namespace Test.ADAL.WinRT.Dashboard
                            IsMultipleResourceRefreshToken =
                                result.IsMultipleResourceRefreshToken,
                            RefreshToken = result.RefreshToken,
+                           IdToken = result.IdToken,
                            TenantId = result.TenantId,
-                           UserInfo =
-                               (result.UserInfo != null)
-                                   ? new UserInfoProxy
-                                     {
-                                         FamilyName =
-                                             result.UserInfo.FamilyName,
-                                         GivenName =
-                                             result.UserInfo.GivenName,
-                                         IdentityProvider =
-                                             result.UserInfo
-                                             .IdentityProvider,
-                                         IsUserIdDisplayable =
-                                             result.UserInfo
-                                             .IsUserIdDisplayable,
-                                         UserId = result.UserInfo.UserId
-                                     }
-                                   : null,
+                           UserInfo = result.UserInfo,
                            Error = result.Error,
                            ErrorDescription = result.ErrorDescription,
                            Status =

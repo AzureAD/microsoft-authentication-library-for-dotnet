@@ -16,12 +16,12 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Text;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     /// <summary>
     /// The encoding helper.
     /// </summary>

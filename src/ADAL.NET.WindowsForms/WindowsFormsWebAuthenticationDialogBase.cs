@@ -44,6 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         protected IWin32Window ownerWindow;
 
         private static readonly int UIHeight = Math.Max(Screen.PrimaryScreen.WorkingArea.Height - UIHeightGap, 160);
+        private Keys key = Keys.None;
 
         /// <summary>
         /// Default constructor
@@ -51,8 +52,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         protected WindowsFormsWebAuthenticationDialogBase()
         {
             this.webBrowser = new CustomWebBrowser();
-
+            this.webBrowser.PreviewKeyDown += webBrowser_PreviewKeyDown;
             this.InitializeComponent();
+        }
+        
+        private void webBrowser_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            if (e.KeyCode == Keys.Back)
+            {
+                key = Keys.Back;
+            }
         }
 
         /// <summary>
@@ -93,6 +102,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                     throw new AdalException(AdalError.InvalidOwnerWindowType,
                         "Invalid owner window type. Expected types are IWin32Window or IntPtr (for window handle).");
                 }
+
+                if (this.ownerWindow != null)
+                {
+                    this.StartPosition = FormStartPosition.CenterParent;
+                }
             }
         }
 
@@ -104,6 +118,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 // it just for safety.
                 e.Cancel = true;
                 return;
+            }
+
+            if (key == Keys.Back)
+            {
+                //navigation is being done via back key. This needs to be disabled.
+                key = Keys.None;
+                e.Cancel = true;
             }
 
             // we cancel further processing, if we reached final URL.
@@ -245,14 +266,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             // If we don't have an owner we need to make sure that the pop up browser 
             // window is in the task bar so that it can be selected with the mouse.
-            //
             this.ShowInTaskbar = null == this.OwnerWindow;
 
             this.webBrowserPanel.ResumeLayout(false);
             this.ResumeLayout(false);
         }
-
-
+        
         private sealed class WindowsFormsWin32Window : IWin32Window
         {
             public IntPtr Handle { get; set; }

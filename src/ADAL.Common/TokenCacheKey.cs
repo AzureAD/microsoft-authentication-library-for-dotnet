@@ -24,9 +24,28 @@ using Windows.Foundation.Metadata;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
-    /// <see cref="TokenCacheKey"/> can be used with Linq to access items from the <see cref="AuthenticationContext.TokenCacheStore"/>.
+    /// Determines what type of subject the token was issued for.
     /// </summary>
-    public sealed class TokenCacheKey
+    internal enum TokenSubjectType
+    {
+        /// <summary>
+        /// User
+        /// </summary>
+        User,
+        /// <summary>
+        /// Client
+        /// </summary>
+        Client,
+        /// <summary>
+        /// UserPlusClient: This is for confidential clients used in middle tier.
+        /// </summary>
+        UserPlusClient
+    };
+
+    /// <summary>
+    /// <see cref="TokenCacheKey"/> can be used with Linq to access items from the TokenCacheStore.
+    /// </summary>
+    internal sealed class TokenCacheKey
     {
         /// <summary>
         /// Default constructor.
@@ -47,16 +66,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.ExpiresOn = result.ExpiresOn;
-            this.TenantId = result.TenantId;
             this.IsMultipleResourceRefreshToken = result.IsMultipleResourceRefreshToken;
 
             if (result.UserInfo != null)
             {
-                this.FamilyName = result.UserInfo.FamilyName;
-                this.GivenName = result.UserInfo.GivenName;
-                this.IsUserIdDisplayable = result.UserInfo.IsUserIdDisplayable;
-                this.IdentityProviderName = result.UserInfo.IdentityProvider;
-                this.UserId = result.UserInfo.UserId;
+                this.UniqueId = result.UserInfo.UniqueId;
+                this.DisplayableId = result.UserInfo.DisplayableId;
             }
         }
 
@@ -76,29 +91,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public DateTimeOffset ExpiresOn { get; set; }
 
         /// <summary>
-        /// Gets or sets the FamilyName.
-        /// </summary>
-        public string FamilyName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the GivenName.
-        /// </summary>
-        public string GivenName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the IdentityProviderName.
-        /// </summary>
-        public string IdentityProviderName { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the RefreshToken applies to multiple resources.
         /// </summary>
         public bool IsMultipleResourceRefreshToken { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the UserId is a displayable.
-        /// </summary>
-        public bool IsUserIdDisplayable { get; set; }
 
         /// <summary>
         /// Gets or sets the Resource.
@@ -106,14 +101,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string Resource { get; set; }
 
         /// <summary>
-        /// Gets or sets the TenantId.
+        /// Gets or sets the user's unique Id.
         /// </summary>
-        public string TenantId { get; set; }
+        public string UniqueId { get; set; }
 
         /// <summary>
-        /// Gets or sets the UserId.
+        /// Gets or sets the user's displayable Id.
         /// </summary>
-        public string UserId { get; set; }
+        public string DisplayableId { get; set; }
+
+        public TokenSubjectType SubjectType { get; set; }
 
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
@@ -145,14 +142,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                && (other.Authority == this.Authority)
                && (other.ClientId == this.ClientId)
                && (other.ExpiresOn == this.ExpiresOn)
-               && (other.FamilyName == this.FamilyName)
-               && (other.GivenName == this.GivenName)
-               && (other.IdentityProviderName == this.IdentityProviderName)
                && (other.IsMultipleResourceRefreshToken == this.IsMultipleResourceRefreshToken)
-               && (other.IsUserIdDisplayable == this.IsUserIdDisplayable)
                && (other.Resource == this.Resource)
-               && (other.TenantId == this.TenantId)
-               && (other.UserId == this.UserId));
+               && (other.UniqueId == this.UniqueId)
+               && (other.DisplayableId == this.DisplayableId)
+               && (other.SubjectType == this.SubjectType));
         }
 
         /// <summary>
@@ -167,14 +161,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return (this.Authority + Delimiter 
                 + this.ClientId + Delimiter
                 + this.ExpiresOn + Delimiter
-                + this.FamilyName + Delimiter
-                + this.GivenName + Delimiter
-                + this.IdentityProviderName + Delimiter
                 + this.IsMultipleResourceRefreshToken + Delimiter
-                + this.IsUserIdDisplayable + Delimiter
                 + this.Resource + Delimiter
-                + this.TenantId + Delimiter
-                + this.UserId).GetHashCode();
+                + this.UniqueId + Delimiter
+                + this.DisplayableId
+                + (int)this.SubjectType).GetHashCode();
         }
     }
 }
