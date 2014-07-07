@@ -153,6 +153,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     case AdalError.MissingFederationMetadataUrl:
                         message = AdalErrorMessage.MissingFederationMetadataUrl;
                         break;
+
+                    case AdalError.IntegratedAuthFailed:
+                        message = AdalErrorMessage.IntegratedAuthFailed;
+                        break;
                 }
             }
 
