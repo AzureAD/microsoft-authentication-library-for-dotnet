@@ -85,28 +85,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static string GetUserPrincipalName()
         {
-            string userId = System.DirectoryServices.AccountManagement.UserPrincipal.Current.UserPrincipalName;
-
-            // On some machines, UserPrincipalName returns null
-            if (string.IsNullOrWhiteSpace(userId))
+            const int NameUserPrincipal = 8;
+            uint userNameSize = 0;
+            NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
+            if (userNameSize == 0)
             {
-                const int NameUserPrincipal = 8;
-                uint userNameSize = 0;
-                if (!NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize))
-                {
-                    throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
-                }
-
-                StringBuilder sb = new StringBuilder((int) userNameSize);
-                if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
-                {
-                    throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
-                }
-
-                userId = sb.ToString();
+                throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
             }
 
-            return userId;
+            StringBuilder sb = new StringBuilder((int) userNameSize);
+            if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
+            {
+                throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+            }
+
+            return sb.ToString();
         }
 
         internal static string CreateSha256Hash(string input)

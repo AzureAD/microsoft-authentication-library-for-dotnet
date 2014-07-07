@@ -271,10 +271,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
 
                         result = await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, resource, clientId, samlCredential, callState);
-                        Logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
-
-                        await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
-                        this.tokenCacheManager.StoreToCache(result, resource, SubjectType, clientId);
                     }
                     else if (string.Compare(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase) == 0)
                     {
@@ -290,6 +286,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     {
                         throw new AdalException(AdalError.UnknownUserType);
                     }
+
+                    Logger.Information(callState, "Token of type '{0}' acquired from OAuth endpoint '{1}'", result.AccessTokenType, this.Authenticator.TokenUri);
+                    await this.UpdateAuthorityTenantAsync(result.TenantId, callState);
+                    this.tokenCacheManager.StoreToCache(result, resource, SubjectType, clientId);
                 }
 
                 LogReturnedToken(result, callState);

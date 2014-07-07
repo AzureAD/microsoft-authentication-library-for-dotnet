@@ -449,6 +449,13 @@ namespace Test.ADAL.Common
             Verify.IsNotNull(result.UserInfo);
             Verify.IsNotNull(result.UserInfo.UniqueId);
             Verify.IsNotNull(result.UserInfo.DisplayableId);
+
+            AuthenticationContextProxy.Delay(2000);
+
+            // Test token cache
+            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, credential);
+            VerifySuccessResult(sts, result2);
+            VerifyExpiresOnAreEqual(result, result2);
         }
 
         public static async Task WebExceptionAccessTestAsync(Sts sts)
