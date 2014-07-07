@@ -232,6 +232,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Failed to refresh token.
         /// </summary>
         public const string FailedToRefreshToken = "failed_to_refresh_token";
+
+        /// <summary>
+        /// Integrated authentication failed. You may try an alternative authentication method.
+        /// </summary>
+        public const string IntegratedAuthFailed = "integrated_authentication_failed";
     }
 
     /// <summary>
@@ -294,6 +299,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string GetUserNameFailed = "Failed to get user name";
         public const string MissingFederationMetadataUrl = "Federation Metadata Url is missing for federated user. This user type is unsupported.";
         public const string SpecifyAnyUser = "If you do not need access token for any specific user, pass userId=UserIdentifier.AnyUser instead of userId=null.";
+        public const string IntegratedAuthFailed = "Integrated authentication failed. You may try an alternative authentication method";
     }
 
     internal static class AuthenticationConstant

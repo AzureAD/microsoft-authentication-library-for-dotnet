@@ -85,6 +85,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     url = policy.Url;
                 }
+                else if (userAuthType == UserAuthType.IntegratedAuth)
+                {
+                    throw new AdalException(AdalError.IntegratedAuthFailed, new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument));                    
+                }
                 else
                 {
                     throw new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument);                    
