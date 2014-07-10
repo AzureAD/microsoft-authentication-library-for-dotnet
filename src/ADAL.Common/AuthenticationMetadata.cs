@@ -25,39 +25,15 @@ using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal enum AuthorityType
-    {
-        Unknown = 0,
-        AAD = 3,
-        ADFS = 4
-    }
-
-    internal class Authenticator
-    {
-        public AuthorityType AuthorityType { get; set; }
-        
-        public bool IsTenantless { get; set; }
-        
-        public string AuthorizationUri { get; set; }
-        
-        public string TokenUri { get; set; }
-
-        public string UserRealmUri { get; set; }
-
-        public string SelfSignedJwtAudience { get; set; }
-    }
-
     internal static class AuthenticationMetadata
     {
         private const string CustomTrustedHostEnvironmentVariableName = "customTrustedHost";
         private const string AuthorizeEndpointTemplate = "https://{host}/{tenant}/oauth2/authorize";
         private const string MetadataTemplate = "{\"Host\":\"{host}\", \"Authority\":\"https://{host}/{tenant}/\", \"InstanceDiscoveryEndpoint\":\"https://{host}/common/discovery/instance\", \"AuthorizeEndpoint\":\"" + AuthorizeEndpointTemplate + "\", \"TokenEndpoint\":\"https://{host}/{tenant}/oauth2/token\", \"UserRealmEndpoint\":\"https://{host}/common/UserRealm\"}";
-        private const string TenantlessTenantName = "Common";
 
         static AuthenticationMetadata()
         {
@@ -81,80 +57,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static List<ActiveDirectoryAuthenticationAuthority> AuthorityList { get; private set; }
 
-        public static async Task<Authenticator> CreateAuthenticatorAsync(bool validateAuthority, string authority, CallState callState, AuthorityType authorityType = AuthorityType.Unknown)
-        {
-            if (authorityType == AuthorityType.Unknown)
-            {
-                authorityType = DetectAuthorityType(authority);
-                if (callState != null)
-                {
-                    callState.AuthorityType = authorityType;
-                }
-            }
-
-            if (authorityType != AuthorityType.AAD && validateAuthority)
-            {
-                throw new ArgumentException(AdalErrorMessage.UnsupportedAuthorityValidation, "validateAuthority");
-            }
-
-            Authenticator authenticator = await GetAuthenticatorAsync(authority, authorityType, validateAuthority, callState);
-
-            if (authenticator == null)
-            {
-                throw new ArgumentException(AdalErrorMessage.AuthorityNotInValidList, "authority");
-            }
-
-            return authenticator;
-        }
-
-        public static string CanonicalizeUri(string uri)
-        {
-            if (!string.IsNullOrWhiteSpace(uri) && !uri.EndsWith("/", StringComparison.OrdinalIgnoreCase))
-            {
-                uri = uri + "/";
-            }
-
-            return uri;
-        }
-
-        public static AuthorityType DetectAuthorityType(string authority)
-        {
-            if (string.IsNullOrWhiteSpace(authority))
-            {
-                throw new ArgumentNullException("authority");
-            }
-
-            if (!Uri.IsWellFormedUriString(authority, UriKind.Absolute))
-            {
-                throw new ArgumentException(
-                    AdalErrorMessage.AuthorityInvalidUriFormat, "authority");
-            }
-
-            var authorityUri = new Uri(authority);
-            if (authorityUri.Scheme != "https")
-            {
-                throw new ArgumentException(AdalErrorMessage.AuthorityUriInsecure, "authority");
-            }
-
-            string path = authorityUri.AbsolutePath.Substring(1);
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                throw new ArgumentException(AdalErrorMessage.AuthorityUriInvalidPath, "authority");
-            }
-
-            string firstPath = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-            AuthorityType authorityType = IsAdfsAuthority(firstPath) ? AuthorityType.ADFS : AuthorityType.AAD;
-
-            return authorityType;
-        }
-
-        public static string ReplaceTenantlessTenant(string authority, string tenantId)
-        {
-            var regex = new Regex(Regex.Escape(TenantlessTenantName), RegexOptions.IgnoreCase);
-            return regex.Replace(authority, tenantId, 1);
-        }
-
-        private static ActiveDirectoryAuthenticationAuthority CreateActiveDirectoryAuthenticationAuthority(string host)
+        public static ActiveDirectoryAuthenticationAuthority CreateActiveDirectoryAuthenticationAuthority(string host)
         {
             string metadata = MetadataTemplate.Replace("{host}", host);
             var serializer = new DataContractJsonSerializer(typeof(ActiveDirectoryAuthenticationAuthority));
@@ -169,32 +72,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return authority;
         }
 
-        private static bool IsAdfsAuthority(string firstPath)
-        {
-            return string.Compare(firstPath, "adfs", StringComparison.OrdinalIgnoreCase) == 0;
-        }
-
-        private static async Task<Authenticator> GetAuthenticatorAsync(string authority, AuthorityType authorityType, bool validateAuthority, CallState callState)
-        {
-            var authorityUri = new Uri(authority);
-            string host = authorityUri.Authority;
-            string path = authorityUri.AbsolutePath.Substring(1);
-            string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-
-            ActiveDirectoryAuthenticationAuthority matchingAuthority = (validateAuthority) ? await FindMatchingAuthorityAsync(host, tenant, callState) : CreateActiveDirectoryAuthenticationAuthority(host);
-
-            return new Authenticator
-                {
-                    AuthorityType = authorityType,
-                    AuthorizationUri = matchingAuthority.AuthorizeEndpoint.Replace("{tenant}", tenant),
-                    TokenUri = matchingAuthority.TokenEndpoint.Replace("{tenant}", tenant),
-                    UserRealmUri = CanonicalizeUri(matchingAuthority.UserRealmEndpoint),
-                    IsTenantless = (string.Compare(tenant, TenantlessTenantName, StringComparison.OrdinalIgnoreCase) == 0),
-                    SelfSignedJwtAudience = matchingAuthority.Issuer.Replace("{tenant}", tenant)
-                };
-        }
-
-        private static async Task<ActiveDirectoryAuthenticationAuthority> FindMatchingAuthorityAsync(string authority, string tenant, CallState callState)
+        public static async Task<ActiveDirectoryAuthenticationAuthority> FindMatchingAuthorityAsync(string authority, string tenant, CallState callState)
         {
             ActiveDirectoryAuthenticationAuthority matchingAuthority = AuthorityList.FirstOrDefault(a => string.Compare(authority, a.Host, StringComparison.OrdinalIgnoreCase) == 0);
             if (matchingAuthority == null)

@@ -551,14 +551,10 @@ namespace Test.ADAL.Common
             VerifySuccessResultAndTokenContent(sts, result);
             Verify.AreEqual(sts.ValidUserName, result.UserInfo.DisplayableId);
 
-            Log.Comment("Fail to acquire token for user2 via cookie for user1");
-            AuthenticationResultProxy result2 = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidRequiredUserId2);
-            VerifyErrorResult(result2, "user_mismatch", null);
-
             Log.Comment("Clear cookie and acquire token for user2 interactively");
             EndBrowserDialogSession();
             AuthenticationContextProxy.SetCredentials(null, sts.ValidPassword2);
-            result2 = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidRequiredUserId2);
+            AuthenticationResultProxy result2 = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidRequiredUserId2);
             VerifySuccessResultAndTokenContent(sts, result2);
             Verify.AreEqual(sts.ValidUserName2, result2.UserInfo.DisplayableId);
 
@@ -596,12 +592,8 @@ namespace Test.ADAL.Common
             VerifySuccessResultAndTokenContent(sts, result);
             Verify.AreEqual(sts.ValidUserName, result.UserInfo.DisplayableId);
 
-            Log.Comment("Fail to acquire token for user2 via cookie for user1");
-            AuthenticationResultProxy result2 = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidRequiredUserId2);
-            VerifyErrorResult(result2, "user_mismatch", null);
-
             Log.Comment("Acquire token via cookie for user1 without user");
-            result2 = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri);
+            AuthenticationResultProxy result2 = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri);
             VerifySuccessResultAndTokenContent(sts, result);
             Verify.AreEqual(sts.ValidUserName, result.UserInfo.DisplayableId);
 

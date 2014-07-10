@@ -138,9 +138,9 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public void AuthorityTypeDetectionTest()
         {
-            Verify.AreEqual(AuthorityType.AAD, AuthenticationMetadata.DetectAuthorityType(AuthenticationMetadata.CanonicalizeUri("https://login.windows.net/tenant/dummy")));
-            Verify.AreEqual(AuthorityType.AAD, AuthenticationMetadata.DetectAuthorityType(AuthenticationMetadata.CanonicalizeUri("https://accounts-int.somethingelse.w/dummy")));
-            Verify.AreEqual(AuthorityType.ADFS, AuthenticationMetadata.DetectAuthorityType(AuthenticationMetadata.CanonicalizeUri("https://abc.com/adfs/dummy")));
+            Verify.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://login.windows.net/tenant/dummy/"));
+            Verify.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://accounts-int.somethingelse.w/dummy/"));
+            Verify.AreEqual(AuthorityType.ADFS, Authenticator.DetectAuthorityType("https://abc.com/adfs/dummy/"));
         }
 
 

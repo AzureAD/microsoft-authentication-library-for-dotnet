@@ -95,6 +95,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember]
         public bool IsMultipleResourceRefreshToken { get; internal set; }
 
+        internal bool RequiresRefresh { get; set; }
+
         /// <summary>
         /// Serializes the object to a JSON string
         /// </summary>

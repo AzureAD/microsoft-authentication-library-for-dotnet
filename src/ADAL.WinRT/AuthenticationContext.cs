@@ -223,11 +223,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return NetworkPlugin.WebUIFactory.Create(promptBehavior, this.UseCorporateNetwork);
         }
     
-        private async Task<AuthorizationResult> AcquireAuthorizationAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId, PromptBehavior promptBehavior, string extraQueryParameters, CallState callState)
-        {
-            return await OAuth2Request.SendAuthorizeRequestAsync(this.Authenticator, resource, redirectUri, clientId, userId, promptBehavior, extraQueryParameters, this.CreateWebAuthenticationDialog(promptBehavior), callState);
-        }
-       
         private static IAsyncOperation<AuthenticationResult> RunTaskAsAsyncOperation(Task<AuthenticationResult> task)
         {
             return RunTask(task).AsAsyncOperation();

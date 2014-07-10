@@ -18,9 +18,11 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -39,10 +41,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     public class TokenCache
 #endif
     {
+        internal delegate Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result, string resource, ClientKey clientKey, string audience, CallState callState);
+
         private const int SchemaVersion = 1;
         
         private const string Delimiter = ":::";
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
+
+        // We do not want to return near expiry tokens, this is why we use this hard coded setting to refresh tokens which are close to expiration.
+        private const int ExpirationMarginInMinutes = 5;
 
         static TokenCache()
         {
@@ -315,6 +322,175 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 BeforeWrite(args);
             }
+        }
+
+        internal void StoreToCache(AuthenticationResult result, string authority, string resource, TokenSubjectType subjectType, string clientId = null)
+        {
+            string uniqueId = (result.UserInfo == null) ? null : result.UserInfo.UniqueId;
+            string displayableId = (result.UserInfo == null) ? null : result.UserInfo.DisplayableId;
+
+            TokenCacheKey tokenCacheKey = this.CreateTokenCacheKey(result, authority, subjectType, resource, clientId);
+            this.OnBeforeWrite(new TokenCacheNotificationArgs()
+            {
+                Resource = resource,
+                ClientId = clientId,
+                UniqueId = uniqueId,
+                DisplayableId = displayableId
+            });
+
+            lock (this.TokenCacheStore)
+            {
+                this.RemoveFromCache(authority, resource, subjectType, clientId, uniqueId, displayableId);
+                this.StoreToCache(tokenCacheKey, result);
+            }
+
+            this.UpdateCachedMRRTRefreshTokens(authority, clientId, subjectType, result);
+        }
+
+        internal AuthenticationResult LoadFromCache(string authority, string resource, CallState callState, ClientKey clientKey, string audience, string uniqueId, string displayableId, TokenSubjectType subjectType)
+        {
+            AuthenticationResult result = null;
+
+            KeyValuePair<TokenCacheKey, string>? kvp = this.LoadSingleEntryFromCache(authority, resource, clientKey.ClientId, uniqueId, displayableId, subjectType);
+
+            if (kvp.HasValue)
+            {
+                TokenCacheKey cacheKey = kvp.Value.Key;
+                string tokenValue = kvp.Value.Value;
+
+                result = TokenCacheEncoding.DecodeCacheValue(tokenValue);
+                bool tokenMarginallyExpired = (cacheKey.ExpiresOn <= DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
+                if (cacheKey.Resource != resource && result.IsMultipleResourceRefreshToken)
+                {
+                    result.AccessToken = null;
+                }
+                else if (tokenMarginallyExpired && result.RefreshToken == null)
+                {
+                    this.TokenCacheStore.Remove(cacheKey);
+                    this.HasStateChanged = true;
+                    result = null;
+                }
+
+                if (result != null && ((result.AccessToken == null || tokenMarginallyExpired) && result.RefreshToken != null))
+                {
+                    result.RequiresRefresh = true;
+                }
+            }
+
+            if (result != null)
+            {
+                Logger.Verbose(callState, "A matching token was found in the cache");
+            }
+
+            return result;
+        }
+
+        private TokenCacheKey CreateTokenCacheKey(AuthenticationResult result, string authority, TokenSubjectType subjectType, string resource = null, string clientId = null)
+        {
+            TokenCacheKey tokenCacheKey = new TokenCacheKey(result) { Authority = authority, SubjectType = subjectType };
+
+            if (!string.IsNullOrWhiteSpace(clientId))
+            {
+                tokenCacheKey.ClientId = clientId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(resource))
+            {
+                tokenCacheKey.Resource = resource;
+            }
+
+            return tokenCacheKey;
+        }
+
+        private void UpdateCachedMRRTRefreshTokens(string authority, string clientId, TokenSubjectType subjectType, AuthenticationResult result)
+        {
+            if (result != null && !string.IsNullOrWhiteSpace(clientId) && result.UserInfo != null)
+            {
+                List<KeyValuePair<TokenCacheKey, string>> mrrtEntries =
+                    this.QueryCache(authority, clientId, result.UserInfo.UniqueId, result.UserInfo.DisplayableId, subjectType).Where(p => p.Key.IsMultipleResourceRefreshToken).ToList();
+
+                foreach (KeyValuePair<TokenCacheKey, string> entry in mrrtEntries)
+                {
+                    AuthenticationResult cachedResult = TokenCacheEncoding.DecodeCacheValue(entry.Value);
+                    cachedResult.RefreshToken = result.RefreshToken;
+                    this.StoreToCache(entry.Key, cachedResult);
+                }
+            }
+        }
+
+        private void StoreToCache(TokenCacheKey key, AuthenticationResult result)
+        {
+            this.TokenCacheStore.Remove(key);
+            this.TokenCacheStore.Add(key, TokenCacheEncoding.EncodeCacheValue(result));
+            this.HasStateChanged = true;
+        }
+
+        private void RemoveFromCache(string authority, string resource, TokenSubjectType subjectType, string clientId = null, string uniqueId = null, string displayableId = null)
+        {
+            IEnumerable<KeyValuePair<TokenCacheKey, string>> cacheValues = this.QueryCache(authority, clientId, uniqueId, displayableId, subjectType, resource);
+
+            List<TokenCacheKey> keysToRemove = cacheValues.Select(cacheValue => cacheValue.Key).ToList();
+
+            foreach (TokenCacheKey tokenCacheKey in keysToRemove)
+            {
+                this.TokenCacheStore.Remove(tokenCacheKey);
+            }
+
+            this.HasStateChanged = true;
+        }
+
+        /// <summary>
+        /// Queries all values in the cache that meet the passed in values, plus the 
+        /// authority value that this AuthorizationContext was created with.  In every case passing
+        /// null results in a wildcard evaluation.
+        /// </summary>
+        private List<KeyValuePair<TokenCacheKey, string>> QueryCache(string authority, string clientId, string uniqueId, string displayableId, TokenSubjectType subjectType, string resource = null)
+        {
+            return
+                this.TokenCacheStore.Where(
+                    p =>
+                        p.Key.Authority == authority
+                        && (string.IsNullOrWhiteSpace(resource) || (string.Compare(p.Key.Resource, resource, StringComparison.OrdinalIgnoreCase) == 0))
+                        && (string.IsNullOrWhiteSpace(clientId) || (string.Compare(p.Key.ClientId, clientId, StringComparison.OrdinalIgnoreCase) == 0))
+                        && (string.IsNullOrWhiteSpace(uniqueId) || (string.Compare(p.Key.UniqueId, uniqueId, StringComparison.Ordinal) == 0))
+                        && (string.IsNullOrWhiteSpace(displayableId) || (string.Compare(p.Key.DisplayableId, displayableId, StringComparison.OrdinalIgnoreCase) == 0))
+                        && p.Key.SubjectType == subjectType).ToList();
+        }
+
+        private KeyValuePair<TokenCacheKey, string>? LoadSingleEntryFromCache(string authority, string resource, string clientId, string uniqueId, string displayableId, TokenSubjectType subjectType)
+        {
+            KeyValuePair<TokenCacheKey, string>? returnValue = null;
+
+            // First identify all potential tokens.
+            List<KeyValuePair<TokenCacheKey, string>> cacheValues = this.QueryCache(authority, clientId, uniqueId, displayableId, subjectType);
+
+            List<KeyValuePair<TokenCacheKey, string>> resourceSpecificCacheValues =
+                cacheValues.Where(p => string.Compare(p.Key.Resource, resource, StringComparison.OrdinalIgnoreCase) == 0).ToList();
+
+            int resourceValuesCount = resourceSpecificCacheValues.Count();
+            if (resourceValuesCount == 1)
+            {
+                returnValue = resourceSpecificCacheValues.First();
+            }
+            else if (resourceValuesCount == 0)
+            {
+                // There are no resource specific tokens.  Choose any of the MRRT tokens if there are any.
+                List<KeyValuePair<TokenCacheKey, string>> mrrtCachValues =
+                    cacheValues.Where(p => p.Key.IsMultipleResourceRefreshToken).ToList();
+
+                if (mrrtCachValues.Any())
+                {
+                    returnValue = mrrtCachValues.First();
+                }
+            }
+            else
+            {
+                // There is more than one resource specific token.  It is 
+                // ambiguous which one to return so throw.
+                throw new AdalException(AdalError.MultipleTokensMatched);
+            }
+
+            return returnValue;
         }
     }
 }

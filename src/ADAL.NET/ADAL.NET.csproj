@@ -54,6 +54,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ADAL.Common\AcquireTokenByRefreshTokenHandler.cs">
+      <Link>Common\AcquireTokenByRefreshTokenHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AcquireTokenForMSAHandler.cs">
+      <Link>Common\AcquireTokenForMSAHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AcquireTokenHandlerBase.cs">
+      <Link>Common\AcquireTokenHandlerBase.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AcquireTokenInteractiveHandler.cs">
+      <Link>Common\AcquireTokenInteractiveHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AcquireTokenNonInteractiveHandler.cs">
+      <Link>Common\AcquireTokenNonInteractiveHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AcquireTokenSilentHandler.cs">
+      <Link>Common\AcquireTokenSilentHandler.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\ActiveDirectoryAuthenticationAuthority.cs">
       <Link>Common\ActiveDirectoryAuthenticationAuthority.cs</Link>
     </Compile>
@@ -80,6 +98,9 @@
     </Compile>
     <Compile Include="..\ADAL.Common\AuthenticationResult.cs">
       <Link>Common\AuthenticationResult.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\Authenticator.cs">
+      <Link>Common\Authenticator.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\AuthorizationResult.cs">
       <Link>Common\AuthorizationResult.cs</Link>
@@ -183,9 +204,6 @@
     <Compile Include="..\ADAL.Common\TokenCacheKey.cs">
       <Link>Common\TokenCacheKey.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\TokenCacheManager.cs">
-      <Link>Common\TokenCacheManager.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\TokenCacheNotificationArgs.cs">
       <Link>Common\TokenCacheNotificationArgs.cs</Link>
     </Compile>
@@ -210,9 +228,12 @@
     <Compile Include="..\ADAL.Common\WsTrustResponse.cs">
       <Link>Common\WsTrustResponse.cs</Link>
     </Compile>
+    <Compile Include="AcquireTokenByAuthorizationCodeHandler.cs" />
+    <Compile Include="AcquireTokenOnBehalfHandler.cs" />
     <Compile Include="AuthenticationContext.cs" />
     <Compile Include="AuthenticationParameters.cs" />
     <Compile Include="AuthenticationResult.cs" />
+    <Compile Include="AcquireTokenForClientHandler.cs" />
     <Compile Include="ClientAssertion.cs" />
     <Compile Include="ClientAssertionCertificate.cs" />
     <Compile Include="ClientCredential.cs" />

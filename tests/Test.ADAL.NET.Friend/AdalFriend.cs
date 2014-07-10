@@ -37,8 +37,11 @@ namespace Test.ADAL.NET.Friend
 
         public static string AcquireAccessCode(AuthenticationContext context, string resource, string clientId, Uri redirectUri, UserIdentifier userId)
         {
-            context.CreateAuthenticatorAsync(null).Wait();
-            AuthorizationResult authorizationResult = context.SendAuthorizeRequest(resource, clientId, redirectUri, userId, PromptBehavior.Auto, null, null);
+            var handler = new AcquireTokenInteractiveHandler(context.Authenticator, context.TokenCache, resource, clientId, redirectUri, PromptBehavior.Auto, userId, null,
+                context.CreateWebAuthenticationDialog(PromptBehavior.Auto), true);
+            handler.CallState = null;
+            context.Authenticator.AuthorizationUri = context.Authority + "oauth2/authorize";
+            AuthorizationResult authorizationResult = handler.AcquireAuthorization();
             return authorizationResult.Code;
         }
 
