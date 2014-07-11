@@ -17,10 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -37,7 +33,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly string extraQueryParameters;
 
-        private readonly IWebUI webUI;
+        private readonly IWebUI webUi;
 
         private readonly UserIdentifier userId;
 
@@ -49,6 +45,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentNullException("redirectUri");
             }
 
+            if (!string.IsNullOrWhiteSpace(redirectUri.Fragment))
+            {
+                throw new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
+            }
+
             this.redirectUri = redirectUri;
 
             if (userId == null)
@@ -56,19 +57,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
             }
 
+            this.userId = userId;
+
             this.promptBehavior = promptBehavior;
 
             this.extraQueryParameters = extraQueryParameters;
 
-            this.webUI = webUI;
-
-            this.userId = userId;
+            this.webUi = webUI;
 
             this.UniqueId = userId.UniqueId;
             this.DisplayableId = userId.DisplayableId;
             this.UserIdentifierType = userId.Type;
 
-            this.LoadFromCache = (promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession);
+            this.LoadFromCache = (tokenCache != null && promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession);
 
             this.SupportADFS = true;
         }
@@ -76,6 +77,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected override async Task<AuthenticationResult> SendTokenRequestAsync()
         {
             AuthenticationResult result;
+
 #if ADAL_WINRT
             AuthorizationResult authorizationResult = await this.AcquireAuthorizationAsync();
 #else
@@ -90,8 +92,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (authorizationResult.Status == AuthorizationStatus.Success)
             {
-                string uri = this.Authenticator.TokenUri;
-                result = await OAuth2Request.SendTokenRequestAsync(uri, authorizationResult.Code, redirectUri, this.Resource, this.ClientKey.ClientId, this.CallState);
+                RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(authorizationResult.Code, this.redirectUri, this.Resource, this.ClientKey.ClientId);
+                result = await this.SendHttpMessageAsync(requestParameters);
                 VerifyUserMatch(result);
             }
             else
@@ -103,11 +105,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
 #if ADAL_WINRT
-        internal async Task<AuthorizationResult> AcquireAuthorizationAsync()
+        private async Task<AuthorizationResult> AcquireAuthorizationAsync()
         {
-            return await OAuth2Request.SendAuthorizeRequestAsync(this.Authenticator, this.Resource, this.redirectUri, this.ClientKey.ClientId, this.userId, this.promptBehavior, this.extraQueryParameters, webUI, this.CallState);
+            Uri authorizationUri = this.CreateAuthorizationUri(await IncludeFormsAuthParamsAsync());
+            return await webUi.AuthenticateAsync(authorizationUri, this.redirectUri, this.CallState);
         }
-       
+
+        internal static async Task<bool> IncludeFormsAuthParamsAsync()
+        {
+            return PlatformSpecificHelper.IsDomainJoined() && await PlatformSpecificHelper.IsUserLocalAsync();
+        }
 #else
         internal AuthorizationResult AcquireAuthorization()
         {
@@ -116,10 +123,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             var sendAuthorizeRequest = new Action(
                 delegate
                 {
-                    authorizationResult = this.SendAuthorizeRequest();
+                    Uri authorizationUri = this.CreateAuthorizationUri(IncludeFormsAuthParams());
+                    string resultUri = this.webUi.Authenticate(authorizationUri, this.redirectUri);
+                    authorizationResult = OAuth2Response.ParseAuthorizeResponse(resultUri, this.CallState);
                 });
 
-            // If the thread is MTA, it cannot create or comunicate with WebBrowser which is a COM control.
+            // If the thread is MTA, it cannot create or communicate with WebBrowser which is a COM control.
             // In this case, we have to create the browser in an STA thread via StaTaskScheduler object.
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
             {
@@ -136,11 +145,30 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return authorizationResult;
         }
 
-        private AuthorizationResult SendAuthorizeRequest()
+        internal static bool IncludeFormsAuthParams()
         {
-            return OAuth2Request.SendAuthorizeRequest(this.Authenticator, this.Resource, this.redirectUri, this.ClientKey.ClientId, this.userId, this.promptBehavior, this.extraQueryParameters, this.webUI, this.CallState);
+            return PlatformSpecificHelper.IsUserLocal() && PlatformSpecificHelper.IsDomainJoined();
         }
 #endif
+
+        private Uri CreateAuthorizationUri(bool includeFormsAuthParam)
+        {
+            string loginHint = null;
+
+            if (!userId.IsAnyUser
+                && (userId.Type == UserIdentifierType.OptionalDisplayableId
+                    || userId.Type == UserIdentifierType.RequiredDisplayableId))
+            {
+                loginHint = userId.Id;
+            }
+
+            RequestParameters requestParameters = OAuth2MessageHelper.CreateAuthorizationRequest(this.Resource, this.ClientKey.ClientId, this.redirectUri, loginHint, this.promptBehavior, this.extraQueryParameters, includeFormsAuthParam, this.CallState);
+
+            var authorizationUri = new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + requestParameters);
+            authorizationUri = new Uri(HttpHelper.CheckForExtraQueryParameter(authorizationUri.AbsoluteUri));
+
+            return authorizationUri;
+        }
 
         private void VerifyUserMatch(AuthenticationResult result)
         {

@@ -28,8 +28,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private readonly UserAssertion userAssertion;
 
-        public AcquireTokenForMSAHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserAssertion userAssertion, bool callSync)
-            : base(authenticator, tokenCache, resource, clientKey, TokenSubjectType.UserPlusClient, callSync)
+        public AcquireTokenForMSAHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserAssertion userAssertion, bool callSync)
+            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.UserPlusClient, callSync)
         {
             if (userAssertion == null)
             {
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected override async Task<AuthenticationResult> SendTokenRequestAsync()
         {
-            return await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, this.Resource, this.ClientKey.ClientId, this.userAssertion, this.CallState);
+            return await this.SendTokenRequestWithUserAssertionAsync(this.userAssertion);
         }
     }
 }

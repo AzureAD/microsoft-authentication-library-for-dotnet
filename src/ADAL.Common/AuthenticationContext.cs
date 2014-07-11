@@ -16,7 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using System;
 using System.Threading.Tasks;
 
@@ -156,25 +155,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        internal async Task CreateAuthenticatorAsync(CallState callState)
-        {
-            if (callState != null)
-            {
-                callState.AuthorityType = this.Authenticator.AuthorityType;
-            }
-
-            await this.Authenticator.UpdateFromMetadataAsync(callState);
-        }
-
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserCredential userCredential, bool callSync = false)
         {
-            var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, resource, new ClientKey(clientId), userCredential, callSync);
+            var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, userCredential, callSync);
             return await handler.RunAsync();
         }
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserAssertion userAssertion, bool callSync = false)
         {
-            var handler = new AcquireTokenForMSAHandler(this.Authenticator, this.TokenCache, resource, new ClientKey(clientId), userAssertion, callSync);
+            var handler = new AcquireTokenForMSAHandler(this.Authenticator, this.TokenCache, resource, clientId, userAssertion, callSync);
             return await handler.RunAsync();
         }
 
@@ -186,13 +175,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, string extraQueryParameters = null, bool callSync = false)
         {
-#if ADAL_WINRT
-            IWebUI webUI = this.CreateWebAuthenticationDialog(promptBehavior);
-#else
-            IWebUI webUI = this.CreateWebAuthenticationDialog(promptBehavior);
-#endif
-
-            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, redirectUri, promptBehavior, userId, extraQueryParameters, webUI, callSync);
+            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, redirectUri, promptBehavior, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(promptBehavior), callSync);
             return await handler.RunAsync();
         }
 

@@ -17,19 +17,16 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class AcquireTokenNonInteractiveHandler : AcquireTokenHandlerBase
     {
-        private UserCredential userCredential;
+        private readonly UserCredential userCredential;
         
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserCredential userCredential, bool callSync)
-            : base(authenticator, tokenCache, resource, clientKey, TokenSubjectType.User, callSync)
+        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserCredential userCredential, bool callSync)
+            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User, callSync)
         {
             if (userCredential == null)
             {
@@ -40,9 +37,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
 #if ADAL_WINRT
-        protected override async Task SetUserIdentifiersAsync()
+        protected override async Task SetUserDisplayableIdAsync()
 #else
-        protected override void SetUserIdentifiers()
+        protected override void SetUserDisplayableId()
 #endif
         {
             // We cannot move the following lines to UserCredential as one of these calls in async. 
@@ -90,7 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     wsTrustResponse.Token,
                     (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
 
-                result = await OAuth2Request.SendTokenRequestWithUserAssertionAsync(this.Authenticator.TokenUri, this.Resource, this.ClientKey.ClientId, samlCredential, this.CallState);
+                result = await this.SendTokenRequestWithUserAssertionAsync(samlCredential);
             }
             else if (string.Compare(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase) == 0)
             {
@@ -100,7 +97,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     throw new AdalException(AdalError.PasswordRequiredForManagedUserError);
                 }
 
-                result = await OAuth2Request.SendTokenRequestWithUserCredentialAsync(this.Authenticator.TokenUri, this.Resource, this.ClientKey.ClientId, this.userCredential, this.CallState);
+                RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(this.Resource, this.ClientKey.ClientId, this.userCredential);
+                result = await this.SendHttpMessageAsync(requestParameters);
+
             }
             else
             {

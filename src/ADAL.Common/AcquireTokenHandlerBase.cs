@@ -17,20 +17,17 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal abstract class AcquireTokenHandlerBase
     {
-        private readonly TokenCache tokenCache;
-
         protected const string NullResource = "null_resource_as_optional";
+
+        private readonly TokenCache tokenCache;
 
         protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, TokenSubjectType subjectType, bool callSync)
         {
@@ -44,16 +41,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.Resource = (resource != NullResource) ? resource : null;
-
             this.ClientKey = clientKey;
-
-            this.SubjectType = subjectType;
-
+            this.TokenSubjectType = subjectType;
             this.CallState = this.CreateCallState(callSync);
 
-            this.LoadFromCache = true;
-            this.StoreToCache = true;
+            this.LoadFromCache = (tokenCache != null);
+            this.StoreToCache = (tokenCache != null);
+            this.SupportADFS = false;
         }
+
+        internal CallState CallState { get; set; }
 
         protected bool SupportADFS { get; set; }
 
@@ -63,9 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected ClientKey ClientKey { get; private set; }
 
-        internal CallState CallState { get; set; }
-
-        protected TokenSubjectType SubjectType { get; private set; }
+        protected TokenSubjectType TokenSubjectType { get; private set; }
 
         protected string UniqueId { get; set; }
 
@@ -77,149 +72,91 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         
         protected bool StoreToCache { get; set; }
 
-        private CallState CreateCallState(bool callSync)
-        {
-            Guid correlationId = (this.Authenticator.CorrelationId != Guid.Empty) ? this.Authenticator.CorrelationId : Guid.NewGuid();
-            return new CallState(correlationId, callSync);
-        }
-
         public async Task<AuthenticationResult> RunAsync()
         {
             await this.Authenticator.UpdateFromMetadataAsync(this.CallState);
             this.ValidateAuthorityType();
 
 #if ADAL_WINRT
-            await SetUserIdentifiersAsync();
+            await SetUserDisplayableIdAsync();
 #else
-            SetUserIdentifiers();
+            SetUserDisplayableId();
 #endif
+
+            bool notifiedBeforeAccessCache = false;
 
             try
             {
                 AuthenticationResult result = null;
-                if (this.LoadFromCache && this.tokenCache != null)
+                if (this.LoadFromCache)
                 { 
-                    this.NotifyBeforeAccessCache(this.Resource, this.ClientKey.ClientId, this.UniqueId, this.DisplayableId);
-                    result = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Resource, this.CallState, this.ClientKey, this.Authenticator.SelfSignedJwtAudience, this.UniqueId, this.DisplayableId, SubjectType);
+                    this.NotifyBeforeAccessCache();
+                    notifiedBeforeAccessCache = true;
+
+                    result = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.UniqueId, this.DisplayableId, this.TokenSubjectType, this.CallState);
+                    if (result != null && result.RequiresRefresh)
+                    {
+                        result = await this.RefreshAccessTokenAsync(result);
+                        if (result != null)
+                        {
+                            this.tokenCache.StoreToCache(result, this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType);
+                        }
+                    }
                 }
                 
-                if (result != null && result.RequiresRefresh)
-                {
-                    AuthenticationResult refreshedResult = await this.RefreshAccessTokenAsync(result, this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience, this.CallState);
-                    if (refreshedResult != null)
-                    {
-                        this.tokenCache.StoreToCache(refreshedResult, this.Authenticator.Authority, this.Resource, this.SubjectType, this.ClientKey.ClientId);
-                    }
-
-                    result = refreshedResult;                    
-                }
-
                 if (result == null)
                 {
                     result = await this.SendTokenRequestAsync();
 
                     await this.Authenticator.UpdateAuthorityTenantAsync(result.TenantId, this.CallState);
 
-                    if (this.StoreToCache && this.tokenCache != null)
+                    if (this.StoreToCache)
                     {
-                        this.tokenCache.StoreToCache(result, this.Authenticator.Authority, this.Resource, this.SubjectType, this.ClientKey.ClientId);
+                        if (!notifiedBeforeAccessCache)
+                        {
+                            this.NotifyBeforeAccessCache();
+                            notifiedBeforeAccessCache = true;
+                        }
+
+                        this.tokenCache.StoreToCache(result, this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType);
                     }
                 }
 
-                LogReturnedToken(result, this.CallState);
+                LogReturnedToken(result);
                 return result;
             }
             finally
             {
-                if (this.StoreToCache)
+                if (notifiedBeforeAccessCache)
                 {
-                    this.NotifyAfterAccessCache(this.Resource, this.ClientKey.ClientId, this.UniqueId, this.DisplayableId);
+                    this.NotifyAfterAccessCache();
                 }
             }
         }
 
 #if ADAL_WINRT
-        protected virtual Task SetUserIdentifiersAsync()
+        protected virtual Task SetUserDisplayableIdAsync()
         {
             return Task.FromResult(false);
         }
 #else
-        protected virtual void SetUserIdentifiers()
+        protected virtual void SetUserDisplayableId()
         {
         }
 #endif
 
         protected abstract Task<AuthenticationResult> SendTokenRequestAsync();
 
-        private static void LogReturnedToken(AuthenticationResult result, CallState callState)
-        {
-            if (result.AccessToken != null)
-            {
-                string accessTokenHash = PlatformSpecificHelper.CreateSha256Hash(result.AccessToken);
-                string logMessage;
-                if (result.RefreshToken != null)
-                {
-                    string refreshTokenHash = PlatformSpecificHelper.CreateSha256Hash(result.RefreshToken);
-                    logMessage = string.Format("Access Token with hash '{0}' and Refresh Token with hash '{1}' returned", accessTokenHash, refreshTokenHash);
-                }
-                else
-                {
-                    logMessage = string.Format("Access Token with hash '{0}' returned", accessTokenHash);
-                }
-
-                Logger.Verbose(callState, logMessage);
-            }
-        }
-
-        protected void NotifyBeforeAccessCache(string resource, string clientId, string uniqueId, string displayableId)
-        {
-            if (this.tokenCache != null)
-            {
-                this.tokenCache.OnBeforeAccess(new TokenCacheNotificationArgs
-                {
-                    TokenCache = this.tokenCache,
-                    Resource = resource,
-                    ClientId = clientId,
-                    UniqueId = uniqueId,
-                    DisplayableId = displayableId
-                });
-            }
-        }
-
-        private void ValidateAuthorityType()
-        {
-            if (!this.SupportADFS && this.Authenticator.AuthorityType == AuthorityType.ADFS)
-            {
-                Logger.Error(this.CallState, "Invalid authority type '{0}'", this.Authenticator.AuthorityType);
-                throw new AdalException(AdalError.InvalidAuthorityType,
-                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.InvalidAuthorityTypeTemplate, this.Authenticator.Authority));
-            }
-        }
-
-        private void NotifyAfterAccessCache(string resource, string clientId, string uniqueId, string displayableId)
-        {
-            if (this.tokenCache != null)
-            {
-                this.tokenCache.OnAfterAccess(new TokenCacheNotificationArgs
-                {
-                    TokenCache = this.tokenCache,
-                    Resource = resource,
-                    ClientId = clientId,
-                    UniqueId = uniqueId,
-                    DisplayableId = displayableId
-                });
-            }
-        }
-
-        private async Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result, string resource, ClientKey clientKey, string audience, CallState callState)
+        private async Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result)
         {
             AuthenticationResult newResult = null;
 
-            if (result != null && resource != null && clientKey != null)
+            if (this.Resource != null)
             {
                 try
                 {
-                    newResult = await this.SendOAuth2RequestByRefreshTokenAsync(resource, result.RefreshToken, clientKey, audience, callState);
+                    newResult = await this.SendTokenRequestByRefreshTokenAsync(result.RefreshToken);
+                    await this.Authenticator.UpdateAuthorityTenantAsync(result.TenantId, this.CallState);
 
                     if (newResult.IdToken == null)
                     {
@@ -245,11 +182,92 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return newResult;
         }
 
-        private async Task<AuthenticationResult> SendOAuth2RequestByRefreshTokenAsync(string resource, string refreshToken, ClientKey clientKey, string audience, CallState callState)
+        protected async Task<AuthenticationResult> SendTokenRequestByRefreshTokenAsync(string refreshToken)
         {
-            AuthenticationResult result = await OAuth2Request.SendTokenRequestByRefreshTokenAsync(this.Authenticator.TokenUri, resource, refreshToken, clientKey, audience, callState);
-            await this.Authenticator.UpdateAuthorityTenantAsync(result.TenantId, callState);
+            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(this.Resource, refreshToken, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
+            AuthenticationResult result = await this.SendHttpMessageAsync(requestParameters);
+
+            if (result.RefreshToken == null)
+            {
+                result.RefreshToken = refreshToken;
+            }
+
             return result;
+        }
+
+        protected async Task<AuthenticationResult> SendTokenRequestWithUserAssertionAsync(UserAssertion userAssertion)
+        {
+            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(this.Resource, this.ClientKey.ClientId, userAssertion);
+            return await this.SendHttpMessageAsync(requestParameters);
+        }
+
+        protected async Task<AuthenticationResult> SendHttpMessageAsync(RequestParameters requestParameters)
+        {
+            string uri = HttpHelper.CheckForExtraQueryParameter(this.Authenticator.TokenUri);
+
+            TokenResponse tokenResponse = await HttpHelper.SendPostRequestAndDeserializeJsonResponseAsync<TokenResponse>(uri, requestParameters, this.CallState);
+
+            return OAuth2Response.ParseTokenResponse(tokenResponse);
+        }
+
+        private void NotifyBeforeAccessCache()
+        {
+            this.tokenCache.OnBeforeAccess(new TokenCacheNotificationArgs
+            {
+                TokenCache = this.tokenCache,
+                Resource = this.Resource,
+                ClientId = this.ClientKey.ClientId,
+                UniqueId = this.UniqueId,
+                DisplayableId = this.DisplayableId
+            });
+        }
+
+        private void NotifyAfterAccessCache()
+        {
+            this.tokenCache.OnAfterAccess(new TokenCacheNotificationArgs
+            {
+                TokenCache = this.tokenCache,
+                Resource = this.Resource,
+                ClientId = this.ClientKey.ClientId,
+                UniqueId = this.UniqueId,
+                DisplayableId = this.DisplayableId
+            });
+        }
+
+        private void LogReturnedToken(AuthenticationResult result)
+        {
+            if (result.AccessToken != null)
+            {
+                string accessTokenHash = PlatformSpecificHelper.CreateSha256Hash(result.AccessToken);
+                string logMessage;
+                if (result.RefreshToken != null)
+                {
+                    string refreshTokenHash = PlatformSpecificHelper.CreateSha256Hash(result.RefreshToken);
+                    logMessage = string.Format("Access Token with hash '{0}' and Refresh Token with hash '{1}' returned", accessTokenHash, refreshTokenHash);
+                }
+                else
+                {
+                    logMessage = string.Format("Access Token with hash '{0}' returned", accessTokenHash);
+                }
+
+                Logger.Verbose(this.CallState, logMessage);
+            }
+        }
+
+        private void ValidateAuthorityType()
+        {
+            if (!this.SupportADFS && this.Authenticator.AuthorityType == AuthorityType.ADFS)
+            {
+                Logger.Error(this.CallState, "Invalid authority type '{0}'", this.Authenticator.AuthorityType);
+                throw new AdalException(AdalError.InvalidAuthorityType,
+                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.InvalidAuthorityTypeTemplate, this.Authenticator.Authority));
+            }
+        }
+
+        private CallState CreateCallState(bool callSync)
+        {
+            Guid correlationId = (this.Authenticator.CorrelationId != Guid.Empty) ? this.Authenticator.CorrelationId : Guid.NewGuid();
+            return new CallState(correlationId, callSync);
         }
     }
 }

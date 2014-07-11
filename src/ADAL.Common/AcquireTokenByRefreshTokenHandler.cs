@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected async override Task<AuthenticationResult> SendTokenRequestAsync()
         {
-            return await OAuth2Request.SendTokenRequestByRefreshTokenAsync(this.Authenticator.TokenUri, this.Resource, refreshToken, this.ClientKey, this.Authenticator.SelfSignedJwtAudience, this.CallState);
+            return await this.SendTokenRequestByRefreshTokenAsync(this.refreshToken);
         }
     }
 }

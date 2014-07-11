@@ -218,11 +218,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return RunTaskAsAsyncOperation(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientId), resource));
         }
 
-        private IWebUI CreateWebAuthenticationDialog(PromptBehavior promptBehavior)
-        {
-            return NetworkPlugin.WebUIFactory.Create(promptBehavior, this.UseCorporateNetwork);
-        }
-    
         private static IAsyncOperation<AuthenticationResult> RunTaskAsAsyncOperation(Task<AuthenticationResult> task)
         {
             return RunTask(task).AsAsyncOperation();
@@ -247,6 +242,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private static Uri GetRedirectUri(Uri redirectUri)
         {
             return redirectUri ?? WebAuthenticationBroker.GetCurrentApplicationCallbackUri();
+        }
+
+        private IWebUI CreateWebAuthenticationDialog(PromptBehavior promptBehavior)
+        {
+            return NetworkPlugin.WebUIFactory.Create(promptBehavior, this.UseCorporateNetwork);
         }
     }
 }

@@ -41,20 +41,20 @@ namespace Test.ADAL.NET.WindowsForms
             TestButton.Enabled = false;
             this.StatusTextBox.Text = string.Empty;
 
-            this.RunTest(AdalTests.AcquireTokenPositive);
-            this.RunTest(AdalTests.AcquireTokenPositiveWithoutRedirectUriOrUserId);
+            this.RunTest(AdalTests.AcquireTokenPositiveTest);
+            this.RunTest(AdalTests.AcquireTokenPositiveWithoutRedirectUriOrUserIdTest);
             await this.RunTestAsync(AdalTests.AcquireTokenPositiveByRefreshTokenTestAsync);
             this.RunTest(AdalTests.AuthenticationContextAuthorityValidationTest);
             this.RunTest(AdalTests.AcquireTokenWithRedirectUriTest);
-            this.RunTest(AdalTests.AcquireTokenWithInvalidAuthority);
-            this.RunTest(AdalTests.AcquireTokenWithInvalidResource);
-            this.RunTest(AdalTests.AcquireTokenWithInvalidClientId);
+            this.RunTest(AdalTests.AcquireTokenWithInvalidAuthorityTest);
+            this.RunTest(AdalTests.AcquireTokenWithInvalidResourceTest);
+            this.RunTest(AdalTests.AcquireTokenWithInvalidClientIdTest);
             this.RunTest(AdalTests.AcquireTokenWithIncorrectUserCredentialTest);
             this.RunTest(AdalTests.ExtraQueryParametersTest);
             this.RunTest(AdalTests.AcquireTokenWithAuthenticationCanceledTest);
             this.RunTest(AdalTests.AcquireTokenPositiveWithDefaultCacheTest);
-            this.RunTest(AdalTests.AcquireTokenPositiveWithInMemoryCache);
-            this.RunTest(AdalTests.AcquireTokenPositiveWithNullCache);
+            this.RunTest(AdalTests.AcquireTokenPositiveWithInMemoryCacheTest);
+            this.RunTest(AdalTests.AcquireTokenPositiveWithNullCacheTest);
             this.RunTest(AdalTests.UserInfoTest);
             await this.RunTestAsync(AdalTests.MultiResourceRefreshTokenTestAsync);
             this.RunTest(AdalTests.TenantlessTest);
@@ -62,7 +62,7 @@ namespace Test.ADAL.NET.WindowsForms
             this.RunTest(AdalTests.ForcePromptTest);
             await this.RunTestAsync(AdalTests.AcquireTokenNonInteractivePositiveTestAsync);
             await this.RunTestAsync(AdalTests.AcquireTokenNonInteractivePositiveTestAsync, StsType.AADFederatedWithADFS3);
-            this.RunTest(AdalTests.AcquireTokenPositiveWithFederatedTenant);
+            this.RunTest(AdalTests.AcquireTokenPositiveWithFederatedTenantTest);
             await this.RunTestAsync(AdalTests.CorrelationIdTestAsync);
             await this.RunTestAsync(AdalTests.AuthenticationParametersDiscoveryTestAsync);
             await this.RunTestAsync(AdalTests.WebExceptionAccessTestAsync);

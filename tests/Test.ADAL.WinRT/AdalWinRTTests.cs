@@ -47,7 +47,7 @@ namespace Test.ADAL.WinRT
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
         public void SmokeTest()
         {
-            AdalTests.AcquireTokenPositive(Sts);
+            AdalTests.AcquireTokenPositiveTest(Sts);
         }
 
         [TestMethod]
@@ -56,7 +56,7 @@ namespace Test.ADAL.WinRT
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveWithoutRedirectUriOrUserIdAsync()
         {
-            AdalTests.AcquireTokenPositiveWithoutRedirectUriOrUserId(Sts);
+            AdalTests.AcquireTokenPositiveWithoutRedirectUriOrUserIdTest(Sts);
         }
 
         [TestMethod]
@@ -92,7 +92,7 @@ namespace Test.ADAL.WinRT
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveWithFederatedTenantTest()
         {
-            AdalTests.AcquireTokenPositiveWithFederatedTenant(Sts);
+            AdalTests.AcquireTokenPositiveWithFederatedTenantTest(Sts);
         }
         
         [TestMethod]

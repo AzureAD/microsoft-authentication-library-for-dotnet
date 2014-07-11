@@ -163,9 +163,6 @@
     <Compile Include="..\ADAL.Common\OAuth2MessageHelper.cs">
       <Link>Common\OAuth2MessageHelper.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\OAuth2Request.cs">
-      <Link>Common\OAuth2Request.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\OAuth2Response.cs">
       <Link>Common\OAuth2Response.cs</Link>
     </Compile>
@@ -237,7 +234,6 @@
     <Compile Include="OAuth2MessageHelper.cs" />
     <Compile Include="StorageFileEventListener.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="OAuth2Request.cs" />
     <Compile Include="PlatformSpecificHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegexUtilities.cs" />

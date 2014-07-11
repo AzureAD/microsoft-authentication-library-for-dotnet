@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     public class TokenCache
 #endif
     {
-        internal delegate Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result, string resource, ClientKey clientKey, string audience, CallState callState);
+        internal delegate Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result, string resource, ClientKey clientKey, CallState callState);
 
         private const int SchemaVersion = 1;
         
@@ -324,7 +324,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        internal void StoreToCache(AuthenticationResult result, string authority, string resource, TokenSubjectType subjectType, string clientId = null)
+        internal void StoreToCache(AuthenticationResult result, string authority, string resource, string clientId, TokenSubjectType subjectType)
         {
             string uniqueId = (result.UserInfo == null) ? null : result.UserInfo.UniqueId;
             string displayableId = (result.UserInfo == null) ? null : result.UserInfo.DisplayableId;
@@ -347,11 +347,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.UpdateCachedMRRTRefreshTokens(authority, clientId, subjectType, result);
         }
 
-        internal AuthenticationResult LoadFromCache(string authority, string resource, CallState callState, ClientKey clientKey, string audience, string uniqueId, string displayableId, TokenSubjectType subjectType)
+        internal AuthenticationResult LoadFromCache(string authority, string resource, string clientId, string uniqueId, string displayableId, TokenSubjectType subjectType, CallState callState)
         {
             AuthenticationResult result = null;
 
-            KeyValuePair<TokenCacheKey, string>? kvp = this.LoadSingleEntryFromCache(authority, resource, clientKey.ClientId, uniqueId, displayableId, subjectType);
+            KeyValuePair<TokenCacheKey, string>? kvp = this.LoadSingleEntryFromCache(authority, resource, clientId, uniqueId, displayableId, subjectType);
 
             if (kvp.HasValue)
             {

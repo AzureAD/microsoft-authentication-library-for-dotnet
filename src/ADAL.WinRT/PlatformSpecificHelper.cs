@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return input.ToLower();
         }
 
-        public async static Task<bool> IsUserLocal()
+        public async static Task<bool> IsUserLocalAsync()
         {
             if (!Windows.System.UserProfile.UserInformation.NameAccessAllowed)
             {

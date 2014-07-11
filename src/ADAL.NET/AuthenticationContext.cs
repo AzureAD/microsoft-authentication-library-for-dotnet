@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>        
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientCredential clientCredential)
         {
-            return await this.AcquireTokenCommonAsync(resource, new ClientKey(clientCredential));
+            return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCredential));
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientAssertionCertificate clientCertificate)
         {
-            return await this.AcquireTokenCommonAsync(resource, new ClientKey(clientCertificate));
+            return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCertificate));
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientAssertion clientAssertion)
         {
-            return await this.AcquireTokenCommonAsync(resource, new ClientKey(clientAssertion));
+            return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientAssertion));
         }
 
         /// <summary>
@@ -407,7 +407,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
         public AuthenticationResult AcquireToken(string resource, ClientCredential clientCredential)
         {
-            return RunAsyncTask(this.AcquireTokenCommonAsync(resource, new ClientKey(clientCredential), callSync: true));
+            return RunAsyncTask(this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCredential), callSync: true));
         }
 
         /// <summary>
@@ -418,7 +418,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
         public AuthenticationResult AcquireToken(string resource, ClientAssertionCertificate clientCertificate)
         {
-            return RunAsyncTask(this.AcquireTokenCommonAsync(resource, new ClientKey(clientCertificate), callSync: true));
+            return RunAsyncTask(this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCertificate), callSync: true));
         }
 
         /// <summary>
@@ -429,7 +429,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
         public AuthenticationResult AcquireToken(string resource, ClientAssertion clientAssertion)
         {
-            return RunAsyncTask(this.AcquireTokenCommonAsync(resource, new ClientKey(clientAssertion), callSync: true));
+            return RunAsyncTask(this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientAssertion), callSync: true));
         }
 
         /// <summary>
@@ -767,7 +767,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await handler.RunAsync();
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, ClientKey clientKey, bool callSync = false)
+        private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(string resource, ClientKey clientKey, bool callSync = false)
         {
             var handler = new AcquireTokenForClientHandler(this.Authenticator, this.TokenCache, resource, clientKey, callSync);
             return await handler.RunAsync();

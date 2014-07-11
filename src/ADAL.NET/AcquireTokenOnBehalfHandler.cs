@@ -39,7 +39,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected override async Task<AuthenticationResult> SendTokenRequestAsync()
         {
-            return await OAuth2Request.SendTokenRequestOnBehalfAsync(this.Authenticator.TokenUri, this.Resource, this.userAssertion, this.ClientKey, this.Authenticator.SelfSignedJwtAudience, this.CallState);
+            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(this.Resource, this.userAssertion, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
+            return await this.SendHttpMessageAsync(requestParameters);
         }
     }
 }

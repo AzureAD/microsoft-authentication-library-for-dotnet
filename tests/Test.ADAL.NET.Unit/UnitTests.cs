@@ -276,7 +276,7 @@ namespace Test.ADAL.NET.Unit
         [Description("Test to verify forms auth parameters.")]
         public void IncludeFormsAuthParamsTest()
         {
-            Assert.IsFalse(OAuth2Request.IncludeFormsAuthParams());
+            Assert.IsFalse(AcquireTokenInteractiveHandler.IncludeFormsAuthParams());
         }
 
         [TestMethod]

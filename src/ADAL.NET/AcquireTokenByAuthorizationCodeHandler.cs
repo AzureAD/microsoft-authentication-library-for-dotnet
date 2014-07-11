@@ -30,11 +30,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public AcquireTokenByAuthorizationCodeHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, string authorizationCode, Uri redirectUri, bool callSync)
             : base(authenticator, tokenCache, resource ?? NullResource, clientKey, TokenSubjectType.UserPlusClient, callSync)
         {
-            if (this.Resource == "null_resource")
-            {
-                this.Resource = null;
-            }
-
             if (string.IsNullOrWhiteSpace(authorizationCode))
             {
                 throw new ArgumentNullException("authorizationCode");
@@ -54,13 +49,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected override async Task<AuthenticationResult> SendTokenRequestAsync()
         {
-            AuthenticationResult result = await OAuth2Request.SendTokenRequestAsync(this.Authenticator.TokenUri, this.authorizationCode, this.redirectUri, this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience, this.CallState);
+            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(this.authorizationCode, this.redirectUri, this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
+            AuthenticationResult result = await this.SendHttpMessageAsync(requestParameters);
 
             this.UniqueId = (result.UserInfo == null) ? null : result.UserInfo.UniqueId;
             this.DisplayableId = (result.UserInfo == null) ? null : result.UserInfo.DisplayableId;
             this.Resource = result.Resource;
-
-            this.NotifyBeforeAccessCache(this.Resource, this.ClientKey.ClientId, this.UniqueId, this.DisplayableId);
 
             return result;
         }

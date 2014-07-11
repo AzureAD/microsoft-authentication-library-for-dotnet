@@ -24,13 +24,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public AcquireTokenForClientHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, bool callSync)
             : base(authenticator, tokenCache, resource, clientKey, TokenSubjectType.Client, callSync)
-        {
-            
+        {            
         }
 
         protected override async Task<AuthenticationResult> SendTokenRequestAsync()
         {
-            return await OAuth2Request.SendTokenRequestAsync(this.Authenticator.TokenUri, this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience, this.CallState);
+            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
+            return await this.SendHttpMessageAsync(requestParameters);
         }
     }
 }
