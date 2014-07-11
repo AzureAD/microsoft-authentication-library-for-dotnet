@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             string result;
 
-            using (this.dialog = new WindowsFormsWebAuthenticationDialog { OwnerWindow = this.OwnerWindow })
+            using (this.dialog = new WindowsFormsWebAuthenticationDialog(this.OwnerWindow))
             {
                 result = this.dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri);
             }

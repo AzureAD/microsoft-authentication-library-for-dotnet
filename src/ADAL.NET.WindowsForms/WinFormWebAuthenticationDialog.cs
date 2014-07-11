@@ -37,7 +37,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         /// <summary>
         /// Default constructor
         /// </summary>
-        public WindowsFormsWebAuthenticationDialog()
+        public WindowsFormsWebAuthenticationDialog(object ownerWindow)
+            : base(ownerWindow)
         {
             this.Shown += this.FormShownHandler;
             this.WebBrowser.DocumentTitleChanged += this.WebBrowserDocumentTitleChangedHandler;
@@ -129,40 +130,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         private void WebBrowserDocumentTitleChangedHandler(object sender, EventArgs e)
         {
             this.Text = this.WebBrowser.DocumentTitle;
-        }
-
-        private static class DpiHelper
-        {
-            static DpiHelper()
-            {
-                const double DefaultDpi = 96.0;
-
-                const int LOGPIXELSX = 88;
-                const int LOGPIXELSY = 90;
-
-                double deviceDpiX;
-                double deviceDpiY;
-
-                IntPtr dC = NativeWrapper.NativeMethods.GetDC(IntPtr.Zero);
-                if (dC != IntPtr.Zero)
-                {
-                    deviceDpiX = NativeWrapper.NativeMethods.GetDeviceCaps(dC, LOGPIXELSX);
-                    deviceDpiY = NativeWrapper.NativeMethods.GetDeviceCaps(dC, LOGPIXELSY);
-                    NativeWrapper.NativeMethods.ReleaseDC(IntPtr.Zero, dC);
-                }
-                else
-                {
-                    deviceDpiX = DefaultDpi;
-                    deviceDpiY = DefaultDpi;
-                }
-
-                int zoomPercentX = (int)(100 * (deviceDpiX / DefaultDpi));
-                int zoomPercentY = (int)(100 * (deviceDpiY / DefaultDpi));
-
-                ZoomPercent = Math.Min(zoomPercentX, zoomPercentY);
-            }
-
-            public static int ZoomPercent { get; private set; }
         }
     }
 }
