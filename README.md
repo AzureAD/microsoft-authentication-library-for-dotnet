@@ -1,10 +1,9 @@
-# Active Directory Authentication Library (ADAL) for .NET and Windows Store
+# Active Directory Authentication Library (ADAL) for .NET, Windows Store and Windows Phone 8.1
 
 Active Directory Authentication Library (ADAL) provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.
 Here you can find the source code for the library. You can find the corresponding releases (both stable and prerelease) on the NuGet gallery at [http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/](http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).
-- The latest stable release is [1.0.3](http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/1.0.3). Note that this is for .NET only.
-- The latest prerelease is [2.6.1-alpha](http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/2.6.1-alpha).
-Please note: as of today the source is not aligned with the latest release. We expect to release an updated prerelease shortly, which will bring back releases and master back in sync.  
+- The latest stable release is [1.0.4](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/1.0.4). Note that this is for .NET only.
+- The latest prerelease is [2.7.10707.1513-rc](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/2.7.10707.1513-rc).
 
 ## Projects in this repo
 
@@ -19,6 +18,10 @@ Please note: as of today the source is not aligned with the latest release. We e
 ### ADAL.WinRT
 
 * This project contains the source of ADAL for Windows Store. ADAL for Windows Store is packaged as a Windows Runtime Component (.winmd).
+
+### ADAL.WinPhone
+
+* This project (under /WinPhone) contains the source of ADAL for Windows Phone 8.1. ADAL for Windows Phone 8.1  is packaged as a Windows Runtime Component. The same /WinPhone folder contains its own tests.
 
 ### Test.ADAL.NET
 
