@@ -17,7 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -47,16 +46,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.LoadFromCache = false;
         }
 
-        protected override async Task<AuthenticationResult> SendTokenRequestAsync()
+        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
         {
-            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(this.authorizationCode, this.redirectUri, this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
-            AuthenticationResult result = await this.SendHttpMessageAsync(requestParameters);
+            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.AuthorizationCode;
+            requestParameters[OAuthParameter.Code] = this.authorizationCode;
+            requestParameters[OAuthParameter.RedirectUri] = this.redirectUri.AbsoluteUri;
+        }
 
+        protected override void PostTokenRequest(AuthenticationResult result)
+        {
             this.UniqueId = (result.UserInfo == null) ? null : result.UserInfo.UniqueId;
             this.DisplayableId = (result.UserInfo == null) ? null : result.UserInfo.DisplayableId;
             this.Resource = result.Resource;
-
-            return result;
         }
     }
 }

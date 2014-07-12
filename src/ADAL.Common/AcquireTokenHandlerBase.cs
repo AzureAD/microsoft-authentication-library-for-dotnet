@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal abstract class AcquireTokenHandlerBase
     {
         protected const string NullResource = "null_resource_as_optional";
-
+        protected readonly static Task CompletedTask = Task.FromResult(false);
         private readonly TokenCache tokenCache;
 
         protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, TokenSubjectType subjectType, bool callSync)
@@ -77,11 +77,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             await this.Authenticator.UpdateFromMetadataAsync(this.CallState);
             this.ValidateAuthorityType();
 
-#if ADAL_WINRT
-            await SetUserDisplayableIdAsync();
-#else
-            SetUserDisplayableId();
-#endif
+            await SetUserDisplayableId();
 
             bool notifiedBeforeAccessCache = false;
 
@@ -106,7 +102,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 
                 if (result == null)
                 {
+                    await this.PreTokenRequest();
                     result = await this.SendTokenRequestAsync();
+                    this.PostTokenRequest(result);
 
                     await this.Authenticator.UpdateAuthorityTenantAsync(result.TenantId, this.CallState);
 
@@ -134,18 +132,28 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-#if ADAL_WINRT
-        protected virtual Task SetUserDisplayableIdAsync()
+        protected virtual Task PreTokenRequest()
         {
-            return Task.FromResult(false);
+            return CompletedTask;
         }
-#else
-        protected virtual void SetUserDisplayableId()
-        {
-        }
-#endif
 
-        protected abstract Task<AuthenticationResult> SendTokenRequestAsync();
+        protected virtual void PostTokenRequest(AuthenticationResult result)
+        {
+        }
+
+        protected abstract void AddAditionalRequestParameters(RequestParameters requestParameters);
+
+        protected virtual Task SetUserDisplayableId()
+        {
+            return CompletedTask;
+        }
+
+        protected virtual async Task<AuthenticationResult> SendTokenRequestAsync()
+        {
+            RequestParameters requestParameters = new RequestParameters(this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
+            this.AddAditionalRequestParameters(requestParameters);
+            return await this.SendHttpMessageAsync(requestParameters);
+        }
 
         private async Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result)
         {
@@ -184,7 +192,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected async Task<AuthenticationResult> SendTokenRequestByRefreshTokenAsync(string refreshToken)
         {
-            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(this.Resource, refreshToken, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
+            RequestParameters requestParameters = new RequestParameters(this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
+            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
+            requestParameters[OAuthParameter.RefreshToken] = refreshToken;
             AuthenticationResult result = await this.SendHttpMessageAsync(requestParameters);
 
             if (result.RefreshToken == null)
@@ -195,13 +205,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return result;
         }
 
-        protected async Task<AuthenticationResult> SendTokenRequestWithUserAssertionAsync(UserAssertion userAssertion)
-        {
-            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(this.Resource, this.ClientKey.ClientId, userAssertion);
-            return await this.SendHttpMessageAsync(requestParameters);
-        }
-
-        protected async Task<AuthenticationResult> SendHttpMessageAsync(RequestParameters requestParameters)
+        private async Task<AuthenticationResult> SendHttpMessageAsync(RequestParameters requestParameters)
         {
             string uri = HttpHelper.CheckForExtraQueryParameter(this.Authenticator.TokenUri);
 

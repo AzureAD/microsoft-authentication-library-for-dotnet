@@ -166,11 +166,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else if (tokenResponse.Error != null)
             {
-                result = PlatformSpecificHelper.ProcessServiceError(tokenResponse.Error, tokenResponse.ErrorDescription);
+                throw new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription);
             }
             else
             {
-                result = PlatformSpecificHelper.ProcessServiceError(AdalError.Unknown, AdalErrorMessage.Unknown);
+                throw new AdalServiceException(AdalError.Unknown, AdalErrorMessage.Unknown);
             }
 
             return result;

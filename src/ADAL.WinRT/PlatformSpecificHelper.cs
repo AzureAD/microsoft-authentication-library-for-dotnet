@@ -40,11 +40,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return localSettings.Values.ContainsKey(variable) ? localSettings.Values[variable].ToString() : null;
         }
 
-        public static AuthenticationResult ProcessServiceError(string error, string errorDescription)
-        {
-            return new AuthenticationResult(AuthenticationStatus.ServiceError, error, errorDescription);
-        }
-
         public static string PlatformSpecificToLower(this string input)
         {
             // WinRT does not have the overload with CultureInfo parameter

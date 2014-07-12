@@ -49,10 +49,10 @@ namespace Test.ADAL.Common
             Verify.IsNull(request.Headers[AdalIdParameter.DeviceModel]);
 #endif
 
-            RequestParameters parameters = new RequestParameters();
+            RequestParameters parameters = new RequestParameters(null, new ClientKey("client_id"), null);
             AdalIdHelper.AddAsQueryParameters(parameters);
 
-            Verify.AreEqual(4, parameters.Count);
+            Verify.AreEqual(5, parameters.Count);
             Verify.IsNotNull(parameters[AdalIdParameter.Product]);
             Verify.IsNotNull(parameters[AdalIdParameter.Version]);
             Verify.IsNotNull(parameters[AdalIdParameter.CpuPlatform]);

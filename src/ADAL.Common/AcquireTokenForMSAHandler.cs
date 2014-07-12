@@ -17,10 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -45,9 +42,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.DisplayableId = userAssertion.UserName;
         }
 
-        protected override async Task<AuthenticationResult> SendTokenRequestAsync()
+        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
         {
-            return await this.SendTokenRequestWithUserAssertionAsync(this.userAssertion);
+            requestParameters[OAuthParameter.GrantType] = this.userAssertion.AssertionType;
+            requestParameters[OAuthParameter.Assertion] = Convert.ToBase64String(Encoding.UTF8.GetBytes(this.userAssertion.Assertion));
+
+            // To request id_token in response
+            requestParameters[OAuthParameter.Scope] = OAuthExtra.ScopeOpenIdValue;
         }
     }
 }

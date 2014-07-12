@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class AcquireTokenByRefreshTokenHandler : AcquireTokenHandlerBase
     {
-        private string refreshToken { get; set; }
+        private readonly string refreshToken;
 
         public AcquireTokenByRefreshTokenHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, string refreshToken, bool callSync)
             : base(authenticator, tokenCache, resource ?? NullResource, clientKey, TokenSubjectType.UserPlusClient, callSync)
@@ -51,6 +51,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected async override Task<AuthenticationResult> SendTokenRequestAsync()
         {
             return await this.SendTokenRequestByRefreshTokenAsync(this.refreshToken);
+        }
+
+        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
+        {                
         }
     }
 }

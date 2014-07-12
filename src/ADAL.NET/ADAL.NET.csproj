@@ -168,9 +168,6 @@
     <Compile Include="..\ADAL.Common\NetworkPlugin.cs">
       <Link>Common\NetworkPlugin.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\OAuth2MessageHelper.cs">
-      <Link>Common\OAuth2MessageHelper.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\OAuth2Response.cs">
       <Link>Common\OAuth2Response.cs</Link>
     </Compile>
@@ -241,7 +238,6 @@
     <Compile Include="JsonWebToken.cs" />
     <Compile Include="JsonWebTokenConstants.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="OAuth2MessageHelper.cs" />
     <Compile Include="PlatformSpecificHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegexUtilities.cs" />

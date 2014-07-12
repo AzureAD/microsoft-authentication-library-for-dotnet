@@ -64,23 +64,24 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public void RequestParametersTest()
         {
-            const string ClientId = "clientId";
-            const string Resource = "resource";
-            string expectedString = string.Format("{0}={1}&{2}={3}", ClientId, EncodingHelper.UrlEncode(ComplexString), Resource, EncodingHelper.UrlEncode(ComplexString2));
+            const string ClientId = "client_id";
+            const string AdditionalParameter = "additional_parameter";
+            const string AdditionalParameter2 = "additional_parameter2";
+            string expectedString = string.Format("client_id=client_id&{0}={1}&{2}={3}", AdditionalParameter, EncodingHelper.UrlEncode(ComplexString), AdditionalParameter2, EncodingHelper.UrlEncode(ComplexString2));
 
-            RequestParameters param = new RequestParameters();
-            param[ClientId] = ComplexString;
-            param[Resource] = ComplexString2;
+            RequestParameters param = new RequestParameters(null, new ClientKey(ClientId), null);
+            param[AdditionalParameter] = ComplexString;
+            param[AdditionalParameter2] = ComplexString2;
             Verify.AreEqual(expectedString, param.ToString());
 
-            param = new RequestParameters();
-            param[ClientId] = ComplexString;
-            param.AddSecureParameter(Resource, StringToSecureString(ComplexString2));
+            param = new RequestParameters(null, new ClientKey(ClientId), null);
+            param[AdditionalParameter] = ComplexString;
+            param.AddSecureParameter(AdditionalParameter2, StringToSecureString(ComplexString2));
             Verify.AreEqual(expectedString, param.ToString());
 
-            param = new RequestParameters();
-            param.AddSecureParameter(ClientId, StringToSecureString(ComplexString));
-            param.AddSecureParameter(Resource, StringToSecureString(ComplexString2));
+            param = new RequestParameters(null, new ClientKey(ClientId), null);
+            param.AddSecureParameter(AdditionalParameter, StringToSecureString(ComplexString));
+            param.AddSecureParameter(AdditionalParameter2, StringToSecureString(ComplexString2));
             Verify.AreEqual(expectedString, param.ToString());
 
             param = new RequestParameters(new StringBuilder(expectedString));

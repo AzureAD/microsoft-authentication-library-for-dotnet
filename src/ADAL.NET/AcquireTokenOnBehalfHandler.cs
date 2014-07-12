@@ -37,10 +37,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.DisplayableId = userAssertion.UserName;
         }
 
-        protected override async Task<AuthenticationResult> SendTokenRequestAsync()
+        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
         {
-            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(this.Resource, this.userAssertion, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
-            return await this.SendHttpMessageAsync(requestParameters);
+            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.JwtBearer;
+            requestParameters[OAuthParameter.Assertion] = this.userAssertion.Assertion;
+            requestParameters[OAuthParameter.RequestedTokenUse] = OAuthRequestedTokenUse.OnBehalfOf;
+
+            // To request id_token in response
+            requestParameters[OAuthParameter.Scope] = OAuthExtra.ScopeOpenIdValue;
         }
     }
 }

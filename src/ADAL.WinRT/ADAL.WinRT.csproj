@@ -160,9 +160,6 @@
     <Compile Include="..\ADAL.Common\NetworkPlugin.cs">
       <Link>Common\NetworkPlugin.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\OAuth2MessageHelper.cs">
-      <Link>Common\OAuth2MessageHelper.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\OAuth2Response.cs">
       <Link>Common\OAuth2Response.cs</Link>
     </Compile>
@@ -231,7 +228,6 @@
     <Compile Include="IWebUI.cs" />
     <Compile Include="IWebUIFactory.cs" />
     <Compile Include="LocalSettingsHelper.cs" />
-    <Compile Include="OAuth2MessageHelper.cs" />
     <Compile Include="StorageFileEventListener.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="PlatformSpecificHelper.cs" />

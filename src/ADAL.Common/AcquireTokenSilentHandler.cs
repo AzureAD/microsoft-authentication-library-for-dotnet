@@ -43,5 +43,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
             throw new AdalException(AdalError.FailedToAcquireTokenSilently);
         }
+
+        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
+        {            
+        }
     }
 }

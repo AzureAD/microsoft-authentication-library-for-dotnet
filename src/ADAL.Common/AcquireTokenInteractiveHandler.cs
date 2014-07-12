@@ -37,6 +37,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly UserIdentifier userId;
 
+        private AuthorizationResult authorizationResult;
+
         public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, string extraQueryParameters, IWebUI webUI, bool callSync)
             : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User, callSync)
         {
@@ -61,6 +63,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.promptBehavior = promptBehavior;
 
+            if (extraQueryParameters != null && extraQueryParameters[0] == '&')
+            {
+                extraQueryParameters = extraQueryParameters.Substring(1);
+            }
+
             this.extraQueryParameters = extraQueryParameters;
 
             this.webUi = webUI;
@@ -74,34 +81,49 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.SupportADFS = true;
         }
 
-        protected override async Task<AuthenticationResult> SendTokenRequestAsync()
-        {
-            AuthenticationResult result;
-
 #if ADAL_WINRT
-            AuthorizationResult authorizationResult = await this.AcquireAuthorizationAsync();
+        protected override async Task PreTokenRequest()
+        {
+            this.authorizationResult = await this.AcquireAuthorizationAsync();
+            VerifyAuthorizationResult();
+        }
 #else
+        protected override Task PreTokenRequest()
+        {
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
-            AuthorizationResult authorizationResult = this.AcquireAuthorization();
+            this.authorizationResult = this.AcquireAuthorization();
+            VerifyAuthorizationResult();
+
+            return CompletedTask;
+        }
 #endif
 
-            if (promptBehavior == PromptBehavior.Never && authorizationResult.Error == OAuthError.LoginRequired)
+        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
+        {
+            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.AuthorizationCode;
+            requestParameters[OAuthParameter.Code] = this.authorizationResult.Code;
+            requestParameters[OAuthParameter.RedirectUri] = redirectUri.AbsoluteUri;            
+        }
+
+        protected override void PostTokenRequest(AuthenticationResult result)
+        {
+            if ((this.DisplayableId == null && this.UniqueId == null) || this.UserIdentifierType == UserIdentifierType.OptionalDisplayableId)
             {
-                throw new AdalException(AdalError.UserInteractionRequired);
+                return;
             }
 
-            if (authorizationResult.Status == AuthorizationStatus.Success)
+            string uniqueId = (result.UserInfo != null && result.UserInfo.UniqueId != null) ? result.UserInfo.UniqueId : "NULL";
+            string displayableId = (result.UserInfo != null) ? result.UserInfo.DisplayableId : "NULL";
+
+            if (this.UserIdentifierType == UserIdentifierType.UniqueId && string.Compare(uniqueId, this.UniqueId, StringComparison.Ordinal) != 0)
             {
-                RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(authorizationResult.Code, this.redirectUri, this.Resource, this.ClientKey.ClientId);
-                result = await this.SendHttpMessageAsync(requestParameters);
-                VerifyUserMatch(result);
-            }
-            else
-            {
-                result = PlatformSpecificHelper.ProcessServiceError(authorizationResult.Error, authorizationResult.ErrorDescription);
+                throw new AdalUserMismatchException(this.UniqueId, uniqueId);
             }
 
-            return result;
+            if (this.UserIdentifierType == UserIdentifierType.RequiredDisplayableId && string.Compare(displayableId, this.DisplayableId, StringComparison.OrdinalIgnoreCase) != 0)
+            {
+                throw new AdalUserMismatchException(this.DisplayableId, displayableId);
+            }
         }
 
 #if ADAL_WINRT
@@ -116,6 +138,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return PlatformSpecificHelper.IsDomainJoined() && await PlatformSpecificHelper.IsUserLocalAsync();
         }
 #else
+
         internal AuthorizationResult AcquireAuthorization()
         {
             AuthorizationResult authorizationResult = null;
@@ -162,7 +185,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 loginHint = userId.Id;
             }
 
-            RequestParameters requestParameters = OAuth2MessageHelper.CreateAuthorizationRequest(this.Resource, this.ClientKey.ClientId, this.redirectUri, loginHint, this.promptBehavior, this.extraQueryParameters, includeFormsAuthParam, this.CallState);
+            RequestParameters requestParameters = this.CreateAuthorizationRequest(loginHint, includeFormsAuthParam);
 
             var authorizationUri = new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + requestParameters);
             authorizationUri = new Uri(HttpHelper.CheckForExtraQueryParameter(authorizationUri.AbsoluteUri));
@@ -170,24 +193,57 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return authorizationUri;
         }
 
-        private void VerifyUserMatch(AuthenticationResult result)
+        private RequestParameters CreateAuthorizationRequest(string loginHint, bool includeFormsAuthParam)
         {
-            if ((this.DisplayableId == null && this.UniqueId == null) || this.UserIdentifierType == UserIdentifierType.OptionalDisplayableId)
+            RequestParameters authorizationRequestParameters = new RequestParameters(this.Resource, this.ClientKey, null);
+            authorizationRequestParameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
+            authorizationRequestParameters[OAuthParameter.RedirectUri] = redirectUri.AbsoluteUri;
+
+            if (!string.IsNullOrWhiteSpace(loginHint))
             {
-                return;
+                authorizationRequestParameters[OAuthExtra.LoginHintParameter] = loginHint;
             }
 
-            string uniqueId = (result.UserInfo != null && result.UserInfo.UniqueId != null) ? result.UserInfo.UniqueId : "NULL";
-            string displayableId = (result.UserInfo != null) ? result.UserInfo.DisplayableId : "NULL";
-
-            if (this.UserIdentifierType == UserIdentifierType.UniqueId && string.Compare(uniqueId, this.UniqueId, StringComparison.Ordinal) != 0)
+            if (this.CallState != null && this.CallState.CorrelationId != Guid.Empty)
             {
-                throw new AdalUserMismatchException(this.UniqueId, uniqueId);
+                authorizationRequestParameters[OAuthExtra.CorrelationIdParameter] = this.CallState.CorrelationId.ToString();
             }
 
-            if (this.UserIdentifierType == UserIdentifierType.RequiredDisplayableId && string.Compare(displayableId, this.DisplayableId, StringComparison.OrdinalIgnoreCase) != 0)
+            // ADFS currently ignores the parameter for now.
+            if (promptBehavior == PromptBehavior.Always)
             {
-                throw new AdalUserMismatchException(this.DisplayableId, displayableId);
+                authorizationRequestParameters[OAuthExtra.PromptParameter] = OAuthExtra.PromptLoginValue;
+            }
+            else if (promptBehavior == PromptBehavior.RefreshSession)
+            {
+                authorizationRequestParameters[OAuthExtra.PromptParameter] = OAuthExtra.PromptRefreshSessionValue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(extraQueryParameters))
+            {
+                authorizationRequestParameters.ExtraQueryParameter = extraQueryParameters;
+            }
+
+            if (includeFormsAuthParam)
+            {
+                authorizationRequestParameters[OAuthExtra.FormsAuthParameter] = OAuthExtra.FormsAuthValue;
+            }
+
+            AdalIdHelper.AddAsQueryParameters(authorizationRequestParameters);
+
+            return authorizationRequestParameters;
+        }
+
+        private void VerifyAuthorizationResult()
+        {
+            if (this.promptBehavior == PromptBehavior.Never && authorizationResult.Error == OAuthError.LoginRequired)
+            {
+                throw new AdalException(AdalError.UserInteractionRequired);
+            }
+
+            if (authorizationResult.Status != AuthorizationStatus.Success)
+            {
+                throw new AdalServiceException(authorizationResult.Error, authorizationResult.ErrorDescription);
             }
         }
     }

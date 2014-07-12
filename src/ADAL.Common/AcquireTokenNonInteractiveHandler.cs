@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -24,6 +25,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal class AcquireTokenNonInteractiveHandler : AcquireTokenHandlerBase
     {
         private readonly UserCredential userCredential;
+
+        private UserAssertion samlAssertion;
         
         public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserCredential userCredential, bool callSync)
             : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User, callSync)
@@ -37,9 +40,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
 #if ADAL_WINRT
-        protected override async Task SetUserDisplayableIdAsync()
+        protected override async Task SetUserDisplayableId()
 #else
-        protected override void SetUserDisplayableId()
+        protected override Task SetUserDisplayableId()
 #endif
         {
             // We cannot move the following lines to UserCredential as one of these calls in async. 
@@ -61,14 +64,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.DisplayableId = userCredential.UserName;
+
+#if !ADAL_WINRT
+            return CompletedTask;
+#endif
         }
 
-        protected override async Task<AuthenticationResult> SendTokenRequestAsync()
+        protected override async Task PreTokenRequest()
         {
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, this.userCredential.UserName, this.CallState);
             Logger.Information(this.CallState, "User '{0}' detected as '{1}'", this.userCredential.UserName, userRealmResponse.AccountType);
 
-            AuthenticationResult result;
             if (string.Compare(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 if (string.IsNullOrWhiteSpace(userRealmResponse.FederationMetadataUrl))
@@ -83,30 +89,49 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 Logger.Information(this.CallState, "Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType);
 
                 // We assume that if the response token type is not SAML 1.1, it is SAML 2
-                var samlCredential = new UserAssertion(
-                    wsTrustResponse.Token,
-                    (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
-
-                result = await this.SendTokenRequestWithUserAssertionAsync(samlCredential);
+                this.samlAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
             }
             else if (string.Compare(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase) == 0)
             {
-                //handle password grant flow for the managed user
+                // handle password grant flow for the managed user
                 if (this.userCredential.PasswordToCharArray() == null)
                 {
                     throw new AdalException(AdalError.PasswordRequiredForManagedUserError);
                 }
-
-                RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(this.Resource, this.ClientKey.ClientId, this.userCredential);
-                result = await this.SendHttpMessageAsync(requestParameters);
-
             }
             else
             {
                 throw new AdalException(AdalError.UnknownUserType);
             }
+        }
 
-            return result;
+        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
+        {
+            if (this.samlAssertion != null)
+            {
+                requestParameters[OAuthParameter.GrantType] = samlAssertion.AssertionType;
+                requestParameters[OAuthParameter.Assertion] = Convert.ToBase64String(Encoding.UTF8.GetBytes(samlAssertion.Assertion));
+            }
+            else
+            {
+                requestParameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
+                requestParameters[OAuthParameter.Username] = this.userCredential.UserName;
+#if ADAL_WINRT
+                requestParameters[OAuthParameter.Password] = this.userCredential.Password;
+#else
+                if (this.userCredential.SecurePassword != null)
+                {
+                    requestParameters.AddSecureParameter(OAuthParameter.Password, this.userCredential.SecurePassword);
+                }
+                else
+                {
+                    requestParameters[OAuthParameter.Password] = this.userCredential.Password;
+                }
+#endif
+            }
+
+            // To request id_token in response
+            requestParameters[OAuthParameter.Scope] = OAuthExtra.ScopeOpenIdValue;
         }
     }
 }

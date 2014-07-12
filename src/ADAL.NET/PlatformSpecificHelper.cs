@@ -40,11 +40,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return !string.IsNullOrWhiteSpace(value) ? value : null;
         }
 
-        public static AuthenticationResult ProcessServiceError(string error, string errorDescription)
-        {
-            throw new AdalServiceException(error, errorDescription);
-        }
-
         public static string PlatformSpecificToLower(this string input)
         {
             return input.ToLower(CultureInfo.InvariantCulture);

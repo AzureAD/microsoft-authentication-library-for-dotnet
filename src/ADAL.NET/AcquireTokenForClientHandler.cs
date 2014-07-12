@@ -16,8 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Threading.Tasks;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class AcquireTokenForClientHandler : AcquireTokenHandlerBase
@@ -27,10 +25,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {            
         }
 
-        protected override async Task<AuthenticationResult> SendTokenRequestAsync()
+        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
         {
-            RequestParameters requestParameters = OAuth2MessageHelper.CreateTokenRequest(this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
-            return await this.SendHttpMessageAsync(requestParameters);
+            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.ClientCredentials;
         }
     }
 }

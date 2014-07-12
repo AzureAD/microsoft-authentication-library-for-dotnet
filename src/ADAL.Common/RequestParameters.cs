@@ -32,9 +32,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly StringBuilder stringBuilderParameter;
 
-        public RequestParameters()
+        public RequestParameters(string resource, ClientKey clientKey, string audience)
         {
-            
+            if (!string.IsNullOrWhiteSpace(resource))
+            {
+                this[OAuthParameter.Resource] = resource;
+            }
+
+            this.AddClientKey(clientKey, audience);    
         }
 
         public RequestParameters(StringBuilder stringBuilderParameter)
@@ -118,6 +123,40 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return messageBuilder;
+        }
+
+        private void AddClientKey(ClientKey clientKey, string audience)
+        {
+            if (clientKey.ClientId != null)
+            {
+                this[OAuthParameter.ClientId] = clientKey.ClientId;
+            }
+
+#if !ADAL_WINRT
+            if (clientKey.Credential != null)
+            {
+                if (clientKey.Credential.ClientSecret != null)
+                {
+                    this[OAuthParameter.ClientSecret] = clientKey.Credential.ClientSecret;
+                }
+                else
+                {
+                    this.AddSecureParameter(OAuthParameter.ClientSecret, clientKey.Credential.SecureClientSecret);
+                }
+            }
+            else if (clientKey.Assertion != null)
+            {
+                this[OAuthParameter.ClientAssertionType] = clientKey.Assertion.AssertionType;
+                this[OAuthParameter.ClientAssertion] = clientKey.Assertion.Assertion;
+            }
+            else if (clientKey.Certificate != null)
+            {
+                JsonWebToken jwtToken = new JsonWebToken(audience, clientKey.Certificate.ClientId, AuthenticationConstant.JwtToAadLifetimeInSeconds, clientKey.Certificate.ClientId);
+                ClientAssertion clientAssertion = jwtToken.Sign(clientKey.Certificate);
+                this[OAuthParameter.ClientAssertionType] = clientAssertion.AssertionType;
+                this[OAuthParameter.ClientAssertion] = clientAssertion.Assertion;
+            }
+#endif
         }
     }
 }

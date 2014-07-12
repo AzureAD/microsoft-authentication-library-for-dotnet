@@ -103,4 +103,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public const string LoginRequired = "login_required";
     }
+
+    internal class OAuthExtra
+    {
+        public const string FormsAuthParameter = "amr_values";
+        public const string LoginHintParameter = "login_hint"; // login_hint is not standard oauth2 parameter
+        public const string CorrelationIdParameter = OAuthHeader.CorrelationId; // correlation id is not standard oauth2 parameter
+        public const string PromptParameter = "prompt"; // prompt is not standard oauth2 parameter
+        public const string FormsAuthValue = "pwd";
+        public const string PromptLoginValue = "login";
+        public const string PromptRefreshSessionValue = "refresh_session";
+        public const string ScopeOpenIdValue = "openid";        
+    }
 }
