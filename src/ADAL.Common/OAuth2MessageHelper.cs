@@ -118,9 +118,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             parameters[OAuthParameter.Resource] = resource;
             parameters[OAuthParameter.ClientId] = clientId;
             parameters[OAuthParameter.Username] = credential.UserName;
-#if ADAL_WINRT
-            parameters[OAuthParameter.Password] = credential.Password;
-#else
+#if !ADAL_WINRT
             if (credential.SecurePassword != null)
             {
                 parameters.AddSecureParameter(OAuthParameter.Password, credential.SecurePassword);

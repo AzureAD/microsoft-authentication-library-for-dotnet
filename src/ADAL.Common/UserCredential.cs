@@ -40,7 +40,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// and it can only be used in domain joined scenarios.
         /// </summary>
         public UserCredential()
-            : this(null, (string)null)
         {
             this.UserAuthType = UserAuthType.IntegratedAuth;
         }
@@ -50,11 +49,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
         public UserCredential(string userName)
-            : this(userName, (string)null)
         {
+            this.UserName = userName;
             this.UserAuthType = UserAuthType.IntegratedAuth;
         }
 
+#if ADAL_WINRT
+#else
         /// <summary>
         /// Constructor to create credential with client id and secret
         /// </summary>
@@ -67,8 +68,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.UserAuthType = UserAuthType.UsernamePassword;
         }
 
-#if ADAL_WINRT
-#else
         /// <summary>
         /// Constructor to create credential with client id and secret
         /// </summary>
@@ -87,16 +86,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public string UserName { get; internal set; }
 
-        internal string Password { get; private set; }
-
         internal UserAuthType UserAuthType { get; private set; }
 
 #if ADAL_WINRT
         internal char[] PasswordToCharArray()
         {
-            return (this.Password != null) ? this.Password.ToCharArray() : null;
+            return null;
         }
 #else
+        internal string Password { get; private set; }
+
         internal SecureString SecurePassword { get; private set; }
 
         internal char[] PasswordToCharArray()

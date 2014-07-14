@@ -108,16 +108,7 @@ namespace Test.ADAL.WinRT.Dashboard
 
                     case CommandType.AquireTokenAsyncRCUPa:
                     {
-                        UserCredential credential;
-
-                        if (arg.Password != null)
-                        {
-                            credential = new UserCredential(arg.UserName, arg.Password);
-                        }
-                        else
-                        {
-                            credential = new UserCredential(arg.UserName);
-                        }
+                        UserCredential credential = new UserCredential(arg.UserName);
 
                         result = await context.AcquireTokenAsync(arg.Resource, arg.ClientId, credential);
                         break;
