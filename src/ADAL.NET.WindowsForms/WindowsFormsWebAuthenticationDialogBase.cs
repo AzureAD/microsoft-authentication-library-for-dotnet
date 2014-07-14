@@ -48,22 +48,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         /// </summary>
         protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow)
         {
-            IWin32Window window = ownerWindow as IWin32Window;
-            if (window != null)
+            if (ownerWindow == null)
             {
-                this.ownerWindow = window;
+                this.ownerWindow = null;
+            }
+            else if (ownerWindow is IWin32Window)
+            {
+                this.ownerWindow = (IWin32Window)ownerWindow;
             }
             else if (ownerWindow is IntPtr)
             {
                 this.ownerWindow = new WindowsFormsWin32Window { Handle = (IntPtr)ownerWindow };
             }
-            else if (null == ownerWindow)
-            {
-                this.ownerWindow = null;
-            }
             else
             {
-                throw new AdalException(AdalError.InvalidOwnerWindowType,
+                throw new AdalException(AdalError.InvalidOwnerWindowType, 
                     "Invalid owner window type. Expected types are IWin32Window or IntPtr (for window handle).");
             }
 
