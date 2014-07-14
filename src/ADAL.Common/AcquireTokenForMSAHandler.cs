@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             requestParameters[OAuthParameter.Assertion] = Convert.ToBase64String(Encoding.UTF8.GetBytes(this.userAssertion.Assertion));
 
             // To request id_token in response
-            requestParameters[OAuthParameter.Scope] = OAuthExtra.ScopeOpenIdValue;
+            requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
         }
     }
 }

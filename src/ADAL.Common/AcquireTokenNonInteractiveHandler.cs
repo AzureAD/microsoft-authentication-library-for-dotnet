@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             // To request id_token in response
-            requestParameters[OAuthParameter.Scope] = OAuthExtra.ScopeOpenIdValue;
+            requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
         }
     }
 }

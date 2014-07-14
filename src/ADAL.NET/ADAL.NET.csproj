@@ -129,9 +129,6 @@
     <Compile Include="..\ADAL.Common\EncodingHelper.cs">
       <Link>Common\EncodingHelper.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\ExceptionHelper.cs">
-      <Link>Common\ExceptionHelper.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\HttpHelper.cs">
       <Link>Common\HttpHelper.cs</Link>
     </Compile>
@@ -176,9 +173,6 @@
     </Compile>
     <Compile Include="..\ADAL.Common\PromptBehavior.cs">
       <Link>Common\PromptBehavior.cs</Link>
-    </Compile>
-    <Compile Include="..\ADAL.Common\RegexUtilities.cs">
-      <Link>Common\RegexUtilities.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\RequestCreationHelper.cs">
       <Link>Common\RequestCreationHelper.cs</Link>
@@ -240,7 +234,6 @@
     <Compile Include="Logger.cs" />
     <Compile Include="PlatformSpecificHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RegexUtilities.cs" />
     <Compile Include="StaTaskScheduler.cs" />
     <Compile Include="Web\IWebUI.cs" />
     <Compile Include="Web\IWebUIFactory.cs" />

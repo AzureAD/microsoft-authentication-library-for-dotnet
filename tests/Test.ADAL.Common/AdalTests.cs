@@ -801,7 +801,7 @@ namespace Test.ADAL.Common
             var context = new AuthenticationContextProxy(sts.Authority, false, TokenCacheStoreType.InMemory);
             AuthenticationResultProxy result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, userId);
             VerifySuccessResult(sts, result);
-            //Thread.Sleep(TimeSpan.FromSeconds(2));
+            AuthenticationContextProxy.Delay(2000);
             AuthenticationResultProxy result2 = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.RefreshSession, userId);
             VerifySuccessResult(sts, result2);
             Verify.AreNotEqual(result.AccessToken, result2.AccessToken);

@@ -89,52 +89,6 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
-        [Description("Test for RegexUtilities helper class")]
-        [TestCategory("AdalDotNetUnit")]
-        public void RegexUtilitiesTest()
-        {
-            Verify.IsFalse(RegexUtilities.IsValidEmail("@majjf.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("A@b@c@example.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("Abc.example.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("j..s@proseware.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("j.@server1.proseware.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("js*@proseware.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("js@proseware..com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma...ma@jjf.co"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma.@jjf.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma@@jjf.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma@jjf."));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma@jjf..com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma@jjf.c"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma_@jjf"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma_@jjf."));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma_@jjf.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("-------"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("12@hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("d.j@server1.proseware.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("david.jones@proseware.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("j.s@server1.proseware.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("j@proseware.com9"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("j_9@[129.126.118.1]"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("jones@ms1.proseware.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("js@proseware.com9"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("m.a@hostname.co"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("m_a1a@hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma.h.saraf.onemore@hostname.com.edu"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma@hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma@hostname.comcom"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("MA@hostname.coMCom"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma12@hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma-a.aa@hostname.com.edu"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma-a@hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma-a@hostname.com.edu"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma-a@1hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma.a@1hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma@1hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("js#internal@proseware.com"));
-        }
-
-        [TestMethod]
         [Description("Test for authority type detection")]
         [TestCategory("AdalDotNetUnit")]
         public void AuthorityTypeDetectionTest()

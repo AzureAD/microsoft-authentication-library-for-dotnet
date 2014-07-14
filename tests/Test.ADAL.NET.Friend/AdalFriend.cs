@@ -41,8 +41,8 @@ namespace Test.ADAL.NET.Friend
                 context.CreateWebAuthenticationDialog(PromptBehavior.Auto), true);
             handler.CallState = null;
             context.Authenticator.AuthorizationUri = context.Authority + "oauth2/authorize";
-            AuthorizationResult authorizationResult = handler.AcquireAuthorization();
-            return authorizationResult.Code;
+            handler.AcquireAuthorization();
+            return handler.authorizationResult.Code;
         }
 
         public static void UpdateTokenExpiryOnTokenCache(TokenCache cache, DateTimeOffset newExpiry)

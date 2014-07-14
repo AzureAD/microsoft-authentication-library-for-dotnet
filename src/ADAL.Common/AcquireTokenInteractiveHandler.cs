@@ -26,6 +26,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     class AcquireTokenInteractiveHandler : AcquireTokenHandlerBase
     {
+        internal AuthorizationResult authorizationResult;
 
         private readonly Uri redirectUri;
 
@@ -36,8 +37,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private readonly IWebUI webUi;
 
         private readonly UserIdentifier userId;
-
-        private AuthorizationResult authorizationResult;
 
         public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, string extraQueryParameters, IWebUI webUI, bool callSync)
             : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User, callSync)
@@ -84,14 +83,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 #if ADAL_WINRT
         protected override async Task PreTokenRequest()
         {
-            this.authorizationResult = await this.AcquireAuthorizationAsync();
+            await this.AcquireAuthorizationAsync();
             VerifyAuthorizationResult();
         }
 #else
         protected override Task PreTokenRequest()
         {
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
-            this.authorizationResult = this.AcquireAuthorization();
+            this.AcquireAuthorization();
             VerifyAuthorizationResult();
 
             return CompletedTask;
@@ -127,10 +126,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
 #if ADAL_WINRT
-        private async Task<AuthorizationResult> AcquireAuthorizationAsync()
+        private async Task AcquireAuthorizationAsync()
         {
             Uri authorizationUri = this.CreateAuthorizationUri(await IncludeFormsAuthParamsAsync());
-            return await webUi.AuthenticateAsync(authorizationUri, this.redirectUri, this.CallState);
+            this.authorizationResult = await webUi.AuthenticateAsync(authorizationUri, this.redirectUri, this.CallState);
         }
 
         internal static async Task<bool> IncludeFormsAuthParamsAsync()
@@ -139,16 +138,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 #else
 
-        internal AuthorizationResult AcquireAuthorization()
+        internal void AcquireAuthorization()
         {
-            AuthorizationResult authorizationResult = null;
-
             var sendAuthorizeRequest = new Action(
                 delegate
                 {
                     Uri authorizationUri = this.CreateAuthorizationUri(IncludeFormsAuthParams());
                     string resultUri = this.webUi.Authenticate(authorizationUri, this.redirectUri);
-                    authorizationResult = OAuth2Response.ParseAuthorizeResponse(resultUri, this.CallState);
+                    this.authorizationResult = OAuth2Response.ParseAuthorizeResponse(resultUri, this.CallState);
                 });
 
             // If the thread is MTA, it cannot create or communicate with WebBrowser which is a COM control.
@@ -164,8 +161,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 sendAuthorizeRequest();
             }
-
-            return authorizationResult;
         }
 
         internal static bool IncludeFormsAuthParams()
@@ -201,22 +196,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (!string.IsNullOrWhiteSpace(loginHint))
             {
-                authorizationRequestParameters[OAuthExtra.LoginHintParameter] = loginHint;
+                authorizationRequestParameters[OAuthParameter.LoginHint] = loginHint;
             }
 
             if (this.CallState != null && this.CallState.CorrelationId != Guid.Empty)
             {
-                authorizationRequestParameters[OAuthExtra.CorrelationIdParameter] = this.CallState.CorrelationId.ToString();
+                authorizationRequestParameters[OAuthParameter.CorrelationId] = this.CallState.CorrelationId.ToString();
             }
 
             // ADFS currently ignores the parameter for now.
             if (promptBehavior == PromptBehavior.Always)
             {
-                authorizationRequestParameters[OAuthExtra.PromptParameter] = OAuthExtra.PromptLoginValue;
+                authorizationRequestParameters[OAuthParameter.Prompt] = OAuthValue.PromptLogin;
             }
             else if (promptBehavior == PromptBehavior.RefreshSession)
             {
-                authorizationRequestParameters[OAuthExtra.PromptParameter] = OAuthExtra.PromptRefreshSessionValue;
+                authorizationRequestParameters[OAuthParameter.Prompt] = OAuthValue.PromptRefreshSession;
             }
 
             if (!string.IsNullOrWhiteSpace(extraQueryParameters))
@@ -226,7 +221,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (includeFormsAuthParam)
             {
-                authorizationRequestParameters[OAuthExtra.FormsAuthParameter] = OAuthExtra.FormsAuthValue;
+                authorizationRequestParameters[OAuthParameter.FormsAuth] = OAuthValue.FormsAuth;
             }
 
             AdalIdHelper.AddAsQueryParameters(authorizationRequestParameters);
