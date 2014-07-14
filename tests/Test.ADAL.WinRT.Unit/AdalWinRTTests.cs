@@ -206,15 +206,6 @@ namespace Test.ADAL.WinRT.Unit
             await AdalTests.InstanceDiscoveryTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
-        [TestMethod]
-        //[Description("Positive Test for AcquireToken non-interactive for managed user")]
-        [TestCategory("AdalWinRTMock")]
-        [DataRow("AAD")]
-        public async Task AcquireTokenNonInteractiveManagedPositiveTest(string stsType)
-        {
-            await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(SetupStsService(GetStsType(stsType)));
-        }
-
         private static void SetReplayerNetworkPlugin()
         {
             NetworkPlugin.WebUIFactory = new ReplayerWebUIFactory();

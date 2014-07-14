@@ -165,7 +165,6 @@ namespace Test.ADAL.Common.Unit
             string authenticationResult = CreateCacheValue();
             string authority = "https://www.gotJwt.com/";
             string clientId = Guid.NewGuid().ToString();
-            string password = Guid.NewGuid().ToString();
             string resource = Guid.NewGuid().ToString();
             string tenantId = Guid.NewGuid().ToString();
             string uniqueId = Guid.NewGuid().ToString();
@@ -173,7 +172,7 @@ namespace Test.ADAL.Common.Unit
             Uri redirectUri = new Uri("https://www.GetJwt.com");
 
             authority = authority + tenantId + "/";
-            UserCredential credential = new UserCredential(displayableId, password);
+            UserCredential credential = new UserCredential(displayableId);
             AuthenticationContext tempContext = new AuthenticationContext(authority, false);
             var localCache = tempContext.TokenCache;
             IDictionary<TokenCacheKey, string> localCacheStore = localCache.TokenCacheStore;

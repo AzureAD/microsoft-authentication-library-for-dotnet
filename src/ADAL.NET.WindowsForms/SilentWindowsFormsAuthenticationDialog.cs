@@ -40,7 +40,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         public int NavigationWaitMiliSecs { get; set; }
 
-        public SilentWindowsFormsAuthenticationDialog()
+        public SilentWindowsFormsAuthenticationDialog(object ownerWindow)
+            : base(ownerWindow)
         {
             this.SuppressBrowserSubDialogs();
             this.WebBrowser.DocumentCompleted += this.DocumentCompletedHandler;

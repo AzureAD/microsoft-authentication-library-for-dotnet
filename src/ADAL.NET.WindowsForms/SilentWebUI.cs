@@ -106,9 +106,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                     {
                         this.formsSyncContext = new WindowsFormsSynchronizationContext();
 
-                        this.dialog = new SilentWindowsFormsAuthenticationDialog
+                        this.dialog = new SilentWindowsFormsAuthenticationDialog(this.OwnerWindow)
                         {
-                            OwnerWindow = this.OwnerWindow,
                             NavigationWaitMiliSecs = NavigationWaitMiliSecs
                         };
 

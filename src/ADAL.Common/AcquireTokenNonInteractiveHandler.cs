@@ -116,9 +116,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 requestParameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
                 requestParameters[OAuthParameter.Username] = this.userCredential.UserName;
-#if ADAL_WINRT
-                requestParameters[OAuthParameter.Password] = this.userCredential.Password;
-#else
+#if !ADAL_WINRT
                 if (this.userCredential.SecurePassword != null)
                 {
                     requestParameters.AddSecureParameter(OAuthParameter.Password, this.userCredential.SecurePassword);
