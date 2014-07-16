@@ -28,14 +28,33 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Default constructor.
         /// </summary>
-        internal TokenCacheItem()
+        internal TokenCacheItem(TokenCacheKey key, AuthenticationResult result)
         {
+            this.Authority = key.Authority;
+            this.Resource = key.Resource;
+            this.ClientId = key.ClientId;
+            this.TokenSubjectType = key.TokenSubjectType;
+            this.UniqueId = key.UniqueId;
+            this.DisplayableId = key.DisplayableId;
+            this.TenantId = result.TenantId;
+            this.ExpiresOn = result.ExpiresOn;
+            this.IsMultipleResourceRefreshToken = result.IsMultipleResourceRefreshToken;
+            this.AccessToken = result.AccessToken;
+            this.RefreshToken = result.RefreshToken;
+            this.IdToken = result.IdToken;
+
+            if (result.UserInfo != null)
+            {
+                this.FamilyName = result.UserInfo.FamilyName;
+                this.GivenName = result.UserInfo.GivenName;
+                this.IdentityProvider = result.UserInfo.IdentityProvider;
+            }
         }
 
         /// <summary>
         /// Gets the Authority.
         /// </summary>
-        public string Authority { get; internal set; }
+        public string Authority { get; private set; }
 
         /// <summary>
         /// Gets the ClientId.
@@ -101,5 +120,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
         public string IdToken { get; internal set; }
+
+        internal TokenSubjectType TokenSubjectType { get; set; }
+
+        internal bool Match(TokenCacheKey key)
+        {
+            return (key.Authority == this.Authority && key.ResourceEquals(this.Resource) && key.ClientIdEquals(this.ClientId)
+                    && key.TokenSubjectType == this.TokenSubjectType && key.UniqueId == this.UniqueId && key.DisplayableIdEquals(this.DisplayableId));
+        }
     }
 }

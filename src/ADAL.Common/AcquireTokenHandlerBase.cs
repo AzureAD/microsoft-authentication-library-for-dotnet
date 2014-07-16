@@ -89,8 +89,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    result = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.UniqueId, this.DisplayableId, this.TokenSubjectType, this.CallState);
-                    if (result != null && result.RequiresRefresh)
+                    result = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.CallState);
+                    if (result != null && result.AccessToken == null && result.RefreshToken != null)
                     {
                         result = await this.RefreshAccessTokenAsync(result);
                         if (result != null)

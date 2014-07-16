@@ -183,9 +183,6 @@
     <Compile Include="..\ADAL.Common\TokenCache.cs">
       <Link>Common\TokenCache.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\TokenCacheHelper.cs">
-      <Link>Common\TokenCacheHelper.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\TokenCacheItem.cs">
       <Link>Common\TokenCacheItem.cs</Link>
     </Compile>
