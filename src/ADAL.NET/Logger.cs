@@ -20,27 +20,27 @@ using System.Diagnostics;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class Logger
+    internal partial class Logger
     {
         internal static void Verbose(CallState callState, string format, params object[] args)
         {
             // TODO: This is temporary code. Replace it with correct implementation for Verbose level
-            Trace.TraceInformation(LogHelper.PrepareLogMessage(callState, format, args));
+            Trace.TraceInformation(PrepareLogMessage(callState, format, args));
         }
 
         internal static void Information(CallState callState, string format, params object[] args)
         {
-            Trace.TraceInformation(LogHelper.PrepareLogMessage(callState, format, args));
+            Trace.TraceInformation(PrepareLogMessage(callState, format, args));
         }
 
         internal static void Warning(CallState callState, string format, params object[] args)
         {
-            Trace.TraceWarning(LogHelper.PrepareLogMessage(callState, format, args));
+            Trace.TraceWarning(PrepareLogMessage(callState, format, args));
         }
 
         internal static void Error(CallState callState, string format, params object[] args)
         {
-            Trace.TraceError(LogHelper.PrepareLogMessage(callState, format, args));
+            Trace.TraceError(PrepareLogMessage(callState, format, args));
         }
     }
 }

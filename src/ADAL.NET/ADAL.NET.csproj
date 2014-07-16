@@ -156,8 +156,8 @@
     <Compile Include="..\ADAL.Common\IRequestCreationHelper.cs">
       <Link>Common\IRequestCreationHelper.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\LogHelper.cs">
-      <Link>Common\LogHelper.cs</Link>
+    <Compile Include="..\ADAL.Common\Logger.cs">
+      <Link>Common\Logger.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\MexParser.cs">
       <Link>Common\MexParser.cs</Link>
@@ -225,7 +225,6 @@
     <Compile Include="ClientKey.cs" />
     <Compile Include="CryptographyHelper.cs" />
     <Compile Include="DotNetEncodingHelper.cs" />
-    <Compile Include="FxcopSupressions.cs" />
     <Compile Include="JsonWebToken.cs" />
     <Compile Include="JsonWebTokenConstants.cs" />
     <Compile Include="Logger.cs" />

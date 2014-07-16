@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,8 +16,15 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 
-[module: SuppressMessage("Microsoft.Design", "CA2210:AssembliesShouldHaveValidStrongNames", 
-    Justification = "We are delay signing the assembly using an approved cert (35 :1024 - Microsoft Shared Libraries ) for strong name signing publicly released dll's.")]
-
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+{
+    internal partial class Logger
+    {
+        internal static string PrepareLogMessage(CallState callState, string format, params object[] args)
+        {
+            return string.Format(CultureInfo.CurrentCulture, format, args) + (callState != null ? (". Correlation ID: " + callState.CorrelationId) : string.Empty);
+        }
+    }
+}
