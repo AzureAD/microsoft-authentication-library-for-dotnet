@@ -74,10 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public async Task<AuthenticationResult> RunAsync()
         {
-            await this.Authenticator.UpdateFromMetadataAsync(this.CallState);
-            this.ValidateAuthorityType();
-
-            await SetUserDisplayableId();
+            await this.PreRunAsync();
 
             bool notifiedBeforeAccessCache = false;
 
@@ -106,8 +103,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     result = await this.SendTokenRequestAsync();
                     this.PostTokenRequest(result);
 
-                    await this.Authenticator.UpdateAuthorityTenantAsync(result.TenantId, this.CallState);
-
                     if (this.StoreToCache)
                     {
                         if (!notifiedBeforeAccessCache)
@@ -132,6 +127,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
+        protected virtual async Task PreRunAsync()
+        {
+            await this.Authenticator.UpdateFromTemplateAsync(this.CallState);
+            this.ValidateAuthorityType();
+        }
+
         protected virtual Task PreTokenRequest()
         {
             return CompletedTask;
@@ -139,20 +140,31 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected virtual void PostTokenRequest(AuthenticationResult result)
         {
+            this.Authenticator.UpdateTenantId(result.TenantId);
         }
 
         protected abstract void AddAditionalRequestParameters(RequestParameters requestParameters);
-
-        protected virtual Task SetUserDisplayableId()
-        {
-            return CompletedTask;
-        }
 
         protected virtual async Task<AuthenticationResult> SendTokenRequestAsync()
         {
             RequestParameters requestParameters = new RequestParameters(this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
             this.AddAditionalRequestParameters(requestParameters);
             return await this.SendHttpMessageAsync(requestParameters);
+        }
+
+        protected async Task<AuthenticationResult> SendTokenRequestByRefreshTokenAsync(string refreshToken)
+        {
+            RequestParameters requestParameters = new RequestParameters(this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
+            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
+            requestParameters[OAuthParameter.RefreshToken] = refreshToken;
+            AuthenticationResult result = await this.SendHttpMessageAsync(requestParameters);
+
+            if (result.RefreshToken == null)
+            {
+                result.RefreshToken = refreshToken;
+            }
+
+            return result;
         }
 
         private async Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result)
@@ -164,7 +176,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 try
                 {
                     newResult = await this.SendTokenRequestByRefreshTokenAsync(result.RefreshToken);
-                    await this.Authenticator.UpdateAuthorityTenantAsync(result.TenantId, this.CallState);
+                    this.Authenticator.UpdateTenantId(result.TenantId);
 
                     if (newResult.IdToken == null)
                     {
@@ -188,21 +200,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return newResult;
-        }
-
-        protected async Task<AuthenticationResult> SendTokenRequestByRefreshTokenAsync(string refreshToken)
-        {
-            RequestParameters requestParameters = new RequestParameters(this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
-            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
-            requestParameters[OAuthParameter.RefreshToken] = refreshToken;
-            AuthenticationResult result = await this.SendHttpMessageAsync(requestParameters);
-
-            if (result.RefreshToken == null)
-            {
-                result.RefreshToken = refreshToken;
-            }
-
-            return result;
         }
 
         private async Task<AuthenticationResult> SendHttpMessageAsync(RequestParameters requestParameters)

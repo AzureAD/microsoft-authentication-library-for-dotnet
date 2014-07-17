@@ -100,15 +100,19 @@ namespace Test.ADAL.Common
         public static void AuthenticationContextAuthorityValidationTest(Sts sts)
         {
             SetCredential(sts);
-            var context = new AuthenticationContextProxy(sts.InvalidAuthority, true);
-            AuthenticationResultProxy result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
-            if (sts.Type == StsType.ADFS)
+            AuthenticationContextProxy context = null;
+            AuthenticationResultProxy result = null;
+            try
             {
-                VerifyErrorResult(result, Sts.InvalidArgumentError, "validateAuthority");
+                context = new AuthenticationContextProxy(sts.InvalidAuthority, true);
+                Verify.AreNotEqual(sts.Type, StsType.ADFS);
+                result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
+                VerifyErrorResult(result, Sts.AuthorityNotInValidList, "authority");
             }
-            else
+            catch (ArgumentException ex)
             {
-                VerifyErrorResult(result, Sts.AuthorityNotInValidList, "authority");                
+                Verify.AreEqual(sts.Type, StsType.ADFS);                
+                Verify.AreEqual(ex.ParamName, "validateAuthority");
             }
 
             context = new AuthenticationContextProxy(sts.InvalidAuthority, false);
@@ -118,26 +122,24 @@ namespace Test.ADAL.Common
             result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
             VerifySuccessResult(sts, result);
 
-            context = new AuthenticationContextProxy(sts.Authority, true);
-            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
-            if (sts.Type == StsType.ADFS)
+            if (sts.Type != StsType.ADFS)
             {
-                VerifyErrorResult(result, Sts.InvalidArgumentError, "validateAuthority");
-            }
-            else                
-            {
-                VerifySuccessResult(sts, result);                 
-            }                
-
-            context = new AuthenticationContextProxy(sts.Authority);
-            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
-            if (sts.Type == StsType.ADFS)
-            {
-                VerifyErrorResult(result, Sts.InvalidArgumentError, "validateAuthority");
-            }
-            else
-            {
+                context = new AuthenticationContextProxy(sts.Authority, true);
+                result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
                 VerifySuccessResult(sts, result);
+            }
+
+            try
+            {
+                context = new AuthenticationContextProxy(sts.InvalidAuthority);
+                Verify.AreNotEqual(sts.Type, StsType.ADFS);
+                result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
+                VerifyErrorResult(result, Sts.AuthorityNotInValidList, "authority");
+            }
+            catch (ArgumentException ex)
+            {
+                Verify.AreEqual(sts.Type, StsType.ADFS);
+                Verify.AreEqual(ex.ParamName, "validateAuthority");
             }
 
             context = new AuthenticationContextProxy(sts.Authority + "/extraPath1/extraPath2", sts.ValidateAuthority);

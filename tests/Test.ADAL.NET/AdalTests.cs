@@ -503,6 +503,7 @@ namespace Test.ADAL.Common
             var credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
 
             AuthenticationResultProxy result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential);
+            AuthenticationContextProxy.Delay(2000);
             AuthenticationResultProxy result2 = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode2, sts.ValidRedirectUriForConfidentialClient, credential);
             VerifySuccessResult(sts, result, true, false);
             VerifySuccessResult(sts, result2, true, false);

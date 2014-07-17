@@ -42,13 +42,13 @@ namespace Test.ADAL.NET.Unit
         {
             var federatedSts = SetupStsService(StsType.AADFederatedWithADFS3);
             AuthenticationContext context = new AuthenticationContext(federatedSts.Authority, federatedSts.ValidateAuthority);
-            await context.Authenticator.UpdateFromMetadataAsync(null);
+            await context.Authenticator.UpdateFromTemplateAsync(null);
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
             VerifyUserRealmResponse(userRealmResponse, "Federated");
 
             var managedSts = SetupStsService(StsType.AAD);
             context = new AuthenticationContext(managedSts.Authority, managedSts.ValidateAuthority);
-            await context.Authenticator.UpdateFromMetadataAsync(null);
+            await context.Authenticator.UpdateFromTemplateAsync(null);
             userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, managedSts.ValidUserName, null);
             VerifyUserRealmResponse(userRealmResponse, "Managed");
 
@@ -95,7 +95,7 @@ namespace Test.ADAL.NET.Unit
         {
             var federatedSts = SetupStsService(StsType.AADFederatedWithADFS3);
             AuthenticationContext context = new AuthenticationContext(federatedSts.Authority, federatedSts.ValidateAuthority);
-            await context.Authenticator.UpdateFromMetadataAsync(null);
+            await context.Authenticator.UpdateFromTemplateAsync(null);
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
             XDocument mexDocument = await FecthMexAsync(userRealmResponse.FederationMetadataUrl);
             Verify.IsNotNull(mexDocument);
@@ -118,7 +118,7 @@ namespace Test.ADAL.NET.Unit
         {
             var federatedSts = SetupStsService(StsType.AADFederatedWithADFS3);
             AuthenticationContext context = new AuthenticationContext(federatedSts.Authority, federatedSts.ValidateAuthority);
-            await context.Authenticator.UpdateFromMetadataAsync(null);
+            await context.Authenticator.UpdateFromTemplateAsync(null);
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
             XDocument mexDocument = await FecthMexAsync(userRealmResponse.FederationMetadataUrl);
             Verify.IsNotNull(mexDocument);
@@ -162,7 +162,7 @@ namespace Test.ADAL.NET.Unit
         {
             var federatedSts = SetupStsService(StsType.AADFederatedWithADFS3);
             AuthenticationContext context = new AuthenticationContext(federatedSts.Authority, federatedSts.ValidateAuthority);
-            await context.Authenticator.UpdateFromMetadataAsync(null);
+            await context.Authenticator.UpdateFromTemplateAsync(null);
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
             XDocument mexDocument = await FecthMexAsync(userRealmResponse.FederationMetadataUrl);
             Verify.IsNotNull(mexDocument);

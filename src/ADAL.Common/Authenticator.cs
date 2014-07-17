@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -32,11 +33,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private const string TenantlessTenantName = "Common";
 
+        private static readonly AuthenticatorTemplateList AuthenticatorTemplateList = new AuthenticatorTemplateList();
+
+        private bool updatedFromTemplate; 
+
         public Authenticator(string authority, bool validateAuthority)
         {
             this.Authority = CanonicalizeUri(authority);
 
             this.AuthorityType = DetectAuthorityType(this.Authority);
+
+            if (this.AuthorityType != AuthorityType.AAD && validateAuthority)
+            {
+                throw new ArgumentException(AdalErrorMessage.UnsupportedAuthorityValidation, "validateAuthority");
+            }
 
             this.ValidateAuthority = validateAuthority;
         }
@@ -59,33 +69,32 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public Guid CorrelationId { get; set; }
 
-        public async Task UpdateFromMetadataAsync(CallState callState)
+        public async Task UpdateFromTemplateAsync(CallState callState)
         {
-            if (this.AuthorityType != AuthorityType.AAD && this.ValidateAuthority)
+            if (!this.updatedFromTemplate)
             {
-                throw new ArgumentException(AdalErrorMessage.UnsupportedAuthorityValidation, "validateAuthority");
+                var authorityUri = new Uri(this.Authority);
+                string host = authorityUri.Authority;
+                string path = authorityUri.AbsolutePath.Substring(1);
+                string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
+
+                AuthenticatorTemplate matchingTemplate = await AuthenticatorTemplateList.FindMatchingItemAsync(this.ValidateAuthority, host, tenant, callState);
+
+                this.AuthorizationUri = matchingTemplate.AuthorizeEndpoint.Replace("{tenant}", tenant);
+                this.TokenUri = matchingTemplate.TokenEndpoint.Replace("{tenant}", tenant);
+                this.UserRealmUri = CanonicalizeUri(matchingTemplate.UserRealmEndpoint);
+                this.IsTenantless = (string.Compare(tenant, TenantlessTenantName, StringComparison.OrdinalIgnoreCase) == 0);
+                this.SelfSignedJwtAudience = matchingTemplate.Issuer.Replace("{tenant}", tenant);
+                this.updatedFromTemplate = true;
             }
-
-            var authorityUri = new Uri(this.Authority);
-            string host = authorityUri.Authority;
-            string path = authorityUri.AbsolutePath.Substring(1);
-            string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-
-            ActiveDirectoryAuthenticationAuthority matchingAuthority = (this.ValidateAuthority) ? await AuthenticationMetadata.FindMatchingAuthorityAsync(host, tenant, callState) : AuthenticationMetadata.CreateActiveDirectoryAuthenticationAuthority(host);
-
-            this.AuthorizationUri = matchingAuthority.AuthorizeEndpoint.Replace("{tenant}", tenant);
-            this.TokenUri = matchingAuthority.TokenEndpoint.Replace("{tenant}", tenant);
-            this.UserRealmUri = CanonicalizeUri(matchingAuthority.UserRealmEndpoint);
-            this.IsTenantless = (string.Compare(tenant, TenantlessTenantName, StringComparison.OrdinalIgnoreCase) == 0);
-            this.SelfSignedJwtAudience = matchingAuthority.Issuer.Replace("{tenant}", tenant);
         }
 
-        public async Task UpdateAuthorityTenantAsync(string tenantId, CallState callState)
+        public void UpdateTenantId(string tenantId)
         {
             if (this.IsTenantless && !string.IsNullOrWhiteSpace(tenantId))
             {
                 this.Authority = ReplaceTenantlessTenant(this.Authority, tenantId);
-                await UpdateFromMetadataAsync(callState);
+                this.updatedFromTemplate = false;
             }
         }
 

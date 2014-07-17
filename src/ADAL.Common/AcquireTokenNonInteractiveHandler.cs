@@ -39,15 +39,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.userCredential = userCredential;
         }
 
-#if ADAL_WINRT
-        protected override async Task SetUserDisplayableId()
-#else
-        protected override Task SetUserDisplayableId()
-#endif
+        protected override async Task PreRunAsync()
         {
+            await base.PreRunAsync();
+
             // We cannot move the following lines to UserCredential as one of these calls in async. 
             // It cannot be moved to constructor or property or a pure sync or async call. This is why we moved it here which is an async call already.
-            if (string.IsNullOrWhiteSpace(userCredential.UserName))
+            if (string.IsNullOrWhiteSpace(this.userCredential.UserName))
             {
 #if ADAL_WINRT
                 this.userCredential.UserName = await PlatformSpecificHelper.GetUserPrincipalNameAsync();
@@ -64,14 +62,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.DisplayableId = userCredential.UserName;
-
-#if !ADAL_WINRT
-            return CompletedTask;
-#endif
         }
 
         protected override async Task PreTokenRequest()
         {
+            await base.PreTokenRequest();
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, this.userCredential.UserName, this.CallState);
             Logger.Information(this.CallState, "User '{0}' detected as '{1}'", this.userCredential.UserName, userRealmResponse.AccountType);
 

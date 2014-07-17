@@ -67,9 +67,6 @@
     <Compile Include="..\ADAL.Common\AcquireTokenSilentHandler.cs">
       <Link>Common\AcquireTokenSilentHandler.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\ActiveDirectoryAuthenticationAuthority.cs">
-      <Link>Common\ActiveDirectoryAuthenticationAuthority.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\AdalException.cs">
       <Link>Common\AdalException.cs</Link>
     </Compile>
@@ -85,9 +82,6 @@
     <Compile Include="..\ADAL.Common\AuthenticationContext.cs">
       <Link>Common\AuthenticationContext.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\AuthenticationMetadata.cs">
-      <Link>Common\AuthenticationMetadata.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\AuthenticationParameters.cs">
       <Link>Common\AuthenticationParameters.cs</Link>
     </Compile>
@@ -96,6 +90,12 @@
     </Compile>
     <Compile Include="..\ADAL.Common\Authenticator.cs">
       <Link>Common\Authenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AuthenticatorTemplate.cs">
+      <Link>Common\AuthenticatorTemplate.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AuthenticatorTemplateList.cs">
+      <Link>Common\AuthenticatorTemplateList.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\AuthorizationResult.cs">
       <Link>Common\AuthorizationResult.cs</Link>

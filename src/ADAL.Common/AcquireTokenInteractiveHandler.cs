@@ -83,12 +83,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 #if ADAL_WINRT
         protected override async Task PreTokenRequest()
         {
+            base.PreTokenRequest();
             await this.AcquireAuthorizationAsync();
             VerifyAuthorizationResult();
         }
 #else
         protected override Task PreTokenRequest()
         {
+            base.PreTokenRequest();
+
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
             this.AcquireAuthorization();
             VerifyAuthorizationResult();
@@ -106,6 +109,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected override void PostTokenRequest(AuthenticationResult result)
         {
+            base.PostTokenRequest(result);
             if ((this.DisplayableId == null && this.UniqueId == null) || this.UserIdentifierType == UserIdentifierType.OptionalDisplayableId)
             {
                 return;

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,11 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
@@ -29,66 +26,51 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal static class AuthenticationMetadata
+    [DataContract]
+    internal class AuthenticatorTemplate
     {
-        private const string CustomTrustedHostEnvironmentVariableName = "customTrustedHost";
         private const string AuthorizeEndpointTemplate = "https://{host}/{tenant}/oauth2/authorize";
         private const string MetadataTemplate = "{\"Host\":\"{host}\", \"Authority\":\"https://{host}/{tenant}/\", \"InstanceDiscoveryEndpoint\":\"https://{host}/common/discovery/instance\", \"AuthorizeEndpoint\":\"" + AuthorizeEndpointTemplate + "\", \"TokenEndpoint\":\"https://{host}/{tenant}/oauth2/token\", \"UserRealmEndpoint\":\"https://{host}/common/UserRealm\"}";
 
-        static AuthenticationMetadata()
-        {
-            string[] trustedHostList = { "login.windows.net", "login.chinacloudapi.cn", "login.cloudgovapi.us" };
-
-            AuthorityList = new List<ActiveDirectoryAuthenticationAuthority>();
-
-            string customAuthorityHost = PlatformSpecificHelper.GetEnvironmentVariable(CustomTrustedHostEnvironmentVariableName);
-            if (string.IsNullOrWhiteSpace(customAuthorityHost))
-            {
-                foreach (string host in trustedHostList)
-                {
-                    AuthorityList.Add(CreateActiveDirectoryAuthenticationAuthority(host));
-                }
-            }
-            else
-            {
-                AuthorityList.Add(CreateActiveDirectoryAuthenticationAuthority(customAuthorityHost));
-            }
-        }
-
-        public static List<ActiveDirectoryAuthenticationAuthority> AuthorityList { get; private set; }
-
-        public static ActiveDirectoryAuthenticationAuthority CreateActiveDirectoryAuthenticationAuthority(string host)
+        public static AuthenticatorTemplate CreateFromHost(string host)
         {
             string metadata = MetadataTemplate.Replace("{host}", host);
-            var serializer = new DataContractJsonSerializer(typeof(ActiveDirectoryAuthenticationAuthority));
+            var serializer = new DataContractJsonSerializer(typeof(AuthenticatorTemplate));
             byte[] serializedObjectBytes = Encoding.UTF8.GetBytes(metadata);
-            ActiveDirectoryAuthenticationAuthority authority;
+            AuthenticatorTemplate authority;
             using (var stream = new MemoryStream(serializedObjectBytes))
             {
-                authority = (ActiveDirectoryAuthenticationAuthority)serializer.ReadObject(stream);
+                authority = (AuthenticatorTemplate)serializer.ReadObject(stream);
                 authority.Issuer = authority.TokenEndpoint;
             }
 
             return authority;
         }
 
-        public static async Task<ActiveDirectoryAuthenticationAuthority> FindMatchingAuthorityAsync(string authority, string tenant, CallState callState)
-        {
-            ActiveDirectoryAuthenticationAuthority matchingAuthority = AuthorityList.FirstOrDefault(a => string.Compare(authority, a.Host, StringComparison.OrdinalIgnoreCase) == 0);
-            if (matchingAuthority == null)
-            {
-                // We only check with the first trusted authority (login.windows.net) for instance discovery
-                if (await FetchAuthenticatorAsync(AuthorityList.First().InstanceDiscoveryEndpoint, authority, tenant, callState) != null)
-                {
-                    matchingAuthority = CreateActiveDirectoryAuthenticationAuthority(authority);
-                }
-            }
+        [DataMember]
+        public string Host { get; internal set; }
 
-            return matchingAuthority;
-        }
+        [DataMember]
+        public string Issuer { get; internal set; }
 
-        private static async Task<string> FetchAuthenticatorAsync(string instanceDiscoveryEndpoint, string host, string tenant, CallState callState)
+        [DataMember]
+        public string Authority { get; internal set; }
+
+        [DataMember]
+        public string InstanceDiscoveryEndpoint { get; internal set; }
+
+        [DataMember]
+        public string AuthorizeEndpoint { get; internal set; }
+
+        [DataMember]
+        public string TokenEndpoint { get; internal set; }
+
+        [DataMember]
+        public string UserRealmEndpoint { get; internal set; }
+
+        public async Task VerifyAnotherHostByInstanceDiscoveryAsync(string host, string tenant, CallState callState)
         {
+            string instanceDiscoveryEndpoint = this.InstanceDiscoveryEndpoint;
             instanceDiscoveryEndpoint += ("?api-version=1.0&authorization_endpoint=" + AuthorizeEndpointTemplate);
             instanceDiscoveryEndpoint = instanceDiscoveryEndpoint.Replace("{host}", host);
             instanceDiscoveryEndpoint = instanceDiscoveryEndpoint.Replace("{tenant}", tenant);
@@ -110,8 +92,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     HttpHelper.VerifyCorrelationIdHeaderInReponse(response, callState);
                     InstanceDiscoveryResponse discoveryResponse = HttpHelper.DeserializeResponse<InstanceDiscoveryResponse>(response);
-                    clientMetrics.SetLastError(null); 
-                    return discoveryResponse.TenantDiscoveryEndpoint;
+                    clientMetrics.SetLastError(null);
+                    if (discoveryResponse.TenantDiscoveryEndpoint == null)
+                    {
+                        throw new AdalException(AdalError.AuthorityNotInValidList);                        
+                    }
                 }
             }
             catch (WebException ex)
@@ -120,8 +105,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 clientMetrics.SetLastError(tokenResponse.ErrorCodes);
                 throw new AdalServiceException(
                     AdalError.AuthorityNotInValidList,
-                    string.Format(CultureInfo.InvariantCulture, "{0}. {1} ({2}): {3}", 
-                        AdalErrorMessage.AuthorityNotInValidList, tokenResponse.Error, host, tokenResponse.ErrorDescription), 
+                    string.Format(CultureInfo.InvariantCulture, "{0}. {1} ({2}): {3}",
+                        AdalErrorMessage.AuthorityNotInValidList, tokenResponse.Error, this.Host, tokenResponse.ErrorDescription),
                     ex);
             }
             finally
