@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 result = new AuthenticationResult(tokenResponse.TokenType, tokenResponse.AccessToken, tokenResponse.RefreshToken, expiresOn)
                     {
-#if !ADAL_WINRT
+#if ADAL_NET
                         // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
                         // to get it from the STS response.
                         Resource = tokenResponse.Resource,

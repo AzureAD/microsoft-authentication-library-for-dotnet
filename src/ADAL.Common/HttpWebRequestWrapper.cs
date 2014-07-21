@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
 
-#if !ADAL_WINRT
+#if ADAL_NET
             if (callState != null && callState.CallSync)
             {
                 return NetworkPlugin.HttpWebRequestFactory.CreateResponse(this.request.GetResponse());
@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public async Task<Stream> GetRequestStreamSyncOrAsync(CallState callState)
         {
-#if !ADAL_WINRT
+#if ADAL_NET
             if (callState != null && callState.CallSync)
             {
                 return this.request.GetRequestStream();

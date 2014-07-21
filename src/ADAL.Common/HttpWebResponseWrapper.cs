@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public void Close()
         {
-#if !ADAL_WINRT
+#if ADAL_NET
             this.response.Close();
 #endif
         }

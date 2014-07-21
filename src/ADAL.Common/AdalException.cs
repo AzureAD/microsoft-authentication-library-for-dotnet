@@ -21,9 +21,7 @@ using System.Globalization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-#if ADAL_WINRT
-    class AdalException : Exception
-#else
+#if ADAL_NET
     using System.Runtime.Serialization;
 
     /// <summary>
@@ -31,6 +29,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     [Serializable]
     public class AdalException : Exception
+#else
+    class AdalException : Exception
 #endif
     {
         internal enum ErrorFormat
@@ -103,8 +103,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public string ErrorCode { get; private set; }
 
-#if ADAL_WINRT
-#else
+#if ADAL_NET
         /// <summary>
         /// Initializes a new instance of the exception class with serialized data.
         /// </summary>

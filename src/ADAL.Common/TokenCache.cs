@@ -35,10 +35,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// Token cache class used by <see cref="AuthenticationContext"/> to store access and refresh tokens.
     /// </summary>
-#if ADAL_WINRT
-    public sealed partial class TokenCache
-#else
+#if ADAL_NET
     public class TokenCache
+#else
+    public sealed partial class TokenCache
 #endif
     {
         internal delegate Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result, string resource, ClientKey clientKey, CallState callState);
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             DefaultShared = new TokenCache();
 
-#if ADAL_WINRT
+#if !ADAL_NET
             DefaultShared.BeforeAccess = DefaultTokenCache_BeforeAccess;
             DefaultShared.AfterAccess = DefaultTokenCache_AfterAccess;
 
@@ -191,10 +191,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Reads a copy of the list of all items in the cache. 
         /// </summary>
         /// <returns>The items in the cache</returns>
-#if ADAL_WINRT
-        public IEnumerable<TokenCacheItem> ReadItems()
-#else
+#if ADAL_NET
         public virtual IEnumerable<TokenCacheItem> ReadItems()
+#else
+        public IEnumerable<TokenCacheItem> ReadItems()
 #endif
         {
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
@@ -215,10 +215,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Deletes an item from the cache.
         /// </summary>
         /// <param name="item">The item to delete from the cache</param>
-#if ADAL_WINRT
-        public void DeleteItem(TokenCacheItem item)
-#else
+#if ADAL_NET
         public virtual void DeleteItem(TokenCacheItem item)
+#else
+        public void DeleteItem(TokenCacheItem item)
 #endif
         {
             if (item == null)
@@ -252,10 +252,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
         /// impact all the instances of <see cref="AuthenticationContext"/> which share that cache.
         /// </summary>
-#if ADAL_WINRT
-        public void Clear()
-#else
+#if ADAL_NET
         public virtual void Clear()
+#else
+        public void Clear()
 #endif
         {
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };

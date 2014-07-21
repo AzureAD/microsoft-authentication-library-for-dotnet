@@ -49,13 +49,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     [DataContract]
     public sealed partial class AuthenticationResult
     {
-        internal AuthenticationResult(AuthenticationStatus status, string error, string errorDescription)
-        {
-            this.Status = status;
-            this.Error = error;
-            this.ErrorDescription = errorDescription;
-        }
-
         internal AuthenticationResult(Exception ex)
         {
             this.Status = AuthenticationStatus.ClientError;

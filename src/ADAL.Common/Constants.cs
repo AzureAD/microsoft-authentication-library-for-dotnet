@@ -20,13 +20,13 @@ using System.Xml.Linq;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-#if ADAL_WINRT
-    internal static partial class AdalError
-#else
+#if ADAL_NET
     /// <summary>
     /// Error code returned as a property in AdalException
     /// </summary>
     public static class AdalError
+#else
+    internal static partial class AdalError
 #endif
     {
         /// <summary>

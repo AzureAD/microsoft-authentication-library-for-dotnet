@@ -25,8 +25,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class RequestParameters : Dictionary<string, string>
     {
-#if ADAL_WINRT
-#else
+#if ADAL_NET
         private Dictionary<string, SecureString> secureParameters;
 #endif
 
@@ -54,8 +53,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return this.ToStringBuilder().ToString();
         }
 
-#if ADAL_WINRT
-#else
+#if ADAL_NET
         public void AddSecureParameter(string key, SecureString value)
         {
             if (this.secureParameters == null)
@@ -97,8 +95,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 EncodingHelper.AddKeyValueString(messageBuilder, EncodingHelper.UrlEncode(kvp.Key), EncodingHelper.UrlEncode(kvp.Value));
             }
 
-#if ADAL_WINRT
-#else
+#if ADAL_NET
             if (this.secureParameters != null)
             {
                 foreach (KeyValuePair<string, SecureString> kvp in this.secureParameters)
@@ -132,7 +129,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this[OAuthParameter.ClientId] = clientKey.ClientId;
             }
 
-#if !ADAL_WINRT
+#if ADAL_NET
             if (clientKey.Credential != null)
             {
                 if (clientKey.Credential.ClientSecret != null)

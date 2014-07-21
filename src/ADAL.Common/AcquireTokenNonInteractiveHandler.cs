@@ -47,10 +47,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // It cannot be moved to constructor or property or a pure sync or async call. This is why we moved it here which is an async call already.
             if (string.IsNullOrWhiteSpace(this.userCredential.UserName))
             {
-#if ADAL_WINRT
-                this.userCredential.UserName = await PlatformSpecificHelper.GetUserPrincipalNameAsync();
-#else
+#if ADAL_NET
                 this.userCredential.UserName = PlatformSpecificHelper.GetUserPrincipalName();
+#else
+                this.userCredential.UserName = await PlatformSpecificHelper.GetUserPrincipalNameAsync();
 #endif
                 if (string.IsNullOrWhiteSpace(userCredential.UserName))
                 {
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 requestParameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
                 requestParameters[OAuthParameter.Username] = this.userCredential.UserName;
-#if !ADAL_WINRT
+#if ADAL_NET
                 if (this.userCredential.SecurePassword != null)
                 {
                     requestParameters.AddSecureParameter(OAuthParameter.Password, this.userCredential.SecurePassword);

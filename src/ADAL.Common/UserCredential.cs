@@ -54,8 +54,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.UserAuthType = UserAuthType.IntegratedAuth;
         }
 
-#if ADAL_WINRT
-#else
+#if ADAL_NET
         /// <summary>
         /// Constructor to create credential with client id and secret
         /// </summary>
@@ -88,12 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal UserAuthType UserAuthType { get; private set; }
 
-#if ADAL_WINRT
-        internal char[] PasswordToCharArray()
-        {
-            return null;
-        }
-#else
+#if ADAL_NET
         internal string Password { get; private set; }
 
         internal SecureString SecurePassword { get; private set; }
@@ -106,6 +100,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return (this.Password != null) ? this.Password.ToCharArray() : null;
+        }
+#else
+        internal char[] PasswordToCharArray()
+        {
+            return null;
         }
 #endif
     }
