@@ -178,7 +178,7 @@ namespace Test.ADAL.Common.Unit
             try
             {
                 var result = await acWithLocalCache.AcquireTokenAsync(resource, clientId, credential);
-#if TEST_ADAL_WINRT
+#if TEST_ADAL_WINRT_UNIT
     // ADAL WinRT does not throw exception. It returns error.
                 Verify.AreEqual("multiple_matching_tokens_detected", result.Error);
 #else
@@ -194,7 +194,7 @@ namespace Test.ADAL.Common.Unit
             {
                 AuthenticationContext acWithDefaultCache = new AuthenticationContext(authority, false);
                 var result = await acWithDefaultCache.AcquireTokenAsync(resource, clientId, credential);
-#if TEST_ADAL_WINRT
+#if TEST_ADAL_WINRT_UNIT
                 Verify.AreEqual("multiple_matching_tokens_detected", result.Error);
 #else
                 Verify.Fail("Exception expected");
@@ -218,7 +218,7 @@ namespace Test.ADAL.Common.Unit
             Verify.IsFalse(localCache.tokenCacheDictionary.ContainsKey(tempKey));
             AddToDictionary(localCache, tempKey, cacheValue);
 
-#if TEST_ADAL_WINRT
+#if TEST_ADAL_WINRT_UNIT
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri);
 #else
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId);
@@ -238,21 +238,21 @@ namespace Test.ADAL.Common.Unit
             var userId = new UserIdentifier(uniqueId, UserIdentifierType.UniqueId);
             var userIdUpper = new UserIdentifier(displayableId.ToUpper(), UserIdentifierType.RequiredDisplayableId);
 
-#if TEST_ADAL_WINRT
+#if TEST_ADAL_WINRT_UNIT
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, PromptBehavior.Auto, userId);
 #else
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userId);
 #endif
             VerifyAuthenticationResultsAreEqual(cacheValue, authenticationResultFromCache);
 
-#if TEST_ADAL_WINRT
+#if TEST_ADAL_WINRT_UNIT
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, PromptBehavior.Auto, userIdUpper);
 #else
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userIdUpper);
 #endif
             VerifyAuthenticationResultsAreEqual(cacheValue, authenticationResultFromCache);
 
-#if TEST_ADAL_WINRT
+#if TEST_ADAL_WINRT_UNIT
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri);
 #else
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId);
@@ -374,16 +374,16 @@ namespace Test.ADAL.Common.Unit
             Verify.AreEqual(3, cacheDictionary.Keys.Count);
             Verify.IsTrue(cacheDictionary.ContainsKey(key3));
 
-            var cacheStoreCopy = new KeyValuePair<TokenCacheKey, AuthenticationResult>[cacheDictionary.Count + 1];
-            cacheDictionary.CopyTo(cacheStoreCopy, 1);
+            var cacheItemsCopy = new KeyValuePair<TokenCacheKey, AuthenticationResult>[cacheDictionary.Count + 1];
+            cacheDictionary.CopyTo(cacheItemsCopy, 1);
             for (int i = 0; i < cacheDictionary.Count; i++)
             {
-                Verify.AreEqual(cacheStoreCopy[i + 1].Value, cacheDictionary[cacheStoreCopy[i + 1].Key]);
+                Verify.AreEqual(cacheItemsCopy[i + 1].Value, cacheDictionary[cacheItemsCopy[i + 1].Key]);
             }
 
             try
             {
-                cacheDictionary.CopyTo(cacheStoreCopy, 2);
+                cacheDictionary.CopyTo(cacheItemsCopy, 2);
                 Verify.Fail("Exception expected");
             }
             catch (ArgumentException)
@@ -393,7 +393,7 @@ namespace Test.ADAL.Common.Unit
 
             try
             {
-                cacheDictionary.CopyTo(cacheStoreCopy, -1);
+                cacheDictionary.CopyTo(cacheItemsCopy, -1);
                 Verify.Fail("Exception expected");
             }
             catch (ArgumentOutOfRangeException)

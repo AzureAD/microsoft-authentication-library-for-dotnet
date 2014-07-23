@@ -17,9 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-#if ADAL_WINRT
-using Windows.Foundation.Metadata;
-#endif
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -43,7 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     };
 
     /// <summary>
-    /// <see cref="TokenCacheKey"/> can be used with Linq to access items from the TokenCacheStore.
+    /// <see cref="TokenCacheKey"/> can be used with Linq to access items from the TokenCache dictionary.
     /// </summary>
     internal sealed class TokenCacheKey
     {
@@ -94,9 +91,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// true if the specified TokenCacheKey is equal to the current object; otherwise, false.
         /// </returns>
         /// <param name="other">The TokenCacheKey to compare with the current object. </param><filterpriority>2</filterpriority>
-#if ADAL_WINRT
-        [DefaultOverload]
-#endif
         public bool Equals(TokenCacheKey other)
         {
             return ReferenceEquals(this, other) ||

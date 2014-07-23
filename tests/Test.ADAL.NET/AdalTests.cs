@@ -72,8 +72,7 @@ namespace Test.ADAL.Common
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, new Uri(sts.ValidRedirectUriForConfidentialClient.AbsoluteUri + "x"), credential);
 
-            // TODO: Update status code to 400 once AAD returns it.
-            VerifyErrorResult(result, "invalid_grant", "access grant is invalid or malformed", (sts.Type == StsType.ADFS) ? 400 : 401);
+            VerifyErrorResult(result, "invalid_grant", "access grant is invalid or malformed", 400);
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, (ClientCredential)null);
             VerifyErrorResult(result, "invalid_argument", "credential");
@@ -86,7 +85,7 @@ namespace Test.ADAL.Common
         public static async Task ConfidentialClientWithX509TestAsync(Sts sts)
         {
             SetCredential(sts);
-            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheStoreType.Null);
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheType.Null);
 
             string authorizationCode = context.AcquireAccessCode(sts.ValidResource, sts.ValidConfidentialClientId, sts.ValidRedirectUriForConfidentialClient, sts.ValidUserId);
             var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
@@ -127,7 +126,7 @@ namespace Test.ADAL.Common
 
         public static async Task ClientCredentialTestAsync(Sts sts)
         {
-            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheStoreType.Null);
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheType.Null);
 
             AuthenticationResultProxy result = null;
 
@@ -153,12 +152,12 @@ namespace Test.ADAL.Common
 
             invalidCredential = new ClientCredential(sts.ValidConfidentialClientId.Replace("0", "1"), sts.ValidConfidentialClientSecret + "x");
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
-            VerifyErrorResult(result, Sts.UnauthorizedClient, "70001", 401);
+            VerifyErrorResult(result, Sts.UnauthorizedClient, "70001", 400);
         }
 
         public static async Task ClientAssertionWithX509TestAsync(Sts sts)
         {
-            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheStoreType.Null);
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheType.Null);
 
             AuthenticationResultProxy result = null;
 
@@ -231,7 +230,7 @@ namespace Test.ADAL.Common
 
         public static async Task ClientAssertionWithSelfSignedJwtTestAsync(Sts sts)
         {
-            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheStoreType.Null);
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheType.Null);
 
             AuthenticationResultProxy result = null;
             ClientAssertion validCredential = CreateClientAssertion(sts.Authority, sts.ValidConfidentialClientId, sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword);
@@ -259,7 +258,7 @@ namespace Test.ADAL.Common
 
             invalidCredential = CreateClientAssertion(sts.Authority, sts.InvalidClientId, sts.InvalidConfidentialClientCertificateName, sts.InvalidConfidentialClientCertificatePassword);
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
-            VerifyErrorResult(result, Sts.UnauthorizedClient, "70001", 401); // AADSTS70001: Application '87002806-c87a-41cd-896b-84ca5690d29e' is not registered for the account.
+            VerifyErrorResult(result, Sts.UnauthorizedClient, "70001", 400); // AADSTS70001: Application '87002806-c87a-41cd-896b-84ca5690d29e' is not registered for the account.
         }
 
         public static async Task AcquireTokenFromCacheTestAsync(Sts sts)

@@ -41,7 +41,7 @@ namespace Test.ADAL.Common
             Verify.IsNotNull(request.Headers[AdalIdParameter.Product]);
             Verify.IsNotNull(request.Headers[AdalIdParameter.Version]);
             Verify.IsNotNull(request.Headers[AdalIdParameter.CpuPlatform]);
-#if TEST_ADAL_WINRT
+#if TEST_ADAL_WINRT_UNIT
             Verify.IsNull(request.Headers[AdalIdParameter.OS]);
             Verify.IsNotNull(request.Headers[AdalIdParameter.DeviceModel]);
 #else
@@ -56,7 +56,7 @@ namespace Test.ADAL.Common
             Verify.IsNotNull(parameters[AdalIdParameter.Product]);
             Verify.IsNotNull(parameters[AdalIdParameter.Version]);
             Verify.IsNotNull(parameters[AdalIdParameter.CpuPlatform]);
-#if TEST_ADAL_WINRT
+#if TEST_ADAL_WINRT_UNIT
             Verify.IsFalse(parameters.ContainsKey(AdalIdParameter.OS));
             Verify.IsNotNull(parameters[AdalIdParameter.DeviceModel]);
 #else

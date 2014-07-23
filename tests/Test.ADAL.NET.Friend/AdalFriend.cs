@@ -47,13 +47,13 @@ namespace Test.ADAL.NET.Friend
 
         public static void UpdateTokenExpiryOnTokenCache(TokenCache cache, DateTimeOffset newExpiry)
         {
-            var cacheStore = cache.tokenCacheDictionary;
+            var cacheDictionary = cache.tokenCacheDictionary;
 
-            var key = cacheStore.Keys.First();
+            var key = cacheDictionary.Keys.First();
             cache.tokenCacheDictionary[key].ExpiresOn = newExpiry; 
-            var value = cacheStore.Values.First();
+            var value = cacheDictionary.Values.First();
             cache.Clear();
-            cacheStore.Add(key, value);        
+            cacheDictionary.Add(key, value);        
         }
     }
 }

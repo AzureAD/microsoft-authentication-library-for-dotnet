@@ -23,12 +23,8 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class RequestParameters : Dictionary<string, string>
+    internal partial class RequestParameters : Dictionary<string, string>
     {
-#if ADAL_NET
-        private Dictionary<string, SecureString> secureParameters;
-#endif
-
         private readonly StringBuilder stringBuilderParameter;
 
         public RequestParameters(string resource, ClientKey clientKey, string audience)
@@ -52,18 +48,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return this.ToStringBuilder().ToString();
         }
-
-#if ADAL_NET
-        public void AddSecureParameter(string key, SecureString value)
-        {
-            if (this.secureParameters == null)
-            {
-                this.secureParameters = new Dictionary<string, SecureString>();
-            }
-
-            this.secureParameters.Add(key, value);
-        }
-#endif
 
         public void WriteToStream(Stream stream)
         {
@@ -95,24 +79,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 EncodingHelper.AddKeyValueString(messageBuilder, EncodingHelper.UrlEncode(kvp.Key), EncodingHelper.UrlEncode(kvp.Value));
             }
 
-#if ADAL_NET
-            if (this.secureParameters != null)
-            {
-                foreach (KeyValuePair<string, SecureString> kvp in this.secureParameters)
-                {
-                    char[] secureParameterChars = null;
-                    try
-                    {
-                        secureParameterChars = kvp.Value.ToCharArray();
-                        EncodingHelper.AddStringWithUrlEncoding(messageBuilder, kvp.Key, secureParameterChars);
-                    }
-                    finally
-                    {
-                        secureParameterChars.SecureClear();
-                    }
-                }
-            }
-#endif
+            this.AddSecureParametersToMessageBuilder(messageBuilder);
 
             if (this.ExtraQueryParameter != null)
             {
@@ -120,40 +87,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return messageBuilder;
-        }
-
-        private void AddClientKey(ClientKey clientKey, string audience)
-        {
-            if (clientKey.ClientId != null)
-            {
-                this[OAuthParameter.ClientId] = clientKey.ClientId;
-            }
-
-#if ADAL_NET
-            if (clientKey.Credential != null)
-            {
-                if (clientKey.Credential.ClientSecret != null)
-                {
-                    this[OAuthParameter.ClientSecret] = clientKey.Credential.ClientSecret;
-                }
-                else
-                {
-                    this.AddSecureParameter(OAuthParameter.ClientSecret, clientKey.Credential.SecureClientSecret);
-                }
-            }
-            else if (clientKey.Assertion != null)
-            {
-                this[OAuthParameter.ClientAssertionType] = clientKey.Assertion.AssertionType;
-                this[OAuthParameter.ClientAssertion] = clientKey.Assertion.Assertion;
-            }
-            else if (clientKey.Certificate != null)
-            {
-                JsonWebToken jwtToken = new JsonWebToken(audience, clientKey.Certificate.ClientId, AuthenticationConstant.JwtToAadLifetimeInSeconds, clientKey.Certificate.ClientId);
-                ClientAssertion clientAssertion = jwtToken.Sign(clientKey.Certificate);
-                this[OAuthParameter.ClientAssertionType] = clientAssertion.AssertionType;
-                this[OAuthParameter.ClientAssertion] = clientAssertion.Assertion;
-            }
-#endif
         }
     }
 }

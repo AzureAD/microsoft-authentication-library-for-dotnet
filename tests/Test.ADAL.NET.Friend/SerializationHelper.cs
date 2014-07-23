@@ -46,7 +46,7 @@ namespace Test.ADAL.Common
 
         public static string StreamToString(Stream stream)
         {
-            using (StreamReader sr = new StreamReader(stream, Encoding.Default, false, 10000, true))
+            using (StreamReader sr = new StreamReader(stream, Encoding.GetEncoding("iso-8859-1"), false, 10000, true))
             {
                 return sr.ReadToEnd();
             }

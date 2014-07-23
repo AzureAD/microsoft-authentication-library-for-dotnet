@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.Resource = (resource != NullResource) ? resource : null;
             this.ClientKey = clientKey;
             this.TokenSubjectType = subjectType;
-            this.CallState = this.CreateCallState(callSync);
+            this.CallState = CreateCallState(this.Authenticator.CorrelationId, callSync);
 
             this.LoadFromCache = (tokenCache != null);
             this.StoreToCache = (tokenCache != null);
@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
                 }
 
-                LogReturnedToken(result);
+                await this.PostRunAsync(result);
                 return result;
             }
             finally
@@ -125,6 +125,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.NotifyAfterAccessCache();
                 }
             }
+        }
+
+        public static CallState CreateCallState(Guid correlationId, bool callSync)
+        {
+            correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
+            return new CallState(correlationId, callSync);
+        }
+
+        protected virtual Task PostRunAsync(AuthenticationResult result)
+        {
+            LogReturnedToken(result);
+
+            return CompletedTask;
         }
 
         protected virtual async Task PreRunAsync()
@@ -263,12 +276,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new AdalException(AdalError.InvalidAuthorityType,
                     string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.InvalidAuthorityTypeTemplate, this.Authenticator.Authority));
             }
-        }
-
-        private CallState CreateCallState(bool callSync)
-        {
-            Guid correlationId = (this.Authenticator.CorrelationId != Guid.Empty) ? this.Authenticator.CorrelationId : Guid.NewGuid();
-            return new CallState(correlationId, callSync);
         }
     }
 }

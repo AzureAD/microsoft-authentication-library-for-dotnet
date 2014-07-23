@@ -50,10 +50,22 @@ namespace Test.ADAL.Common
         private static string password;
         private static SecureString securePassword;
 
-        public AuthenticationContextProxy(string authority, bool validateAuthority, TokenCacheStoreType tokenCacheStoreType)
+        public AuthenticationContextProxy(string authority)
+        {
+            this.context = new AuthenticationContext(authority);
+            this.context.CorrelationId = new Guid(FixedCorrelationId);
+        }
+
+        public AuthenticationContextProxy(string authority, bool validateAuthority)
+        {
+            this.context = new AuthenticationContext(authority, validateAuthority);
+            this.context.CorrelationId = new Guid(FixedCorrelationId);
+        }
+
+        public AuthenticationContextProxy(string authority, bool validateAuthority, TokenCacheType tokenCacheType)
         {
             TokenCache tokenCache = null;
-            if (tokenCacheStoreType == TokenCacheStoreType.InMemory)
+            if (tokenCacheType == TokenCacheType.InMemory)
             {
                 tokenCache = new TokenCache();
             }

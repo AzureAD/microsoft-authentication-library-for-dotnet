@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,44 +16,48 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Security;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal enum UserAuthType
-    {
-        IntegratedAuth,
-        UsernamePassword
-    }
-
-    // Disabled Non-Interactive Feature
-    /// <summary>
-    /// Credential used for integrated authentication on domain-joined machines.
-    /// </summary>
     public sealed partial class UserCredential
     {
         /// <summary>
-        /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
-        /// and it can only be used in domain joined scenarios.
+        /// Constructor to create credential with client id and secret
         /// </summary>
-        public UserCredential()
+        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
+        /// <param name="password">User password.</param>
+        public UserCredential(string userName, string password)
         {
-            this.UserAuthType = UserAuthType.IntegratedAuth;
+            this.UserName = userName;
+            this.Password = password;
+            this.UserAuthType = UserAuthType.UsernamePassword;
         }
 
         /// <summary>
         /// Constructor to create credential with client id and secret
         /// </summary>
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        public UserCredential(string userName)
+        /// <param name="securePassword">User password.</param>
+        public UserCredential(string userName, SecureString securePassword)
         {
             this.UserName = userName;
-            this.UserAuthType = UserAuthType.IntegratedAuth;
+            this.SecurePassword = securePassword;
+            this.UserAuthType = UserAuthType.UsernamePassword;
         }
 
-        /// <summary>
-        /// Gets identifier of the user.
-        /// </summary>
-        public string UserName { get; internal set; }
+        internal string Password { get; private set; }
 
-        internal UserAuthType UserAuthType { get; private set; }
+        internal SecureString SecurePassword { get; private set; }
+
+        internal char[] PasswordToCharArray()
+        {
+            if (this.SecurePassword != null)
+            {
+                return this.SecurePassword.ToCharArray();
+            }
+
+            return (this.Password != null) ? this.Password.ToCharArray() : null;
+        }
     }
 }

@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             get
             {
-                return ReferenceEquals(this, AnyUser);
+                return (this.Type == AnyUser.Type && this.Id == AnyUser.Id);
             }            
         }
 
