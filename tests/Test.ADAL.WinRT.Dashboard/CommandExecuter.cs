@@ -74,7 +74,7 @@ namespace Test.ADAL.WinRT.Dashboard
                     case CommandType.CreateContextAVT:
                     {
                         TokenCache tokenCache = null;
-                        if (arg.TokenCacheStoreType == TokenCacheStoreType.InMemory)
+                        if (arg.TokenCacheType == TokenCacheType.InMemory)
                         {
                             tokenCache = new TokenCache()
                                          {

@@ -103,7 +103,7 @@ namespace Test.ADAL.WinRT
         public string ClientSecret { get; set; }
 
         [DataMember]
-        public TokenCacheStoreType TokenCacheStoreType { get; set; }
+        public TokenCacheType TokenCacheType { get; set; }
 
         [DataMember]
         public PromptBehaviorProxy PromptBehavior { get; set; }

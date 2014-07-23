@@ -64,11 +64,11 @@ namespace Test.ADAL.Common
                 new CommandArguments { Authority = authority, ValidateAuthority = validateAuthority }));
         }
 
-        public AuthenticationContextProxy(string authority, bool validateAuthority, TokenCacheStoreType tokenCacheStoreType)
+        public AuthenticationContextProxy(string authority, bool validateAuthority, TokenCacheType tokenCacheType)
         {
             CommandProxy.AddCommand(new AuthenticationContextCommand(
                 CommandType.CreateContextAVT,
-                new CommandArguments { Authority = authority, ValidateAuthority = validateAuthority, TokenCacheStoreType = tokenCacheStoreType }));
+                new CommandArguments { Authority = authority, ValidateAuthority = validateAuthority, TokenCacheType = tokenCacheType }));
         }
 
         public static void InitializeTest()
