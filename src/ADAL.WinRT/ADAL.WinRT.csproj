@@ -49,6 +49,12 @@
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ADAL.CommonWinRT\AuthenticationContext.cs">
+      <Link>CommonWinRT\AuthenticationContext.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\PlatformSpecificHelper.cs">
+      <Link>CommonWinRT\PlatformSpecificHelper.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\AcquireTokenByRefreshTokenHandler.cs">
       <Link>Common\AcquireTokenByRefreshTokenHandler.cs</Link>
     </Compile>
@@ -208,6 +214,7 @@
     <Compile Include="..\ADAL.Common\WsTrustResponse.cs">
       <Link>Common\WsTrustResponse.cs</Link>
     </Compile>
+    <Compile Include="AcquireTokenInteractiveHandler.cs" />
     <Compile Include="AdalEventSource.cs" />
     <Compile Include="AdalTrace.cs" />
     <Compile Include="AuthenticationContext.cs" />
@@ -215,6 +222,7 @@
     <Compile Include="AuthenticationResult.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="CryptographyHelper.cs" />
+    <Compile Include="RequestParameters.cs" />
     <Compile Include="TokenCache.cs" />
     <Compile Include="IWebUI.cs" />
     <Compile Include="IWebUIFactory.cs" />
@@ -224,6 +232,7 @@
     <Compile Include="PlatformSpecificHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegexUtilities.cs" />
+    <Compile Include="UserCredential.cs" />
     <Compile Include="WebUI.cs" />
     <Compile Include="WebUIFactory.cs" />
     <Compile Include="WinRTEncodingHelper.cs" />
