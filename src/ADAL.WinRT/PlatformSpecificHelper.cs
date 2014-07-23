@@ -17,9 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Windows.Networking;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -28,25 +26,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static string GetProductName()
         {
             return "WinRT";
-        }
-
-        public async static Task<bool> IsUserLocalAsync()
-        {
-            if (!Windows.System.UserProfile.UserInformation.NameAccessAllowed)
-            {
-                throw new AdalException(AdalError.CannotAccessUserInformation);
-            }
-
-            try
-            {
-                return string.IsNullOrEmpty(await Windows.System.UserProfile.UserInformation.GetDomainNameAsync());
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // This mostly means Enterprise capability is missing, so WIA cannot be used and
-                // we return true to add form auth parameter in the caller.
-                return true;
-            }
         }
 
         public async static Task<string> GetUserPrincipalNameAsync()
@@ -64,22 +43,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 throw new AdalException(AdalError.UnauthorizedUserInformationAccess, ex);
             }
-        }
-
-        public static bool IsDomainJoined()
-        {
-            IReadOnlyList<HostName> hostNamesList = Windows.Networking.Connectivity.NetworkInformation
-                .GetHostNames();
-
-            foreach (var entry in hostNamesList)
-            {
-                if (entry.Type == Windows.Networking.HostNameType.DomainName)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }
