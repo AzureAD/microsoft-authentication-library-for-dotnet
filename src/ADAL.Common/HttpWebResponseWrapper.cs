@@ -55,9 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public void Close()
         {
-#if !ADAL_WINRT
-            this.response.Close();
-#endif
+            PlatformSpecificHelper.CloseHttpWebResponse(this.response);
         }
 
         public void Dispose()

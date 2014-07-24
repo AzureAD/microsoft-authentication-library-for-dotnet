@@ -93,7 +93,7 @@ namespace Test.ADAL.Common
                 }
 
                 SetCredential(sts);
-                var context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheStoreType.Null);
+                var context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheType.Null);
                 var result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
                 AdalTests.VerifySuccessResult(sts, result);
 
@@ -116,13 +116,13 @@ namespace Test.ADAL.Common
                         response.Close();
                     }
 
-                    context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheStoreType.Null);
+                    context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheType.Null);
                     result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
                     AdalTests.VerifySuccessResult(sts, result);
                 }
 
                 authParams = await AuthenticationParametersProxy.CreateFromResourceUrlAsync(new Uri(RelyingPartyWithDiscoveryUrl));
-                context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheStoreType.Null);
+                context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheType.Null);
                 result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
                 AdalTests.VerifySuccessResult(sts, result);
 

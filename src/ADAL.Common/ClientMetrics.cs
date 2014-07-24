@@ -82,7 +82,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (pendingClientMetrics != null && NetworkPlugin.RequestCreationHelper.RecordClientMetrics)
             {
                 Dictionary<string, string> headers = new Dictionary<string, string>();
-                headers[ClientMetricsHeaderLastError] = pendingClientMetrics.lastError;
+                if (pendingClientMetrics.lastError != null)
+                {
+                    headers[ClientMetricsHeaderLastError] = pendingClientMetrics.lastError;
+                }
+
                 headers[ClientMetricsHeaderLastRequest] = pendingClientMetrics.lastCorrelationId.ToString();
                 headers[ClientMetricsHeaderLastResponseTime] = pendingClientMetrics.lastResponseTime.ToString();
                 headers[ClientMetricsHeaderLastEndpoint] = pendingClientMetrics.lastEndpoint;

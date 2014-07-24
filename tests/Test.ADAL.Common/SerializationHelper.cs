@@ -44,7 +44,7 @@ namespace Test.ADAL.Common
 
         public static void StringToStream(string str, Stream stream)
         {
-            using (StreamWriter sw = new StreamWriter(stream, Encoding.GetEncoding("Windows-1252"), 10000, true))
+            using (StreamWriter sw = new StreamWriter(stream, Encoding.GetEncoding("iso-8859-1"), 10000, true))
             {
                 sw.Write(str);
                 sw.Flush();
@@ -77,7 +77,7 @@ namespace Test.ADAL.Common
             this.responseBody = dictionary["Body"];
             this.StatusCode = (HttpStatusCode)Enum.Parse(typeof(HttpStatusCode), dictionary["StatusCode"]);
             this.headers = new WebHeaderCollection();
-#if !TEST_ADAL_WINRT
+#if !TEST_ADAL_WINRT_UNIT
             if (dictionary.ContainsKey("WWW-AuthenticateHeader"))
             {
                 this.headers.Add("WWW-Authenticate", dictionary["WWW-AuthenticateHeader"]);

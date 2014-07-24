@@ -37,20 +37,23 @@ namespace Test.ADAL.NET.Friend
 
         public static string AcquireAccessCode(AuthenticationContext context, string resource, string clientId, Uri redirectUri, UserIdentifier userId)
         {
-            context.CreateAuthenticatorAsync(null).Wait();
-            AuthorizationResult authorizationResult = context.SendAuthorizeRequest(resource, clientId, redirectUri, userId, PromptBehavior.Auto, null, null);
-            return authorizationResult.Code;
+            var handler = new AcquireTokenInteractiveHandler(context.Authenticator, context.TokenCache, resource, clientId, redirectUri, PromptBehavior.Auto, userId, null,
+                context.CreateWebAuthenticationDialog(PromptBehavior.Auto), true);
+            handler.CallState = null;
+            context.Authenticator.AuthorizationUri = context.Authority + "oauth2/authorize";
+            handler.AcquireAuthorization();
+            return handler.authorizationResult.Code;
         }
 
         public static void UpdateTokenExpiryOnTokenCache(TokenCache cache, DateTimeOffset newExpiry)
         {
-            var cacheStore = cache.TokenCacheStore;
+            var cacheDictionary = cache.tokenCacheDictionary;
 
-            var key = cacheStore.Keys.First();
-            key.ExpiresOn = newExpiry; 
-            var value = cacheStore.Values.First();
+            var key = cacheDictionary.Keys.First();
+            cache.tokenCacheDictionary[key].ExpiresOn = newExpiry; 
+            var value = cacheDictionary.Values.First();
             cache.Clear();
-            cacheStore.Add(key, value);        
+            cacheDictionary.Add(key, value);        
         }
     }
 }

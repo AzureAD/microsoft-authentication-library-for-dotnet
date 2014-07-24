@@ -113,10 +113,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 if (response != null)
                 {
-#if ADAL_WINRT
-#else
                     response.Close();
-#endif
                 }
             }
 

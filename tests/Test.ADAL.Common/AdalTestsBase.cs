@@ -19,10 +19,6 @@
 using System;
 using System.Collections.Generic;
 
-#if !TEST_ADAL_WINRT
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
-
 namespace Test.ADAL.Common
 {
     public abstract class AdalTestsBase
@@ -36,8 +32,8 @@ namespace Test.ADAL.Common
 
         protected Sts Sts { get; set; }
 
-#if !TEST_ADAL_WINRT
-        public TestContext TestContext { get; set; }
+#if !TEST_ADAL_WINRT_UNIT
+        public Microsoft.VisualStudio.TestTools.UnitTesting.TestContext TestContext { get; set; }
 
         protected StsType GetStsTypeFromContext()
         {

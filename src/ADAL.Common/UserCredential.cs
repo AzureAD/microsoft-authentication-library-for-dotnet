@@ -16,11 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-#if ADAL_WINRT
-#else
-using System.Security;
-#endif
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal enum UserAuthType
@@ -33,7 +28,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// Credential used for integrated authentication on domain-joined machines.
     /// </summary>
-    public sealed class UserCredential
+    public sealed partial class UserCredential
     {
         /// <summary>
         /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
@@ -54,59 +49,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.UserAuthType = UserAuthType.IntegratedAuth;
         }
 
-#if ADAL_WINRT
-#else
-        /// <summary>
-        /// Constructor to create credential with client id and secret
-        /// </summary>
-        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        /// <param name="password">User password.</param>
-        public UserCredential(string userName, string password)
-        {
-            this.UserName = userName;
-            this.Password = password;
-            this.UserAuthType = UserAuthType.UsernamePassword;
-        }
-
-        /// <summary>
-        /// Constructor to create credential with client id and secret
-        /// </summary>
-        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        /// <param name="securePassword">User password.</param>
-        public UserCredential(string userName, SecureString securePassword)
-        {
-            this.UserName = userName;
-            this.SecurePassword = securePassword;
-            this.UserAuthType = UserAuthType.UsernamePassword;
-        }
-#endif
-
         /// <summary>
         /// Gets identifier of the user.
         /// </summary>
         public string UserName { get; internal set; }
 
         internal UserAuthType UserAuthType { get; private set; }
-
-#if ADAL_WINRT
-        internal char[] PasswordToCharArray()
-        {
-            return null;
-        }
-#else
-        internal string Password { get; private set; }
-
-        internal SecureString SecurePassword { get; private set; }
-
-        internal char[] PasswordToCharArray()
-        {
-            if (this.SecurePassword != null)
-            {
-                return this.SecurePassword.ToCharArray();
-            }
-
-            return (this.Password != null) ? this.Password.ToCharArray() : null;
-        }
-#endif
     }
 }

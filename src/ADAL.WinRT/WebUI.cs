@@ -88,8 +88,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
 
-            AuthorizationResult result;
+            return ProcessAuthorizationResult(webAuthenticationResult, callState);
+        }
 
+        private static AuthorizationResult ProcessAuthorizationResult(WebAuthenticationResult webAuthenticationResult, CallState callState)
+        {
+            AuthorizationResult result;
             switch (webAuthenticationResult.ResponseStatus)
             {
                 case WebAuthenticationStatus.Success:

@@ -23,18 +23,18 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class RequestParameters : Dictionary<string, string>
+    internal partial class RequestParameters : Dictionary<string, string>
     {
-#if ADAL_WINRT
-#else
-        private Dictionary<string, SecureString> secureParameters;
-#endif
-
         private readonly StringBuilder stringBuilderParameter;
 
-        public RequestParameters()
+        public RequestParameters(string resource, ClientKey clientKey, string audience)
         {
-            
+            if (!string.IsNullOrWhiteSpace(resource))
+            {
+                this[OAuthParameter.Resource] = resource;
+            }
+
+            this.AddClientKey(clientKey, audience);    
         }
 
         public RequestParameters(StringBuilder stringBuilderParameter)
@@ -48,19 +48,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return this.ToStringBuilder().ToString();
         }
-
-#if ADAL_WINRT
-#else
-        public void AddSecureParameter(string key, SecureString value)
-        {
-            if (this.secureParameters == null)
-            {
-                this.secureParameters = new Dictionary<string, SecureString>();
-            }
-
-            this.secureParameters.Add(key, value);
-        }
-#endif
 
         public void WriteToStream(Stream stream)
         {
@@ -92,25 +79,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 EncodingHelper.AddKeyValueString(messageBuilder, EncodingHelper.UrlEncode(kvp.Key), EncodingHelper.UrlEncode(kvp.Value));
             }
 
-#if ADAL_WINRT
-#else
-            if (this.secureParameters != null)
-            {
-                foreach (KeyValuePair<string, SecureString> kvp in this.secureParameters)
-                {
-                    char[] secureParameterChars = null;
-                    try
-                    {
-                        secureParameterChars = kvp.Value.ToCharArray();
-                        EncodingHelper.AddStringWithUrlEncoding(messageBuilder, kvp.Key, secureParameterChars);
-                    }
-                    finally
-                    {
-                        secureParameterChars.SecureClear();
-                    }
-                }
-            }
-#endif
+            this.AddSecureParametersToMessageBuilder(messageBuilder);
 
             if (this.ExtraQueryParameter != null)
             {

@@ -25,7 +25,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.Common
 {
-    internal enum TokenCacheStoreType
+    internal enum TokenCacheType
     {
         Null,
         InMemory

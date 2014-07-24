@@ -18,9 +18,7 @@
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-#if ADAL_WINRT
-    class AdalUserMismatchException : AdalException
-#else
+#if ADAL_NET
     using System;
     using System.Runtime.Serialization;
 
@@ -29,6 +27,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     [Serializable]
     public class AdalUserMismatchException : AdalException
+#else
+    class AdalUserMismatchException : AdalException
 #endif
     {
         /// <summary>
@@ -52,8 +52,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public string ReturnedUser { get; private set; }
 
-#if ADAL_WINRT
-#else
+#if ADAL_NET
         /// <summary>
         /// Initializes a new instance of the exception class with serialized data.
         /// </summary>

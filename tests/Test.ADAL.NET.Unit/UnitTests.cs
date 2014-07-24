@@ -64,23 +64,24 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public void RequestParametersTest()
         {
-            const string ClientId = "clientId";
-            const string Resource = "resource";
-            string expectedString = string.Format("{0}={1}&{2}={3}", ClientId, EncodingHelper.UrlEncode(ComplexString), Resource, EncodingHelper.UrlEncode(ComplexString2));
+            const string ClientId = "client_id";
+            const string AdditionalParameter = "additional_parameter";
+            const string AdditionalParameter2 = "additional_parameter2";
+            string expectedString = string.Format("client_id=client_id&{0}={1}&{2}={3}", AdditionalParameter, EncodingHelper.UrlEncode(ComplexString), AdditionalParameter2, EncodingHelper.UrlEncode(ComplexString2));
 
-            RequestParameters param = new RequestParameters();
-            param[ClientId] = ComplexString;
-            param[Resource] = ComplexString2;
+            RequestParameters param = new RequestParameters(null, new ClientKey(ClientId), null);
+            param[AdditionalParameter] = ComplexString;
+            param[AdditionalParameter2] = ComplexString2;
             Verify.AreEqual(expectedString, param.ToString());
 
-            param = new RequestParameters();
-            param[ClientId] = ComplexString;
-            param.AddSecureParameter(Resource, StringToSecureString(ComplexString2));
+            param = new RequestParameters(null, new ClientKey(ClientId), null);
+            param[AdditionalParameter] = ComplexString;
+            param.AddSecureParameter(AdditionalParameter2, StringToSecureString(ComplexString2));
             Verify.AreEqual(expectedString, param.ToString());
 
-            param = new RequestParameters();
-            param.AddSecureParameter(ClientId, StringToSecureString(ComplexString));
-            param.AddSecureParameter(Resource, StringToSecureString(ComplexString2));
+            param = new RequestParameters(null, new ClientKey(ClientId), null);
+            param.AddSecureParameter(AdditionalParameter, StringToSecureString(ComplexString));
+            param.AddSecureParameter(AdditionalParameter2, StringToSecureString(ComplexString2));
             Verify.AreEqual(expectedString, param.ToString());
 
             param = new RequestParameters(new StringBuilder(expectedString));
@@ -88,59 +89,13 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
-        [Description("Test for RegexUtilities helper class")]
-        [TestCategory("AdalDotNetUnit")]
-        public void RegexUtilitiesTest()
-        {
-            Verify.IsFalse(RegexUtilities.IsValidEmail("@majjf.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("A@b@c@example.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("Abc.example.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("j..s@proseware.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("j.@server1.proseware.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("js*@proseware.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("js@proseware..com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma...ma@jjf.co"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma.@jjf.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma@@jjf.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma@jjf."));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma@jjf..com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma@jjf.c"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma_@jjf"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma_@jjf."));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("ma_@jjf.com"));
-            Verify.IsFalse(RegexUtilities.IsValidEmail("-------"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("12@hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("d.j@server1.proseware.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("david.jones@proseware.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("j.s@server1.proseware.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("j@proseware.com9"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("j_9@[129.126.118.1]"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("jones@ms1.proseware.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("js@proseware.com9"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("m.a@hostname.co"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("m_a1a@hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma.h.saraf.onemore@hostname.com.edu"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma@hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma@hostname.comcom"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("MA@hostname.coMCom"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma12@hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma-a.aa@hostname.com.edu"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma-a@hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma-a@hostname.com.edu"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma-a@1hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma.a@1hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("ma@1hostname.com"));
-            Verify.IsTrue(RegexUtilities.IsValidEmail("js#internal@proseware.com"));
-        }
-
-        [TestMethod]
         [Description("Test for authority type detection")]
         [TestCategory("AdalDotNetUnit")]
         public void AuthorityTypeDetectionTest()
         {
-            Verify.AreEqual(AuthorityType.AAD, AuthenticationMetadata.DetectAuthorityType(AuthenticationMetadata.CanonicalizeUri("https://login.windows.net/tenant/dummy")));
-            Verify.AreEqual(AuthorityType.AAD, AuthenticationMetadata.DetectAuthorityType(AuthenticationMetadata.CanonicalizeUri("https://accounts-int.somethingelse.w/dummy")));
-            Verify.AreEqual(AuthorityType.ADFS, AuthenticationMetadata.DetectAuthorityType(AuthenticationMetadata.CanonicalizeUri("https://abc.com/adfs/dummy")));
+            Verify.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://login.windows.net/tenant/dummy/"));
+            Verify.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://accounts-int.somethingelse.w/dummy/"));
+            Verify.AreEqual(AuthorityType.ADFS, Authenticator.DetectAuthorityType("https://abc.com/adfs/dummy/"));
         }
 
 
@@ -276,7 +231,7 @@ namespace Test.ADAL.NET.Unit
         [Description("Test to verify forms auth parameters.")]
         public void IncludeFormsAuthParamsTest()
         {
-            Assert.IsFalse(OAuth2Request.IncludeFormsAuthParams());
+            Assert.IsFalse(AcquireTokenInteractiveHandler.IncludeFormsAuthParams());
         }
 
         [TestMethod]

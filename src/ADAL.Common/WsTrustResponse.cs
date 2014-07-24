@@ -24,7 +24,7 @@ using System.Xml.Linq;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    class WsTrustResponse
+    internal class WsTrustResponse
     {
         public const string Saml1Assertion = "urn:oasis:names:tc:SAML:1.0:assertion";
 
