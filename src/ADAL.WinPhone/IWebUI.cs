@@ -17,32 +17,17 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+using Windows.ApplicationModel.Activation;
+using Windows.Security.Authentication.Web;
+
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
-    internal static partial class PlatformSpecificHelper
+    internal interface IWebUI
     {
-        public static string GetProductName()
-        {
-            return "WinRT";
-        }
+        void Authenticate(Uri authorizationUri, Uri redirectUri, IDictionary<string, object> headersMap, CallState callState);
 
-        public async static Task<string> GetUserPrincipalNameAsync()
-        {
-            if (!Windows.System.UserProfile.UserInformation.NameAccessAllowed)
-            {
-                throw new AdalException(AdalError.CannotAccessUserInformation);
-            }
-
-            try
-            {
-                return await Windows.System.UserProfile.UserInformation.GetPrincipalNameAsync();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                throw new AdalException(AdalError.UnauthorizedUserInformationAccess, ex);
-            }
-        }
+        AuthorizationResult ProcessAuthorizationResult(IWebAuthenticationBrokerContinuationEventArgs args, CallState callState);
     }
 }

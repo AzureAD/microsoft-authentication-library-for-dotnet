@@ -16,20 +16,13 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Net;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    static partial class EncodingHelper
+    internal static partial class PlatformSpecificHelper
     {
-        public static string UrlEncode(string message)
+        public static string GetProductName()
         {
-            return WebUtility.UrlEncode(message);
-        }
-
-        public static string UrlDecode(string message)
-        {
-            return WebUtility.UrlDecode(message);
+            return "WinPhone";
         }
     }
 }

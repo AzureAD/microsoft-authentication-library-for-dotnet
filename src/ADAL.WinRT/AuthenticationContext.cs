@@ -170,6 +170,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), promptBehavior, userId, extraQueryParameters));
         }
+
         private IWebUI CreateWebAuthenticationDialog(PromptBehavior promptBehavior)
         {
             return NetworkPlugin.WebUIFactory.Create(promptBehavior, this.UseCorporateNetwork);

@@ -16,33 +16,12 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal static partial class PlatformSpecificHelper
+    interface IWebUIFactory
     {
-        public static string GetProductName()
-        {
-            return "WinRT";
-        }
-
-        public async static Task<string> GetUserPrincipalNameAsync()
-        {
-            if (!Windows.System.UserProfile.UserInformation.NameAccessAllowed)
-            {
-                throw new AdalException(AdalError.CannotAccessUserInformation);
-            }
-
-            try
-            {
-                return await Windows.System.UserProfile.UserInformation.GetPrincipalNameAsync();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                throw new AdalException(AdalError.UnauthorizedUserInformationAccess, ex);
-            }
-        }
+        IWebUI Create();
     }
 }

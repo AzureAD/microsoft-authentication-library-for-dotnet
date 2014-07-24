@@ -1,53 +1,42 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform>AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{C174F2A5-F06E-4EA4-A811-D41CDC1013B1}</ProjectGuid>
+    <ProjectGuid>{BDFC3241-0B81-47E2-94C1-A2D54F066E48}</ProjectGuid>
     <OutputType>winmdobj</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.IdentityModel.Clients.ActiveDirectory</RootNamespace>
     <AssemblyName>Microsoft.IdentityModel.Clients.ActiveDirectory</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetPlatformVersion>8.1</TargetPlatformVersion>
+    <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <DefineConstants>ADAL_WINRT</DefineConstants>
+    <ProjectTypeGuids>{76F1466A-8B6D-4E39-A767-685A06062A39};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\Debug\WinRT\</OutputPath>
-    <DefineConstants>$(DefineConstants);DEBUG;TRACE;NETFX_CORE</DefineConstants>
+    <OutputPath>..\..\..\bin\Debug\WinPhone\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NETFX_CORE;ADAL_WINPHONE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>Microsoft.IdentityModel.Clients.ActiveDirectory.XML</DocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <DocumentationFile>Microsoft.IdentityModel.Clients.ActiveDirectory.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\Release\WinRT\</OutputPath>
-    <DefineConstants>$(DefineConstants);TRACE;NETFX_CORE</DefineConstants>
+    <OutputPath>..\..\..\bin\Release\WinPhone\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;ADAL_WINPHONE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>Microsoft.IdentityModel.Clients.ActiveDirectory.XML</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <DelaySign>true</DelaySign>
-  </PropertyGroup>
-  <ItemGroup>
-    <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="..\ADAL.CommonWinRT\AdalEventSource.cs">
       <Link>CommonWinRT\AdalEventSource.cs</Link>
@@ -91,20 +80,17 @@
     <Compile Include="..\ADAL.CommonWinRT\TokenCache.cs">
       <Link>CommonWinRT\TokenCache.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
+      <Link>Common\CommonAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\AcquireTokenByRefreshTokenHandler.cs">
       <Link>Common\AcquireTokenByRefreshTokenHandler.cs</Link>
-    </Compile>
-    <Compile Include="..\ADAL.Common\AcquireTokenForMSAHandler.cs">
-      <Link>Common\AcquireTokenForMSAHandler.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\AcquireTokenHandlerBase.cs">
       <Link>Common\AcquireTokenHandlerBase.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\AcquireTokenInteractiveHandler.cs">
       <Link>Common\AcquireTokenInteractiveHandler.cs</Link>
-    </Compile>
-    <Compile Include="..\ADAL.Common\AcquireTokenNonInteractiveHandler.cs">
-      <Link>Common\AcquireTokenNonInteractiveHandler.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\AcquireTokenSilentHandler.cs">
       <Link>Common\AcquireTokenSilentHandler.cs</Link>
@@ -154,9 +140,6 @@
     <Compile Include="..\ADAL.Common\ClientMetrics.cs">
       <Link>Common\ClientMetrics.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
-      <Link>Common\CommonAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\Constants.cs">
       <Link>Common\Constants.cs</Link>
     </Compile>
@@ -193,9 +176,6 @@
     <Compile Include="..\ADAL.Common\Logger.cs">
       <Link>Common\Logger.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\MexParser.cs">
-      <Link>Common\MexParser.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\NetworkPlugin.cs">
       <Link>Common\NetworkPlugin.cs</Link>
     </Compile>
@@ -226,12 +206,6 @@
     <Compile Include="..\ADAL.Common\TokenCacheNotificationArgs.cs">
       <Link>Common\TokenCacheNotificationArgs.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\UserAssertion.cs">
-      <Link>Common\UserAssertion.cs</Link>
-    </Compile>
-    <Compile Include="..\ADAL.Common\UserCredential.cs">
-      <Link>Common\UserCredential.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\UserIdentifier.cs">
       <Link>Common\UserIdentifier.cs</Link>
     </Compile>
@@ -244,31 +218,31 @@
     <Compile Include="..\ADAL.Common\UserRealmDiscoveryResponse.cs">
       <Link>Common\UserRealmDiscoveryResponse.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\WsTrustRequest.cs">
-      <Link>Common\WsTrustRequest.cs</Link>
-    </Compile>
-    <Compile Include="..\ADAL.Common\WsTrustResponse.cs">
-      <Link>Common\WsTrustResponse.cs</Link>
-    </Compile>
     <Compile Include="AcquireTokenInteractiveHandler.cs" />
     <Compile Include="AuthenticationContext.cs" />
     <Compile Include="IWebUI.cs" />
     <Compile Include="IWebUIFactory.cs" />
     <Compile Include="PlatformSpecificHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RegexUtilities.cs" />
-    <Compile Include="UserCredential.cs" />
     <Compile Include="WebUI.cs" />
     <Compile Include="WebUIFactory.cs" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '11.0' ">
-    <VisualStudioVersion>11.0</VisualStudioVersion>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
+    <VisualStudioVersion>12.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetPlatformIdentifier)' == '' ">
+    <TargetPlatformIdentifier>WindowsPhoneApp</TargetPlatformIdentifier>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>true</DelaySign>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
