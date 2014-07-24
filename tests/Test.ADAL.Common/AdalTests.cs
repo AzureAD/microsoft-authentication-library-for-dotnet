@@ -113,6 +113,14 @@ namespace Test.ADAL.Common
                 Verify.AreEqual(sts.Type, StsType.ADFS);
                 Verify.AreEqual(ex.ParamName, "validateAuthority");
             }
+#if TEST_ADAL_WINPHONE_UNIT
+            catch (AdalServiceException ex)
+            {
+                Verify.AreNotEqual(sts.Type, StsType.ADFS);
+                Verify.AreEqual(ex.ErrorCode, Sts.AuthorityNotInValidList);
+                Verify.IsTrue(ex.Message.Contains("authority"));
+            }
+#endif
 
             context = new AuthenticationContextProxy(sts.InvalidAuthority, false);
             result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
@@ -140,6 +148,14 @@ namespace Test.ADAL.Common
                 Verify.AreEqual(sts.Type, StsType.ADFS);
                 Verify.AreEqual(ex.ParamName, "validateAuthority");
             }
+#if TEST_ADAL_WINPHONE_UNIT
+            catch (AdalServiceException ex)
+            {
+                Verify.AreNotEqual(sts.Type, StsType.ADFS);
+                Verify.AreEqual(ex.ErrorCode, Sts.AuthorityNotInValidList);
+                Verify.IsTrue(ex.Message.Contains("authority"));
+            }
+#endif
 
             context = new AuthenticationContextProxy(sts.Authority + "/extraPath1/extraPath2", sts.ValidateAuthority);
             result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
@@ -409,6 +425,18 @@ namespace Test.ADAL.Common
                 context = new AuthenticationContextProxy(sts.Authority.Replace("windows.net", "windows.unknown"), sts.ValidateAuthority);
                 result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
                 VerifyErrorResult(result, "authority_not_in_valid_list", "invalid_instance");
+            }
+#if TEST_ADAL_WINPHONE_UNIT
+            catch (AdalServiceException ex)
+            {
+                Verify.AreNotEqual(sts.Type, StsType.ADFS);
+                Verify.AreEqual(ex.ErrorCode, Sts.AuthorityNotInValidList);
+                Verify.IsTrue(ex.Message.Contains("authority"));
+            }
+#endif
+            finally
+            {
+                
             }
         }
 
