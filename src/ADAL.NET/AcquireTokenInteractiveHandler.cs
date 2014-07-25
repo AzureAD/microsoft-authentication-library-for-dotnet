@@ -70,6 +70,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return IsUserLocal() && IsDomainJoined();
         }
 
+        internal async Task<Uri> CreateAuthorizationUriAsync(Guid correlationId)
+        {
+            this.CallState.CorrelationId = correlationId;
+            await this.Authenticator.UpdateFromTemplateAsync(this.CallState);
+            return this.CreateAuthorizationUri(false);
+        }
+
         private static bool IsDomainJoined()
         {
             bool returnValue = false;

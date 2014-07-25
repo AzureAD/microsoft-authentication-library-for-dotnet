@@ -129,8 +129,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
-        /// <param name="authDelegate">Optional delegate that can be passed by the developer to process authentication result.</param>
-        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be null.</param>
+        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
+        /// <param name="authDelegate">Optional delegate that can be passed by the developer to process authentication result.</param>        
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         [DefaultOverload]
         public void AcquireTokenAndContinue(string resource, string clientId, Uri redirectUri, UserIdentifier userId, AuthenticationContextDelegate authDelegate)
@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
-        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be null.</param>
+        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <param name="authDelegate">Optional delegate that can be passed by the developer to process authentication result.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
@@ -160,8 +160,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
+        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <param name="authDelegate">Optional delegate that can be passed by the developer to process authentication result.</param>
-        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be null.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public void AcquireTokenAndContinue(string resource, string clientId, UserIdentifier userId, AuthenticationContextDelegate authDelegate)
         {
@@ -174,7 +174,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
-        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be null.</param>
+        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <param name="authDelegate">Optional delegate that can be passed by the developer to process authentication result.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
