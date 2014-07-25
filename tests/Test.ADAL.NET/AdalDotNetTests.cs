@@ -482,5 +482,14 @@ namespace Test.ADAL.NET
         {
             await AdalTests.TokenSubjectTypeTest(Sts);
         }
+
+        [TestMethod]
+        [Description("Test for GetAuthorizationRequestURL")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
+        public void GetAuthorizationRequestURLTest()
+        {
+            AdalTests.GetAuthorizationRequestURLTest(Sts);
+        }
     }
 }
