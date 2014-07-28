@@ -20,6 +20,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class JsonWebTokenConstants
     {
+        public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
+
         public const string HeaderType = "JWT";
 
         internal class Algorithms
@@ -36,6 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             public const string Subject = "sub";
             public const string NotBefore = "nbf";
             public const string ExpiresOn = "exp";
+            public const string JwtIdentifier = "jti";
         }
 
         internal class ReservedHeaderParameters

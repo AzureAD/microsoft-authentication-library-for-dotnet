@@ -27,14 +27,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private readonly StringBuilder stringBuilderParameter;
 
-        public RequestParameters(string resource, ClientKey clientKey, string audience)
+        public RequestParameters(string resource, ClientKey clientKey)
         {
             if (!string.IsNullOrWhiteSpace(resource))
             {
                 this[OAuthParameter.Resource] = resource;
             }
 
-            this.AddClientKey(clientKey, audience);    
+            this.AddClientKey(clientKey);    
         }
 
         public RequestParameters(StringBuilder stringBuilderParameter)

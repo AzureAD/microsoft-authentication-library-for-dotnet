@@ -35,6 +35,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.userAssertion = userAssertion;
             this.DisplayableId = userAssertion.UserName;
+
+            this.SupportADFS = true;
         }
 
         protected override void AddAditionalRequestParameters(RequestParameters requestParameters)

@@ -160,14 +160,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected virtual async Task<AuthenticationResult> SendTokenRequestAsync()
         {
-            RequestParameters requestParameters = new RequestParameters(this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
+            RequestParameters requestParameters = new RequestParameters(this.Resource, this.ClientKey);
             this.AddAditionalRequestParameters(requestParameters);
             return await this.SendHttpMessageAsync(requestParameters);
         }
 
         protected async Task<AuthenticationResult> SendTokenRequestByRefreshTokenAsync(string refreshToken)
         {
-            RequestParameters requestParameters = new RequestParameters(this.Resource, this.ClientKey, this.Authenticator.SelfSignedJwtAudience);
+            RequestParameters requestParameters = new RequestParameters(this.Resource, this.ClientKey);
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
             requestParameters[OAuthParameter.RefreshToken] = refreshToken;
             AuthenticationResult result = await this.SendHttpMessageAsync(requestParameters);

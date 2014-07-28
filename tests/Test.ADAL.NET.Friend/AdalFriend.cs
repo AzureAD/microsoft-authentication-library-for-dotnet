@@ -27,11 +27,9 @@ namespace Test.ADAL.NET.Friend
     {
         public static ClientAssertion CreateJwt(X509Certificate2 cert, string issuer, string aud)
         {
-            // Thirty minutes
-            const uint JwtToAcsLifetimeInSeconds = 60 * 30; 
-
             ClientAssertionCertificate certificate = new ClientAssertionCertificate(issuer, cert);
-            JsonWebToken jwtToken = new JsonWebToken(aud, issuer, JwtToAcsLifetimeInSeconds, issuer);
+
+            JsonWebToken jwtToken = new JsonWebToken(certificate, aud);
             return jwtToken.Sign(certificate);
         }
 

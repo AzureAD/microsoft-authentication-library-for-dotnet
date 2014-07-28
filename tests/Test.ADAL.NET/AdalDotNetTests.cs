@@ -324,7 +324,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Positive Test for Confidential Client")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task ConfidentialClientWithX509Test()
         {
             await AdalTests.ConfidentialClientWithX509TestAsync(Sts);
@@ -333,7 +333,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Test for Client credential")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task ClientCredentialTestAsync()
         {
             await AdalTests.ClientCredentialTestAsync(Sts);
@@ -342,7 +342,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Test for Client assertion with X509")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task ClientAssertionWithX509Test()
         {
             await AdalTests.ClientAssertionWithX509TestAsync(Sts);
@@ -351,7 +351,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Test for Confidential Client with self signed jwt")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
         public async Task ConfidentialClientWithJwtTest()
         {
             await AdalTests.ConfidentialClientWithJwtTestAsync(Sts);
@@ -360,7 +360,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Positive Test for Client assertion with self signed Jwt")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task ClientAssertionWithSelfSignedJwtTest()
         {
             await AdalTests.ClientAssertionWithSelfSignedJwtTestAsync(Sts);
@@ -369,7 +369,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Positive Test for Confidential Client")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task ConfidentialClientTest()
         {
             await AdalTests.ConfidentialClientTestAsync(Sts);

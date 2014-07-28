@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private void AddClientKey(ClientKey clientKey, string audience)
+        private void AddClientKey(ClientKey clientKey)
         {
             if (clientKey.ClientId != null)
             {
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else if (clientKey.Certificate != null)
             {
-                JsonWebToken jwtToken = new JsonWebToken(audience, clientKey.Certificate.ClientId, AuthenticationConstant.JwtToAadLifetimeInSeconds, clientKey.Certificate.ClientId);
+                JsonWebToken jwtToken = new JsonWebToken(clientKey.Certificate, clientKey.Authenticator.SelfSignedJwtAudience);
                 ClientAssertion clientAssertion = jwtToken.Sign(clientKey.Certificate);
                 this[OAuthParameter.ClientAssertionType] = clientAssertion.AssertionType;
                 this[OAuthParameter.ClientAssertion] = clientAssertion.Assertion;

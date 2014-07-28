@@ -16,13 +16,16 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Threading.Tasks;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class AcquireTokenForClientHandler : AcquireTokenHandlerBase
     {
         public AcquireTokenForClientHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, bool callSync)
             : base(authenticator, tokenCache, resource, clientKey, TokenSubjectType.Client, callSync)
-        {            
+        {
+            this.SupportADFS = true;
         }
 
         protected override void AddAditionalRequestParameters(RequestParameters requestParameters)

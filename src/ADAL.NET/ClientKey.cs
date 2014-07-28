@@ -34,8 +34,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.HasCredential = true;
         }
 
-        public ClientKey(ClientAssertionCertificate clientCertificate)
+        public ClientKey(ClientAssertionCertificate clientCertificate, Authenticator authenticator)
         {
+            this.Authenticator = authenticator;
+
             if (clientCertificate == null)
             {
                 throw new ArgumentNullException("clientCertificate");
@@ -63,5 +65,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public ClientAssertionCertificate Certificate { get; private set; }
 
         public ClientAssertion Assertion { get; private set; }
+
+        public Authenticator Authenticator { get; private set; }
     }
 }
