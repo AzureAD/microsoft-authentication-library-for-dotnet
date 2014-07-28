@@ -20,6 +20,10 @@ Please note: as of today the source is not aligned with the latest release. We e
 
 * This project contains the source of ADAL for Windows Store. ADAL for Windows Store is packaged as a Windows Runtime Component (.winmd).
 
+### ADAL.WinPhone
+
+* This project contains the source of ADAL for Windows Phone. ADAL for Windows Phone is packaged as a Windows Runtime Component (.winmd).
+
 ### Test.ADAL.NET
 
 * End to end tests for ADAL .NET.
@@ -44,9 +48,17 @@ Please note: as of today the source is not aligned with the latest release. We e
 
 * The Windows Store application used for running ADAL for Windows Store tests.
 
+### Test.ADAL.WinPhone.Dashboard
+
+* The Windows Phone application used for running ADAL for Windows Phone tests.
+
 ### Test.ADAL.WinRT.Unit
 
 * Unit tests for various components in ADAL for Windows Store as well as mock based tests for ADAL for Windows Store.
+
+### Test.ADAL.WinPhone.Unit
+
+* Unit tests for various components in ADAL for Windows Phone as well as mock based tests for ADAL for Windows Phone.
 
 ## How to Run Tests
 
