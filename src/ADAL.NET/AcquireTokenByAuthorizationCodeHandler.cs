@@ -44,6 +44,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.redirectUri = redirectUri;
 
             this.LoadFromCache = false;
+
+            this.SupportADFS = true;
         }
 
         protected override void AddAditionalRequestParameters(RequestParameters requestParameters)

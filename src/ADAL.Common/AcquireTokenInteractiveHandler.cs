@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private RequestParameters CreateAuthorizationRequest(string loginHint, bool includeFormsAuthParam)
         {
-            RequestParameters authorizationRequestParameters = new RequestParameters(this.Resource, this.ClientKey, null);
+            RequestParameters authorizationRequestParameters = new RequestParameters(this.Resource, this.ClientKey);
             authorizationRequestParameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
             authorizationRequestParameters[OAuthParameter.RedirectUri] = redirectUri.AbsoluteUri;
 

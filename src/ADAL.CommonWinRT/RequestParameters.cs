@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
         }
 
-        private void AddClientKey(ClientKey clientKey, string audience)
+        private void AddClientKey(ClientKey clientKey)
         {
             if (clientKey.ClientId != null)
             {

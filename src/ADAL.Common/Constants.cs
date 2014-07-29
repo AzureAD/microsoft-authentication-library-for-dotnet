@@ -302,11 +302,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string IntegratedAuthFailed = "Integrated authentication failed. You may try an alternative authentication method";
     }
 
-    internal static class AuthenticationConstant
-    {
-        public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
-    }
-
     internal class XmlNamespace
     {
         public static readonly XNamespace Wsdl = "http://schemas.xmlsoap.org/wsdl/";

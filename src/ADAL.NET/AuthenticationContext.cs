@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientAssertionCertificate clientCertificate)
         {
-            return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCertificate));
+            return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCertificate, this.Authenticator));
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, ClientAssertionCertificate clientCertificate)
         {
-            return await this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri, new ClientKey(clientCertificate), null);
+            return await this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri, new ClientKey(clientCertificate, this.Authenticator), null);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, ClientAssertionCertificate clientCertificate, string resource)
         {
-            return await this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri, new ClientKey(clientCertificate), resource);
+            return await this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri, new ClientKey(clientCertificate, this.Authenticator), resource);
         }
 
         /// <summary>
@@ -264,7 +264,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, ClientAssertionCertificate clientCertificate)
         {
-            return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientCertificate), null);
+            return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientCertificate, this.Authenticator), null);
         }
 
         /// <summary>
@@ -277,7 +277,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, ClientAssertionCertificate clientCertificate, string resource)
         {
-            return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientCertificate), resource);
+            return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientCertificate, this.Authenticator), resource);
         }
 
         /// <summary>
@@ -301,7 +301,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientAssertionCertificate clientCertificate, UserAssertion userAssertion)
         {
-            return await this.AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientCertificate), userAssertion);
+            return await this.AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientCertificate, this.Authenticator), userAssertion);
         }
 
         /// <summary>
@@ -360,7 +360,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, ClientAssertionCertificate clientCertificate, UserIdentifier userId)
         {
-            return await this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientCertificate), userId);
+            return await this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientCertificate, this.Authenticator), userId);
         }
 
         /// <summary>
@@ -418,7 +418,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
         public AuthenticationResult AcquireToken(string resource, ClientAssertionCertificate clientCertificate)
         {
-            return RunAsyncTask(this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCertificate), callSync: true));
+            return RunAsyncTask(this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCertificate, this.Authenticator), callSync: true));
         }
 
         /// <summary>
@@ -552,7 +552,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public AuthenticationResult AcquireTokenByAuthorizationCode(string authorizationCode, Uri redirectUri, ClientAssertionCertificate clientCertificate)
         {
-            return RunAsyncTask(this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri, new ClientKey(clientCertificate), null, callSync: true));
+            return RunAsyncTask(this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri, new ClientKey(clientCertificate, this.Authenticator), null, callSync: true));
         }
 
         /// <summary>
@@ -566,7 +566,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public AuthenticationResult AcquireTokenByAuthorizationCode(string authorizationCode, Uri redirectUri, ClientAssertionCertificate clientCertificate, string resource)
         {
-            return RunAsyncTask(this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri, new ClientKey(clientCertificate), resource, callSync: true));
+            return RunAsyncTask(this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri, new ClientKey(clientCertificate, this.Authenticator), resource, callSync: true));
         }
 
         /// <summary>
@@ -649,7 +649,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public AuthenticationResult AcquireTokenByRefreshToken(string refreshToken, ClientAssertionCertificate clientCertificate)
         {
-            return RunAsyncTask(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientCertificate), null, callSync: true));
+            return RunAsyncTask(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientCertificate, this.Authenticator), null, callSync: true));
         }
 
         /// <summary>
@@ -662,7 +662,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public AuthenticationResult AcquireTokenByRefreshToken(string refreshToken, ClientAssertionCertificate clientCertificate, string resource)
         {
-            return RunAsyncTask(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientCertificate), resource, callSync: true));
+            return RunAsyncTask(this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientCertificate, this.Authenticator), resource, callSync: true));
         }
 
         /// <summary>
@@ -686,7 +686,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
         public AuthenticationResult AcquireToken(string resource, ClientAssertionCertificate clientCertificate, UserAssertion userAssertion)
         {
-            return RunAsyncTask(this.AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientCertificate), userAssertion, callSync: true));
+            return RunAsyncTask(this.AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientCertificate, this.Authenticator), userAssertion, callSync: true));
         }
 
         /// <summary>
@@ -746,7 +746,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public AuthenticationResult AcquireTokenSilent(string resource, ClientAssertionCertificate clientCertificate, UserIdentifier userId)
         {
-            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientCertificate), userId, callSync: true));
+            return RunAsyncTask(this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientCertificate, this.Authenticator), userId, callSync: true));
         }
 
         /// <summary>

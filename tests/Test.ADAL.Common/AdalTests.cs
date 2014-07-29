@@ -497,14 +497,14 @@ namespace Test.ADAL.Common
             AuthenticationResultProxy result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
             VerifySuccessResult(sts, result);
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.InvalidClientId);
-            VerifyErrorResult(result, "invalid_request", "AADSTS90011");
+            VerifyErrorResult(result, "unauthorized_client", "AADSTS70001");
             Verify.IsNotNull(result.Exception);
             Verify.IsNotNull(result.Exception.InnerException);
             Verify.IsTrue(result.Exception.InnerException is WebException);
             using (StreamReader sr = new StreamReader(((WebException)(result.Exception.InnerException)).Response.GetResponseStream()))
             {
                 string streamBody = sr.ReadToEnd();
-                Verify.IsTrue(streamBody.Contains("AADSTS90011"));
+                Verify.IsTrue(streamBody.Contains("AADSTS70001"));
             }
         }
 
