@@ -30,7 +30,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 var localSettings = ApplicationData.Current.LocalSettings;
                 localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
                 byte[] state = LocalSettingsHelper.GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
-                DefaultShared.Deserialize(state);
+                if (state != null)
+                {
+                    DefaultShared.Deserialize(state);
+                }
             }
             catch (Exception ex)
             {
