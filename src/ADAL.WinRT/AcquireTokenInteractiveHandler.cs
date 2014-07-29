@@ -23,6 +23,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Windows.Networking;
+using Windows.Networking.Connectivity;
+using Windows.System.UserProfile;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -37,44 +39,38 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private async Task AcquireAuthorizationAsync()
         {
-            Uri authorizationUri = this.CreateAuthorizationUri(await IncludeFormsAuthParamsAsync());
+            Uri authorizationUri = this.CreateAuthorizationUri(await IncludeFormsAuthParamsAsync(this.CallState));
             this.authorizationResult = await webUi.AuthenticateAsync(authorizationUri, this.redirectUri, this.CallState);
         }
 
-        internal static async Task<bool> IncludeFormsAuthParamsAsync()
+        internal static async Task<bool> IncludeFormsAuthParamsAsync(CallState callState)
         {
-            return IsDomainJoined() && await IsUserLocalAsync();
+            return IsDomainJoined() && await IsUserLocalAsync(callState);
         }
 
         private static bool IsDomainJoined()
         {
-            IReadOnlyList<HostName> hostNamesList = Windows.Networking.Connectivity.NetworkInformation
-                .GetHostNames();
-
-            foreach (var entry in hostNamesList)
-            {
-                if (entry.Type == HostNameType.DomainName)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return NetworkInformation.GetHostNames().Any(entry => entry.Type == HostNameType.DomainName);
         }
 
-        private async static Task<bool> IsUserLocalAsync()
+        private async static Task<bool> IsUserLocalAsync(CallState callState)
         {
-            if (!Windows.System.UserProfile.UserInformation.NameAccessAllowed)
+            if (!UserInformation.NameAccessAllowed)
             {
-                throw new AdalException(AdalError.CannotAccessUserInformation);
+                // The access is not allowed and we cannot determine whether this is a local user or not. So, we do NOT add form auth parameter.
+                // This is the case where we can advise customers to add extra query parameter if they want.
+
+                Logger.Information(callState, "Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.");
+                return false;   
             }
 
             try
             {
-                return string.IsNullOrEmpty(await Windows.System.UserProfile.UserInformation.GetDomainNameAsync());
+                return string.IsNullOrEmpty(await UserInformation.GetDomainNameAsync());
             }
             catch (UnauthorizedAccessException)
             {
+                Logger.Information(callState, "Cannot try Windows Integrated Auth due to lack of Enterprise capability.");
                 // This mostly means Enterprise capability is missing, so WIA cannot be used and
                 // we return true to add form auth parameter in the caller.
                 return true;
