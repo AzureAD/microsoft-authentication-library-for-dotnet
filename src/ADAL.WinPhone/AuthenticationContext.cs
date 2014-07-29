@@ -204,7 +204,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private void AcquireTokenAndContinueCommon(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters, AuthenticationContextDelegate authDelegate)
         {
-            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, redirectUri, PromptBehavior.Auto, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(), false);
+            IWebUI webUi = this.CreateWebAuthenticationDialog();
+            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, redirectUri, webUi.PromptBehavior, userId, extraQueryParameters, webUi, false);
             handler.AcquireAuthorization();
             this.authenticationContextDelegate = authDelegate;
         }

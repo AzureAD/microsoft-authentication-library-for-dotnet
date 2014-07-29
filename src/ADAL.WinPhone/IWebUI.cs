@@ -26,6 +26,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
     internal interface IWebUI
     {
+        PromptBehavior PromptBehavior { get; }
+
         void Authenticate(Uri authorizationUri, Uri redirectUri, IDictionary<string, object> headersMap, CallState callState);
 
         AuthorizationResult ProcessAuthorizationResult(IWebAuthenticationBrokerContinuationEventArgs args, CallState callState);

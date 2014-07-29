@@ -50,7 +50,7 @@ namespace Test.ADAL.WinRT.Unit
         //[Description("Test to verify forms auth parameters.")]
         public async Task IncludeFormsAuthParamsTest()
         {
-            Verify.IsFalse(await AcquireTokenInteractiveHandler.IncludeFormsAuthParamsAsync());
+            Verify.IsFalse(await AcquireTokenInteractiveHandler.IncludeFormsAuthParamsAsync(null));
         }
 
 
