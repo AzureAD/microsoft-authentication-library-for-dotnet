@@ -34,6 +34,14 @@ namespace Test.ADAL.WinPhone.Unit
     {
         private const string Delimiter = ":::";
 
+        public PromptBehavior PromptBehavior
+        {
+            get
+            {
+                return PromptBehavior.Auto;
+            }
+        }
+
         public static AuthorizationResult LastAuthorizationResult { get; private set; }
 
         public static IDictionary<string, object> LastHeadersMap { get; private set; }

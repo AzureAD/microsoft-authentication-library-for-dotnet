@@ -35,6 +35,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
         }
 
+        public PromptBehavior PromptBehavior
+        {
+            get
+            {
+                return PromptBehavior.Always; 
+            }            
+        }
+
         public void Authenticate(Uri authorizationUri, Uri redirectUri, IDictionary<string, object> headersMap, CallState callState)
         {
             ValueSet set = new ValueSet();
