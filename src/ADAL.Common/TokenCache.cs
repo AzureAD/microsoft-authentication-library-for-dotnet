@@ -154,7 +154,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (state == null)
             {
-                throw new ArgumentNullException("state");
+                this.tokenCacheDictionary.Clear();
+                return;
             }
 
             using (Stream stream = new MemoryStream())
