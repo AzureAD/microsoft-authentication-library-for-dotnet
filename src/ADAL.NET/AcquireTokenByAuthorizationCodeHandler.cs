@@ -60,7 +60,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             base.PostTokenRequest(result);
             this.UniqueId = (result.UserInfo == null) ? null : result.UserInfo.UniqueId;
             this.DisplayableId = (result.UserInfo == null) ? null : result.UserInfo.DisplayableId;
-            this.Resource = result.Resource;
+            if (result.Resource != null)
+            {
+                this.Resource = result.Resource;
+            }
+
+            // If resource is not passed as an argument and is not returned by STS either, 
+            // we cannot store the token in the cache with null resource.
+            // TODO: Store refresh token though if STS supports MRRT.
+            this.StoreToCache = (this.Resource != null);
         }
     }
 }
