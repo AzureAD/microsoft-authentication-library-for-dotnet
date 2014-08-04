@@ -84,6 +84,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string GivenName = "given_name";
         public const string FamilyName = "family_name";
         public const string IdentityProvider = "idp";
+        public const string Issuer = "iss";
         public const string PasswordExpiration = "pwd_exp";
         public const string PasswordChangeUrl = "pwd_url";
     }

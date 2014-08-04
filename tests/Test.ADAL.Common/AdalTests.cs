@@ -750,6 +750,7 @@ namespace Test.ADAL.Common
                 ValidateUserInfo(result.TenantId, "tenant id", true);
                 ValidateUserInfo(result.UserInfo.UniqueId, "user unique id", true);
                 ValidateUserInfo(result.UserInfo.DisplayableId, "user displayable id", true);
+                ValidateUserInfo(result.UserInfo.IdentityProvider, "identity provider", true);
                 ValidateUserInfo(result.UserInfo.GivenName, "given name", false);
                 ValidateUserInfo(result.UserInfo.FamilyName, "family name", false);
             }
