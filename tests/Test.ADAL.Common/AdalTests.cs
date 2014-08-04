@@ -516,19 +516,17 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result);
 
             result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId, "redirect_uri=123");
-            VerifyErrorResult(result, Sts.AuthenticationCanceledError, null);   // AADSTS90004: The request is not properly formatted. The parameter 'redirect_uri' is duplicated.  
+            VerifyErrorResult(result, "duplicate_query_parameter", "redirect_uri");   
 
-            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId, "resource=123");
-            VerifyErrorResult(result, Sts.AuthenticationCanceledError, null);   // AADSTS90004: The request is not properly formatted. The parameter 'resource' is duplicated.
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId, "resource=123&dummy=dummy_value#$%^@%^^%");
+            VerifyErrorResult(result, "duplicate_query_parameter", "resource");   
 
             result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId, "client_id=123");
-            VerifyErrorResult(result, Sts.AuthenticationCanceledError, null);   // AADSTS90004: The request is not properly formatted. The parameter 'client_id' is duplicated.  
+            VerifyErrorResult(result, "duplicate_query_parameter", "client_id");   
 
             EndBrowserDialogSession();
             result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId, "login_hint=123");
-            
-            // AAD error: AADSTS90004: The request is not properly formatted. The parameter 'login_hint' is duplicated.              
-            VerifyErrorResult(result, Sts.AuthenticationCanceledError, null);                
+            VerifyErrorResult(result, "duplicate_query_parameter", "login_hint");   
 
             EndBrowserDialogSession();
             result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId, "login_hintx=123");
