@@ -3,7 +3,7 @@
 Active Directory Authentication Library (ADAL) provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.
 Here you can find the source code for the library. You can find the corresponding releases (both stable and prerelease) on the NuGet gallery at [http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/](http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).
 - The latest stable release is [1.0.4](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/1.0.4). Note that this is for .NET only.
-- The latest prerelease is [2.7.10707.1513-rc](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/2.7.10707.1513-rc).
+- The latest prerelease is [2.8.10804.1442-rc](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/2.8.10804.1442-rc).
 
 ## Projects in this repo
 
@@ -21,6 +21,8 @@ Here you can find the source code for the library. You can find the correspondin
 
 ### ADAL.WinPhone
 
+* This project contains the source of ADAL for Windows Phone. ADAL for Windows Phone is packaged as a Windows Runtime Component (.winmd).
+=======
 * This project (under /WinPhone) contains the source of ADAL for Windows Phone 8.1. ADAL for Windows Phone 8.1  is packaged as a Windows Runtime Component. The same /WinPhone folder contains its own tests.
 
 ### Test.ADAL.NET
@@ -47,9 +49,17 @@ Here you can find the source code for the library. You can find the correspondin
 
 * The Windows Store application used for running ADAL for Windows Store tests.
 
+### Test.ADAL.WinPhone.Dashboard
+
+* The Windows Phone application used for running ADAL for Windows Phone tests.
+
 ### Test.ADAL.WinRT.Unit
 
 * Unit tests for various components in ADAL for Windows Store as well as mock based tests for ADAL for Windows Store.
+
+### Test.ADAL.WinPhone.Unit
+
+* Unit tests for various components in ADAL for Windows Phone as well as mock based tests for ADAL for Windows Phone.
 
 ## How to Run Tests
 

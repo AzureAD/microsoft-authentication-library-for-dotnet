@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BDFC3241-0B81-47E2-94C1-A2D54F066E48}</ProjectGuid>
+    <OutputType>winmdobj</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.IdentityModel.Clients.ActiveDirectory</RootNamespace>
+    <AssemblyName>Microsoft.IdentityModel.Clients.ActiveDirectory</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetPlatformVersion>8.1</TargetPlatformVersion>
+    <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{76F1466A-8B6D-4E39-A767-685A06062A39};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\Debug\WinPhone\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NETFX_CORE;ADAL_WINPHONE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <DocumentationFile>Microsoft.IdentityModel.Clients.ActiveDirectory.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\Release\WinPhone\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;ADAL_WINPHONE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>Microsoft.IdentityModel.Clients.ActiveDirectory.XML</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\ADAL.CommonWinRT\AdalEventSource.cs">
+      <Link>CommonWinRT\AdalEventSource.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\AdalTrace.cs">
+      <Link>CommonWinRT\AdalTrace.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\AuthenticationContext.cs">
+      <Link>CommonWinRT\AuthenticationContext.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\AuthenticationParameters.cs">
+      <Link>CommonWinRT\AuthenticationParameters.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\AuthenticationResult.cs">
+      <Link>CommonWinRT\AuthenticationResult.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\Constants.cs">
+      <Link>CommonWinRT\Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\CryptographyHelper.cs">
+      <Link>CommonWinRT\CryptographyHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\EncodingHelper.cs">
+      <Link>CommonWinRT\EncodingHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\LocalSettingsHelper.cs">
+      <Link>CommonWinRT\LocalSettingsHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\Logger.cs">
+      <Link>CommonWinRT\Logger.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\PlatformSpecificHelper.cs">
+      <Link>CommonWinRT\PlatformSpecificHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\RequestParameters.cs">
+      <Link>CommonWinRT\RequestParameters.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\StorageFileEventListener.cs">
+      <Link>CommonWinRT\StorageFileEventListener.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.CommonWinRT\TokenCache.cs">
+      <Link>CommonWinRT\TokenCache.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
+      <Link>Common\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AcquireTokenByRefreshTokenHandler.cs">
+      <Link>Common\AcquireTokenByRefreshTokenHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AcquireTokenHandlerBase.cs">
+      <Link>Common\AcquireTokenHandlerBase.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AcquireTokenInteractiveHandler.cs">
+      <Link>Common\AcquireTokenInteractiveHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AcquireTokenSilentHandler.cs">
+      <Link>Common\AcquireTokenSilentHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AdalException.cs">
+      <Link>Common\AdalException.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AdalIdHelper.cs">
+      <Link>Common\AdalIdHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AdalServiceException.cs">
+      <Link>Common\AdalServiceException.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AdalUserMismatchException.cs">
+      <Link>Common\AdalUserMismatchException.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AuthenticationContext.cs">
+      <Link>Common\AuthenticationContext.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AuthenticationParameters.cs">
+      <Link>Common\AuthenticationParameters.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AuthenticationResult.cs">
+      <Link>Common\AuthenticationResult.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\Authenticator.cs">
+      <Link>Common\Authenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AuthenticatorTemplate.cs">
+      <Link>Common\AuthenticatorTemplate.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AuthenticatorTemplateList.cs">
+      <Link>Common\AuthenticatorTemplateList.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\AuthorizationResult.cs">
+      <Link>Common\AuthorizationResult.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\Base64UrlEncoder.cs">
+      <Link>Common\Base64UrlEncoder.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\CallState.cs">
+      <Link>Common\CallState.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\ClientKey.cs">
+      <Link>Common\ClientKey.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\ClientMetrics.cs">
+      <Link>Common\ClientMetrics.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\Constants.cs">
+      <Link>Common\Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\DateTimeHelper.cs">
+      <Link>Common\DateTimeHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\EncodingHelper.cs">
+      <Link>Common\EncodingHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\HttpWebRequestFactory.cs">
+      <Link>Common\HttpWebRequestFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\HttpWebRequestWrapper.cs">
+      <Link>Common\HttpWebRequestWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\HttpWebResponseFactory.cs">
+      <Link>Common\HttpWebResponseFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\HttpWebResponseWrapper.cs">
+      <Link>Common\HttpWebResponseWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\IHttpWebRequest.cs">
+      <Link>Common\IHttpWebRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\IHttpWebRequestFactory.cs">
+      <Link>Common\IHttpWebRequestFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\IHttpWebResponse.cs">
+      <Link>Common\IHttpWebResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\IRequestCreationHelper.cs">
+      <Link>Common\IRequestCreationHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\Logger.cs">
+      <Link>Common\Logger.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\NetworkPlugin.cs">
+      <Link>Common\NetworkPlugin.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\OAuth2Response.cs">
+      <Link>Common\OAuth2Response.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\OAuthConstants.cs">
+      <Link>Common\OAuthConstants.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\PromptBehavior.cs">
+      <Link>Common\PromptBehavior.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\RequestCreationHelper.cs">
+      <Link>Common\RequestCreationHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\RequestParameters.cs">
+      <Link>Common\RequestParameters.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\TokenCache.cs">
+      <Link>Common\TokenCache.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\TokenCacheItem.cs">
+      <Link>Common\TokenCacheItem.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\TokenCacheKey.cs">
+      <Link>Common\TokenCacheKey.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\TokenCacheNotificationArgs.cs">
+      <Link>Common\TokenCacheNotificationArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\UserIdentifier.cs">
+      <Link>Common\UserIdentifier.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\UserInfo.cs">
+      <Link>Common\UserInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\HttpHelper.cs">
+      <Link>Common\HttpHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.Common\UserRealmDiscoveryResponse.cs">
+      <Link>Common\UserRealmDiscoveryResponse.cs</Link>
+    </Compile>
+    <Compile Include="AcquireTokenInteractiveHandler.cs" />
+    <Compile Include="AuthenticationContext.cs" />
+    <Compile Include="IWebUI.cs" />
+    <Compile Include="IWebUIFactory.cs" />
+    <Compile Include="PlatformSpecificHelper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebUI.cs" />
+    <Compile Include="WebUIFactory.cs" />
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
+    <VisualStudioVersion>12.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetPlatformIdentifier)' == '' ">
+    <TargetPlatformIdentifier>WindowsPhoneApp</TargetPlatformIdentifier>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>true</DelaySign>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

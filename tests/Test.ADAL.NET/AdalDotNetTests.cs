@@ -81,7 +81,7 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
         public void SmokeTest()
         {
-            AdalTests.AcquireTokenPositive(Sts);
+            AdalTests.AcquireTokenPositiveTest(Sts);
         }
 
         [TestMethod]
@@ -90,7 +90,7 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveTest()
         {
-            AdalTests.AcquireTokenPositive(Sts);
+            AdalTests.AcquireTokenPositiveTest(Sts);
         }
 
         [TestMethod]
@@ -99,7 +99,7 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveWithoutRedirectUriOrUserIdAsync()
         {
-            AdalTests.AcquireTokenPositiveWithoutRedirectUriOrUserId(Sts);
+            AdalTests.AcquireTokenPositiveWithoutRedirectUriOrUserIdTest(Sts);
         }
 
         [TestMethod]
@@ -135,7 +135,7 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenWithInvalidAuthorityTest()
         {
-            AdalTests.AcquireTokenWithInvalidAuthority(Sts);
+            AdalTests.AcquireTokenWithInvalidAuthorityTest(Sts);
         }
 
         [TestMethod]
@@ -144,7 +144,7 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenWithInvalidResourceTest()
         {
-            AdalTests.AcquireTokenWithInvalidResource(Sts);
+            AdalTests.AcquireTokenWithInvalidResourceTest(Sts);
         }
 
         [TestMethod]
@@ -153,7 +153,7 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenWithInvalidClientIdTest()
         {
-            AdalTests.AcquireTokenWithInvalidClientId(Sts);
+            AdalTests.AcquireTokenWithInvalidClientIdTest(Sts);
         }
 
         [TestMethod]
@@ -199,7 +199,7 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveWithInMemoryCacheTest()
         {
-            AdalTests.AcquireTokenPositiveWithInMemoryCache(Sts);
+            AdalTests.AcquireTokenPositiveWithInMemoryCacheTest(Sts);
         }
 
         [TestMethod]
@@ -209,7 +209,7 @@ namespace Test.ADAL.NET
         [Ignore]    // Enable once the test bug is fixed.
         public void AcquireTokenPositiveWithNullCacheTest()
         {
-            AdalTests.AcquireTokenPositiveWithNullCache(Sts);
+            AdalTests.AcquireTokenPositiveWithNullCacheTest(Sts);
         }
 
         [TestMethod]
@@ -281,7 +281,7 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
         public void AcquireTokenAndRefreshSessionTest()
         {
-            AdalTests.AcquireTokenAndRefreshSession(Sts);
+            AdalTests.AcquireTokenAndRefreshSessionTest(Sts);
         }
 
         [TestMethod]
@@ -290,7 +290,7 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
         public void AcquireTokenPositiveWithFederatedTenantTest()
         {
-            AdalTests.AcquireTokenPositiveWithFederatedTenant(Sts);
+            AdalTests.AcquireTokenPositiveWithFederatedTenantTest(Sts);
         }
 
 
@@ -324,7 +324,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Positive Test for Confidential Client")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task ConfidentialClientWithX509Test()
         {
             await AdalTests.ConfidentialClientWithX509TestAsync(Sts);
@@ -333,7 +333,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Test for Client credential")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task ClientCredentialTestAsync()
         {
             await AdalTests.ClientCredentialTestAsync(Sts);
@@ -342,7 +342,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Test for Client assertion with X509")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task ClientAssertionWithX509Test()
         {
             await AdalTests.ClientAssertionWithX509TestAsync(Sts);
@@ -351,7 +351,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Test for Confidential Client with self signed jwt")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
         public async Task ConfidentialClientWithJwtTest()
         {
             await AdalTests.ConfidentialClientWithJwtTestAsync(Sts);
@@ -360,7 +360,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Positive Test for Client assertion with self signed Jwt")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task ClientAssertionWithSelfSignedJwtTest()
         {
             await AdalTests.ClientAssertionWithSelfSignedJwtTestAsync(Sts);
@@ -369,7 +369,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Positive Test for Confidential Client")]
         [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockStsSyncAsync", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAADSyncAsync", DataAccessMethod.Sequential)]
         public async Task ConfidentialClientTest()
         {
             await AdalTests.ConfidentialClientTestAsync(Sts);
@@ -481,6 +481,15 @@ namespace Test.ADAL.NET
         public async Task TokenSubjectTypeTest()
         {
             await AdalTests.TokenSubjectTypeTest(Sts);
+        }
+
+        [TestMethod]
+        [Description("Test for GetAuthorizationRequestURL")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
+        public void GetAuthorizationRequestURLTest()
+        {
+            AdalTests.GetAuthorizationRequestURLTest(Sts);
         }
     }
 }

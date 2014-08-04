@@ -27,15 +27,13 @@ namespace Test.ADAL.WinRT.Unit
     {
         private const string Delimiter = ":::";
 
-        public object OwnerWindow { get; set; }
-
         public ReplayerWebUI(PromptBehavior promptBehavior, bool useCorporateNetwork)
         {
         }
 
-        public async Task<AuthorizationResult> AuthenticateAsync(Uri requestUri, Uri callbackUri, CallState callState)
+        public async Task<AuthorizationResult> AuthenticateAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
-            string key = requestUri.AbsoluteUri + callbackUri.AbsoluteUri;
+            string key = authorizationUri.AbsoluteUri + redirectUri.AbsoluteUri;
 
             if (IOMap.ContainsKey(key))
             {

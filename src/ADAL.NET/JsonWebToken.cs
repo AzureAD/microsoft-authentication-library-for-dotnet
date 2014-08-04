@@ -31,20 +31,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly JWTPayload payload;
 
-        public JsonWebToken(string audience, string issuer, uint allowedLifetimeInSeconds, string subject)
+        public JsonWebToken(ClientAssertionCertificate certificate, string audience)
         {
             DateTime validFrom = NetworkPlugin.RequestCreationHelper.GetJsonWebTokenValidFrom();
 
-            DateTime validTo = validFrom + TimeSpan.FromSeconds(allowedLifetimeInSeconds);
+            DateTime validTo = validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds);
 
             this.payload = new JWTPayload
                 {
                     Audience = audience,
-                    Issuer = issuer,
+                    Issuer = certificate.ClientId,
                     ValidFrom = DateTimeHelper.ConvertToTimeT(validFrom),
                     ValidTo = DateTimeHelper.ConvertToTimeT(validTo),
-                    Subject = subject
+                    Subject = certificate.ClientId
                 };
+
+            if (certificate.ClientAssertionJwtIdentifier != null)
+            {
+                this.payload.JwtIdentifier = certificate.ClientAssertionJwtIdentifier;
+            }
         }
 
         public ClientAssertion Sign(ClientAssertionCertificate credential)
@@ -164,6 +169,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             [DataMember(Name = JsonWebTokenConstants.ReservedClaims.Subject, IsRequired = false,
                 EmitDefaultValue = false)]
             public string Subject { get; set; }
+
+            [DataMember(Name = JsonWebTokenConstants.ReservedClaims.JwtIdentifier, IsRequired=false, EmitDefaultValue=false)]
+            public string JwtIdentifier { get; set; }
         }
 
         [DataContract]

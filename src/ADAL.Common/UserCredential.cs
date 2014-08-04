@@ -16,11 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-#if ADAL_WINRT
-#else
-using System.Security;
-#endif
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal enum UserAuthType
@@ -33,14 +28,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// Credential used for integrated authentication on domain-joined machines.
     /// </summary>
-    public sealed class UserCredential
+    public sealed partial class UserCredential
     {
         /// <summary>
         /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
         /// and it can only be used in domain joined scenarios.
         /// </summary>
         public UserCredential()
-            : this(null, (string)null)
         {
             this.UserAuthType = UserAuthType.IntegratedAuth;
         }
@@ -50,64 +44,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
         public UserCredential(string userName)
-            : this(userName, (string)null)
         {
+            this.UserName = userName;
             this.UserAuthType = UserAuthType.IntegratedAuth;
         }
-
-        /// <summary>
-        /// Constructor to create credential with client id and secret
-        /// </summary>
-        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        /// <param name="password">User password.</param>
-        public UserCredential(string userName, string password)
-        {
-            this.UserName = userName;
-            this.Password = password;
-            this.UserAuthType = UserAuthType.UsernamePassword;
-        }
-
-#if ADAL_WINRT
-#else
-        /// <summary>
-        /// Constructor to create credential with client id and secret
-        /// </summary>
-        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        /// <param name="securePassword">User password.</param>
-        public UserCredential(string userName, SecureString securePassword)
-        {
-            this.UserName = userName;
-            this.SecurePassword = securePassword;
-            this.UserAuthType = UserAuthType.UsernamePassword;
-        }
-#endif
 
         /// <summary>
         /// Gets identifier of the user.
         /// </summary>
         public string UserName { get; internal set; }
 
-        internal string Password { get; private set; }
-
         internal UserAuthType UserAuthType { get; private set; }
-
-#if ADAL_WINRT
-        internal char[] PasswordToCharArray()
-        {
-            return (this.Password != null) ? this.Password.ToCharArray() : null;
-        }
-#else
-        internal SecureString SecurePassword { get; private set; }
-
-        internal char[] PasswordToCharArray()
-        {
-            if (this.SecurePassword != null)
-            {
-                return this.SecurePassword.ToCharArray();
-            }
-
-            return (this.Password != null) ? this.Password.ToCharArray() : null;
-        }
-#endif
     }
 }

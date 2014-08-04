@@ -19,3 +19,7 @@ TestResults/
 winphone/src/ADAL.WinPhone/obj/
 winphone/tests/Test.ADAL.WinPhone.UnitTest/obj/
 winphone/src/ADAL.WinPhone/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
+src/ADAL.WinPhone/obj/
+tests/Test.ADAL.WinPhone.Dashboard/obj/
+src/ADAL.WinPhone/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
+tests/Test.ADAL.WinPhone.Unit/obj/

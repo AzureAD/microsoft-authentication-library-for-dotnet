@@ -35,6 +35,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string RequestedTokenUse = "requested_token_use";
         public const string Username = "username";
         public const string Password = "password";
+
+        public const string FormsAuth = "amr_values";
+        public const string LoginHint = "login_hint"; // login_hint is not standard oauth2 parameter
+        public const string CorrelationId = OAuthHeader.CorrelationId; // correlation id is not standard oauth2 parameter
+        public const string Prompt = "prompt"; // prompt is not standard oauth2 parameter
     }
 
     internal class OAuthGrantType
@@ -79,6 +84,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string GivenName = "given_name";
         public const string FamilyName = "family_name";
         public const string IdentityProvider = "idp";
+        public const string Issuer = "iss";
         public const string PasswordExpiration = "pwd_exp";
         public const string PasswordChangeUrl = "pwd_url";
     }
@@ -102,5 +108,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal class OAuthError
     {
         public const string LoginRequired = "login_required";
+    }
+
+    internal class OAuthValue
+    {
+        public const string FormsAuth = "pwd";
+        public const string PromptLogin = "login";
+        public const string PromptRefreshSession = "refresh_session";
+        public const string ScopeOpenId = "openid";
     }
 }

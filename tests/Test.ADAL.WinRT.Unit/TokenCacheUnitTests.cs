@@ -30,8 +30,8 @@ namespace Test.ADAL.WinRT.Unit
     {
         [TestMethod]
         [TestCategory("AdalWinRTUnit")]
-        //[Description("Test to store in default token cache store")]
-        public void DefaultTokenCacheStoreTest()
+        //[Description("Test to store in default token cache")]
+        public void DefaultTokenCacheTest()
         {
             TokenCacheTests.DefaultTokenCacheTest();
         }

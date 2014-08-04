@@ -25,10 +25,22 @@ namespace Test.ADAL.Common
 {
     internal partial class AuthenticationContextProxy
     {
-        public AuthenticationContextProxy(string authority, bool validateAuthority, TokenCacheStoreType tokenCacheStoreType)
+        public AuthenticationContextProxy(string authority)
+        {
+            this.context = new AuthenticationContext(authority);
+            this.context.CorrelationId = new Guid(FixedCorrelationId);
+        }
+
+        public AuthenticationContextProxy(string authority, bool validateAuthority)
+        {
+            this.context = new AuthenticationContext(authority, validateAuthority);
+            this.context.CorrelationId = new Guid(FixedCorrelationId);
+        }
+
+        public AuthenticationContextProxy(string authority, bool validateAuthority, TokenCacheType tokenCacheType)
         {
             TokenCache tokenCache = null;
-            if (tokenCacheStoreType == TokenCacheStoreType.InMemory)
+            if (tokenCacheType == TokenCacheType.InMemory)
             {
                 tokenCache = new TokenCache();
             }
@@ -120,10 +132,7 @@ namespace Test.ADAL.Common
 
         public async Task<AuthenticationResultProxy> AcquireTokenAsync(string validResource, string validClientId, UserCredentialProxy credential)
         {
-            return GetAuthenticationResultProxy(await this.context.AcquireTokenAsync(validResource, validClientId,
-                (credential.Password == null) ?
-                new UserCredential(credential.UserId) :
-                new UserCredential(credential.UserId, credential.Password)));
+            return GetAuthenticationResultProxy(await this.context.AcquireTokenAsync(validResource, validClientId, new UserCredential(credential.UserId)));
         }
     }
 }

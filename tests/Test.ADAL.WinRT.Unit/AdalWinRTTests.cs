@@ -53,7 +53,7 @@ namespace Test.ADAL.WinRT.Unit
         [DataRow("ADFS")]
         public void AcquireTokenPositiveTest(string stsType)
         {
-            AdalTests.AcquireTokenPositive(SetupStsService(GetStsType(stsType)));
+            AdalTests.AcquireTokenPositiveTest(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -83,7 +83,7 @@ namespace Test.ADAL.WinRT.Unit
         [DataRow("ADFS")]
         public void AcquireTokenWithInvalidAuthorityTest(string stsType)
         {
-            AdalTests.AcquireTokenWithInvalidAuthority(SetupStsService(GetStsType(stsType)));
+            AdalTests.AcquireTokenWithInvalidAuthorityTest(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -93,7 +93,7 @@ namespace Test.ADAL.WinRT.Unit
         [DataRow("ADFS")]
         public void AcquireTokenWithInvalidResourceTest(string stsType)
         {
-            AdalTests.AcquireTokenWithInvalidResource(SetupStsService(GetStsType(stsType)));
+            AdalTests.AcquireTokenWithInvalidResourceTest(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -103,7 +103,7 @@ namespace Test.ADAL.WinRT.Unit
         [DataRow("ADFS")]
         public void AcquireTokenWithInvalidClientIdTest(string stsType)
         {
-            AdalTests.AcquireTokenWithInvalidClientId(SetupStsService(GetStsType(stsType)));
+            AdalTests.AcquireTokenWithInvalidClientIdTest(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -154,7 +154,7 @@ namespace Test.ADAL.WinRT.Unit
         [DataRow("ADFS")]
         public void AcquireTokenPositiveWithInMemoryCacheTest(string stsType)
         {
-            AdalTests.AcquireTokenPositiveWithInMemoryCache(SetupStsService(GetStsType(stsType)));
+            AdalTests.AcquireTokenPositiveWithInMemoryCacheTest(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -165,7 +165,7 @@ namespace Test.ADAL.WinRT.Unit
         [Ignore]    // Enable once the test bug is fixed.
         public void AcquireTokenPositiveWithNullCacheTest(string stsType)
         {
-            AdalTests.AcquireTokenPositiveWithNullCache(SetupStsService(GetStsType(stsType)));
+            AdalTests.AcquireTokenPositiveWithNullCacheTest(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -204,15 +204,6 @@ namespace Test.ADAL.WinRT.Unit
         public async Task InstanceDiscoveryTest(string stsType)
         {
             await AdalTests.InstanceDiscoveryTestAsync(SetupStsService(GetStsType(stsType)));
-        }
-
-        [TestMethod]
-        //[Description("Positive Test for AcquireToken non-interactive for managed user")]
-        [TestCategory("AdalWinRTMock")]
-        [DataRow("AAD")]
-        public async Task AcquireTokenNonInteractiveManagedPositiveTest(string stsType)
-        {
-            await AdalTests.AcquireTokenNonInteractivePositiveTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         private static void SetReplayerNetworkPlugin()

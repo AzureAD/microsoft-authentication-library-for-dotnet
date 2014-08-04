@@ -17,7 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -38,12 +37,6 @@ namespace Test.ADAL.Common
             var credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
 
             AuthenticationResultProxy result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential);
-            if (sts.Type == StsType.ADFS)
-            {
-                VerifyErrorResult(result, Sts.InvalidAuthorityType, null);
-                return;
-            }
-
             VerifySuccessResult(sts, result);
 
             AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
@@ -73,8 +66,7 @@ namespace Test.ADAL.Common
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, new Uri(sts.ValidRedirectUriForConfidentialClient.AbsoluteUri + "x"), credential);
 
-            // TODO: Update status code to 400 once AAD returns it.
-            VerifyErrorResult(result, "invalid_grant", "access grant is invalid or malformed", (sts.Type == StsType.ADFS) ? 400 : 401);
+            VerifyErrorResult(result, "invalid_grant", "access grant is invalid or malformed", 400);
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, (ClientCredential)null);
             VerifyErrorResult(result, "invalid_argument", "credential");
@@ -87,17 +79,11 @@ namespace Test.ADAL.Common
         public static async Task ConfidentialClientWithX509TestAsync(Sts sts)
         {
             SetCredential(sts);
-            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheStoreType.Null);
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheType.Null);
 
             string authorizationCode = context.AcquireAccessCode(sts.ValidResource, sts.ValidConfidentialClientId, sts.ValidRedirectUriForConfidentialClient, sts.ValidUserId);
             var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             AuthenticationResultProxy result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, certificate, sts.ValidResource);
-            if (sts.Type == StsType.ADFS)
-            {
-                VerifyErrorResult(result, Sts.InvalidAuthorityType, null);
-                return;
-            }
-
             VerifySuccessResult(sts, result);
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, certificate);
@@ -128,18 +114,12 @@ namespace Test.ADAL.Common
 
         public static async Task ClientCredentialTestAsync(Sts sts)
         {
-            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheStoreType.Null);
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheType.Null);
 
             AuthenticationResultProxy result = null;
 
             var credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
             result = await context.AcquireTokenAsync(sts.ValidResource, credential);
-            if (sts.Type == StsType.ADFS)
-            {
-                VerifyErrorResult(result, Sts.InvalidAuthorityType, null);
-                return;
-            }
-
             Verify.IsNotNull(result.AccessToken);
 
             result = await context.AcquireTokenAsync(null, credential);
@@ -154,23 +134,17 @@ namespace Test.ADAL.Common
 
             invalidCredential = new ClientCredential(sts.ValidConfidentialClientId.Replace("0", "1"), sts.ValidConfidentialClientSecret + "x");
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
-            VerifyErrorResult(result, Sts.UnauthorizedClient, "70001", 401);
+            VerifyErrorResult(result, Sts.UnauthorizedClient, "70001", 400);
         }
 
         public static async Task ClientAssertionWithX509TestAsync(Sts sts)
         {
-            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheStoreType.Null);
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheType.Null);
 
             AuthenticationResultProxy result = null;
 
             var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             result = await context.AcquireTokenAsync(sts.ValidResource, certificate);
-            if (sts.Type == StsType.ADFS)
-            {
-                VerifyErrorResult(result, Sts.InvalidAuthorityType, null);
-                return;
-            }
-
             Verify.IsNotNull(result.AccessToken);
 
             result = await context.AcquireTokenAsync(null, certificate);
@@ -199,12 +173,6 @@ namespace Test.ADAL.Common
             ClientAssertion credential = CreateClientAssertion(sts.Authority, sts.ValidConfidentialClientId, sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword);
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential, sts.ValidResource);
-            if (sts.Type == StsType.ADFS)
-            {
-                VerifyErrorResult(result, Sts.InvalidAuthorityType, null);
-                return;
-            }
-
             VerifySuccessResult(sts, result);
 
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, credential, sts.ValidResource);
@@ -232,17 +200,11 @@ namespace Test.ADAL.Common
 
         public static async Task ClientAssertionWithSelfSignedJwtTestAsync(Sts sts)
         {
-            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheStoreType.Null);
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheType.Null);
 
             AuthenticationResultProxy result = null;
             ClientAssertion validCredential = CreateClientAssertion(sts.Authority, sts.ValidConfidentialClientId, sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword);
             result = await context.AcquireTokenAsync(sts.ValidResource, validCredential);
-            if (sts.Type == StsType.ADFS)
-            {
-                VerifyErrorResult(result, Sts.InvalidAuthorityType, null);
-                return;
-            }
-
             Verify.IsNotNull(result.AccessToken);
 
             result = await context.AcquireTokenAsync(null, validCredential);
@@ -260,7 +222,7 @@ namespace Test.ADAL.Common
 
             invalidCredential = CreateClientAssertion(sts.Authority, sts.InvalidClientId, sts.InvalidConfidentialClientCertificateName, sts.InvalidConfidentialClientCertificatePassword);
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
-            VerifyErrorResult(result, Sts.UnauthorizedClient, "70001", 401); // AADSTS70001: Application '87002806-c87a-41cd-896b-84ca5690d29e' is not registered for the account.
+            VerifyErrorResult(result, Sts.UnauthorizedClient, "70001", 400); // AADSTS70001: Application '87002806-c87a-41cd-896b-84ca5690d29e' is not registered for the account.
         }
 
         public static async Task AcquireTokenFromCacheTestAsync(Sts sts)
@@ -504,6 +466,7 @@ namespace Test.ADAL.Common
             var credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
 
             AuthenticationResultProxy result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential);
+            AuthenticationContextProxy.Delay(2000);
             AuthenticationResultProxy result2 = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode2, sts.ValidRedirectUriForConfidentialClient, credential);
             VerifySuccessResult(sts, result, true, false);
             VerifySuccessResult(sts, result2, true, false);
@@ -579,6 +542,34 @@ namespace Test.ADAL.Common
             Verify.AreEqual(cacheItems.Count, 2);
         }
 
+        internal static void GetAuthorizationRequestURLTest(Sts sts)
+        {
+            var context = new AuthenticationContext(sts.Authority, sts.ValidateAuthority);
+            Uri uri = null;
+
+            try
+            {
+                uri = context.GetAuthorizationRequestURL(null, sts.ValidClientId, sts.ValidDefaultRedirectUri, sts.ValidUserId, "extra=123");
+            }
+            catch (ArgumentNullException ex)
+            {
+                Verify.AreEqual(ex.ParamName, "resource");
+            }
+            
+            uri = context.GetAuthorizationRequestURL(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, sts.ValidUserId, "extra=123");
+            Verify.IsNotNull(uri);
+            Verify.IsTrue(uri.AbsoluteUri.Contains("login_hint"));
+            Verify.IsTrue(uri.AbsoluteUri.Contains("extra=123"));
+            uri = context.GetAuthorizationRequestURL(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, UserIdentifier.AnyUser, null);
+            Verify.IsNotNull(uri);
+            Verify.IsFalse(uri.AbsoluteUri.Contains("login_hint"));
+            Verify.IsFalse(uri.AbsoluteUri.Contains("client-request-id="));
+            context.CorrelationId = Guid.NewGuid();
+            uri = context.GetAuthorizationRequestURL(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, sts.ValidUserId, "extra");
+            Verify.IsNotNull(uri);
+            Verify.IsTrue(uri.AbsoluteUri.Contains("client-request-id="));
+        }
+
         private static void VerifySuccessResult(AuthenticationResult result)
         {
             Log.Comment("Verifying success result...");
@@ -593,15 +584,15 @@ namespace Test.ADAL.Common
 
         public static ClientAssertion CreateClientAssertion(string authority, string clientId, string certificateName, string certificatePassword)
         {
-            authority = authority.Replace("login", "sts");
+            string audience = authority.Replace("login", "sts");
 
             // Test fails with out this
-            if (!authority.EndsWith(@"/"))
+            if (!audience.EndsWith(@"/"))
             {
-                authority += @"/";
+                audience += @"/";
             }
 
-            ClientAssertion assertion = AdalFriend.CreateJwt(new X509Certificate2(certificateName, certificatePassword), clientId, authority);
+            ClientAssertion assertion = AdalFriend.CreateJwt(new X509Certificate2(certificateName, certificatePassword), clientId, audience);
             return new ClientAssertion(clientId, assertion.Assertion);
         }
     }
