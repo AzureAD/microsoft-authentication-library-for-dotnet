@@ -99,6 +99,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         [DataMember(Name = IdTokenClaim.IdentityProvider, IsRequired = false)]
         public string IdentityProvider { get; set; }
+
+        [DataMember(Name = IdTokenClaim.Issuer, IsRequired = false)]
+        public string Issuer { get; set; }
     }
 
     internal static class OAuth2Response
@@ -148,7 +151,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     string givenName = idToken.GivenName;
                     string familyName = idToken.FamilyName;
-                    string identityProvider = idToken.IdentityProvider;
+                    string identityProvider = idToken.IdentityProvider ?? idToken.Issuer;
                     DateTimeOffset? passwordExpiresOffest = null;
                     if (idToken.PasswordExpiration > 0)
                     {

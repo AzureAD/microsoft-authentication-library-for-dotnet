@@ -128,7 +128,20 @@ namespace Test.ADAL.Common
             AuthenticationResult result = this.context.AcquireTokenSilentAsync(resource, clientId, userId).AsTask().Result;
             if (result.Status != AuthenticationStatus.Success)
             {
-                this.context.AcquireTokenAndContinue(resource, clientId, redirectUri, userId, extraQueryParameters, null);
+                try
+                {
+                    this.context.AcquireTokenAndContinue(resource, clientId, redirectUri, userId, extraQueryParameters, null);
+                }
+                catch (AdalException ex)
+                {
+                    return new AuthenticationResultProxy
+                    {
+                        Error = ex.ErrorCode,
+                        ErrorDescription = ex.Message,
+                        Status = AuthenticationStatusProxy.ClientError,
+                    };                    
+                }
+
                 result = this.ContinueAcquireTokenAsync().Result;
             }
 

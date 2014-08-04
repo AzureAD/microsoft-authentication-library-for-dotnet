@@ -17,6 +17,8 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -151,17 +153,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 authorizationRequestParameters[OAuthParameter.Prompt] = OAuthValue.PromptRefreshSession;
             }
 
-            if (!string.IsNullOrWhiteSpace(extraQueryParameters))
-            {
-                authorizationRequestParameters.ExtraQueryParameter = extraQueryParameters;
-            }
-
             if (includeFormsAuthParam)
             {
                 authorizationRequestParameters[OAuthParameter.FormsAuth] = OAuthValue.FormsAuth;
             }
 
             AdalIdHelper.AddAsQueryParameters(authorizationRequestParameters);
+
+            if (!string.IsNullOrWhiteSpace(extraQueryParameters))
+            {
+                // Checks for extraQueryParameters duplicating standard parameters
+                Dictionary<string, string> kvps = EncodingHelper.ParseKeyValueList(extraQueryParameters, '&', false, this.CallState);
+                foreach (KeyValuePair<string, string> kvp in kvps)
+                {
+                    if (authorizationRequestParameters.ContainsKey(kvp.Key))
+                    {
+                        throw new AdalException(AdalError.DuplicateQueryParameter, string.Format(AdalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
+                    }
+                }
+
+                authorizationRequestParameters.ExtraQueryParameter = extraQueryParameters;
+            }
 
             return authorizationRequestParameters;
         }
