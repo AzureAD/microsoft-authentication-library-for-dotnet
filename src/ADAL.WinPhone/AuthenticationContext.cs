@@ -105,7 +105,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DefaultOverload]
         public void AcquireTokenAndContinue(string resource, string clientId, AuthenticationContextDelegate authDelegate)
         {
-            this.AcquireTokenAndContinueCommon(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), UserIdentifier.AnyUser, null, authDelegate);
+            this.AcquireTokenAndContinueCommon(resource, clientId, Constant.SsoPlaceHolderUri, UserIdentifier.AnyUser, null, authDelegate);
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DefaultOverload]
         public void AcquireTokenAndContinue(string resource, string clientId, Uri redirectUri, AuthenticationContextDelegate authDelegate)
         {
-            this.AcquireTokenAndContinueCommon(resource, clientId, GetRedirectUri(redirectUri), UserIdentifier.AnyUser, null, authDelegate);
+            this.AcquireTokenAndContinueCommon(resource, clientId, redirectUri, UserIdentifier.AnyUser, null, authDelegate);
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DefaultOverload]
         public void AcquireTokenAndContinue(string resource, string clientId, Uri redirectUri, UserIdentifier userId, AuthenticationContextDelegate authDelegate)
         {
-            this.AcquireTokenAndContinueCommon(resource, clientId, GetRedirectUri(redirectUri), userId, null, authDelegate);
+            this.AcquireTokenAndContinueCommon(resource, clientId, redirectUri, userId, null, authDelegate);
         }
 
         /// <summary>

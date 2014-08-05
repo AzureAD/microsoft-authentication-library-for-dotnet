@@ -39,13 +39,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             WebAuthenticationResult webAuthenticationResult;
 
-            if (redirectUri.AbsoluteUri == WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri)
+            if (redirectUri.Scheme == Constant.MsAppScheme)
             {
+                // SSO Mode
+
                 WebAuthenticationOptions options = this.useCorporateNetwork ? WebAuthenticationOptions.UseCorporateNetwork : WebAuthenticationOptions.None;
 
                 if (this.promptBehavior == PromptBehavior.Never)
                 {                
-                    // SSO Mode
                     options |= WebAuthenticationOptions.SilentMode;
                 }
 
@@ -70,10 +71,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             else if (this.promptBehavior == PromptBehavior.Never)
             {
                 throw new ArgumentException(AdalErrorMessage.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
-            }
-            else if (redirectUri.Scheme == "ms-app")
-            {
-                throw new ArgumentException(AdalErrorMessage.RedirectUriAppIdMismatch, "redirectUri");
             }
             else
             {

@@ -16,18 +16,19 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Text.RegularExpressions;
+using System;
+using Windows.Security.Authentication.Web;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal static partial class RegexUtilities
+    internal partial class AcquireTokenInteractiveHandler
     {
-        private static string DomainMapper(Match match)
+        private static void VerifySsoRedirectUri(Uri redirectUri)
         {
-            // This implementation is not ideal, but IdnMapping class does not exist in WinRT.
-            string domainName = match.Groups[2].Value;
-            return match.Groups[1].Value + domainName;
+            if (redirectUri.Scheme == Constant.MsAppScheme && !object.ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri))
+            {
+                throw new ArgumentException(AdalErrorMessage.InvalidMsAppUri, "redirectUri");
+            }
         }
     }
 }
-

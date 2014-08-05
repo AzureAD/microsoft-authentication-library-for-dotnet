@@ -97,10 +97,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return result;
         }
-
-        private static Uri GetRedirectUri(Uri redirectUri)
-        {
-            return redirectUri ?? WebAuthenticationBroker.GetCurrentApplicationCallbackUri();
-        }
     }
 }

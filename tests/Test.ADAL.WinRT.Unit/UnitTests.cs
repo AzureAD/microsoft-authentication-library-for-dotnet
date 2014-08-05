@@ -23,6 +23,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Test.ADAL.Common;
 using Logger = Microsoft.IdentityModel.Clients.ActiveDirectory.Logger;
+using Windows.Security.Authentication.Web;
 
 namespace Test.ADAL.WinRT.Unit
 {
@@ -85,6 +86,29 @@ namespace Test.ADAL.WinRT.Unit
                     throw ex;
                 }
             }
+        }
+
+        [TestMethod]
+        [TestCategory("AdalWinRTUnit")]
+        public async Task MsAppRedirectUriTest()
+        {
+            Sts sts = new AadSts();
+            AuthenticationContext context = new AuthenticationContext(sts.Authority);
+            AuthenticationResult result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId,
+                new Uri("ms-app://s-1-15-2-2097830667-3131301884-2920402518-3338703368-1480782779-4157212157-3811015497/"));
+
+            Verify.IsNotNull(result.Error);
+            Verify.AreEqual(result.Error, Sts.InvalidArgumentError);
+            Verify.IsTrue(result.ErrorDescription.Contains("redirectUri"));
+            Verify.IsTrue(result.ErrorDescription.Contains("ms-app"));
+
+            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId,
+                WebAuthenticationBroker.GetCurrentApplicationCallbackUri());
+
+            Verify.IsNotNull(result.Error);
+            Verify.AreEqual(result.Error, Sts.InvalidArgumentError);
+            Verify.IsTrue(result.ErrorDescription.Contains("redirectUri"));
+            Verify.IsTrue(result.ErrorDescription.Contains("ms-app"));
         }
     }
 }
