@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.promptBehavior = promptBehavior;
 
-            if (extraQueryParameters != null && extraQueryParameters[0] == '&')
+            if (!string.IsNullOrEmpty(extraQueryParameters) && extraQueryParameters[0] == '&')
             {
                 extraQueryParameters = extraQueryParameters.Substring(1);
             }

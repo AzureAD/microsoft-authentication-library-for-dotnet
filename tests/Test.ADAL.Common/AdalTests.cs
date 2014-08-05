@@ -535,6 +535,9 @@ namespace Test.ADAL.Common
             EndBrowserDialogSession();
             result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, UserIdentifier.AnyUser, "login_hint=" + sts.ValidUserName);
             VerifySuccessResult(sts, result);
+
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId, string.Empty);
+            VerifySuccessResult(sts, result);
         }
 
         internal static void AcquireTokenWithPromptBehaviorNeverTest(Sts sts)
