@@ -32,6 +32,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         /// <summary>
         /// Gets or Sets flag to enable logged in user authentication. Note that enabling this flag requires some extra application capabilites.
+        /// This flag only works with SSO overloads of AcquireTokenAsync (i.e. no redirectUri). It is ignored in other overloads.
         /// </summary>
         public bool UseCorporateNetwork { get; set; }
 
@@ -68,7 +69,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DefaultOverload]
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), PromptBehavior.Auto, UserIdentifier.AnyUser));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, Constant.SsoPlaceHolderUri, PromptBehavior.Auto, UserIdentifier.AnyUser));
         }
 
         /// <summary>
@@ -81,7 +82,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DefaultOverload]
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, GetRedirectUri(redirectUri), PromptBehavior.Auto, UserIdentifier.AnyUser));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, redirectUri, PromptBehavior.Auto, UserIdentifier.AnyUser));
         }
 
         /// <summary>
@@ -95,7 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DefaultOverload]
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, GetRedirectUri(redirectUri), promptBehavior, UserIdentifier.AnyUser));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, redirectUri, promptBehavior, UserIdentifier.AnyUser));
         }
 
         /// <summary>
@@ -111,7 +112,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DefaultOverload]
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior, UserIdentifier userId)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, GetRedirectUri(redirectUri), promptBehavior, userId));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, redirectUri, promptBehavior, userId));
         }
 
         /// <summary>
@@ -131,7 +132,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Acquires security token from the authority.
+        /// Acquires security token from the authority in SSO mode.
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
@@ -139,11 +140,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, PromptBehavior promptBehavior)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), promptBehavior, UserIdentifier.AnyUser));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, Constant.SsoPlaceHolderUri, promptBehavior, UserIdentifier.AnyUser));
         }
 
         /// <summary>
-        /// Acquires security token from the authority.
+        /// Acquires security token from the authority in SSO mode.
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
@@ -153,11 +154,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, PromptBehavior promptBehavior, UserIdentifier userId)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), promptBehavior, userId));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, Constant.SsoPlaceHolderUri, promptBehavior, userId));
         }
 
         /// <summary>
-        /// Acquires security token from the authority.
+        /// Acquires security token from the authority in SSO mode.
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
@@ -168,7 +169,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, PromptBehavior promptBehavior, UserIdentifier userId, string extraQueryParameters)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), promptBehavior, userId, extraQueryParameters));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, Constant.SsoPlaceHolderUri, promptBehavior, userId, extraQueryParameters));
         }
 
         private IWebUI CreateWebAuthenticationDialog(PromptBehavior promptBehavior)

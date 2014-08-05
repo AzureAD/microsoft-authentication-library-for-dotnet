@@ -50,6 +50,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
 
+            VerifySsoRedirectUri(redirectUri);
+
             this.redirectUri = redirectUri;
 
             if (userId == null)

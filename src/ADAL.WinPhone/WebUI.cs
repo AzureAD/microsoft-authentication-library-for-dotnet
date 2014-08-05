@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 set[key] = headersMap[key];
             }
 
-            if (redirectUri.AbsoluteUri == WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri)
+            if (redirectUri.Scheme == Constant.MsAppScheme)
             {
                 // SSO Mode
 
@@ -63,10 +63,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     throw new AdalException(AdalError.AuthenticationUiFailed, ex);
                 }
-            }
-            else if (redirectUri.Scheme == "ms-app")
-            {
-                throw new ArgumentException(AdalErrorMessage.RedirectUriAppIdMismatch, "redirectUri");
             }
             else
             {

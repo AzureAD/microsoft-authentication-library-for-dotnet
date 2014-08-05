@@ -118,6 +118,7 @@
     <Compile Include="ReplayerWebAuthenticationBrokerContinuationEventArgs.cs" />
     <Compile Include="ReplayerWebUI.cs" />
     <Compile Include="ReplayerWebUIFactory.cs" />
+    <Compile Include="UnitTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">

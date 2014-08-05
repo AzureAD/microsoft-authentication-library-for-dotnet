@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static partial class AdalError
@@ -27,8 +28,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal static partial class AdalErrorMessage
     {
         public const string CannotAccessUserInformation = "Cannot access user information. Check machine's Privacy settings or initialize UserCredential with userId";
-        public const string RedirectUriAppIdMismatch = "The return URI provided does not match the app's ID";
         public const string RedirectUriUnsupportedWithPromptBehaviorNever = "PromptBehavior.Never is supported in SSO mode only (i.e. no redirectUri)";
         public const string UnauthorizedUserInformationAccess = "Unauthorized accessing user information. Check application's 'Enterprise Authentication' capability";
+    }
+
+    internal static class Constant
+    {
+        public const string MsAppScheme = "ms-app";
+        public static readonly Uri SsoPlaceHolderUri = new Uri(MsAppScheme + "://sso");
     }
 }

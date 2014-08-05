@@ -38,6 +38,9 @@
     <DocumentationFile>Microsoft.IdentityModel.Clients.ActiveDirectory.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\ADAL.CommonWinRT\AcquireTokenInteractiveHandler.cs">
+      <Link>CommonWinRT\AcquireTokenInteractiveHandler.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.CommonWinRT\AdalEventSource.cs">
       <Link>CommonWinRT\AdalEventSource.cs</Link>
     </Compile>
