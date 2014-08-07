@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         internal AuthorizationResult authorizationResult;
 
-        private readonly Uri redirectUri;
+        private Uri redirectUri;
 
         private readonly PromptBehavior promptBehavior;
 
@@ -50,9 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
 
-            VerifySsoRedirectUri(redirectUri);
-
-            this.redirectUri = redirectUri;
+            this.SetRedirectUri(redirectUri);
 
             if (userId == null)
             {

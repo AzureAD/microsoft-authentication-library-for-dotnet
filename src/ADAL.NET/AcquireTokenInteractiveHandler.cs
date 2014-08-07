@@ -110,9 +110,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return prefix.Equals(Environment.MachineName.ToUpperInvariant());
         }
 
-        private static void VerifySsoRedirectUri(Uri redirectUri)
+        private void SetRedirectUri(Uri redirectUri)
         {
-            // No logic here. Only WinRT and WinPhone need to check the redirectUri for SSO.
+            this.redirectUri = redirectUri;
         }
 
         private static class NativeMethods
