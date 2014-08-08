@@ -146,11 +146,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // ADFS currently ignores the parameter for now.
             if (promptBehavior == PromptBehavior.Always)
             {
-                authorizationRequestParameters[OAuthParameter.Prompt] = OAuthValue.PromptLogin;
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
             }
             else if (promptBehavior == PromptBehavior.RefreshSession)
             {
-                authorizationRequestParameters[OAuthParameter.Prompt] = OAuthValue.PromptRefreshSession;
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
+            }
+            else if (promptBehavior == PromptBehavior.Never)
+            {
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.None;
             }
 
             if (includeFormsAuthParam)

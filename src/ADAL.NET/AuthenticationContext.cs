@@ -804,7 +804,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 // Any exception thrown as a result of running task will cause AggregateException to be thrown with 
                 // actual exception as inner.
-                throw ae.InnerExceptions[0];
+                Exception innerException = ae.InnerExceptions[0];
+
+                // In MTA case, AggregateException is two layer deep, so checking the InnerException for that.
+                if (innerException is AggregateException)
+                {
+                    innerException = ((AggregateException)innerException).InnerExceptions[0];
+                }
+
+                throw innerException;
             }
         }
 
