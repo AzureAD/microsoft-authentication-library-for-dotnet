@@ -113,8 +113,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal class OAuthValue
     {
         public const string FormsAuth = "pwd";
-        public const string PromptLogin = "login";
-        public const string PromptRefreshSession = "refresh_session";
         public const string ScopeOpenId = "openid";
+    }
+
+    internal class PromptValue
+    {
+        public const string Login = "login";
+        public const string RefreshSession = "refresh_session";
+        public const string None = "none";        
     }
 }

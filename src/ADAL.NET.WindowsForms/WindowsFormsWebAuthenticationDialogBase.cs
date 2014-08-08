@@ -44,6 +44,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         private Keys key = Keys.None;
 
         /// <summary>
+        /// From MSDN (http://msdn.microsoft.com/en-us/library/ie/dn720860(v=vs.85).aspx): 
+        /// The net session count tracks the number of instances of the web browser control. 
+        /// When a web browser control is created, the net session count is incremented. When the control 
+        /// is destroyed, the net session count is decremented. When the net session count reaches zero, 
+        /// the session cookies for the process are cleared. SetQueryNetSessionCount can be used to prevent 
+        /// the session cookies from being cleared for applications where web browser controls are being created 
+        /// and destroyed throughout the lifetime of the application. (Because the application lives longer than 
+        /// a given instance, session cookies must be retained for a longer periods of time.
+        /// </summary>
+        static WindowsFormsWebAuthenticationDialogBase()
+        {
+            int sessionCount = NativeMethods.SetQueryNetSessionCount(NativeMethods.SessionOp.SESSION_QUERY);
+            if (sessionCount == 0)
+            {
+                NativeMethods.SetQueryNetSessionCount(NativeMethods.SessionOp.SESSION_INCREMENT);
+            }
+        }
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow)
@@ -319,6 +338,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             }
 
             public static int ZoomPercent { get; private set; }
+        }
+
+
+        internal static class NativeMethods
+        {
+            internal enum SessionOp 
+            {
+                SESSION_QUERY = 0,
+                SESSION_INCREMENT,
+                SESSION_DECREMENT
+            };
+
+            [DllImport("IEFRAME.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
+            internal static extern int SetQueryNetSessionCount(SessionOp sessionOp);        
         }
     }
 }
