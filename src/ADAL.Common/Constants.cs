@@ -60,6 +60,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string AuthorityNotInValidList = "authority_not_in_valid_list";
 
         /// <summary>
+        /// Authority validation failed.
+        /// </summary>
+        public const string AuthorityValidationFailed = "authority_validation_failed";
+
+        /// <summary>
         /// Loading required assembly failed.
         /// </summary>
         public const string AssemblyLoadFailed = "assembly_load_failed";
@@ -254,6 +259,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string AuthenticationUiFailed = "The browser based authentication dialog failed to complete for an unkown reason";
         public const string AuthorityInvalidUriFormat = "'authority' should be in Uri format";
         public const string AuthorityNotInValidList = "'authority' is not in the list of valid addresses";
+        public const string AuthorityValidationFailed = "Authority validation failed";
         public const string AuthorityUriInsecure = "'authority' should use the 'https' scheme";
         public const string AuthorityUriInvalidPath = "'authority' Uri should have at least one segment in the path (i.e. https://<host>/<path>/...)";
         public const string AuthorizationServerInvalidResponse = "The authorization server returned an invalid response";
