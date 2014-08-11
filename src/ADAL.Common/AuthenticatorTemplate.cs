@@ -104,9 +104,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
                 clientMetrics.SetLastError(tokenResponse.ErrorCodes);
                 throw new AdalServiceException(
-                    AdalError.AuthorityNotInValidList,
-                    string.Format(CultureInfo.InvariantCulture, "{0}. {1} ({2}): {3}",
-                        AdalErrorMessage.AuthorityNotInValidList, tokenResponse.Error, this.Host, tokenResponse.ErrorDescription),
+                    AdalError.AuthorityValidationFailed,
+                    string.Format(CultureInfo.InvariantCulture, "{0}. {1}: {2}",
+                        AdalErrorMessage.AuthorityValidationFailed, tokenResponse.Error, tokenResponse.ErrorDescription),
                     ex);
             }
             finally

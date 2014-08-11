@@ -217,7 +217,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 return new TokenResponse 
                     { 
                         Error = AdalError.ServiceReturnedError,
-                        ErrorDescription = AdalError.ServiceReturnedError 
+                        ErrorDescription = AdalErrorMessage.ServiceReturnedError 
                     };
             }
 
