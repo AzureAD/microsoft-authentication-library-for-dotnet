@@ -72,6 +72,16 @@ namespace Test.ADAL.Common
             Assert.IsNotNull(variable, message);
         }
 
+        internal static void IsNullOrEmptyString(string variable, string message = null)
+        {
+            Assert.IsTrue(string.IsNullOrEmpty(variable), message);
+        }
+
+        internal static void IsNotNullOrEmptyString(string variable, string message = null)
+        {
+            Assert.IsFalse(string.IsNullOrEmpty(variable), message);
+        }
+
         internal static void Fail(string message, params object[] args)
         {
             Assert.IsTrue(false, message, args);

@@ -105,5 +105,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// You can use this code for purposes such as implementing retry logic or error investigation.
         /// </summary>
         public int StatusCode { get; set; }
+
+        /// <summary>
+        /// The Windows Runtime string type is a value type and has no null value. 
+        /// The .NET projection prohibits passing a null .NET string across the Windows Runtime ABI boundary for this reason.
+        /// </summary>
+        internal void ReplaceNullStringPropertiesWithEmptyString()
+        {
+            this.AccessToken = this.AccessToken ?? string.Empty;
+            this.AccessTokenType = this.AccessTokenType ?? string.Empty;
+            this.Error = this.Error ?? string.Empty;
+            this.ErrorDescription = this.ErrorDescription ?? string.Empty;
+            this.IdToken = this.IdToken ?? string.Empty;
+            this.RefreshToken = this.RefreshToken ?? string.Empty;
+            this.TenantId = this.TenantId ?? string.Empty;
+            if (this.UserInfo != null)
+            {
+                this.UserInfo.DisplayableId = this.UserInfo.DisplayableId ?? string.Empty;
+                this.UserInfo.FamilyName = this.UserInfo.FamilyName ?? string.Empty;
+                this.UserInfo.GivenName = this.UserInfo.GivenName ?? string.Empty;
+                this.UserInfo.IdentityProvider = this.UserInfo.IdentityProvider ?? string.Empty;
+            }
+        }
     }
 }

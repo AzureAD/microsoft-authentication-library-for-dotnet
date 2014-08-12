@@ -103,11 +103,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
                 clientMetrics.SetLastError(tokenResponse.ErrorCodes);
-                throw new AdalServiceException(
-                    AdalError.AuthorityValidationFailed,
-                    string.Format(CultureInfo.InvariantCulture, "{0}. {1}: {2}",
-                        AdalErrorMessage.AuthorityValidationFailed, tokenResponse.Error, tokenResponse.ErrorDescription),
-                    ex);
+
+                if (tokenResponse.Error == "invalid_instance")
+                {
+                    throw new AdalServiceException(AdalError.AuthorityNotInValidList, ex);
+                }
+                else
+                {
+                    throw new AdalServiceException(
+                        AdalError.AuthorityValidationFailed,
+                        string.Format(CultureInfo.InvariantCulture, "{0}. {1}: {2}", AdalErrorMessage.AuthorityValidationFailed, tokenResponse.Error, tokenResponse.ErrorDescription),
+                        ex);
+                }
             }
             finally
             {
