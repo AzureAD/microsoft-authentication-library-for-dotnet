@@ -120,7 +120,7 @@ namespace Test.ADAL.Common
 
             var credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
             result = await context.AcquireTokenAsync(sts.ValidResource, credential);
-            Verify.IsNotNull(result.AccessToken);
+            Verify.IsNotNullOrEmptyString(result.AccessToken);
 
             result = await context.AcquireTokenAsync(null, credential);
             VerifyErrorResult(result, Sts.InvalidArgumentError, "resource");
@@ -145,7 +145,7 @@ namespace Test.ADAL.Common
 
             var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             result = await context.AcquireTokenAsync(sts.ValidResource, certificate);
-            Verify.IsNotNull(result.AccessToken);
+            Verify.IsNotNullOrEmptyString(result.AccessToken);
 
             result = await context.AcquireTokenAsync(null, certificate);
             VerifyErrorResult(result, Sts.InvalidArgumentError, "resource");
@@ -205,7 +205,7 @@ namespace Test.ADAL.Common
             AuthenticationResultProxy result = null;
             ClientAssertion validCredential = CreateClientAssertion(sts.Authority, sts.ValidConfidentialClientId, sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword);
             result = await context.AcquireTokenAsync(sts.ValidResource, validCredential);
-            Verify.IsNotNull(result.AccessToken);
+            Verify.IsNotNullOrEmptyString(result.AccessToken);
 
             result = await context.AcquireTokenAsync(null, validCredential);
             VerifyErrorResult(result, Sts.InvalidArgumentError, "resource");
@@ -444,13 +444,13 @@ namespace Test.ADAL.Common
                 result[i] = await context.AcquireTokenAsync(sts.ValidResource, certificate);
                 Log.Comment("Error: " + result[i].Error);
                 Log.Comment("Error Description: " + result[i].ErrorDescription);
-                Verify.IsNotNull(result[i].AccessToken);
+                Verify.IsNotNullOrEmptyString(result[i].AccessToken);
             });
 
             result[0] = await context.AcquireTokenAsync(sts.ValidResource, certificate);
             Log.Comment("Error: " + result[0].Error);
             Log.Comment("Error Description: " + result[0].ErrorDescription);
-            Verify.IsNotNull(result[0].AccessToken);
+            Verify.IsNotNullOrEmptyString(result[0].AccessToken);
         }
 
         internal static async Task AcquireTokenByAuthorizationCodeWithCacheTest(Sts sts)
@@ -575,8 +575,8 @@ namespace Test.ADAL.Common
             Log.Comment("Verifying success result...");
 
             Verify.IsNotNull(result);
-            Verify.IsNotNull(result.AccessToken, "AuthenticationResult.AccessToken");
-            Verify.IsNotNull(result.RefreshToken, "AuthenticationResult.RefreshToken");
+            Verify.IsNotNullOrEmptyString(result.AccessToken, "AuthenticationResult.AccessToken");
+            Verify.IsNotNullOrEmptyString(result.RefreshToken, "AuthenticationResult.RefreshToken");
             long expiresIn = (long)(result.ExpiresOn - DateTime.UtcNow).TotalSeconds;
             Log.Comment("Verifying token expiration...");
             Verify.IsGreaterThanOrEqual(expiresIn, (long)0, "Token Expiration");

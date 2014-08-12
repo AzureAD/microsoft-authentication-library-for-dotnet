@@ -310,9 +310,9 @@ namespace Test.ADAL.Common
             if (sts.Type == StsType.AAD)
             {
                 Verify.AreEqual(sts.ValidUserName, result.UserInfo.DisplayableId);
-                Verify.IsNotNull(result.UserInfo.UniqueId);
-                Verify.IsNotNull(result.UserInfo.GivenName);
-                Verify.IsNotNull(result.UserInfo.FamilyName);
+                Verify.IsNotNullOrEmptyString(result.UserInfo.UniqueId);
+                Verify.IsNotNullOrEmptyString(result.UserInfo.GivenName);
+                Verify.IsNotNullOrEmptyString(result.UserInfo.FamilyName);
 
                 EndBrowserDialogSession();
                 Log.Comment("Waiting 2 seconds before next token request...");
@@ -388,7 +388,7 @@ namespace Test.ADAL.Common
             var context = new AuthenticationContextProxy(sts.TenantlessAuthority, sts.ValidateAuthority);
             AuthenticationResultProxy result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
             VerifySuccessResult(sts, result);
-            Verify.IsNotNull(result.TenantId);
+            Verify.IsNotNullOrEmptyString(result.TenantId);
 
             AuthenticationContextProxy.SetCredentials(null, null);
             AuthenticationResultProxy result2 = context.AcquireToken(
@@ -424,7 +424,7 @@ namespace Test.ADAL.Common
             {
                 context = new AuthenticationContextProxy(sts.Authority.Replace("windows.net", "windows.unknown"), sts.ValidateAuthority);
                 result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PromptBehaviorProxy.Auto, sts.ValidUserId);
-                VerifyErrorResult(result, "authority_not_in_valid_list", "invalid_instance");
+                VerifyErrorResult(result, "authority_not_in_valid_list", "authority");
             }
 #if TEST_ADAL_WINPHONE_UNIT
             catch (AdalServiceException ex)
@@ -479,8 +479,8 @@ namespace Test.ADAL.Common
             AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, credential);
             VerifySuccessResult(sts, result);
             Verify.IsNotNull(result.UserInfo);
-            Verify.IsNotNull(result.UserInfo.UniqueId);
-            Verify.IsNotNull(result.UserInfo.DisplayableId);
+            Verify.IsNotNullOrEmptyString(result.UserInfo.UniqueId);
+            Verify.IsNotNullOrEmptyString(result.UserInfo.DisplayableId);
 
             AuthenticationContextProxy.Delay(2000);
 
@@ -716,18 +716,18 @@ namespace Test.ADAL.Common
             }
 
             Verify.AreEqual(AuthenticationStatusProxy.Success, result.Status, "AuthenticationResult.Status");
-            Verify.IsNotNull(result.AccessToken, "AuthenticationResult.AccessToken");
+            Verify.IsNotNullOrEmptyString(result.AccessToken, "AuthenticationResult.AccessToken");
             if (supportRefreshToken)
             {
-                Verify.IsNotNull(result.RefreshToken, "AuthenticationResult.RefreshToken");
+                Verify.IsNotNullOrEmptyString(result.RefreshToken, "AuthenticationResult.RefreshToken");
             }
             else
             {
-                Verify.IsNull(result.RefreshToken, "AuthenticationResult.RefreshToken");
+                Verify.IsNullOrEmptyString(result.RefreshToken, "AuthenticationResult.RefreshToken");
             }
 
-            Verify.IsNull(result.Error, "AuthenticationResult.Error");
-            Verify.IsNull(result.ErrorDescription, "AuthenticationResult.ErrorDescription");
+            Verify.IsNullOrEmptyString(result.Error, "AuthenticationResult.Error");
+            Verify.IsNullOrEmptyString(result.ErrorDescription, "AuthenticationResult.ErrorDescription");
 
             if (sts.Type != StsType.ADFS && supportUserInfo)
             {
@@ -767,18 +767,18 @@ namespace Test.ADAL.Common
         {
             Log.Comment(string.Format("Verifying error result '{0}':'{1}'...", result.Error, result.ErrorDescription));
             Verify.AreNotEqual(AuthenticationStatusProxy.Success, result.Status);
-            Verify.IsNull(result.AccessToken);
-            Verify.IsNotNull(result.Error);
-            Verify.IsNotNull(result.ErrorDescription);
+            Verify.IsNullOrEmptyString(result.AccessToken);
+            Verify.IsNotNullOrEmptyString(result.Error);
+            Verify.IsNotNullOrEmptyString(result.ErrorDescription);
             Verify.IsFalse(result.ErrorDescription.Contains("+"), "Error description should not be in URL form encoding!");
             Verify.IsFalse(result.ErrorDescription.Contains("%2"), "Error description should not be in URL encoding!");
 
-            if (error != null)
+            if (!string.IsNullOrEmpty(error))
             {
                 Verify.AreEqual(error, result.Error);
             }
 
-            if (errorDescriptionKeyword != null)
+            if (!string.IsNullOrEmpty(errorDescriptionKeyword))
             {
                 VerifyErrorDescriptionContains(result.ErrorDescription, errorDescriptionKeyword);
             }

@@ -95,6 +95,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 result = new AuthenticationResult(ex);
             }
 
+            result.ReplaceNullStringPropertiesWithEmptyString();
+
             return result;
         }
     }

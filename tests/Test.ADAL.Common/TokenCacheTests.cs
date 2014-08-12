@@ -561,14 +561,25 @@ namespace Test.ADAL.Common.Unit
 
         private static bool AreAuthenticationResultsEqual(AuthenticationResult result1, AuthenticationResult result2)
         {
-            return (result1.AccessToken == result2.AccessToken && result1.AccessTokenType == result2.AccessTokenType 
-                    && result1.IdToken == result2.IdToken && result1.IsMultipleResourceRefreshToken == result2.IsMultipleResourceRefreshToken
-                    && result1.RefreshToken == result2.RefreshToken && result1.TenantId == result2.TenantId
+            return (AreStringsEqual(result1.AccessToken, result2.AccessToken)
+                    && AreStringsEqual(result1.AccessTokenType, result2.AccessTokenType)
+                    && AreStringsEqual(result1.IdToken, result2.IdToken)
+                    && result1.IsMultipleResourceRefreshToken == result2.IsMultipleResourceRefreshToken
+                    && AreStringsEqual(result1.RefreshToken, result2.RefreshToken)
+                    && AreStringsEqual(result1.TenantId, result2.TenantId)
                     && (result1.UserInfo == null || result2.UserInfo == null || 
-                        (result1.UserInfo.DisplayableId == result2.UserInfo.DisplayableId
-                        && result1.UserInfo.FamilyName == result2.UserInfo.FamilyName && result1.UserInfo.GivenName == result2.UserInfo.GivenName
-                        && result1.UserInfo.IdentityProvider == result2.UserInfo.IdentityProvider && result1.UserInfo.PasswordChangeUrl == result2.UserInfo.PasswordChangeUrl
-                        && result1.UserInfo.PasswordExpiresOn == result2.UserInfo.PasswordExpiresOn && result1.UserInfo.UniqueId == result2.UserInfo.UniqueId)));
+                        (AreStringsEqual(result1.UserInfo.DisplayableId, result2.UserInfo.DisplayableId)
+                        && AreStringsEqual(result1.UserInfo.FamilyName, result2.UserInfo.FamilyName)
+                        && AreStringsEqual(result1.UserInfo.GivenName, result2.UserInfo.GivenName)
+                        && AreStringsEqual(result1.UserInfo.IdentityProvider, result2.UserInfo.IdentityProvider) 
+                        && result1.UserInfo.PasswordChangeUrl == result2.UserInfo.PasswordChangeUrl
+                        && result1.UserInfo.PasswordExpiresOn == result2.UserInfo.PasswordExpiresOn 
+                        && result1.UserInfo.UniqueId == result2.UserInfo.UniqueId)));
+        }
+
+        private static bool AreStringsEqual(string str1, string str2)
+        {
+            return (str1 == str2 || string.IsNullOrEmpty(str1) && string.IsNullOrEmpty(str2));
         }
 
         private static void AddToDictionary(TokenCache tokenCache, TokenCacheKey key, AuthenticationResult value)

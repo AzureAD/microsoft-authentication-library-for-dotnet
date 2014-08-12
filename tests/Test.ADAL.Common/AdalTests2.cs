@@ -54,7 +54,7 @@ namespace Test.ADAL.Common
                 Trace.Listeners.Add(listener);
                 context.SetCorrelationId(Guid.Empty);
                 AuthenticationResultProxy result2 = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidClientId);
-                Verify.IsNotNull(result2.AccessToken);
+                Verify.IsNotNullOrEmptyString(result2.AccessToken);
                 listener.Flush();
                 string trace = Encoding.UTF8.GetString(stream.ToArray(), 0, (int)stream.Position);
                 Verify.IsFalse(trace.Contains(correlationId.ToString()));
