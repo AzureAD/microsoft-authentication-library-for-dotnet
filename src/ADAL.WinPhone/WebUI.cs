@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }            
         }
 
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, IDictionary<string, object> headersMap, CallState callState)
+        public void Authenticate(Uri authorizationUri, Uri redirectUri, bool ssoMode, IDictionary<string, object> headersMap, CallState callState)
         {
             ValueSet set = new ValueSet();
             foreach (string key in headersMap.Keys)
@@ -51,30 +51,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 set[key] = headersMap[key];
             }
 
-            if (redirectUri.Scheme == Constant.MsAppScheme)
+            try
             {
-                // SSO Mode
-
-                try
-                {
-                    WebAuthenticationBroker.AuthenticateAndContinue(authorizationUri, null, set, WebAuthenticationOptions.None);
-                }
-                catch (FileNotFoundException ex)
-                {
-                    throw new AdalException(AdalError.AuthenticationUiFailed, ex);
-                }
+                WebAuthenticationBroker.AuthenticateAndContinue(authorizationUri, ssoMode ? null : redirectUri, set, WebAuthenticationOptions.None);
             }
-            else
+            catch (Exception ex)
             {
-                try
-                {
-                    // Non-SSO Mode
-                    WebAuthenticationBroker.AuthenticateAndContinue(authorizationUri, redirectUri, set, WebAuthenticationOptions.None);
-                }
-                catch (FileNotFoundException ex)
-                {
-                    throw new AdalException(AdalError.AuthenticationUiFailed, ex);
-                }
+                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
             }
         }
 

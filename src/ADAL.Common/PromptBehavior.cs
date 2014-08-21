@@ -40,7 +40,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         Always,
 
-// PromptBehavior.Never is not implemented in WinRT library yet.
         /// <summary>
         /// The user will not be prompted for credentials.  If prompting is necessary then the AcquireToken request
         /// will fail.

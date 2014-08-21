@@ -165,7 +165,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public void AcquireTokenAndContinue(string resource, string clientId, UserIdentifier userId, AuthenticationContextDelegate authDelegate)
         {
-            this.AcquireTokenAndContinueCommon(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), userId, null, authDelegate);
+            this.AcquireTokenAndContinueCommon(resource, clientId,Constant.SsoPlaceHolderUri, userId, null, authDelegate);
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public void AcquireTokenAndContinue(string resource, string clientId, UserIdentifier userId, string extraQueryParameters, AuthenticationContextDelegate authDelegate)
         {
-            this.AcquireTokenAndContinueCommon(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), userId, extraQueryParameters, authDelegate);
+            this.AcquireTokenAndContinueCommon(resource, clientId, Constant.SsoPlaceHolderUri, userId, extraQueryParameters, authDelegate);
         }
 
         /// <summary>

@@ -28,6 +28,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private readonly AuthenticationContextDelegate authenticationContextDelegate;
 
+        // This constructor is called by ContinueAcquireTokenAsync after WAB call has returned.
         public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, AuthenticationContextDelegate authenticationContextDelegate, IWebAuthenticationBrokerContinuationEventArgs args)
             : this(
                 authenticator, 
@@ -35,7 +36,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 (string)args.ContinuationData[WabArgName.Resource], 
                 (string)args.ContinuationData[WabArgName.ClientId],
                 new Uri((string)args.ContinuationData[WabArgName.RedirectUri]), 
-                PromptBehavior.RefreshSession,
+                PromptBehavior.Always,  // This is simply to disable cache lookup. In fact, there is no authorize call at this point and promptBehavior is not applicable.
                 new UserIdentifier((string)args.ContinuationData[WabArgName.UserId],
                     (UserIdentifierType)((int)args.ContinuationData[WabArgName.UserIdType])),
                 null, 
@@ -57,6 +58,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal void AcquireAuthorization()
         {
+            // In SSO, case, we should not pass prompt=login (i.e. PromptBehavior.Always), otherwise persistent cookie cannot be used and SSO would not work.
+            if (this.ssoMode || this.redirectUri.Scheme == Constant.MsAppScheme)
+            {
+                this.promptBehavior = PromptBehavior.RefreshSession;
+            }
+            
             Uri authorizationUri = this.CreateAuthorizationUri(false);
 
             IDictionary<string, object> payload = new Dictionary<string, object>();
@@ -67,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             payload[WabArgName.Resource] = this.Resource;
             payload[WabArgName.ClientId] = this.ClientKey.ClientId;
 
-            webUi.Authenticate(authorizationUri, this.redirectUri, payload, this.CallState);
+            webUi.Authenticate(authorizationUri, this.redirectUri, this.ssoMode, payload, this.CallState);
         }
 
         protected override async Task PostRunAsync(AuthenticationResult result)

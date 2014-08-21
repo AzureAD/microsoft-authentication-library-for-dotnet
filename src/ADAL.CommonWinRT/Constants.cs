@@ -35,6 +35,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal static class Constant
     {
         public const string MsAppScheme = "ms-app";
-        public static readonly Uri SsoPlaceHolderUri = new Uri(MsAppScheme + "://sso");
+        public static readonly Uri SsoPlaceHolderUri = new Uri("https://sso");
     }
 }

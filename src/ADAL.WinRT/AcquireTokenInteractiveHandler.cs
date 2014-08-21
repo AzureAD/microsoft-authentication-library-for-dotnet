@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private async Task AcquireAuthorizationAsync()
         {
             Uri authorizationUri = this.CreateAuthorizationUri(await IncludeFormsAuthParamsAsync(this.CallState));
-            this.authorizationResult = await webUi.AuthenticateAsync(authorizationUri, this.redirectUri, this.CallState);
+            this.authorizationResult = await webUi.AuthenticateAsync(authorizationUri, this.redirectUri, this.ssoMode, this.CallState);
         }
 
         internal static async Task<bool> IncludeFormsAuthParamsAsync(CallState callState)

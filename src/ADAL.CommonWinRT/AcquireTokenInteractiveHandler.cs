@@ -23,21 +23,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal partial class AcquireTokenInteractiveHandler
     {
-        private void SetRedirectUri(Uri redirectUri)
-        {
-            if (redirectUri.Scheme == Constant.MsAppScheme)
-            {
-                if (ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri))
-                {
-                    redirectUri = WebAuthenticationBroker.GetCurrentApplicationCallbackUri();
-                }
-                else
-                {
-                    throw new ArgumentException(AdalErrorMessage.InvalidMsAppUri, "redirectUri");
-                }
-            }
+        private bool ssoMode;
 
-            this.redirectUri = redirectUri;
+        private void VerifyRedirectUriForSsoMode()
+        {
+            if (ReferenceEquals(this.redirectUri, Constant.SsoPlaceHolderUri))
+            {
+                ssoMode = true;
+
+                this.redirectUri = WebAuthenticationBroker.GetCurrentApplicationCallbackUri();
+            }
         }
     }
 }

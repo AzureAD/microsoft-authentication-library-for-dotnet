@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         /// <summary>
         /// Gets or Sets flag to enable logged in user authentication. Note that enabling this flag requires some extra application capabilites.
-        /// This flag only works with SSO overloads of AcquireTokenAsync (i.e. no redirectUri). It is ignored in other overloads.
+        /// This flag only works in SSO mode and is ignored otherwise.
         /// </summary>
         public bool UseCorporateNetwork { get; set; }
 

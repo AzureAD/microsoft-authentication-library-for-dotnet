@@ -23,6 +23,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
     internal interface IWebUI
     {
-        Task<AuthorizationResult> AuthenticateAsync(Uri authorizationUri, Uri redirectUri, CallState callState);
+        Task<AuthorizationResult> AuthenticateAsync(Uri authorizationUri, Uri redirectUri, bool ssoMode, CallState callState);
     }
 }
