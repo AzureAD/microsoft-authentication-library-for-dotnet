@@ -98,17 +98,7 @@ namespace Test.ADAL.WinRT.Unit
                 new Uri("ms-app://s-1-15-2-2097830667-3131301884-2920402518-3338703368-1480782779-4157212157-3811015497/"));
 
             Verify.IsNotNullOrEmptyString(result.Error);
-            Verify.AreEqual(result.Error, Sts.InvalidArgumentError);
-            Verify.IsTrue(result.ErrorDescription.Contains("redirectUri"));
-            Verify.IsTrue(result.ErrorDescription.Contains("ms-app"));
-
-            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId,
-                WebAuthenticationBroker.GetCurrentApplicationCallbackUri());
-
-            Verify.IsNotNullOrEmptyString(result.Error);
-            Verify.AreEqual(result.Error, Sts.InvalidArgumentError);
-            Verify.IsTrue(result.ErrorDescription.Contains("redirectUri"));
-            Verify.IsTrue(result.ErrorDescription.Contains("ms-app"));
+            Verify.AreEqual(result.Error, Sts.AuthenticationUiFailedError);
         }
     }
 }
