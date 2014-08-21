@@ -49,10 +49,10 @@ namespace Test.ADAL.WinPhone.Unit
 
                 Verify.Fail("Argument exception expected");
             }
-            catch (ArgumentException ex)
+            catch (AdalException ex)
             {
-                Verify.IsTrue(ex.Message.Contains("redirectUri"));
-                Verify.IsTrue(ex.Message.Contains("ms-app"));
+                Verify.AreEqual(ex.ErrorCode, Sts.AuthenticationUiFailedError);
+                Verify.IsTrue(ex.InnerException is ArgumentException);
             }
 
             try

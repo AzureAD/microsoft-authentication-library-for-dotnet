@@ -46,7 +46,7 @@ namespace Test.ADAL.WinPhone.Unit
 
         public static IDictionary<string, object> LastHeadersMap { get; private set; }
 
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, IDictionary<string, object> headersMap, CallState callState)
+        public void Authenticate(Uri authorizationUri, Uri redirectUri, bool ssoMode, IDictionary<string, object> headersMap, CallState callState)
         {
             string key = authorizationUri.AbsoluteUri + redirectUri.AbsoluteUri;
 

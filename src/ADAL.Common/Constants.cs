@@ -256,7 +256,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public const string AccessingMetadataDocumentFailed = "Accessing WS metadata exchange failed";
         public const string AssemblyLoadFailedTemplate = "Loading an assembly required for interactive user authentication failed. Make sure assembly '{0}' exists";
-        public const string AuthenticationUiFailed = "The browser based authentication dialog failed to complete for an unkown reason";
+        public const string AuthenticationUiFailed = "The browser based authentication dialog failed to complete";
         public const string AuthorityInvalidUriFormat = "'authority' should be in Uri format";
         public const string AuthorityNotInValidList = "'authority' is not in the list of valid addresses";
         public const string AuthorityValidationFailed = "Authority validation failed";
@@ -312,7 +312,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string SpecifyAnyUser = "If you do not need access token for any specific user, pass userId=UserIdentifier.AnyUser instead of userId=null.";
         public const string IntegratedAuthFailed = "Integrated authentication failed. You may try an alternative authentication method";
         public const string DuplicateQueryParameterTemplate = "Duplicate query parameter '{0}' in extraQueryParameters";
-        public const string InvalidMsAppUri = "Cannot pass redirectUri with ms-app scheme. To use SSO mode, call overload without redirectUri argument";
     }
 
     internal class XmlNamespace

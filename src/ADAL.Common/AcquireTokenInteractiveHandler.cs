@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private Uri redirectUri;
 
-        private readonly PromptBehavior promptBehavior;
+        private PromptBehavior promptBehavior;
 
         private readonly string extraQueryParameters;
 
@@ -50,7 +50,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
 
-            this.SetRedirectUri(redirectUri);
+            this.redirectUri = redirectUri;
+
+            this.VerifyRedirectUriForSsoMode();
 
             if (userId == null)
             {
@@ -74,7 +76,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.DisplayableId = userId.DisplayableId;
             this.UserIdentifierType = userId.Type;
 
-            this.LoadFromCache = (tokenCache != null && promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession);
+            this.LoadFromCache = (tokenCache != null && this.promptBehavior != PromptBehavior.Always && this.promptBehavior != PromptBehavior.RefreshSession);
 
             this.SupportADFS = true;
         }
@@ -83,7 +85,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.AuthorizationCode;
             requestParameters[OAuthParameter.Code] = this.authorizationResult.Code;
-            requestParameters[OAuthParameter.RedirectUri] = redirectUri.AbsoluteUri;            
+            requestParameters[OAuthParameter.RedirectUri] = this.redirectUri.AbsoluteUri;            
         }
 
         protected override void PostTokenRequest(AuthenticationResult result)
@@ -131,7 +133,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             RequestParameters authorizationRequestParameters = new RequestParameters(this.Resource, this.ClientKey);
             authorizationRequestParameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
-            authorizationRequestParameters[OAuthParameter.RedirectUri] = redirectUri.AbsoluteUri;
+
+            authorizationRequestParameters[OAuthParameter.RedirectUri] = this.redirectUri.AbsoluteUri;
 
             if (!string.IsNullOrWhiteSpace(loginHint))
             {
@@ -154,7 +157,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else if (promptBehavior == PromptBehavior.Never)
             {
-                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.None;
+                // TODO: Currently AAD does not give us right behavior with prompt=none. It may return error in some cases where it can indeed issue token without user interaction.
+                // Uncomment the following line once the issue is fixed.
+                // authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.None;
             }
 
             if (includeFormsAuthParam)

@@ -35,54 +35,45 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.useCorporateNetwork = useCorporateNetwork;
         }
 
-        public async Task<AuthorizationResult> AuthenticateAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AuthenticateAsync(Uri authorizationUri, Uri redirectUri, bool ssoMode, CallState callState)
         {
-            WebAuthenticationResult webAuthenticationResult;
-
-            if (redirectUri.Scheme == Constant.MsAppScheme)
-            {
-                // SSO Mode
-
-                WebAuthenticationOptions options = this.useCorporateNetwork ? WebAuthenticationOptions.UseCorporateNetwork : WebAuthenticationOptions.None;
-
-                if (this.promptBehavior == PromptBehavior.Never)
-                {                
-                    options |= WebAuthenticationOptions.SilentMode;
-                }
-
-                try
-                {
-                        webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri);
-                }
-                catch (FileNotFoundException ex)
-                {
-                    throw new AdalException(AdalError.AuthenticationUiFailed, ex);
-                }
-                catch (Exception ex)
-                {
-                    if (this.promptBehavior == PromptBehavior.Never)
-                    {
-                        throw new AdalException(AdalError.UserInteractionRequired, ex);
-                    }
-
-                    throw;
-                }
-            }
-            else if (this.promptBehavior == PromptBehavior.Never)
+            if (this.promptBehavior == PromptBehavior.Never && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
             {
                 throw new ArgumentException(AdalErrorMessage.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
             }
-            else
+            
+            WebAuthenticationResult webAuthenticationResult;
+
+            WebAuthenticationOptions options = (this.useCorporateNetwork && (ssoMode || redirectUri.Scheme == Constant.MsAppScheme)) ? WebAuthenticationOptions.UseCorporateNetwork : WebAuthenticationOptions.None;
+
+            if (this.promptBehavior == PromptBehavior.Never)
             {
-                try
+                options |= WebAuthenticationOptions.SilentMode;
+            }
+
+            try
+            {
+                if (ssoMode)
                 {
-                    // Non-SSO Mode
-                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(WebAuthenticationOptions.None, authorizationUri, redirectUri);
+                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri);
                 }
-                catch (FileNotFoundException ex)
+                else
+                { 
+                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri, redirectUri);
+                }
+            }
+            catch (FileNotFoundException ex)
+            {
+                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
+            }
+            catch (Exception ex)
+            {
+                if (this.promptBehavior == PromptBehavior.Never)
                 {
-                    throw new AdalException(AdalError.AuthenticationUiFailed, ex);
+                    throw new AdalException(AdalError.UserInteractionRequired, ex);
                 }
+
+                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
             }
 
             return ProcessAuthorizationResult(webAuthenticationResult, callState);
