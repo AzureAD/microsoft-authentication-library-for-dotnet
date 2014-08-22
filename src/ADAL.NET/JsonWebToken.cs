@@ -46,10 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Subject = certificate.ClientId
                 };
 
-            if (certificate.ClientAssertionJwtIdentifier != null)
-            {
-                this.payload.JwtIdentifier = certificate.ClientAssertionJwtIdentifier;
-            }
+            this.payload.JwtIdentifier = Guid.NewGuid().ToString();
         }
 
         public ClientAssertion Sign(ClientAssertionCertificate credential)
