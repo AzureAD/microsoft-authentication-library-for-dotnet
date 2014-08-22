@@ -372,7 +372,7 @@ namespace Test.ADAL.Common
 
             var invalidClientCredential = new ClientAssertionCertificate(sts.ValidConfidentialClientId.Replace('1', '2'), new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             result2 = await context.AcquireTokenAsync(sts.ValidResource, invalidClientCredential, result.AccessToken);
-            VerifyErrorResult(result2, Sts.UnauthorizedClient, "not registered");
+            VerifyErrorResult(result2, Sts.UnauthorizedClient, "not found");
 
             result2 = await context.AcquireTokenAsync(sts.ValidResource, clientCertificate, result.AccessToken);
             VerifySuccessResult(sts, result2, true, false);
