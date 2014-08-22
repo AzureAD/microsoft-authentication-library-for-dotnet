@@ -26,10 +26,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal partial class AcquireTokenInteractiveHandler
     {
-        private readonly AuthenticationContextDelegate authenticationContextDelegate;
-
         // This constructor is called by ContinueAcquireTokenAsync after WAB call has returned.
-        public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, AuthenticationContextDelegate authenticationContextDelegate, IWebAuthenticationBrokerContinuationEventArgs args)
+        public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, IWebAuthenticationBrokerContinuationEventArgs args)
             : this(
                 authenticator, 
                 tokenCache, 
@@ -45,7 +43,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             CallState callState = new CallState(new Guid((string)args.ContinuationData[WabArgName.CorrelationId]), false);
             this.authorizationResult = this.webUi.ProcessAuthorizationResult(args, callState);
-            this.authenticationContextDelegate = authenticationContextDelegate;
         }
 
         protected override Task PreTokenRequest()
@@ -76,17 +73,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             payload[WabArgName.ClientId] = this.ClientKey.ClientId;
 
             webUi.Authenticate(authorizationUri, this.redirectUri, this.ssoMode, payload, this.CallState);
-        }
-
-        protected override async Task PostRunAsync(AuthenticationResult result)
-        {
-            await base.PostRunAsync(result);
-            // Execute callback 
-            if (this.authenticationContextDelegate != null)
-            {
-                var dispatcher = CoreApplication.MainView.CoreWindow.Dispatcher;
-                await dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => this.authenticationContextDelegate(result));
-            }
         }
 
         private static class WabArgName

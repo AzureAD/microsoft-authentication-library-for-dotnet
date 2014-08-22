@@ -20,6 +20,7 @@ using System;
 using System.Threading.Tasks;
 
 using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web;
@@ -190,16 +191,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public IAsyncOperation<AuthenticationResult> ContinueAcquireTokenAsync(IWebAuthenticationBrokerContinuationEventArgs args)
         {
-            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, this.authenticationContextDelegate, args);
+            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, args);
+            return this.RunInteractiveHandlerAsync(handler).AsAsyncOperation();
+        }
 
-            try
+        private async Task<AuthenticationResult> RunInteractiveHandlerAsync(AcquireTokenInteractiveHandler handler)
+        {
+            AuthenticationResult result = await RunTask(handler.RunAsync());
+            
+            // Execute callback 
+            if (this.authenticationContextDelegate != null)
             {
-                return RunTaskAsAsyncOperation(handler.RunAsync());
-            }
-            finally
-            {
+                var dispatcher = CoreApplication.MainView.CoreWindow.Dispatcher;
+                await dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => this.authenticationContextDelegate(result));
                 this.authenticationContextDelegate = null;
             }
+
+            return result;
         }
 
         private void AcquireTokenAndContinueCommon(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters, AuthenticationContextDelegate authDelegate)
