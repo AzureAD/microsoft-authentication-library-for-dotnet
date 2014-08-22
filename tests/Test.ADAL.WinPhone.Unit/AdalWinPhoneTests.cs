@@ -211,6 +211,15 @@ namespace Test.ADAL.WinPhone.Unit
             await AdalTests.InstanceDiscoveryTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
+        [TestMethod]
+        //[Description("Test for AuthenticationContextDelegate")]
+        [TestCategory("AdalWinPhoneMock")]
+        [DataRow("AAD")]
+        public void AcquireTokenWithCallbackTest(string stsType)
+        {
+            AdalTests.AcquireTokenWithCallbackTest(SetupStsService(GetStsType(stsType)));
+        }
+
         private static void SetReplayerNetworkPlugin()
         {
             NetworkPlugin.WebUIFactory = new ReplayerWebUIFactory();
