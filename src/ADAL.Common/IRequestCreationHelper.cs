@@ -28,5 +28,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         void AddAdalIdParameters(IDictionary<string, string> parameters);
 
         DateTime GetJsonWebTokenValidFrom();
+        
+        string GetJsonWebTokenId();
     }
 }

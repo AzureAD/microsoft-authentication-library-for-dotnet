@@ -54,5 +54,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return DateTime.UtcNow;
         }
+
+        public string GetJsonWebTokenId()
+        {
+            return Guid.NewGuid().ToString();            
+        }
     }
 }

@@ -22,6 +22,11 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.NET.Friend
 {
+    public static class RecorderJwtId
+    {
+        public static int JwtIdIndex { get; set; }
+    }
+
     class RecorderRequestCreationHelper : RecorderBase, IRequestCreationHelper
     {
         private readonly IRequestCreationHelper internalRequestCreationHelper;
@@ -59,6 +64,22 @@ namespace Test.ADAL.NET.Friend
             IOMap[JsonWebTokenValidFrom] = result.Ticks.ToString();
 
             return result;
+        }
+
+        public string GetJsonWebTokenId()
+        {
+            const string JsonWebTokenIdPrefix = "JsonWebTokenId";
+            string jsonWebTokenId = JsonWebTokenIdPrefix + RecorderJwtId.JwtIdIndex;
+            if (IOMap.ContainsKey(jsonWebTokenId))
+            {
+                return IOMap[jsonWebTokenId];
+            }
+
+            string id = Guid.NewGuid().ToString();
+
+            IOMap[jsonWebTokenId] = id;
+
+            return id;
         }
     }
 }
