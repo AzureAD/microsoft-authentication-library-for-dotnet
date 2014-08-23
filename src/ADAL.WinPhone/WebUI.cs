@@ -39,6 +39,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             get
             {
+                // In lack of PromptBehavior in WinPhone, we always pass prompt=login.
                 return PromptBehavior.Always; 
             }            
         }

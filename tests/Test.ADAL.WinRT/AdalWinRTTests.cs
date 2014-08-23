@@ -137,33 +137,33 @@ namespace Test.ADAL.WinRT
             AdalTests.VerifySuccessResult(sts, result);
 
             // Should not be able to get a token silently on first try.
-            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, PromptBehaviorProxy.Never);
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, null, PromptBehaviorProxy.Never);
             AdalTests.VerifyErrorResult(result, Sts.UserInteractionRequired, null);
 
             AuthenticationContextProxy.SetCredentials(sts.ValidUserName, sts.ValidPassword);
             // Obtain a token interactively.
-            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId);
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, null);
             AdalTests.VerifySuccessResult(sts, result);
 
             // Obtain a token interactively.
             AuthenticationContextProxy.ClearDefaultCache();
-            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId);
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, null);
             AdalTests.VerifySuccessResult(sts, result);
 
             AuthenticationContextProxy.SetCredentials(null, null);
             // Now there should be a token available in the cache so token should be available silently.
-            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, PromptBehaviorProxy.Never);
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, null, PromptBehaviorProxy.Never);
             AdalTests.VerifySuccessResult(sts, result);
 
             // Clear the cache and silent auth should work via session cookies.
             AuthenticationContextProxy.ClearDefaultCache();
-            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, PromptBehaviorProxy.Never);
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, null, PromptBehaviorProxy.Never);
             AdalTests.VerifySuccessResult(sts, result);
 
             // Clear the cache and cookies and silent auth should fail.
             AuthenticationContextProxy.ClearDefaultCache();
             AdalTests.EndBrowserDialogSession();
-            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, PromptBehaviorProxy.Never);
+            result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, null, PromptBehaviorProxy.Never);
             AdalTests.VerifyErrorResult(result, Sts.UserInteractionRequired, null);                
         }
 
@@ -181,12 +181,12 @@ namespace Test.ADAL.WinRT
             AuthenticationContextProxy.ClearDefaultCache();
 
             AuthenticationContextProxy.SetCredentials(Sts.ValidUserName, Sts.ValidPassword);
-            result = context.AcquireToken(Sts.ValidResource, Sts.ValidClientId);
+            result = context.AcquireToken(Sts.ValidResource, Sts.ValidClientId, null);
             AdalTests.VerifySuccessResult(Sts, result);
 
             AuthenticationContextProxy.ClearDefaultCache();
 
-            result = context.AcquireToken(Sts.ValidResource, Sts.ValidClientId, (Uri)null);
+            result = context.AcquireToken(Sts.ValidResource, Sts.ValidClientId, null);
             AdalTests.VerifySuccessResult(Sts, result);
 
             AuthenticationContextProxy.ClearDefaultCache();
