@@ -138,6 +138,11 @@ namespace Test.ADAL.NET.Friend
                 }
             }
 
+            if (RecorderSettings.Mode == RecorderMode.Replay)
+            {
+                throw new InvalidDataException("Data missing from recorder in replay mode");
+            }
+
             try
             {
                 IHttpWebResponse response = await this.internalHttpWebRequest.GetResponseSyncOrAsync(callState);

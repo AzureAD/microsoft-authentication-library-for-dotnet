@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Subject = certificate.ClientId
                 };
 
-            this.payload.JwtIdentifier = Guid.NewGuid().ToString();
+            this.payload.JwtIdentifier = NetworkPlugin.RequestCreationHelper.GetJsonWebTokenId();
         }
 
         public ClientAssertion Sign(ClientAssertionCertificate credential)

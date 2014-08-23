@@ -83,6 +83,7 @@ namespace Test.ADAL.Common
 
             string authorizationCode = context.AcquireAccessCode(sts.ValidResource, sts.ValidConfidentialClientId, sts.ValidRedirectUriForConfidentialClient, sts.ValidUserId);
             var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
+            RecorderJwtId.JwtIdIndex = 1;
             AuthenticationResultProxy result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, certificate, sts.ValidResource);
             VerifySuccessResult(sts, result);
 
@@ -144,6 +145,7 @@ namespace Test.ADAL.Common
             AuthenticationResultProxy result = null;
 
             var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
+            RecorderJwtId.JwtIdIndex = 2;
             result = await context.AcquireTokenAsync(sts.ValidResource, certificate);
             Verify.IsNotNullOrEmptyString(result.AccessToken);
 
@@ -154,10 +156,12 @@ namespace Test.ADAL.Common
             VerifyErrorResult(result, Sts.InvalidArgumentError, "clientCertificate");
 
             var invalidCertificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.InvalidConfidentialClientCertificateName, sts.InvalidConfidentialClientCertificatePassword));
+            RecorderJwtId.JwtIdIndex = 3;
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCertificate);
             VerifyErrorResult(result, Sts.InvalidClientError, "50012"); // AADSTS50012: Client assertion contains an invalid signature.
 
             invalidCertificate = new ClientAssertionCertificate(sts.InvalidClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
+            RecorderJwtId.JwtIdIndex = 4;
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCertificate);
             VerifyErrorResult(result, Sts.UnauthorizedClient, "70001"); // AADSTS70001: Application '87002806-c87a-41cd-896b-84ca5690d29e' is not registered for the account.
         }
@@ -340,6 +344,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result);
 
             var clientCertificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
+            RecorderJwtId.JwtIdIndex = 5;
             AuthenticationResultProxy result2 = await context.AcquireTokenAsync(null, clientCertificate, result.AccessToken);
             VerifyErrorResult(result2, Sts.InvalidArgumentError, "resource");
 
@@ -347,6 +352,7 @@ namespace Test.ADAL.Common
             VerifyErrorResult(result2, Sts.InvalidArgumentError, "userAssertion");
 
             result2 = await context.AcquireTokenAsync(sts.ValidResource, (ClientAssertionCertificate)null, result.AccessToken);
+            RecorderJwtId.JwtIdIndex = 6;
             VerifyErrorResult(result2, Sts.InvalidArgumentError, "clientCertificate");
 
             result2 = await context.AcquireTokenAsync(sts.ValidResource, clientCertificate, result.AccessToken);
@@ -371,6 +377,7 @@ namespace Test.ADAL.Common
             VerifyErrorResult(result2, "invalid_grant", "invalid signature");
 
             var invalidClientCredential = new ClientAssertionCertificate(sts.ValidConfidentialClientId.Replace('1', '2'), new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
+            RecorderJwtId.JwtIdIndex = 7;
             result2 = await context.AcquireTokenAsync(sts.ValidResource, invalidClientCredential, result.AccessToken);
             VerifyErrorResult(result2, Sts.UnauthorizedClient, "not found");
 
@@ -436,6 +443,7 @@ namespace Test.ADAL.Common
             AuthenticationResultProxy[] result = new AuthenticationResultProxy[ParallelCount];
 
             var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, new X509Certificate2(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
+            RecorderJwtId.JwtIdIndex = 8;
 
             AuthenticationContextProxy.CallSync = true;
 

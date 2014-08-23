@@ -44,5 +44,10 @@ namespace Test.ADAL.WinRT.Unit
 
             throw new InvalidOperationException("Unexpected missing dictionary key");
         }
+
+        public string GetJsonWebTokenId()
+        {
+            throw new NotImplementedException("AcquireToken using JWT is not supported in ADAL WinRT");
+        }
     }
 }
