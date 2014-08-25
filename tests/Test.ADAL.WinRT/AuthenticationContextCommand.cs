@@ -50,8 +50,6 @@ namespace Test.ADAL.WinRT
         CreateContextA,
         CreateContextAV,
         CreateContextAVT,
-        AquireTokenAsyncRC,
-        AquireTokenAsyncRCP,
         AquireTokenAsyncRCUPa,
         AquireTokenAsyncRCRe,
         AquireTokenAsyncRCReP,

@@ -55,13 +55,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal void AcquireAuthorization()
         {
-            // In SSO, case, we should not pass prompt=login (i.e. PromptBehavior.Always), otherwise persistent cookie cannot be used and SSO would not work.
-            if (this.ssoMode || this.redirectUri.Scheme == Constant.MsAppScheme)
-            {
-                Logger.Verbose(this.CallState, "Using PromptBehavior.RefreshSession for SSO mode");
-                this.promptBehavior = PromptBehavior.RefreshSession;
-            }
-            
             Uri authorizationUri = this.CreateAuthorizationUri(false);
 
             IDictionary<string, object> payload = new Dictionary<string, object>();

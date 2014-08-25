@@ -119,23 +119,11 @@ namespace Test.ADAL.Common
                 new CommandArguments { Resource = resource, ClientId = clientId, UserName = credential.UserId, Password = credential.Password });
         }
 
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId)
-        {
-            return RunAsyncTask(AddCommandAndRunAsync(CommandType.AquireTokenAsyncRC, new CommandArguments { Resource = resource, ClientId = clientId }));
-        }
-
         public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri)
         {
             return RunAsyncTask(AddCommandAndRunAsync(
                 CommandType.AquireTokenAsyncRCRe,
                 new CommandArguments { Resource = resource, ClientId = clientId, RedirectUri = redirectUri }));
-        }
-
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, PromptBehaviorProxy promptBehavior)
-        {
-            return RunAsyncTask(AddCommandAndRunAsync(
-                CommandType.AquireTokenAsyncRCP,
-                new CommandArguments { Resource = resource, ClientId = clientId, PromptBehavior = promptBehavior }));
         }
 
         public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehavior)
