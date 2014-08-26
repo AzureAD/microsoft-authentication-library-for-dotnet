@@ -32,7 +32,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (!Windows.System.UserProfile.UserInformation.NameAccessAllowed)
             {
-                throw new AdalException(AdalError.CannotAccessUserInformation);
+                var ex = new AdalException(AdalError.CannotAccessUserInformation);
+                Logger.LogException(null, ex);
+                throw ex;
             }
 
             try
@@ -41,7 +43,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (UnauthorizedAccessException ex)
             {
-                throw new AdalException(AdalError.UnauthorizedUserInformationAccess, ex);
+                var adalEx = new AdalException(AdalError.UnauthorizedUserInformationAccess, ex);
+                Logger.LogException(null, adalEx);
+                throw adalEx;
             }
         }
     }

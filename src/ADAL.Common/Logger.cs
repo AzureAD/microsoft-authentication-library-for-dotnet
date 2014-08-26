@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.Globalization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -25,6 +26,33 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         internal static string PrepareLogMessage(CallState callState, string format, params object[] args)
         {
             return string.Format(CultureInfo.CurrentCulture, format, args) + (callState != null ? (". Correlation ID: " + callState.CorrelationId) : string.Empty);
+        }
+
+        internal static void LogException(CallState callState, Exception ex)
+        {
+            ArgumentException argumentEx = ex as ArgumentException;
+            if (argumentEx != null)
+            {
+                Information(callState, "ArgumentException was thrown for argument '{0}' with message '{1}'", argumentEx.ParamName, argumentEx.Message);
+                return;
+            }
+
+            AdalServiceException adalServiceEx = ex as AdalServiceException;
+            if (adalServiceEx != null)
+            {
+                Information(callState, "AdalServiceException was thrown with ErrorCode '{0}' and StatusCode '{1}' and innerException '{2}'", 
+                    adalServiceEx.ErrorCode, adalServiceEx.StatusCode, (adalServiceEx.InnerException != null) ? adalServiceEx.Message : "No inner exception");
+                return;
+            }
+
+            AdalException adalEx = ex as AdalException;
+            if (adalEx != null)
+            {
+                Information(callState, "AdalException was thrown with ErrorCode '{0}'", adalEx.ErrorCode);
+                return;
+            }
+
+            Information(callState, "Exception of type '{0}' was thrown with message '{1}'", ex.GetType().ToString(), ex.Message);
         }
     }
 }

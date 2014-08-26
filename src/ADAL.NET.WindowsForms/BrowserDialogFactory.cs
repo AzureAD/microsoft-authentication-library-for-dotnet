@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 case PromptBehavior.Never:
                     return new SilentWebUI();
                 default:
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException("Unexpected PromptBehavior value");
             }
         }
     }

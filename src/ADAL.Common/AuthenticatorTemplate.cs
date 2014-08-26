@@ -95,7 +95,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     clientMetrics.SetLastError(null);
                     if (discoveryResponse.TenantDiscoveryEndpoint == null)
                     {
-                        throw new AdalException(AdalError.AuthorityNotInValidList);                        
+                        var ex = new AdalException(AdalError.AuthorityNotInValidList);
+                        Logger.LogException(null, ex);
+                        throw ex;
                     }
                 }
             }
@@ -106,14 +108,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (tokenResponse.Error == "invalid_instance")
                 {
-                    throw new AdalServiceException(AdalError.AuthorityNotInValidList, ex);
+                    var serviceEx = new AdalServiceException(AdalError.AuthorityNotInValidList, ex);
+                    Logger.LogException(null, serviceEx);
+                    throw serviceEx;
                 }
                 else
                 {
-                    throw new AdalServiceException(
+                    var serviceEx = new AdalServiceException(
                         AdalError.AuthorityValidationFailed,
                         string.Format(CultureInfo.InvariantCulture, "{0}. {1}: {2}", AdalErrorMessage.AuthorityValidationFailed, tokenResponse.Error, tokenResponse.ErrorDescription),
                         ex);
+                    Logger.LogException(null, serviceEx);
+                    throw serviceEx;
                 }
             }
             finally

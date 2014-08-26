@@ -32,6 +32,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, TokenSubjectType subjectType, bool callSync)
         {
             this.Authenticator = authenticator;
+            this.CallState = CreateCallState(this.Authenticator.CorrelationId, callSync);
+            Logger.Information(this.CallState, "=== Token Acquisition started");
 
             this.tokenCache = tokenCache;
 
@@ -43,7 +45,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.Resource = (resource != NullResource) ? resource : null;
             this.ClientKey = clientKey;
             this.TokenSubjectType = subjectType;
-            this.CallState = CreateCallState(this.Authenticator.CorrelationId, callSync);
 
             this.LoadFromCache = (tokenCache != null);
             this.StoreToCache = (tokenCache != null);
@@ -202,10 +203,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     AdalServiceException serviceException = ex as AdalServiceException;
                     if (serviceException != null && serviceException.ErrorCode == "invalid_request")
                     {
-                        throw new AdalServiceException(
+                        var serviceEx = new AdalServiceException(
                             AdalError.FailedToRefreshToken,
                             AdalErrorMessage.FailedToRefreshToken + ". " + serviceException.Message,
                             (WebException)serviceException.InnerException);
+                        Logger.LogException(this.CallState, serviceEx);
+                        throw serviceEx;
                     }
 
                     newResult = null;
@@ -221,7 +224,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             TokenResponse tokenResponse = await HttpHelper.SendPostRequestAndDeserializeJsonResponseAsync<TokenResponse>(uri, requestParameters, this.CallState);
 
-            return OAuth2Response.ParseTokenResponse(tokenResponse);
+            return OAuth2Response.ParseTokenResponse(tokenResponse, this.CallState);
         }
 
         private void NotifyBeforeAccessCache()
@@ -273,8 +276,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (!this.SupportADFS && this.Authenticator.AuthorityType == AuthorityType.ADFS)
             {
                 Logger.Error(this.CallState, "Invalid authority type '{0}'", this.Authenticator.AuthorityType);
-                throw new AdalException(AdalError.InvalidAuthorityType,
+                var ex = new AdalException(AdalError.InvalidAuthorityType,
                     string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.InvalidAuthorityTypeTemplate, this.Authenticator.Authority));
+                Logger.LogException(this.CallState, ex);
+                throw ex;
             }
         }
     }

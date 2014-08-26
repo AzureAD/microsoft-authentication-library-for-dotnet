@@ -40,7 +40,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
             if (this.promptBehavior == PromptBehavior.Never && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
             {
-                throw new ArgumentException(AdalErrorMessage.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
+                var ex = new ArgumentException(AdalErrorMessage.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
+                Logger.LogException(callState, ex);
+                throw ex;
             }
             
             WebAuthenticationResult webAuthenticationResult;
@@ -65,16 +67,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (FileNotFoundException ex)
             {
-                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
+                var adalEx = new AdalException(AdalError.AuthenticationUiFailed, ex);
+                Logger.LogException(callState, adalEx);
+                throw adalEx;
             }
             catch (Exception ex)
             {
                 if (this.promptBehavior == PromptBehavior.Never)
                 {
-                    throw new AdalException(AdalError.UserInteractionRequired, ex);
+                    var adalEx = new AdalException(AdalError.UserInteractionRequired, ex);
+                    Logger.LogException(callState, adalEx);
+                    throw adalEx;
                 }
 
-                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
+                var uiFailedEx = new AdalException(AdalError.AuthenticationUiFailed, ex);
+                Logger.LogException(callState, uiFailedEx);
+                throw uiFailedEx;
             }
 
             return ProcessAuthorizationResult(webAuthenticationResult, callState);
