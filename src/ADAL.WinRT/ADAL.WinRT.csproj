@@ -118,6 +118,9 @@
     <Compile Include="..\ADAL.Common\AdalServiceException.cs">
       <Link>Common\AdalServiceException.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\AdalSilentTokenAcquisitionException.cs">
+      <Link>Common\AdalSilentTokenAcquisitionException.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\AdalUserMismatchException.cs">
       <Link>Common\AdalUserMismatchException.cs</Link>
     </Compile>

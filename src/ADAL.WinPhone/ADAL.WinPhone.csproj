@@ -80,6 +80,9 @@
     <Compile Include="..\ADAL.CommonWinRT\TokenCache.cs">
       <Link>CommonWinRT\TokenCache.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\AdalSilentTokenAcquisitionException.cs">
+      <Link>Common\AdalSilentTokenAcquisitionException.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>Common\CommonAssemblyInfo.cs</Link>
     </Compile>

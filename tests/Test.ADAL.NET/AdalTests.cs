@@ -236,10 +236,15 @@ namespace Test.ADAL.Common
             try
             {
                 await context.AcquireTokenSilentAsync(sts.ValidResource, sts.ValidClientId, sts.ValidUserId);
+                Verify.Fail("AdalSilentTokenAcquisitionException was expected");
             }
-            catch (AdalException ex)
+            catch (AdalSilentTokenAcquisitionException ex)
             {
                 Verify.AreEqual(AdalError.FailedToAcquireTokenSilently, ex.ErrorCode);
+            }
+            catch
+            {
+                Verify.Fail("AdalSilentTokenAcquisitionException was expected");                
             }
 
             AuthenticationContextProxy.SetCredentials(sts.Type == StsType.ADFS ? sts.ValidUserName : null, sts.ValidPassword);

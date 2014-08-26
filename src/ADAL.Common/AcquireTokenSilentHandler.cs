@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected override Task<AuthenticationResult> SendTokenRequestAsync()
         {
             Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
-            throw new AdalException(AdalError.FailedToAcquireTokenSilently);
+            throw new AdalSilentTokenAcquisitionException();
         }
 
         protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
