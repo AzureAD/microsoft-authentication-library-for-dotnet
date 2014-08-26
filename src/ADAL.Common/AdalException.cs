@@ -245,10 +245,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         message = AdalErrorMessage.UserInteractionRequired;
                         break;
 
-                    case AdalError.FailedToAcquireTokenSilently:
-                        message = AdalErrorMessage.FailedToAcquireTokenSilently;
-                        break;
-
                     case AdalError.MissingFederationMetadataUrl:
                         message = AdalErrorMessage.MissingFederationMetadataUrl;
                         break;
