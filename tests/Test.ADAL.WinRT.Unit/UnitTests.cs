@@ -99,6 +99,12 @@ namespace Test.ADAL.WinRT.Unit
 
             Verify.IsNotNullOrEmptyString(result.Error);
             Verify.AreEqual(result.Error, Sts.AuthenticationUiFailedError);
+
+            Uri uri = WebAuthenticationBroker.GetCurrentApplicationCallbackUri();
+            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, uri);
+
+            Verify.IsNotNullOrEmptyString(result.Error);
+            Verify.AreEqual(result.Error, Sts.AuthenticationUiFailedError);
         }
     }
 }

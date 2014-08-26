@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }            
         }
 
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, bool ssoMode, IDictionary<string, object> headersMap, CallState callState)
+        public void Authenticate(Uri authorizationUri, Uri redirectUri, IDictionary<string, object> headersMap, CallState callState)
         {
             ValueSet set = new ValueSet();
             foreach (string key in headersMap.Keys)
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                WebAuthenticationBroker.AuthenticateAndContinue(authorizationUri, ssoMode ? null : redirectUri, set, WebAuthenticationOptions.None);
+                WebAuthenticationBroker.AuthenticateAndContinue(authorizationUri, ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri) ? null : redirectUri, set, WebAuthenticationOptions.None);
             }
             catch (Exception ex)
             {

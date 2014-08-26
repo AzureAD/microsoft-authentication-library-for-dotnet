@@ -20,7 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
-using Windows.ApplicationModel.Core;
+using Windows.Security.Authentication.Web;
+using Windows.Storage;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -59,13 +60,41 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             IDictionary<string, object> payload = new Dictionary<string, object>();
             payload[WabArgName.CorrelationId] = this.CallState.CorrelationId.ToString();
-            payload[WabArgName.RedirectUri] = redirectUri.AbsoluteUri;
+            payload[WabArgName.RedirectUri] = this.redirectUriRequestParameter;
             payload[WabArgName.UserId] = userId.Id;
             payload[WabArgName.UserIdType] = (int)userId.Type;
             payload[WabArgName.Resource] = this.Resource;
             payload[WabArgName.ClientId] = this.ClientKey.ClientId;
 
-            webUi.Authenticate(authorizationUri, this.redirectUri, this.ssoMode, payload, this.CallState);
+            webUi.Authenticate(authorizationUri, this.redirectUri, payload, this.CallState);
+        }
+
+        private void SetRedirectUriRequestParameter()
+        {
+            if (ReferenceEquals(this.redirectUri, Constant.SsoPlaceHolderUri))
+            {
+                try
+                {
+                    this.redirectUriRequestParameter = WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri;
+                }
+                catch (FormatException ex)
+                {
+                    // This is the workaround for a bug in managed Uri class of WinPhone SDK which makes it throw UriFormatException when it gets called from unmanaged code. 
+                    const string CurrentApplicationCallbackUriSetting = "CurrentApplicationCallbackUri";
+                    if (ApplicationData.Current.LocalSettings.Values.ContainsKey(CurrentApplicationCallbackUriSetting))
+                    {
+                        this.redirectUriRequestParameter = (string)ApplicationData.Current.LocalSettings.Values[CurrentApplicationCallbackUriSetting];
+                    }
+                    else
+                    {
+                        throw new AdalException(AdalError.NeedToSetCallbackUriAsLocalSetting, AdalErrorMessage.NeedToSetCallbackUriAsLocalSetting, ex);
+                    }
+                }
+            }
+            else
+            {
+                this.redirectUriRequestParameter = redirectUri.AbsoluteUri;                
+            }
         }
 
         private static class WabArgName

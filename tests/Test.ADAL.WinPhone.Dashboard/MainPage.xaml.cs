@@ -99,7 +99,14 @@ namespace Test.ADAL.WinPhone.Dashboard
 
         private void DisplayToken(AuthenticationResult result)
         {
-            this.AccessToken.Text = result.AccessToken;
+            if (!string.IsNullOrEmpty(result.AccessToken))
+            {
+                this.AccessToken.Text = result.AccessToken;
+            }
+            else
+            {
+                this.AccessToken.Text = result.ErrorDescription;
+            }
         }
 
         private async void Button_Click_1(object sender, RoutedEventArgs e)
@@ -107,6 +114,23 @@ namespace Test.ADAL.WinPhone.Dashboard
             this.AccessToken.Text = string.Empty;
             this.context = await AuthenticationContext.CreateAsync(sts.Authority);
             this.context.TokenCache.Clear();
+        }
+
+        private async void SsoButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.AccessToken.Text = string.Empty;
+
+            this.context = await AuthenticationContext.CreateAsync(sts.Authority);
+
+            var result = await this.context.AcquireTokenSilentAsync(sts.ValidResource, sts.ValidClientId, sts.ValidUserId);
+            if (result.Status == AuthenticationStatus.Success)
+            {
+                this.DisplayToken(result);
+            }
+            else
+            {
+                this.context.AcquireTokenAndContinue(sts.ValidResource, sts.ValidClientId, null, sts.ValidUserId, this.DisplayToken);
+            }
         }
     }
 }

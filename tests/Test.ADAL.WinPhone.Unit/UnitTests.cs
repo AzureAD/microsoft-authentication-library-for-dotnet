@@ -20,6 +20,7 @@ using System;
 using System.Threading.Tasks;
 
 using Windows.Security.Authentication.Web;
+using Windows.Storage;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
@@ -41,11 +42,8 @@ namespace Test.ADAL.WinPhone.Unit
 
             try
             {
-                context.AcquireTokenAndContinue(
-                    sts.ValidResource,
-                    sts.ValidClientId,
-                    new Uri("ms-app://test/"),
-                    null);
+                UserIdentifierType t = UserIdentifierType.RequiredDisplayableId;
+                context.AcquireTokenAndContinue(sts.ValidResource, sts.ValidClientId, new Uri("ms-app://test/"), null);
 
                 Verify.Fail("Argument exception expected");
             }
@@ -57,15 +55,37 @@ namespace Test.ADAL.WinPhone.Unit
 
             try
             {
-                context.AcquireTokenAndContinue(sts.ValidResource, sts.ValidClientId,
-                    WebAuthenticationBroker.GetCurrentApplicationCallbackUri(),
-                    null);
+                WebAuthenticationBroker.GetCurrentApplicationCallbackUri();
 
                 Verify.Fail("Exception expected");
             }
             catch (Exception ex)
             {
                 Verify.IsTrue(ex.Message.Contains("hostname"));
+            }
+
+            try
+            {
+                context.AcquireTokenAndContinue(sts.ValidResource, sts.ValidClientId, null, null);
+
+                Verify.Fail("Exception expected");
+            }
+            catch (AdalException ex)
+            {
+                Verify.AreEqual(ex.ErrorCode, "need_to_set_callback_uri_as_local_setting");
+            }
+
+            try
+            {
+                // Incorrect ms-app
+                ApplicationData.Current.LocalSettings.Values["CurrentApplicationCallbackUri"] = "ms-app://s-1-15-2-2097830667-3131301884-2920402518-3338703368-1480782779-4157212157-3811015497/";
+                context.AcquireTokenAndContinue(sts.ValidResource, sts.ValidClientId, null, null);
+
+                Verify.Fail("Exception expected");
+            }
+            catch (AdalException ex)
+            {
+                Verify.AreEqual(ex.ErrorCode, Sts.AuthenticationUiFailedError);
             }
         }
     }

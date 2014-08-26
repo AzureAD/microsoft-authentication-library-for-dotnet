@@ -35,8 +35,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.useCorporateNetwork = useCorporateNetwork;
         }
 
-        public async Task<AuthorizationResult> AuthenticateAsync(Uri authorizationUri, Uri redirectUri, bool ssoMode, CallState callState)
+        public async Task<AuthorizationResult> AuthenticateAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
+            bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
             if (this.promptBehavior == PromptBehavior.Never && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
             {
                 throw new ArgumentException(AdalErrorMessage.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");

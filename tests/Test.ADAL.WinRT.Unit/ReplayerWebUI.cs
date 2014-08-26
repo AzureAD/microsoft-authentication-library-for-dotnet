@@ -31,7 +31,7 @@ namespace Test.ADAL.WinRT.Unit
         {
         }
 
-        public async Task<AuthorizationResult> AuthenticateAsync(Uri authorizationUri, Uri redirectUri, bool ssoMode, CallState callState)
+        public async Task<AuthorizationResult> AuthenticateAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
             string key = authorizationUri.AbsoluteUri + redirectUri.AbsoluteUri;
 
