@@ -55,7 +55,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (string.IsNullOrWhiteSpace(userCredential.UserName))
                 {
                     Logger.Information(this.CallState, "Could not find UPN for logged in user");
-                    throw new AdalException(AdalError.UnknownUser);
+                    var ex = new AdalException(AdalError.UnknownUser);
+                    Logger.LogException(this.CallState, ex);
+                    throw ex;
                 }
 
                 Logger.Information(this.CallState, "Logged in user '{0}' detected", userCredential.UserName);
@@ -74,7 +76,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 if (string.IsNullOrWhiteSpace(userRealmResponse.FederationMetadataUrl))
                 {
-                    throw new AdalException(AdalError.MissingFederationMetadataUrl);
+                    var ex = new AdalException(AdalError.MissingFederationMetadataUrl);
+                    Logger.LogException(this.CallState, ex);
+                    throw ex;
                 }
 
                 Uri wsTrustUrl = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, this.userCredential.UserAuthType, this.CallState);
@@ -91,12 +95,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 // handle password grant flow for the managed user
                 if (this.userCredential.PasswordToCharArray() == null)
                 {
-                    throw new AdalException(AdalError.PasswordRequiredForManagedUserError);
+                    var ex = new AdalException(AdalError.PasswordRequiredForManagedUserError);
+                    Logger.LogException(this.CallState, ex);
+                    throw ex;
                 }
             }
             else
             {
-                throw new AdalException(AdalError.UnknownUserType);
+                var ex = new AdalException(AdalError.UnknownUserType);
+                Logger.LogException(this.CallState, ex);
+                throw ex;
             }
         }
 

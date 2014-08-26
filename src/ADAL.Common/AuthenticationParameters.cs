@@ -63,7 +63,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 || authenticateHeader.Length < Bearer.Length + 2
                 || !char.IsWhiteSpace(authenticateHeader[Bearer.Length]))
             {
-                throw new ArgumentException(AdalErrorMessage.InvalidAuthenticateHeaderFormat, "authenticateHeader");
+                var ex = new ArgumentException(AdalErrorMessage.InvalidAuthenticateHeaderFormat, "authenticateHeader");
+                Logger.LogException(null, ex);
+                throw ex;
             }
 
             authenticateHeader = authenticateHeader.Substring(Bearer.Length).Trim();
@@ -97,14 +99,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(resourceUrl.AbsoluteUri);
                 request.ContentType = "application/x-www-form-urlencoded";
                 response = await request.GetResponseSyncOrAsync(callState);
-                throw new AdalException(AdalError.UnauthorizedResponseExpected);
+                var ex = new AdalException(AdalError.UnauthorizedResponseExpected);
+                Logger.LogException(null, ex);
+                throw ex;
             }
             catch (WebException ex)
             {
                 response = NetworkPlugin.HttpWebRequestFactory.CreateResponse(ex.Response);
                 if (response == null)
                 {
-                    throw new AdalServiceException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);
+                    var serviceEx = new AdalServiceException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);
+                    Logger.LogException(null, serviceEx);
+                    throw serviceEx;
                 }
 
                 authParams = CreateFromUnauthorizedResponseCommon(response);
@@ -136,12 +142,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else
                 {
-                    throw new ArgumentException(AdalErrorMessage.MissingAuthenticateHeader, "response");
+                    var ex = new ArgumentException(AdalErrorMessage.MissingAuthenticateHeader, "response");
+                    Logger.LogException(null, ex);
+                    throw ex;
                 }
             }
             else
             {
-                throw new ArgumentException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, "response");
+                var ex = new ArgumentException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, "response");
+                Logger.LogException(null, ex);
+                throw ex;
             }
 
             return authParams;

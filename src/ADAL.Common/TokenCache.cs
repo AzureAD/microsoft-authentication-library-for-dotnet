@@ -295,7 +295,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             AuthenticationResult result = null;
 
-            KeyValuePair<TokenCacheKey, AuthenticationResult>? kvp = this.LoadSingleItemFromCache(authority, resource, clientId, subjectType, uniqueId, displayableId);
+            KeyValuePair<TokenCacheKey, AuthenticationResult>? kvp = this.LoadSingleItemFromCache(authority, resource, clientId, subjectType, uniqueId, displayableId, callState);
 
             if (kvp.HasValue)
             {
@@ -358,7 +358,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private KeyValuePair<TokenCacheKey, AuthenticationResult>? LoadSingleItemFromCache(string authority, string resource, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId)
+        private KeyValuePair<TokenCacheKey, AuthenticationResult>? LoadSingleItemFromCache(string authority, string resource, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId, CallState callState)
         {
             // First identify all potential tokens.
             List<KeyValuePair<TokenCacheKey, AuthenticationResult>> items = this.QueryCache(authority, clientId, subjectType, uniqueId, displayableId);
@@ -387,7 +387,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 // There is more than one resource specific token.  It is 
                 // ambiguous which one to return so throw.
-                throw new AdalException(AdalError.MultipleTokensMatched);
+                var ex = new AdalException(AdalError.MultipleTokensMatched);
+                Logger.LogException(callState, ex);
+                throw ex;
             }
 
             return returnValue;

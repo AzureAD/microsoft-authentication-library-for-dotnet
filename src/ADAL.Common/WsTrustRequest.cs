@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 try
                 {
                     XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(ex.Response.GetResponseStream());
-                    errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument);
+                    errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument, callState);
                 }
                 catch (AdalException)
                 {

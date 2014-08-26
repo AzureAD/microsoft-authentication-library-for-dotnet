@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             if (null == this.CallbackUri)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("CallbackUri cannot be null");
             }
 
             Thread uiSubThread = this.StartUIThread();
