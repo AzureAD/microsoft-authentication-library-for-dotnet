@@ -29,6 +29,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private Uri redirectUri;
 
+        private string redirectUriRequestParameter;
+
         private PromptBehavior promptBehavior;
 
         private readonly string extraQueryParameters;
@@ -52,7 +54,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.redirectUri = redirectUri;
 
-            this.VerifyRedirectUriForSsoMode();
+            this.SetRedirectUriRequestParameter();
 
             if (userId == null)
             {
@@ -85,7 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.AuthorizationCode;
             requestParameters[OAuthParameter.Code] = this.authorizationResult.Code;
-            requestParameters[OAuthParameter.RedirectUri] = this.redirectUri.AbsoluteUri;            
+            requestParameters[OAuthParameter.RedirectUri] = this.redirectUriRequestParameter;            
         }
 
         protected override void PostTokenRequest(AuthenticationResult result)
@@ -134,7 +136,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             RequestParameters authorizationRequestParameters = new RequestParameters(this.Resource, this.ClientKey);
             authorizationRequestParameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
 
-            authorizationRequestParameters[OAuthParameter.RedirectUri] = this.redirectUri.AbsoluteUri;
+            authorizationRequestParameters[OAuthParameter.RedirectUri] = this.redirectUriRequestParameter;
 
             if (!string.IsNullOrWhiteSpace(loginHint))
             {

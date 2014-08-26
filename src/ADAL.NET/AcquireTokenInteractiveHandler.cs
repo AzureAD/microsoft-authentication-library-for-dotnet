@@ -110,9 +110,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return prefix.Equals(Environment.MachineName.ToUpperInvariant());
         }
 
-        private void VerifyRedirectUriForSsoMode()
+        private void SetRedirectUriRequestParameter()
         {
-            // There is no special redirectUri for SSO mode on this platform.
+            this.redirectUriRequestParameter = redirectUri.AbsoluteUri;
         }
 
         private static class NativeMethods

@@ -49,9 +49,6 @@
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\ADAL.CommonWinRT\AcquireTokenInteractiveHandler.cs">
-      <Link>CommonWinRT\AcquireTokenInteractiveHandler.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.CommonWinRT\AdalEventSource.cs">
       <Link>CommonWinRT\AdalEventSource.cs</Link>
     </Compile>
