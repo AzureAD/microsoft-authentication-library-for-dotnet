@@ -159,9 +159,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else if (promptBehavior == PromptBehavior.Never)
             {
-                // TODO: Currently AAD does not give us right behavior with prompt=none. It may return error in some cases where it can indeed issue token without user interaction.
-                // Uncomment the following line once the issue is fixed.
-                // authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.None;
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
             }
 
             if (includeFormsAuthParam)

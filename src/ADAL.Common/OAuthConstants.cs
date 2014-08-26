@@ -120,6 +120,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public const string Login = "login";
         public const string RefreshSession = "refresh_session";
-        public const string None = "none";        
+        public const string AttemptNone = "attempt_none";        
     }
 }
