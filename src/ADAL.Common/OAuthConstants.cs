@@ -113,8 +113,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal class OAuthValue
     {
         public const string FormsAuth = "pwd";
-        public const string PromptLogin = "login";
-        public const string PromptRefreshSession = "refresh_session";
         public const string ScopeOpenId = "openid";
+    }
+
+    internal class PromptValue
+    {
+        public const string Login = "login";
+        public const string RefreshSession = "refresh_session";
+
+        // The behavior of this value is identical to prompt=none for managed users; However, for federated users, AAD
+        // redirects to ADFS as it cannot determine in advance whether ADFS can login user silently (e.g. via WIA) or not.
+        public const string AttemptNone = "attempt_none";        
     }
 }

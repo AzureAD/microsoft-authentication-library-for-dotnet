@@ -28,7 +28,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (userId == null)
             {
-                throw new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
+                var ex = new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
+                Logger.LogException(this.CallState, ex);
+                throw ex;
             }
 
             this.UniqueId = userId.UniqueId;
@@ -41,7 +43,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected override Task<AuthenticationResult> SendTokenRequestAsync()
         {
             Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
-            throw new AdalException(AdalError.FailedToAcquireTokenSilently);
+            var ex = new AdalSilentTokenAcquisitionException();
+            Logger.LogException(this.CallState, ex);
+            throw ex;
         }
 
         protected override void AddAditionalRequestParameters(RequestParameters requestParameters)

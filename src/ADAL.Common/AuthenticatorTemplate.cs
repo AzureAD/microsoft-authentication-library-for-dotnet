@@ -95,7 +95,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     clientMetrics.SetLastError(null);
                     if (discoveryResponse.TenantDiscoveryEndpoint == null)
                     {
-                        throw new AdalException(AdalError.AuthorityNotInValidList);                        
+                        var ex = new AdalException(AdalError.AuthorityNotInValidList);
+                        Logger.LogException(null, ex);
+                        throw ex;
                     }
                 }
             }
@@ -103,11 +105,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
                 clientMetrics.SetLastError(tokenResponse.ErrorCodes);
-                throw new AdalServiceException(
-                    AdalError.AuthorityNotInValidList,
-                    string.Format(CultureInfo.InvariantCulture, "{0}. {1} ({2}): {3}",
-                        AdalErrorMessage.AuthorityNotInValidList, tokenResponse.Error, this.Host, tokenResponse.ErrorDescription),
-                    ex);
+
+                if (tokenResponse.Error == "invalid_instance")
+                {
+                    var serviceEx = new AdalServiceException(AdalError.AuthorityNotInValidList, ex);
+                    Logger.LogException(null, serviceEx);
+                    throw serviceEx;
+                }
+                else
+                {
+                    var serviceEx = new AdalServiceException(
+                        AdalError.AuthorityValidationFailed,
+                        string.Format(CultureInfo.InvariantCulture, "{0}. {1}: {2}", AdalErrorMessage.AuthorityValidationFailed, tokenResponse.Error, tokenResponse.ErrorDescription),
+                        ex);
+                    Logger.LogException(null, serviceEx);
+                    throw serviceEx;
+                }
             }
             finally
             {

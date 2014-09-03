@@ -37,55 +37,52 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public async Task<AuthorizationResult> AuthenticateAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
+            bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
+            if (this.promptBehavior == PromptBehavior.Never && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
+            {
+                var ex = new ArgumentException(AdalErrorMessage.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
+                Logger.LogException(callState, ex);
+                throw ex;
+            }
+            
             WebAuthenticationResult webAuthenticationResult;
 
-            if (redirectUri.AbsoluteUri == WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri)
-            {
-                WebAuthenticationOptions options = this.useCorporateNetwork ? WebAuthenticationOptions.UseCorporateNetwork : WebAuthenticationOptions.None;
+            WebAuthenticationOptions options = (this.useCorporateNetwork && (ssoMode || redirectUri.Scheme == Constant.MsAppScheme)) ? WebAuthenticationOptions.UseCorporateNetwork : WebAuthenticationOptions.None;
 
+            if (this.promptBehavior == PromptBehavior.Never)
+            {
+                options |= WebAuthenticationOptions.SilentMode;
+            }
+
+            try
+            {
+                if (ssoMode)
+                {
+                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri);
+                }
+                else
+                { 
+                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri, redirectUri);
+                }
+            }
+            catch (FileNotFoundException ex)
+            {
+                var adalEx = new AdalException(AdalError.AuthenticationUiFailed, ex);
+                Logger.LogException(callState, adalEx);
+                throw adalEx;
+            }
+            catch (Exception ex)
+            {
                 if (this.promptBehavior == PromptBehavior.Never)
-                {                
-                    // SSO Mode
-                    options |= WebAuthenticationOptions.SilentMode;
+                {
+                    var adalEx = new AdalException(AdalError.UserInteractionRequired, ex);
+                    Logger.LogException(callState, adalEx);
+                    throw adalEx;
                 }
 
-                try
-                {
-                        webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri);
-                }
-                catch (FileNotFoundException ex)
-                {
-                    throw new AdalException(AdalError.AuthenticationUiFailed, ex);
-                }
-                catch (Exception ex)
-                {
-                    if (this.promptBehavior == PromptBehavior.Never)
-                    {
-                        throw new AdalException(AdalError.UserInteractionRequired, ex);
-                    }
-
-                    throw;
-                }
-            }
-            else if (this.promptBehavior == PromptBehavior.Never)
-            {
-                throw new ArgumentException(AdalErrorMessage.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
-            }
-            else if (redirectUri.Scheme == "ms-app")
-            {
-                throw new ArgumentException(AdalErrorMessage.RedirectUriAppIdMismatch, "redirectUri");
-            }
-            else
-            {
-                try
-                {
-                    // Non-SSO Mode
-                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(WebAuthenticationOptions.None, authorizationUri, redirectUri);
-                }
-                catch (FileNotFoundException ex)
-                {
-                    throw new AdalException(AdalError.AuthenticationUiFailed, ex);
-                }
+                var uiFailedEx = new AdalException(AdalError.AuthenticationUiFailed, ex);
+                Logger.LogException(callState, uiFailedEx);
+                throw uiFailedEx;
             }
 
             return ProcessAuthorizationResult(webAuthenticationResult, callState);

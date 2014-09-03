@@ -111,12 +111,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                             NavigationWaitMiliSecs = NavigationWaitMiliSecs
                         };
 
-                        Uri promptNeverRequestUri = AmendRequestUriWithPromptNever(this.RequestUri);
                         this.dialog.Done += this.UIDoneHandler;
 
                         this.threadInitializedEvent.Set();
 
-                        this.dialog.AuthenticateAAD(promptNeverRequestUri, this.CallbackUri);
+                        this.dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri);
 
                         // Start and turn control over to the message loop.
                         Application.Run();
@@ -150,7 +149,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             if (null == this.CallbackUri)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("CallbackUri cannot be null");
             }
 
             Thread uiSubThread = this.StartUIThread();
@@ -196,23 +195,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             this.threadInitializedEvent.Dispose();
             this.threadInitializedEvent = null;
-        }
-
-        /// <summary>
-        /// This method makes a lot of assumption about the shape of the Url that has been handed to it.
-        /// These include:
-        /// 1. There is no fragment.
-        /// 2. There is an existing query string that can simply be appended to.
-        /// These are not ordinarily safe assumptions.  
-        /// This code is crying out for a better Uri class that can be used to 
-        /// dynamically manipulate and generate uri's, but that will have to be taken up in a future 
-        /// release.
-        /// </summary>
-        private static Uri AmendRequestUriWithPromptNever(Uri requestUri)
-        {
-            string stringUri = requestUri.ToString();
-            stringUri += "&prompt=none";
-            return new Uri(stringUri);
         }
 
         private void ThrowIfTransferredException()

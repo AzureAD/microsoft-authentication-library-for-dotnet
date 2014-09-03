@@ -32,23 +32,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="certificate">The certificate used as credential.</param>
-        /// <param name="clientAssertionJwtIdentifier">Identifier of the client jwt token.</param>
-        public ClientAssertionCertificate(string clientId, X509Certificate2 certificate, string clientAssertionJwtIdentifier)
-            : this(clientId, certificate)
-        {
-            if (string.IsNullOrWhiteSpace(clientAssertionJwtIdentifier))
-            {
-                throw new ArgumentNullException("clientAssertionJwtIdentifier");
-            }
-
-            this.ClientAssertionJwtIdentifier = clientAssertionJwtIdentifier;
-        }
-
-        /// <summary>
-        /// Constructor to create credential with client Id and certificate.
-        /// </summary>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="certificate">The certificate used as credential.</param>
         public ClientAssertionCertificate(string clientId, X509Certificate2 certificate)
         {
             if (string.IsNullOrWhiteSpace(clientId))
@@ -88,11 +71,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Gets the certificate used as credential.
         /// </summary>
         public X509Certificate2 Certificate { get; private set; }
-
-        /// <summary>
-        /// Gets the identifier of the client jwt token.
-        /// </summary>
-        public string ClientAssertionJwtIdentifier { get; private set; }
 
         internal byte[] Sign(string message)
         {

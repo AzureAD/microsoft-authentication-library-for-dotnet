@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 
 using Windows.Networking;
 using Windows.Networking.Connectivity;
+using Windows.Security.Authentication.Web;
 using Windows.System.UserProfile;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -75,6 +76,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 // we return true to add form auth parameter in the caller.
                 return true;
             }
+        }
+
+        private void SetRedirectUriRequestParameter()
+        {
+            this.redirectUriRequestParameter = ReferenceEquals(this.redirectUri, Constant.SsoPlaceHolderUri) ? 
+                WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri : 
+                this.redirectUri.AbsoluteUri;
         }
     }
 }

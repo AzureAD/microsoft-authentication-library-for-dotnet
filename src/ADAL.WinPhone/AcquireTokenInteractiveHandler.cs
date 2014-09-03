@@ -20,22 +20,22 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
-using Windows.ApplicationModel.Core;
+using Windows.Security.Authentication.Web;
+using Windows.Storage;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal partial class AcquireTokenInteractiveHandler
     {
-        private readonly AuthenticationContextDelegate authenticationContextDelegate;
-
-        public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, AuthenticationContextDelegate authenticationContextDelegate, IWebAuthenticationBrokerContinuationEventArgs args)
+        // This constructor is called by ContinueAcquireTokenAsync after WAB call has returned.
+        public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, IWebAuthenticationBrokerContinuationEventArgs args)
             : this(
                 authenticator, 
                 tokenCache, 
                 (string)args.ContinuationData[WabArgName.Resource], 
                 (string)args.ContinuationData[WabArgName.ClientId],
                 new Uri((string)args.ContinuationData[WabArgName.RedirectUri]), 
-                PromptBehavior.RefreshSession,
+                PromptBehavior.Always,  // This is simply to disable cache lookup. In fact, there is no authorize call at this point and promptBehavior is not applicable.
                 new UserIdentifier((string)args.ContinuationData[WabArgName.UserId],
                     (UserIdentifierType)((int)args.ContinuationData[WabArgName.UserIdType])),
                 null, 
@@ -44,7 +44,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             CallState callState = new CallState(new Guid((string)args.ContinuationData[WabArgName.CorrelationId]), false);
             this.authorizationResult = this.webUi.ProcessAuthorizationResult(args, callState);
-            this.authenticationContextDelegate = authenticationContextDelegate;
         }
 
         protected override Task PreTokenRequest()
@@ -61,7 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             IDictionary<string, object> payload = new Dictionary<string, object>();
             payload[WabArgName.CorrelationId] = this.CallState.CorrelationId.ToString();
-            payload[WabArgName.RedirectUri] = redirectUri.AbsoluteUri;
+            payload[WabArgName.RedirectUri] = this.redirectUriRequestParameter;
             payload[WabArgName.UserId] = userId.Id;
             payload[WabArgName.UserIdType] = (int)userId.Type;
             payload[WabArgName.Resource] = this.Resource;
@@ -70,14 +69,33 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             webUi.Authenticate(authorizationUri, this.redirectUri, payload, this.CallState);
         }
 
-        protected override async Task PostRunAsync(AuthenticationResult result)
+        private void SetRedirectUriRequestParameter()
         {
-            await base.PostRunAsync(result);
-            // Execute callback 
-            if (this.authenticationContextDelegate != null)
+            if (ReferenceEquals(this.redirectUri, Constant.SsoPlaceHolderUri))
             {
-                var dispatcher = CoreApplication.MainView.CoreWindow.Dispatcher;
-                await dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => this.authenticationContextDelegate(result));
+                try
+                {
+                    this.redirectUriRequestParameter = WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri;
+                }
+                catch (FormatException ex)
+                {
+                    // This is the workaround for a bug in managed Uri class of WinPhone SDK which makes it throw UriFormatException when it gets called from unmanaged code. 
+                    const string CurrentApplicationCallbackUriSetting = "CurrentApplicationCallbackUri";
+                    if (ApplicationData.Current.LocalSettings.Values.ContainsKey(CurrentApplicationCallbackUriSetting))
+                    {
+                        this.redirectUriRequestParameter = (string)ApplicationData.Current.LocalSettings.Values[CurrentApplicationCallbackUriSetting];
+                    }
+                    else
+                    {
+                        var adalEx = new AdalException(AdalError.NeedToSetCallbackUriAsLocalSetting, AdalErrorMessage.NeedToSetCallbackUriAsLocalSetting, ex);
+                        Logger.LogException(this.CallState, adalEx);
+                        throw adalEx;
+                    }
+                }
+            }
+            else
+            {
+                this.redirectUriRequestParameter = redirectUri.AbsoluteUri;                
             }
         }
 

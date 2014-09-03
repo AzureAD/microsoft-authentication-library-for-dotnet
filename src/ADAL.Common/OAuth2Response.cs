@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
     internal static class OAuth2Response
     {
-        public static AuthenticationResult ParseTokenResponse(TokenResponse tokenResponse)
+        public static AuthenticationResult ParseTokenResponse(TokenResponse tokenResponse, CallState callState)
         {
             AuthenticationResult result;
 
@@ -169,11 +169,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else if (tokenResponse.Error != null)
             {
-                throw new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription);
+                var ex = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription);
+                Logger.LogException(callState, ex);
+                throw ex;
             }
             else
             {
-                throw new AdalServiceException(AdalError.Unknown, AdalErrorMessage.Unknown);
+                var ex = new AdalServiceException(AdalError.Unknown, AdalErrorMessage.Unknown);
+                Logger.LogException(callState, ex);
+                throw ex;
             }
 
             return result;
@@ -217,7 +221,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 return new TokenResponse 
                     { 
                         Error = AdalError.ServiceReturnedError,
-                        ErrorDescription = AdalError.ServiceReturnedError 
+                        ErrorDescription = AdalErrorMessage.ServiceReturnedError 
                     };
             }
 

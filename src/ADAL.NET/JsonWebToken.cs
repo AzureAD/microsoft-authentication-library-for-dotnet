@@ -46,10 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Subject = certificate.ClientId
                 };
 
-            if (certificate.ClientAssertionJwtIdentifier != null)
-            {
-                this.payload.JwtIdentifier = certificate.ClientAssertionJwtIdentifier;
-            }
+            this.payload.JwtIdentifier = NetworkPlugin.RequestCreationHelper.GetJsonWebTokenId();
         }
 
         public ClientAssertion Sign(ClientAssertionCertificate credential)
@@ -60,7 +57,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // Length check before sign
             if (MaxTokenLength < token.Length)
             {
-                throw new AdalException(AdalError.EncodedTokenTooLong);
+                var ex = new AdalException(AdalError.EncodedTokenTooLong);
+                Logger.LogException(null, ex);
+                throw ex;
             }
 
             return new ClientAssertion(this.payload.Issuer, string.Concat(token, ".", UrlEncodeSegment(credential.Sign(token))));

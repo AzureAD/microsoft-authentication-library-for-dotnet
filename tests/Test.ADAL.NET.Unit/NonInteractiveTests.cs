@@ -122,9 +122,9 @@ namespace Test.ADAL.NET.Unit
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
             XDocument mexDocument = await FecthMexAsync(userRealmResponse.FederationMetadataUrl);
             Verify.IsNotNull(mexDocument);
-            Uri wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.IntegratedAuth);
+            Uri wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.IntegratedAuth, null);
             Verify.IsNotNull(wsTrustAddress);
-            wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword);
+            wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
             Verify.IsNotNull(wsTrustAddress);
 
             string mexDocumentContent = mexDocument.ToString();
@@ -133,7 +133,7 @@ namespace Test.ADAL.NET.Unit
             {
                 string modifiedMexDocumentContent = mexDocumentContent.Replace("securitypolicy", string.Empty);
                 XDocument modifiedMexDocument = ConvertStringToXDocument(modifiedMexDocumentContent);
-                MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword);
+                MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword, null);
                 Verify.Fail("Exception expected");
             }
             catch (AdalException ex)
@@ -145,7 +145,7 @@ namespace Test.ADAL.NET.Unit
             {
                 string modifiedMexDocumentContent = mexDocumentContent.Replace(wsTrustAddress.AbsoluteUri, string.Empty);
                 XDocument modifiedMexDocument = ConvertStringToXDocument(modifiedMexDocumentContent);
-                MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword);
+                MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword, null);
                 Verify.Fail("Exception expected");
             }
             catch (AdalException ex)
@@ -166,7 +166,7 @@ namespace Test.ADAL.NET.Unit
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
             XDocument mexDocument = await FecthMexAsync(userRealmResponse.FederationMetadataUrl);
             Verify.IsNotNull(mexDocument);
-            Uri wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword);
+            Uri wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
             Verify.IsNotNull(wsTrustAddress);
 
             WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, new UserCredential(federatedSts.ValidUserName, federatedSts.ValidPassword), null);

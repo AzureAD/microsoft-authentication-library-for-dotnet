@@ -18,6 +18,7 @@
         <Button Content="Smoke Test" HorizontalAlignment="Left" Margin="141,34,0,0" VerticalAlignment="Top" Click="Button_Click"/>
         <TextBox HorizontalAlignment="Left" Height="386" Margin="21,231,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="345" Name="AccessToken"/>
         <controls5:Button Content="Clear Cache" HorizontalAlignment="Left" Margin="139,92,0,0" VerticalAlignment="Top" Click="Button_Click_1"/>
+        <controls5:Button Content="SSO Test" HorizontalAlignment="Left" Margin="141,149,0,0" VerticalAlignment="Top" Click="SsoButton_Click"/>
 
     </controls5:Grid>
 </Page>

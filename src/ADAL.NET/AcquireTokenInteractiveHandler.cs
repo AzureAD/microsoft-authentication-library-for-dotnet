@@ -110,6 +110,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return prefix.Equals(Environment.MachineName.ToUpperInvariant());
         }
 
+        private void SetRedirectUriRequestParameter()
+        {
+            this.redirectUriRequestParameter = redirectUri.AbsoluteUri;
+        }
+
         private static class NativeMethods
         {
             public const int ErrorSuccess = 0;

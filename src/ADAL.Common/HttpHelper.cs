@@ -54,7 +54,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
                 clientMetrics.SetLastError(tokenResponse.ErrorCodes);
-                throw new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, ex);
+                var serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, ex);
+                Logger.LogException(callState, serviceEx);
+                throw serviceEx;
             }
             finally
             {

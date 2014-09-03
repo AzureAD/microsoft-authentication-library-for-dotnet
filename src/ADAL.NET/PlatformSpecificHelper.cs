@@ -51,13 +51,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
             if (userNameSize == 0)
             {
-                throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                var ex = new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                Logger.LogException(null, ex);
+                throw ex;
             }
 
             StringBuilder sb = new StringBuilder((int) userNameSize);
             if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
             {
-                throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                var ex = new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                Logger.LogException(null, ex);
+                throw ex;
             }
 
             return sb.ToString();

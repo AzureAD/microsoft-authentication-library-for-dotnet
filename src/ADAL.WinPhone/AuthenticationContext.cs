@@ -20,6 +20,7 @@ using System;
 using System.Threading.Tasks;
 
 using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web;
@@ -96,30 +97,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Starts security token acquisition from the authority in SSO mode.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="authDelegate">Optional delegate that can be passed by the developer to process authentication result.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        [DefaultOverload]
-        public void AcquireTokenAndContinue(string resource, string clientId, AuthenticationContextDelegate authDelegate)
-        {
-            this.AcquireTokenAndContinueCommon(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), UserIdentifier.AnyUser, null, authDelegate);
-        }
-
-        /// <summary>
         /// Starts security token acquisition from the authority.
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority. Pass null or application's callback URI for SSO mode.</param>
         /// <param name="authDelegate">Optional delegate that can be passed by the developer to process authentication result.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         [DefaultOverload]
         public void AcquireTokenAndContinue(string resource, string clientId, Uri redirectUri, AuthenticationContextDelegate authDelegate)
         {
-            this.AcquireTokenAndContinueCommon(resource, clientId, GetRedirectUri(redirectUri), UserIdentifier.AnyUser, null, authDelegate);
+            this.AcquireTokenAndContinueCommon(resource, clientId, redirectUri ?? Constant.SsoPlaceHolderUri, UserIdentifier.AnyUser, null, authDelegate);
         }
 
         /// <summary>
@@ -127,7 +115,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority. Pass null or application's callback URI for SSO mode.</param>
         /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
         /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <param name="authDelegate">Optional delegate that can be passed by the developer to process authentication result.</param>        
@@ -135,7 +123,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DefaultOverload]
         public void AcquireTokenAndContinue(string resource, string clientId, Uri redirectUri, UserIdentifier userId, AuthenticationContextDelegate authDelegate)
         {
-            this.AcquireTokenAndContinueCommon(resource, clientId, GetRedirectUri(redirectUri), userId, null, authDelegate);
+            this.AcquireTokenAndContinueCommon(resource, clientId, redirectUri ?? Constant.SsoPlaceHolderUri, userId, null, authDelegate);
         }
 
         /// <summary>
@@ -143,7 +131,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority. Pass null or application's callback URI for SSO mode.</param>
         /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
         /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
@@ -151,36 +139,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public void AcquireTokenAndContinue(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters, AuthenticationContextDelegate authDelegate)
         {
-            this.AcquireTokenAndContinueCommon(resource, clientId, redirectUri, userId, extraQueryParameters, authDelegate);
-        }
-
-        /// <summary>
-        /// Starts security token acquisition from the authority in SSO mode.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
-        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <param name="authDelegate">Optional delegate that can be passed by the developer to process authentication result.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public void AcquireTokenAndContinue(string resource, string clientId, UserIdentifier userId, AuthenticationContextDelegate authDelegate)
-        {
-            this.AcquireTokenAndContinueCommon(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), userId, null, authDelegate);
-        }
-
-        /// <summary>
-        /// Starts security token acquisition from the authority in SSO mode.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
-        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <param name="authDelegate">Optional delegate that can be passed by the developer to process authentication result.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public void AcquireTokenAndContinue(string resource, string clientId, UserIdentifier userId, string extraQueryParameters, AuthenticationContextDelegate authDelegate)
-        {
-            this.AcquireTokenAndContinueCommon(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), userId, extraQueryParameters, authDelegate);
+            this.AcquireTokenAndContinueCommon(resource, clientId, redirectUri ?? Constant.SsoPlaceHolderUri, userId, extraQueryParameters, authDelegate);
         }
 
         /// <summary>
@@ -190,16 +149,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public IAsyncOperation<AuthenticationResult> ContinueAcquireTokenAsync(IWebAuthenticationBrokerContinuationEventArgs args)
         {
-            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, this.authenticationContextDelegate, args);
+            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, args);
+            return this.RunInteractiveHandlerAsync(handler).AsAsyncOperation();
+        }
 
-            try
+        private async Task<AuthenticationResult> RunInteractiveHandlerAsync(AcquireTokenInteractiveHandler handler)
+        {
+            AuthenticationResult result = await RunTask(handler.RunAsync());
+            
+            // Execute callback 
+            if (this.authenticationContextDelegate != null)
             {
-                return RunTaskAsAsyncOperation(handler.RunAsync());
-            }
-            finally
-            {
+                var dispatcher = CoreApplication.MainView.CoreWindow.Dispatcher;
+                await dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => this.authenticationContextDelegate(result));
                 this.authenticationContextDelegate = null;
             }
+
+            return result;
         }
 
         private void AcquireTokenAndContinueCommon(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters, AuthenticationContextDelegate authDelegate)

@@ -35,7 +35,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (string.IsNullOrWhiteSpace(userAssertion.AssertionType))
             {
-                throw new ArgumentException(AdalErrorMessage.UserCredentialAssertionTypeEmpty, "userAssertion");
+                var ex = new ArgumentException(AdalErrorMessage.UserCredentialAssertionTypeEmpty, "userAssertion");
+                Logger.LogException(this.CallState, ex);
+                throw ex;
             }
 
             this.userAssertion = userAssertion;

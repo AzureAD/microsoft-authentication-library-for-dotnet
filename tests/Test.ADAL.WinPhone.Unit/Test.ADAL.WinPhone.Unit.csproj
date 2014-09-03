@@ -112,12 +112,14 @@
     <Compile Include="..\Test.ADAL.WinRT.Unit\SerializationHelper.cs">
       <Link>CommonWinRT\SerializationHelper.cs</Link>
     </Compile>
+    <Compile Include="AdalTests.cs" />
     <Compile Include="AuthenticationContextProxy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AdalWinPhoneTests.cs" />
     <Compile Include="ReplayerWebAuthenticationBrokerContinuationEventArgs.cs" />
     <Compile Include="ReplayerWebUI.cs" />
     <Compile Include="ReplayerWebUIFactory.cs" />
+    <Compile Include="UnitTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">

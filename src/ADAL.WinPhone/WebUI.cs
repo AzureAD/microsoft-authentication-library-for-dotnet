@@ -39,6 +39,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             get
             {
+                // In lack of PromptBehavior in WinPhone, we always pass prompt=login.
                 return PromptBehavior.Always; 
             }            
         }
@@ -51,34 +52,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 set[key] = headersMap[key];
             }
 
-            if (redirectUri.AbsoluteUri == WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri)
+            try
             {
-                // SSO Mode
-
-                try
-                {
-                    WebAuthenticationBroker.AuthenticateAndContinue(authorizationUri, null, set, WebAuthenticationOptions.None);
-                }
-                catch (FileNotFoundException ex)
-                {
-                    throw new AdalException(AdalError.AuthenticationUiFailed, ex);
-                }
+                WebAuthenticationBroker.AuthenticateAndContinue(authorizationUri, ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri) ? null : redirectUri, set, WebAuthenticationOptions.None);
             }
-            else if (redirectUri.Scheme == "ms-app")
+            catch (Exception ex)
             {
-                throw new ArgumentException(AdalErrorMessage.RedirectUriAppIdMismatch, "redirectUri");
-            }
-            else
-            {
-                try
-                {
-                    // Non-SSO Mode
-                    WebAuthenticationBroker.AuthenticateAndContinue(authorizationUri, redirectUri, set, WebAuthenticationOptions.None);
-                }
-                catch (FileNotFoundException ex)
-                {
-                    throw new AdalException(AdalError.AuthenticationUiFailed, ex);
-                }
+                var adalEx = new AdalException(AdalError.AuthenticationUiFailed, ex);
+                Logger.LogException(callState, adalEx);
+                throw adalEx;
             }
         }
 

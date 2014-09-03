@@ -32,6 +32,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         /// <summary>
         /// Gets or Sets flag to enable logged in user authentication. Note that enabling this flag requires some extra application capabilites.
+        /// This flag only works in SSO mode and is ignored otherwise.
         /// </summary>
         public bool UseCorporateNetwork { get; set; }
 
@@ -60,28 +61,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Acquires security token from the authority in SSO mode.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        [DefaultOverload]
-        public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId)
-        {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), PromptBehavior.Auto, UserIdentifier.AnyUser));
-        }
-
-        /// <summary>
         /// Acquires security token from the authority.
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority. Pass null or application's callback URI for SSO mode.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         [DefaultOverload]
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, GetRedirectUri(redirectUri), PromptBehavior.Auto, UserIdentifier.AnyUser));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, redirectUri ?? Constant.SsoPlaceHolderUri, PromptBehavior.Auto, UserIdentifier.AnyUser));
         }
 
         /// <summary>
@@ -89,13 +78,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority. Pass null or application's callback URI for SSO mode.</param>
         /// <param name="promptBehavior">If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         [DefaultOverload]
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, GetRedirectUri(redirectUri), promptBehavior, UserIdentifier.AnyUser));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, redirectUri ?? Constant.SsoPlaceHolderUri, promptBehavior, UserIdentifier.AnyUser));
         }
 
         /// <summary>
@@ -103,7 +92,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority. Pass null or application's callback URI for SSO mode.</param>
         /// <param name="promptBehavior">If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.</param>
         /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
         /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
@@ -111,7 +100,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DefaultOverload]
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior, UserIdentifier userId)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, GetRedirectUri(redirectUri), promptBehavior, userId));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, redirectUri ?? Constant.SsoPlaceHolderUri, promptBehavior, userId));
         }
 
         /// <summary>
@@ -119,7 +108,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority. Pass null or application's callback URI for SSO mode.</param>
         /// <param name="promptBehavior">If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.</param>
         /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
         /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
@@ -127,48 +116,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, string extraQueryParameters)
         {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, redirectUri, promptBehavior, userId, extraQueryParameters));
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="promptBehavior">If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, PromptBehavior promptBehavior)
-        {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), promptBehavior, UserIdentifier.AnyUser));
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="promptBehavior">If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.</param>
-        /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
-        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, PromptBehavior promptBehavior, UserIdentifier userId)
-        {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), promptBehavior, userId));
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="promptBehavior">If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.</param>
-        /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
-        /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public IAsyncOperation<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, PromptBehavior promptBehavior, UserIdentifier userId, string extraQueryParameters)
-        {
-            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, WebAuthenticationBroker.GetCurrentApplicationCallbackUri(), promptBehavior, userId, extraQueryParameters));
+            return RunTaskAsAsyncOperation(this.AcquireTokenCommonAsync(resource, clientId, redirectUri ?? Constant.SsoPlaceHolderUri, promptBehavior, userId, extraQueryParameters));
         }
 
         private IWebUI CreateWebAuthenticationDialog(PromptBehavior promptBehavior)

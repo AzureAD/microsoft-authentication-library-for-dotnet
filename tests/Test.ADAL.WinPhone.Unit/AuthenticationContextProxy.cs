@@ -69,6 +69,8 @@ namespace Test.ADAL.Common
             }
         }
 
+        public AuthenticationContextDelegate AuthenticationContextDelegate { get; set; }
+
         public static void SetEnvironmentVariable(string environmentVariable, string environmentVariableValue)
         {
             var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
@@ -99,7 +101,7 @@ namespace Test.ADAL.Common
             AuthenticationResult result = this.context.AcquireTokenSilentAsync(resource, clientId).AsTask().Result;
             if (result.Status != AuthenticationStatus.Success)
             {
-                this.context.AcquireTokenAndContinue(resource, clientId, redirectUri, null);
+                this.context.AcquireTokenAndContinue(resource, clientId, redirectUri, this.AuthenticationContextDelegate);
                 result = this.ContinueAcquireTokenAsync().Result;
             }
 
@@ -116,7 +118,7 @@ namespace Test.ADAL.Common
             AuthenticationResult result = this.context.AcquireTokenSilentAsync(resource, clientId, userId).AsTask().Result;
             if (result.Status != AuthenticationStatus.Success)
             {
-                this.context.AcquireTokenAndContinue(resource, clientId, redirectUri, userId, null);
+                this.context.AcquireTokenAndContinue(resource, clientId, redirectUri, userId, this.AuthenticationContextDelegate);
                 result = this.ContinueAcquireTokenAsync().Result;
             }
 
@@ -130,7 +132,7 @@ namespace Test.ADAL.Common
             {
                 try
                 {
-                    this.context.AcquireTokenAndContinue(resource, clientId, redirectUri, userId, extraQueryParameters, null);
+                    this.context.AcquireTokenAndContinue(resource, clientId, redirectUri, userId, extraQueryParameters, this.AuthenticationContextDelegate);
                 }
                 catch (AdalException ex)
                 {

@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return CreateFromResponseDocument(responseDocument);
         }
 
-        public static string ReadErrorResponse(XDocument responseDocument)
+        public static string ReadErrorResponse(XDocument responseDocument, CallState callState)
         {
             string errorMessage = null;
 
@@ -69,7 +69,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (XmlException ex)
             {
-                throw new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
+                var adalEx = new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
+                Logger.LogException(callState, adalEx);
+                throw adalEx;
             }
 
             return errorMessage;
@@ -83,7 +85,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (XmlException ex)
             {
-                throw new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
+                var adalEx = new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
+                Logger.LogException(null, adalEx);
+                throw adalEx;
             }
         }
 
@@ -120,12 +124,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (XmlException ex)
             {
-                throw new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
+                var adalEx = new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
+                Logger.LogException(null, adalEx);
+                throw adalEx;
             }
 
             if (tokenResponseDictionary.Count == 0)
             {
-                throw new AdalException(AdalError.ParsingWsTrustResponseFailed);
+                var ex = new AdalException(AdalError.ParsingWsTrustResponseFailed);
+                Logger.LogException(null, ex);
+                throw ex;
             }
 
             string tokenType = tokenResponseDictionary.ContainsKey(Saml1Assertion) ? Saml1Assertion : tokenResponseDictionary.Keys.First();
