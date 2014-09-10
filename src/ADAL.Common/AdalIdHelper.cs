@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// This class adds additional query parameters or headers to the requests sent to STS. This can help us in
     /// collecting statistics and potentially on diagnostics.
     /// </summary>
-    internal class AdalIdHelper
+    internal partial class AdalIdHelper
     {
         public static void AddAsQueryParameters(RequestParameters parameters)
         {
@@ -83,59 +83,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             AssemblyInformationalVersionAttribute attribute = typeof(AdalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
             return (attribute != null) ? attribute.InformationalVersion : string.Empty;
-        }
-
-        public static string GetProcessorArchitecture()
-        {
-            return NativeMethods.GetProcessorArchitecture();
-        }
-
-        private static class NativeMethods
-        {
-            private const int PROCESSOR_ARCHITECTURE_AMD64 = 9;
-            private const int PROCESSOR_ARCHITECTURE_ARM = 5;
-            private const int PROCESSOR_ARCHITECTURE_IA64 = 6;
-            private const int PROCESSOR_ARCHITECTURE_INTEL = 0;
-
-            [DllImport("kernel32.dll")]
-            private static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
-
-            public static string GetProcessorArchitecture()
-            {
-                SYSTEM_INFO systemInfo = new SYSTEM_INFO();
-                GetNativeSystemInfo(ref systemInfo);
-                switch (systemInfo.wProcessorArchitecture)
-                {
-                    case PROCESSOR_ARCHITECTURE_AMD64:
-                    case PROCESSOR_ARCHITECTURE_IA64:
-                        return "x64";
-
-                    case PROCESSOR_ARCHITECTURE_ARM:
-                        return "ARM";
-
-                    case PROCESSOR_ARCHITECTURE_INTEL:
-                        return "x86";
-
-                    default:
-                        return "Unknown";
-                }
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            private struct SYSTEM_INFO
-            {
-                public short wProcessorArchitecture;
-                public short wReserved;
-                public int dwPageSize;
-                public IntPtr lpMinimumApplicationAddress;
-                public IntPtr lpMaximumApplicationAddress;
-                public IntPtr dwActiveProcessorMask;
-                public int dwNumberOfProcessors;
-                public int dwProcessorType;
-                public int dwAllocationGranularity;
-                public short wProcessorLevel;
-                public short wProcessorRevision;
-            }
         }
     }
 }
