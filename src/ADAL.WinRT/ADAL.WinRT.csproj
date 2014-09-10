@@ -49,6 +49,9 @@
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ADAL.CommonDesktop\AdalIdHelper.cs">
+      <Link>CommonDesktop\AdalIdHelper.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.CommonWinRT\AdalEventSource.cs">
       <Link>CommonWinRT\AdalEventSource.cs</Link>
     </Compile>
