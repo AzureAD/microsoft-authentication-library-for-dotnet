@@ -55,6 +55,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ADAL.CommonDesktop\AdalIdHelper.cs">
+      <Link>CommonDesktop\AdalIdHelper.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\AcquireTokenByRefreshTokenHandler.cs">
       <Link>Common\AcquireTokenByRefreshTokenHandler.cs</Link>
     </Compile>
