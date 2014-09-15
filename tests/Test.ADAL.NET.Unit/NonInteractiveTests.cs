@@ -65,16 +65,8 @@ namespace Test.ADAL.NET.Unit
                 Verify.IsNotNull(ex.ErrorCode, AdalError.UnknownUser);
             }
 
-            try
-            {
-                await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, "ab@cd@ef", null);
-                Verify.Fail("Exception expected");
-            }
-            catch (AdalException ex)
-            {
-                Verify.IsNotNull(ex.ErrorCode, AdalError.UserRealmDiscoveryFailed);
-                Verify.IsNotNull(ex.InnerException);
-            }
+            userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, "ab@cd@ef", null);
+            Verify.AreEqual("Unknown", userRealmResponse.AccountType);
 
             try
             {
