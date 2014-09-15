@@ -303,7 +303,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             return new AdalServiceException(
                 AdalError.AuthenticationUiFailed,
-                string.Format("The browser based authentication dialog failed to complete for an unkown reason. StatusCode: {0}", statusCode)) { StatusCode = statusCode };
+                string.Format("The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}", statusCode)) { StatusCode = statusCode };
         }
 
         protected static class DpiHelper

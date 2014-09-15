@@ -41,6 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private const string ClientMetricsHeaderLastEndpoint = "x-client-last-endpoint";
 
         private static ClientMetrics pendingClientMetrics;
+        private static readonly object PendingClientMetricsLock = new object();
 
         private Stopwatch metricsTimer;
         private string lastError;
@@ -65,9 +66,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 lastResponseTime = metricsTimer.ElapsedMilliseconds;
                 lastCorrelationId = callState.CorrelationId;
                 lastEndpoint = endpoint;
-                if (pendingClientMetrics == null) 
+                lock (PendingClientMetricsLock)
                 {
-                    pendingClientMetrics = this;
+                    if (pendingClientMetrics == null)
+                    {
+                        pendingClientMetrics = this;
+                    }
                 }
             }
         }
@@ -79,20 +83,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static void AddClientMetricsHeadersToRequest(IHttpWebRequest request)
         {
-            if (pendingClientMetrics != null && NetworkPlugin.RequestCreationHelper.RecordClientMetrics)
+            lock (PendingClientMetricsLock)
             {
-                Dictionary<string, string> headers = new Dictionary<string, string>();
-                if (pendingClientMetrics.lastError != null)
+                if (pendingClientMetrics != null && NetworkPlugin.RequestCreationHelper.RecordClientMetrics)
                 {
-                    headers[ClientMetricsHeaderLastError] = pendingClientMetrics.lastError;
+                    Dictionary<string, string> headers = new Dictionary<string, string>();
+                    if (pendingClientMetrics.lastError != null)
+                    {
+                        headers[ClientMetricsHeaderLastError] = pendingClientMetrics.lastError;
+                    }
+
+                    headers[ClientMetricsHeaderLastRequest] = pendingClientMetrics.lastCorrelationId.ToString();
+                    headers[ClientMetricsHeaderLastResponseTime] = pendingClientMetrics.lastResponseTime.ToString();
+                    headers[ClientMetricsHeaderLastEndpoint] = pendingClientMetrics.lastEndpoint;
+
+                    HttpHelper.AddHeadersToRequest(request, headers);
+                    pendingClientMetrics = null;
                 }
-
-                headers[ClientMetricsHeaderLastRequest] = pendingClientMetrics.lastCorrelationId.ToString();
-                headers[ClientMetricsHeaderLastResponseTime] = pendingClientMetrics.lastResponseTime.ToString();
-                headers[ClientMetricsHeaderLastEndpoint] = pendingClientMetrics.lastEndpoint;
-
-                HttpHelper.AddHeadersToRequest(request, headers);
-                pendingClientMetrics = null;
             }
         }
     }
