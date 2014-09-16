@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             get
             {
-                return this.result;
+                return this.authenticationResult;
             }
         }
 
