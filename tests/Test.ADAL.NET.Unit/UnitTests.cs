@@ -18,12 +18,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Owin.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using Owin;
+
 using Test.ADAL.Common;
 
 namespace Test.ADAL.NET.Unit
@@ -31,6 +38,7 @@ namespace Test.ADAL.NET.Unit
     [TestClass]
     [DeploymentItem("valid_cert.pfx")]
     [DeploymentItem("valid_cert2.pfx")]
+    [DeploymentItem("Microsoft.Owin.Host.HttpListener.dll")]
     public class UnitTests
     {
         private const string ComplexString = "asdfk+j0a-=skjwe43;1l234 1#$!$#%345903485qrq@#$!@#$!(rekr341!#$%Ekfaآزمايشsdsdfsddfdgsfgjsglk==CVADS";
@@ -255,6 +263,52 @@ namespace Test.ADAL.NET.Unit
             }
         }
 
+        [TestMethod]
+        [TestCategory("AdalDotNetUnit")]
+        public async Task TimeoutTest()
+        {
+            const string TestServiceUrl = "http://localhost:8080";
+            using (WebApp.Start<TestService>(TestServiceUrl))
+            {
+                HttpWebRequestWrapper webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=0&response_code=200") { TimeoutInMilliSeconds = 10000 };
+                await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), true));   // Synchronous
+
+                webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=0&response_code=200") { TimeoutInMilliSeconds = 10000 };
+                await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), false));  // Asynchronous
+
+                try
+                {
+                    webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=0&response_code=400") { TimeoutInMilliSeconds = 10000 };
+                    await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), false));
+                }
+                catch (WebException ex)
+                {
+                    Verify.AreEqual(ex.Status, WebExceptionStatus.ProtocolError);
+                }
+
+
+                try
+                {
+                    webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=10000&response_code=200") { TimeoutInMilliSeconds = 500 };
+                    await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), true));   // Synchronous
+                }
+                catch (WebException ex)
+                {
+                    Verify.AreEqual(ex.Status, WebExceptionStatus.Timeout);
+                }
+
+                try
+                {
+                    webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=10000&response_code=200") { TimeoutInMilliSeconds = 500 };
+                    await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), false));  // Asynchronous
+                }
+                catch (WebException ex)
+                {
+                    Verify.AreEqual(ex.Status, WebExceptionStatus.RequestCanceled);
+                }
+            }
+        }
+        
         private static void RunAuthenticationParametersPositive(string authenticateHeader, string expectedAuthority, string excepectedResource)
         {
             AuthenticationParameters parameters = AuthenticationParameters.CreateFromResponseAuthenticateHeader(authenticateHeader);
@@ -333,6 +387,25 @@ namespace Test.ADAL.NET.Unit
             secureStr.MakeReadOnly();
 
             return secureStr;
+        }
+
+        internal class TestService
+        {
+            public void Configuration(IAppBuilder app)
+            {
+                app.Run(ctx =>
+                {
+                    int delay = int.Parse(ctx.Request.Query["delay"]);
+                    if (delay > 0)
+                    {
+                        Thread.Sleep(delay);
+                    }
+
+                    var response = ctx.Response;
+                    response.StatusCode = int.Parse(ctx.Request.Query["response_code"]);
+                    return response.WriteAsync("dummy");
+                });
+            }
         }
     }
 }

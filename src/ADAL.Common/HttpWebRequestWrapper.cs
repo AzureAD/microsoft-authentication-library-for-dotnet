@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
@@ -25,6 +26,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal class HttpWebRequestWrapper : IHttpWebRequest
     {
         private readonly HttpWebRequest request;
+
+        private int timeoutInMilliSeconds = 30000;
 
         public HttpWebRequestWrapper(string uri)
         {
@@ -73,6 +76,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
+        public int TimeoutInMilliSeconds
+        {
+            set
+            {
+                this.timeoutInMilliSeconds = value;
+            }        
+        }
+
         public async Task<IHttpWebResponse> GetResponseSyncOrAsync(CallState callState)
         {
             if (this.BodyParameters != null)
@@ -86,10 +97,42 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 #if ADAL_NET
             if (callState != null && callState.CallSync)
             {
+                this.request.Timeout = this.timeoutInMilliSeconds;
                 return NetworkPlugin.HttpWebRequestFactory.CreateResponse(this.request.GetResponse());
             }
+
+            Task<WebResponse> getResponseTask = this.request.GetResponseAsync();
+            System.Threading.ThreadPool.RegisterWaitForSingleObject(
+                ((IAsyncResult)getResponseTask).AsyncWaitHandle, 
+                delegate (object state, bool timedOut)
+                    {
+                        if (timedOut)
+                        {
+                            ((HttpWebRequest)state).Abort();
+                        }
+                    },
+                this.request, 
+                this.timeoutInMilliSeconds, 
+                true);
+
+            return NetworkPlugin.HttpWebRequestFactory.CreateResponse(await getResponseTask);
+#else
+            var timer = Windows.System.Threading.ThreadPoolTimer.CreateTimer(
+                delegate
+                    {
+                        this.request.Abort();
+                    }, 
+                TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds));
+
+            try
+            {
+                return NetworkPlugin.HttpWebRequestFactory.CreateResponse(await this.request.GetResponseAsync());
+            }
+            finally
+            {
+                timer.Cancel();
+            }
 #endif
-            return NetworkPlugin.HttpWebRequestFactory.CreateResponse(await this.request.GetResponseAsync());
         }
 
         public async Task<Stream> GetRequestStreamSyncOrAsync(CallState callState)
