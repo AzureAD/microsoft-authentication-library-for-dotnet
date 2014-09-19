@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         private Uri desiredCallbackUri;
 
-        protected string result;
+        protected string authenticationResult;
 
         protected IWin32Window ownerWindow;
 
@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) && url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath))
             {
-                this.result = url.AbsoluteUri;
+                this.authenticationResult = url.AbsoluteUri;
                 this.StopWebBrowser();
 
                 // in this handler object could be already disposed, so it should be the last method
@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         public string AuthenticateAAD(Uri requestUri, Uri callbackUri)
         {
             this.desiredCallbackUri = callbackUri;
-            this.result = null;
+            this.authenticationResult = null;
 
             // The WebBrowser event handlers must not throw exceptions.
             // If they do then they may be swallowed by the native
@@ -214,7 +214,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             this.webBrowser.Navigate(requestUri);
             this.OnAuthenticate();
 
-            return this.result;
+            return this.authenticationResult;
         }
 
         protected virtual void OnAuthenticate()
@@ -303,7 +303,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             return new AdalServiceException(
                 AdalError.AuthenticationUiFailed,
-                string.Format("The browser based authentication dialog failed to complete for an unkown reason. StatusCode: {0}", statusCode)) { StatusCode = statusCode };
+                string.Format("The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}", statusCode)) { StatusCode = statusCode };
         }
 
         protected static class DpiHelper

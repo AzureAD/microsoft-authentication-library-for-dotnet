@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -105,6 +106,36 @@ namespace Test.ADAL.WinRT.Unit
 
             Verify.IsNotNullOrEmptyString(result.Error);
             Verify.AreEqual(result.Error, Sts.AuthenticationUiFailedError);
+        }
+
+        [TestMethod]
+        [TestCategory("AdalWinRTUnit")]
+        [Ignore]    // This test requires TestService to run in a non-WinRT app. The code can be found in tests\Test.ADAL.NET.Unit\UnitTests.cs
+        public async Task TimeoutTest()
+        {
+            const string TestServiceUrl = "http://localhost:8080";
+            HttpWebRequestWrapper webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=0&response_code=200") { TimeoutInMilliSeconds = 10000 };
+            await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), false));  // Asynchronous
+
+            try
+            {
+                webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=0&response_code=400") { TimeoutInMilliSeconds = 10000 };
+                await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), false));
+            }
+            catch (WebException ex)
+            {
+                Verify.AreEqual((int)(ex.Status), 7);   // ProtocolError
+            }
+
+            try
+            {
+                webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=10000&response_code=200") { TimeoutInMilliSeconds = 500 };
+                await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), false));  // Asynchronous
+            }
+            catch (WebException ex)
+            {
+                Verify.AreEqual((int)(ex.Status), 6);   // RequestCanceled
+            }
         }
     }
 }
