@@ -23,7 +23,7 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal partial class RequestParameters : Dictionary<string, string>
+    internal class RequestParameters : Dictionary<string, string>
     {
         private readonly StringBuilder stringBuilderParameter;
 
@@ -85,6 +85,31 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return messageBuilder;
+        }
+
+        private void AddClientKey(ClientKey clientKey)
+        {
+            if (clientKey.ClientId != null)
+            {
+                this[OAuthParameter.ClientId] = clientKey.ClientId;
+            }
+
+            if (clientKey.Credential != null)
+            {
+                this[OAuthParameter.ClientSecret] = clientKey.Credential.ClientSecret;
+            }
+            else if (clientKey.Assertion != null)
+            {
+                this[OAuthParameter.ClientAssertionType] = clientKey.Assertion.AssertionType;
+                this[OAuthParameter.ClientAssertion] = clientKey.Assertion.Assertion;
+            }
+            else if (clientKey.Certificate != null)
+            {
+                JsonWebToken jwtToken = new JsonWebToken(clientKey.Certificate, clientKey.Authenticator.SelfSignedJwtAudience);
+                ClientAssertion clientAssertion = jwtToken.Sign(clientKey.Certificate);
+                this[OAuthParameter.ClientAssertionType] = clientAssertion.AssertionType;
+                this[OAuthParameter.ClientAssertion] = clientAssertion.Assertion;
+            }
         }
     }
 }

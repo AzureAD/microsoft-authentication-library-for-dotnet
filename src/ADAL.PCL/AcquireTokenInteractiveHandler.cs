@@ -18,10 +18,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal partial class AcquireTokenInteractiveHandler : AcquireTokenHandlerBase
+    internal class AcquireTokenInteractiveHandler : AcquireTokenHandlerBase
     {
         internal AuthorizationResult authorizationResult;
 
@@ -80,11 +81,38 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.SupportADFS = true;
         }
 
+        protected override async Task PreTokenRequest()
+        {
+            await base.PreTokenRequest();
+
+            // We do not have async interactive API in .NET, so we call this synchronous method instead.
+            await this.AcquireAuthorizationAsync();
+            this.VerifyAuthorizationResult();
+        }
+
+        internal async Task AcquireAuthorizationAsync()
+        {
+            Uri authorizationUri = this.CreateAuthorizationUri(await IncludeFormsAuthParamsAsync());
+            string resultUri = await this.webUi.AcquireAuthorizationAsync(authorizationUri, this.redirectUri, this.CallState);
+            this.authorizationResult = OAuth2Response.ParseAuthorizeResponse(resultUri, this.CallState);
+        }
+
+        internal async Task<bool> IncludeFormsAuthParamsAsync()
+        {
+            return (await PlatformPlugin.PlatformInformation.IsUserLocalAsync(this.CallState)) && PlatformPlugin.PlatformInformation.IsDomainJoined();
+        }
+
+        internal async Task<Uri> CreateAuthorizationUriAsync(Guid correlationId)
+        {
+            this.CallState.CorrelationId = correlationId;
+            await this.Authenticator.UpdateFromTemplateAsync(this.CallState);
+            return this.CreateAuthorizationUri(false);
+        }
         protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
         {
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.AuthorizationCode;
             requestParameters[OAuthParameter.Code] = this.authorizationResult.Code;
-            requestParameters[OAuthParameter.RedirectUri] = this.redirectUriRequestParameter;            
+            requestParameters[OAuthParameter.RedirectUri] = this.redirectUriRequestParameter;
         }
 
         protected override void PostTokenRequest(AuthenticationResult result)

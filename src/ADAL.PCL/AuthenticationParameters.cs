@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -45,6 +45,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string Resource { get; set; }
 
         /// <summary>
+        /// Creates authentication parameters from address of the resource. This method expects the resource server to return unauthorized response
+        /// with WWW-Authenticate header containing authentication parameters.
+        /// </summary>
+        /// <param name="resourceUrl">Address of the resource</param>
+        /// <returns>AuthenticationParameters object containing authentication parameters</returns>
+        public static async Task<AuthenticationParameters> CreateFromResourceUrlAsync(Uri resourceUrl)
+        {
+            return await CreateFromResourceUrlCommonAsync(resourceUrl);
+        }
+
+        /// <summary>
+        /// Creates authentication parameters from the response received from the response received from the resource. This method expects the response to have unauthorized status and
+        /// WWW-Authenticate header containing authentication parameters.</summary>
+        /// <param name="response">Response received from the resource.</param>
+        /// <returns>AuthenticationParameters object containing authentication parameters</returns>
+        public static AuthenticationParameters CreateFromUnauthorizedResponse(HttpWebResponse response)
+        {
+            return CreateFromUnauthorizedResponseCommon(PlatformPlugin.HttpWebRequestFactory.CreateResponse(response));
+        }
+
+        /// <summary>
         /// Creates authentication parameters from the WWW-Authenticate header in response received from resource. This method expects the header to contain authentication parameters.
         /// </summary>
         /// <param name="authenticateHeader">Content of header WWW-Authenticate header</param>
@@ -59,7 +80,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             authenticateHeader = authenticateHeader.Trim();
 
             // This also checks for cases like "BearerXXXX authorization_uri=...." and "Bearer" and "Bearer "
-            if (!authenticateHeader.StartsWith(Bearer, StringComparison.OrdinalIgnoreCase) 
+            if (!authenticateHeader.StartsWith(Bearer, StringComparison.OrdinalIgnoreCase)
                 || authenticateHeader.Length < Bearer.Length + 2
                 || !char.IsWhiteSpace(authenticateHeader[Bearer.Length]))
             {

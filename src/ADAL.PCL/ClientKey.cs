@@ -20,8 +20,19 @@ using System;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal partial class ClientKey
+    internal class ClientKey
     {
+        public ClientKey(string clientId)
+        {
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                throw new ArgumentNullException("clientId");
+            }
+
+            this.ClientId = clientId;
+            this.HasCredential = false;
+        }
+
         public ClientKey(ClientCredential clientCredential)
         {
             if (clientCredential == null)
@@ -67,5 +78,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public ClientAssertion Assertion { get; private set; }
 
         public Authenticator Authenticator { get; private set; }
+
+        public string ClientId { get; private set; }
+
+        public bool HasCredential { get; private set; }
     }
 }

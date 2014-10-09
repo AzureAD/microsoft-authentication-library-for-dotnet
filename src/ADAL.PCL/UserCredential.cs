@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,12 +16,39 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Security;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    internal enum UserAuthType
+    {
+        IntegratedAuth,
+        UsernamePassword
+    }
+
+    // Disabled Non-Interactive Feature
+    /// <summary>
+    /// Credential used for integrated authentication on domain-joined machines.
+    /// </summary>
     public sealed partial class UserCredential
     {
+        /// <summary>
+        /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
+        /// and it can only be used in domain joined scenarios.
+        /// </summary>
+        public UserCredential()
+        {
+            this.UserAuthType = UserAuthType.IntegratedAuth;
+        }
+
+        /// <summary>
+        /// Constructor to create credential with client id and secret
+        /// </summary>
+        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
+        public UserCredential(string userName)
+        {
+            this.UserName = userName;
+            this.UserAuthType = UserAuthType.IntegratedAuth;
+        }
+
         /// <summary>
         /// Constructor to create credential with client id and secret
         /// </summary>
@@ -33,6 +60,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.Password = password;
             this.UserAuthType = UserAuthType.UsernamePassword;
         }
+
+        /// <summary>
+        /// Gets identifier of the user.
+        /// </summary>
+        public string UserName { get; internal set; }
+
+        internal UserAuthType UserAuthType { get; private set; }
 
         internal string Password { get; private set; }
 
