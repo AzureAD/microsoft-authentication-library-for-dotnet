@@ -17,57 +17,31 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal partial class AcquireTokenInteractiveHandler
     {
-        protected override Task PreTokenRequest()
+        protected override async Task PreTokenRequest()
         {
-            base.PreTokenRequest();
+            await base.PreTokenRequest();
 
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
-            this.AcquireAuthorization();
+            await this.AcquireAuthorizationAsync();
             this.VerifyAuthorizationResult();
-
-            return CompletedTask;
         }
 
-        internal void AcquireAuthorization()
+        internal async Task AcquireAuthorizationAsync()
         {
-            var sendAuthorizeRequest = new Action(
-                delegate
-                {
-                    Uri authorizationUri = this.CreateAuthorizationUri(IncludeFormsAuthParams());
-                    string resultUri = this.webUi.Authenticate(authorizationUri, this.redirectUri);
-                    this.authorizationResult = OAuth2Response.ParseAuthorizeResponse(resultUri, this.CallState);
-                });
-
-            // If the thread is MTA, it cannot create or communicate with WebBrowser which is a COM control.
-            // In this case, we have to create the browser in an STA thread via StaTaskScheduler object.
-            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
-            {
-                using (var staTaskScheduler = new StaTaskScheduler(1))
-                {
-                    Task.Factory.StartNew(sendAuthorizeRequest, CancellationToken.None, TaskCreationOptions.None, staTaskScheduler).Wait();
-                }
-            }
-            else
-            {
-                sendAuthorizeRequest();
-            }
+            Uri authorizationUri = this.CreateAuthorizationUri(await IncludeFormsAuthParamsAsync());
+            string resultUri = await this.webUi.AcquireAuthorizationAsync(authorizationUri, this.redirectUri, this.CallState);
+            this.authorizationResult = OAuth2Response.ParseAuthorizeResponse(resultUri, this.CallState);
         }
 
-        internal static bool IncludeFormsAuthParams()
+        internal async Task<bool> IncludeFormsAuthParamsAsync()
         {
-            return IsUserLocal() && IsDomainJoined();
+            return (await PlatformPlugin.PlatformInformation.IsUserLocalAsync(this.CallState)) && PlatformPlugin.PlatformInformation.IsDomainJoined();
         }
 
         internal async Task<Uri> CreateAuthorizationUriAsync(Guid correlationId)
@@ -75,63 +49,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.CallState.CorrelationId = correlationId;
             await this.Authenticator.UpdateFromTemplateAsync(this.CallState);
             return this.CreateAuthorizationUri(false);
-        }
-
-        private static bool IsDomainJoined()
-        {
-            bool returnValue = false;
-            IntPtr pDomain = IntPtr.Zero;
-            try
-            {
-                NativeMethods.NetJoinStatus status = NativeMethods.NetJoinStatus.NetSetupUnknownStatus;
-                int result = NativeMethods.NetGetJoinInformation(null, out pDomain, out status);
-                if (pDomain != IntPtr.Zero)
-                {
-                    NativeMethods.NetApiBufferFree(pDomain);
-                }
-
-                returnValue = result == NativeMethods.ErrorSuccess &&
-                              status == NativeMethods.NetJoinStatus.NetSetupDomainName;
-            }
-            catch (Exception)
-            {
-                // ignore the exception as the result is already set to false;
-            }
-            finally
-            {
-                pDomain = IntPtr.Zero;
-            }
-            return returnValue;
-        }
-
-        private static bool IsUserLocal()
-        {
-            string prefix = WindowsIdentity.GetCurrent().Name.Split('\\')[0].ToUpperInvariant();
-            return prefix.Equals(Environment.MachineName.ToUpperInvariant());
-        }
-
-        private void SetRedirectUriRequestParameter()
-        {
-            this.redirectUriRequestParameter = redirectUri.AbsoluteUri;
-        }
-
-        private static class NativeMethods
-        {
-            public const int ErrorSuccess = 0;
-
-            [DllImport("Netapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-            public static extern int NetGetJoinInformation(string server, out IntPtr domain, out NetJoinStatus status);
-
-            [DllImport("Netapi32.dll")]
-            public static extern int NetApiBufferFree(IntPtr Buffer);
-
-            public enum NetJoinStatus
-            {
-                NetSetupUnknownStatus = 0,
-                NetSetupUnjoined,
-                NetSetupWorkgroupName,
-                NetSetupDomainName
-            }
         }
     }
 }

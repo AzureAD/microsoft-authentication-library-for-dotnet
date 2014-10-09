@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -35,11 +34,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// Token cache class used by <see cref="AuthenticationContext"/> to store access and refresh tokens.
     /// </summary>
-#if ADAL_NET
-    public class TokenCache
-#else
-    public sealed partial class TokenCache
-#endif
+    public partial class TokenCache
     {
         internal delegate Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result, string resource, ClientKey clientKey, CallState callState);
 
@@ -57,12 +52,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             DefaultShared = new TokenCache();
 
-#if !ADAL_NET
             DefaultShared.BeforeAccess = DefaultTokenCache_BeforeAccess;
             DefaultShared.AfterAccess = DefaultTokenCache_AfterAccess;
 
             DefaultTokenCache_BeforeAccess(null);
-#endif
         }
 
         /// <summary>
@@ -76,7 +69,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Constructor receiving state of the cache
         /// </summary>        
-        public TokenCache([ReadOnlyArray] byte[] state)
+        public TokenCache(byte[] state)
             : this()
         {
             this.Deserialize(state);
@@ -150,7 +143,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Deserializes state of the cache. The state should be the blob received earlier by calling the method Serialize.
         /// </summary>
         /// <param name="state">State of the cache as a blob</param>
-        public void Deserialize([ReadOnlyArray] byte[] state)
+        public void Deserialize(byte[] state)
         {
             if (state == null)
             {
@@ -192,11 +185,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Reads a copy of the list of all items in the cache. 
         /// </summary>
         /// <returns>The items in the cache</returns>
-#if ADAL_NET
         public virtual IEnumerable<TokenCacheItem> ReadItems()
-#else
-        public IEnumerable<TokenCacheItem> ReadItems()
-#endif
         {
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
             this.OnBeforeAccess(args);
@@ -216,11 +205,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Deletes an item from the cache.
         /// </summary>
         /// <param name="item">The item to delete from the cache</param>
-#if ADAL_NET
         public virtual void DeleteItem(TokenCacheItem item)
-#else
-        public void DeleteItem(TokenCacheItem item)
-#endif
         {
             if (item == null)
             {
@@ -253,11 +238,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
         /// impact all the instances of <see cref="AuthenticationContext"/> which share that cache.
         /// </summary>
-#if ADAL_NET
         public virtual void Clear()
-#else
-        public void Clear()
-#endif
         {
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
             this.OnBeforeAccess(args);
@@ -317,7 +298,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (result != null)
                 {
-                    Logger.Verbose(callState, "A matching token was found in the cache");
+                    PlatformPlugin.Logger.Verbose(callState, "A matching token was found in the cache");
                 }
             }
 
@@ -388,7 +369,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 // There is more than one resource specific token.  It is 
                 // ambiguous which one to return so throw.
                 var ex = new AdalException(AdalError.MultipleTokensMatched);
-                Logger.LogException(callState, ex);
+                PlatformPlugin.Logger.LogException(callState, ex);
                 throw ex;
             }
 

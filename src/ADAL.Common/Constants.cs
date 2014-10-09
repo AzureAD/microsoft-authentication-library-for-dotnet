@@ -20,14 +20,10 @@ using System.Xml.Linq;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-#if ADAL_NET
     /// <summary>
     /// Error code returned as a property in AdalException
     /// </summary>
     public static class AdalError
-#else
-    internal static partial class AdalError
-#endif
     {
         /// <summary>
         /// Unknown error.
@@ -70,7 +66,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string AssemblyLoadFailed = "assembly_load_failed";
 
         /// <summary>
-        /// Loading required assembly failed.
+        /// Assembly not found.
+        /// </summary>
+        public const string AssemblyNotFound = "assembly_not_found";
+
+        /// <summary>
+        /// Invalid owner window type.
         /// </summary>
         public const string InvalidOwnerWindowType = "invalid_owner_window_type";
 
@@ -252,10 +253,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// The active directory authentication error message.
     /// </summary>
-    internal static partial class AdalErrorMessage
+    internal static class AdalErrorMessage
     {
         public const string AccessingMetadataDocumentFailed = "Accessing WS metadata exchange failed";
-        public const string AssemblyLoadFailedTemplate = "Loading an assembly required for interactive user authentication failed. Make sure assembly '{0}' exists";
+        public const string AssemblyNotFoundTemplate = "Assembly required for the platform not found. Make sure assembly '{0}' exists";
+        public const string AssemblyLoadFailedTemplate = "Loading an assembly required for the platform failed. Make sure assembly for the correct platform '{0}' exists";
         public const string AuthenticationUiFailed = "The browser based authentication dialog failed to complete";
         public const string AuthorityInvalidUriFormat = "'authority' should be in Uri format";
         public const string AuthorityNotInValidList = "'authority' is not in the list of valid addresses";

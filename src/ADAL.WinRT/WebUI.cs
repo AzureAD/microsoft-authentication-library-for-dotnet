@@ -20,7 +20,6 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Security.Authentication.Web;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -29,19 +28,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private readonly PromptBehavior promptBehavior;
         private readonly bool useCorporateNetwork;
 
-        public WebUI(PromptBehavior promptBehavior, bool useCorporateNetwork)
+        public WebUI(IAuthorizationParameters parameters)
         {
+            if (!(parameters is AuthorizationParameters))
+            {
+                throw new ArgumentException("parameters should be of type AuthorizationParameters", "parameters");
+            }
+
             this.promptBehavior = promptBehavior;
             this.useCorporateNetwork = useCorporateNetwork;
         }
 
-        public async Task<AuthorizationResult> AuthenticateAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public string AuthorizationResultUri { get; private set; }
+
+        public async Task<string> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
             bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
             if (this.promptBehavior == PromptBehavior.Never && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
             {
-                var ex = new ArgumentException(AdalErrorMessage.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
-                Logger.LogException(callState, ex);
+                var ex = new ArgumentException(AdalErrorMessageEx.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
+                PlatformPlugin.Logger.LogException(callState, ex);
                 throw ex;
             }
             
@@ -68,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (FileNotFoundException ex)
             {
                 var adalEx = new AdalException(AdalError.AuthenticationUiFailed, ex);
-                Logger.LogException(callState, adalEx);
+                PlatformPlugin.Logger.LogException(callState, adalEx);
                 throw adalEx;
             }
             catch (Exception ex)
@@ -76,16 +82,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (this.promptBehavior == PromptBehavior.Never)
                 {
                     var adalEx = new AdalException(AdalError.UserInteractionRequired, ex);
-                    Logger.LogException(callState, adalEx);
+                    PlatformPlugin.Logger.LogException(callState, adalEx);
                     throw adalEx;
                 }
 
                 var uiFailedEx = new AdalException(AdalError.AuthenticationUiFailed, ex);
-                Logger.LogException(callState, uiFailedEx);
+                PlatformPlugin.Logger.LogException(callState, uiFailedEx);
                 throw uiFailedEx;
             }
 
-            return ProcessAuthorizationResult(webAuthenticationResult, callState);
+            AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult, callState);
+
+            return "https://dummy.com?code=" + result.Code;
         }
 
         private static AuthorizationResult ProcessAuthorizationResult(WebAuthenticationResult webAuthenticationResult, CallState callState)

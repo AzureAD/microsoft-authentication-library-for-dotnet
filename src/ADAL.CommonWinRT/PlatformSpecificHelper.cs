@@ -32,13 +32,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
             return localSettings.Values.ContainsKey(variable) ? localSettings.Values[variable].ToString() : null;
         }
-
-        public static string PlatformSpecificToLower(this string input)
-        {
-            // WinRT does not have the overload with CultureInfo parameter
-            return input.ToLower();
-        }
-
+       
         public static string CreateSha256Hash(string input)
         {
             IBuffer inputBuffer = CryptographicBuffer.ConvertStringToBinary(input, BinaryStringEncoding.Utf8);

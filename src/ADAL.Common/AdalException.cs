@@ -21,17 +21,12 @@ using System.Globalization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-#if ADAL_NET
     using System.Runtime.Serialization;
 
     /// <summary>
     /// The exception type thrown when an error occurs during token acquisition.
     /// </summary>
-    [Serializable]
     public class AdalException : Exception
-#else
-    class AdalException : Exception
-#endif
     {
         internal enum ErrorFormat
         {
@@ -103,36 +98,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public string ErrorCode { get; private set; }
 
-#if ADAL_NET
-        /// <summary>
-        /// Initializes a new instance of the exception class with serialized data.
-        /// </summary>
-        /// <param name="info">The System.Runtime.Serialization.SerializationInfo that holds the serialized object data about the exception being thrown.</param>
-        /// <param name="context">The System.Runtime.Serialization.StreamingContext that contains contextual information about the source or destination.</param>
-        protected AdalException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-            this.ErrorCode = info.GetString("ErrorCode");
-        }
-
-        /// <summary>
-        /// Sets the System.Runtime.Serialization.SerializationInfo with information about the exception.
-        /// </summary>
-        /// <param name="info">The System.Runtime.Serialization.SerializationInfo that holds the serialized object data about the exception being thrown.</param>
-        /// <param name="context">The System.Runtime.Serialization.StreamingContext that contains contextual information about the source or destination.</param>
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-            {
-                throw new ArgumentNullException("info");
-            }
-
-            info.AddValue("ErrorCode", this.ErrorCode);
-
-            base.GetObjectData(info, context);
-        }
-#endif
-
         private static string GetErrorMessage(string errorCode)
         {
             string message = null;
@@ -157,146 +122,94 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 case AdalError.IdentityProviderRequestFailed:
                     message = AdalErrorMessage.IdentityProviderRequestFailed;
                     break;
-            }
 
-            // The switch case is divided into two to address the strange behavior of winmdidl tool for generating idl file from winmd for ADAL WinRT.
-            if (message == null)
-            {
-                switch (errorCode)
-                {
-                    case AdalError.StsTokenRequestFailed:
-                        message = AdalErrorMessage.StsTokenRequestFailed;
-                        break;
+                case AdalError.StsTokenRequestFailed:
+                    message = AdalErrorMessage.StsTokenRequestFailed;
+                    break;
 
-                    case AdalError.EncodedTokenTooLong:
-                        message = AdalErrorMessage.EncodedTokenTooLong;
-                        break;
+                case AdalError.EncodedTokenTooLong:
+                    message = AdalErrorMessage.EncodedTokenTooLong;
+                    break;
 
-                    case AdalError.StsMetadataRequestFailed:
-                        message = AdalErrorMessage.StsMetadataRequestFailed;
-                        break;
+                case AdalError.StsMetadataRequestFailed:
+                    message = AdalErrorMessage.StsMetadataRequestFailed;
+                    break;
 
-                    case AdalError.AuthorityNotInValidList:
-                        message = AdalErrorMessage.AuthorityNotInValidList;
-                        break;
+                case AdalError.AuthorityNotInValidList:
+                    message = AdalErrorMessage.AuthorityNotInValidList;
+                    break;
 
-                    case AdalError.UnknownUserType:
-                        message = AdalErrorMessage.UnknownUserType;
-                        break;
-                }
-            }
+                case AdalError.UnknownUserType:
+                    message = AdalErrorMessage.UnknownUserType;
+                    break;
 
-            // The switch case is divided into two to address the strange behavior of winmdidl tool for generating idl file from winmd for ADAL WinRT.
-            if (message == null)
-            {
-                switch (errorCode)
-                {
-                    case AdalError.UnknownUser:
-                        message = AdalErrorMessage.UnknownUser;
-                        break;
+                case AdalError.UnknownUser:
+                    message = AdalErrorMessage.UnknownUser;
+                    break;
 
-                    case AdalError.UserRealmDiscoveryFailed:
-                        message = AdalErrorMessage.UserRealmDiscoveryFailed;
-                        break;
+                case AdalError.UserRealmDiscoveryFailed:
+                    message = AdalErrorMessage.UserRealmDiscoveryFailed;
+                    break;
 
-                    case AdalError.AccessingWsMetadataExchangeFailed:
-                        message = AdalErrorMessage.AccessingMetadataDocumentFailed;
-                        break;
+                case AdalError.AccessingWsMetadataExchangeFailed:
+                    message = AdalErrorMessage.AccessingMetadataDocumentFailed;
+                    break;
 
-                    case AdalError.ParsingWsMetadataExchangeFailed:
-                        message = AdalErrorMessage.ParsingMetadataDocumentFailed;
-                        break;
-                }
-            }
+                case AdalError.ParsingWsMetadataExchangeFailed:
+                    message = AdalErrorMessage.ParsingMetadataDocumentFailed;
+                    break;
 
-            // The switch case is divided into two to address the strange behavior of winmdidl tool for generating idl file from winmd for ADAL WinRT.
-            if (message == null)
-            {
-                switch (errorCode)
-                {
-                    case AdalError.WsTrustEndpointNotFoundInMetadataDocument:
-                        message = AdalErrorMessage.WsTrustEndpointNotFoundInMetadataDocument;
-                        break;
+                case AdalError.WsTrustEndpointNotFoundInMetadataDocument:
+                    message = AdalErrorMessage.WsTrustEndpointNotFoundInMetadataDocument;
+                    break;
 
-                    case AdalError.ParsingWsTrustResponseFailed:
-                        message = AdalErrorMessage.ParsingWsTrustResponseFailed;
-                        break;
+                case AdalError.ParsingWsTrustResponseFailed:
+                    message = AdalErrorMessage.ParsingWsTrustResponseFailed;
+                    break;
 
-                    case AdalError.AuthenticationCanceled:
-                        message = AdalErrorMessage.AuthenticationCanceled;
-                        break;
+                case AdalError.AuthenticationCanceled:
+                    message = AdalErrorMessage.AuthenticationCanceled;
+                    break;
 
-                    case AdalError.NetworkNotAvailable:
-                        message = AdalErrorMessage.NetworkIsNotAvailable;
-                        break;
-                }
-            }
+                case AdalError.NetworkNotAvailable:
+                    message = AdalErrorMessage.NetworkIsNotAvailable;
+                    break;
 
-            // The switch case is divided into two to address the strange behavior of winmdidl tool for generating idl file from winmd for ADAL WinRT.
-            if (message == null)
-            {
-                switch (errorCode)
-                {
-                    case AdalError.AuthenticationUiFailed:
-                        message = AdalErrorMessage.AuthenticationUiFailed;
-                        break;
+                case AdalError.AuthenticationUiFailed:
+                    message = AdalErrorMessage.AuthenticationUiFailed;
+                    break;
 
-                    case AdalError.UserInteractionRequired:
-                        message = AdalErrorMessage.UserInteractionRequired;
-                        break;
+                case AdalError.UserInteractionRequired:
+                    message = AdalErrorMessage.UserInteractionRequired;
+                    break;
 
-                    case AdalError.MissingFederationMetadataUrl:
-                        message = AdalErrorMessage.MissingFederationMetadataUrl;
-                        break;
+                case AdalError.MissingFederationMetadataUrl:
+                    message = AdalErrorMessage.MissingFederationMetadataUrl;
+                    break;
 
-                    case AdalError.IntegratedAuthFailed:
-                        message = AdalErrorMessage.IntegratedAuthFailed;
-                        break;
-                }
-            }
+                case AdalError.IntegratedAuthFailed:
+                    message = AdalErrorMessage.IntegratedAuthFailed;
+                    break;
 
-#if ADAL_WINRT
-            // The switch case is divided into two to address the strange behavior of winmdidl tool for generating idl file from winmd for ADAL WinRT.
-            if (message == null)
-            {
-                switch (errorCode)
-                {
-                    case AdalError.UnauthorizedUserInformationAccess:
-                        message = AdalErrorMessage.UnauthorizedUserInformationAccess;
-                        break;
+                case AdalError.UnauthorizedResponseExpected:
+                    message = AdalErrorMessage.UnauthorizedResponseExpected;
+                    break;
 
-                    case AdalError.CannotAccessUserInformation:
-                        message = AdalErrorMessage.CannotAccessUserInformation;
-                        break;
-                }
-            }
-#endif
+                case AdalError.MultipleTokensMatched:
+                    message = AdalErrorMessage.MultipleTokensMatched;
+                    break;
 
-            // The switch case is divided into two to address the strange behavior of winmdidl tool for generating idl file from winmd for ADAL WinRT.
-            if (message == null)
-            {
-                switch (errorCode)
-                {
-                    case AdalError.UnauthorizedResponseExpected:
-                        message = AdalErrorMessage.UnauthorizedResponseExpected;
-                        break;
+                case AdalError.PasswordRequiredForManagedUserError:
+                    message = AdalErrorMessage.PasswordRequiredForManagedUserError;
+                    break;
 
-                    case AdalError.MultipleTokensMatched:
-                        message = AdalErrorMessage.MultipleTokensMatched;
-                        break;
+                case AdalError.GetUserNameFailed:
+                    message = AdalErrorMessage.GetUserNameFailed;
+                    break;
 
-                    case AdalError.PasswordRequiredForManagedUserError:
-                        message = AdalErrorMessage.PasswordRequiredForManagedUserError;
-                        break;
-
-                    case AdalError.GetUserNameFailed:
-                        message = AdalErrorMessage.GetUserNameFailed;
-                        break;
-
-                    default:
-                        message = AdalErrorMessage.Unknown;
-                        break;
-                }
+                default:
+                    message = AdalErrorMessage.Unknown;
+                    break;
             }
 
             return String.Format(CultureInfo.InvariantCulture, "{0}: {1}", errorCode, message);

@@ -34,29 +34,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.UserAuthType = UserAuthType.UsernamePassword;
         }
 
-        /// <summary>
-        /// Constructor to create credential with client id and secret
-        /// </summary>
-        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        /// <param name="securePassword">User password.</param>
-        public UserCredential(string userName, SecureString securePassword)
-        {
-            this.UserName = userName;
-            this.SecurePassword = securePassword;
-            this.UserAuthType = UserAuthType.UsernamePassword;
-        }
-
         internal string Password { get; private set; }
-
-        internal SecureString SecurePassword { get; private set; }
 
         internal char[] PasswordToCharArray()
         {
-            if (this.SecurePassword != null)
-            {
-                return this.SecurePassword.ToCharArray();
-            }
-
             return (this.Password != null) ? this.Password.ToCharArray() : null;
         }
     }

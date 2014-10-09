@@ -74,65 +74,21 @@ namespace Test.ADAL.Common
         {
         }
 
-        internal AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri)
+        private async Task<AuthenticationResultProxy> RunTaskAsync(Task<AuthenticationResult> task)
         {
-            return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri).AsTask().Result);
-        }
+            AuthenticationResultProxy resultProxy;
 
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehaviorProxy)
-        {
-            PromptBehavior promptBehavior = (promptBehaviorProxy == PromptBehaviorProxy.Always) ? PromptBehavior.Always : PromptBehavior.Auto;
-
-            return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri, promptBehavior).AsTask().Result);
-        }
-
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehaviorProxy, UserIdentifier userId)
-        {
-            PromptBehavior promptBehavior = (promptBehaviorProxy == PromptBehaviorProxy.Always) ? PromptBehavior.Always : PromptBehavior.Auto;
-
-            return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri, promptBehavior, userId).AsTask().Result);
-        }
-
-        public AuthenticationResultProxy AcquireToken(string resource, string clientId, Uri redirectUri, PromptBehaviorProxy promptBehaviorProxy, UserIdentifier userId, string extraQueryParameters)
-        {
-            PromptBehavior promptBehavior = (promptBehaviorProxy == PromptBehaviorProxy.Always) ? PromptBehavior.Always : PromptBehavior.Auto;
-
-            return GetAuthenticationResultProxy(this.context.AcquireTokenAsync(resource, clientId, redirectUri, promptBehavior, userId, extraQueryParameters).AsTask().Result);
-        }
-
-        public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId)
-        {
-            return GetAuthenticationResultProxy(await this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId));
-        }
-
-        public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, string resource)
-        {
-            return GetAuthenticationResultProxy(await this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId, resource));
-        }
-
-        private static AuthenticationResultProxy GetAuthenticationResultProxy(AuthenticationResult result)
-        {
-            return new AuthenticationResultProxy
+            try
             {
-                AccessToken = result.AccessToken,
-                AccessTokenType = result.AccessTokenType,
-                ExpiresOn = result.ExpiresOn,
-                IsMultipleResourceRefreshToken = result.IsMultipleResourceRefreshToken,
-                RefreshToken = result.RefreshToken,
-                IdToken = result.IdToken,
-                TenantId = result.TenantId,
-                UserInfo = result.UserInfo,
-                Error = result.Error,
-                ErrorDescription = result.ErrorDescription,
-                Status = (result.Status == AuthenticationStatus.Success) ? AuthenticationStatusProxy.Success :
-                    ((result.Status == AuthenticationStatus.ClientError) ? AuthenticationStatusProxy.ClientError : AuthenticationStatusProxy.ServiceError),                
-                ExceptionStatusCode = result.StatusCode
-            };
-        }
+                AuthenticationResult result = await task;
+                resultProxy = GetAuthenticationResultProxy(result);
+            }
+            catch (Exception ex)
+            {
+                resultProxy = GetAuthenticationResultProxy(ex);
+            }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string validResource, string validClientId, UserCredentialProxy credential)
-        {
-            return GetAuthenticationResultProxy(await this.context.AcquireTokenAsync(validResource, validClientId, new UserCredential(credential.UserId)));
+            return resultProxy;
         }
     }
 }

@@ -19,7 +19,6 @@
 using System.Net;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-#if ADAL_NET
     using System;
     using System.Net;
     using System.Runtime.Serialization;
@@ -27,11 +26,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// The exception type thrown when user returned by service does not match user in the request.
     /// </summary>
-    [Serializable]
     public class AdalServiceException : AdalException
-#else
-    class AdalServiceException : AdalException
-#endif
     {
         /// <summary>
         ///  Initializes a new instance of the exception class with a specified
@@ -67,7 +62,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public AdalServiceException(string errorCode, string message, WebException innerException)
             : base(errorCode, message, innerException)
         {
-            IHttpWebResponse response = NetworkPlugin.HttpWebRequestFactory.CreateResponse(innerException.Response);
+            IHttpWebResponse response = PlatformPlugin.HttpWebRequestFactory.CreateResponse(innerException.Response);
             this.StatusCode = (response != null) ? (int)response.StatusCode : 0;
         }
 
@@ -77,35 +72,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// You can use this code for purposes such as implementing retry logic or error investigation.
         /// </summary>
         public int StatusCode { get; set; }
-
-#if ADAL_NET
-        /// <summary>
-        /// Initializes a new instance of the exception class with serialized data.
-        /// </summary>
-        /// <param name="info">The System.Runtime.Serialization.SerializationInfo that holds the serialized object data about the exception being thrown.</param>
-        /// <param name="context">The System.Runtime.Serialization.StreamingContext that contains contextual information about the source or destination.</param>
-        protected AdalServiceException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-            this.StatusCode = info.GetInt32("StatusCode");
-        }
-
-        /// <summary>
-        /// Sets the System.Runtime.Serialization.SerializationInfo with information about the exception.
-        /// </summary>
-        /// <param name="info">The System.Runtime.Serialization.SerializationInfo that holds the serialized object data about the exception being thrown.</param>
-        /// <param name="context">The System.Runtime.Serialization.StreamingContext that contains contextual information about the source or destination.</param>
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-            {
-                throw new ArgumentNullException("info");
-            }
-
-            info.AddValue("StatusCode", this.StatusCode);
-
-            base.GetObjectData(info, context);
-        }
-#endif
     }
 }

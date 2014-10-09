@@ -116,11 +116,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 result = new AuthenticationResult(tokenResponse.TokenType, tokenResponse.AccessToken, tokenResponse.RefreshToken, expiresOn)
                     {
-#if ADAL_NET
                         // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
                         // to get it from the STS response.
                         Resource = tokenResponse.Resource,
-#endif                        
                         IsMultipleResourceRefreshToken = (!string.IsNullOrWhiteSpace(tokenResponse.RefreshToken) && !string.IsNullOrWhiteSpace(tokenResponse.Resource)),
                     };
 
@@ -170,13 +168,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             else if (tokenResponse.Error != null)
             {
                 var ex = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription);
-                Logger.LogException(callState, ex);
+                PlatformPlugin.Logger.LogException(callState, ex);
                 throw ex;
             }
             else
             {
                 var ex = new AdalServiceException(AdalError.Unknown, AdalErrorMessage.Unknown);
-                Logger.LogException(callState, ex);
+                PlatformPlugin.Logger.LogException(callState, ex);
                 throw ex;
             }
 

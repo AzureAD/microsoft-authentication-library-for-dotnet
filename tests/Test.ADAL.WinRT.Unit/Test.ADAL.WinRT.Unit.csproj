@@ -129,9 +129,13 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ADAL.WinRT\ADAL.WinRT.csproj">
-      <Project>{c174f2a5-f06e-4ea4-a811-d41cdc1013b1}</Project>
-      <Name>ADAL.WinRT</Name>
+    <ProjectReference Include="..\..\src\ADAL.PCL.WinRT\ADAL.PCL.WinRT.csproj">
+      <Project>{826d90f4-ca79-4788-918c-b66aa5cc6df0}</Project>
+      <Name>ADAL.PCL.WinRT</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ADAL.PCL\ADAL.PCL.csproj">
+      <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
+      <Name>ADAL.PCL</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">

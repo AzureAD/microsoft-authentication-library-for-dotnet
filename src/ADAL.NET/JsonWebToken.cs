@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public JsonWebToken(ClientAssertionCertificate certificate, string audience)
         {
-            DateTime validFrom = NetworkPlugin.RequestCreationHelper.GetJsonWebTokenValidFrom();
+            DateTime validFrom = PlatformPlugin.RequestCreationHelper.GetJsonWebTokenValidFrom();
 
             DateTime validTo = validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds);
 
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Subject = certificate.ClientId
                 };
 
-            this.payload.JwtIdentifier = NetworkPlugin.RequestCreationHelper.GetJsonWebTokenId();
+            this.payload.JwtIdentifier = PlatformPlugin.RequestCreationHelper.GetJsonWebTokenId();
         }
 
         public ClientAssertion Sign(ClientAssertionCertificate credential)
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (MaxTokenLength < token.Length)
             {
                 var ex = new AdalException(AdalError.EncodedTokenTooLong);
-                Logger.LogException(null, ex);
+                PlatformPlugin.Logger.LogException(null, ex);
                 throw ex;
             }
 
@@ -187,7 +187,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 get
                 {
                     // Thumbprint should be url encoded
-                    return Base64UrlEncoder.Encode(this.Credential.Certificate.GetCertHash());
+                    return PlatformPlugin.CryptographyHelper.GetX509CertificateThumbprint(this.Credential);
                 }
 
                 set

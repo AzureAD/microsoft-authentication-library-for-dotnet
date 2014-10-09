@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public void Close()
         {
-            PlatformSpecificHelper.CloseHttpWebResponse(this.response);
+            PlatformPlugin.PlatformInformation.CloseHttpWebResponse(this.response);
         }
 
         public void Dispose()

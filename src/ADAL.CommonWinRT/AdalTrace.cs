@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             set
             {
                 level = value;
-                Logger.SetListenerLevel(level);
+                ((Logger)PlatformPlugin.Logger).SetListenerLevel(level);
             }            
         }
     }

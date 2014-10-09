@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -76,12 +77,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         value = UrlDecode(value);
                     }
 
-                    key = key.Trim().PlatformSpecificToLower();
+                    key = key.Trim().ToLower();
                     value = value.Trim().Trim(new[] { '\"' }).Trim();
 
                     if (response.ContainsKey(key))
                     {
-                        Logger.Warning(callState, "Key/value pair list contains redundant key '{0}'.", key);
+                        PlatformPlugin.Logger.Warning(callState, "Key/value pair list contains redundant key '{0}'.", key);
                     }
 
                     response[key] = value;

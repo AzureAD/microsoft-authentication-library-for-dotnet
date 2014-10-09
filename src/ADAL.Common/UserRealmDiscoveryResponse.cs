@@ -46,14 +46,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             userRealmEndpoint += (userName + "?api-version=1.0");
 
             userRealmEndpoint = HttpHelper.CheckForExtraQueryParameter(userRealmEndpoint);
-            Logger.Information(callState, "Sending user realm discovery request to '{0}'", userRealmEndpoint);
+            PlatformPlugin.Logger.Information(callState, "Sending user realm discovery request to '{0}'", userRealmEndpoint);
 
             UserRealmDiscoveryResponse userRealmResponse;
             ClientMetrics clientMetrics = new ClientMetrics();
 
             try
             {
-                IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(userRealmEndpoint);
+                IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create(userRealmEndpoint);
                 request.Method = "GET";
                 request.Accept = "application/json";
                 HttpHelper.AddCorrelationIdHeadersToRequest(request, callState);

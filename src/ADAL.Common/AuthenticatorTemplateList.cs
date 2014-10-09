@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             string[] trustedHostList = { "login.windows.net", "login.chinacloudapi.cn", "login.cloudgovapi.us" };
 
-            string customAuthorityHost = PlatformSpecificHelper.GetEnvironmentVariable("customTrustedHost");
+            string customAuthorityHost = PlatformPlugin.PlatformInformation.GetEnvironmentVariable("customTrustedHost");
             if (string.IsNullOrWhiteSpace(customAuthorityHost))
             {
                 foreach (string host in trustedHostList)

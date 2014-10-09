@@ -19,47 +19,44 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation.Collections;
 using Windows.Security.Authentication.Web;
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class WebUI : IWebUI
     {
-        public WebUI()
+        private static SemaphoreSlim returnedUriReady;
+        private static string authorizationResultUri;
+
+        public async Task<string> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
+            returnedUriReady = new SemaphoreSlim(0);
+            Authenticate(authorizationUri, redirectUri, callState);
+            await returnedUriReady.WaitAsync();
+            return authorizationResultUri;
         }
 
-        public PromptBehavior PromptBehavior
+        public static void SetAuthorizationResultUri(string authorizationResultUriInput)
         {
-            get
-            {
-                // In lack of PromptBehavior in WinPhone, we always pass prompt=login.
-                return PromptBehavior.Always; 
-            }            
+            authorizationResultUri = authorizationResultUriInput;
+            returnedUriReady.Release();
         }
 
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, IDictionary<string, object> headersMap, CallState callState)
+        public void Authenticate(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
-            ValueSet set = new ValueSet();
-            foreach (string key in headersMap.Keys)
-            {
-                set[key] = headersMap[key];
-            }
-
             try
             {
-                WebAuthenticationBroker.AuthenticateAndContinue(authorizationUri, ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri) ? null : redirectUri, set, WebAuthenticationOptions.None);
+                WebAuthenticationBroker.AuthenticateAndContinue(authorizationUri, ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri) ? null : redirectUri, null, WebAuthenticationOptions.None);
             }
             catch (Exception ex)
             {
                 var adalEx = new AdalException(AdalError.AuthenticationUiFailed, ex);
-                Logger.LogException(callState, adalEx);
+                PlatformPlugin.Logger.LogException(callState, ex);
                 throw adalEx;
             }
         }

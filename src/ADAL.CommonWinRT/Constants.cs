@@ -19,14 +19,14 @@
 using System;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal static partial class AdalError
+    public static class AdalErrorEx
     {
         public const string UnauthorizedUserInformationAccess = "unauthorized_user_information_access";
         public const string CannotAccessUserInformation = "user_information_access_failed";
         public const string NeedToSetCallbackUriAsLocalSetting = "need_to_set_callback_uri_as_local_setting";
     }
 
-    internal static partial class AdalErrorMessage
+    internal static class AdalErrorMessageEx
     {
         public const string CannotAccessUserInformation = "Cannot access user information. Check machine's Privacy settings or initialize UserCredential with userId";
         public const string RedirectUriUnsupportedWithPromptBehaviorNever = "PromptBehavior.Never is supported in SSO mode only (null redirectUri)";

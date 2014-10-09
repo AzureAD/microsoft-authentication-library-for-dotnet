@@ -37,8 +37,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         static AuthenticationContext()
         {
-            Logger.Information(null, string.Format("ADAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
-                PlatformSpecificHelper.GetProductName(), AdalIdHelper.GetAdalVersion(), AdalIdHelper.GetAssemblyFileVersion(), AdalIdHelper.GetAssemblyInformationalVersion()));
+            PlatformPlugin.Logger.Information(null, string.Format("ADAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
+                PlatformPlugin.PlatformInformation.GetProductName(), AdalIdHelper.GetAdalVersion(), AdalIdHelper.GetAssemblyFileVersion(), AdalIdHelper.GetAssemblyInformationalVersion()));
         }
 
         /// <summary>
@@ -46,11 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Using this constructor will turn ON validation of the authority URL by default if validation is supported for the authority address.
         /// </summary>
         /// <param name="authority">Address of the authority to issue token.</param>
-#if ADAL_WINPHONE
-        private AuthenticationContext(string authority)
-#else
         public AuthenticationContext(string authority)
-#endif
             : this(authority, AuthorityValidationType.NotProvided, TokenCache.DefaultShared)
         {
         }
@@ -61,16 +57,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="authority">Address of the authority to issue token.</param>
         /// <param name="validateAuthority">Flag to turn address validation ON or OFF.</param>
-#if ADAL_WINPHONE
-        private AuthenticationContext(string authority, bool validateAuthority)
-#else
         public AuthenticationContext(string authority, bool validateAuthority)
-#endif
             : this(authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False, TokenCache.DefaultShared)
         {
         }
 
-#if ADAL_NET
         /// <summary>
         /// Constructor to create the context with the address of the authority.
         /// Using this constructor will turn ON validation of the authority URL by default if validation is supported for the authority address.
@@ -81,7 +72,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             : this(authority, AuthorityValidationType.NotProvided, tokenCache)
         {
         }
-#endif
 
         /// <summary>
         /// Constructor to create the context with the address of the authority and flag to turn address validation off.
@@ -90,11 +80,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="authority">Address of the authority to issue token.</param>
         /// <param name="validateAuthority">Flag to turn address validation ON or OFF.</param>
         /// <param name="tokenCache">Token cache used to lookup cached tokens on calls to AcquireToken</param>
-#if ADAL_WINPHONE
-        private AuthenticationContext(string authority, bool validateAuthority, TokenCache tokenCache)
-#else
         public AuthenticationContext(string authority, bool validateAuthority, TokenCache tokenCache)
-#endif
             : this(authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False, tokenCache)
         {
         }
@@ -129,24 +115,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-#if ADAL_NET
         /// <summary>
-        /// Gets the TokenCache
-        /// </summary>
-        /// <remarks>
-        /// By default, TokenCache is an in-memory collection of key/value pairs. 
-        /// Library will automatically save tokens in the cache when AcquireToken is called.  
-        /// The default token cache is static so all tokens will available to all instances of AuthenticationContext. To use a custom TokenCache pass one to the <see cref="AuthenticationContext">.constructor</see>.
-        /// To turn OFF token caching, use the constructor and set TokenCache to null.
-        /// </remarks>
-#else
-        /// <summary>
-        /// Property to provide ADAL's token cache. By default, TokenCache is a persistent cache based on application's local settings. 
+        /// Property to provide ADAL's token cache. Depending on the platform, TokenCache may have a default persistent cache or not. 
         /// Library will automatically save tokens in default TokenCache whenever you obtain them. Cached tokens will be available only to the application that saved them. 
-        /// Cached tokens in default token cache will outlive the application's execution, and will be available in subsequent runs.
+        /// If the cache is persistent, the tokens stored in it will outlive the application's execution, and will be available in subsequent runs.
         /// To turn OFF token caching, set TokenCache to null. 
         /// </summary>
-#endif
         public TokenCache TokenCache { get; private set; }
 
         /// <summary>
@@ -166,7 +140,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-#if !ADAL_WINPHONE
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserCredential userCredential, bool callSync = false)
         {
             var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, userCredential, callSync);
@@ -179,12 +152,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await handler.RunAsync();
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, string extraQueryParameters = null, bool callSync = false)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId, string extraQueryParameters = null, bool callSync = false)
         {
-            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, redirectUri, promptBehavior, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(promptBehavior), callSync);
+            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, redirectUri, parameters, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters), callSync);
             return await handler.RunAsync();
         }
-#endif
 
         private async Task<AuthenticationResult> AcquireTokenByRefreshTokenCommonAsync(string refreshToken, ClientKey clientKey, string resource, bool callSync = false)
         {

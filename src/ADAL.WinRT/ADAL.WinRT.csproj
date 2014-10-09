@@ -46,9 +46,6 @@
     <DelaySign>true</DelaySign>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="..\ADAL.CommonDesktop\AdalIdHelper.cs">
       <Link>CommonDesktop\AdalIdHelper.cs</Link>
     </Compile>

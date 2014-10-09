@@ -94,55 +94,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
 
-#if ADAL_NET
-            if (callState != null && callState.CallSync)
-            {
-                this.request.Timeout = this.timeoutInMilliSeconds;
-                return NetworkPlugin.HttpWebRequestFactory.CreateResponse(this.request.GetResponse());
-            }
-
-            Task<WebResponse> getResponseTask = this.request.GetResponseAsync();
-            System.Threading.ThreadPool.RegisterWaitForSingleObject(
-                ((IAsyncResult)getResponseTask).AsyncWaitHandle, 
-                delegate (object state, bool timedOut)
-                    {
-                        if (timedOut)
-                        {
-                            ((HttpWebRequest)state).Abort();
-                        }
-                    },
-                this.request, 
-                this.timeoutInMilliSeconds, 
-                true);
-
-            return NetworkPlugin.HttpWebRequestFactory.CreateResponse(await getResponseTask);
-#else
-            var timer = Windows.System.Threading.ThreadPoolTimer.CreateTimer(
-                delegate
-                    {
-                        this.request.Abort();
-                    }, 
-                TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds));
-
-            try
-            {
-                return NetworkPlugin.HttpWebRequestFactory.CreateResponse(await this.request.GetResponseAsync());
-            }
-            finally
-            {
-                timer.Cancel();
-            }
-#endif
+            return await PlatformPlugin.WebUIFactory.GetResponseWithTimeoutSyncOrAsync(this.request, this.timeoutInMilliSeconds, callState);
         }
 
         public async Task<Stream> GetRequestStreamSyncOrAsync(CallState callState)
         {
-#if ADAL_NET
-            if (callState != null && callState.CallSync)
-            {
-                return this.request.GetRequestStream();
-            }
-#endif
             return await this.request.GetRequestStreamAsync();
         }
     }

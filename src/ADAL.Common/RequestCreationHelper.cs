@@ -30,24 +30,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public void AddAdalIdParameters(IDictionary<string, string> parameters)
         {
-            parameters[AdalIdParameter.Product] = PlatformSpecificHelper.GetProductName();
+            parameters[AdalIdParameter.Product] = PlatformPlugin.PlatformInformation.GetProductName();
             parameters[AdalIdParameter.Version] = AdalIdHelper.GetAdalVersion();
 
-#if !ADAL_WINPHONE
-            parameters[AdalIdParameter.CpuPlatform] = AdalIdHelper.GetProcessorArchitecture();
-#endif
+            var processorInofrmation = PlatformPlugin.PlatformInformation.GetProcessorArchitecture();
+            if (processorInofrmation != null)
+            {
+                parameters[AdalIdParameter.CpuPlatform] = processorInofrmation;
+            }
 
-#if ADAL_NET
-            parameters[AdalIdParameter.OS] = Environment.OSVersion.ToString();
+            var osInformation = PlatformPlugin.PlatformInformation.GetOperatingSystem();
+            if (osInformation != null)
+            {
+                parameters[AdalIdParameter.OS] = osInformation;
+            }
 
-            // Since ADAL .NET may be used on servers, for security reasons, we do not emit device type.
-#else
-            // In WinRT, there is no way to reliably get OS version. All can be done reliably is to check 
-            // for existence of specific features which does not help in this case, so we do not emit OS in WinRT.
-
-            var deviceInformation = new Windows.Security.ExchangeActiveSyncProvisioning.EasClientDeviceInformation();
-            parameters[AdalIdParameter.DeviceModel] = deviceInformation.SystemProductName;
-#endif
+            var deviceInformation = PlatformPlugin.PlatformInformation.GetDeviceModel();
+            if (deviceInformation != null)
+            {
+                parameters[AdalIdParameter.DeviceModel] = deviceInformation;
+            }
         }
 
         public DateTime GetJsonWebTokenValidFrom()

@@ -50,9 +50,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             XDocument mexDocument;
             try
             {
-                IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(federationMetadataUrl);
+                IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create(federationMetadataUrl);
                 request.Method = "GET";
-                request.ContentType = "application/soap+xml";
                 using (var response = await request.GetResponseSyncOrAsync(callState))
                 {
                     mexDocument = XDocument.Load(response.GetResponseStream(), LoadOptions.None);
@@ -61,13 +60,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (WebException ex)
             {
                 var serviceEx = new AdalServiceException(AdalError.AccessingWsMetadataExchangeFailed, ex);
-                Logger.LogException(callState, serviceEx);
+                PlatformPlugin.Logger.LogException(callState, serviceEx);
                 throw serviceEx;
             }
             catch (XmlException ex)
             {
                 var adalEx = new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
-                Logger.LogException(callState, adalEx);
+                PlatformPlugin.Logger.LogException(callState, adalEx);
                 throw adalEx;
             }
 
@@ -92,20 +91,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 else if (userAuthType == UserAuthType.IntegratedAuth)
                 {
                     var ex = new AdalException(AdalError.IntegratedAuthFailed, new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument));
-                    Logger.LogException(callState, ex);
+                    PlatformPlugin.Logger.LogException(callState, ex);
                     throw ex;
                 }
                 else
                 {
                     var ex = new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument);
-                    Logger.LogException(callState, ex);
+                    PlatformPlugin.Logger.LogException(callState, ex);
                     throw ex;
                 }
             }
             catch (XmlException ex)
             {
                 var adalEx = new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
-                Logger.LogException(callState, adalEx);
+                PlatformPlugin.Logger.LogException(callState, adalEx);
                 throw adalEx;
             }
 

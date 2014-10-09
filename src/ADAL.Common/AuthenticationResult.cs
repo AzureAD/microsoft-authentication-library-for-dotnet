@@ -95,6 +95,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember]
         public bool IsMultipleResourceRefreshToken { get; internal set; }
 
+        // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
+        // to get it from the STS response.
+        internal string Resource { get; set; }
+
         /// <summary>
         /// Serializes the object to a JSON string
         /// </summary>

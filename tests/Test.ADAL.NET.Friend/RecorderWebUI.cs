@@ -17,12 +17,14 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Threading.Tasks;
+
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Test.ADAL.NET.Friend
 {
-    public class RecorderWebUI : RecorderBase, IWebUI
+    internal class RecorderWebUI : RecorderBase, IWebUI
     {
         private const string Delimiter = ":::";
         private readonly IWebUI internalWebUI;
@@ -32,14 +34,12 @@ namespace Test.ADAL.NET.Friend
             Initialize();
         }
 
-        public RecorderWebUI(PromptBehavior promptBehavior, object ownerWindow)
+        public RecorderWebUI(IAuthorizationParameters parameters)
         {
-            this.internalWebUI = (new WebUIFactory()).Create(promptBehavior, ownerWindow);
+            this.internalWebUI = (new WebUIFactory()).CreateAuthenticationDialog(parameters);
         }
 
-        public object OwnerWindow { get; set; }
-
-        public string Authenticate(Uri requestUri, Uri callbackUri)
+        public async Task<string> AcquireAuthorizationAsync(Uri requestUri, Uri callbackUri, CallState callState)
         {
             string key = requestUri.AbsoluteUri + callbackUri.AbsoluteUri;
             string value = null;
@@ -64,7 +64,7 @@ namespace Test.ADAL.NET.Friend
 
             try
             {
-                string result = this.internalWebUI.Authenticate(requestUri, callbackUri);
+                string result = await this.internalWebUI.AcquireAuthorizationAsync(requestUri, callbackUri, callState);
                 value = 'P' + result;
                 return result;
             }

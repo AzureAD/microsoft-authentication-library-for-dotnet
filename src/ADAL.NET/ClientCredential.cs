@@ -48,24 +48,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Constructor to create credential with client id and secret. This constructor accepts client secret as SecureString.
-        /// </summary>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="secureClientSecret">Secret of the client requesting the token in form of SecureString.</param>
-        public ClientCredential(string clientId, SecureString secureClientSecret)
-        {
-            if (string.IsNullOrWhiteSpace(clientId))
-            {
-                throw new ArgumentNullException("clientId");
-            }
-
-            this.ClientId = clientId;
-            this.SecureClientSecret = secureClientSecret;
-        }
-
-        internal SecureString SecureClientSecret { get; private set; }
-
-        /// <summary>
         /// Gets the identifier of the client requesting the token.
         /// </summary>
         public string ClientId { get; private set; }

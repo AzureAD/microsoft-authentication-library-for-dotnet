@@ -38,9 +38,9 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         [Description("Test for TokenCache")]
         [TestCategory("AdalDotNetUnit")]
-        public async Task TokenCacheKeyTest()
+        public async Task TokenCacheKeyTestAsync()
         {
-            await TokenCacheTests.TokenCacheKeyTestAsync();
+            await TokenCacheTests.TokenCacheKeyTestAsync(new AuthorizationParameters(PromptBehavior.Auto, null));
         }
 
         [TestMethod]

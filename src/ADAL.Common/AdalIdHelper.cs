@@ -16,10 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -59,13 +57,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public static void AddAsQueryParameters(RequestParameters parameters)
         {
-            NetworkPlugin.RequestCreationHelper.AddAdalIdParameters(parameters);
+            PlatformPlugin.RequestCreationHelper.AddAdalIdParameters(parameters);
         }
 
         public static void AddAsHeaders(IHttpWebRequest request)
         {
             Dictionary<string, string> headers = new Dictionary<string, string>();
-            NetworkPlugin.RequestCreationHelper.AddAdalIdParameters(headers);
+            PlatformPlugin.RequestCreationHelper.AddAdalIdParameters(headers);
             HttpHelper.AddHeadersToRequest(request, headers);
         }
 
@@ -76,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static string GetAssemblyFileVersion()
         {
-            return typeof(AdalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+            return PlatformPlugin.PlatformInformation.GetAssemblyFileVersionAttribute();
         }
 
         public static string GetAssemblyInformationalVersion()

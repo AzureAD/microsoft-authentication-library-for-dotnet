@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             lock (PendingClientMetricsLock)
             {
-                if (pendingClientMetrics != null && NetworkPlugin.RequestCreationHelper.RecordClientMetrics)
+                if (pendingClientMetrics != null && PlatformPlugin.RequestCreationHelper.RecordClientMetrics)
                 {
                     Dictionary<string, string> headers = new Dictionary<string, string>();
                     if (pendingClientMetrics.lastError != null)

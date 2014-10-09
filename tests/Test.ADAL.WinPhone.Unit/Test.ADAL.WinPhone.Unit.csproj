@@ -112,7 +112,6 @@
     <Compile Include="..\Test.ADAL.WinRT.Unit\SerializationHelper.cs">
       <Link>CommonWinRT\SerializationHelper.cs</Link>
     </Compile>
-    <Compile Include="AdalTests.cs" />
     <Compile Include="AuthenticationContextProxy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AdalWinPhoneTests.cs" />
@@ -140,13 +139,17 @@
     <Content Include="Assets\WideLogo.scale-240.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ADAL.WinPhone\ADAL.WinPhone.csproj">
-      <Project>{bdfc3241-0b81-47e2-94c1-a2d54f066e48}</Project>
-      <Name>ADAL.WinPhone</Name>
-    </ProjectReference>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+    <ProjectReference Include="..\..\src\ADAL.PCL.WinPhone\ADAL.PCL.WinPhone.csproj">
+      <Project>{28e56f9e-f264-4da5-800e-3e5ccb05dec1}</Project>
+      <Name>ADAL.PCL.WinPhone</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ADAL.PCL\ADAL.PCL.csproj">
+      <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
+      <Name>ADAL.PCL</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>

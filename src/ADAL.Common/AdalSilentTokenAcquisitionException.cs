@@ -18,18 +18,13 @@
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-#if ADAL_NET
     using System;
     using System.Runtime.Serialization;
 
     /// <summary>
     /// The exception type thrown when a token cannot be acquired silently.
     /// </summary>
-    [Serializable]
     public class AdalSilentTokenAcquisitionException : AdalException
-#else
-    class AdalSilentTokenAcquisitionException : AdalException
-#endif
     {
         /// <summary>
         ///  Initializes a new instance of the exception class.
@@ -38,32 +33,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             : base(AdalError.FailedToAcquireTokenSilently, AdalErrorMessage.FailedToAcquireTokenSilently)
         {
         }
-
-#if ADAL_NET
-        /// <summary>
-        /// Initializes a new instance of the exception class with serialized data.
-        /// </summary>
-        /// <param name="info">The System.Runtime.Serialization.SerializationInfo that holds the serialized object data about the exception being thrown.</param>
-        /// <param name="context">The System.Runtime.Serialization.StreamingContext that contains contextual information about the source or destination.</param>
-        protected AdalSilentTokenAcquisitionException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        /// <summary>
-        /// Sets the System.Runtime.Serialization.SerializationInfo with information about the exception.
-        /// </summary>
-        /// <param name="info">The System.Runtime.Serialization.SerializationInfo that holds the serialized object data about the exception being thrown.</param>
-        /// <param name="context">The System.Runtime.Serialization.StreamingContext that contains contextual information about the source or destination.</param>
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-            {
-                throw new ArgumentNullException("info");
-            }
-
-            base.GetObjectData(info, context);
-        }
-#endif
     }
 }

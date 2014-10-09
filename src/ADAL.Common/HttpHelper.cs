@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(uri);
+                IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create(uri);
                 request.ContentType = "application/x-www-form-urlencoded";
                 AddCorrelationIdHeadersToRequest(request, callState);
                 AdalIdHelper.AddAsHeaders(request);
@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
                 clientMetrics.SetLastError(tokenResponse.ErrorCodes);
                 var serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, ex);
-                Logger.LogException(callState, serviceEx);
+                PlatformPlugin.Logger.LogException(callState, serviceEx);
                 throw serviceEx;
             }
             finally
@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static string CheckForExtraQueryParameter(string url)
         {
-            string extraQueryParameter = PlatformSpecificHelper.GetEnvironmentVariable("ExtraQueryParameter");
+            string extraQueryParameter = PlatformPlugin.PlatformInformation.GetEnvironmentVariable("ExtraQueryParameter");
             string delimiter = (url.IndexOf('?') > 0) ? "&" : "?";
             if (!string.IsNullOrWhiteSpace(extraQueryParameter))
             {
@@ -149,11 +149,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Guid correlationIdInResponse;
                     if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
                     {
-                        Logger.Information(callState, "Returned correlation id '{0}' is not in GUID format.", correlationIdHeader);
+                        PlatformPlugin.Logger.Information(callState, "Returned correlation id '{0}' is not in GUID format.", correlationIdHeader);
                     }
                     else if (correlationIdInResponse != callState.CorrelationId)
                     {
-                        Logger.Information(callState, "Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, callState.CorrelationId);
+                        PlatformPlugin.Logger.Information(callState, "Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, callState.CorrelationId);
                     }
 
                     break;

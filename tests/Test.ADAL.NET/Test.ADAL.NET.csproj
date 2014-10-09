@@ -155,13 +155,13 @@
     <Compile Include="StaSynchronizationContext.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ADAL.NET.WindowsForms\ADAL.NET.WindowsForms.csproj">
-      <Project>{5774fdcb-c918-4cde-8098-a4052852c51d}</Project>
-      <Name>ADAL.NET.WindowsForms</Name>
+    <ProjectReference Include="..\..\src\ADAL.PCL.Desktop\ADAL.PCL.Desktop.csproj">
+      <Project>{fa2c7f08-3ccb-47c2-b359-627cc96c04a3}</Project>
+      <Name>ADAL.PCL.Desktop</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\ADAL.NET\ADAL.NET.csproj">
-      <Project>{344519d6-c690-4b41-8802-9cb51359d965}</Project>
-      <Name>ADAL.NET</Name>
+    <ProjectReference Include="..\..\src\ADAL.PCL\ADAL.PCL.csproj">
+      <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
+      <Name>ADAL.PCL</Name>
     </ProjectReference>
     <ProjectReference Include="..\Test.ADAL.NET.Friend\Test.ADAL.NET.Friend.csproj">
       <Project>{f22f94db-3e3b-49c9-9534-9b499e199aab}</Project>

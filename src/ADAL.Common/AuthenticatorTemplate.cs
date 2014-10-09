@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(instanceDiscoveryEndpoint);
+                IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create(instanceDiscoveryEndpoint);
                 request.Method = "GET";
                 HttpHelper.AddCorrelationIdHeadersToRequest(request, callState);
                 AdalIdHelper.AddAsHeaders(request);
@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (discoveryResponse.TenantDiscoveryEndpoint == null)
                     {
                         var ex = new AdalException(AdalError.AuthorityNotInValidList);
-                        Logger.LogException(null, ex);
+                        PlatformPlugin.Logger.LogException(null, ex);
                         throw ex;
                     }
                 }
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (tokenResponse.Error == "invalid_instance")
                 {
                     var serviceEx = new AdalServiceException(AdalError.AuthorityNotInValidList, ex);
-                    Logger.LogException(null, serviceEx);
+                    PlatformPlugin.Logger.LogException(null, serviceEx);
                     throw serviceEx;
                 }
                 else
@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         AdalError.AuthorityValidationFailed,
                         string.Format(CultureInfo.InvariantCulture, "{0}. {1}: {2}", AdalErrorMessage.AuthorityValidationFailed, tokenResponse.Error, tokenResponse.ErrorDescription),
                         ex);
-                    Logger.LogException(null, serviceEx);
+                    PlatformPlugin.Logger.LogException(null, serviceEx);
                     throw serviceEx;
                 }
             }

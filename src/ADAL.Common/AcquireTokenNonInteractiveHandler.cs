@@ -47,20 +47,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // It cannot be moved to constructor or property or a pure sync or async call. This is why we moved it here which is an async call already.
             if (string.IsNullOrWhiteSpace(this.userCredential.UserName))
             {
-#if ADAL_NET
-                this.userCredential.UserName = PlatformSpecificHelper.GetUserPrincipalName();
-#else
-                this.userCredential.UserName = await PlatformSpecificHelper.GetUserPrincipalNameAsync();
-#endif
+                this.userCredential.UserName = await PlatformPlugin.PlatformInformation.GetUserPrincipalNameAsync();
                 if (string.IsNullOrWhiteSpace(userCredential.UserName))
                 {
-                    Logger.Information(this.CallState, "Could not find UPN for logged in user");
+                    PlatformPlugin.Logger.Information(this.CallState, "Could not find UPN for logged in user");
                     var ex = new AdalException(AdalError.UnknownUser);
-                    Logger.LogException(this.CallState, ex);
+                    PlatformPlugin.Logger.LogException(this.CallState, ex);
                     throw ex;
                 }
 
-                Logger.Information(this.CallState, "Logged in user '{0}' detected", userCredential.UserName);
+                PlatformPlugin.Logger.Information(this.CallState, "Logged in user '{0}' detected", userCredential.UserName);
             }
 
             this.DisplayableId = userCredential.UserName;
@@ -70,22 +66,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             await base.PreTokenRequest();
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, this.userCredential.UserName, this.CallState);
-            Logger.Information(this.CallState, "User '{0}' detected as '{1}'", this.userCredential.UserName, userRealmResponse.AccountType);
+            PlatformPlugin.Logger.Information(this.CallState, "User '{0}' detected as '{1}'", this.userCredential.UserName, userRealmResponse.AccountType);
 
             if (string.Compare(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 if (string.IsNullOrWhiteSpace(userRealmResponse.FederationMetadataUrl))
                 {
                     var ex = new AdalException(AdalError.MissingFederationMetadataUrl);
-                    Logger.LogException(this.CallState, ex);
+                    PlatformPlugin.Logger.LogException(this.CallState, ex);
                     throw ex;
                 }
 
                 Uri wsTrustUrl = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, this.userCredential.UserAuthType, this.CallState);
-                Logger.Information(this.CallState, "WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustUrl, userRealmResponse.FederationMetadataUrl);
+                PlatformPlugin.Logger.Information(this.CallState, "WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustUrl, userRealmResponse.FederationMetadataUrl);
 
                 WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustUrl, this.userCredential, this.CallState);
-                Logger.Information(this.CallState, "Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType);
+                PlatformPlugin.Logger.Information(this.CallState, "Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType);
 
                 // We assume that if the response token type is not SAML 1.1, it is SAML 2
                 this.samlAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
@@ -96,14 +92,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (this.userCredential.PasswordToCharArray() == null)
                 {
                     var ex = new AdalException(AdalError.PasswordRequiredForManagedUserError);
-                    Logger.LogException(this.CallState, ex);
+                    PlatformPlugin.Logger.LogException(this.CallState, ex);
                     throw ex;
                 }
             }
             else
             {
                 var ex = new AdalException(AdalError.UnknownUserType);
-                Logger.LogException(this.CallState, ex);
+                PlatformPlugin.Logger.LogException(this.CallState, ex);
                 throw ex;
             }
         }
@@ -119,16 +115,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 requestParameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
                 requestParameters[OAuthParameter.Username] = this.userCredential.UserName;
-#if ADAL_NET
-                if (this.userCredential.SecurePassword != null)
-                {
-                    requestParameters.AddSecureParameter(OAuthParameter.Password, this.userCredential.SecurePassword);
-                }
-                else
-                {
-                    requestParameters[OAuthParameter.Password] = this.userCredential.Password;
-                }
-#endif
+                requestParameters[OAuthParameter.Password] = this.userCredential.Password;
             }
 
             // To request id_token in response

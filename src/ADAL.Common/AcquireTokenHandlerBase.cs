@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             this.Authenticator = authenticator;
             this.CallState = CreateCallState(this.Authenticator.CorrelationId, callSync);
-            Logger.Information(this.CallState, "=== Token Acquisition started");
+            PlatformPlugin.Logger.Information(this.CallState, "=== Token Acquisition started");
 
             this.tokenCache = tokenCache;
 
@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 AuthenticationResult result = null;
                 if (this.LoadFromCache)
-                { 
+                {
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         }
                     }
                 }
-                
+
                 if (result == null)
                 {
                     await this.PreTokenRequest();
@@ -207,7 +207,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             AdalError.FailedToRefreshToken,
                             AdalErrorMessage.FailedToRefreshToken + ". " + serviceException.Message,
                             (WebException)serviceException.InnerException);
-                        Logger.LogException(this.CallState, serviceEx);
+                        PlatformPlugin.Logger.LogException(this.CallState, serviceEx);
                         throw serviceEx;
                     }
 
@@ -255,11 +255,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (result.AccessToken != null)
             {
-                string accessTokenHash = PlatformSpecificHelper.CreateSha256Hash(result.AccessToken);
+                string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.AccessToken);
                 string logMessage;
                 if (result.RefreshToken != null)
                 {
-                    string refreshTokenHash = PlatformSpecificHelper.CreateSha256Hash(result.RefreshToken);
+                    string refreshTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.RefreshToken);
                     logMessage = string.Format("Access Token with hash '{0}' and Refresh Token with hash '{1}' returned", accessTokenHash, refreshTokenHash);
                 }
                 else
@@ -267,7 +267,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     logMessage = string.Format("Access Token with hash '{0}' returned", accessTokenHash);
                 }
 
-                Logger.Verbose(this.CallState, logMessage);
+                PlatformPlugin.Logger.Verbose(this.CallState, logMessage);
             }
         }
 
@@ -275,10 +275,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (!this.SupportADFS && this.Authenticator.AuthorityType == AuthorityType.ADFS)
             {
-                Logger.Error(this.CallState, "Invalid authority type '{0}'", this.Authenticator.AuthorityType);
+                PlatformPlugin.Logger.Error(this.CallState, "Invalid authority type '{0}'", this.Authenticator.AuthorityType);
                 var ex = new AdalException(AdalError.InvalidAuthorityType,
                     string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.InvalidAuthorityTypeTemplate, this.Authenticator.Authority));
-                Logger.LogException(this.CallState, ex);
+                PlatformPlugin.Logger.LogException(this.CallState, ex);
                 throw ex;
             }
         }

@@ -79,8 +79,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 EncodingHelper.AddKeyValueString(messageBuilder, EncodingHelper.UrlEncode(kvp.Key), EncodingHelper.UrlEncode(kvp.Value));
             }
 
-            this.AddSecureParametersToMessageBuilder(messageBuilder);
-
             if (this.ExtraQueryParameter != null)
             {
                 messageBuilder.Append('&' + this.ExtraQueryParameter);

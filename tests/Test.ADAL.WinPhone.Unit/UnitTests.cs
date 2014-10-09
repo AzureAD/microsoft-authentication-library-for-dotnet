@@ -38,20 +38,14 @@ namespace Test.ADAL.WinPhone.Unit
         public async Task MsAppRedirectUriTest()
         {
             Sts sts = new AadSts();
-            AuthenticationContext context = await AuthenticationContext.CreateAsync(sts.Authority);
+            AuthenticationContextProxy context = new AuthenticationContextProxy(sts.Authority);
 
-            try
-            {
-                UserIdentifierType t = UserIdentifierType.RequiredDisplayableId;
-                context.AcquireTokenAndContinue(sts.ValidResource, sts.ValidClientId, new Uri("ms-app://test/"), null);
+            AuthenticationResultProxy result = null;
 
-                Verify.Fail("Argument exception expected");
-            }
-            catch (AdalException ex)
-            {
-                Verify.AreEqual(ex.ErrorCode, Sts.AuthenticationUiFailedError);
-                Verify.IsTrue(ex.InnerException is ArgumentException);
-            }
+            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, new Uri("ms-app://test/"), null);
+
+            Verify.IsNotNullOrEmptyString(result.Error);
+            Verify.AreEqual(result.Error, Sts.AuthenticationUiFailedError);            
 
             try
             {
@@ -64,29 +58,13 @@ namespace Test.ADAL.WinPhone.Unit
                 Verify.IsTrue(ex.Message.Contains("hostname"));
             }
 
-            try
-            {
-                context.AcquireTokenAndContinue(sts.ValidResource, sts.ValidClientId, null, null);
+            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, null, null);
+            Verify.AreEqual(result.Error, "need_to_set_callback_uri_as_local_setting");
 
-                Verify.Fail("Exception expected");
-            }
-            catch (AdalException ex)
-            {
-                Verify.AreEqual(ex.ErrorCode, "need_to_set_callback_uri_as_local_setting");
-            }
-
-            try
-            {
-                // Incorrect ms-app
-                ApplicationData.Current.LocalSettings.Values["CurrentApplicationCallbackUri"] = "ms-app://s-1-15-2-2097830667-3131301884-2920402518-3338703368-1480782779-4157212157-3811015497/";
-                context.AcquireTokenAndContinue(sts.ValidResource, sts.ValidClientId, null, null);
-
-                Verify.Fail("Exception expected");
-            }
-            catch (AdalException ex)
-            {
-                Verify.AreEqual(ex.ErrorCode, Sts.AuthenticationUiFailedError);
-            }
+            // Incorrect ms-app
+            ApplicationData.Current.LocalSettings.Values["CurrentApplicationCallbackUri"] = "ms-app://s-1-15-2-2097830667-3131301884-2920402518-3338703368-1480782779-4157212157-3811015497/";
+            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, null, null);
+            Verify.AreEqual(result.Error, Sts.AuthenticationUiFailedError);
         }
     }
 }

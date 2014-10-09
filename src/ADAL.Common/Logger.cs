@@ -21,14 +21,22 @@ using System.Globalization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal partial class Logger
+    internal abstract class LoggerBase
     {
-        internal static string PrepareLogMessage(CallState callState, string format, params object[] args)
+        internal abstract void Verbose(CallState callState, string format, params object[] args);
+
+        internal abstract void Information(CallState callState, string format, params object[] args);
+
+        internal abstract void Warning(CallState callState, string format, params object[] args);
+
+        internal abstract void Error(CallState callState, string format, params object[] args);
+
+        internal string PrepareLogMessage(CallState callState, string format, params object[] args)
         {
             return string.Format(CultureInfo.CurrentCulture, format, args) + (callState != null ? (". Correlation ID: " + callState.CorrelationId) : string.Empty);
         }
 
-        internal static void LogException(CallState callState, Exception ex)
+        internal void LogException(CallState callState, Exception ex)
         {
             ArgumentException argumentEx = ex as ArgumentException;
             if (argumentEx != null)

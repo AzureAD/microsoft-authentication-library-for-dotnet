@@ -16,25 +16,27 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using System;
+using System.Diagnostics.Tracing;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal static class NetworkPlugin
+    internal class Logger : LoggerBase
     {
-        static NetworkPlugin()
+        internal override void Verbose(CallState callState, string format, params object[] args)
         {
-            SetToDefault();
         }
 
-        public static IWebUIFactory WebUIFactory { get; set; }
-        public static IHttpWebRequestFactory HttpWebRequestFactory { get; set; }
-        public static IRequestCreationHelper RequestCreationHelper { get; set; }
-
-        public static void SetToDefault()
+        internal override void Information(CallState callState, string format, params object[] args)
         {
-            WebUIFactory = new WebUIFactory();
-            HttpWebRequestFactory = new HttpWebRequestFactory();
-            RequestCreationHelper = new RequestCreationHelper();            
         }
-    }
+
+        internal override void Warning(CallState callState, string format, params object[] args)
+        {
+        }
+
+        internal override void Error(CallState callState, string format, params object[] args)
+        {
+        }
+   }
 }

@@ -17,7 +17,10 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Net;
 using System.Net.NetworkInformation;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
@@ -27,9 +30,53 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         protected Uri CallbackUri { get; private set; }
 
-        public object OwnerWindow { get; set; }
+        public Object OwnerWindow { get; set; }
 
-        public string Authenticate(Uri requestUri, Uri callbackUri)
+        public async Task<string> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        {
+            string authorizationResultUri = null;
+
+            var sendAuthorizeRequest = new Action(
+                delegate
+                {
+                    authorizationResultUri = this.Authenticate(authorizationUri, redirectUri);
+                });
+
+            // If the thread is MTA, it cannot create or communicate with WebBrowser which is a COM control.
+            // In this case, we have to create the browser in an STA thread via StaTaskScheduler object.
+            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
+            {
+                using (var staTaskScheduler = new StaTaskScheduler(1))
+                {
+                    try
+                    {
+                        Task.Factory.StartNew(sendAuthorizeRequest, CancellationToken.None, TaskCreationOptions.None, staTaskScheduler).Wait();
+                    }
+                    catch (AggregateException ae)
+                    {
+                        // Any exception thrown as a result of running task will cause AggregateException to be thrown with 
+                        // actual exception as inner.
+                        Exception innerException = ae.InnerExceptions[0];
+
+                        // In MTA case, AggregateException is two layer deep, so checking the InnerException for that.
+                        if (innerException is AggregateException)
+                        {
+                            innerException = ((AggregateException)innerException).InnerExceptions[0];
+                        }
+
+                        throw innerException;
+                    }
+                }
+            }
+            else
+            {
+                sendAuthorizeRequest();
+            }
+
+            return authorizationResultUri;
+        }
+
+        internal string Authenticate(Uri requestUri, Uri callbackUri)
         {
             this.RequestUri = requestUri;
             this.CallbackUri = callbackUri;

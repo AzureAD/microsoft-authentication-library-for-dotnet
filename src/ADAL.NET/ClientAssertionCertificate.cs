@@ -18,7 +18,6 @@
 
 using System;
 using System.Globalization;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -32,7 +31,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="certificate">The certificate used as credential.</param>
-        public ClientAssertionCertificate(string clientId, X509Certificate2 certificate)
+        /// <param name="password">The certificate password</param>
+        public ClientAssertionCertificate(string clientId, byte[] certificate, string password)
         {
             if (string.IsNullOrWhiteSpace(clientId))
             {
@@ -44,14 +44,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentNullException("certificate");
             }
 
-            if (certificate.PublicKey.Key.KeySize < MinKeySizeInBits)
+            if (string.IsNullOrWhiteSpace(password))
             {
-                throw new ArgumentOutOfRangeException("certificate", 
-                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.CertificateKeySizeTooSmallTemplate, MinKeySizeInBits));
+                throw new ArgumentNullException("password");
             }
 
             this.ClientId = clientId;
             this.Certificate = certificate;
+            this.Password = password;
         }
 
         /// <summary>
@@ -70,11 +70,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Gets the certificate used as credential.
         /// </summary>
-        public X509Certificate2 Certificate { get; private set; }
+        public byte[] Certificate { get; private set; }
+
+        public string Password { get; private set; }
 
         internal byte[] Sign(string message)
         {
-            return CryptographyHelper.SignWithCertificate(message, this.Certificate);
+            return PlatformPlugin.CryptographyHelper.SignWithCertificate(message, this.Certificate, this.Password);
         }
     }
 }

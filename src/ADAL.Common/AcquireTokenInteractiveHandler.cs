@@ -19,8 +19,6 @@
 using System;
 using System.Collections.Generic;
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal partial class AcquireTokenInteractiveHandler : AcquireTokenHandlerBase
@@ -31,7 +29,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private string redirectUriRequestParameter;
 
-        private PromptBehavior promptBehavior;
+        private IAuthorizationParameters authorizationParameters;
 
         private readonly string extraQueryParameters;
 
@@ -39,35 +37,30 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly UserIdentifier userId;
 
-        public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, Uri redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, string extraQueryParameters, IWebUI webUI, bool callSync)
+        public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId, string extraQueryParameters, IWebUI webUI, bool callSync)
             : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User, callSync)
         {
-            if (redirectUri == null)
-            {
-                throw new ArgumentNullException("redirectUri");
-            }
+            this.redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
 
-            if (!string.IsNullOrWhiteSpace(redirectUri.Fragment))
+            if (!string.IsNullOrWhiteSpace(this.redirectUri.Fragment))
             {
                 var ex = new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
-                Logger.LogException(this.CallState, ex);
+                PlatformPlugin.Logger.LogException(this.CallState, ex);
                 throw ex;
             }
 
-            this.redirectUri = redirectUri;
+            this.authorizationParameters = parameters;
 
-            this.SetRedirectUriRequestParameter();
+            this.redirectUriRequestParameter = PlatformPlugin.PlatformInformation.GetRedirectUriAsString(this.redirectUri, this.CallState);
 
             if (userId == null)
             {
                 var ex = new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
-                Logger.LogException(this.CallState, ex);
+                PlatformPlugin.Logger.LogException(this.CallState, ex);
                 throw ex;
             }
 
             this.userId = userId;
-
-            this.promptBehavior = promptBehavior;
 
             if (!string.IsNullOrEmpty(extraQueryParameters) && extraQueryParameters[0] == '&')
             {
@@ -82,7 +75,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.DisplayableId = userId.DisplayableId;
             this.UserIdentifierType = userId.Type;
 
-            this.LoadFromCache = (tokenCache != null && this.promptBehavior != PromptBehavior.Always && this.promptBehavior != PromptBehavior.RefreshSession);
+            this.LoadFromCache = (tokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters));
 
             this.SupportADFS = true;
         }
@@ -108,14 +101,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (this.UserIdentifierType == UserIdentifierType.UniqueId && string.Compare(uniqueId, this.UniqueId, StringComparison.Ordinal) != 0)
             {
                 var ex = new AdalUserMismatchException(this.UniqueId, uniqueId);
-                Logger.LogException(this.CallState, ex);
+                PlatformPlugin.Logger.LogException(this.CallState, ex);
                 throw ex;
             }
 
             if (this.UserIdentifierType == UserIdentifierType.RequiredDisplayableId && string.Compare(displayableId, this.DisplayableId, StringComparison.OrdinalIgnoreCase) != 0)
             {
                 var ex = new AdalUserMismatchException(this.DisplayableId, displayableId);
-                Logger.LogException(this.CallState, ex);
+                PlatformPlugin.Logger.LogException(this.CallState, ex);
                 throw ex;
             }
         }
@@ -156,18 +149,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 authorizationRequestParameters[OAuthParameter.CorrelationId] = this.CallState.CorrelationId.ToString();
             }
 
-            // ADFS currently ignores the parameter for now.
-            if (promptBehavior == PromptBehavior.Always)
+            if (this.authorizationParameters != null)
             {
-                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
-            }
-            else if (promptBehavior == PromptBehavior.RefreshSession)
-            {
-                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
-            }
-            else if (promptBehavior == PromptBehavior.Never)
-            {
-                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
+                PlatformPlugin.PlatformInformation.AddPromptBehaviorQueryParameter(this.authorizationParameters, authorizationRequestParameters);
             }
 
             if (includeFormsAuthParam)
@@ -186,7 +170,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (authorizationRequestParameters.ContainsKey(kvp.Key))
                     {
                         var ex = new AdalException(AdalError.DuplicateQueryParameter, string.Format(AdalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
-                        Logger.LogException(this.CallState, ex);
+                        PlatformPlugin.Logger.LogException(this.CallState, ex);
                         throw ex;
                     }
                 }
@@ -199,17 +183,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private void VerifyAuthorizationResult()
         {
-            if (this.promptBehavior == PromptBehavior.Never && this.authorizationResult.Error == OAuthError.LoginRequired)
+            if (this.authorizationResult.Error == OAuthError.LoginRequired)
             {
                 var ex = new AdalException(AdalError.UserInteractionRequired);
-                Logger.LogException(this.CallState, ex);
+                PlatformPlugin.Logger.LogException(this.CallState, ex);
                 throw ex;
             }
 
             if (this.authorizationResult.Status != AuthorizationStatus.Success)
             {
                 var ex = new AdalServiceException(this.authorizationResult.Error, this.authorizationResult.ErrorDescription);
-                Logger.LogException(this.CallState, ex);
+                PlatformPlugin.Logger.LogException(this.CallState, ex);
                 throw ex;
             }
         }

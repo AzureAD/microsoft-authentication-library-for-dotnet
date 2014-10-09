@@ -21,19 +21,19 @@ using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal partial class Logger : IDisposable
+    internal partial class Logger : LoggerBase, IDisposable
     {
         private const string LogFilename = "AdalTraces.log";
         private bool disposed;
-        private static readonly AdalEventSource AdalEventSource;
-        private static StorageFileEventListener adalListener;
+        private readonly AdalEventSource AdalEventSource;
+        private StorageFileEventListener adalListener;
 
-        static Logger()
+        public Logger()
         {
             AdalEventSource = new AdalEventSource();
         }
 
-        internal static void SetListenerLevel(AdalTraceLevel level)
+        internal void SetListenerLevel(AdalTraceLevel level)
         {
             if (level != AdalTraceLevel.None)
             {
@@ -52,27 +52,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        internal static void Verbose(CallState callState, string format, params object[] args)
+        internal override void Verbose(CallState callState, string format, params object[] args)
         {
             AdalEventSource.Verbose(PrepareLogMessage(callState, format, args));
         }
 
-        internal static void Information(CallState callState, string format, params object[] args)
+        internal override void Information(CallState callState, string format, params object[] args)
         {
             AdalEventSource.Information(PrepareLogMessage(callState, format, args));
         }
 
-        internal static void Warning(CallState callState, string format, params object[] args)
+        internal override void Warning(CallState callState, string format, params object[] args)
         {
             AdalEventSource.Warning(PrepareLogMessage(callState, format, args));
         }
 
-        internal static void Error(CallState callState, string format, params object[] args)
+        internal override void Error(CallState callState, string format, params object[] args)
         {
             AdalEventSource.Error(PrepareLogMessage(callState, format, args));
         }
 
-        private static EventLevel GetEventLevel(AdalTraceLevel level)
+        private EventLevel GetEventLevel(AdalTraceLevel level)
         {
             EventLevel returnLevel;
             switch (level)
