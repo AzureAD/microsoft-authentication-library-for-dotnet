@@ -23,3 +23,16 @@ src/ADAL.WinPhone/obj/
 tests/Test.ADAL.WinPhone.Dashboard/obj/
 src/ADAL.WinPhone/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
 tests/Test.ADAL.WinPhone.Unit/obj/
+samples/AdalAndroidSample/obj/
+samples/AdalDesktopSample/obj/
+samples/AdaliOSSample/obj/
+samples/AdalUniversalSample/AdalUniversalSample.Windows/obj/
+samples/AdalUniversalSample/AdalUniversalSample.WindowsPhone/obj/
+samples/Sample.PCL/obj/
+src/ADAL.PCL.Android/obj/
+src/ADAL.PCL.Desktop/obj/
+src/ADAL.PCL.iOS/obj/
+src/ADAL.PCL.WinPhone/obj/
+src/ADAL.PCL.WinRT/obj/
+src/ADAL.PCL/obj/
+tests/Test.ADAL.WinPhone.Unit/AppPackages/
