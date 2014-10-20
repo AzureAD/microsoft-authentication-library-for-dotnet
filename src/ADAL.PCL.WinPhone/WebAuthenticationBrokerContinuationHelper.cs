@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public static void SetWebAuthenticationBrokerContinuationEventArgs(IWebAuthenticationBrokerContinuationEventArgs args)
         {
-            WebUI.SetAuthorizationResultUri(args.WebAuthenticationResult.ResponseData);
+            WebUI.SetAuthorizationResultUri(args.WebAuthenticationResult);
         }
     }
 }

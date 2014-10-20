@@ -26,6 +26,10 @@ namespace AdaliOSSample
 		[GeneratedCode ("iOS Designer", "1.0")]
 		partial void UIButton16_TouchUpInside (UIButton sender);
 
+		[Action ("UIButton25_TouchUpInside:")]
+		[GeneratedCode ("iOS Designer", "1.0")]
+		partial void UIButton25_TouchUpInside (UIButton sender);
+
 		void ReleaseDesignerOutlets ()
 		{
 			if (ReportLabel != null) {

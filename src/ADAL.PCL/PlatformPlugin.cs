@@ -55,21 +55,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static void InitializeByAssemblyDynamicLinking()
         {
-            try
-            {
-                Assembly assembly = LoadPlatformSpecificAssembly();
-                const string Namespace = "Microsoft.IdentityModel.Clients.ActiveDirectory.";
-                InjectDependecies(
-                    (IWebUIFactory)Activator.CreateInstance(assembly.GetType(Namespace + "WebUIFactory")),
-                    (LoggerBase)Activator.CreateInstance(assembly.GetType(Namespace + "Logger")),
-                    (PlatformInformationBase)Activator.CreateInstance(assembly.GetType(Namespace + "PlatformInformation")),
-                    (ICryptographyHelper)Activator.CreateInstance(assembly.GetType(Namespace + "CryptographyHelper"))
-                );
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            Assembly assembly = LoadPlatformSpecificAssembly();
+            const string Namespace = "Microsoft.IdentityModel.Clients.ActiveDirectory.";
+            InjectDependecies(
+                (IWebUIFactory)Activator.CreateInstance(assembly.GetType(Namespace + "WebUIFactory")),
+                (LoggerBase)Activator.CreateInstance(assembly.GetType(Namespace + "Logger")),
+                (PlatformInformationBase)Activator.CreateInstance(assembly.GetType(Namespace + "PlatformInformation")),
+                (ICryptographyHelper)Activator.CreateInstance(assembly.GetType(Namespace + "CryptographyHelper"))
+            );
         }
 
         public static void InjectDependecies(IWebUIFactory webUIFactory, LoggerBase logger, PlatformInformationBase platformInformation, ICryptographyHelper cryptographyHelper)

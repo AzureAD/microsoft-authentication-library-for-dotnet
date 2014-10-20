@@ -34,15 +34,17 @@ namespace AdalDesktopSample
         static void Main(string[] args)
         {
             AcquireTokenAsync().Wait();
-            System.Console.ReadKey();
+            Console.ReadKey();
         }
 
         private static async Task AcquireTokenAsync()
         {
             TokenBroker tokenBroker = new TokenBroker();
-            string token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
+            string token = await tokenBroker.GetTokenInteractiveAsync(new AuthorizationParameters(PromptBehavior.Auto, null));
             Console.WriteLine(token + "\n");
-            token = await tokenBroker.GetTokenInteractiveAsync(new AuthorizationParameters(PromptBehavior.Auto, null));
+            token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
+            Console.WriteLine(token + "\n");
+            token = await tokenBroker.GetTokenWithClientCredentialAsync();
             Console.WriteLine(token);
         }
     }

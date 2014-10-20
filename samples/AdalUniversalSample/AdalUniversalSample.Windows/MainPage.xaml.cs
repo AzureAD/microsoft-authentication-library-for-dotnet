@@ -59,5 +59,12 @@ namespace AdalUniversalSample
             string token = await tokenBroker.GetTokenInteractiveWithMsAppAsync(new AuthorizationParameters(PromptBehavior.Auto, false));
             this.AccessToken.Text = token;
         }
+
+        private async void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            this.AccessToken.Text = string.Empty;
+            string token = await tokenBroker.GetTokenWithClientCredentialAsync();
+            this.AccessToken.Text = token;
+        }
     }
 }

@@ -35,8 +35,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentException("parameters should be of type AuthorizationParameters", "parameters");
             }
 
-            this.promptBehavior = promptBehavior;
-            this.useCorporateNetwork = useCorporateNetwork;
+            this.promptBehavior = ((AuthorizationParameters)parameters).PromptBehavior;
+            this.useCorporateNetwork = ((AuthorizationParameters)parameters).UseCorporateNetwork;
         }
 
         public string AuthorizationResultUri { get; private set; }
@@ -69,6 +69,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 else
                 { 
                     webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri, redirectUri);
+                }
+
+                if (webAuthenticationResult.ResponseStatus == WebAuthenticationStatus.UserCancel)
+                {
+                    throw new AdalException(AdalError.AuthenticationCanceled, AdalErrorMessage.AuthenticationCanceled);
+                }
+                else if (webAuthenticationResult.ResponseStatus == WebAuthenticationStatus.ErrorHttp)
+                {
+                    throw new AdalException(AdalError.AuthenticationUiFailed, AdalErrorMessage.AuthenticationUiFailed);
                 }
             }
             catch (FileNotFoundException ex)

@@ -101,5 +101,20 @@ namespace AdaliOSSample
                 throw ex;
             }
         }
+
+        async partial void UIButton25_TouchUpInside(UIButton sender)
+        {
+            try
+            {
+                ReportLabel.Text = string.Empty;
+                TokenBroker tokenBroker = new TokenBroker();
+                string token = await tokenBroker.GetTokenWithClientCredentialAsync();
+                ReportLabel.Text = token;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

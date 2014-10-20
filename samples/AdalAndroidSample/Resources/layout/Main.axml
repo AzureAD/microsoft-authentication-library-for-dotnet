@@ -15,6 +15,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/acquireTokenUPButton" />
+    <Button
+        android:text="Acquire Token with Client Credential"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/acquireTokenClientCredButton" />
     <TextView
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"

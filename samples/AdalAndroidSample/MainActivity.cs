@@ -46,6 +46,9 @@ namespace AdalAndroidSample
             Button acquireTokenUPButton = FindViewById<Button>(Resource.Id.acquireTokenUPButton);
             acquireTokenUPButton.Click += acquireTokenUPButton_Click;
 
+            Button acquireTokenWithClientCredentialButton = FindViewById<Button>(Resource.Id.acquireTokenClientCredButton);
+            acquireTokenWithClientCredentialButton.Click += acquireTokenWithClientCredentialButton_Click;
+
             this.accessTokenTextView = FindViewById<TextView>(Resource.Id.accessTokenTextView);
         }
 
@@ -69,6 +72,14 @@ namespace AdalAndroidSample
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
             string token = await tokenBroker.GetTokenInteractiveAsync(new AuthorizationParameters(this));
+            this.accessTokenTextView.Text = token;
+        }
+
+        private async void acquireTokenWithClientCredentialButton_Click(object sender, EventArgs e)
+        {
+            this.accessTokenTextView.Text = string.Empty;
+            TokenBroker tokenBroker = new TokenBroker();
+            string token = await tokenBroker.GetTokenWithClientCredentialAsync();
             this.accessTokenTextView.Text = token;
         }
     }

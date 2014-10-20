@@ -49,7 +49,7 @@ namespace Sample.PCL
             }
             catch (Exception ex)
             {
-                throw ex;
+                return ex.Message;
             }
         }
 
@@ -63,7 +63,7 @@ namespace Sample.PCL
             }
             catch (Exception ex)
             {
-                throw ex;
+                return ex.Message;
             }
         }
 
@@ -77,7 +77,21 @@ namespace Sample.PCL
             }
             catch (Exception ex)
             {
-                throw ex;
+                return ex.Message;
+            }
+        }
+
+        public async Task<string> GetTokenWithClientCredentialAsync()
+        {
+            try
+            {
+                var result = await context.AcquireTokenAsync(sts.ValidResource, new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret));
+
+                return result.AccessToken;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
             }
         }
     }
