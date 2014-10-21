@@ -3,7 +3,7 @@
     <metadata>
         <title>Active Directory Authentication Library</title>
         <id>Microsoft.IdentityModel.Clients.ActiveDirectory</id>
-        <version>REPLACE_DURING_BULD</version>
+        <version>REPLACE_DURING_BULD-alpha</version>
         <authors>Microsoft Open Technologies</authors>
         <licenseUrl>http://go.microsoft.com/fwlink/?LinkId=317295</licenseUrl>
         <projectUrl>http://go.microsoft.com/fwlink/?LinkId=258232</projectUrl>
