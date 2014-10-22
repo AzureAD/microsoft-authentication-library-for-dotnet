@@ -36,3 +36,5 @@ src/ADAL.PCL.WinPhone/obj/
 src/ADAL.PCL.WinRT/obj/
 src/ADAL.PCL/obj/
 tests/Test.ADAL.WinPhone.Unit/AppPackages/
+src/ADAL.PCL.CoreCLR/obj/
+ADAL.NET.sdf
