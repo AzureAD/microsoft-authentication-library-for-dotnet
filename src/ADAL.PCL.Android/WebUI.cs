@@ -58,10 +58,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             try
             {
-                var brokerIntent = new Intent(this.parameters.CallerActivity, typeof(WebAuthenticationBrokerActivity));
-                brokerIntent.PutExtra("Url", authorizationUri.AbsoluteUri);
-                brokerIntent.PutExtra("Callback", redirectUri.AbsoluteUri);
-                this.parameters.CallerActivity.StartActivityForResult(brokerIntent, 0);
+                var agentIntent = new Intent(this.parameters.CallerActivity, typeof(AuthenticationAgentActivity));
+                agentIntent.PutExtra("Url", authorizationUri.AbsoluteUri);
+                agentIntent.PutExtra("Callback", redirectUri.AbsoluteUri);
+                this.parameters.CallerActivity.StartActivityForResult(agentIntent, 0);
             }
             catch (Exception ex)
             {

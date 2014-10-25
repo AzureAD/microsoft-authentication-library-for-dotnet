@@ -25,8 +25,8 @@ using MonoTouch.Foundation;
 
 namespace ADAL
 {
-    [Register("WebAuthenticationBrokerUIViewController")]
-    public class WebAuthenticationBrokerUIViewController : UIViewController
+    [Register("AuthenticationAgentUIViewController")]
+    public class AuthenticationAgentUIViewController : UIViewController
     {
 		UIWebView webView;
 
@@ -37,7 +37,7 @@ namespace ADAL
 
         public delegate void ReturnCode(string result);
 
-        public WebAuthenticationBrokerUIViewController(string url, string callback, ReturnCode callbackMethod)
+        public AuthenticationAgentUIViewController(string url, string callback, ReturnCode callbackMethod)
         {
             this.url = url;
             this.callback = callback;
@@ -52,7 +52,17 @@ namespace ADAL
 			View.BackgroundColor = UIColor.White;
 
             webView = new UIWebView(View.Bounds);
-            webView.LoadStarted += webView_LoadStarted;
+		    webView.ShouldStartLoad = (wView, request, navType) =>
+		    {
+                if (request != null && request.Url.ToString().StartsWith(callback))
+                {
+                    callbackMethod(request.Url.ToString());
+                    this.DismissViewController(true, null);
+                    return false;
+                }
+
+                return true;
+		    };
 
 			View.AddSubview(webView);
 
@@ -61,14 +71,5 @@ namespace ADAL
 			// if this is false, page will be 'zoomed in' to normal size
 			//webView.ScalesPageToFit = true;
 		}
-
-        void webView_LoadStarted(object sender, EventArgs e)
-        {
-            if (webView.Request.Url.ToString().StartsWith(callback))
-            {
-                callbackMethod(webView.Request.Url.ToString());
-                this.DismissViewController(true, null);
-            }
-        }
     }
 }

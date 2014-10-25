@@ -27,9 +27,9 @@ using Android.Content;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public static class WebAuthenticationBrokerContinuationHelper
+    public static class AuthenticationAgentContinuationHelper
     {
-        public static void SetWebAuthenticationBrokerContinuationEventArgs(int requestCode, Result resultCode, Intent data)
+        public static void SetAuthenticationAgentContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
             WebUI.SetAuthorizationResultUri(data.GetStringExtra("ReturnedUrl"));
         }

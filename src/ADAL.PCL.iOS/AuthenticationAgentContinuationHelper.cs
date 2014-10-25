@@ -24,7 +24,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public static class WebAuthenticationBrokerContinuationHelper
+    public static class AuthenticationAgentContinuationHelper
     {
         public static void SetResultUri(string resultUri)
         {

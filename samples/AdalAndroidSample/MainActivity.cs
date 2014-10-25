@@ -54,7 +54,7 @@ namespace AdalAndroidSample
 
         protected override async void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
-            WebAuthenticationBrokerContinuationHelper.SetWebAuthenticationBrokerContinuationEventArgs(requestCode, resultCode, data);
+            AuthenticationAgentContinuationHelper.SetAuthenticationAgentContinuationEventArgs(requestCode, resultCode, data);
 
             base.OnActivityResult(requestCode, resultCode, data);
         }

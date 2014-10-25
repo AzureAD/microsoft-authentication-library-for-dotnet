@@ -26,7 +26,7 @@ namespace AdalAndroidSample
 		
 		public static void UpdateIdValues()
 		{
-			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Id.brokerWebView = global::AdalAndroidSample.Resource.Id.brokerWebView;
+			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Id.agentWebView = global::AdalAndroidSample.Resource.Id.agentWebView;
 			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Layout.WebAuthenticationBroker = global::AdalAndroidSample.Resource.Layout.WebAuthenticationBroker;
 			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.String.ApplicationName = global::AdalAndroidSample.Resource.String.ApplicationName;
 		}
@@ -76,7 +76,7 @@ namespace AdalAndroidSample
 			public const int acquireTokenUPButton = 2131034113;
 			
 			// aapt resource value: 0x7f050004
-			public const int brokerWebView = 2131034116;
+			public const int agentWebView = 2131034116;
 			
 			static Id()
 			{

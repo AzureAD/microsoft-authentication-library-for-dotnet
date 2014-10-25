@@ -31,8 +31,8 @@ using Android.Widget;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    [Activity(Label = "WebAuthenticationBroker")]
-    public class WebAuthenticationBrokerActivity : Activity
+    [Activity(Label = "Sign in")]
+    public class AuthenticationAgentActivity : Activity
     {
         private AdalWebViewClient client;
 
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             string url = Intent.GetStringExtra("Url");
 
-            WebView webView = FindViewById<WebView>(Resource.Id.brokerWebView);
+            WebView webView = FindViewById<WebView>(Resource.Id.agentWebView);
             WebSettings webSettings = webView.Settings;
             webSettings.JavaScriptEnabled = true;
 

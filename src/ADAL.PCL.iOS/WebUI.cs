@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             try
             {
-                this.parameters.CallerViewController.PresentViewController(new WebAuthenticationBrokerUIViewController(authorizationUri.AbsoluteUri, redirectUri.AbsoluteUri, CallbackMethod), true, null);
+                this.parameters.CallerViewController.PresentViewController(new AuthenticationAgentUIViewController(authorizationUri.AbsoluteUri, redirectUri.AbsoluteUri, CallbackMethod), true, null);
             }
             catch (Exception ex)
             {
@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private void CallbackMethod(string resultUri)
         {
-            WebAuthenticationBrokerContinuationHelper.SetResultUri(resultUri);
+            AuthenticationAgentContinuationHelper.SetResultUri(resultUri);
         }
     }
 }

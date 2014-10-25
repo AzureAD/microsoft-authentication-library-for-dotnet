@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 		{
 			
 			// aapt resource value: 0x7f040000
-			public static int brokerWebView = 2130968576;
+			public static int agentWebView = 2130968576;
 			
 			static Id()
 			{
