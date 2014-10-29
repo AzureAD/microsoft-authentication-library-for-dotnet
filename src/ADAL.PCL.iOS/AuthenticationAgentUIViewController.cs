@@ -23,21 +23,21 @@ using MonoTouch.CoreFoundation;
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
 
-namespace ADAL
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     [Register("AuthenticationAgentUIViewController")]
-    public class AuthenticationAgentUIViewController : UIViewController
+    internal class AuthenticationAgentUIViewController : UIViewController
     {
 		UIWebView webView;
 
         private string url;
         private string callback;
 
-        private ReturnCode callbackMethod;
+        private ReturnCodeCallback callbackMethod;
 
-        public delegate void ReturnCode(string result);
+        public delegate void ReturnCodeCallback(AuthorizationResult result);
 
-        public AuthenticationAgentUIViewController(string url, string callback, ReturnCode callbackMethod)
+        public AuthenticationAgentUIViewController(string url, string callback, ReturnCodeCallback callbackMethod)
         {
             this.url = url;
             this.callback = callback;
@@ -47,16 +47,17 @@ namespace ADAL
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
-			
-			Title = "WebView";
-			View.BackgroundColor = UIColor.White;
+
+            this.Title = "Sign in";
+
+            View.BackgroundColor = UIColor.White;
 
             webView = new UIWebView(View.Bounds);
 		    webView.ShouldStartLoad = (wView, request, navType) =>
 		    {
                 if (request != null && request.Url.ToString().StartsWith(callback))
                 {
-                    callbackMethod(request.Url.ToString());
+                    callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, request.Url.ToString()));
                     this.DismissViewController(true, null);
                     return false;
                 }
@@ -66,10 +67,18 @@ namespace ADAL
 
 			View.AddSubview(webView);
 
+            this.NavigationItem.LeftBarButtonItem = new UIBarButtonItem(UIBarButtonSystemItem.Cancel, this.CancelAuthentication);
+
 			webView.LoadRequest (new NSUrlRequest (new NSUrl (this.url)));
 			
 			// if this is false, page will be 'zoomed in' to normal size
 			//webView.ScalesPageToFit = true;
 		}
+
+        private void CancelAuthentication(object sender, EventArgs e)
+        {
+            callbackMethod(new AuthorizationResult(AuthorizationStatus.UserCancel, null));
+            this.DismissViewController(true, null);
+        }
     }
 }

@@ -20,16 +20,12 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-using ADAL;
-
-using MonoTouch.UIKit;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class WebUI : IWebUI
     {
         private static SemaphoreSlim returnedUriReady;
-        private static string authorizationResultUri;
+        private static AuthorizationResult authorizationResult;
         private readonly AuthorizationParameters parameters;
 
         public WebUI(IAuthorizationParameters parameters)
@@ -41,17 +37,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        public async Task<string> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
             returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, callState);
             await returnedUriReady.WaitAsync();
-            return authorizationResultUri;
+            return authorizationResult;
         }
 
-        public static void SetAuthorizationResultUri(string authorizationResultUriInput)
+        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
         {
-            authorizationResultUri = authorizationResultUriInput;
+            authorizationResult = authorizationResultInput;
             returnedUriReady.Release();
         }
 
@@ -59,7 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             try
             {
-                this.parameters.CallerViewController.PresentViewController(new AuthenticationAgentUIViewController(authorizationUri.AbsoluteUri, redirectUri.AbsoluteUri, CallbackMethod), true, null);
+                this.parameters.CallerViewController.PresentViewController(new AuthenticationAgentUINavigationController(authorizationUri.AbsoluteUri, redirectUri.AbsoluteUri, CallbackMethod), false, null);
             }
             catch (Exception ex)
             {
@@ -69,9 +65,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private void CallbackMethod(string resultUri)
+        private void CallbackMethod(AuthorizationResult result)
         {
-            AuthenticationAgentContinuationHelper.SetResultUri(resultUri);
+            SetAuthorizationResult(result);
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public string AuthorizationResultUri { get; private set; }
 
-        public async Task<string> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
             bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
             if (this.promptBehavior == PromptBehavior.Never && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
@@ -73,11 +73,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (webAuthenticationResult.ResponseStatus == WebAuthenticationStatus.UserCancel)
                 {
-                    throw new AdalException(AdalError.AuthenticationCanceled, AdalErrorMessage.AuthenticationCanceled);
+                    throw new AdalException(AdalError.AuthenticationCanceled);
                 }
                 else if (webAuthenticationResult.ResponseStatus == WebAuthenticationStatus.ErrorHttp)
                 {
-                    throw new AdalException(AdalError.AuthenticationUiFailed, AdalErrorMessage.AuthenticationUiFailed);
+                    throw new AdalException(AdalError.AuthenticationUiFailed);
                 }
             }
             catch (FileNotFoundException ex)
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult, callState);
 
-            return "https://dummy.com?code=" + result.Code;
+            return result;
         }
 
         private static AuthorizationResult ProcessAuthorizationResult(WebAuthenticationResult webAuthenticationResult, CallState callState)
@@ -111,16 +111,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             switch (webAuthenticationResult.ResponseStatus)
             {
                 case WebAuthenticationStatus.Success:
-                    result = OAuth2Response.ParseAuthorizeResponse(webAuthenticationResult.ResponseData, callState);
+                    result = new AuthorizationResult(AuthorizationStatus.Success, webAuthenticationResult.ResponseData);
                     break;
                 case WebAuthenticationStatus.ErrorHttp:
-                    result = new AuthorizationResult(AdalError.AuthenticationFailed, webAuthenticationResult.ResponseErrorDetail.ToString());
+                    result = new AuthorizationResult(AuthorizationStatus.ErrorHttp, webAuthenticationResult.ResponseErrorDetail.ToString());
                     break;
                 case WebAuthenticationStatus.UserCancel:
-                    result = new AuthorizationResult(AdalError.AuthenticationCanceled, AdalErrorMessage.AuthenticationCanceled);
+                    result = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
                     break;
                 default:
-                    result = new AuthorizationResult(AdalError.AuthenticationFailed, AdalErrorMessage.AuthorizationServerInvalidResponse);
+                    result = new AuthorizationResult(AuthorizationStatus.UnknownError, null);
                     break;
             }
 

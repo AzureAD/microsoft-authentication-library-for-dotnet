@@ -31,45 +31,34 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal class WebUI : IWebUI
     {
         private static SemaphoreSlim returnedUriReady;
-        private static string authorizationResultUri;
-        private static string error;
-        private static string errorDescription;
+        private static AuthorizationResult authorizationResult;
 
-        public async Task<string> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
             returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, callState);
             await returnedUriReady.WaitAsync();
 
-            if (error != null)
-            {
-                throw new AdalException(error, errorDescription);
-            }
-
-            return authorizationResultUri;
+            return authorizationResult;
         }
 
         public static void SetAuthorizationResultUri(WebAuthenticationResult webAuthenticationResult)
         {
             if (webAuthenticationResult.ResponseStatus == WebAuthenticationStatus.Success)
             {
-                error = null;
-                authorizationResultUri = webAuthenticationResult.ResponseData;    
+                authorizationResult = new AuthorizationResult(AuthorizationStatus.Success, webAuthenticationResult.ResponseData);    
             }
             else if (webAuthenticationResult.ResponseStatus == WebAuthenticationStatus.ErrorHttp)
             {
-                error = AdalError.AuthenticationUiFailed;
-                errorDescription = AdalErrorMessage.AuthenticationUiFailed;
+                authorizationResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp, null);
             }
             else if (webAuthenticationResult.ResponseStatus == WebAuthenticationStatus.UserCancel)
             {
-                error = AdalError.AuthenticationCanceled;
-                errorDescription = AdalErrorMessage.AuthenticationCanceled;
+                authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
             }
             else
             {
-                error = AdalError.Unknown;
-                errorDescription = AdalErrorMessage.Unknown;
+                authorizationResult = new AuthorizationResult(AuthorizationStatus.UnknownError, null);
             }
             
             returnedUriReady.Release();
@@ -87,28 +76,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 PlatformPlugin.Logger.LogException(callState, ex);
                 throw adalEx;
             }
-        }
-
-        public AuthorizationResult ProcessAuthorizationResult(IWebAuthenticationBrokerContinuationEventArgs args, CallState callState)
-        {
-            AuthorizationResult result;
-            switch (args.WebAuthenticationResult.ResponseStatus)
-            {
-                case WebAuthenticationStatus.Success:
-                    result = OAuth2Response.ParseAuthorizeResponse(args.WebAuthenticationResult.ResponseData, callState);
-                    break;
-                case WebAuthenticationStatus.ErrorHttp:
-                    result = new AuthorizationResult(AdalError.AuthenticationFailed, args.WebAuthenticationResult.ResponseErrorDetail.ToString());
-                    break;
-                case WebAuthenticationStatus.UserCancel:
-                    result = new AuthorizationResult(AdalError.AuthenticationCanceled, AdalErrorMessage.AuthenticationCanceled);
-                    break;
-                default:
-                    result = new AuthorizationResult(AdalError.AuthenticationFailed, AdalErrorMessage.AuthorizationServerInvalidResponse);
-                    break;
-            }
-
-            return result;
         }
     }
 }

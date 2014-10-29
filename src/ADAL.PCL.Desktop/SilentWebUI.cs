@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         private WindowsFormsSynchronizationContext formsSyncContext;
 
-        private string result;
+        private AuthorizationResult result;
 
         private Exception uiException;
 
@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         /// UI thread completes.  
         /// </summary>
         /// <returns></returns>
-        protected override string OnAuthenticate()
+        protected override AuthorizationResult OnAuthenticate()
         {
             if (null == this.CallbackUri)
             {
@@ -160,7 +160,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             this.ThrowIfTransferredException();
 
-            if (string.IsNullOrEmpty(this.result))
+            if (this.result == null)
             {
                 throw new AdalException(AdalError.UserInteractionRequired);
             }

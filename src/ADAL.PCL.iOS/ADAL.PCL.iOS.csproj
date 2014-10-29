@@ -40,13 +40,13 @@
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AdalInitializer.cs" />
+    <Compile Include="AuthenticationAgentUINavigationController.cs" />
     <Compile Include="AuthenticationAgentUIViewController.cs" />
     <Compile Include="AuthorizationParameters.cs" />
     <Compile Include="CryptographyHelper.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="PlatformInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="AuthenticationAgentContinuationHelper.cs" />
     <Compile Include="WebUI.cs" />
     <Compile Include="WebUIFactory.cs" />
   </ItemGroup>

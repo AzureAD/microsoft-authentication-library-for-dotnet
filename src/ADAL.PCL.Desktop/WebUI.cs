@@ -32,14 +32,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         public Object OwnerWindow { get; set; }
 
-        public async Task<string> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
-            string authorizationResultUri = null;
+            AuthorizationResult authorizationResult = null;
 
             var sendAuthorizeRequest = new Action(
                 delegate
                 {
-                    authorizationResultUri = this.Authenticate(authorizationUri, redirectUri);
+                    authorizationResult = this.Authenticate(authorizationUri, redirectUri);
                 });
 
             // If the thread is MTA, it cannot create or communicate with WebBrowser which is a COM control.
@@ -73,10 +73,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 sendAuthorizeRequest();
             }
 
-            return authorizationResultUri;
+            return authorizationResult;
         }
 
-        internal string Authenticate(Uri requestUri, Uri callbackUri)
+        internal AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri)
         {
             this.RequestUri = requestUri;
             this.CallbackUri = callbackUri;
@@ -93,6 +93,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             }
         }
 
-        protected abstract string OnAuthenticate();
+        protected abstract AuthorizationResult OnAuthenticate();
     }
 }

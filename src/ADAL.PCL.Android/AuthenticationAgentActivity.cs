@@ -63,7 +63,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public override void Finish()
         {
-            this.SetResult(Result.Ok, this.client.ReturnIntent);
+            if (this.client.ReturnIntent != null)
+            {
+                this.SetResult(Result.Ok, this.client.ReturnIntent);
+            }
+            else
+            {
+                this.SetResult(Result.Canceled, new Intent("Return"));
+            }
             base.Finish();
         }
 

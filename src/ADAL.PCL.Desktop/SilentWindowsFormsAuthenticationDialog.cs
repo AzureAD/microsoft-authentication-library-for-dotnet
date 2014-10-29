@@ -52,14 +52,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             this.SignalDone();
         }
 
-        public string Result
-        {
-            get
-            {
-                return this.authenticationResult;
-            }
-        }
-
         /// <summary>
         /// Make sure that the browser control does not surface any of it's own dialogs.
         /// For instance bad certificate or javascript error dialogs.

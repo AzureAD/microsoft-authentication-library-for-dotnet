@@ -31,7 +31,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public static void SetAuthenticationAgentContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
-            WebUI.SetAuthorizationResultUri(data.GetStringExtra("ReturnedUrl"));
+            AuthorizationResult authorizationResult;
+            switch (resultCode)
+            {
+                case Result.Ok: authorizationResult= new AuthorizationResult(AuthorizationStatus.Success, data.GetStringExtra("ReturnedUrl")); break;
+                case Result.Canceled: authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null); break;
+                default: authorizationResult = new AuthorizationResult(AuthorizationStatus.UnknownError, null); break;
+            }
+
+            WebUI.SetAuthorizationResult(authorizationResult);
         }
     }
 }

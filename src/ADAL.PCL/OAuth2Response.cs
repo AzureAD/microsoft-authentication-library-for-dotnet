@@ -181,37 +181,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return result;
         }
 
-        public static AuthorizationResult ParseAuthorizeResponse(string webAuthenticationResult, CallState callState)
-        {
-            AuthorizationResult result = null;
-
-            var resultUri = new Uri(webAuthenticationResult);
-
-            // NOTE: The Fragment property actually contains the leading '#' character and that must be dropped
-            string resultData = resultUri.Query;
-
-            if (!string.IsNullOrWhiteSpace(resultData))
-            {
-                // Remove the leading '?' first
-                Dictionary<string, string> response = EncodingHelper.ParseKeyValueList(resultData.Substring(1), '&', true, callState);
-
-                if (response.ContainsKey(OAuthReservedClaim.Code))
-                {
-                    result = new AuthorizationResult(response[OAuthReservedClaim.Code]);
-                }
-                else if (response.ContainsKey(OAuthReservedClaim.Error))
-                {
-                    result = new AuthorizationResult(response[OAuthReservedClaim.Error], response.ContainsKey(OAuthReservedClaim.ErrorDescription) ? response[OAuthReservedClaim.ErrorDescription] : null);
-                }
-                else
-                {
-                    result = new AuthorizationResult(AdalError.AuthenticationFailed, AdalErrorMessage.AuthorizationServerInvalidResponse);
-                }
-            }
-
-            return result;
-        }
-
         public static TokenResponse ReadErrorResponse(WebResponse response)
         {
             if (response == null)

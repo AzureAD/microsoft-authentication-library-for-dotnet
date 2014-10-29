@@ -37,8 +37,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         private Uri desiredCallbackUri;
 
-        protected string authenticationResult;
-
         protected IWin32Window ownerWindow;
 
         private Keys key = Keys.None;
@@ -61,6 +59,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 NativeMethods.SetQueryNetSessionCount(NativeMethods.SessionOp.SESSION_INCREMENT);
             }
         }
+
+        internal AuthorizationResult Result { get; set; }
 
         /// <summary>
         /// Default constructor
@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) && url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath))
             {
-                this.authenticationResult = url.AbsoluteUri;
+                this.Result = new AuthorizationResult(AuthorizationStatus.Success, url.AbsoluteUri);
                 this.StopWebBrowser();
 
                 // in this handler object could be already disposed, so it should be the last method
@@ -199,10 +199,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         protected abstract void OnNavigationCanceled(int statusCode);
 
-        public string AuthenticateAAD(Uri requestUri, Uri callbackUri)
+        internal AuthorizationResult AuthenticateAAD(Uri requestUri, Uri callbackUri)
         {
             this.desiredCallbackUri = callbackUri;
-            this.authenticationResult = null;
+            this.Result = null;
 
             // The WebBrowser event handlers must not throw exceptions.
             // If they do then they may be swallowed by the native
@@ -214,7 +214,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             this.webBrowser.Navigate(requestUri);
             this.OnAuthenticate();
 
-            return this.authenticationResult;
+            return this.Result;
         }
 
         protected virtual void OnAuthenticate()

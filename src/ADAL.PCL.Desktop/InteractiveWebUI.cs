@@ -22,9 +22,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
     {
         private WindowsFormsWebAuthenticationDialog dialog;
 
-        protected override string OnAuthenticate()
+        protected override AuthorizationResult OnAuthenticate()
         {
-            string result;
+            AuthorizationResult result;
 
             using (this.dialog = new WindowsFormsWebAuthenticationDialog(this.OwnerWindow))
             {

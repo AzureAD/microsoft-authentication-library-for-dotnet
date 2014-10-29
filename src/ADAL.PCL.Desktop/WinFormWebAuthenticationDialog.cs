@@ -63,7 +63,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 case DialogResult.OK:
                     break;
                 case DialogResult.Cancel:
-                    throw new AdalException(AdalError.AuthenticationCanceled);
+                    this.Result = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+                    break;
                 default:
                     throw this.CreateExceptionForAuthenticationUiFailed(this.statusCode);
             }

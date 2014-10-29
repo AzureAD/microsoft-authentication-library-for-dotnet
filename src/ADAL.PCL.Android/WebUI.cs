@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal class WebUI : IWebUI
     {
         private static SemaphoreSlim returnedUriReady;
-        private static string authorizationResultUri;
+        private static AuthorizationResult authorizationResult;
         private AuthorizationParameters parameters;
 
         public WebUI(IAuthorizationParameters parameters)
@@ -40,17 +40,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        public async Task<string> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
             returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, callState);
             await returnedUriReady.WaitAsync();
-            return authorizationResultUri;
+            return authorizationResult;
         }
 
-        public static void SetAuthorizationResultUri(string authorizationResultUriInput)
+        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
         {
-            authorizationResultUri = authorizationResultUriInput;
+            authorizationResult = authorizationResultInput;
             returnedUriReady.Release();
         }
 
