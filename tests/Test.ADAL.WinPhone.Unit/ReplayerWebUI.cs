@@ -37,7 +37,7 @@ namespace Test.ADAL.WinPhone.Unit
         {
         }
 
-        public async Task<string> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
             string key = authorizationUri.AbsoluteUri + redirectUri.AbsoluteUri;
 
@@ -46,13 +46,13 @@ namespace Test.ADAL.WinPhone.Unit
                 string value = IOMap[key];
                 if (value[0] == 'P')
                 {
-                    return value.Substring(1);
+                    return new AuthorizationResult(AuthorizationStatus.Success, value.Substring(1));
                 }
 
                 if (value[0] == 'A')
                 {
                     string[] segments = value.Substring(1).Split(new[] { Delimiter }, StringSplitOptions.RemoveEmptyEntries);
-                    return string.Format("https://dummy?error={0}&error_description={1}", segments[0], segments[1]);
+                    return new AuthorizationResult(AuthorizationStatus.Success, string.Format("https://dummy?error={0}&error_description={1}", segments[0], segments[1]));
                 }
             }
 

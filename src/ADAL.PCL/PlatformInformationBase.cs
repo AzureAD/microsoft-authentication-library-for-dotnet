@@ -58,7 +58,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         public virtual void AddPromptBehaviorQueryParameter(IAuthorizationParameters parameters, RequestParameters authorizationRequestParameters)
-        {            
+        {
+            authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
         }
 
         public virtual bool GetCacheLoadPolicy(IAuthorizationParameters parameters)

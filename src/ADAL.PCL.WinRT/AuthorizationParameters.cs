@@ -23,6 +23,9 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    /// <summary>
+    /// Additional parameters used in acquiring user's authorization
+    /// </summary>
     public class AuthorizationParameters : IAuthorizationParameters
     {
         public AuthorizationParameters(PromptBehavior promptBehavior, bool useCorporateNetwork)
@@ -31,8 +34,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.UseCorporateNetwork = useCorporateNetwork;
         }
 
+        /// <summary>
+        /// Gets or Sets flag to enable logged in user authentication. Note that enabling this flag requires some extra application capabilites.
+        /// This flag only works in SSO mode and is ignored otherwise.
+        /// </summary>
         public bool UseCorporateNetwork { get; private set; }
 
+        /// <summary>
+        /// Gets prompt behavior. If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.
+        /// </summary>
         public PromptBehavior PromptBehavior { get; private set; }
     }
 }

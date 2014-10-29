@@ -25,6 +25,9 @@ using MonoTouch.UIKit;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    /// <summary>
+    /// Additional parameters used in acquiring user's authorization
+    /// </summary>
     public class AuthorizationParameters : IAuthorizationParameters
     {
         public AuthorizationParameters(UIViewController callerViewController)
@@ -32,6 +35,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.CallerViewController = callerViewController;
         }
 
+        /// <summary>
+        /// Caller UIViewController
+        /// </summary>
         public UIViewController CallerViewController { get; private set; } 
     }
 }

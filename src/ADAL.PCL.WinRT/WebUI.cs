@@ -70,15 +70,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 { 
                     webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri, redirectUri);
                 }
-
-                if (webAuthenticationResult.ResponseStatus == WebAuthenticationStatus.UserCancel)
-                {
-                    throw new AdalException(AdalError.AuthenticationCanceled);
-                }
-                else if (webAuthenticationResult.ResponseStatus == WebAuthenticationStatus.ErrorHttp)
-                {
-                    throw new AdalException(AdalError.AuthenticationUiFailed);
-                }
             }
             catch (FileNotFoundException ex)
             {

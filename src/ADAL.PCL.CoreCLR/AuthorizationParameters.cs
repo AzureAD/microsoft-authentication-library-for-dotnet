@@ -23,10 +23,10 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    /// <summary>
+    /// Additional parameters used in acquiring user's authorization
+    /// </summary>
     public class AuthorizationParameters : IAuthorizationParameters
     {
-        public AuthorizationParameters()
-        {
-        }
     }
 }
