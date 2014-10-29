@@ -19,27 +19,29 @@
 using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.NET.Friend
 {
     public static class AdalFriend
     {
-        public static ClientAssertion CreateJwt(X509Certificate2 cert, string issuer, string aud)
+        public static ClientAssertion CreateJwt(byte[] cert, string password, string issuer, string aud)
         {
-            ClientAssertionCertificate certificate = new ClientAssertionCertificate(issuer, cert);
+            ClientAssertionCertificate certificate = new ClientAssertionCertificate(issuer, cert, password);
 
             JsonWebToken jwtToken = new JsonWebToken(certificate, aud);
             return jwtToken.Sign(certificate);
         }
 
-        public static string AcquireAccessCode(AuthenticationContext context, string resource, string clientId, Uri redirectUri, UserIdentifier userId)
+        public async static Task<string> AcquireAccessCodeAsync(AuthenticationContext context, string resource, string clientId, Uri redirectUri, UserIdentifier userId)
         {
-            var handler = new AcquireTokenInteractiveHandler(context.Authenticator, context.TokenCache, resource, clientId, redirectUri, PromptBehavior.Auto, userId, null,
-                context.CreateWebAuthenticationDialog(PromptBehavior.Auto), true);
+            var handler = new AcquireTokenInteractiveHandler(context.Authenticator, context.TokenCache, resource, clientId, redirectUri, new AuthorizationParameters(PromptBehavior.Auto, null), userId, null,
+                context.CreateWebAuthenticationDialog(new AuthorizationParameters(PromptBehavior.Auto, null)), false);
             handler.CallState = null;
             context.Authenticator.AuthorizationUri = context.Authority + "oauth2/authorize";
-            handler.AcquireAuthorization();
+            await handler.AcquireAuthorizationAsync();
             return handler.authorizationResult.Code;
         }
 

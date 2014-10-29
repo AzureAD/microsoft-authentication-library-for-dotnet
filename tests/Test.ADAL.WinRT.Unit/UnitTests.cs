@@ -23,7 +23,6 @@ using Windows.Storage;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Test.ADAL.Common;
-using Logger = Microsoft.IdentityModel.Clients.ActiveDirectory.Logger;
 using Windows.Security.Authentication.Web;
 
 namespace Test.ADAL.WinRT.Unit
@@ -52,7 +51,8 @@ namespace Test.ADAL.WinRT.Unit
         //[Description("Test to verify forms auth parameters.")]
         public async Task IncludeFormsAuthParamsTest()
         {
-            Verify.IsFalse(await AcquireTokenInteractiveHandler.IncludeFormsAuthParamsAsync(null));
+            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(new Authenticator("https://dummy.com/tenant", false), null, "resource", "clientId", new Uri("https://dummy"), new AuthorizationParameters(PromptBehavior.Auto, false), UserIdentifier.AnyUser, null, null, false);
+            Assert.IsFalse(await handler.IncludeFormsAuthParamsAsync());
         }
 
 
@@ -72,7 +72,7 @@ namespace Test.ADAL.WinRT.Unit
             {
                 AdalTrace.Level = AdalTraceLevel.Informational;
                 string guidValue = Guid.NewGuid().ToString();
-                Logger.Information(null, "{0}", guidValue);
+                PlatformPlugin.Logger.Information(null, "{0}", guidValue);
                 StorageFolder sf = ApplicationData.Current.LocalFolder;
                 AdalTrace.Level = AdalTraceLevel.None;
                 StorageFile file = await sf.GetFileAsync("AdalTraces.log");
@@ -94,15 +94,16 @@ namespace Test.ADAL.WinRT.Unit
         public async Task MsAppRedirectUriTest()
         {
             Sts sts = new AadSts();
-            AuthenticationContext context = new AuthenticationContext(sts.Authority);
-            AuthenticationResult result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId,
-                new Uri("ms-app://s-1-15-2-2097830667-3131301884-2920402518-3338703368-1480782779-4157212157-3811015497/"));
+            AuthenticationContextProxy context = new AuthenticationContextProxy(sts.Authority);
+            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId,
+                new Uri("ms-app://s-1-15-2-2097830667-3131301884-2920402518-3338703368-1480782779-4157212157-3811015497/"), 
+                new AuthorizationParameters(PromptBehavior.Auto, false));
 
             Verify.IsNotNullOrEmptyString(result.Error);
             Verify.AreEqual(result.Error, Sts.AuthenticationUiFailedError);
 
             Uri uri = WebAuthenticationBroker.GetCurrentApplicationCallbackUri();
-            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, uri);
+            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, uri, new AuthorizationParameters(PromptBehavior.Auto, false));
 
             Verify.IsNotNullOrEmptyString(result.Error);
             Verify.AreEqual(result.Error, Sts.AuthenticationUiFailedError);

@@ -17,134 +17,114 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.IO;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
-    /// Contains the results of one token acquisition operation. 
+    /// Represents the outcome of one authentication operation.
     /// </summary>
+    public enum AuthenticationStatus
+    {
+        /// <summary>
+        /// Authentication Success.
+        /// </summary>
+        Success = 0,
+
+        /// <summary>
+        /// Authentication failed due to error on client side.
+        /// </summary>
+        ClientError = -1,
+
+        /// <summary>
+        /// Authentication failed due to error returned by service.
+        /// </summary>
+        ServiceError = -2,
+    }
+
+    /// <summary>
+    /// Contains the results of one token acquisition operation. 
+    /// It can either contain the requested token (and supporting data) or information about why the token acquisition failed.
+    /// </summary>
+    [DataContract]
     public sealed partial class AuthenticationResult
     {
-        private const string Oauth2AuthorizationHeader = "Bearer ";
-
-        /// <summary>
-        /// Creates result returned from AcquireToken. Except in advanced scenarios related to token caching, you do not need to create any instance of AuthenticationResult.
-        /// </summary>
-        /// <param name="accessTokenType">Type of the Access Token returned</param>
-        /// <param name="accessToken">The Access Token requested</param>
-        /// <param name="refreshToken">The Refresh Token associated with the requested Access Token</param>
-        /// <param name="expiresOn">The point in time in which the Access Token returned in the AccessToken property ceases to be valid</param>
-        internal AuthenticationResult(string accessTokenType, string accessToken, string refreshToken, DateTimeOffset expiresOn)
+        internal AuthenticationResult(Exception ex)
         {
-            this.AccessTokenType = accessTokenType;
-            this.AccessToken = accessToken;
-            this.RefreshToken = refreshToken;
-            this.ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
-        }
-
-        /// <summary>
-        /// Gets the type of the Access Token returned. 
-        /// </summary>
-        [DataMember]
-        public string AccessTokenType { get; private set; }
-
-        /// <summary>
-        /// Gets the Access Token requested.
-        /// </summary>
-        [DataMember]
-        public string AccessToken { get; internal set; }
-
-        /// <summary>
-        /// Gets the Refresh Token associated with the requested Access Token. Note: not all operations will return a Refresh Token.
-        /// </summary>
-        [DataMember]
-        public string RefreshToken { get; internal set; }
-
-        /// <summary>
-        /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid.
-        /// This value is calculated based on current UTC time measured locally and the value expiresIn received from the service.
-        /// </summary>
-        [DataMember]
-        public DateTimeOffset ExpiresOn { get; internal set; }
-
-        /// <summary>
-        /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is not returned by the service.
-        /// </summary>
-        [DataMember]
-        public string TenantId { get; private set; }
-
-        /// <summary>
-        /// Gets user information including user Id. Some elements in UserInfo might be null if not returned by the service.
-        /// </summary>
-        [DataMember]
-        public UserInfo UserInfo { get; internal set; }
-
-        /// <summary>
-        /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
-        /// </summary>
-        [DataMember]
-        public string IdToken { get; internal set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the refresh token can be used for requesting access token for other resources.
-        /// </summary>
-        [DataMember]
-        public bool IsMultipleResourceRefreshToken { get; internal set; }
-
-        /// <summary>
-        /// Serializes the object to a JSON string
-        /// </summary>
-        /// <returns>Deserialized authentication result</returns>
-        public static AuthenticationResult Deserialize(string serializedObject)
-        {
-            AuthenticationResult result;
-            var serializer = new DataContractJsonSerializer(typeof(AuthenticationResult));
-            byte[] serializedObjectBytes = Encoding.UTF8.GetBytes(serializedObject);
-            using (var stream = new MemoryStream(serializedObjectBytes))
+            this.Status = AuthenticationStatus.ClientError;
+            this.StatusCode = 0;
+            if (ex is ArgumentNullException)
             {
-                result = (AuthenticationResult)serializer.ReadObject(stream);
+                this.Error = AdalError.InvalidArgument;
+                this.ErrorDescription = string.Format(AdalErrorMessage.NullParameterTemplate, ((ArgumentNullException)ex).ParamName);
             }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Creates authorization header from authentication result.
-        /// </summary>
-        /// <returns>Created authorization header</returns>
-        public string CreateAuthorizationHeader()
-        {
-            return Oauth2AuthorizationHeader + this.AccessToken;
-        }
-
-        /// <summary>
-        /// Serializes the object to a JSON string
-        /// </summary>
-        /// <returns>Serialized authentication result</returns>
-        public string Serialize()
-        {
-            string serializedObject;
-            var serializer = new DataContractJsonSerializer(typeof(AuthenticationResult));
-            using (MemoryStream stream = new MemoryStream())
+            else if (ex is ArgumentException)
             {
-                serializer.WriteObject(stream, this);
-                serializedObject = Encoding.UTF8.GetString(stream.ToArray(), 0, (int)stream.Position);
+                this.Error = AdalError.InvalidArgument;
+                this.ErrorDescription = ex.Message;
             }
-
-            return serializedObject;
+            else if (ex is AdalException)
+            {
+                this.Error = ((AdalException)ex).ErrorCode;
+                this.ErrorDescription = (ex.InnerException != null) ? ex.Message + ". " + ex.InnerException.Message : ex.Message;
+                AdalServiceException serviceException = ex as AdalServiceException;
+                if (serviceException != null)
+                {
+                    this.Status = AuthenticationStatus.ServiceError;
+                    this.StatusCode = serviceException.StatusCode;
+                }
+            }
+            else
+            {
+                this.Error = AdalError.AuthenticationFailed;
+                this.ErrorDescription = ex.Message;
+            }
         }
 
-        internal void UpdateTenantAndUserInfo(string tenantId, string idToken, UserInfo userInfo)
+        /// <summary>
+        /// Gets the outcome of the token acquisition operation.
+        /// </summary>
+        [DataMember]
+        public AuthenticationStatus Status { get; private set; }
+
+        /// <summary>
+        /// Gets provides error type in case of error.
+        /// </summary>
+        [DataMember]
+        public string Error { get; private set; }
+
+        /// <summary>
+        /// Gets detailed information in case of error.
+        /// </summary>
+        [DataMember]
+        public string ErrorDescription { get; private set; }
+
+        /// <summary>
+        /// Gets the status code returned from http layer if any error happens. This status code is either the HttpStatusCode in the inner WebException response or
+        /// NavigateError Event Status Code in browser based flow (See http://msdn.microsoft.com/en-us/library/bb268233(v=vs.85).aspx).
+        /// You can use this code for purposes such as implementing retry logic or error investigation.
+        /// </summary>
+        public int StatusCode { get; set; }
+
+        /// <summary>
+        /// The Windows Runtime string type is a value type and has no null value. 
+        /// The .NET projection prohibits passing a null .NET string across the Windows Runtime ABI boundary for this reason.
+        /// </summary>
+        internal void ReplaceNullStringPropertiesWithEmptyString()
         {
-            this.TenantId = tenantId;
-            this.IdToken = idToken;
-            if (userInfo != null)
+            this.AccessToken = this.AccessToken ?? string.Empty;
+            this.AccessTokenType = this.AccessTokenType ?? string.Empty;
+            this.Error = this.Error ?? string.Empty;
+            this.ErrorDescription = this.ErrorDescription ?? string.Empty;
+            this.IdToken = this.IdToken ?? string.Empty;
+            this.RefreshToken = this.RefreshToken ?? string.Empty;
+            this.TenantId = this.TenantId ?? string.Empty;
+            if (this.UserInfo != null)
             {
-                this.UserInfo = new UserInfo(userInfo);
+                this.UserInfo.DisplayableId = this.UserInfo.DisplayableId ?? string.Empty;
+                this.UserInfo.FamilyName = this.UserInfo.FamilyName ?? string.Empty;
+                this.UserInfo.GivenName = this.UserInfo.GivenName ?? string.Empty;
+                this.UserInfo.IdentityProvider = this.UserInfo.IdentityProvider ?? string.Empty;
             }
         }
     }

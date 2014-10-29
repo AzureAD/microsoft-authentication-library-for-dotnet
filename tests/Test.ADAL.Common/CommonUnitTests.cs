@@ -24,9 +24,10 @@ namespace Test.ADAL.Common
     {
         public static void CreateSha256HashTest()
         {
-            string hash = PlatformSpecificHelper.CreateSha256Hash("abc");
-            string hash2 = PlatformSpecificHelper.CreateSha256Hash("abd");
-            string hash3 = PlatformSpecificHelper.CreateSha256Hash("abc");
+            ICryptographyHelper cryptoHelper = new CryptographyHelper();
+            string hash = cryptoHelper.CreateSha256Hash("abc");
+            string hash2 = cryptoHelper.CreateSha256Hash("abd");
+            string hash3 = cryptoHelper.CreateSha256Hash("abc");
             Verify.AreEqual(hash, hash3);
             Verify.AreNotEqual(hash, hash2);
             Verify.AreEqual(hash, "ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=");
@@ -34,7 +35,7 @@ namespace Test.ADAL.Common
 
         public static void AdalIdTest()
         {
-            IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create("https://test");
+            IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create("https://test");
             AdalIdHelper.AddAsHeaders(request);
 
             Verify.AreEqual(4, request.Headers.Count);

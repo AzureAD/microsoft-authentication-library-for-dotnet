@@ -72,14 +72,14 @@ namespace Test.ADAL.NET.Friend
 
         private static void SetRecorderNetworkPlugin()
         {
-            NetworkPlugin.WebUIFactory = new RecorderWebUIFactory();
-            NetworkPlugin.HttpWebRequestFactory = new RecorderHttpWebRequestFactory();
-            NetworkPlugin.RequestCreationHelper = new RecorderRequestCreationHelper();
+            PlatformPlugin.WebUIFactory = new RecorderWebUIFactory();
+            PlatformPlugin.HttpWebRequestFactory = new RecorderHttpWebRequestFactory();
+            PlatformPlugin.RequestCreationHelper = new RecorderRequestCreationHelper();
         }
 
         private static void ResetRecorderNetworkPlugin()
         {
-            NetworkPlugin.SetToDefault();
+            PlatformPlugin.InitializeByAssemblyDynamicLinking();
         }
     }
 }

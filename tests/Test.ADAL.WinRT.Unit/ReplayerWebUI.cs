@@ -19,7 +19,6 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Test.ADAL.WinRT.Unit
 {
@@ -27,11 +26,11 @@ namespace Test.ADAL.WinRT.Unit
     {
         private const string Delimiter = ":::";
 
-        public ReplayerWebUI(PromptBehavior promptBehavior, bool useCorporateNetwork)
+        public ReplayerWebUI(IAuthorizationParameters parameters)
         {
         }
 
-        public async Task<AuthorizationResult> AuthenticateAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
             string key = authorizationUri.AbsoluteUri + redirectUri.AbsoluteUri;
 
@@ -40,13 +39,13 @@ namespace Test.ADAL.WinRT.Unit
                 string value = IOMap[key];
                 if (value[0] == 'P')
                 {
-                    return OAuth2Response.ParseAuthorizeResponse(value.Substring(1), callState);
+                    return new AuthorizationResult(AuthorizationStatus.Success, value.Substring(1));
                 }
                 
                 if (value[0] == 'A')
                 {
                     string []segments = value.Substring(1).Split(new [] { Delimiter }, StringSplitOptions.RemoveEmptyEntries);
-                    return new AuthorizationResult(error: segments[0], errorDescription: segments[1]);
+                    return new AuthorizationResult(AuthorizationStatus.Success, string.Format("https://dummy?error={0}&error_description={1}", segments[0], segments[1]));
                 }
             }
 

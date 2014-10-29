@@ -3,16 +3,16 @@
     <metadata>
         <title>Active Directory Authentication Library</title>
         <id>Microsoft.IdentityModel.Clients.ActiveDirectory</id>
-        <version>REPLACE_DURING_BULD</version>
+        <version>REPLACE_DURING_BULD-alpha</version>
         <authors>Microsoft Open Technologies</authors>
         <licenseUrl>http://go.microsoft.com/fwlink/?LinkId=317295</licenseUrl>
         <projectUrl>http://go.microsoft.com/fwlink/?LinkId=258232</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
-        <description>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.</description>
-        <summary>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.</summary>
+        <description>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides a Portable Class Library with easy to use authentication functionality for your .NET client on various platforms including Windows desktop, Windows Store, Windows Phone, Xamarin iOS and Xamarin Android by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.</description>
+        <summary>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides easy to use authentication functionality for your .NET based client by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.</summary>
         <language>en-US</language>
         <owners>Microsoft Open Technologies</owners>
-        <tags>Active Directory Authentication Library, ADAL, Active Directory, Windows Azure Active Directory, AD, AAD, Identity, Authentication, .NET, Windows Store</tags>
+        <tags>Active Directory Authentication Library, ADAL, Active Directory, Windows Azure Active Directory, AD, AAD, Identity, Authentication, .NET, Windows Store, Windows Phone, Xamarin iOS, Xamarin Android</tags>
         <copyright>(C) Microsoft Open Technologies. All rights reserved.</copyright>
     </metadata>
 </package>

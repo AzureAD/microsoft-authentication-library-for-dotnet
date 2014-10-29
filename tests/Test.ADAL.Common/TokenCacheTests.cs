@@ -145,7 +145,7 @@ namespace Test.ADAL.Common.Unit
             VerifyCacheItemCount(cache, 0);
         }
 
-        public static async Task TokenCacheKeyTestAsync()
+        public static async Task TokenCacheKeyTestAsync(AuthorizationParameters parameters)
         {
             CheckPublicGetSets();
 
@@ -178,12 +178,7 @@ namespace Test.ADAL.Common.Unit
             try
             {
                 var result = await acWithLocalCache.AcquireTokenAsync(resource, clientId, credential);
-#if TEST_ADAL_WINRT_UNIT
-    // ADAL WinRT does not throw exception. It returns error.
-                Verify.AreEqual("multiple_matching_tokens_detected", result.Error);
-#else
                 Verify.Fail("Exception expected");
-#endif
             }
             catch (AdalException adae)
             {
@@ -194,11 +189,7 @@ namespace Test.ADAL.Common.Unit
             {
                 AuthenticationContext acWithDefaultCache = new AuthenticationContext(authority, false);
                 var result = await acWithDefaultCache.AcquireTokenAsync(resource, clientId, credential);
-#if TEST_ADAL_WINRT_UNIT
-                Verify.AreEqual("multiple_matching_tokens_detected", result.Error);
-#else
                 Verify.Fail("Exception expected");
-#endif
             }
             catch (AdalException adae)
             {
@@ -218,11 +209,7 @@ namespace Test.ADAL.Common.Unit
             Verify.IsFalse(localCache.tokenCacheDictionary.ContainsKey(tempKey));
             AddToDictionary(localCache, tempKey, cacheValue);
 
-#if TEST_ADAL_WINRT_UNIT
-            authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri);
-#else
-            authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId);
-#endif
+            authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, parameters);
             VerifyAuthenticationResultsAreEqual(cacheValue, authenticationResultFromCache);
 
             // @resource && @clientId && userId
@@ -238,25 +225,13 @@ namespace Test.ADAL.Common.Unit
             var userId = new UserIdentifier(uniqueId, UserIdentifierType.UniqueId);
             var userIdUpper = new UserIdentifier(displayableId.ToUpper(), UserIdentifierType.RequiredDisplayableId);
 
-#if TEST_ADAL_WINRT_UNIT
-            authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, PromptBehavior.Auto, userId);
-#else
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userId);
-#endif
             VerifyAuthenticationResultsAreEqual(cacheValue, authenticationResultFromCache);
 
-#if TEST_ADAL_WINRT_UNIT
-            authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, PromptBehavior.Auto, userIdUpper);
-#else
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userIdUpper);
-#endif
             VerifyAuthenticationResultsAreEqual(cacheValue, authenticationResultFromCache);
 
-#if TEST_ADAL_WINRT_UNIT
-            authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri);
-#else
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId);
-#endif
             VerifyAuthenticationResultsAreEqual(cacheValue, authenticationResultFromCache);
 
         }

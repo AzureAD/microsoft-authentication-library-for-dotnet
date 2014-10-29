@@ -16,16 +16,24 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using System.Net;
+using System.Threading.Tasks;
+
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Test.ADAL.WinRT.Unit
 {
     class ReplayerWebUIFactory : IWebUIFactory
     {
-        public IWebUI Create(PromptBehavior promptBehavior, bool useCorporateNetwork)
+        public IWebUI CreateAuthenticationDialog(IAuthorizationParameters parameters)
         {
-            return new ReplayerWebUI(promptBehavior, useCorporateNetwork);
+            return new ReplayerWebUI(parameters);
+        }
+
+        public Task<IHttpWebResponse> GetResponseWithTimeoutSyncOrAsync(HttpWebRequest request, int timeoutInMilliSeconds, CallState callState)
+        {
+            throw new NotImplementedException();
         }
     }
 }

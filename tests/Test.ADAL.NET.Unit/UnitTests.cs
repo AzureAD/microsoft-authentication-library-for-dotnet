@@ -57,17 +57,6 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
-        [Description("Positive Test for SecureString conversions")]
-        [TestCategory("AdalDotNetUnit")]
-        public void SecureStringTest()
-        {
-            TestSecureStringToCharArray(string.Empty);
-            TestSecureStringToCharArray("   ");
-            TestSecureStringToCharArray(ComplexString);
-            TestSecureStringToCharArray(ComplexString2);
-        }
-
-        [TestMethod]
         [Description("Test for RequestParameters class")]
         [TestCategory("AdalDotNetUnit")]
         public void RequestParametersTest()
@@ -84,12 +73,12 @@ namespace Test.ADAL.NET.Unit
 
             param = new RequestParameters(null, new ClientKey(ClientId));
             param[AdditionalParameter] = ComplexString;
-            param.AddSecureParameter(AdditionalParameter2, StringToSecureString(ComplexString2));
+            param[AdditionalParameter2] = ComplexString2;
             Verify.AreEqual(expectedString, param.ToString());
 
             param = new RequestParameters(null, new ClientKey(ClientId));
-            param.AddSecureParameter(AdditionalParameter, StringToSecureString(ComplexString));
-            param.AddSecureParameter(AdditionalParameter2, StringToSecureString(ComplexString2));
+            param[AdditionalParameter] = ComplexString;
+            param[AdditionalParameter2] = ComplexString2;
             Verify.AreEqual(expectedString, param.ToString());
 
             param = new RequestParameters(new StringBuilder(expectedString));
@@ -233,13 +222,13 @@ namespace Test.ADAL.NET.Unit
             return tr;
         }
 
-
         [TestMethod]
         [TestCategory("AdalDotNetUnit")]
         [Description("Test to verify forms auth parameters.")]
-        public void IncludeFormsAuthParamsTest()
+        public async Task IncludeFormsAuthParamsTest()
         {
-            Assert.IsFalse(AcquireTokenInteractiveHandler.IncludeFormsAuthParams());
+            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(new Authenticator("https://dummy.com/tenant", false), null, "resource", "clientId", new Uri("https://dummy"), new AuthorizationParameters(PromptBehavior.Auto, null), UserIdentifier.AnyUser, null, null, false);
+            Assert.IsFalse(await handler.IncludeFormsAuthParamsAsync());
         }
 
         [TestMethod]
@@ -251,14 +240,17 @@ namespace Test.ADAL.NET.Unit
             string[] certs = { "valid_cert.pfx", "valid_cert2.pfx" };
             for (int i = 0; i < 2; i++)
             {
-                X509Certificate2 x509Certificate = new X509Certificate2(certs[i], "password");
-                byte[] signature = CryptographyHelper.SignWithCertificate(Message, x509Certificate);
+                X509Certificate2 x509Certificate = new X509Certificate2(certs[i], "password", X509KeyStorageFlags.Exportable);
+                byte[] rawData = x509Certificate.Export(X509ContentType.Pkcs12, "password");
+
+                ICryptographyHelper cryptoHelper = new CryptographyHelper();
+                byte[] signature = cryptoHelper.SignWithCertificate(Message, rawData, "password");
                 Verify.IsNotNull(signature);
 
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
 
-                signature = CryptographyHelper.SignWithCertificate(Message, x509Certificate);
+                signature = cryptoHelper.SignWithCertificate(Message, rawData, "password");
                 Verify.IsNotNull(signature);
             }
         }
@@ -365,16 +357,6 @@ namespace Test.ADAL.NET.Unit
             string encodedStr2 = (encodedChars == null) ? null : new string(encodedChars);
 
             Verify.AreEqual(encodedStr, encodedStr2);            
-        }
-
-        private void TestSecureStringToCharArray(string str)
-        {
-            var secureStr = StringToSecureString(str);
-
-            char[] secureChars = secureStr.ToCharArray();
-            var secureStringRestored = new string(secureChars);
-
-            Verify.AreEqual(str, secureStringRestored);            
         }
 
         private SecureString StringToSecureString(string str)

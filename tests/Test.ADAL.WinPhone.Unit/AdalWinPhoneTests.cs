@@ -48,17 +48,18 @@ namespace Test.ADAL.WinPhone.Unit
             AdalTests.InitializeTest();
 
             SetReplayerNetworkPlugin();
-        }
 
+            AdalTests.AuthorizationParameters = new AuthorizationParameters();
+        }
 
         [TestMethod]
         //[Description("Positive Test for AcquireToken")]
         [TestCategory("AdalWinPhoneMock")]
         [DataRow("AAD")]
         [DataRow("ADFS")]
-        public void AcquireTokenPositiveTest(string stsType)
+        public async Task AcquireTokenPositiveTest(string stsType)
         {
-            AdalTests.AcquireTokenPositiveTest(SetupStsService(GetStsType(stsType)));
+            await AdalTests.AcquireTokenPositiveTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -76,9 +77,9 @@ namespace Test.ADAL.WinPhone.Unit
         [TestCategory("AdalWinPhoneMock")]
         [DataRow("AAD")]
         [DataRow("ADFS")]
-        public void AuthenticationContextAuthorityValidationTest(string stsType)
+        public async Task AuthenticationContextAuthorityValidationTest(string stsType)
         {
-            AdalTests.AuthenticationContextAuthorityValidationTest(SetupStsService(GetStsType(stsType)));
+            await AdalTests.AuthenticationContextAuthorityValidationTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -86,9 +87,9 @@ namespace Test.ADAL.WinPhone.Unit
         [TestCategory("AdalWinPhoneMock")]
         [DataRow("AAD")]
         [DataRow("ADFS")]
-        public void AcquireTokenWithInvalidAuthorityTest(string stsType)
+        public async Task AcquireTokenWithInvalidAuthorityTest(string stsType)
         {
-            AdalTests.AcquireTokenWithInvalidAuthorityTest(SetupStsService(GetStsType(stsType)));
+            await AdalTests.AcquireTokenWithInvalidAuthorityTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -96,9 +97,9 @@ namespace Test.ADAL.WinPhone.Unit
         [TestCategory("AdalWinPhoneMock")]
         [DataRow("AAD")]
         [DataRow("ADFS")]
-        public void AcquireTokenWithInvalidResourceTest(string stsType)
+        public async Task AcquireTokenWithInvalidResourceTest(string stsType)
         {
-            AdalTests.AcquireTokenWithInvalidResourceTest(SetupStsService(GetStsType(stsType)));
+            await AdalTests.AcquireTokenWithInvalidResourceTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -106,9 +107,9 @@ namespace Test.ADAL.WinPhone.Unit
         [TestCategory("AdalWinPhoneMock")]
         [DataRow("AAD")]
         [DataRow("ADFS")]
-        public void AcquireTokenWithInvalidClientIdTest(string stsType)
+        public async Task AcquireTokenWithInvalidClientIdTest(string stsType)
         {
-            AdalTests.AcquireTokenWithInvalidClientIdTest(SetupStsService(GetStsType(stsType)));
+            await AdalTests.AcquireTokenWithInvalidClientIdTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -116,9 +117,9 @@ namespace Test.ADAL.WinPhone.Unit
         [TestCategory("AdalWinPhoneMock")]
         [DataRow("AAD")]
         [DataRow("ADFS")]
-        public void AcquireTokenWithIncorrectUserCredentialTest(string stsType)
+        public async Task AcquireTokenWithIncorrectUserCredentialTest(string stsType)
         {
-            AdalTests.AcquireTokenWithIncorrectUserCredentialTest(SetupStsService(GetStsType(stsType)));
+            await AdalTests.AcquireTokenWithIncorrectUserCredentialTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -126,9 +127,9 @@ namespace Test.ADAL.WinPhone.Unit
         [TestCategory("AdalWinPhoneMock")]
         [DataRow("AAD")]
         [DataRow("ADFS")]
-        public void ExtraQueryParametersTest(string stsType)
+        public async Task ExtraQueryParametersTest(string stsType)
         {
-            AdalTests.ExtraQueryParametersTest(SetupStsService(GetStsType(stsType)));
+            await AdalTests.ExtraQueryParametersTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -136,10 +137,10 @@ namespace Test.ADAL.WinPhone.Unit
         [TestCategory("AdalWinPhoneMock")]
         [DataRow("AAD")]
         [DataRow("ADFS")]
-        public void AcquireTokenWithAuthenticationCanceledTest(string stsType)
+        public async Task AcquireTokenWithAuthenticationCanceledTest(string stsType)
         {
             // ADFS security dialog hang up
-            AdalTests.AcquireTokenWithAuthenticationCanceledTest(SetupStsService(GetStsType(stsType)));
+            await AdalTests.AcquireTokenWithAuthenticationCanceledTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -147,9 +148,9 @@ namespace Test.ADAL.WinPhone.Unit
         [TestCategory("AdalWinPhoneMock")]
         [DataRow("AAD")]
         [DataRow("ADFS")]
-        public void AcquireTokenPositiveWithDefaultCacheTest(string stsType)
+        public async Task AcquireTokenPositiveWithDefaultCacheTest(string stsType)
         {
-            AdalTests.AcquireTokenPositiveWithDefaultCacheTest(SetupStsService(GetStsType(stsType)));
+            await AdalTests.AcquireTokenPositiveWithDefaultCacheTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -157,9 +158,9 @@ namespace Test.ADAL.WinPhone.Unit
         [TestCategory("AdalWinPhoneMock")]
         [DataRow("AAD")]
         [DataRow("ADFS")]
-        public void AcquireTokenPositiveWithInMemoryCacheTest(string stsType)
+        public async Task AcquireTokenPositiveWithInMemoryCacheTest(string stsType)
         {
-            AdalTests.AcquireTokenPositiveWithInMemoryCacheTest(SetupStsService(GetStsType(stsType)));
+            await AdalTests.AcquireTokenPositiveWithInMemoryCacheTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -168,9 +169,9 @@ namespace Test.ADAL.WinPhone.Unit
         [DataRow("AAD")]
         [DataRow("ADFS")]
         [Ignore]    // Enable once the test bug is fixed.
-        public void AcquireTokenPositiveWithNullCacheTest(string stsType)
+        public async Task AcquireTokenPositiveWithNullCacheTest(string stsType)
         {
-            AdalTests.AcquireTokenPositiveWithNullCacheTest(SetupStsService(GetStsType(stsType)));
+            await AdalTests.AcquireTokenPositiveWithNullCacheTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -178,9 +179,9 @@ namespace Test.ADAL.WinPhone.Unit
         [TestCategory("AdalWinPhoneMock")]
         [DataRow("AAD")]
         [DataRow("ADFS")]
-        public void UserInfoTest(string stsType)
+        public async Task UserInfoTest(string stsType)
         {
-            AdalTests.UserInfoTest(SetupStsService(GetStsType(stsType)));
+            await AdalTests.UserInfoTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -197,9 +198,9 @@ namespace Test.ADAL.WinPhone.Unit
         //[Description("Test for acquring token using tenantless endpoint")]
         [TestCategory("AdalWinPhoneMock")]
         [DataRow("AAD")]
-        public void TenantlessTest(string stsType)
+        public async Task TenantlessTest(string stsType)
         {
-            AdalTests.TenantlessTest(SetupStsService(GetStsType(stsType)));
+            await AdalTests.TenantlessTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
         [TestMethod]
@@ -211,20 +212,11 @@ namespace Test.ADAL.WinPhone.Unit
             await AdalTests.InstanceDiscoveryTestAsync(SetupStsService(GetStsType(stsType)));
         }
 
-        [TestMethod]
-        //[Description("Test for AuthenticationContextDelegate")]
-        [TestCategory("AdalWinPhoneMock")]
-        [DataRow("AAD")]
-        public void AcquireTokenWithCallbackTest(string stsType)
-        {
-            AdalTests.AcquireTokenWithCallbackTest(SetupStsService(GetStsType(stsType)));
-        }
-
         private static void SetReplayerNetworkPlugin()
         {
-            NetworkPlugin.WebUIFactory = new ReplayerWebUIFactory();
-            NetworkPlugin.HttpWebRequestFactory = new ReplayerHttpWebRequestFactory();
-            NetworkPlugin.RequestCreationHelper = new ReplayerRequestCreationHelper();
+            PlatformPlugin.WebUIFactory = new ReplayerWebUIFactory();
+            PlatformPlugin.HttpWebRequestFactory = new ReplayerHttpWebRequestFactory();
+            PlatformPlugin.RequestCreationHelper = new ReplayerRequestCreationHelper();
         }
     }
 }

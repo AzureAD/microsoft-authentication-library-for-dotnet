@@ -17,42 +17,116 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Globalization;
+using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal partial class Logger
+    internal partial class Logger : LoggerBase, IDisposable
     {
-        internal static string PrepareLogMessage(CallState callState, string format, params object[] args)
+        private const string LogFilename = "AdalTraces.log";
+        private bool disposed;
+        private readonly AdalEventSource AdalEventSource;
+        private StorageFileEventListener adalListener;
+
+        public Logger()
         {
-            return string.Format(CultureInfo.CurrentCulture, format, args) + (callState != null ? (". Correlation ID: " + callState.CorrelationId) : string.Empty);
+            AdalEventSource = new AdalEventSource();
         }
 
-        internal static void LogException(CallState callState, Exception ex)
+        internal void SetListenerLevel(AdalTraceLevel level)
         {
-            ArgumentException argumentEx = ex as ArgumentException;
-            if (argumentEx != null)
+            if (level != AdalTraceLevel.None)
             {
-                Information(callState, "ArgumentException was thrown for argument '{0}' with message '{1}'", argumentEx.ParamName, argumentEx.Message);
-                return;
-            }
+                if (adalListener == null)
+                {
+                    adalListener = new StorageFileEventListener(LogFilename);
+                }
 
-            AdalServiceException adalServiceEx = ex as AdalServiceException;
-            if (adalServiceEx != null)
+                adalListener.EnableEvents(AdalEventSource, GetEventLevel(level));
+            }
+            else if (adalListener != null)
             {
-                Information(callState, "AdalServiceException was thrown with ErrorCode '{0}' and StatusCode '{1}' and innerException '{2}'", 
-                    adalServiceEx.ErrorCode, adalServiceEx.StatusCode, (adalServiceEx.InnerException != null) ? adalServiceEx.Message : "No inner exception");
-                return;
+                adalListener.DisableEvents(AdalEventSource);
+                adalListener.Dispose();
+                adalListener = null;
             }
+        }
 
-            AdalException adalEx = ex as AdalException;
-            if (adalEx != null)
+        internal override void Verbose(CallState callState, string format, params object[] args)
+        {
+            AdalEventSource.Verbose(PrepareLogMessage(callState, format, args));
+        }
+
+        internal override void Information(CallState callState, string format, params object[] args)
+        {
+            AdalEventSource.Information(PrepareLogMessage(callState, format, args));
+        }
+
+        internal override void Warning(CallState callState, string format, params object[] args)
+        {
+            AdalEventSource.Warning(PrepareLogMessage(callState, format, args));
+        }
+
+        internal override void Error(CallState callState, string format, params object[] args)
+        {
+            AdalEventSource.Error(PrepareLogMessage(callState, format, args));
+        }
+
+        private EventLevel GetEventLevel(AdalTraceLevel level)
+        {
+            EventLevel returnLevel;
+            switch (level)
             {
-                Information(callState, "AdalException was thrown with ErrorCode '{0}'", adalEx.ErrorCode);
-                return;
+                case AdalTraceLevel.Informational:
+                    returnLevel = EventLevel.Informational;
+                    break;
+                case AdalTraceLevel.Verbose:
+                    returnLevel = EventLevel.Verbose;
+                    break;
+                case AdalTraceLevel.Warning:
+                    returnLevel = EventLevel.Warning;
+                    break;
+                case AdalTraceLevel.Error:
+                    returnLevel = EventLevel.Error;
+                    break;
+                case AdalTraceLevel.Critical:
+                    returnLevel = EventLevel.Critical;
+                    break;
+                case AdalTraceLevel.LogAlways:
+                    returnLevel = EventLevel.LogAlways;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("level");
             }
+            return returnLevel;
+        }
 
-            Information(callState, "Exception of type '{0}' was thrown with message '{1}'", ex.GetType().ToString(), ex.Message);
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    if (adalListener != null)
+                    {
+                        adalListener.Dispose();
+                        adalListener = null;
+                    }
+
+                    if (AdalEventSource != null)
+                    {
+                        AdalEventSource.Dispose();
+                    }
+                }
+
+                disposed = true;
+            }
         }
     }
 }
