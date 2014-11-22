@@ -115,13 +115,28 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     if (adalListener != null)
                     {
-                        adalListener.Dispose();
+                        try
+                        {
+                            adalListener.Dispose();
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
+
                         adalListener = null;
                     }
 
                     if (AdalEventSource != null)
                     {
-                        AdalEventSource.Dispose();
+                        try
+                        {
+                            AdalEventSource.Dispose();
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
                     }
                 }
 

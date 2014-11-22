@@ -132,6 +132,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 BinaryWriter writer = new BinaryWriter(stream);
                 writer.Write(SchemaVersion);
+                Logger.Verbose(null, "Serializing token cache with {0} items.", this.tokenCacheDictionary.Count);
                 writer.Write(this.tokenCacheDictionary.Count);
                 foreach (KeyValuePair<TokenCacheKey, AuthenticationResult> kvp in this.tokenCacheDictionary)
                 {
@@ -169,7 +170,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 int schemaVersion = reader.ReadInt32();
                 if (schemaVersion != SchemaVersion)
                 {
-                    // The version of the serialized cache does not match the current schema
+                    Logger.Warning(null, "The version of the serialized cache does not match the current schema");
                     return;
                 }
 
@@ -185,6 +186,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     this.tokenCacheDictionary.Add(key, result);
                 }
+
+                Logger.Verbose(null, "Deserialized {0} items to token cache.", count);
             }
         }
 
@@ -306,11 +309,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (tokenMarginallyExpired || !cacheKey.ResourceEquals(resource))
                 {
                     result.AccessToken = null;
+                    if (tokenMarginallyExpired)
+                    {
+                        Logger.Verbose(callState, "A [marginally] expired token was found in the cache");
+                    }
                 }
 
                 if (result.AccessToken == null && result.RefreshToken == null)
                 {
                     this.tokenCacheDictionary.Remove(cacheKey);
+                    Logger.Verbose(callState, "An old item was removed from the cache");
                     this.HasStateChanged = true;
                     result = null;
                 }
@@ -320,11 +328,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Logger.Verbose(callState, "A matching token was found in the cache");
                 }
             }
+            else
+            {
+                Logger.Verbose(callState, "No matching token was found in the cache");
+            }
 
             return result;
         }
 
-        internal void StoreToCache(AuthenticationResult result, string authority, string resource, string clientId, TokenSubjectType subjectType)
+        internal void StoreToCache(AuthenticationResult result, string authority, string resource, string clientId, TokenSubjectType subjectType, CallState callState)
         {
             string uniqueId = (result.UserInfo != null) ? result.UserInfo.UniqueId : null;
             string displayableId = (result.UserInfo != null) ? result.UserInfo.DisplayableId : null;
@@ -339,6 +351,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, subjectType, result.UserInfo);
             this.tokenCacheDictionary[tokenCacheKey] = result;
+            Logger.Verbose(callState, "An item was stored in the cache");
             this.UpdateCachedMrrtRefreshTokens(result, authority, clientId, subjectType);
 
             this.HasStateChanged = true;
@@ -370,6 +383,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             KeyValuePair<TokenCacheKey, AuthenticationResult>? returnValue = null;
             if (resourceValuesCount == 1)
             {
+                Logger.Verbose(callState, "An item matching the requested resource was found in the cache");
                 returnValue = resourceSpecificItems.First();
             }
             else if (resourceValuesCount == 0)
@@ -381,14 +395,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (mrrtItems.Any())
                 {
                     returnValue = mrrtItems.First();
+                    Logger.Verbose(callState, "A Multi Resource Refresh Token for a different resource was found which can be used");
                 }
             }
             else
             {
-                // There is more than one resource specific token.  It is 
-                // ambiguous which one to return so throw.
+                Logger.Information(callState, "There are more than one resource specific tokens in the cache.  It is ambiguous which one to return");
                 var ex = new AdalException(AdalError.MultipleTokensMatched);
-                Logger.LogException(callState, ex);
                 throw ex;
             }
 

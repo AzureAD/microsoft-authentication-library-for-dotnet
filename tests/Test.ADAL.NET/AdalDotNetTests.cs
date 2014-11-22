@@ -491,5 +491,14 @@ namespace Test.ADAL.NET
         {
             AdalTests.GetAuthorizationRequestURLTest(Sts);
         }
+
+        [TestMethod]
+        [Description("Test for logging in ADAL")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
+        public async Task LoggerTest()
+        {
+            await AdalTests.LoggerTest(Sts);
+        }
     }
 }

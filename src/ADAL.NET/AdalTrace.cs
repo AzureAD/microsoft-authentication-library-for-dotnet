@@ -16,36 +16,29 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Diagnostics.Tracing;
+using System.Diagnostics;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    [EventSource(Name = "Microsoft.IdentityModel.Clients.ActiveDirectory")]
-    internal class AdalEventSource : EventSource
+    /// <summary>
+    /// The class which contains trace related properties
+    /// </summary>
+    public static class AdalTrace
     {
-
-        [Event(1, Level = EventLevel.Verbose)]
-        internal void Verbose(string message)
+        static AdalTrace()
         {
-            WriteEvent(1, message);
+            TraceSource = new TraceSource("Microsoft.IdentityModel.Clients.ActiveDirectory", SourceLevels.All);
+            LegacyTraceSwitch = new TraceSwitch("ADALLegacySwitch", "ADAL Switch for System.Diagnostics.Trace", "Verbose");
         }
 
-        [Event(2, Level = EventLevel.Informational)]
-        internal void Information(string message)
-        {
-            WriteEvent(2, message);
-        }
+        /// <summary>
+        /// Sets/gets the TraceSource that ADAL writes events to which has the name Microsoft.IdentityModel.Clients.ActiveDirectory.
+        /// </summary>
+        public static TraceSource TraceSource { get; private set; }
 
-        [Event(3, Level = EventLevel.Warning)]
-        internal void Warning(string message)
-        {
-            WriteEvent(3, message);
-        }
-
-        [Event(4, Level = EventLevel.Error)]
-        internal void Error(string message)
-        {
-            WriteEvent(4, message);
-        }
+        /// <summary>
+        /// Enables/disables basic tracing using class System.Diagnostics.Trace.
+        /// </summary>
+        public static TraceSwitch LegacyTraceSwitch { get; private set; }
     }
 }

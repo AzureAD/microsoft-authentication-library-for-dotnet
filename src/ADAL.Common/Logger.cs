@@ -18,6 +18,7 @@
 
 using System;
 using System.Globalization;
+using System.Net;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -30,29 +31,39 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal static void LogException(CallState callState, Exception ex)
         {
+            Information(callState, "=== Token Acquisition finished with error:\n\t{0}", GetLogException(ex));
+        }
+
+        private static string GetLogException(Exception ex)
+        {
+            string message = string.Format("Exception Type: {0}\n\tMessage: {1}\n\t", ex.GetType().Name, ex.Message.Replace("\n", "\n\t\t"));
             ArgumentException argumentEx = ex as ArgumentException;
+            AdalServiceException adalServiceEx = ex as AdalServiceException;
+            AdalException adalEx = ex as AdalException;
+            WebException webEx = ex as WebException;
             if (argumentEx != null)
             {
-                Information(callState, "ArgumentException was thrown for argument '{0}' with message '{1}'", argumentEx.ParamName, argumentEx.Message);
-                return;
+                message += string.Format("ParamName: {0}", argumentEx.ParamName);
             }
-
-            AdalServiceException adalServiceEx = ex as AdalServiceException;
-            if (adalServiceEx != null)
+            else if (adalServiceEx != null)
             {
-                Information(callState, "AdalServiceException was thrown with ErrorCode '{0}' and StatusCode '{1}' and innerException '{2}'", 
-                    adalServiceEx.ErrorCode, adalServiceEx.StatusCode, (adalServiceEx.InnerException != null) ? adalServiceEx.Message : "No inner exception");
-                return;
+                message += string.Format("ErrorCode: {0}\n\tStatusCode: {1}", adalServiceEx.ErrorCode, adalServiceEx.StatusCode);
             }
-
-            AdalException adalEx = ex as AdalException;
-            if (adalEx != null)
+            else if (adalEx != null)
             {
-                Information(callState, "AdalException was thrown with ErrorCode '{0}'", adalEx.ErrorCode);
-                return;
+                message += string.Format("ErrorCode: {0}", adalEx.ErrorCode);
+            }
+            else if (webEx != null)
+            {
+                message += string.Format("Status: {0}\n\tSource: {1}", webEx.Status, webEx.Source);
             }
 
-            Information(callState, "Exception of type '{0}' was thrown with message '{1}'", ex.GetType().ToString(), ex.Message);
+            if (ex.InnerException != null)
+            {
+                message += string.Format("\n\tInnerException:\n\t\t{0}", GetLogException(ex.InnerException).Replace("\n", "\n\t\t"));
+            }
+
+            return message + "\n\t";
         }
     }
 }
