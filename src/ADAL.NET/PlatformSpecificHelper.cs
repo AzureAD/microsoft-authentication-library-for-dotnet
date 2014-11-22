@@ -52,7 +52,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (userNameSize == 0)
             {
                 var ex = new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
-                Logger.LogException(null, ex);
                 throw ex;
             }
 
@@ -60,7 +59,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
             {
                 var ex = new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
-                Logger.LogException(null, ex);
                 throw ex;
             }
 

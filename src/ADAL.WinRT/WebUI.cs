@@ -41,7 +41,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (this.promptBehavior == PromptBehavior.Never && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
             {
                 var ex = new ArgumentException(AdalErrorMessage.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
-                Logger.LogException(callState, ex);
                 throw ex;
             }
             
@@ -68,7 +67,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (FileNotFoundException ex)
             {
                 var adalEx = new AdalException(AdalError.AuthenticationUiFailed, ex);
-                Logger.LogException(callState, adalEx);
                 throw adalEx;
             }
             catch (Exception ex)
@@ -76,12 +74,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (this.promptBehavior == PromptBehavior.Never)
                 {
                     var adalEx = new AdalException(AdalError.UserInteractionRequired, ex);
-                    Logger.LogException(callState, adalEx);
                     throw adalEx;
                 }
 
                 var uiFailedEx = new AdalException(AdalError.AuthenticationUiFailed, ex);
-                Logger.LogException(callState, uiFailedEx);
                 throw uiFailedEx;
             }
 

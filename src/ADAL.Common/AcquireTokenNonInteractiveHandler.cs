@@ -56,7 +56,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     Logger.Information(this.CallState, "Could not find UPN for logged in user");
                     var ex = new AdalException(AdalError.UnknownUser);
-                    Logger.LogException(this.CallState, ex);
                     throw ex;
                 }
 
@@ -77,7 +76,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (string.IsNullOrWhiteSpace(userRealmResponse.FederationMetadataUrl))
                 {
                     var ex = new AdalException(AdalError.MissingFederationMetadataUrl);
-                    Logger.LogException(this.CallState, ex);
                     throw ex;
                 }
 
@@ -96,14 +94,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (this.userCredential.PasswordToCharArray() == null)
                 {
                     var ex = new AdalException(AdalError.PasswordRequiredForManagedUserError);
-                    Logger.LogException(this.CallState, ex);
                     throw ex;
                 }
             }
             else
             {
                 var ex = new AdalException(AdalError.UnknownUserType);
-                Logger.LogException(this.CallState, ex);
                 throw ex;
             }
         }

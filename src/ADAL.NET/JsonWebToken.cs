@@ -58,7 +58,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (MaxTokenLength < token.Length)
             {
                 var ex = new AdalException(AdalError.EncodedTokenTooLong);
-                Logger.LogException(null, ex);
                 throw ex;
             }
 

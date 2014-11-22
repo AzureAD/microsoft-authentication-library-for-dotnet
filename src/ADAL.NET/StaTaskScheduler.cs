@@ -46,7 +46,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (numberOfThreads < 1)
             {
                 var ex = new ArgumentOutOfRangeException("numberOfThreads");
-                Logger.LogException(null, ex);
                 throw ex;
             }
 

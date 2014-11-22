@@ -29,7 +29,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (userId == null)
             {
                 var ex = new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
-                Logger.LogException(this.CallState, ex);
                 throw ex;
             }
 
@@ -44,7 +43,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
             var ex = new AdalSilentTokenAcquisitionException();
-            Logger.LogException(this.CallState, ex);
             throw ex;
         }
 

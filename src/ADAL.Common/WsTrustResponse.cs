@@ -70,7 +70,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (XmlException ex)
             {
                 var adalEx = new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
-                Logger.LogException(callState, adalEx);
                 throw adalEx;
             }
 
@@ -86,7 +85,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (XmlException ex)
             {
                 var adalEx = new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
-                Logger.LogException(null, adalEx);
                 throw adalEx;
             }
         }
@@ -125,14 +123,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (XmlException ex)
             {
                 var adalEx = new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
-                Logger.LogException(null, adalEx);
                 throw adalEx;
             }
 
             if (tokenResponseDictionary.Count == 0)
             {
                 var ex = new AdalException(AdalError.ParsingWsTrustResponseFailed);
-                Logger.LogException(null, ex);
                 throw ex;
             }
 
