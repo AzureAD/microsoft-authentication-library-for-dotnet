@@ -57,8 +57,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // Length check before sign
             if (MaxTokenLength < token.Length)
             {
-                var ex = new AdalException(AdalError.EncodedTokenTooLong);
-                throw ex;
+                throw new AdalException(AdalError.EncodedTokenTooLong);
             }
 
             return new ClientAssertion(this.payload.Issuer, string.Concat(token, ".", UrlEncodeSegment(credential.Sign(token))));

@@ -32,8 +32,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (!Windows.System.UserProfile.UserInformation.NameAccessAllowed)
             {
-                var ex = new AdalException(AdalError.CannotAccessUserInformation);
-                throw ex;
+                throw new AdalException(AdalError.CannotAccessUserInformation);
             }
 
             try

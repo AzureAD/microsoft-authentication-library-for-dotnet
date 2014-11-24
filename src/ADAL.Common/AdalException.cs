@@ -103,6 +103,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public string ErrorCode { get; private set; }
 
+        /// <summary>
+        /// Creates and returns a string representation of the current exception.
+        /// </summary>
+        /// <returns>A string representation of the current exception.</returns>
+        public override string ToString()
+        {
+            return base.ToString() + string.Format("\n\tErrorCode: {0}", this.ErrorCode);
+        }
+
 #if ADAL_NET
         /// <summary>
         /// Initializes a new instance of the exception class with serialized data.

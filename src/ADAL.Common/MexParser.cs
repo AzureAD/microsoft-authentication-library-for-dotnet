@@ -89,13 +89,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else if (userAuthType == UserAuthType.IntegratedAuth)
                 {
-                    var ex = new AdalException(AdalError.IntegratedAuthFailed, new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument));
-                    throw ex;
+                    throw new AdalException(AdalError.IntegratedAuthFailed, new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument));
                 }
                 else
                 {
-                    var ex = new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument);
-                    throw ex;
+                    throw new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument);
                 }
             }
             catch (XmlException ex)

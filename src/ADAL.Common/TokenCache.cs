@@ -170,7 +170,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 int schemaVersion = reader.ReadInt32();
                 if (schemaVersion != SchemaVersion)
                 {
-                    Logger.Warning(null, "The version of the serialized cache does not match the current schema");
+                    Logger.Warning(null, "The version of the persistent state of the cache does not match the current schema, so skipping deserialization.");
                     return;
                 }
 
@@ -304,14 +304,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 TokenCacheKey cacheKey = kvp.Value.Key;
                 result = kvp.Value.Value;
-                bool tokenMarginallyExpired = (result.ExpiresOn <= DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
+                bool tokenNearExpiry = (result.ExpiresOn <= DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
 
-                if (tokenMarginallyExpired || !cacheKey.ResourceEquals(resource))
+                if (tokenNearExpiry || !cacheKey.ResourceEquals(resource))
                 {
                     result.AccessToken = null;
-                    if (tokenMarginallyExpired)
+                    if (tokenNearExpiry)
                     {
-                        Logger.Verbose(callState, "A [marginally] expired token was found in the cache");
+                        Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
                     }
                 }
 
@@ -400,9 +400,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
-                Logger.Information(callState, "There are more than one resource specific tokens in the cache.  It is ambiguous which one to return");
-                var ex = new AdalException(AdalError.MultipleTokensMatched);
-                throw ex;
+                throw new AdalException(AdalError.MultipleTokensMatched);
             }
 
             return returnValue;

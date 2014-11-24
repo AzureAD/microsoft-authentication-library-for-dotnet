@@ -95,8 +95,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     clientMetrics.SetLastError(null);
                     if (discoveryResponse.TenantDiscoveryEndpoint == null)
                     {
-                        var ex = new AdalException(AdalError.AuthorityNotInValidList);
-                        throw ex;
+                        throw new AdalException(AdalError.AuthorityNotInValidList);
                     }
                 }
             }

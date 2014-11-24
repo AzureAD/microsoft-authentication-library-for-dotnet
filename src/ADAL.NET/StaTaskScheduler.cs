@@ -45,8 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // Validate arguments
             if (numberOfThreads < 1)
             {
-                var ex = new ArgumentOutOfRangeException("numberOfThreads");
-                throw ex;
+                throw new ArgumentOutOfRangeException("numberOfThreads");
             }
 
             // Initialize the tasks collection

@@ -128,8 +128,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (tokenResponseDictionary.Count == 0)
             {
-                var ex = new AdalException(AdalError.ParsingWsTrustResponseFailed);
-                throw ex;
+                throw new AdalException(AdalError.ParsingWsTrustResponseFailed);
             }
 
             string tokenType = tokenResponseDictionary.ContainsKey(Saml1Assertion) ? Saml1Assertion : tokenResponseDictionary.Keys.First();

@@ -287,9 +287,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (!this.SupportADFS && this.Authenticator.AuthorityType == AuthorityType.ADFS)
             {
                 Logger.Error(this.CallState, "Invalid authority type '{0}'", this.Authenticator.AuthorityType);
-                var ex = new AdalException(AdalError.InvalidAuthorityType,
+                throw new AdalException(AdalError.InvalidAuthorityType,
                     string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.InvalidAuthorityTypeTemplate, this.Authenticator.Authority));
-                throw ex;
             }
         }
     }
