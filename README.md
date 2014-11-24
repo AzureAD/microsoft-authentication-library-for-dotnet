@@ -5,7 +5,7 @@ Here you can find the source code for the library. You can find the correspondin
 
 - The latest stable release is [2.12.111071459](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/). 
 - 
-- There is also a prerelease version of the library avialable on the NuGet gallery.
+- The next version of the library in prerelease form is also avialable on the NuGet gallery.
 - 
 ## Samples and Documentation
 
