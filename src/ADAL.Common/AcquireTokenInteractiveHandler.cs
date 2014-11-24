@@ -49,9 +49,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (!string.IsNullOrWhiteSpace(redirectUri.Fragment))
             {
-                var ex = new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
-                Logger.LogException(this.CallState, ex);
-                throw ex;
+                throw new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
 
             this.redirectUri = redirectUri;
@@ -60,9 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (userId == null)
             {
-                var ex = new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
-                Logger.LogException(this.CallState, ex);
-                throw ex;
+                throw new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
             }
 
             this.userId = userId;
@@ -107,16 +103,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (this.UserIdentifierType == UserIdentifierType.UniqueId && string.Compare(uniqueId, this.UniqueId, StringComparison.Ordinal) != 0)
             {
-                var ex = new AdalUserMismatchException(this.UniqueId, uniqueId);
-                Logger.LogException(this.CallState, ex);
-                throw ex;
+                throw new AdalUserMismatchException(this.UniqueId, uniqueId);
             }
 
             if (this.UserIdentifierType == UserIdentifierType.RequiredDisplayableId && string.Compare(displayableId, this.DisplayableId, StringComparison.OrdinalIgnoreCase) != 0)
             {
-                var ex = new AdalUserMismatchException(this.DisplayableId, displayableId);
-                Logger.LogException(this.CallState, ex);
-                throw ex;
+                throw new AdalUserMismatchException(this.DisplayableId, displayableId);
             }
         }
 
@@ -185,9 +177,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     if (authorizationRequestParameters.ContainsKey(kvp.Key))
                     {
-                        var ex = new AdalException(AdalError.DuplicateQueryParameter, string.Format(AdalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
-                        Logger.LogException(this.CallState, ex);
-                        throw ex;
+                        throw new AdalException(AdalError.DuplicateQueryParameter, string.Format(AdalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
                     }
                 }
 
@@ -201,16 +191,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (this.promptBehavior == PromptBehavior.Never && this.authorizationResult.Error == OAuthError.LoginRequired)
             {
-                var ex = new AdalException(AdalError.UserInteractionRequired);
-                Logger.LogException(this.CallState, ex);
-                throw ex;
+                throw new AdalException(AdalError.UserInteractionRequired);
             }
 
             if (this.authorizationResult.Status != AuthorizationStatus.Success)
             {
-                var ex = new AdalServiceException(this.authorizationResult.Error, this.authorizationResult.ErrorDescription);
-                Logger.LogException(this.CallState, ex);
-                throw ex;
+                throw new AdalServiceException(this.authorizationResult.Error, this.authorizationResult.ErrorDescription);
             }
         }
     }

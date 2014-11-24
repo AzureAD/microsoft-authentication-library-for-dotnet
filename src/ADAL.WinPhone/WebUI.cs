@@ -58,9 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (Exception ex)
             {
-                var adalEx = new AdalException(AdalError.AuthenticationUiFailed, ex);
-                Logger.LogException(callState, adalEx);
-                throw adalEx;
+                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
             }
         }
 

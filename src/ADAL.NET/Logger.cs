@@ -21,26 +21,46 @@ using System.Diagnostics;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal partial class Logger
-    {
+    {   
         internal static void Verbose(CallState callState, string format, params object[] args)
         {
-            // TODO: This is temporary code. Replace it with correct implementation for Verbose level
-            Trace.TraceInformation(PrepareLogMessage(callState, format, args));
+            string message = PrepareLogMessage(callState, format, args);
+            AdalTrace.TraceSource.TraceEvent(TraceEventType.Verbose, 1, message);
+            if (AdalTrace.LegacyTraceSwitch.TraceVerbose)
+            {
+                // There is no TraceVerbose method.
+                Trace.TraceInformation(message);
+            }
         }
 
         internal static void Information(CallState callState, string format, params object[] args)
         {
-            Trace.TraceInformation(PrepareLogMessage(callState, format, args));
+            string message = PrepareLogMessage(callState, format, args);
+            AdalTrace.TraceSource.TraceData(TraceEventType.Information, 2, message);
+            if (AdalTrace.LegacyTraceSwitch.TraceInfo)
+            {
+                Trace.TraceInformation(message);
+            }
         }
 
         internal static void Warning(CallState callState, string format, params object[] args)
         {
-            Trace.TraceWarning(PrepareLogMessage(callState, format, args));
+            string message = PrepareLogMessage(callState, format, args);
+            AdalTrace.TraceSource.TraceEvent(TraceEventType.Warning, 3, message);
+            if (AdalTrace.LegacyTraceSwitch.TraceWarning)
+            {
+                Trace.TraceWarning(message);
+            }
         }
 
         internal static void Error(CallState callState, string format, params object[] args)
         {
-            Trace.TraceError(PrepareLogMessage(callState, format, args));
+            string message = PrepareLogMessage(callState, format, args);
+            AdalTrace.TraceSource.TraceEvent(TraceEventType.Error, 4, message);
+            if (AdalTrace.LegacyTraceSwitch.TraceError)
+            {
+                Trace.TraceError(message);
+            }
         }
     }
 }

@@ -45,9 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (this.AuthorityType != AuthorityType.AAD && validateAuthority)
             {
-                var ex = new ArgumentException(AdalErrorMessage.UnsupportedAuthorityValidation, "validateAuthority");
-                Logger.LogException(null, ex);
-                throw ex;
+                throw new ArgumentException(AdalErrorMessage.UnsupportedAuthorityValidation, "validateAuthority");
             }
 
             this.ValidateAuthority = validateAuthority;
@@ -109,25 +107,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (!Uri.IsWellFormedUriString(authority, UriKind.Absolute))
             {
-                var ex = new ArgumentException(AdalErrorMessage.AuthorityInvalidUriFormat, "authority");
-                Logger.LogException(null, ex);
-                throw ex;
+                throw new ArgumentException(AdalErrorMessage.AuthorityInvalidUriFormat, "authority");
             }
 
             var authorityUri = new Uri(authority);
             if (authorityUri.Scheme != "https")
             {
-                var ex = new ArgumentException(AdalErrorMessage.AuthorityUriInsecure, "authority");
-                Logger.LogException(null, ex);
-                throw ex;
+                throw new ArgumentException(AdalErrorMessage.AuthorityUriInsecure, "authority");
             }
 
             string path = authorityUri.AbsolutePath.Substring(1);
             if (string.IsNullOrWhiteSpace(path))
             {
-                var ex = new ArgumentException(AdalErrorMessage.AuthorityUriInvalidPath, "authority");
-                Logger.LogException(null, ex);
-                throw ex;
+                throw new ArgumentException(AdalErrorMessage.AuthorityUriInvalidPath, "authority");
             }
 
             string firstPath = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));

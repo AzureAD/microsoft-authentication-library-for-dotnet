@@ -223,6 +223,7 @@
     <Compile Include="AcquireTokenByAuthorizationCodeHandler.cs" />
     <Compile Include="AcquireTokenInteractiveHandler.cs" />
     <Compile Include="AcquireTokenOnBehalfHandler.cs" />
+    <Compile Include="AdalTrace.cs" />
     <Compile Include="AuthenticationContext.cs" />
     <Compile Include="AuthenticationParameters.cs" />
     <Compile Include="AuthenticationResult.cs" />

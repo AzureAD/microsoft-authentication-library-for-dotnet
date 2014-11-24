@@ -22,6 +22,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Test.ADAL.NET.Friend;
+using System.Diagnostics;
 
 namespace Test.ADAL.Common
 {
@@ -587,6 +588,53 @@ namespace Test.ADAL.Common
             Verify.IsTrue(uri.AbsoluteUri.Contains("client-request-id="));
         }
 
+        internal static async Task LoggerTest(Sts sts)
+        {
+            var traceSourceListener = new TestTraceListner();
+            AdalTrace.TraceSource.Listeners.Add(traceSourceListener);
+
+            traceSourceListener.Filter = new SourceFilter("Microsoft.IdentityModel.Clients.ActiveDirectory");
+
+            Trace.TraceInformation("$$$$$");
+
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheType.Null);
+
+            var credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
+            await context.AcquireTokenAsync(sts.ValidResource, credential);
+            var invalidCredential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret + "x");
+            await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
+
+            Verify.IsTrue(traceSourceListener.TraceBuffer.IndexOf("$$") < 0);
+            Verify.IsTrue(traceSourceListener.TraceBuffer.IndexOf("Correlation ID") > 0);
+
+            traceSourceListener.TraceBuffer = string.Empty;
+
+            var traceListener = new TestTraceListner();
+            Trace.Listeners.Add(traceListener);
+
+            credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
+            await context.AcquireTokenAsync(sts.ValidResource, credential);
+            invalidCredential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret + "x");
+            await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
+
+            Verify.IsFalse(string.IsNullOrEmpty(traceListener.TraceBuffer));
+            Verify.IsFalse(string.IsNullOrEmpty(traceSourceListener.TraceBuffer));
+            Verify.AreEqual(traceListener.TraceBuffer, traceSourceListener.TraceBuffer);
+
+
+            traceSourceListener.TraceBuffer = string.Empty;
+            traceListener.TraceBuffer = string.Empty;
+            AdalTrace.LegacyTraceSwitch.Level = TraceLevel.Off;
+
+            credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
+            await context.AcquireTokenAsync(sts.ValidResource, credential);
+            invalidCredential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret + "x");
+            await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
+
+            Verify.IsTrue(string.IsNullOrEmpty(traceListener.TraceBuffer));
+            Verify.IsFalse(string.IsNullOrEmpty(traceSourceListener.TraceBuffer));
+        }
+
         private static void VerifySuccessResult(AuthenticationResult result)
         {
             Log.Comment("Verifying success result...");
@@ -611,6 +659,20 @@ namespace Test.ADAL.Common
 
             ClientAssertion assertion = AdalFriend.CreateJwt(new X509Certificate2(certificateName, certificatePassword), clientId, audience);
             return new ClientAssertion(clientId, assertion.Assertion);
+        }
+
+        class TestTraceListner : TraceListener
+        {
+            public override void Write(string message)
+            {
+            }
+
+            public override void WriteLine(string message)
+            {
+                TraceBuffer += message;
+            }
+
+            public string TraceBuffer { get; set; }
         }
     }
 }

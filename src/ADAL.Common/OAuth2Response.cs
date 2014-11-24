@@ -169,15 +169,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else if (tokenResponse.Error != null)
             {
-                var ex = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription);
-                Logger.LogException(callState, ex);
-                throw ex;
+                throw new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription);
             }
             else
             {
-                var ex = new AdalServiceException(AdalError.Unknown, AdalErrorMessage.Unknown);
-                Logger.LogException(callState, ex);
-                throw ex;
+                throw new AdalServiceException(AdalError.Unknown, AdalErrorMessage.Unknown);
             }
 
             return result;

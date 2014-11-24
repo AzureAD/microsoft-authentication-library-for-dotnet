@@ -38,9 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (!string.IsNullOrWhiteSpace(resource) && this.Authenticator.AuthorityType != AuthorityType.AAD)
             {
-                var ex = new ArgumentException(AdalErrorMessage.UnsupportedMultiRefreshToken, "resource");
-                Logger.LogException(this.CallState, ex);
-                throw ex;
+                throw new ArgumentException(AdalErrorMessage.UnsupportedMultiRefreshToken, "resource");
             }
 
             this.refreshToken = refreshToken;

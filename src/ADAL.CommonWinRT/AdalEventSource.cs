@@ -20,6 +20,7 @@ using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    [EventSource(Name = "Microsoft.IdentityModel.Clients.ActiveDirectory")]
     internal class AdalEventSource : EventSource
     {
 
