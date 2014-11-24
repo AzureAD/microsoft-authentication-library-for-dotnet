@@ -41,8 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (UnauthorizedAccessException ex)
             {
-                var adalEx = new AdalException(AdalError.UnauthorizedUserInformationAccess, ex);
-                throw adalEx;
+                throw new AdalException(AdalError.UnauthorizedUserInformationAccess, ex);
             }
         }
     }

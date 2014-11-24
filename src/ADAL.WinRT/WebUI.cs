@@ -65,19 +65,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (FileNotFoundException ex)
             {
-                var adalEx = new AdalException(AdalError.AuthenticationUiFailed, ex);
-                throw adalEx;
+                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
             }
             catch (Exception ex)
             {
                 if (this.promptBehavior == PromptBehavior.Never)
                 {
-                    var adalEx = new AdalException(AdalError.UserInteractionRequired, ex);
-                    throw adalEx;
+                    throw new AdalException(AdalError.UserInteractionRequired, ex);
                 }
 
-                var uiFailedEx = new AdalException(AdalError.AuthenticationUiFailed, ex);
-                throw uiFailedEx;
+                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
             }
 
             return ProcessAuthorizationResult(webAuthenticationResult, callState);

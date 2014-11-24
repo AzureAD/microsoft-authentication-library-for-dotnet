@@ -106,16 +106,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (tokenResponse.Error == "invalid_instance")
                 {
-                    var serviceEx = new AdalServiceException(AdalError.AuthorityNotInValidList, ex);
-                    throw serviceEx;
+                    throw new AdalServiceException(AdalError.AuthorityNotInValidList, ex);
                 }
                 else
                 {
-                    var serviceEx = new AdalServiceException(
+                    throw new AdalServiceException(
                         AdalError.AuthorityValidationFailed,
                         string.Format(CultureInfo.InvariantCulture, "{0}. {1}: {2}", AdalErrorMessage.AuthorityValidationFailed, tokenResponse.Error, tokenResponse.ErrorDescription),
                         ex);
-                    throw serviceEx;
                 }
             }
             finally

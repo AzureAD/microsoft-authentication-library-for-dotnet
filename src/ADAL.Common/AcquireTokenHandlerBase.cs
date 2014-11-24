@@ -214,11 +214,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     AdalServiceException serviceException = ex as AdalServiceException;
                     if (serviceException != null && serviceException.ErrorCode == "invalid_request")
                     {
-                        var serviceEx = new AdalServiceException(
+                        throw new AdalServiceException(
                             AdalError.FailedToRefreshToken,
                             AdalErrorMessage.FailedToRefreshToken + ". " + serviceException.Message,
                             (WebException)serviceException.InnerException);
-                        throw serviceEx;
                     }
 
                     newResult = null;

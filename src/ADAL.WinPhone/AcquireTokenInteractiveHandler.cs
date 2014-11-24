@@ -87,8 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
                     else
                     {
-                        var adalEx = new AdalException(AdalError.NeedToSetCallbackUriAsLocalSetting, AdalErrorMessage.NeedToSetCallbackUriAsLocalSetting, ex);
-                        throw adalEx;
+                        throw new AdalException(AdalError.NeedToSetCallbackUriAsLocalSetting, AdalErrorMessage.NeedToSetCallbackUriAsLocalSetting, ex);
                     }
                 }
             }

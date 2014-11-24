@@ -60,13 +60,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (WebException ex)
             {
-                var serviceEx = new AdalServiceException(AdalError.AccessingWsMetadataExchangeFailed, ex);
-                throw serviceEx;
+                throw new AdalServiceException(AdalError.AccessingWsMetadataExchangeFailed, ex);
             }
             catch (XmlException ex)
             {
-                var adalEx = new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
-                throw adalEx;
+                throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
             }
 
             return mexDocument;
@@ -98,8 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (XmlException ex)
             {
-                var adalEx = new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
-                throw adalEx;
+                throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
             }
 
             return url;
