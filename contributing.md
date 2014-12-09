@@ -25,6 +25,7 @@ $ git remote add upstream git@github.com:AzureAD/azure-activedirectory-library-f
 Now decide if you want your feature or bug fix to go into the current stable version or the next version of the library. 
 
 **Bug fixes for the current stable version need to go to 'servicing' branch.**
+
 **New features for the next version should go to 'dev' branch.** 
 
 The master branch is effectively frozen; patches that change the SDKs
