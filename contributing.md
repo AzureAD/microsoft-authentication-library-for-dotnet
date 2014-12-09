@@ -19,11 +19,13 @@ Example for .NET:
 ```
 $ git clone git@github.com:username/azure-activedirectory-library-for-dotnet.git
 $ cd azure-activedirectory-library-for-dotnet
-$ git remote add upstream git@github.com:MSOpenTech/azure-activedirectory-library-for-dotnet.git
+$ git remote add upstream git@github.com:AzureAD/azure-activedirectory-library-for-dotnet.git
 ```
 
-Now decide if you want your feature or bug fix to go into the dev branch
-or the master branch.  **All bug fixes and new features should go into the dev branch.**
+Now decide if you want your feature or bug fix to go into the current stable version or the next version of the library. 
+
+**Bug fixes for the current stable version need to go to 'servicing' branch.**
+**New features for the next version should go to 'dev' branch.** 
 
 The master branch is effectively frozen; patches that change the SDKs
 protocols or API surface area or affect the run-time behavior of the SDK will be rejected.
