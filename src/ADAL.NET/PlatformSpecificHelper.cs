@@ -65,12 +65,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static string CreateSha256Hash(string input)
         {
-            SHA256CryptoServiceProvider provider = new SHA256CryptoServiceProvider();
+            SHA256Cng cng = new SHA256Cng();
             UTF8Encoding encoding = new UTF8Encoding();
-            byte[] inputBytes = encoding.GetBytes(input);
-            byte[] hashBytes = provider.ComputeHash(inputBytes);
-            string hash = Convert.ToBase64String(hashBytes);
-            return hash;
+            return Convert.ToBase64String(cng.ComputeHash(encoding.GetBytes(input)));
         }
 
         public static void CloseHttpWebResponse(WebResponse response)
