@@ -147,11 +147,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Guid correlationIdInResponse;
                     if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
                     {
-                        Logger.Information(callState, "Returned correlation id '{0}' is not in GUID format.", correlationIdHeader);
+                        Logger.Warning(callState, "Returned correlation id '{0}' is not in GUID format.", correlationIdHeader);
                     }
                     else if (correlationIdInResponse != callState.CorrelationId)
                     {
-                        Logger.Information(callState, "Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, callState.CorrelationId);
+                        Logger.Warning(callState, "Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, callState.CorrelationId);
                     }
 
                     break;

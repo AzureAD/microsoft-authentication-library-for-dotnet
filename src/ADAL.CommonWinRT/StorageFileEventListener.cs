@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 catch (Exception ex)
                 {
-                    Logger.Information(null, ex.Message);
+                    Logger.Warning(null, ex.Message);
                 }
                 finally
                 {

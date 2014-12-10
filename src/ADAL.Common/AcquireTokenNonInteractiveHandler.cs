@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     throw new AdalException(AdalError.UnknownUser);
                 }
 
-                Logger.Information(this.CallState, "Logged in user '{0}' detected", userCredential.UserName);
+                Logger.Verbose(this.CallState, "Logged in user with hash '{0}' detected", PlatformSpecificHelper.CreateSha256Hash(userCredential.UserName));
             }
 
             this.DisplayableId = userCredential.UserName;
@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             await base.PreTokenRequest();
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, this.userCredential.UserName, this.CallState);
-            Logger.Information(this.CallState, "User '{0}' detected as '{1}'", this.userCredential.UserName, userRealmResponse.AccountType);
+            Logger.Information(this.CallState, "User with hash '{0}' detected as '{1}'", PlatformSpecificHelper.CreateSha256Hash(this.userCredential.UserName), userRealmResponse.AccountType);
 
             if (string.Compare(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase) == 0)
             {

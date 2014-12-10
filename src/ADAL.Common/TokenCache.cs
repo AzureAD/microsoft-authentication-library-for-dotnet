@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 BinaryWriter writer = new BinaryWriter(stream);
                 writer.Write(SchemaVersion);
-                Logger.Verbose(null, "Serializing token cache with {0} items.", this.tokenCacheDictionary.Count);
+                Logger.Information(null, "Serializing token cache with {0} items.", this.tokenCacheDictionary.Count);
                 writer.Write(this.tokenCacheDictionary.Count);
                 foreach (KeyValuePair<TokenCacheKey, AuthenticationResult> kvp in this.tokenCacheDictionary)
                 {
@@ -187,7 +187,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.tokenCacheDictionary.Add(key, result);
                 }
 
-                Logger.Verbose(null, "Deserialized {0} items to token cache.", count);
+                Logger.Information(null, "Deserialized {0} items to token cache.", count);
             }
         }
 
@@ -318,19 +318,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (result.AccessToken == null && result.RefreshToken == null)
                 {
                     this.tokenCacheDictionary.Remove(cacheKey);
-                    Logger.Verbose(callState, "An old item was removed from the cache");
+                    Logger.Information(callState, "An old item was removed from the cache");
                     this.HasStateChanged = true;
                     result = null;
                 }
 
                 if (result != null)
                 {
-                    Logger.Verbose(callState, "A matching token was found in the cache");
+                    Logger.Information(callState, "A matching token was found in the cache");
                 }
             }
             else
             {
-                Logger.Verbose(callState, "No matching token was found in the cache");
+                Logger.Information(callState, "No matching token was found in the cache");
             }
 
             return result;
@@ -383,7 +383,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             KeyValuePair<TokenCacheKey, AuthenticationResult>? returnValue = null;
             if (resourceValuesCount == 1)
             {
-                Logger.Verbose(callState, "An item matching the requested resource was found in the cache");
+                Logger.Information(callState, "An item matching the requested resource was found in the cache");
                 returnValue = resourceSpecificItems.First();
             }
             else if (resourceValuesCount == 0)
@@ -395,7 +395,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (mrrtItems.Any())
                 {
                     returnValue = mrrtItems.First();
-                    Logger.Verbose(callState, "A Multi Resource Refresh Token for a different resource was found which can be used");
+                    Logger.Information(callState, "A Multi Resource Refresh Token for a different resource was found which can be used");
                 }
             }
             else

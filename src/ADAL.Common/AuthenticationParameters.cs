@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 || !char.IsWhiteSpace(authenticateHeader[Bearer.Length]))
             {
                 var ex = new ArgumentException(AdalErrorMessage.InvalidAuthenticateHeaderFormat, "authenticateHeader");
-                Logger.LogException(null, ex);
+                Logger.Error(null, ex);
                 throw ex;
             }
 
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 request.ContentType = "application/x-www-form-urlencoded";
                 response = await request.GetResponseSyncOrAsync(callState);
                 var ex = new AdalException(AdalError.UnauthorizedResponseExpected);
-                Logger.LogException(null, ex);
+                Logger.Error(null, ex);
                 throw ex;
             }
             catch (WebException ex)
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (response == null)
                 {
                     var serviceEx = new AdalServiceException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);
-                    Logger.LogException(null, serviceEx);
+                    Logger.Error(null, serviceEx);
                     throw serviceEx;
                 }
 
@@ -143,14 +143,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 else
                 {
                     var ex = new ArgumentException(AdalErrorMessage.MissingAuthenticateHeader, "response");
-                    Logger.LogException(null, ex);
+                    Logger.Error(null, ex);
                     throw ex;
                 }
             }
             else
             {
                 var ex = new ArgumentException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, "response");
-                Logger.LogException(null, ex);
+                Logger.Error(null, ex);
                 throw ex;
             }
 
