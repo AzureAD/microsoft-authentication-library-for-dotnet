@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (Exception ex)
             {
-                Logger.Information(null, "Failed to load cache: " + ex);
+                Logger.Warning(null, "Failed to load cache: " + ex);
                 // Ignore as the cache seems to be corrupt
             }
         }
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 catch (Exception ex)
                 {
-                    Logger.Information(null, "Failed to save cache: " + ex);
+                    Logger.Warning(null, "Failed to save cache: " + ex);
                 }
             }
         }
