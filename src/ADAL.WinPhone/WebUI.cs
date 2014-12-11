@@ -68,12 +68,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             switch (args.WebAuthenticationResult.ResponseStatus)
             {
                 case WebAuthenticationStatus.Success:
-					// Issue #129 - Windows Phone cannot handle ms-app URI's so use the placeholder URL for SSO
+					// Issue #129 - Windows Phone cannot handle ms-app URI's so use the placeholder URI for SSO
 					var responseData = args.WebAuthenticationResult.ResponseData;
-					if(responseData.StartsWith("ms-app://", StringComparison.OrdinalIgnoreCase))
+					if(responseData.StartsWith(Constant.MsAppScheme, StringComparison.OrdinalIgnoreCase))
 					{
-						responseData = responseData.Substring(responseData.IndexOf('?'));
-						responseData = Constant.SsoPlaceHolderUri + responseData;
+						responseData = Constant.SsoPlaceHolderUri + responseData.Substring(responseData.IndexOf('?'));
 					}
 
 					result = OAuth2Response.ParseAuthorizeResponse(responseData, callState);
