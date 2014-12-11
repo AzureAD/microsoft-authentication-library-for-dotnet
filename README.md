@@ -39,8 +39,6 @@ All code is licensed under the Apache 2.0 license and we triage actively on GitH
 ### ADAL.WinPhone
 
 * This project contains the source of ADAL for Windows Phone. ADAL for Windows Phone is packaged as a Windows Runtime Component (.winmd).
-=======
-* This project (under /WinPhone) contains the source of ADAL for Windows Phone 8.1. ADAL for Windows Phone 8.1  is packaged as a Windows Runtime Component. The same /WinPhone folder contains its own tests.
 
 ### Test.ADAL.NET
 
