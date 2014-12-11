@@ -68,7 +68,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             switch (args.WebAuthenticationResult.ResponseStatus)
             {
                 case WebAuthenticationStatus.Success:
-                    result = OAuth2Response.ParseAuthorizeResponse(args.WebAuthenticationResult.ResponseData, callState);
+					// Issue #129 - Windows Phone cannot handle ms-app URI's so use the placeholder URI for SSO
+					var responseData = args.WebAuthenticationResult.ResponseData;
+					if(responseData.StartsWith(Constant.MsAppScheme, StringComparison.OrdinalIgnoreCase))
+					{
+						responseData = Constant.SsoPlaceHolderUri + responseData.Substring(responseData.IndexOf('?'));
+					}
+
+					result = OAuth2Response.ParseAuthorizeResponse(responseData, callState);
                     break;
                 case WebAuthenticationStatus.ErrorHttp:
                     result = new AuthorizationResult(AdalError.AuthenticationFailed, args.WebAuthenticationResult.ResponseErrorDetail.ToString());

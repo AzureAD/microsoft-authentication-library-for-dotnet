@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.Diagnostics;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -24,7 +25,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {   
         internal static void Verbose(CallState callState, string format, params object[] args)
         {
-            string message = PrepareLogMessage(callState, format, args);
+
+            string message = PrepareLogMessage(callState, GetCallerType(), format, args);
             AdalTrace.TraceSource.TraceEvent(TraceEventType.Verbose, 1, message);
             if (AdalTrace.LegacyTraceSwitch.TraceVerbose)
             {
@@ -35,7 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal static void Information(CallState callState, string format, params object[] args)
         {
-            string message = PrepareLogMessage(callState, format, args);
+            string message = PrepareLogMessage(callState, GetCallerType(), format, args);
             AdalTrace.TraceSource.TraceData(TraceEventType.Information, 2, message);
             if (AdalTrace.LegacyTraceSwitch.TraceInfo)
             {
@@ -45,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal static void Warning(CallState callState, string format, params object[] args)
         {
-            string message = PrepareLogMessage(callState, format, args);
+            string message = PrepareLogMessage(callState, GetCallerType(), format, args);
             AdalTrace.TraceSource.TraceEvent(TraceEventType.Warning, 3, message);
             if (AdalTrace.LegacyTraceSwitch.TraceWarning)
             {
@@ -53,14 +55,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        internal static void Error(CallState callState, string format, params object[] args)
+        internal static void Error(CallState callState, Exception ex)
         {
-            string message = PrepareLogMessage(callState, format, args);
+            string message = PrepareLogMessage(callState, GetCallerType(), "{0}", ex);
             AdalTrace.TraceSource.TraceEvent(TraceEventType.Error, 4, message);
             if (AdalTrace.LegacyTraceSwitch.TraceError)
             {
                 Trace.TraceError(message);
             }
+        }
+
+        private static string GetCallerType()
+        {
+            StackFrame frame = new StackFrame(2, false);
+            var method = frame.GetMethod();
+            return (method.ReflectedType != null) ? method.ReflectedType.Name : null;
         }
     }
 }
