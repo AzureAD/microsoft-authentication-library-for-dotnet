@@ -65,10 +65,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static string CreateSha256Hash(string input)
         {
-            using (SHA256Cng cng = new SHA256Cng())
+            using (SHA256Cng sha = new SHA256Cng())
             {
                 UTF8Encoding encoding = new UTF8Encoding();
-                return Convert.ToBase64String(cng.ComputeHash(encoding.GetBytes(input)));
+                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
             }
         }
 
