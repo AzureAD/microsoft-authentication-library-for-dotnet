@@ -26,7 +26,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     public sealed class UserAssertion
     {
         /// <summary>
-        /// Constructor to create credential with assertion 
+        /// Constructor to create the object with an assertion. This constructor can be used for On Behalf Of flow which assumes the
+        /// assertion is a JWT token. For other flows, the other construction with assertionType must be used.
         /// </summary>
         /// <param name="assertion">Assertion representing the user.</param>
         public UserAssertion(string assertion)

@@ -119,6 +119,9 @@
     <Compile Include="..\Test.ADAL.NET\AuthenticationParametersProxy.cs">
       <Link>AuthenticationParametersProxy.cs</Link>
     </Compile>
+    <Compile Include="..\Test.ADAL.NET\StsLoginFlow.cs">
+      <Link>StsLoginFlow.cs</Link>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

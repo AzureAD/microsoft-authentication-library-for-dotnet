@@ -54,7 +54,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result, true, false);
 
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, sts.ValidResource);
-            VerifyErrorResult(result, "invalid_request", "90014", 400);    // ACS90014: The request body must contain the following parameter: 'client_secret or client_assertion'.
+            VerifyErrorResult(result, "invalid_request", null, 400, "90014");    // ACS90014: The request body must contain the following parameter: 'client_secret or client_assertion'.
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(null, sts.ValidRedirectUriForConfidentialClient, credential);
             VerifyErrorResult(result, "invalid_argument", "authorizationCode");
@@ -95,7 +95,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result, true, false);
 
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, sts.ValidResource);
-            VerifyErrorResult(result, Sts.InvalidRequest, "90014", 400);   // The request body must contain the following parameter: 'client_secret or client_assertion'.
+            VerifyErrorResult(result, Sts.InvalidRequest, null, 400, "90014");   // The request body must contain the following parameter: 'client_secret or client_assertion'.
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, certificate, null);
             VerifySuccessResult(sts, result);
@@ -132,11 +132,11 @@ namespace Test.ADAL.Common
 
             var invalidCredential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret + "x");
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
-            VerifyErrorResult(result, Sts.InvalidClientError, "50012");
+            VerifyErrorResult(result, Sts.InvalidClientError, null, 0, "50012");
 
             invalidCredential = new ClientCredential(sts.ValidConfidentialClientId.Replace("0", "1"), sts.ValidConfidentialClientSecret + "x");
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
-            VerifyErrorResult(result, Sts.UnauthorizedClient, "70001", 400);
+            VerifyErrorResult(result, Sts.UnauthorizedClient, null, 400, "70001");
         }
 
         public static async Task ClientAssertionWithX509TestAsync(Sts sts)
@@ -633,6 +633,37 @@ namespace Test.ADAL.Common
 
             Verify.IsTrue(string.IsNullOrEmpty(traceListener.TraceBuffer));
             Verify.IsFalse(string.IsNullOrEmpty(traceSourceListener.TraceBuffer));
+        }
+
+        internal static void MsaTest()
+        {
+            AadSts sts = new AadSts();
+
+            string liveIdtoken = StsLoginFlow.TryGetSamlToken("https://login.live.com", sts.MsaUserName, sts.MsaPassword, "urn:federation:MicrosoftOnline");
+            var context = new AuthenticationContext(sts.Authority, sts.ValidateAuthority, null);
+
+            try
+            {
+                var result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, new UserAssertion(liveIdtoken, "urn:ietf:params:oauth:grant-type:saml1_1-bearer"));
+                VerifySuccessResult(result);
+            }
+            catch (Exception ex)
+            {
+                Verify.Fail("Unexpected exception: " + ex);
+            }
+
+            try
+            {
+                var result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, new UserAssertion("x", "urn:ietf:params:oauth:grant-type:saml1_1-bearer"));
+                Verify.Fail("Exception expected");
+                VerifySuccessResult(result);
+            }
+            catch (AdalServiceException ex)
+            {
+                Verify.AreEqual(ex.ErrorCode, "invalid_grant");
+                Verify.AreEqual(ex.StatusCode, 400);
+                Verify.IsTrue(ex.ServiceErrorCodes.Contains("50008"));
+            }
         }
 
         private static void VerifySuccessResult(AuthenticationResult result)

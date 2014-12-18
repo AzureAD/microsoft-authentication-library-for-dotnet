@@ -32,7 +32,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal class ReservedClaims
         {
-            public const string ActorToken = "actortoken";
             public const string Audience = "aud";
             public const string Issuer = "iss";
             public const string Subject = "sub";

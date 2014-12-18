@@ -113,6 +113,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     throw new AdalServiceException(
                         AdalError.AuthorityValidationFailed,
                         string.Format(CultureInfo.InvariantCulture, "{0}. {1}: {2}", AdalErrorMessage.AuthorityValidationFailed, tokenResponse.Error, tokenResponse.ErrorDescription),
+                        tokenResponse.ErrorCodes,
                         ex);
                 }
             }
