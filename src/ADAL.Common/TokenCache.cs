@@ -106,9 +106,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         /// <summary>
         /// Gets or sets the flag indicating whether cache state has changed. ADAL methods set this flag after any change. Caller application should reset 
-        /// the flag after serlizaing and persisting the state of the cache.
+        /// the flag after serializing and persisting the state of the cache.
         /// </summary>
-        public bool HasStateChanged { get; set; }
+        public volatile bool HasStateChanged { get; set; }
 
         /// <summary>
         /// Gets the nunmber of items in the cache.
