@@ -44,14 +44,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         internal delegate Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result, string resource, ClientKey clientKey, CallState callState);
 
         private const int SchemaVersion = 2;
-        
+
         private const string Delimiter = ":::";
+
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
         internal readonly IDictionary<TokenCacheKey, AuthenticationResult> tokenCacheDictionary;
 
         // We do not want to return near expiry tokens, this is why we use this hard coded setting to refresh tokens which are close to expiration.
         private const int ExpirationMarginInMinutes = 5;
+
+        private volatile bool hasStateChanged = false; 
 
         static TokenCache()
         {
@@ -108,7 +111,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Gets or sets the flag indicating whether cache state has changed. ADAL methods set this flag after any change. Caller application should reset 
         /// the flag after serializing and persisting the state of the cache.
         /// </summary>
-        public volatile bool HasStateChanged { get; set; }
+        public bool HasStateChanged
+        {
+            get
+            {
+                return this.hasStateChanged;
+            }
+
+            set
+            {
+                this.hasStateChanged = value;
+            }
+        }
 
         /// <summary>
         /// Gets the nunmber of items in the cache.
