@@ -61,9 +61,6 @@
     <Compile Include="..\ADAL.Common\AcquireTokenByRefreshTokenHandler.cs">
       <Link>Common\AcquireTokenByRefreshTokenHandler.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\AcquireTokenForMSAHandler.cs">
-      <Link>Common\AcquireTokenForMSAHandler.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\AcquireTokenHandlerBase.cs">
       <Link>Common\AcquireTokenHandlerBase.cs</Link>
     </Compile>

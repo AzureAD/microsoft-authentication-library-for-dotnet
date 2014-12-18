@@ -94,6 +94,8 @@ namespace Test.ADAL.Common
 
         public int ExceptionStatusCode { get; set; }
 
+        public string[] ExceptionServiceErrorCodes { get; set; }
+
         internal static AuthenticationResultProxy Deserialize(string obj)
         {
             AuthenticationResultProxy output = null;

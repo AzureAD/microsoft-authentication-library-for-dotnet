@@ -153,6 +153,7 @@
     <Compile Include="AuthenticationParametersProxy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StaSynchronizationContext.cs" />
+    <Compile Include="StsLoginFlow.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ADAL.NET.WindowsForms\ADAL.NET.WindowsForms.csproj">
@@ -185,6 +186,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
+    <EmbeddedResource Include="SamlLoginTemplate.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Test.ADAL.Common\Certs\invalid_cert.pfx">

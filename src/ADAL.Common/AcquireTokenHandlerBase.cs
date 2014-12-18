@@ -217,6 +217,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         throw new AdalServiceException(
                             AdalError.FailedToRefreshToken,
                             AdalErrorMessage.FailedToRefreshToken + ". " + serviceException.Message,
+                            serviceException.ServiceErrorCodes,
                             (WebException)serviceException.InnerException);
                     }
 

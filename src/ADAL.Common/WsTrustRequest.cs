@@ -97,6 +97,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new AdalServiceException(
                     AdalError.FederatedServiceReturnedError,
                     string.Format(AdalErrorMessage.FederatedServiceReturnedErrorTemplate, url, errorMessage),
+                    null,
                     ex);
             }
 
