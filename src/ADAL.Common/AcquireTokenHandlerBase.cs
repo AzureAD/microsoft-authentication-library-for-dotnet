@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             this.Authenticator = authenticator;
             this.CallState = CreateCallState(this.Authenticator.CorrelationId, callSync);
-            Logger.Verbose(this.CallState, 
+            Logger.Information(this.CallState, 
                 string.Format("=== Token Acquisition started:\n\tAuthority: {0}\n\tResource: {1}\n\tClientId: {2}\n\tCacheType: {3}\n\tAuthentication Target: {4}\n\t",
                 authenticator.Authority, resource, clientKey.ClientId,
                 (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(" ({0} items)", tokenCache.Count) : "null",
@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (string.IsNullOrWhiteSpace(resource))
             {
                 var ex = new ArgumentNullException("resource");
-                Logger.LogException(this.CallState, ex);
+                Logger.Error(this.CallState, ex);
                 throw ex;
             }
 
@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (Exception ex)
             {
-                Logger.LogException(this.CallState, ex);
+                Logger.Error(this.CallState, ex);
                 throw;
             }
             finally
@@ -217,6 +217,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         throw new AdalServiceException(
                             AdalError.FailedToRefreshToken,
                             AdalErrorMessage.FailedToRefreshToken + ". " + serviceException.Message,
+                            serviceException.ServiceErrorCodes,
                             (WebException)serviceException.InnerException);
                     }
 
@@ -275,9 +276,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     refreshTokenHash = "[No Refresh Token]";
                 }
 
-                Logger.Verbose(this.CallState, "=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tRefresh Token Hash: {1}\n\tExpiration Time: {2}\n\tUser: {3}\n\t",
+                Logger.Information(this.CallState, "=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tRefresh Token Hash: {1}\n\tExpiration Time: {2}\n\tUser Hash: {3}\n\t",
                     accessTokenHash, refreshTokenHash, result.ExpiresOn, 
-                    (result.UserInfo != null) ? string.Format("{0} ({1})", result.UserInfo.UniqueId, result.UserInfo.DisplayableId) : "null");
+                    result.UserInfo != null ? PlatformSpecificHelper.CreateSha256Hash(result.UserInfo.UniqueId) : "null");
             }
         }
 
@@ -285,7 +286,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (!this.SupportADFS && this.Authenticator.AuthorityType == AuthorityType.ADFS)
             {
-                Logger.Error(this.CallState, "Invalid authority type '{0}'", this.Authenticator.AuthorityType);
                 throw new AdalException(AdalError.InvalidAuthorityType,
                     string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.InvalidAuthorityTypeTemplate, this.Authenticator.Authority));
             }

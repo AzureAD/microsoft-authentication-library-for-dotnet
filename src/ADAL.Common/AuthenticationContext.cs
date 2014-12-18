@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserAssertion userAssertion, bool callSync = false)
         {
-            var handler = new AcquireTokenForMSAHandler(this.Authenticator, this.TokenCache, resource, clientId, userAssertion, callSync);
+            var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, userAssertion, callSync);
             return await handler.RunAsync();
         }
 

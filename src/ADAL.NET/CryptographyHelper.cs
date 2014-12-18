@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -34,7 +35,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             try
             {
                 newRsa = GetCryptoProviderForSha256(rsa);
-                using (SHA256 sha = SHA256.Create())
+                using (SHA256Cng sha = new SHA256Cng())
                 {
                     return newRsa.SignData(Encoding.UTF8.GetBytes(message), sha);
                 }

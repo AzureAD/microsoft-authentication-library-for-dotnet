@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 
@@ -24,14 +25,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal partial class Logger
     {
-        internal static string PrepareLogMessage(CallState callState, string format, params object[] args)
+        internal static string PrepareLogMessage(CallState callState, string classOrComponent, string format, params object[] args)
         {
-            return string.Format(CultureInfo.CurrentCulture, format, args) + (callState != null ? (". Correlation ID: " + callState.CorrelationId) : string.Empty);
-        }
-
-        internal static void LogException(CallState callState, Exception ex)
-        {
-            Information(callState, "=== Token Acquisition finished with error:\n\t{0}", ex);
+            string message = string.Format(CultureInfo.CurrentCulture, format, args);
+            string correlationId = (callState != null) ? callState.CorrelationId.ToString() : string.Empty;
+            return string.Format(CultureInfo.CurrentCulture, "{0}: {1} - {2}: {3}", DateTime.UtcNow, correlationId, classOrComponent, message);
         }
     }
 }

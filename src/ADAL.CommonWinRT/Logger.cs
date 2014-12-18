@@ -52,24 +52,54 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        internal static void Verbose(CallState callState, string format, params object[] args)
+        internal static void Verbose(CallState callState, string arg, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Verbose(PrepareLogMessage(callState, format, args));
+            Verbose(callState, callerFilePath, "{0}", new object[] { arg });
         }
 
-        internal static void Information(CallState callState, string format, params object[] args)
+        internal static void Information(CallState callState, string arg, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Information(PrepareLogMessage(callState, format, args));
+            Information(callState, callerFilePath, "{0}", new object[] { arg });
         }
 
-        internal static void Warning(CallState callState, string format, params object[] args)
+        internal static void Information(CallState callState, string format, object arg, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Warning(PrepareLogMessage(callState, format, args));
+            Information(callState, callerFilePath, format, new [] { arg });
         }
 
-        internal static void Error(CallState callState, string format, params object[] args)
+        internal static void Information(CallState callState, string format, object arg, object arg2, object arg3, object arg4, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Error(PrepareLogMessage(callState, format, args));
+            Information(callState, callerFilePath, format, new [] { arg, arg2, arg3, arg4 });
+        }
+
+        internal static void Warning(CallState callState, string arg, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        {
+            Warning(callState, callerFilePath, "{0}", new object[] { arg });
+        }
+
+        internal static void Warning(CallState callState, string format, object arg, object arg2, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        {
+            Warning(callState, callerFilePath, format, new[] { arg, arg2 });
+        }
+
+        internal static void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        {
+            AdalEventSource.Error(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), "{0}", ex));
+        }
+
+        private static void Verbose(CallState callState, string format, string callerFilePath, params object[] args)
+        {
+            AdalEventSource.Verbose(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), format, args));
+        }
+
+        private static void Information(CallState callState, string callerFilePath, string format, params object[] args)
+        {
+            AdalEventSource.Information(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), format, args));
+        }
+
+        private static void Warning(CallState callState, string callerFilePath, string format, params object[] args)
+        {
+            AdalEventSource.Warning(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), format, args));
         }
 
         private static EventLevel GetEventLevel(AdalTraceLevel level)
@@ -99,6 +129,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     throw new ArgumentOutOfRangeException("level");
             }
             return returnLevel;
+        }
+
+        private static string GetCallerFilename(string callerFilePath)
+        {
+            return callerFilePath.Substring(callerFilePath.LastIndexOf("\\", StringComparison.Ordinal) + 1);            
         }
 
         public void Dispose()

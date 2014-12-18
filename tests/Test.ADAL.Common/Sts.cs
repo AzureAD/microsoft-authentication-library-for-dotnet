@@ -185,7 +185,6 @@ namespace Test.ADAL.Common
             this.InvalidClientId = "87002806-c87a-41cd-896b-84ca5690d29e";
             this.InvalidResource = "00000003-0000-0ff1-ce00-000000000001";
             this.ValidateAuthority = true;
-            this.ValidClientId = "87002806-c87a-41cd-896b-84ca5690d29f";
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
             this.ValidExpiresIn = 28800;
             this.ValidNonExistingRedirectUri = new Uri("https://non_existing_uri.com/");
@@ -213,8 +212,14 @@ namespace Test.ADAL.Common
             this.ValidResource = "b7a671d8-a408-42ff-86e0-aaf447fd17c4";
             this.ValidResource2 = "4848e7b1-7a6e-450e-aedb-31fd3c196db4";
             this.ValidResource3 = "3e5e5728-f57e-4d7f-b4be-87d0bdc39900";
+
+            this.MsaUserName = "aaltests@outlook.com";
+            this.MsaPassword = "<REPLACE>";
         }
+
         public string TenantName { get; protected set; }
+        public string MsaUserName { get; protected set; }        
+        public string MsaPassword { get; protected set; }
     }
 
     class AdfsSts : Sts

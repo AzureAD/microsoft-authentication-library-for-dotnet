@@ -500,5 +500,14 @@ namespace Test.ADAL.NET
         {
             await AdalTests.LoggerTest(Sts);
         }
+
+        [TestMethod]
+        [Description("Test for non-interactive federation with MSA")]
+        [TestCategory("AdalDotNet")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
+        public void MsaTest()
+        {
+            AdalTests.MsaTest();
+        }
     }
 }

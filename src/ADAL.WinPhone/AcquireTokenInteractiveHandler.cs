@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 tokenCache, 
                 (string)args.ContinuationData[WabArgName.Resource], 
                 (string)args.ContinuationData[WabArgName.ClientId],
-                new Uri((string)args.ContinuationData[WabArgName.RedirectUri]), 
+                GetRedirectUri((string)args.ContinuationData[WabArgName.RedirectUri]),	// Issue #129 - Windows Phone cannot handle ms-app URI's so use the placeholder URI for SSO
                 PromptBehavior.Always,  // This is simply to disable cache lookup. In fact, there is no authorize call at this point and promptBehavior is not applicable.
                 new UserIdentifier((string)args.ContinuationData[WabArgName.UserId],
                     (UserIdentifierType)((int)args.ContinuationData[WabArgName.UserIdType])),
@@ -67,6 +67,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             payload[WabArgName.ClientId] = this.ClientKey.ClientId;
 
             webUi.Authenticate(authorizationUri, this.redirectUri, payload, this.CallState);
+        }
+
+        private static Uri GetRedirectUri(string url)
+        {
+            if (url.StartsWith(Constant.MsAppScheme, StringComparison.OrdinalIgnoreCase))
+            {
+                return Constant.SsoPlaceHolderUri;
+            }
+
+            return new Uri(url);
         }
 
         private void SetRedirectUriRequestParameter()

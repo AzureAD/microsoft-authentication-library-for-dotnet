@@ -564,6 +564,7 @@ namespace Test.ADAL.Common
             {
                 output.Error = ((AdalServiceException)ex).ErrorCode;
                 output.ExceptionStatusCode = ((AdalServiceException)ex).StatusCode;
+                output.ExceptionServiceErrorCodes = ((AdalServiceException)ex).ServiceErrorCodes;
                 output.Status = AuthenticationStatusProxy.ServiceError;
             }
             else if (ex is AdalException)

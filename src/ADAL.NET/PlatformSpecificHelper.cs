@@ -65,12 +65,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static string CreateSha256Hash(string input)
         {
-            SHA256 sha256 = SHA256Managed.Create();
-            UTF8Encoding encoding = new UTF8Encoding();
-            byte[] inputBytes = encoding.GetBytes(input);
-            byte[] hashBytes = sha256.ComputeHash(inputBytes);
-            string hash = Convert.ToBase64String(hashBytes);
-            return hash;
+            using (SHA256Cng sha = new SHA256Cng())
+            {
+                UTF8Encoding encoding = new UTF8Encoding();
+                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
+            }
         }
 
         public static void CloseHttpWebResponse(WebResponse response)

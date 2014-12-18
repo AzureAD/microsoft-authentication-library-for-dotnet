@@ -64,9 +64,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             return "Unknown";
                     }
                 }
-                catch (System.EntryPointNotFoundException)
+                catch
                 {
-                    // We're probably running on some kind of *NIX
                     return "Unknown";
                 }
             }
