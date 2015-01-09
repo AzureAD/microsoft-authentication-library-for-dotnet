@@ -17,7 +17,9 @@
 //----------------------------------------------------------------------
 
 using System;
+#if !SILVERLIGHT
 using System.Collections.Concurrent;
+#endif
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Collections.Generic;

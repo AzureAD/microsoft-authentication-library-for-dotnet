@@ -17,7 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Diagnostics.Tracing;
+using Windows.Foundation.Diagnostics;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -25,12 +25,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private const string LogFilename = "AdalTraces.log";
         private bool disposed;
-        private static readonly AdalEventSource AdalEventSource;
-        private static StorageFileEventListener adalListener;
+        private static readonly LoggingChannel AdalEventSource;
+        private static FileLoggingSession adalListener;
 
         static Logger()
         {
-            AdalEventSource = new AdalEventSource();
+            AdalEventSource = new LoggingChannel("Microsoft.IdentityModel.Clients.ActiveDirectory");
         }
 
         internal static void SetListenerLevel(AdalTraceLevel level)
@@ -39,14 +39,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 if (adalListener == null)
                 {
-                    adalListener = new StorageFileEventListener(LogFilename);
+                    adalListener = new FileLoggingSession(LogFilename);
                 }
 
-                adalListener.EnableEvents(AdalEventSource, GetEventLevel(level));
+                adalListener.AddLoggingChannel(AdalEventSource, GetEventLevel(level));
             }
             else if (adalListener != null)
             {
-                adalListener.DisableEvents(AdalEventSource);
+                adalListener.RemoveLoggingChannel(AdalEventSource);
                 adalListener.Dispose();
                 adalListener = null;
             }
@@ -54,46 +54,46 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal static void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Error(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), "{0}", ex));
+            AdalEventSource.LogMessage(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), "{0}", ex), LoggingLevel.Error);
         }
 
         private static void Verbose(CallState callState, string format, string callerFilePath, params object[] args)
         {
-            AdalEventSource.Verbose(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), format, args));
+            AdalEventSource.LogMessage(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), format, args), LoggingLevel.Verbose);
         }
 
         private static void Information(CallState callState, string callerFilePath, string format, params object[] args)
         {
-            AdalEventSource.Information(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), format, args));
+            AdalEventSource.LogMessage(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), format, args), LoggingLevel.Information);
         }
 
         private static void Warning(CallState callState, string callerFilePath, string format, params object[] args)
         {
-            AdalEventSource.Warning(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), format, args));
+            AdalEventSource.LogMessage(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), format, args), LoggingLevel.Warning);
         }
 
-        private static EventLevel GetEventLevel(AdalTraceLevel level)
+        private static LoggingLevel GetEventLevel(AdalTraceLevel level)
         {
-            EventLevel returnLevel;
+            LoggingLevel returnLevel;
             switch (level)
             {
                 case AdalTraceLevel.Informational:
-                    returnLevel = EventLevel.Informational;
+                    returnLevel = LoggingLevel.Information;
                     break;
                 case AdalTraceLevel.Verbose:
-                    returnLevel = EventLevel.Verbose;
+                    returnLevel = LoggingLevel.Verbose;
                     break;
                 case AdalTraceLevel.Warning:
-                    returnLevel = EventLevel.Warning;
+                    returnLevel = LoggingLevel.Warning;
                     break;
                 case AdalTraceLevel.Error:
-                    returnLevel = EventLevel.Error;
+                    returnLevel = LoggingLevel.Error;
                     break;
                 case AdalTraceLevel.Critical:
-                    returnLevel = EventLevel.Critical;
+                    returnLevel = LoggingLevel.Critical;
                     break;
                 case AdalTraceLevel.LogAlways:
-                    returnLevel = EventLevel.LogAlways;
+                    returnLevel = LoggingLevel.Verbose;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("level");
