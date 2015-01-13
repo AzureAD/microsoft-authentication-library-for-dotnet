@@ -41,7 +41,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             parameters[AdalIdParameter.OS] = Environment.OSVersion.ToString();
 
             // Since ADAL .NET may be used on servers, for security reasons, we do not emit device type.
-#elif !SILVERLIGHT
+#elif SILVERLIGHT
+            parameters[AdalIdParameter.OS] = Environment.OSVersion.ToString();
+#else
             // In WinRT, there is no way to reliably get OS version. All can be done reliably is to check 
             // for existence of specific features which does not help in this case, so we do not emit OS in WinRT.
 

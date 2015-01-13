@@ -94,6 +94,9 @@
     <Compile Include="..\ADAL.CommonWinRT\TokenCache.cs">
       <Link>CommonWinRT\TokenCache.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.CommonWinStore\Logger.cs">
+      <Link>CommonWinStore\Logger.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\AcquireTokenByRefreshTokenHandler.cs">
       <Link>Common\AcquireTokenByRefreshTokenHandler.cs</Link>
     </Compile>
@@ -252,9 +255,6 @@
     </Compile>
     <Compile Include="..\ADAL.Common\WsTrustResponse.cs">
       <Link>Common\WsTrustResponse.cs</Link>
-    </Compile>
-    <Compile Include="..\ADAL.WinPhone\Logger.cs">
-      <Link>CommonWinStore\Logger.cs</Link>
     </Compile>
     <Compile Include="AcquireTokenInteractiveHandler.cs" />
     <Compile Include="AuthenticationContext.cs" />

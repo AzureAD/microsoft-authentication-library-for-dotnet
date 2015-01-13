@@ -44,6 +44,9 @@
     <DocumentationFile>..\..\bin\Release\WinPhoneSL\Microsoft.IdentityModel.Clients.ActiveDirectory.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\ADAL.CommonWinStore\Logger.cs">
+      <Link>CommonWinStore\Logger.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.WinPhone\AcquireTokenInteractiveHandler.cs">
       <Link>CommonWinPhone\AcquireTokenInteractiveHandler.cs</Link>
     </Compile>
@@ -56,9 +59,6 @@
     <Compile Include="..\ADAL.WinPhone\IWebUIFactory.cs">
       <Link>CommonWinPhone\IWebUIFactory.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.WinPhone\Logger.cs">
-      <Link>CommonWinStore\Logger.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.WinPhone\PlatformSpecificHelper.cs">
       <Link>CommonWinPhone\PlatformSpecificHelper.cs</Link>
     </Compile>
@@ -68,14 +68,12 @@
     <Compile Include="..\ADAL.WinPhone\WebUIFactory.cs">
       <Link>CommonWinPhone\WebUIFactory.cs</Link>
     </Compile>
+    <Compile Include="AdalTrace.cs" />
     <Compile Include="ConcurrentDictionary.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\ADAL.CommonWinRT\AdalTrace.cs">
-      <Link>CommonWinRT\AdalTrace.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.CommonWinRT\AuthenticationContext.cs">
       <Link>CommonWinRT\AuthenticationContext.cs</Link>
     </Compile>

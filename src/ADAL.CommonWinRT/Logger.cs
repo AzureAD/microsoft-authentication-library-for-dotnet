@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AdalEventSource.Error(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), "{0}", ex));
         }
 
-        private static void Verbose(CallState callState, string format, string callerFilePath, params object[] args)
+        private static void Verbose(CallState callState, string callerFilePath, string format, params object[] args)
         {
             AdalEventSource.Verbose(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), format, args));
         }

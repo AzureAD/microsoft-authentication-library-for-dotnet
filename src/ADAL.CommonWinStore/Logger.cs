@@ -20,7 +20,7 @@ using System;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal partial class Logger : IDisposable
+    internal partial class Logger
     {
         internal static void Verbose(CallState callState, string arg, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
