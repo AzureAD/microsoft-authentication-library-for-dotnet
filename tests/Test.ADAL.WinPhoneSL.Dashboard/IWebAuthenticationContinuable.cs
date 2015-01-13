@@ -16,16 +16,12 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Windows.ApplicationModel.Activation;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Test.ADAL.WinPhoneSL.Dashboard
 {
-    class ConcurrentDictionary<TKey, TValue> : Dictionary<TKey, TValue>
+    interface IWebAuthenticationContinuable
     {
-        // WinPhone applications do not usually access token cache from multiple threads, so a regular dictionary seems sufficient.
+        void ContinueWebAuthentication(WebAuthenticationBrokerContinuationEventArgs args);
     }
 }
