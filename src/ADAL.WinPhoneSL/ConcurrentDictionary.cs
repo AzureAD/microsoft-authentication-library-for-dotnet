@@ -16,29 +16,16 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    /// <summary>
-    /// This class manages tracing in ADAL.
-    /// </summary>
-    public static class AdalTrace
+    class ConcurrentDictionary<TKey, TValue> : Dictionary<TKey, TValue>
     {
-        static AdalTrace()
-        {
-            TraceSource = new TraceSource("Microsoft.IdentityModel.Clients.ActiveDirectory", SourceLevels.All);
-            LegacyTraceSwitch = new TraceSwitch("ADALLegacySwitch", "ADAL Switch for System.Diagnostics.Trace", "Verbose");
-        }
-
-        /// <summary>
-        /// Sets/gets the TraceSource that ADAL writes events to which has the name Microsoft.IdentityModel.Clients.ActiveDirectory.
-        /// </summary>
-        public static TraceSource TraceSource { get; private set; }
-
-        /// <summary>
-        /// Enables/disables basic tracing using class System.Diagnostics.Trace.
-        /// </summary>
-        public static TraceSwitch LegacyTraceSwitch { get; private set; }
+        // WinPhone applications do not usually access token cache from multiple threads, so a regular dictionary seems sufficient.
     }
 }
