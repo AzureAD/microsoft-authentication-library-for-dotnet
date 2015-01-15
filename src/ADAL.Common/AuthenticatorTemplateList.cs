@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public AuthenticatorTemplateList()
         {
-            string[] trustedHostList = { "login.windows.net", "login.chinacloudapi.cn", "login.cloudgovapi.us" };
+            string[] trustedHostList = { "login.windows.net", "login.chinacloudapi.cn", "login.cloudgovapi.us", "login.microsoftonline.com" };
 
             string customAuthorityHost = PlatformSpecificHelper.GetEnvironmentVariable("customTrustedHost");
             if (string.IsNullOrWhiteSpace(customAuthorityHost))
