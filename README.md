@@ -123,6 +123,17 @@ There is also a default event listener which writes logs to a local file named *
 AdalTrace.Level = AdalTraceLevel.Informational;
 ```
 
+#### Windows Phone Silverlight Applications
+
+Since Silverlight does not support EventSource/EventListener, we use ```LoggingChannel/LoginSession``` for logging. There is a ```LoggingChannel``` in ```AdalTrace``` which you can connect your own ```LoggingSession/FileLoggingSession``` to it and also control trace level using it. Here is an example:
+
+```
+LoggingSession loggingSession = new LoggingSession("ADAL Logging Session");
+loggingSession.AddLoggingChannel(AdalTrace.AdalLoggingChannel, LoggingLevel.Verbose);
+```
+
+and then use ```loggingSession.SaveToFileAsync(...)``` to copy the logs to a file. If you use emulator, you can then use ```ISETool.exe``` and ```tracerpt.exe``` tools to copy log file and convert it to text format.
+
 ### Network Traces
 
 You can use various tools to capture the HTTP traffic that ADAL generates.  This is most useful if you are familiar with the OAuth protocol or if you need to provide diagnostic information to Microsoft or other support channels.
@@ -160,6 +171,10 @@ All code is licensed under the Apache 2.0 license and we triage actively on GitH
 
 * This project contains the source of ADAL for Windows Phone. ADAL for Windows Phone is packaged as a Windows Runtime Component (.winmd).
 
+### ADAL.WinPhoneSL
+
+* This project contains the source of ADAL for Windows Phone Silverlight. 
+
 ### Test.ADAL.NET
 
 * End to end tests for ADAL .NET.
@@ -187,6 +202,10 @@ All code is licensed under the Apache 2.0 license and we triage actively on GitH
 ### Test.ADAL.WinPhone.Dashboard
 
 * The Windows Phone application used for running ADAL for Windows Phone tests.
+
+### Test.ADAL.WinPhoneSL.Dashboard
+
+* The Windows Phone Silverlight application used for running ADAL for Windows Phone Silverlight tests.
 
 ### Test.ADAL.WinRT.Unit
 
