@@ -1,4 +1,4 @@
-# Active Directory Authentication Library (ADAL) for .NET, Windows Store and Windows Phone 8.1
+# Active Directory Authentication Library (ADAL) for .NET, Windows Store, Windows Phone 8.1 and Windows Phone 8.1 Silverlight
 
 Active Directory Authentication Library (ADAL) provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.
 Here you can find the source code for the library. You can find the corresponding releases (both stable and prerelease) on the NuGet gallery at [http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/](http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).
