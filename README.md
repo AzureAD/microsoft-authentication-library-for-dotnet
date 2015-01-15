@@ -1,9 +1,9 @@
-# Active Directory Authentication Library (ADAL) for .NET, Windows Store and Windows Phone 8.1
+# Active Directory Authentication Library (ADAL) for .NET, Windows Store, Windows Phone 8.1 and Windows Phone 8.1 Silverlight
 
 Active Directory Authentication Library (ADAL) provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.
 Here you can find the source code for the library. You can find the corresponding releases (both stable and prerelease) on the NuGet gallery at [http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/](http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).
 
-- The latest stable release is [2.12.111071459](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/). 
+- The latest stable release is [2.14.201151115](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/). 
 - 
 - The next version of the library in prerelease form is also avialable on the NuGet gallery.
 - 
@@ -123,6 +123,17 @@ There is also a default event listener which writes logs to a local file named *
 AdalTrace.Level = AdalTraceLevel.Informational;
 ```
 
+#### Windows Phone Silverlight Applications
+
+Since Silverlight does not support EventSource/EventListener, we use ```LoggingChannel/LoginSession``` for logging. There is a ```LoggingChannel``` in ```AdalTrace``` which you can connect your own ```LoggingSession/FileLoggingSession``` to it and also control trace level using it. Here is an example:
+
+```
+LoggingSession loggingSession = new LoggingSession("ADAL Logging Session");
+loggingSession.AddLoggingChannel(AdalTrace.AdalLoggingChannel, LoggingLevel.Verbose);
+```
+
+and then use ```loggingSession.SaveToFileAsync(...)``` to copy the logs to a file. If you use emulator, you can then use ```ISETool.exe``` and ```tracerpt.exe``` tools to copy log file and convert it to text format.
+
 ### Network Traces
 
 You can use various tools to capture the HTTP traffic that ADAL generates.  This is most useful if you are familiar with the OAuth protocol or if you need to provide diagnostic information to Microsoft or other support channels.
@@ -160,6 +171,10 @@ All code is licensed under the Apache 2.0 license and we triage actively on GitH
 
 * This project contains the source of ADAL for Windows Phone. ADAL for Windows Phone is packaged as a Windows Runtime Component (.winmd).
 
+### ADAL.WinPhoneSL
+
+* This project contains the source of ADAL for Windows Phone Silverlight. 
+
 ### Test.ADAL.NET
 
 * End to end tests for ADAL .NET.
@@ -187,6 +202,10 @@ All code is licensed under the Apache 2.0 license and we triage actively on GitH
 ### Test.ADAL.WinPhone.Dashboard
 
 * The Windows Phone application used for running ADAL for Windows Phone tests.
+
+### Test.ADAL.WinPhoneSL.Dashboard
+
+* The Windows Phone Silverlight application used for running ADAL for Windows Phone Silverlight tests.
 
 ### Test.ADAL.WinRT.Unit
 
