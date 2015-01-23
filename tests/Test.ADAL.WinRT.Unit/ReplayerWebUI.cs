@@ -39,7 +39,9 @@ namespace Test.ADAL.WinRT.Unit
                 string value = IOMap[key];
                 if (value[0] == 'P')
                 {
-                    return new AuthorizationResult(AuthorizationStatus.Success, value.Substring(1));
+                    value = value.Substring(1);
+                    string[] valueSegments = value.Split(new string[] { "::" }, StringSplitOptions.None);
+                    return new AuthorizationResult((AuthorizationStatus)Enum.Parse(typeof(AuthorizationStatus), valueSegments[0]), valueSegments[1]);
                 }
                 
                 if (value[0] == 'A')

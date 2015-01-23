@@ -49,8 +49,10 @@ namespace Test.ADAL.NET.Friend
                 value = IOMap[key];
                 if (value[0] == 'P')
                 {
-                    return new AuthorizationResult(AuthorizationStatus.Success, value.Substring(1));
-                }
+                    value = value.Substring(1);
+                    string[] valueSegments = value.Split(new string[] {"::"}, StringSplitOptions.None);
+                    return new AuthorizationResult((AuthorizationStatus)Enum.Parse(typeof(AuthorizationStatus), valueSegments[0]), valueSegments[1]);
+                }               
                 
                 if (value[0] == 'A')
                 {
@@ -65,7 +67,17 @@ namespace Test.ADAL.NET.Friend
             try
             {
                 AuthorizationResult result = await this.internalWebUI.AcquireAuthorizationAsync(requestUri, callbackUri, callState);
-                value = 'P' + result.Code;
+                const string DummyUri = "https://temp_uri";
+                switch (result.Status)
+                {
+                    case AuthorizationStatus.Success: value = string.Format("{0}?code={1}", DummyUri, result.Code); break;
+                    case AuthorizationStatus.UserCancel: value = string.Empty; break;
+                    case AuthorizationStatus.ProtocolError: value = string.Format("{0}?error={1}&error_description={2}", DummyUri, result.Error, result.ErrorDescription); break;
+                    default: value = string.Empty; break;
+                }
+
+                value = "P" + result.Status + "::" + value;
+
                 return result;
             }
             catch (AdalException ex)

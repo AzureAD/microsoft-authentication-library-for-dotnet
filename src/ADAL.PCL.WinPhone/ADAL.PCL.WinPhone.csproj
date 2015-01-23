@@ -91,9 +91,6 @@
     <Compile Include="..\ADAL.Common\AdalEventSource.cs">
       <Link>AdalEventSource.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\AdalTrace.cs">
-      <Link>AdalTrace.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
@@ -103,8 +100,8 @@
     <Compile Include="..\ADAL.Common\Logger.cs">
       <Link>Logger.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\StorageFileEventListener.cs">
-      <Link>StorageFileEventListener.cs</Link>
+    <Compile Include="..\ADAL.PCL\AdalOption.cs">
+      <Link>AdalOption.cs</Link>
     </Compile>
     <Compile Include="AuthorizationParameters.cs" />
     <Compile Include="CryptographyHelper.cs" />

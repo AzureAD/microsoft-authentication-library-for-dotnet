@@ -41,12 +41,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private const int SchemaVersion = 2;
         
         private const string Delimiter = ":::";
-        private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
         internal readonly IDictionary<TokenCacheKey, AuthenticationResult> tokenCacheDictionary;
 
         // We do not want to return near expiry tokens, this is why we use this hard coded setting to refresh tokens which are close to expiration.
         private const int ExpirationMarginInMinutes = 5;
+
+        private volatile bool hasStateChanged = false; 
 
         static TokenCache()
         {
@@ -99,9 +100,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         /// <summary>
         /// Gets or sets the flag indicating whether cache state has changed. ADAL methods set this flag after any change. Caller application should reset 
-        /// the flag after serlizaing and persisting the state of the cache.
+        /// the flag after serializing and persisting the state of the cache.
         /// </summary>
-        public bool HasStateChanged { get; set; }
+        public bool HasStateChanged
+        {
+            get
+            {
+                return this.hasStateChanged;
+            }
+
+            set
+            {
+                this.hasStateChanged = value;
+            }
+        }
 
         /// <summary>
         /// Gets the nunmber of items in the cache.
@@ -125,6 +137,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 BinaryWriter writer = new BinaryWriter(stream);
                 writer.Write(SchemaVersion);
+                PlatformPlugin.Logger.Information(null, string.Format("Serializing token cache with {0} items.", this.tokenCacheDictionary.Count));
                 writer.Write(this.tokenCacheDictionary.Count);
                 foreach (KeyValuePair<TokenCacheKey, AuthenticationResult> kvp in this.tokenCacheDictionary)
                 {
@@ -162,7 +175,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 int schemaVersion = reader.ReadInt32();
                 if (schemaVersion != SchemaVersion)
                 {
-                    // The version of the serialized cache does not match the current schema
+                    PlatformPlugin.Logger.Warning(null, "The version of the persistent state of the cache does not match the current schema, so skipping deserialization.");
                     return;
                 }
 
@@ -178,6 +191,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     this.tokenCacheDictionary.Add(key, result);
                 }
+
+                PlatformPlugin.Logger.Information(null, string.Format("Deserialized {0} items to token cache.", count));
             }
         }
 
@@ -282,30 +297,39 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 TokenCacheKey cacheKey = kvp.Value.Key;
                 result = kvp.Value.Value;
-                bool tokenMarginallyExpired = (result.ExpiresOn <= DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
+                bool tokenNearExpiry = (result.ExpiresOn <= DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
 
-                if (tokenMarginallyExpired || !cacheKey.ResourceEquals(resource))
+                if (tokenNearExpiry || !cacheKey.ResourceEquals(resource))
                 {
                     result.AccessToken = null;
+                    if (tokenNearExpiry)
+                    {
+                        PlatformPlugin.Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
+                    }
                 }
 
                 if (result.AccessToken == null && result.RefreshToken == null)
                 {
                     this.tokenCacheDictionary.Remove(cacheKey);
+                    PlatformPlugin.Logger.Information(callState, "An old item was removed from the cache");
                     this.HasStateChanged = true;
                     result = null;
                 }
 
                 if (result != null)
                 {
-                    PlatformPlugin.Logger.Verbose(callState, "A matching token was found in the cache");
+                    PlatformPlugin.Logger.Information(callState, "A matching token was found in the cache");
                 }
+            }
+            else
+            {
+                PlatformPlugin.Logger.Information(callState, "No matching token was found in the cache");
             }
 
             return result;
         }
 
-        internal void StoreToCache(AuthenticationResult result, string authority, string resource, string clientId, TokenSubjectType subjectType)
+        internal void StoreToCache(AuthenticationResult result, string authority, string resource, string clientId, TokenSubjectType subjectType, CallState callState)
         {
             string uniqueId = (result.UserInfo != null) ? result.UserInfo.UniqueId : null;
             string displayableId = (result.UserInfo != null) ? result.UserInfo.DisplayableId : null;
@@ -320,6 +344,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, subjectType, result.UserInfo);
             this.tokenCacheDictionary[tokenCacheKey] = result;
+            PlatformPlugin.Logger.Verbose(callState, "An item was stored in the cache");
             this.UpdateCachedMrrtRefreshTokens(result, authority, clientId, subjectType);
 
             this.HasStateChanged = true;
@@ -327,7 +352,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private void UpdateCachedMrrtRefreshTokens(AuthenticationResult result, string authority, string clientId, TokenSubjectType subjectType)
         {
-            if (result.UserInfo != null)
+            if (result.UserInfo != null && result.IsMultipleResourceRefreshToken)
             {
                 List<KeyValuePair<TokenCacheKey, AuthenticationResult>> mrrtItems =
                     this.QueryCache(authority, clientId, subjectType, result.UserInfo.UniqueId, result.UserInfo.DisplayableId).Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
@@ -351,6 +376,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             KeyValuePair<TokenCacheKey, AuthenticationResult>? returnValue = null;
             if (resourceValuesCount == 1)
             {
+                PlatformPlugin.Logger.Information(callState, "An item matching the requested resource was found in the cache");
                 returnValue = resourceSpecificItems.First();
             }
             else if (resourceValuesCount == 0)
@@ -362,15 +388,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (mrrtItems.Any())
                 {
                     returnValue = mrrtItems.First();
+                    PlatformPlugin.Logger.Information(callState, "A Multi Resource Refresh Token for a different resource was found which can be used");
                 }
             }
             else
             {
-                // There is more than one resource specific token.  It is 
-                // ambiguous which one to return so throw.
-                var ex = new AdalException(AdalError.MultipleTokensMatched);
-                PlatformPlugin.Logger.LogException(callState, ex);
-                throw ex;
+                throw new AdalException(AdalError.MultipleTokensMatched);
             }
 
             return returnValue;

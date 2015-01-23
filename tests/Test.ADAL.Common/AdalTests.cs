@@ -441,7 +441,7 @@ namespace Test.ADAL.Common
             }
         }
 
-        public static async Task AcquireTokenPositiveWithFederatedTenantTest(Sts sts)
+        public static async Task AcquireTokenPositiveWithFederatedTenantTestAsync(Sts sts)
         {
             var userId = sts.ValidUserId;
 
@@ -685,7 +685,7 @@ namespace Test.ADAL.Common
             Verify.IsGreaterThanOrEqual(expiresIn, (long)0, "Token ExpiresOn");
         }
 
-        public static void VerifyErrorResult(AuthenticationResultProxy result, string error, string errorDescriptionKeyword, int statusCode = 0)
+        public static void VerifyErrorResult(AuthenticationResultProxy result, string error, string errorDescriptionKeyword, int statusCode = 0, string serviceErrorCode = null)
         {
             Log.Comment(string.Format("Verifying error result '{0}':'{1}'...", result.Error, result.ErrorDescription));
             Verify.AreNotEqual(AuthenticationStatusProxy.Success, result.Status);
@@ -708,6 +708,11 @@ namespace Test.ADAL.Common
             if (statusCode != 0)
             {
                 Verify.AreEqual(statusCode, result.ExceptionStatusCode);
+            }
+
+            if (serviceErrorCode != null)
+            {
+                Verify.IsTrue(result.ExceptionServiceErrorCodes.Contains(serviceErrorCode));
             }
         }
 

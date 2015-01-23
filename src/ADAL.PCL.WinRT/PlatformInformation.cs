@@ -49,9 +49,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (!UserInformation.NameAccessAllowed)
             {
-                var ex = new AdalException(AdalErrorEx.CannotAccessUserInformation, AdalErrorMessageEx.CannotAccessUserInformation);
-                PlatformPlugin.Logger.LogException(null, ex);
-                throw ex;
+                throw new AdalException(AdalErrorEx.CannotAccessUserInformation, AdalErrorMessageEx.CannotAccessUserInformation);
             }
 
             try
@@ -60,9 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (UnauthorizedAccessException ex)
             {
-                var adalEx = new AdalException(AdalErrorEx.UnauthorizedUserInformationAccess, AdalErrorMessageEx.UnauthorizedUserInformationAccess, ex);
-                PlatformPlugin.Logger.LogException(null, adalEx);
-                throw adalEx;
+                throw new AdalException(AdalErrorEx.UnauthorizedUserInformationAccess, AdalErrorMessageEx.UnauthorizedUserInformationAccess, ex);
             }
         }
 
@@ -173,22 +169,29 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             public static string GetProcessorArchitecture()
             {
-                SYSTEM_INFO systemInfo = new SYSTEM_INFO();
-                GetNativeSystemInfo(ref systemInfo);
-                switch (systemInfo.wProcessorArchitecture)
+                try
                 {
-                    case PROCESSOR_ARCHITECTURE_AMD64:
-                    case PROCESSOR_ARCHITECTURE_IA64:
-                        return "x64";
+                    SYSTEM_INFO systemInfo = new SYSTEM_INFO();
+                    GetNativeSystemInfo(ref systemInfo);
+                    switch (systemInfo.wProcessorArchitecture)
+                    {
+                        case PROCESSOR_ARCHITECTURE_AMD64:
+                        case PROCESSOR_ARCHITECTURE_IA64:
+                            return "x64";
 
-                    case PROCESSOR_ARCHITECTURE_ARM:
-                        return "ARM";
+                        case PROCESSOR_ARCHITECTURE_ARM:
+                            return "ARM";
 
-                    case PROCESSOR_ARCHITECTURE_INTEL:
-                        return "x86";
+                        case PROCESSOR_ARCHITECTURE_INTEL:
+                            return "x86";
 
-                    default:
-                        return "Unknown";
+                        default:
+                            return "Unknown";
+                    }
+                }
+                catch
+                {
+                    return "Unknown";
                 }
             }
 

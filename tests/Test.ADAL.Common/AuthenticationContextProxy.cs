@@ -54,21 +54,6 @@ namespace Test.ADAL.Common
                 new UserCredential(credential.UserId, credential.Password)));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters)
-        {
-            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientId, redirectUri, parameters));
-        }
-
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId)
-        {
-            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientId, redirectUri, parameters, userId));
-        }
-
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId, string extraQueryParameters)
-        {
-            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientId, redirectUri, parameters, userId, extraQueryParameters));
-        }
-
         public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId)
         {
             return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId));
@@ -211,6 +196,7 @@ namespace Test.ADAL.Common
             {
                 output.Error = ((AdalServiceException)ex).ErrorCode;
                 output.ExceptionStatusCode = ((AdalServiceException)ex).StatusCode;
+                output.ExceptionServiceErrorCodes = ((AdalServiceException)ex).ServiceErrorCodes;
                 output.Status = AuthenticationStatusProxy.ServiceError;
             }
             else if (ex is AdalException)

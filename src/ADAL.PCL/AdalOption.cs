@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,26 +16,18 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Diagnostics;
+using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class Logger : LoggerBase
+    public static class AdalOption
     {
-        internal override void Verbose(CallState callState, string format, params object[] args)
+        public static EventSource AdalEventSource
         {
-        }
-
-        internal override void Information(CallState callState, string format, params object[] args)
-        {
-        }
-
-        internal override void Warning(CallState callState, string format, params object[] args)
-        {
-        }
-
-        internal override void Error(CallState callState, string format, params object[] args)
-        {
+            get
+            {
+                return Logger.AdalEventSource;
+            }
         }
     }
 }

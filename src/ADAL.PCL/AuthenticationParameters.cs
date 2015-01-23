@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 || !char.IsWhiteSpace(authenticateHeader[Bearer.Length]))
             {
                 var ex = new ArgumentException(AdalErrorMessage.InvalidAuthenticateHeaderFormat, "authenticateHeader");
-                PlatformPlugin.Logger.LogException(null, ex);
+                PlatformPlugin.Logger.Error(null, ex);
                 throw ex;
             }
 
@@ -121,7 +121,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 request.ContentType = "application/x-www-form-urlencoded";
                 response = await request.GetResponseSyncOrAsync(callState);
                 var ex = new AdalException(AdalError.UnauthorizedResponseExpected);
-                PlatformPlugin.Logger.LogException(null, ex);
+                PlatformPlugin.Logger.Error(null, ex);
                 throw ex;
             }
             catch (WebException ex)
@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (response == null)
                 {
                     var serviceEx = new AdalServiceException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);
-                    PlatformPlugin.Logger.LogException(null, serviceEx);
+                    PlatformPlugin.Logger.Error(null, serviceEx);
                     throw serviceEx;
                 }
 
@@ -164,14 +164,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 else
                 {
                     var ex = new ArgumentException(AdalErrorMessage.MissingAuthenticateHeader, "response");
-                    PlatformPlugin.Logger.LogException(null, ex);
+                    PlatformPlugin.Logger.Error(null, ex);
                     throw ex;
                 }
             }
             else
             {
                 var ex = new ArgumentException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, "response");
-                PlatformPlugin.Logger.LogException(null, ex);
+                PlatformPlugin.Logger.Error(null, ex);
                 throw ex;
             }
 

@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -18,25 +18,26 @@
 
 using System;
 using System.Diagnostics.Tracing;
-
+﻿
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class Logger : LoggerBase
     {
-        internal override void Verbose(CallState callState, string format, params object[] args)
+        internal override void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
         }
 
-        internal override void Information(CallState callState, string format, params object[] args)
+        internal override void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
         }
 
-        internal override void Warning(CallState callState, string format, params object[] args)
+        internal override void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
         }
 
-        internal override void Error(CallState callState, string format, params object[] args)
+        internal override void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
         }
-   }
+    }
 }
+

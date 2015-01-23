@@ -17,6 +17,8 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -53,7 +55,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result, true, false);
 
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, sts.ValidResource);
-            VerifyErrorResult(result, "invalid_request", "90014", 400);    // ACS90014: The request body must contain the following parameter: 'client_secret or client_assertion'.
+            VerifyErrorResult(result, "invalid_request", null, 400, "90014");    // ACS90014: The request body must contain the following parameter: 'client_secret or client_assertion'.
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(null, sts.ValidRedirectUriForConfidentialClient, credential);
             VerifyErrorResult(result, "invalid_argument", "authorizationCode");
@@ -94,7 +96,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result, true, false);
 
             result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, sts.ValidResource);
-            VerifyErrorResult(result, Sts.InvalidRequest, "90014", 400);   // The request body must contain the following parameter: 'client_secret or client_assertion'.
+            VerifyErrorResult(result, Sts.InvalidRequest, null, 400, "90014");   // The request body must contain the following parameter: 'client_secret or client_assertion'.
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, certificate, null);
             VerifySuccessResult(sts, result);
@@ -158,12 +160,12 @@ namespace Test.ADAL.Common
             var invalidCertificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, ExportX509Certificate(sts.InvalidConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword), sts.InvalidConfidentialClientCertificatePassword);
             RecorderJwtId.JwtIdIndex = 3;
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCertificate);
-            VerifyErrorResult(result, Sts.InvalidClientError, "50012"); // AADSTS50012: Client assertion contains an invalid signature.
+            VerifyErrorResult(result, Sts.InvalidClientError, null, 0, "50012");
 
             invalidCertificate = new ClientAssertionCertificate(sts.InvalidClientId, ExportX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword), sts.ConfidentialClientCertificatePassword);
             RecorderJwtId.JwtIdIndex = 4;
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCertificate);
-            VerifyErrorResult(result, Sts.UnauthorizedClient, "70001"); // AADSTS70001: Application '87002806-c87a-41cd-896b-84ca5690d29e' is not registered for the account.
+            VerifyErrorResult(result, Sts.UnauthorizedClient, null, 400, "70001");
         }
 
         public static async Task ConfidentialClientWithJwtTestAsync(Sts sts)
@@ -444,7 +446,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result3, true, false);
         }
 
-        internal static async Task MultiThreadedClientAssertionWithX509Test(Sts sts)
+        internal static async Task MultiThreadedClientAssertionWithX509TestAsync(Sts sts)
         {
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
 
@@ -468,7 +470,7 @@ namespace Test.ADAL.Common
             Verify.IsNotNullOrEmptyString(result[0].AccessToken);
         }
 
-        internal static async Task AcquireTokenByAuthorizationCodeWithCacheTest(Sts sts)
+        internal static async Task AcquireTokenByAuthorizationCodeWithCacheTestAsync(Sts sts)
         {
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
 
@@ -499,7 +501,7 @@ namespace Test.ADAL.Common
             VerifyExpiresOnAreNotEqual(result4, result5);
         }
 
-        internal static async Task ConfidentialClientTokenRefreshWithMRRTTest(Sts sts)
+        internal static async Task ConfidentialClientTokenRefreshWithMRRTTestAsync(Sts sts)
         {
             SetCredential(sts);
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
@@ -626,7 +628,7 @@ namespace Test.ADAL.Common
             Verify.AreNotEqual(result.AccessToken, result2.AccessToken);
         }
 
-        internal static async Task TokenSubjectTypeTest(Sts sts)
+        internal static async Task TokenSubjectTypeTestAsync(Sts sts)
         {
             SetCredential(sts);
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
@@ -680,6 +682,74 @@ namespace Test.ADAL.Common
             uri = await context.GetAuthorizationRequestUrlAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, sts.ValidUserId, "extra");
             Verify.IsNotNull(uri);
             Verify.IsTrue(uri.AbsoluteUri.Contains("client-request-id="));
+        }
+
+        internal static async Task LoggerTestAsync(Sts sts)
+        {
+            var eventListener = new SampleEventListener();
+            eventListener.EnableEvents(AdalOption.AdalEventSource, EventLevel.Verbose);
+
+            Trace.TraceInformation("$$$$$");
+
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheType.Null);
+
+            var credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
+            await context.AcquireTokenAsync(sts.ValidResource, credential);
+            var invalidCredential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret + "x");
+            await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
+
+            Verify.IsTrue(eventListener.TraceBuffer.IndexOf("$$") < 0);
+            Verify.IsTrue(eventListener.TraceBuffer.IndexOf("Correlation ID") > 0);
+
+            eventListener.TraceBuffer = string.Empty;
+
+            credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
+            await context.AcquireTokenAsync(sts.ValidResource, credential);
+            invalidCredential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret + "x");
+            await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
+
+            Verify.IsFalse(string.IsNullOrEmpty(eventListener.TraceBuffer));
+
+            eventListener.TraceBuffer = string.Empty;
+            eventListener.DisableEvents(AdalOption.AdalEventSource);
+
+            credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
+            await context.AcquireTokenAsync(sts.ValidResource, credential);
+            invalidCredential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret + "x");
+            await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
+
+            Verify.IsTrue(string.IsNullOrEmpty(eventListener.TraceBuffer));
+        }
+
+        internal static async Task MsaTestAsync()
+        {
+            AadSts sts = new AadSts();
+
+            string liveIdtoken = StsLoginFlow.TryGetSamlToken("https://login.live.com", sts.MsaUserName, sts.MsaPassword, "urn:federation:MicrosoftOnline");
+            var context = new AuthenticationContext(sts.Authority, sts.ValidateAuthority, null);
+
+            try
+            {
+                var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, new UserAssertion(liveIdtoken, "urn:ietf:params:oauth:grant-type:saml1_1-bearer"));
+                VerifySuccessResult(result);
+            }
+            catch (Exception ex)
+            {
+                Verify.Fail("Unexpected exception: " + ex);
+            }
+
+            try
+            {
+                var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, new UserAssertion("x", "urn:ietf:params:oauth:grant-type:saml1_1-bearer"));
+                Verify.Fail("Exception expected");
+                VerifySuccessResult(result);
+            }
+            catch (AdalServiceException ex)
+            {
+                Verify.AreEqual(ex.ErrorCode, "invalid_grant");
+                Verify.AreEqual(ex.StatusCode, 400);
+                Verify.IsTrue(ex.ServiceErrorCodes.Contains("50008"));
+            }
         }
 
         private static void VerifySuccessResult(AuthenticationResult result)

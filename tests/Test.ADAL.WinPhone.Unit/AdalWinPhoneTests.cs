@@ -35,6 +35,7 @@ namespace Test.ADAL.WinPhone.Unit
         {
             AdalTests.TestType = TestType.WinRT;
             ReplayerBase.InitializeAsync().Wait();
+            PlatformPlugin.PlatformInformation = new TestPlatformInformation();
         }
 
         [AssemblyCleanup]
@@ -217,6 +218,14 @@ namespace Test.ADAL.WinPhone.Unit
             PlatformPlugin.WebUIFactory = new ReplayerWebUIFactory();
             PlatformPlugin.HttpWebRequestFactory = new ReplayerHttpWebRequestFactory();
             PlatformPlugin.RequestCreationHelper = new ReplayerRequestCreationHelper();
+        }
+
+        class TestPlatformInformation : PlatformInformation
+        {
+            public override void AddPromptBehaviorQueryParameter(IAuthorizationParameters parameters, RequestParameters authorizationRequestParameters)
+            {
+                // Do not add prompt=login to the query to be able to use the mock dictionary created by Test.ADAL.NET.
+            }            
         }
     }
 }

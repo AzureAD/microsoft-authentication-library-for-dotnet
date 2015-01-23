@@ -52,12 +52,20 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ADAL.Common\AdalEventSource.cs">
+      <Link>AdalEventSource.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\Logger.cs">
+      <Link>Logger.cs</Link>
+    </Compile>
+    <Compile Include="..\ADAL.PCL\AdalOption.cs">
+      <Link>AdalOption.cs</Link>
+    </Compile>
     <Compile Include="AuthorizationParameters.cs" />
     <Compile Include="CryptographyHelper.cs" />
-    <Compile Include="Logger.cs" />
     <Compile Include="PlatformInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebUIFactory.cs" />

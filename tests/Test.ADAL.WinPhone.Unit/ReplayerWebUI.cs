@@ -17,12 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-
-using Windows.ApplicationModel.Activation;
-using Windows.Security.Authentication.Web;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 using Test.ADAL.WinRT.Unit;
@@ -46,7 +41,9 @@ namespace Test.ADAL.WinPhone.Unit
                 string value = IOMap[key];
                 if (value[0] == 'P')
                 {
-                    return new AuthorizationResult(AuthorizationStatus.Success, value.Substring(1));
+                    value = value.Substring(1);
+                    string[] valueSegments = value.Split(new string[] { "::" }, StringSplitOptions.None);
+                    return new AuthorizationResult((AuthorizationStatus)Enum.Parse(typeof(AuthorizationStatus), valueSegments[0]), valueSegments[1]);
                 }
 
                 if (value[0] == 'A')

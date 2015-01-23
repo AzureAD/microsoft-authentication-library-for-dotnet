@@ -126,6 +126,21 @@ namespace Test.ADAL.Common
             this.context.CorrelationId = correlationId;
         }
 
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters)
+        {
+            return await RunTaskInteractiveAsync(resource, clientId, redirectUri, parameters, UserIdentifier.AnyUser, null);
+        }
+
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId)
+        {
+            return await RunTaskInteractiveAsync(resource, clientId, redirectUri, parameters, userId, null);
+        }
+
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId, string extraQueryParameters)
+        {
+            return await RunTaskInteractiveAsync(resource, clientId, redirectUri, parameters, userId, extraQueryParameters);
+        }
+
         private async Task<AuthenticationResultProxy> RunTaskAsync(Task<AuthenticationResult> task)
         {
             AuthenticationResultProxy resultProxy;
@@ -258,7 +273,8 @@ namespace Test.ADAL.Common
 
         public async Task<string> AcquireAccessCodeAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId)
         {
-            return await AdalFriend.AcquireAccessCodeAsync(this.context, resource, clientId, redirectUri, userId);
+            AuthenticationResultProxy result = await AcquireAccessCodeAsync(resource, clientId, redirectUri, userId, null);
+            return result.AccessToken;
         }
 
         public delegate void UiSupplyDelegate(WindowsFormsWebAuthenticationDialog dialog);

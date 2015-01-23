@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -92,10 +93,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 throw new AdalException(AdalError.AssemblyLoadFailed, string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.AssemblyLoadFailedTemplate, platformSpecificAssemblyName), ex);
             }
-        }
-
-        private static void ThrowAssemlyLoadFailedException(string webAuthenticationDialogAssemblyName, Exception innerException)
-        {
         }
     }
 }

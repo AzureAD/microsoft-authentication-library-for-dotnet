@@ -34,7 +34,8 @@ namespace Test.ADAL.NET.Friend
 
         public Task<IHttpWebResponse> GetResponseWithTimeoutSyncOrAsync(HttpWebRequest request, int timeoutInMilliSeconds, CallState callState)
         {
-            throw new NotImplementedException();
+            IWebUIFactory webUiFactory = new WebUIFactory();
+            return webUiFactory.GetResponseWithTimeoutSyncOrAsync(request, timeoutInMilliSeconds, callState);
         }
     }
 }

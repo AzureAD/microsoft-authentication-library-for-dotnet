@@ -119,6 +119,9 @@
     <Compile Include="..\Test.ADAL.NET\AuthenticationParametersProxy.cs">
       <Link>AuthenticationParametersProxy.cs</Link>
     </Compile>
+    <Compile Include="..\Test.ADAL.NET\StsLoginFlow.cs">
+      <Link>StsLoginFlow.cs</Link>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -174,6 +177,12 @@
       <Project>{f22f94db-3e3b-49c9-9534-9b499e199aab}</Project>
       <Name>Test.ADAL.NET.Friend</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Test.ADAL.NET\SamlLoginTemplate.xml">
+      <Link>SamlLoginTemplate.xml</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
