@@ -272,7 +272,7 @@ namespace Test.ADAL.NET
         [TestMethod]
         [Description("Positive Test for AcquireToken using federated tenant and then refreshing the session")]
         [TestCategory("AdalDotNet")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
         public async Task AcquireTokenAndRefreshSessionTest()
         {
             await AdalTests.AcquireTokenAndRefreshSessionTestAsync(Sts);

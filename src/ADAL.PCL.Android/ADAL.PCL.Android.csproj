@@ -48,6 +48,7 @@
     </Compile>
     <Compile Include="AuthorizationParameters.cs" />
     <Compile Include="CryptographyHelper.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="PlatformInformation.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
