@@ -2,7 +2,7 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
+    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{94569420-69B5-4031-A975-F5791E3F2F17}</ProjectGuid>
@@ -57,7 +57,6 @@
     <Compile Include="AcquireTokenByAuthorizationCodeHandler.cs" />
     <Compile Include="AcquireTokenByRefreshTokenHandler.cs" />
     <Compile Include="AcquireTokenForClientHandler.cs" />
-    <Compile Include="AcquireTokenForMSAHandler.cs" />
     <Compile Include="AcquireTokenHandlerBase.cs" />
     <Compile Include="AcquireTokenInteractiveHandler.cs" />
     <Compile Include="AcquireTokenNonInteractiveHandler.cs" />
@@ -97,7 +96,7 @@
     <Compile Include="IRequestCreationHelper.cs" />
     <Compile Include="JsonWebToken.cs" />
     <Compile Include="JsonWebTokenConstants.cs" />
-    <Compile Include="Logger.cs" />
+    <Compile Include="LoggerBase.cs" />
     <Compile Include="MexParser.cs" />
     <Compile Include="OAuth2Response.cs" />
     <Compile Include="OAuthConstants.cs" />

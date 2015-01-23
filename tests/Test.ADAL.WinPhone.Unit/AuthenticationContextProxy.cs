@@ -76,6 +76,21 @@ namespace Test.ADAL.Common
         {
         }
 
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters)
+        {
+            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientId, redirectUri, parameters));
+        }
+
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId)
+        {
+            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientId, redirectUri, parameters, userId));
+        }
+
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId, string extraQueryParameters)
+        {
+            return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientId, redirectUri, parameters, userId, extraQueryParameters));
+        }
+
         private async Task<AuthenticationResultProxy> RunTaskAsync(Task<AuthenticationResult> task)
         {
             AuthenticationResultProxy resultProxy;

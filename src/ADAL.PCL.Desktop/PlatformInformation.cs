@@ -42,17 +42,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
             if (userNameSize == 0)
             {
-                var ex = new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
-                PlatformPlugin.Logger.LogException(null, ex);
-                throw ex;
+                throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
             }
 
             StringBuilder sb = new StringBuilder((int)userNameSize);
             if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
             {
-                var ex = new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
-                PlatformPlugin.Logger.LogException(null, ex);
-                throw ex;
+                throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
             }
 
             return sb.ToString();
@@ -169,22 +165,29 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             public static string GetProcessorArchitecture()
             {
-                SYSTEM_INFO systemInfo = new SYSTEM_INFO();
-                GetNativeSystemInfo(ref systemInfo);
-                switch (systemInfo.wProcessorArchitecture)
+                try
+                { 
+                    SYSTEM_INFO systemInfo = new SYSTEM_INFO();
+                    GetNativeSystemInfo(ref systemInfo);
+                    switch (systemInfo.wProcessorArchitecture)
+                    {
+                        case PROCESSOR_ARCHITECTURE_AMD64:
+                        case PROCESSOR_ARCHITECTURE_IA64:
+                            return "x64";
+
+                        case PROCESSOR_ARCHITECTURE_ARM:
+                            return "ARM";
+
+                        case PROCESSOR_ARCHITECTURE_INTEL:
+                            return "x86";
+
+                        default:
+                            return "Unknown";
+                    }
+                }
+                catch
                 {
-                    case PROCESSOR_ARCHITECTURE_AMD64:
-                    case PROCESSOR_ARCHITECTURE_IA64:
-                        return "x64";
-
-                    case PROCESSOR_ARCHITECTURE_ARM:
-                        return "ARM";
-
-                    case PROCESSOR_ARCHITECTURE_INTEL:
-                        return "x86";
-
-                    default:
-                        return "Unknown";
+                    return "Unknown";
                 }
             }
 

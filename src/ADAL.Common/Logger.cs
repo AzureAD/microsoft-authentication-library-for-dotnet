@@ -17,116 +17,48 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Diagnostics.Tracing;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal partial class Logger : LoggerBase, IDisposable
+    internal class Logger : LoggerBase
     {
-        private const string LogFilename = "AdalTraces.log";
-        private bool disposed;
-        private readonly AdalEventSource AdalEventSource;
-        private StorageFileEventListener adalListener;
-
-        public Logger()
+        static Logger()
         {
             AdalEventSource = new AdalEventSource();
         }
 
-        internal void SetListenerLevel(AdalTraceLevel level)
-        {
-            if (level != AdalTraceLevel.None)
-            {
-                if (adalListener == null)
-                {
-                    adalListener = new StorageFileEventListener(LogFilename);
-                }
+        internal static AdalEventSource AdalEventSource { get; private set; }
 
-                adalListener.EnableEvents(AdalEventSource, GetEventLevel(level));
-            }
-            else if (adalListener != null)
-            {
-                adalListener.DisableEvents(AdalEventSource);
-                adalListener.Dispose();
-                adalListener = null;
-            }
+        internal override void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        {
+            AdalEventSource.Error(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), ex.ToString()));
         }
 
-        internal override void Verbose(CallState callState, string format, params object[] args)
+        internal override void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Verbose(PrepareLogMessage(callState, format, args));
+            AdalEventSource.Verbose(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
         }
 
-        internal override void Information(CallState callState, string format, params object[] args)
+        internal override void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Information(PrepareLogMessage(callState, format, args));
+            AdalEventSource.Information(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
         }
 
-        internal override void Warning(CallState callState, string format, params object[] args)
+        internal override void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Warning(PrepareLogMessage(callState, format, args));
+            AdalEventSource.Warning(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
         }
 
-        internal override void Error(CallState callState, string format, params object[] args)
+        private static string GetCallerFilename(string callerFilePath)
         {
-            AdalEventSource.Error(PrepareLogMessage(callState, format, args));
+            return callerFilePath.Substring(callerFilePath.LastIndexOf("\\", StringComparison.Ordinal) + 1);
         }
 
-        private EventLevel GetEventLevel(AdalTraceLevel level)
+        internal static string PrepareLogMessage(CallState callState, string classOrComponent, string message)
         {
-            EventLevel returnLevel;
-            switch (level)
-            {
-                case AdalTraceLevel.Informational:
-                    returnLevel = EventLevel.Informational;
-                    break;
-                case AdalTraceLevel.Verbose:
-                    returnLevel = EventLevel.Verbose;
-                    break;
-                case AdalTraceLevel.Warning:
-                    returnLevel = EventLevel.Warning;
-                    break;
-                case AdalTraceLevel.Error:
-                    returnLevel = EventLevel.Error;
-                    break;
-                case AdalTraceLevel.Critical:
-                    returnLevel = EventLevel.Critical;
-                    break;
-                case AdalTraceLevel.LogAlways:
-                    returnLevel = EventLevel.LogAlways;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("level");
-            }
-            return returnLevel;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
-                if (disposing)
-                {
-                    if (adalListener != null)
-                    {
-                        adalListener.Dispose();
-                        adalListener = null;
-                    }
-
-                    if (AdalEventSource != null)
-                    {
-                        AdalEventSource.Dispose();
-                    }
-                }
-
-                disposed = true;
-            }
+            string correlationId = (callState != null) ? callState.CorrelationId.ToString() : string.Empty;
+            return string.Format(CultureInfo.CurrentCulture, "{0}: {1} - {2}: {3}", DateTime.UtcNow, correlationId, classOrComponent, message);
         }
     }
 }

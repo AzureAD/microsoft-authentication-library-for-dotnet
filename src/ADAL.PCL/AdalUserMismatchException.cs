@@ -46,5 +46,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Gets the user returned by service.
         /// </summary>
         public string ReturnedUser { get; private set; }
+
+        /// <summary>
+        /// Creates and returns a string representation of the current exception.
+        /// </summary>
+        /// <returns>A string representation of the current exception.</returns>
+        public override string ToString()
+        {
+            return base.ToString() + string.Format("\n\tRequestedUser: {0}\n\tReturnedUser: {1}", this.RequestedUser, this.ReturnedUser);
+        }
     }
 }

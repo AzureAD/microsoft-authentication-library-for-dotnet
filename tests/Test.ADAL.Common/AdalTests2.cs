@@ -18,10 +18,13 @@
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.Common
 {
@@ -34,34 +37,22 @@ namespace Test.ADAL.Common
             Guid correlationId = Guid.NewGuid();
             AuthenticationResultProxy result = null;
 
-            MemoryStream stream = new MemoryStream();
-            using (var listener = new TextWriterTraceListener(stream))
-            {
-                Trace.Listeners.Add(listener);
+            var eventListener = new SampleEventListener();
+            eventListener.EnableEvents(AdalOption.AdalEventSource, EventLevel.Verbose);
 
-                context.SetCorrelationId(correlationId);
-                result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
-                VerifySuccessResult(sts, result);
-                listener.Flush();
-                string trace = Encoding.UTF8.GetString(stream.ToArray(), 0, (int)stream.Position);
-                Verify.IsTrue(trace.Contains(correlationId.ToString()));
-                Trace.Listeners.Remove(listener);
-            }
+            context.SetCorrelationId(correlationId);
+            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
+            VerifySuccessResult(sts, result);
+            Verify.IsTrue(eventListener.TraceBuffer.Contains(correlationId.ToString()));
 
-            stream = new MemoryStream();
-            using (var listener = new TextWriterTraceListener(stream))
-            {
-                Trace.Listeners.Add(listener);
-                context.SetCorrelationId(Guid.Empty);
-                AuthenticationResultProxy result2 = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidClientId);
-                Verify.IsNotNullOrEmptyString(result2.AccessToken);
-                listener.Flush();
-                string trace = Encoding.UTF8.GetString(stream.ToArray(), 0, (int)stream.Position);
-                Verify.IsFalse(trace.Contains(correlationId.ToString()));
-                Verify.IsTrue(trace.Contains("Correlation ID"));
-                Trace.Listeners.Remove(listener);
-            }
+            eventListener.TraceBuffer = string.Empty;
+
+            context.SetCorrelationId(Guid.Empty);
+            AuthenticationResultProxy result2 = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidClientId);
+            Verify.IsNotNullOrEmptyString(result2.AccessToken);
+            Verify.IsFalse(eventListener.TraceBuffer.Contains(correlationId.ToString()));
         }
+
         public static async Task AuthenticationParametersDiscoveryTestAsync(Sts sts)
         {
             const string RelyingPartyWithDiscoveryUrl = "http://localhost:8080";
@@ -156,6 +147,16 @@ namespace Test.ADAL.Common
             {
                 VerifyTokenContent(result);
             }
+        }
+    }
+
+    class SampleEventListener : EventListener
+    {
+        public string TraceBuffer { get; set; }
+
+        protected override void OnEventWritten(EventWrittenEventArgs eventData)
+        {
+            TraceBuffer += (eventData.Payload[0] + "\n");
         }
     }
 }

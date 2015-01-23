@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     if (response.ContainsKey(key))
                     {
-                        PlatformPlugin.Logger.Warning(callState, "Key/value pair list contains redundant key '{0}'.", key);
+                        PlatformPlugin.Logger.Warning(callState, string.Format("Key/value pair list contains redundant key '{0}'.", key));
                     }
 
                     response[key] = value;

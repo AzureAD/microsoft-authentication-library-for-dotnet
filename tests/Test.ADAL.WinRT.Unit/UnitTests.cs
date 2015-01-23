@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics.Tracing;
 using System.Net;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -60,33 +61,15 @@ namespace Test.ADAL.WinRT.Unit
         [TestCategory("AdalWinRTUnit")]
         public void AdalTraceTest()
         {
-            Verify.IsTrue(AdalTrace.Level == AdalTraceLevel.None);
-        }
-
-        [TestMethod]
-        [TestCategory("AdalWinRTUnit")]
-        [Ignore]    // TODO: The test is currently failing. 
-        public async Task LoggerTest()
-        {
-            for (int i = 0; i < 2; i++)
-            {
-                AdalTrace.Level = AdalTraceLevel.Informational;
-                string guidValue = Guid.NewGuid().ToString();
-                PlatformPlugin.Logger.Information(null, "{0}", guidValue);
-                StorageFolder sf = ApplicationData.Current.LocalFolder;
-                AdalTrace.Level = AdalTraceLevel.None;
-                StorageFile file = await sf.GetFileAsync("AdalTraces.log");
-                try
-                {
-                    string content = await FileIO.ReadTextAsync(file);
-                    Log.Comment(content);
-                    Verify.IsTrue(content.Contains(guidValue));
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-            }
+            Verify.IsFalse(AdalOption.AdalEventSource.IsEnabled());
+            var eventListener = new SampleEventListener();
+            eventListener.EnableEvents(AdalOption.AdalEventSource, EventLevel.Verbose);
+            Verify.IsNullOrEmptyString(eventListener.TraceBuffer);
+            Verify.IsTrue(AdalOption.AdalEventSource.IsEnabled());
+            AuthenticationContext context = new AuthenticationContext("https://login.windows.net/commmon");
+            Verify.IsNotNullOrEmptyString(eventListener.TraceBuffer);
+            eventListener.DisableEvents(AdalOption.AdalEventSource);
+            Verify.IsFalse(AdalOption.AdalEventSource.IsEnabled());
         }
 
         [TestMethod]
@@ -136,6 +119,16 @@ namespace Test.ADAL.WinRT.Unit
             catch (WebException ex)
             {
                 Verify.AreEqual((int)(ex.Status), 6);   // RequestCanceled
+            }
+        }
+
+        class SampleEventListener : EventListener
+        {
+            public string TraceBuffer { get; set; }
+
+            protected override void OnEventWritten(EventWrittenEventArgs eventData)
+            {
+                TraceBuffer += (eventData.Payload[0] + "\n");
             }
         }
     }

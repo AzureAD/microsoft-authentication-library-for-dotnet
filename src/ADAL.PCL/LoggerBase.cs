@@ -16,36 +16,22 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Diagnostics.Tracing;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    [EventSource(Name = "Microsoft.IdentityModel.Clients.ActiveDirectory")]
-    internal class AdalEventSource : EventSource
+    internal abstract class LoggerBase
     {
+        internal abstract void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
 
-        [Event(1, Level = EventLevel.Verbose)]
-        internal void Verbose(string message)
-        {
-            WriteEvent(1, message);
-        }
+        internal abstract void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
 
-        [Event(2, Level = EventLevel.Informational)]
-        internal void Information(string message)
-        {
-            WriteEvent(2, message);
-        }
+        internal abstract void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
 
-        [Event(3, Level = EventLevel.Warning)]
-        internal void Warning(string message)
-        {
-            WriteEvent(3, message);
-        }
-
-        [Event(4, Level = EventLevel.Error)]
-        internal void Error(string message)
-        {
-            WriteEvent(4, message);
-        }
+        internal abstract void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
     }
 }

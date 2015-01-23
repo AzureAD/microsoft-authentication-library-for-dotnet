@@ -18,6 +18,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -283,9 +284,8 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AADFederatedWithADFS3", DataAccessMethod.Sequential)]
         public async Task AcquireTokenPositiveWithFederatedTenantTest()
         {
-            await AdalTests.AcquireTokenPositiveWithFederatedTenantTest(Sts);
+            await AdalTests.AcquireTokenPositiveWithFederatedTenantTestAsync(Sts);
         }
-
 
         [TestMethod]
         [Description("Correlation Id test")]
@@ -446,7 +446,7 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
         public async Task MultiThreadedClientAssertionWithX509Test()
         {
-            await AdalTests.MultiThreadedClientAssertionWithX509Test(Sts);
+            await AdalTests.MultiThreadedClientAssertionWithX509TestAsync(Sts);
         }
 
         [TestMethod]
@@ -455,7 +455,7 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
         public async Task AcquireTokenByAuthorizationCodeWithCacheTest()
         {
-            await AdalTests.AcquireTokenByAuthorizationCodeWithCacheTest(Sts);
+            await AdalTests.AcquireTokenByAuthorizationCodeWithCacheTestAsync(Sts);
         }
 
         [TestMethod]
@@ -464,7 +464,7 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
         public async Task ConfidentialClientTokenRefreshWithMrrtTest()
         {
-            await AdalTests.ConfidentialClientTokenRefreshWithMRRTTest(Sts);
+            await AdalTests.ConfidentialClientTokenRefreshWithMRRTTestAsync(Sts);
         }
 
         [TestMethod]
@@ -473,7 +473,7 @@ namespace Test.ADAL.NET
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
         public async Task TokenSubjectTypeTest()
         {
-            await AdalTests.TokenSubjectTypeTest(Sts);
+            await AdalTests.TokenSubjectTypeTestAsync(Sts);
         }
 
         [TestMethod]
@@ -483,6 +483,24 @@ namespace Test.ADAL.NET
         public async Task GetAuthorizationRequestUrlTest()
         {
             await AdalTests.GetAuthorizationRequestURLTestAsync(Sts);
+        }
+
+        [TestMethod]
+        [Description("Test for logging in ADAL")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
+        public async Task LoggerTest()
+        {
+            await AdalTests.LoggerTestAsync(Sts);
+        }
+
+        [TestMethod]
+        [Description("Test for non-interactive federation with MSA")]
+        [TestCategory("AdalDotNet")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "AAD", DataAccessMethod.Sequential)]
+        public async Task MsaTest()
+        {
+            await AdalTests.MsaTestAsync();
         }
     }
 }

@@ -453,7 +453,7 @@ namespace Test.ADAL.Common.Unit
         public static AuthenticationResult CreateCacheValue(string uniqueId, string displayableId)
         {
             string refreshToken = string.Format("RefreshToken{0}", Rand.Next());
-            return new AuthenticationResult(null, ValidAccessToken, refreshToken, new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)))
+            return new AuthenticationResult(null, ValidAccessToken, refreshToken, new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
                 {
                     UserInfo = new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId }
                 };

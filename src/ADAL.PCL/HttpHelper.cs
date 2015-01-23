@@ -54,9 +54,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
                 clientMetrics.SetLastError(tokenResponse.ErrorCodes);
-                var serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, ex);
-                PlatformPlugin.Logger.LogException(callState, serviceEx);
-                throw serviceEx;
+                throw new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, tokenResponse.ErrorCodes, ex);
             }
             finally
             {
@@ -149,11 +147,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Guid correlationIdInResponse;
                     if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
                     {
-                        PlatformPlugin.Logger.Information(callState, "Returned correlation id '{0}' is not in GUID format.", correlationIdHeader);
+                        PlatformPlugin.Logger.Warning(callState, string.Format("Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
                     }
                     else if (correlationIdInResponse != callState.CorrelationId)
                     {
-                        PlatformPlugin.Logger.Information(callState, "Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, callState.CorrelationId);
+                        PlatformPlugin.Logger.Warning(callState, string.Format("Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, callState.CorrelationId));
                     }
 
                     break;

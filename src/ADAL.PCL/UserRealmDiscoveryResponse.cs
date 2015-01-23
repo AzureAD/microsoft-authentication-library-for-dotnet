@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             userRealmEndpoint += (userName + "?api-version=1.0");
 
             userRealmEndpoint = HttpHelper.CheckForExtraQueryParameter(userRealmEndpoint);
-            PlatformPlugin.Logger.Information(callState, "Sending user realm discovery request to '{0}'", userRealmEndpoint);
+            PlatformPlugin.Logger.Information(callState, string.Format("Sending user realm discovery request to '{0}'", userRealmEndpoint));
 
             UserRealmDiscoveryResponse userRealmResponse;
             ClientMetrics clientMetrics = new ClientMetrics();

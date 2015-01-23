@@ -59,15 +59,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (WebException ex)
             {
-                var serviceEx = new AdalServiceException(AdalError.AccessingWsMetadataExchangeFailed, ex);
-                PlatformPlugin.Logger.LogException(callState, serviceEx);
-                throw serviceEx;
+                throw new AdalServiceException(AdalError.AccessingWsMetadataExchangeFailed, ex);
             }
             catch (XmlException ex)
             {
-                var adalEx = new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
-                PlatformPlugin.Logger.LogException(callState, adalEx);
-                throw adalEx;
+                throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
             }
 
             return mexDocument;
@@ -90,22 +86,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else if (userAuthType == UserAuthType.IntegratedAuth)
                 {
-                    var ex = new AdalException(AdalError.IntegratedAuthFailed, new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument));
-                    PlatformPlugin.Logger.LogException(callState, ex);
-                    throw ex;
+                    throw new AdalException(AdalError.IntegratedAuthFailed, new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument));
                 }
                 else
                 {
-                    var ex = new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument);
-                    PlatformPlugin.Logger.LogException(callState, ex);
-                    throw ex;
+                    throw new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument);
                 }
             }
             catch (XmlException ex)
             {
-                var adalEx = new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
-                PlatformPlugin.Logger.LogException(callState, adalEx);
-                throw adalEx;
+                throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
             }
 
             return url;
