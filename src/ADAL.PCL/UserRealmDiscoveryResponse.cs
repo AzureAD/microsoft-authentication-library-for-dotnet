@@ -16,7 +16,9 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
@@ -53,22 +55,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create(userRealmEndpoint);
-                request.Method = "GET";
+                IHttpClient request = PlatformPlugin.HttpClientFactory.Create(userRealmEndpoint, callState);
                 request.Accept = "application/json";
-                HttpHelper.AddCorrelationIdHeadersToRequest(request, callState);
-                AdalIdHelper.AddAsHeaders(request);
+                AdalIdHelper.AddAsHeaders(request.Headers);
 
-                clientMetrics.BeginClientMetricsRecord(request, callState);
+                clientMetrics.BeginClientMetricsRecord(request.Headers, callState);
 
-                using (var response = await request.GetResponseSyncOrAsync(callState))
+                using (var response = await request.GetResponseAsync())
                 {
-                    HttpHelper.VerifyCorrelationIdHeaderInReponse(response, callState);
-                    userRealmResponse = HttpHelper.DeserializeResponse<UserRealmDiscoveryResponse>(response);
+                    userRealmResponse = HttpHelper.DeserializeResponse<UserRealmDiscoveryResponse>(response.ResponseStream);
                     clientMetrics.SetLastError(null);
                 }
             }
-            catch (WebException ex)
+            catch (HttpRequestWrapperException ex)
             {
                 var serviceException = new AdalServiceException(AdalError.UserRealmDiscoveryFailed, ex);
                 clientMetrics.SetLastError(new[] { serviceException.StatusCode.ToString() });

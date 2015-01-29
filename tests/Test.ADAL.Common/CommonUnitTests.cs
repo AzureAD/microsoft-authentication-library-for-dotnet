@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.Common
@@ -35,19 +37,19 @@ namespace Test.ADAL.Common
 
         public static void AdalIdTest()
         {
-            IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create("https://test");
-            AdalIdHelper.AddAsHeaders(request);
+            IHttpClient request = PlatformPlugin.HttpClientFactory.Create("https://test", null);
+            AdalIdHelper.AddAsHeaders(request.Headers);
 
             Verify.AreEqual(4, request.Headers.Count);
             Verify.IsNotNull(request.Headers[AdalIdParameter.Product]);
             Verify.IsNotNull(request.Headers[AdalIdParameter.Version]);
             Verify.IsNotNull(request.Headers[AdalIdParameter.CpuPlatform]);
 #if TEST_ADAL_WINRT_UNIT
-            Verify.IsNull(request.Headers[AdalIdParameter.OS]);
+            Verify.IsFalse(request.Headers.ContainsKey(AdalIdParameter.OS));
             Verify.IsNotNull(request.Headers[AdalIdParameter.DeviceModel]);
 #else
             Verify.IsNotNull(request.Headers[AdalIdParameter.OS]);
-            Verify.IsNull(request.Headers[AdalIdParameter.DeviceModel]);
+            Verify.IsFalse(request.Headers.ContainsKey(AdalIdParameter.DeviceModel));
 #endif
 
             RequestParameters parameters = new RequestParameters(null, new ClientKey("client_id"));

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,21 +16,25 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
 using System.Net;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System.Threading.Tasks;
 
-namespace Test.ADAL.NET.Friend
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    class RecorderHttpWebRequestFactory : IHttpWebRequestFactory
+    internal interface IHttpClient
     {
-        public IHttpWebRequest Create(string uri)
-        {
-            return new RecorderHttpWebRequest(uri);
-        }
+        RequestParameters BodyParameters { get; set; }
 
-        public IHttpWebResponse CreateResponse(WebResponse response)
-        {
-            return new RecorderHttpWebResponse(response);
-        }
+        string Accept { set; }
+
+        string ContentType { set; }
+
+        bool UseDefaultCredentials { set; }
+
+        Dictionary<string, string> Headers { get; }
+
+        Task<IHttpWebResponse> GetResponseAsync();
     }
 }

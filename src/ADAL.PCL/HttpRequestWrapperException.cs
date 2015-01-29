@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,20 +16,24 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class HttpWebRequestFactory : IHttpWebRequestFactory
+    internal class HttpRequestWrapperException : Exception
     {
-        public IHttpWebRequest Create(string uri)
+        public HttpRequestWrapperException(IHttpWebResponse webResponse, Exception innerException) 
+            : base(string.Empty, innerException)
         {
-            return new HttpWebRequestWrapper(uri);
+            this.WebResponse = webResponse;
         }
 
-        public IHttpWebResponse CreateResponse(WebResponse response)
-        {
-            return new HttpWebResponseWrapper(response);
-        }
+        public IHttpWebResponse WebResponse { get; private set; }
     }
 }

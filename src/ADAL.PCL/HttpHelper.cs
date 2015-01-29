@@ -28,60 +28,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static class HttpHelper
     {
-
-        public static async Task<T> SendPostRequestAndDeserializeJsonResponseAsync<T>(string uri, RequestParameters requestParameters, CallState callState)
-        {
-            ClientMetrics clientMetrics = new ClientMetrics();
-
-            try
-            {
-                IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create(uri);
-                request.ContentType = "application/x-www-form-urlencoded";
-                AddCorrelationIdHeadersToRequest(request, callState);
-                AdalIdHelper.AddAsHeaders(request);
-
-                clientMetrics.BeginClientMetricsRecord(request, callState);
-
-                SetPostRequest(request, requestParameters, callState);
-                using (IHttpWebResponse response = await request.GetResponseSyncOrAsync(callState))
-                {
-                    VerifyCorrelationIdHeaderInReponse(response, callState);
-                    clientMetrics.SetLastError(null);
-                    return DeserializeResponse<T>(response);
-                }
-            }
-            catch (WebException ex)
-            {
-                TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
-                clientMetrics.SetLastError(tokenResponse.ErrorCodes);
-                throw new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, tokenResponse.ErrorCodes, ex);
-            }
-            finally
-            {
-                clientMetrics.EndClientMetricsRecord(ClientMetricsEndpointType.Token, callState);
-            }
-        }
-
-        public static void SetPostRequest(IHttpWebRequest request, RequestParameters requestParameters, CallState callState, Dictionary<string, string> headers = null)
-        {
-            request.Method = "POST";
-
-            if (headers != null)
-            {
-                foreach (KeyValuePair<string, string> kvp in headers)
-                {
-                    request.Headers[kvp.Key] = kvp.Value;
-                }
-            }
-
-            request.BodyParameters = requestParameters;
-        }
-
-        public static T DeserializeResponse<T>(IHttpWebResponse response)
+        public static T DeserializeResponse<T>(Stream responseStream)
         {
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
-
-            Stream responseStream = response.GetResponseStream();
 
             if (responseStream == null)
             {
@@ -112,62 +61,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return url;
-        }
-
-        public static void AddCorrelationIdHeadersToRequest(IHttpWebRequest request, CallState callState)
-        {
-            if (callState == null || callState.CorrelationId == Guid.Empty)
-            {
-                return;
-            }
-
-            Dictionary<string, string> headers = new Dictionary<string, string>
-                                                 {
-                                                     { OAuthHeader.CorrelationId, callState.CorrelationId.ToString() },
-                                                     { OAuthHeader.RequestCorrelationIdInResponse, "true" }
-                                                 };
-
-            AddHeadersToRequest(request, headers);
-        }
-
-        public static void VerifyCorrelationIdHeaderInReponse(IHttpWebResponse response, CallState callState)
-        {
-            if (callState == null || callState.CorrelationId == Guid.Empty)
-            {
-                return;
-            }
-
-            WebHeaderCollection headers = response.Headers;
-            foreach (string reponseHeaderKey in headers.AllKeys)
-            {
-                string trimmedKey = reponseHeaderKey.Trim();
-                if (string.Compare(trimmedKey, OAuthHeader.CorrelationId, StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    string correlationIdHeader = headers[trimmedKey].Trim();
-                    Guid correlationIdInResponse;
-                    if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
-                    {
-                        PlatformPlugin.Logger.Warning(callState, string.Format("Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
-                    }
-                    else if (correlationIdInResponse != callState.CorrelationId)
-                    {
-                        PlatformPlugin.Logger.Warning(callState, string.Format("Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, callState.CorrelationId));
-                    }
-
-                    break;
-                }
-            }
-        }
-
-        public static void AddHeadersToRequest(IHttpWebRequest request, Dictionary<string, string> headers)
-        {
-            if (headers != null)
-            {
-                foreach (KeyValuePair<string, string> kvp in headers)
-                {
-                    request.Headers[kvp.Key] = kvp.Value;
-                }
-            }
         }
     }
 }

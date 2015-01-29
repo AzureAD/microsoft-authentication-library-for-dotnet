@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,25 +16,20 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+
+namespace Test.ADAL.WinRT.Unit
 {
-    internal interface IHttpWebRequest
+    class ReplayerHttpClientFactory : IHttpClientFactory
     {
-        RequestParameters BodyParameters { get; set; }
-
-        string Accept { set; }
-
-        string ContentType { set; }
-
-        string Method { set; }
-
-        bool UseDefaultCredentials { set; }
-
-        WebHeaderCollection Headers { get; }
-
-        Task<IHttpWebResponse> GetResponseSyncOrAsync(CallState callState);
+        public IHttpClient Create(string uri, CallState callState)
+        {
+            return new ReplayerHttpClient(uri, callState);
+        }
     }
 }

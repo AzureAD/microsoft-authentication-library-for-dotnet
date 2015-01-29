@@ -52,24 +52,29 @@ namespace Test.ADAL.Common
             }
         }
 
-        public static string SerializeWebException(WebException ex)
+        public static string SerializeException(HttpRequestWrapperException ex)
         {
             var dictionary = new Dictionary<string, string>();
-            dictionary["StatusCode"] = ((int)((HttpWebResponse)(ex.Response)).StatusCode).ToString();
-            Stream responseStream = ex.Response.GetResponseStream();
+            dictionary["StatusCode"] = ((int)(ex.WebResponse.StatusCode)).ToString();
+            Stream responseStream = ex.WebResponse.ResponseStream;
             if (responseStream != null)
             {
                 dictionary["Body"] = StreamToString(responseStream);
                 responseStream.Position = 0;
 
-                if (ex.Response.Headers.AllKeys.Contains("WWW-Authenticate", StringComparer.OrdinalIgnoreCase))
+                if (ex.WebResponse.Headers.Keys.Contains("WWW-Authenticate", StringComparer.OrdinalIgnoreCase))
                 {
-                    dictionary["WWW-AuthenticateHeader"] = ex.Response.Headers["WWW-Authenticate"];
+                    dictionary["WWW-AuthenticateHeader"] = ex.WebResponse.Headers["WWW-Authenticate"];
                 }
             }
             else
             {
                 dictionary["Body"] = string.Empty;
+            }
+
+            foreach (var headerKey in ex.WebResponse.Headers.Keys)
+            {
+                dictionary["Header-" + headerKey] = ex.WebResponse.Headers[headerKey];
             }
 
             using (Stream stream = new MemoryStream())

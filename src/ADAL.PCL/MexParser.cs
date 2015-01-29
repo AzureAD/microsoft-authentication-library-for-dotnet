@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -50,14 +51,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             XDocument mexDocument;
             try
             {
-                IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create(federationMetadataUrl);
-                request.Method = "GET";
-                using (var response = await request.GetResponseSyncOrAsync(callState))
+                IHttpClient request = PlatformPlugin.HttpClientFactory.Create(federationMetadataUrl, callState);
+                using (var response = await request.GetResponseAsync())
                 {
-                    mexDocument = XDocument.Load(response.GetResponseStream(), LoadOptions.None);
+                    mexDocument = XDocument.Load(response.ResponseStream, LoadOptions.None);
                 }
             }
-            catch (WebException ex)
+            catch (HttpRequestWrapperException ex)
             {
                 throw new AdalServiceException(AdalError.AccessingWsMetadataExchangeFailed, ex);
             }

@@ -60,11 +60,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             PlatformPlugin.RequestCreationHelper.AddAdalIdParameters(parameters);
         }
 
-        public static void AddAsHeaders(IHttpWebRequest request)
+        public static void AddAsHeaders(Dictionary<string, string> headers)
         {
-            Dictionary<string, string> headers = new Dictionary<string, string>();
             PlatformPlugin.RequestCreationHelper.AddAdalIdParameters(headers);
-            HttpHelper.AddHeadersToRequest(request, headers);
         }
 
         public static string GetAdalVersion()

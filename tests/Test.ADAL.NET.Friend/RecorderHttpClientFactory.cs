@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,15 +16,23 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+
+using Test.ADAL.Common;
+
+namespace Test.ADAL.NET.Friend
 {
-    internal static class HttpWebResponseFactory
+    class RecorderHttpClientFactory : IHttpClientFactory
     {
-        public static IHttpWebResponse Create(WebResponse response)
+        public IHttpClient Create(string uri, CallState callState)
         {
-            return new HttpWebResponseWrapper(response);
+            return new RecorderHttpClient(uri, callState);
         }
     }
 }

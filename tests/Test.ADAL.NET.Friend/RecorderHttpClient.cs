@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -25,33 +26,34 @@ using Test.ADAL.Common;
 
 namespace Test.ADAL.NET.Friend
 {
-    internal class RecorderHttpWebRequest : RecorderBase, IHttpWebRequest
+    internal class RecorderHttpClient : RecorderBase, IHttpClient
     {
-        private readonly IHttpWebRequest internalHttpWebRequest;
+        private readonly IHttpClient internalHttpCilent;
         private readonly Dictionary<string, string> keyElements;
 
-        static RecorderHttpWebRequest()
+        static RecorderHttpClient()
         {
             Initialize();
         }
 
-        public RecorderHttpWebRequest(string uri)
+        public RecorderHttpClient(string uri, CallState callState)
         {
-            this.internalHttpWebRequest = (new HttpWebRequestFactory()).Create(uri);
+            this.internalHttpCilent = (new HttpClientFactory()).Create(uri, null);
             this.keyElements = new Dictionary<string, string>();
             this.keyElements["Uri"] = uri;
+            this.CallState = callState;
         }
 
         public RequestParameters BodyParameters
         {
             set
             {
-                this.internalHttpWebRequest.BodyParameters = value;
+                this.internalHttpCilent.BodyParameters = value;
             }
 
             get
             {
-                return this.internalHttpWebRequest.BodyParameters;
+                return this.internalHttpCilent.BodyParameters;
             }
         }
 
@@ -60,7 +62,7 @@ namespace Test.ADAL.NET.Friend
             set
             {
                 this.keyElements["Accept"] = value;
-                this.internalHttpWebRequest.Accept = value;
+                this.internalHttpCilent.Accept = value;
             }
         }
 
@@ -69,16 +71,7 @@ namespace Test.ADAL.NET.Friend
             set
             {
                 this.keyElements["ContentType"] = value;
-                this.internalHttpWebRequest.ContentType = value;
-            }
-        }
-
-        public string Method
-        {
-            set
-            {
-                this.keyElements["Method"] = value;
-                this.internalHttpWebRequest.Method = value;
+                this.internalHttpCilent.ContentType = value;
             }
         }
 
@@ -87,28 +80,35 @@ namespace Test.ADAL.NET.Friend
             set
             {
                 this.keyElements["UseDefaultCredentials"] = value.ToString();
-                this.internalHttpWebRequest.UseDefaultCredentials = value;
+                this.internalHttpCilent.UseDefaultCredentials = value;
             }
         }
 
-        public WebHeaderCollection Headers
+        public Dictionary<string, string> Headers
         {
             get
             {
-                return this.internalHttpWebRequest.Headers;
+                return this.internalHttpCilent.Headers;
             }
         }
 
-        public async Task<IHttpWebResponse> GetResponseSyncOrAsync(CallState callState)
+        public CallState CallState { get; set; }
+
+        public async Task<IHttpWebResponse> GetResponseAsync()
         {
-            foreach (var headerKey in this.internalHttpWebRequest.Headers.AllKeys)
+            foreach (var headerKey in this.internalHttpCilent.Headers.Keys)
             {
-                this.keyElements["Header-" + headerKey] = this.internalHttpWebRequest.Headers[headerKey];
+                this.keyElements["Header-" + headerKey] = this.internalHttpCilent.Headers[headerKey];
             }
 
-            if (this.internalHttpWebRequest.BodyParameters != null)
+            if (this.CallState != null)
             {
-                foreach (var kvp in this.internalHttpWebRequest.BodyParameters)
+                this.keyElements["Header-CorrelationId"] = this.CallState.CorrelationId.ToString();
+            }
+
+            if (this.internalHttpCilent.BodyParameters != null)
+            {
+                foreach (var kvp in this.internalHttpCilent.BodyParameters)
                 {
                     string value = (kvp.Key == "password") ? "PASSWORD" : kvp.Value;
                     this.keyElements["Body-" + kvp.Key] = value;
@@ -121,7 +121,6 @@ namespace Test.ADAL.NET.Friend
                 key += string.Format("{0}={1},", kvp.Key, kvp.Value);
             }
 
-            Stream responseStream;
             if (IOMap.ContainsKey(key))
             {
                 string value = IOMap[key];
@@ -130,12 +129,8 @@ namespace Test.ADAL.NET.Friend
                     value = value.Substring(1);
                     return new RecorderHttpWebResponse(value, HttpStatusCode.OK);
                 }
-                else
-                {
-                    value = value.Substring(1);
-                    WebException ex = SerializationHelper.DeserializeWebException(value);
-                    throw ex;
-                }
+
+                throw SerializationHelper.DeserializeException(value.Substring(1));
             }
 
             if (RecorderSettings.Mode == RecorderMode.Replay)
@@ -145,15 +140,15 @@ namespace Test.ADAL.NET.Friend
 
             try
             {
-                IHttpWebResponse response = await this.internalHttpWebRequest.GetResponseSyncOrAsync(callState);
-                responseStream = response.GetResponseStream();
+                IHttpWebResponse response = await this.internalHttpCilent.GetResponseAsync();
+                Stream responseStream = response.ResponseStream;
                 string str = SerializationHelper.StreamToString(responseStream);
                 IOMap.Add(key, 'P' + str);
                 return new RecorderHttpWebResponse(str, HttpStatusCode.OK);
             }
-            catch (WebException ex)
+            catch (HttpRequestWrapperException ex)
             {
-                IOMap[key] = 'N' + SerializationHelper.SerializeWebException(ex);
+                IOMap[key] = 'N' + SerializationHelper.SerializeException(ex);
                 throw ex;
             }
         }

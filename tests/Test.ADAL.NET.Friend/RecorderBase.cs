@@ -26,22 +26,22 @@ namespace Test.ADAL.NET.Friend
     {
         protected static Dictionary<string, string> IOMap;
 
-        private static string DictionaryFilePath;
+        private static string dictionaryFilePath;
 
         public static void Initialize()
         {
             if (IOMap == null)
             {
-                DictionaryFilePath = RecorderSettings.Path + @"recorded_data.dat";
-                IOMap = (RecorderSettings.Mode == RecorderMode.Replay && File.Exists(DictionaryFilePath))
-                    ? SerializationHelper.DeserializeDictionary(DictionaryFilePath)
+                dictionaryFilePath = RecorderSettings.Path + @"recorded_data.dat";
+                IOMap = (RecorderSettings.Mode == RecorderMode.Replay && File.Exists(dictionaryFilePath))
+                    ? SerializationHelper.DeserializeDictionary(dictionaryFilePath)
                     : new Dictionary<string, string>();
             }
         }
 
         public static void WriteToFile()
         {
-            SerializationHelper.SerializeDictionary(IOMap, DictionaryFilePath);
+            SerializationHelper.SerializeDictionary(IOMap, dictionaryFilePath);
         }
     }
 }

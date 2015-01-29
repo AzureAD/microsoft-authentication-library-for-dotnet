@@ -49,11 +49,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private long lastResponseTime;
         private string lastEndpoint;
 
-        public void BeginClientMetricsRecord(IHttpWebRequest request, CallState callState)
+        public void BeginClientMetricsRecord(Dictionary<string, string> headers, CallState callState)
         {
             if (callState != null && callState.AuthorityType == AuthorityType.AAD)
             {
-                AddClientMetricsHeadersToRequest(request);
+                AddClientMetricsHeadersToRequest(headers);
                 metricsTimer = Stopwatch.StartNew();
             }            
         }
@@ -81,13 +81,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             lastError = (errorCodes != null) ? string.Join(",", errorCodes) : null;
         }
 
-        private static void AddClientMetricsHeadersToRequest(IHttpWebRequest request)
+        private static void AddClientMetricsHeadersToRequest(Dictionary<string, string> headers)
         {
             lock (PendingClientMetricsLock)
             {
                 if (pendingClientMetrics != null && PlatformPlugin.RequestCreationHelper.RecordClientMetrics)
                 {
-                    Dictionary<string, string> headers = new Dictionary<string, string>();
                     if (pendingClientMetrics.lastError != null)
                     {
                         headers[ClientMetricsHeaderLastError] = pendingClientMetrics.lastError;
@@ -97,7 +96,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     headers[ClientMetricsHeaderLastResponseTime] = pendingClientMetrics.lastResponseTime.ToString();
                     headers[ClientMetricsHeaderLastEndpoint] = pendingClientMetrics.lastEndpoint;
 
-                    HttpHelper.AddHeadersToRequest(request, headers);
                     pendingClientMetrics = null;
                 }
             }

@@ -49,31 +49,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 default:
                     throw new InvalidOperationException("Unexpected PromptBehavior value");
             }
-        }
-
-        public async Task<IHttpWebResponse> GetResponseWithTimeoutSyncOrAsync(HttpWebRequest request, int timeoutInMilliSeconds, CallState callState)
-        {
-            if (callState != null && callState.CallSync)
-            {
-                request.Timeout = timeoutInMilliSeconds;
-                return PlatformPlugin.HttpWebRequestFactory.CreateResponse(request.GetResponse());
-            }
-
-            Task<WebResponse> getResponseTask = request.GetResponseAsync();
-            ThreadPool.RegisterWaitForSingleObject(
-                ((IAsyncResult)getResponseTask).AsyncWaitHandle,
-                delegate(object state, bool timedOut)
-                {
-                    if (timedOut)
-                    {
-                        ((HttpWebRequest)state).Abort();
-                    }
-                },
-                request,
-                timeoutInMilliSeconds,
-                true);
-
-            return PlatformPlugin.HttpWebRequestFactory.CreateResponse(await getResponseTask);
-        }       
+        }  
     }
 }

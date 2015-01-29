@@ -216,7 +216,7 @@ namespace Test.ADAL.WinPhone.Unit
         private static void SetReplayerNetworkPlugin()
         {
             PlatformPlugin.WebUIFactory = new ReplayerWebUIFactory();
-            PlatformPlugin.HttpWebRequestFactory = new ReplayerHttpWebRequestFactory();
+            PlatformPlugin.HttpClientFactory = new ReplayerHttpClientFactory();
             PlatformPlugin.RequestCreationHelper = new ReplayerRequestCreationHelper();
         }
 

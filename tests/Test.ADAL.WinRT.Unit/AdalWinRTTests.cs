@@ -211,7 +211,7 @@ namespace Test.ADAL.WinRT.Unit
         private static void SetReplayerNetworkPlugin()
         {
             PlatformPlugin.WebUIFactory = new ReplayerWebUIFactory();
-            PlatformPlugin.HttpWebRequestFactory = new ReplayerHttpWebRequestFactory();
+            PlatformPlugin.HttpClientFactory = new ReplayerHttpClientFactory();
             PlatformPlugin.RequestCreationHelper = new ReplayerRequestCreationHelper();
         }
     }

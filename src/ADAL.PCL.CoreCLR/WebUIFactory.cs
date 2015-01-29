@@ -29,17 +29,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public IWebUI CreateAuthenticationDialog(IAuthorizationParameters parameters)
         {
             throw new NotImplementedException();
-        }
-
-        public async Task<IHttpWebResponse> GetResponseWithTimeoutSyncOrAsync(HttpWebRequest request, int timeoutInMilliSeconds, CallState callState)
-        {
-            if (callState != null && callState.CallSync)
-            {
-                throw new NotImplementedException();
-            }
-
-            Task<WebResponse> getResponseTask = request.GetResponseAsync();
-            return PlatformPlugin.HttpWebRequestFactory.CreateResponse(await getResponseTask);
-        }       
+        }   
     }
 }

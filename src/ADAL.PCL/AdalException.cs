@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return base.ToString() + string.Format("\n\tErrorCode: {0}", this.ErrorCode);
         }
 
-        private static string GetErrorMessage(string errorCode)
+        protected static string GetErrorMessage(string errorCode)
         {
             string message = null;
             switch (errorCode)

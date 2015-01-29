@@ -28,7 +28,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     interface IWebUIFactory
     {
         IWebUI CreateAuthenticationDialog(IAuthorizationParameters parameters);
-
-        Task<IHttpWebResponse> GetResponseWithTimeoutSyncOrAsync(HttpWebRequest request, int timeoutInMilliSeconds, CallState callState);
     }
 }

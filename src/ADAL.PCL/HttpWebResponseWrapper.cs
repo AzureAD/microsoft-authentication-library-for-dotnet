@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
@@ -24,38 +25,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class HttpWebResponseWrapper : IHttpWebResponse
     {
-        private WebResponse response;
-
-        public HttpWebResponseWrapper(WebResponse response)
+        public HttpWebResponseWrapper(Stream responseStream, Dictionary<string, string> headers, HttpStatusCode statusCode)
         {
-            this.response = response;
+            this.ResponseStream = responseStream;
+            this.Headers = headers;
+            this.StatusCode = statusCode;
         }
 
-        public HttpStatusCode StatusCode
-        {
-            get
-            {
-                var httpWebResponse = this.response as HttpWebResponse;
-                return (httpWebResponse != null) ? httpWebResponse.StatusCode : HttpStatusCode.NotImplemented;
-            }
-        }
+        public HttpStatusCode StatusCode { get; private set; }
 
-        public WebHeaderCollection Headers
-        {
-            get
-            {
-                return this.response.Headers;
-            }
-        }
+        public Dictionary<string, string> Headers { get; private set; }
 
-        public Stream GetResponseStream()
-        {
-            return this.response.GetResponseStream();
-        }
+        public Stream ResponseStream { get; private set; }
 
         public void Close()
         {
-            PlatformPlugin.PlatformInformation.CloseHttpWebResponse(this.response);
+            // TODO: Do we need a close method?
         }
 
         public void Dispose()
@@ -68,11 +53,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (disposing)
             {
-                if (response != null)
+                // TODO: Address the missing Dispose method issue.
+                /*if (response != null)
                 {
                     ((IDisposable)response).Dispose();
                     response = null;
-                }
+                }*/
             }
         }
     }

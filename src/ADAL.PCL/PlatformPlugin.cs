@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         static PlatformPlugin()
         {
-            HttpWebRequestFactory = new HttpWebRequestFactory();
+            HttpClientFactory = new HttpClientFactory();
             RequestCreationHelper = new RequestCreationHelper();
 
             if (PlatformPluginSwitch.DynamicallyLinkAssembly)
@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         public static IWebUIFactory WebUIFactory { get; set; }
-        public static IHttpWebRequestFactory HttpWebRequestFactory { get; set; }
+        public static IHttpClientFactory HttpClientFactory { get; set; }
         public static IRequestCreationHelper RequestCreationHelper { get; set; }
         public static LoggerBase Logger { get; set; }
         public static PlatformInformationBase PlatformInformation { get; set; }

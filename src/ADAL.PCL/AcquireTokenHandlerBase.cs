@@ -18,7 +18,6 @@
 
 using System;
 using System.Globalization;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -216,7 +215,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             AdalError.FailedToRefreshToken,
                             AdalErrorMessage.FailedToRefreshToken + ". " + serviceException.Message,
                             serviceException.ServiceErrorCodes,
-                            (WebException)serviceException.InnerException);
+                            serviceException.InnerException);
                     }
 
                     newResult = null;
@@ -230,7 +229,45 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             string uri = HttpHelper.CheckForExtraQueryParameter(this.Authenticator.TokenUri);
 
-            TokenResponse tokenResponse = await HttpHelper.SendPostRequestAndDeserializeJsonResponseAsync<TokenResponse>(uri, requestParameters, this.CallState);
+            ClientMetrics clientMetrics = new ClientMetrics();
+            TokenResponse tokenResponse = null;
+
+            try
+            {
+                IHttpClient request = PlatformPlugin.HttpClientFactory.Create(uri, this.CallState);
+                //request.ContentType = "application/x-www-form-urlencoded";
+                AdalIdHelper.AddAsHeaders(request.Headers);
+
+                clientMetrics.BeginClientMetricsRecord(request.Headers, this.CallState);
+
+                request.BodyParameters = requestParameters;
+                using (IHttpWebResponse response = await request.GetResponseAsync())
+                {
+                    clientMetrics.SetLastError(null);
+                    tokenResponse = HttpHelper.DeserializeResponse<TokenResponse>(response.ResponseStream);
+                }
+            }
+            catch (HttpRequestWrapperException ex)
+            {
+                AdalServiceException serviceEx;
+                if (ex.WebResponse != null)
+                {
+                    tokenResponse = OAuth2Response.ReadErrorResponse(ex.WebResponse);
+                    serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, tokenResponse.ErrorCodes, ex);
+                }
+                else
+                {
+                    serviceEx = new AdalServiceException(AdalError.Unknown, ex);                    
+                }
+
+                clientMetrics.SetLastError(serviceEx.ServiceErrorCodes);
+                PlatformPlugin.Logger.Error(this.CallState, serviceEx);
+                throw serviceEx;
+            }
+            finally
+            {
+                clientMetrics.EndClientMetricsRecord(ClientMetricsEndpointType.Token, this.CallState);
+            }
 
             return OAuth2Response.ParseTokenResponse(tokenResponse, this.CallState);
         }

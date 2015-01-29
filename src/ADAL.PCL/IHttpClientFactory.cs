@@ -17,13 +17,13 @@
 //----------------------------------------------------------------------
 
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    interface IHttpWebRequestFactory
+    interface IHttpClientFactory
     {
-        IHttpWebRequest Create(string uri);
-
-        IHttpWebResponse CreateResponse(WebResponse response);
+        IHttpClient Create(string uri, CallState callState);
     }
 }

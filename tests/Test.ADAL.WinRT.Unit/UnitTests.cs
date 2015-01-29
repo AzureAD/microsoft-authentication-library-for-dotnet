@@ -98,13 +98,13 @@ namespace Test.ADAL.WinRT.Unit
         public async Task TimeoutTest()
         {
             const string TestServiceUrl = "http://localhost:8080";
-            HttpWebRequestWrapper webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=0&response_code=200") { TimeoutInMilliSeconds = 10000 };
-            await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), false));  // Asynchronous
+            HttpClientWrapper webRequest = new HttpClientWrapper(TestServiceUrl + "?delay=0&response_code=200", null) { TimeoutInMilliSeconds = 10000 };
+            await webRequest.GetResponseAsync();
 
             try
             {
-                webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=0&response_code=400") { TimeoutInMilliSeconds = 10000 };
-                await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), false));
+                webRequest = new HttpClientWrapper(TestServiceUrl + "?delay=0&response_code=400", null) { TimeoutInMilliSeconds = 10000 };
+                await webRequest.GetResponseAsync();
             }
             catch (WebException ex)
             {
@@ -113,8 +113,8 @@ namespace Test.ADAL.WinRT.Unit
 
             try
             {
-                webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=10000&response_code=200") { TimeoutInMilliSeconds = 500 };
-                await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), false));  // Asynchronous
+                webRequest = new HttpClientWrapper(TestServiceUrl + "?delay=10000&response_code=200", null) { TimeoutInMilliSeconds = 500 };
+                await webRequest.GetResponseAsync();
             }
             catch (WebException ex)
             {

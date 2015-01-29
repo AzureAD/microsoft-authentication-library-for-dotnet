@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -203,9 +204,9 @@ namespace Test.ADAL.Common
         public static async Task AcquireTokenWithInvalidAuthorityTestAsync(Sts sts)
         {
             SetCredential(sts);
-            var context = new AuthenticationContextProxy("https://www.live.com/login", false);
+            var context = new AuthenticationContextProxy("https://www.outlook.com/login", false);
             AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
-            VerifyErrorResult(result, Sts.AuthenticationCanceledError, null);
+            VerifyErrorResult(result, Sts.AuthenticationUiFailedError, null);
 
             context = new AuthenticationContextProxy(sts.InvalidAuthority, false);
             result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
@@ -472,7 +473,7 @@ namespace Test.ADAL.Common
             VerifyExpiresOnAreEqual(result, result2);
         }
 
-        public static async Task WebExceptionAccessTestAsync(Sts sts)
+        public static async Task InnerExceptionAccessTestAsync(Sts sts)
         {
             SetCredential(sts);
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
@@ -482,12 +483,7 @@ namespace Test.ADAL.Common
             VerifyErrorResult(result, "unauthorized_client", "AADSTS70001");
             Verify.IsNotNull(result.Exception);
             Verify.IsNotNull(result.Exception.InnerException);
-            Verify.IsTrue(result.Exception.InnerException is WebException);
-            using (StreamReader sr = new StreamReader(((WebException)(result.Exception.InnerException)).Response.GetResponseStream()))
-            {
-                string streamBody = sr.ReadToEnd();
-                Verify.IsTrue(streamBody.Contains("AADSTS70001"));
-            }
+            Verify.IsTrue(result.Exception.InnerException is HttpRequestException);
         }
 
         public static async Task ExtraQueryParametersTestAsync(Sts sts)

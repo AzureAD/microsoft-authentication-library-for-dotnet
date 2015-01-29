@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -26,68 +27,31 @@ namespace Test.ADAL.NET.Friend
 {
     class RecorderHttpWebResponse : IHttpWebResponse
     {
-        private Stream responseStream;
-
-        private readonly HttpStatusCode statusCode;
-        private readonly WebHeaderCollection headers;
-
-        public RecorderHttpWebResponse(WebResponse response)
+        public RecorderHttpWebResponse(Stream responseStream, Dictionary<string, string> headers, HttpStatusCode statusCode)
         {
-            this.responseStream = response.GetResponseStream();
-
-            var replayerWebResponse = response as ReplayerWebResponse;
-            var httpWebResponse = response as HttpWebResponse;
-            if (replayerWebResponse != null)
-            {
-                this.statusCode = replayerWebResponse.StatusCode;
-                this.headers = replayerWebResponse.Headers;
-            }
-            else if (httpWebResponse != null)
-            {
-                this.statusCode = httpWebResponse.StatusCode;
-                this.headers = httpWebResponse.Headers;
-            }
-            else
-            {
-                this.statusCode = HttpStatusCode.NotImplemented;
-                this.headers = new WebHeaderCollection();
-            }
+            this.ResponseStream = responseStream;
+            this.Headers = headers;
+            this.StatusCode = statusCode;
         }
 
         public RecorderHttpWebResponse(string responseString, HttpStatusCode statusCode)
         {
-            this.responseStream = new MemoryStream();
-            SerializationHelper.StringToStream(responseString, responseStream);
-            responseStream.Position = 0;
-            this.statusCode = statusCode;
-            this.headers = new WebHeaderCollection();
+            this.ResponseStream = new MemoryStream();
+            SerializationHelper.StringToStream(responseString, ResponseStream);
+            ResponseStream.Position = 0;
+            this.StatusCode = statusCode;
+            this.Headers = new Dictionary<string, string>();
         }
 
-        public HttpStatusCode StatusCode
-        {
-            get
-            {
-                return this.statusCode;
-            }
-        }
+        public HttpStatusCode StatusCode { get; private set; }
 
-        public WebHeaderCollection Headers
-        {
-            get
-            {
-                return this.headers;
-            }
-        }
+        public Dictionary<string, string> Headers { get; private set; }
 
-        public Stream GetResponseStream()
-        {
-            return this.responseStream;
-        }
+        public Stream ResponseStream { get; private set; }
 
         public void Close()
         {
-            this.responseStream.Close();
-            this.responseStream = null;
+            throw new NotImplementedException();
         }
 
         public void Dispose()
@@ -100,11 +64,12 @@ namespace Test.ADAL.NET.Friend
         {
             if (disposing)
             {
-                if (this.responseStream != null)
+                // TODO: Address the missing Dispose method issue.
+                /*if (response != null)
                 {
-                    ((IDisposable)this.responseStream).Dispose();
-                    this.responseStream = null;
-                }
+                    ((IDisposable)response).Dispose();
+                    response = null;
+                }*/
             }
         }
     }

@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -262,41 +263,33 @@ namespace Test.ADAL.NET.Unit
             const string TestServiceUrl = "http://localhost:8080";
             using (WebApp.Start<TestService>(TestServiceUrl))
             {
-                HttpWebRequestWrapper webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=0&response_code=200") { TimeoutInMilliSeconds = 10000 };
-                await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), true));   // Synchronous
+                HttpClientWrapper webClient = new HttpClientWrapper(TestServiceUrl + "?delay=0&response_code=200", null) { TimeoutInMilliSeconds = 10000 };
+                await webClient.GetResponseAsync();
 
-                webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=0&response_code=200") { TimeoutInMilliSeconds = 10000 };
-                await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), false));  // Asynchronous
-
-                try
-                {
-                    webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=0&response_code=400") { TimeoutInMilliSeconds = 10000 };
-                    await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), false));
-                }
-                catch (WebException ex)
-                {
-                    Verify.AreEqual(ex.Status, WebExceptionStatus.ProtocolError);
-                }
-
+                webClient = new HttpClientWrapper(TestServiceUrl + "?delay=0&response_code=200", null) { TimeoutInMilliSeconds = 10000 };
+                await webClient.GetResponseAsync();
 
                 try
                 {
-                    webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=10000&response_code=200") { TimeoutInMilliSeconds = 500 };
-                    await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), true));   // Synchronous
+                    webClient = new HttpClientWrapper(TestServiceUrl + "?delay=0&response_code=400", null) { TimeoutInMilliSeconds = 10000 };
+                    await webClient.GetResponseAsync();
                 }
-                catch (WebException ex)
+                catch (HttpRequestWrapperException ex)
                 {
-                    Verify.AreEqual(ex.Status, WebExceptionStatus.Timeout);
+                    Verify.AreEqual(ex.WebResponse.StatusCode, HttpStatusCode.BadRequest);
                 }
+
 
                 try
                 {
-                    webRequest = new HttpWebRequestWrapper(TestServiceUrl + "?delay=10000&response_code=200") { TimeoutInMilliSeconds = 500 };
-                    await webRequest.GetResponseSyncOrAsync(new CallState(Guid.NewGuid(), false));  // Asynchronous
+                    webClient = new HttpClientWrapper(TestServiceUrl + "?delay=10000&response_code=200", null) { TimeoutInMilliSeconds = 500 };
+                    await webClient.GetResponseAsync();
                 }
-                catch (WebException ex)
+                catch (HttpRequestWrapperException ex)
                 {
-                    Verify.AreEqual(ex.Status, WebExceptionStatus.RequestCanceled);
+                    Verify.IsTrue(ex.InnerException is TaskCanceledException);
+                    var serviceException = new AdalServiceException(AdalError.Unknown, ex);
+                    Verify.AreEqual(serviceException.StatusCode, (int)HttpStatusCode.RequestTimeout);
                 }
             }
         }

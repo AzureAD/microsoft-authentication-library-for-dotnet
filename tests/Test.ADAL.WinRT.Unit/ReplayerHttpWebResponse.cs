@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -26,57 +27,24 @@ namespace Test.ADAL.WinRT.Unit
 {
     class ReplayerHttpWebResponse : IHttpWebResponse
     {
-        private Stream responseStream;
-
-        private readonly HttpStatusCode statusCode;
-
-        public ReplayerHttpWebResponse(WebResponse response)
-        {
-            this.responseStream = response.GetResponseStream();
-            HttpWebResponse httpWebResponse = response as HttpWebResponse;
-            if (httpWebResponse != null)
-            {
-                this.statusCode = httpWebResponse.StatusCode;
-            }
-            else
-            {
-                ReplayerWebResponse replayerWebResponse = response as ReplayerWebResponse;
-                this.statusCode = (replayerWebResponse != null) ? replayerWebResponse.StatusCode : HttpStatusCode.NotImplemented;
-            }
-        }
-
         public ReplayerHttpWebResponse(string responseString, HttpStatusCode statusCode)
         {
-            this.responseStream = new MemoryStream();
-            SerializationHelper.StringToStream(responseString, responseStream);
-            responseStream.Position = 0;
-            this.statusCode = statusCode;
+            this.ResponseStream = new MemoryStream();
+            SerializationHelper.StringToStream(responseString, this.ResponseStream);
+            this.ResponseStream.Position = 0;
+            this.StatusCode = statusCode;
+            this.Headers = new Dictionary<string, string>();
         }
 
-        public HttpStatusCode StatusCode
-        {
-            get
-            {
-                return this.statusCode;
-            }
-        }
+        public HttpStatusCode StatusCode { get; private set; }
 
-        public WebHeaderCollection Headers
-        {
-            get
-            {
-                return new WebHeaderCollection();
-            }
-        }
+        public Dictionary<string, string> Headers { get; private set; }
 
-        public Stream GetResponseStream()
-        {
-            return this.responseStream;
-        }
+        public Stream ResponseStream { get; private set; }
 
         public void Close()
         {
-            this.responseStream = null;
+            throw new NotImplementedException();
         }
 
         public void Dispose()
@@ -89,11 +57,11 @@ namespace Test.ADAL.WinRT.Unit
         {
             if (disposing)
             {
-                if (this.responseStream != null)
+                /*if (this.responseStream != null)
                 {
                     ((IDisposable)this.responseStream).Dispose();
                     this.responseStream = null;
-                }
+                }*/
             }
         }
     }

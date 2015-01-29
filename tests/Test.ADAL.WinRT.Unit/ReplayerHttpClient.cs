@@ -25,28 +25,29 @@ using Test.ADAL.Common;
 
 namespace Test.ADAL.WinRT.Unit
 {
-    internal class ReplayerHttpWebRequest : ReplayerBase, IHttpWebRequest
+    internal class ReplayerHttpClient : ReplayerBase, IHttpClient
     {
-        private readonly IHttpWebRequest internalHttpWebRequest;
+        private readonly IHttpClient internalHttpCilent;
         private readonly Dictionary<string, string> keyElements;
 
-        public ReplayerHttpWebRequest(string uri)
+        public ReplayerHttpClient(string uri, CallState callState)
         {
-            this.internalHttpWebRequest = (new HttpWebRequestFactory()).Create(uri);
+            this.internalHttpCilent = (new HttpClientFactory()).Create(uri, null);
             this.keyElements = new Dictionary<string, string>();
             this.keyElements["Uri"] = uri;
+            this.CallState = callState;
         }
 
         public RequestParameters BodyParameters
         {
             set
             {
-                this.internalHttpWebRequest.BodyParameters = value;
+                this.internalHttpCilent.BodyParameters = value;
             }
 
             get
             {
-                return this.internalHttpWebRequest.BodyParameters;
+                return this.internalHttpCilent.BodyParameters;
             }
         }
 
@@ -55,7 +56,7 @@ namespace Test.ADAL.WinRT.Unit
             set
             {
                 this.keyElements["Accept"] = value;
-                this.internalHttpWebRequest.Accept = value;
+                this.internalHttpCilent.Accept = value;
             }
         }
 
@@ -64,16 +65,7 @@ namespace Test.ADAL.WinRT.Unit
             set
             {
                 this.keyElements["ContentType"] = value;
-                this.internalHttpWebRequest.ContentType = value;
-            }
-        }
-
-        public string Method
-        {
-            set
-            {
-                this.keyElements["Method"] = value;
-                this.internalHttpWebRequest.Method = value;
+                this.internalHttpCilent.ContentType = value;
             }
         }
 
@@ -85,24 +77,31 @@ namespace Test.ADAL.WinRT.Unit
             }
         }
 
-        public WebHeaderCollection Headers
+        public Dictionary<string, string> Headers
         {
             get
             {
-                return this.internalHttpWebRequest.Headers;
+                return this.internalHttpCilent.Headers;
             }
         }
 
-        public async Task<IHttpWebResponse> GetResponseSyncOrAsync(CallState callState)
+        public CallState CallState { get; set; }
+
+        public async Task<IHttpWebResponse> GetResponseAsync()
         {
-            foreach (var headerKey in this.internalHttpWebRequest.Headers.AllKeys)
+            foreach (var headerKey in this.internalHttpCilent.Headers.Keys)
             {
-                this.keyElements["Header-" + headerKey] = this.internalHttpWebRequest.Headers[headerKey];
+                this.keyElements["Header-" + headerKey] = this.internalHttpCilent.Headers[headerKey];
             }
 
-            if (this.internalHttpWebRequest.BodyParameters != null)
+            if (this.CallState != null)
             {
-                foreach (var kvp in this.internalHttpWebRequest.BodyParameters)
+                this.keyElements["Header-CorrelationId"] = this.CallState.CorrelationId.ToString();
+            }
+
+            if (this.internalHttpCilent.BodyParameters != null)
+            {
+                foreach (var kvp in this.internalHttpCilent.BodyParameters)
                 {
                     string value = (kvp.Key == "password") ? "PASSWORD" : kvp.Value;
                     this.keyElements["Body-" + kvp.Key] = value;
@@ -123,10 +122,8 @@ namespace Test.ADAL.WinRT.Unit
                     value = value.Substring(1);
                     return new ReplayerHttpWebResponse(value, HttpStatusCode.OK);
                 }
-                else
-                {
-                    throw SerializationHelper.DeserializeWebException(value.Substring(1));
-                }
+
+                throw SerializationHelper.DeserializeException(value.Substring(1));
             }
 
             throw new Exception("There is no recorded response to replay");

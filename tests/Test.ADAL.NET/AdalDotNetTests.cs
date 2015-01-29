@@ -18,7 +18,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.Tracing;
 using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -309,9 +308,9 @@ namespace Test.ADAL.NET
         [Description("Test for reading WebException as inner exception")]
         [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
-        public async Task WebExceptionAccessTest()
+        public async Task InnerExceptionAccessTest()
         {
-            await AdalTests.WebExceptionAccessTestAsync(Sts);
+            await AdalTests.InnerExceptionAccessTestAsync(Sts);
         }
 
         [TestMethod]

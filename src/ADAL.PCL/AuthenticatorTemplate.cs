@@ -19,6 +19,7 @@
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
@@ -81,17 +82,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create(instanceDiscoveryEndpoint);
-                request.Method = "GET";
-                HttpHelper.AddCorrelationIdHeadersToRequest(request, callState);
-                AdalIdHelper.AddAsHeaders(request);
+                IHttpClient request = PlatformPlugin.HttpClientFactory.Create(instanceDiscoveryEndpoint, callState);
+                AdalIdHelper.AddAsHeaders(request.Headers);
 
-                clientMetrics.BeginClientMetricsRecord(request, callState);
+                clientMetrics.BeginClientMetricsRecord(request.Headers, callState);
 
-                using (var response = await request.GetResponseSyncOrAsync(callState))
+                using (var response = await request.GetResponseAsync())
                 {
-                    HttpHelper.VerifyCorrelationIdHeaderInReponse(response, callState);
-                    InstanceDiscoveryResponse discoveryResponse = HttpHelper.DeserializeResponse<InstanceDiscoveryResponse>(response);
+                    InstanceDiscoveryResponse discoveryResponse = HttpHelper.DeserializeResponse<InstanceDiscoveryResponse>(response.ResponseStream);                    
                     clientMetrics.SetLastError(null);
                     if (discoveryResponse.TenantDiscoveryEndpoint == null)
                     {
@@ -99,9 +97,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
                 }
             }
-            catch (WebException ex)
+            catch (HttpRequestWrapperException ex)
             {
-                TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
+                TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.WebResponse);
                 clientMetrics.SetLastError(tokenResponse.ErrorCodes);
 
                 if (tokenResponse.Error == "invalid_instance")

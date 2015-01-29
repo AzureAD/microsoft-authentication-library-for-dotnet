@@ -20,8 +20,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -177,9 +179,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return result;
         }
 
-        public static TokenResponse ReadErrorResponse(WebResponse response)
+        public static TokenResponse ReadErrorResponse(IHttpWebResponse webResponse)
         {
-            if (response == null)
+            if (webResponse == null)
             {
                 return new TokenResponse 
                     { 
@@ -188,7 +190,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     };
             }
 
-            Stream responseStream = response.GetResponseStream();
+            Stream responseStream = webResponse.ResponseStream;
 
             if (responseStream == null)
             {
@@ -206,7 +208,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(TokenResponse));
                 tokenResponse = ((TokenResponse)serializer.ReadObject(responseStream));
 
-                // Reset stream position to make it possible for application to read WebException body again
+                // Reset stream position to make it possible for application to read HttpRequestException body again
                 responseStream.Position = 0;
             }
             catch (SerializationException)
@@ -214,7 +216,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 responseStream.Position = 0;
                 tokenResponse = new TokenResponse
                 {
-                    Error = (((HttpWebResponse)response).StatusCode == HttpStatusCode.ServiceUnavailable) ? 
+                    Error = (webResponse.StatusCode == HttpStatusCode.ServiceUnavailable) ? 
                         AdalError.ServiceUnavailable : 
                         AdalError.Unknown,
                     ErrorDescription = HttpHelper.ReadStreamContent(responseStream)

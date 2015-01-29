@@ -18,7 +18,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -59,7 +61,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static async Task<WsTrustResponse> SendRequestAsync(Uri url, UserCredential credential, CallState callState)
         {
-            IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create(url.AbsoluteUri);
+            IHttpClient request = PlatformPlugin.HttpClientFactory.Create(url.AbsoluteUri, callState);
             request.ContentType = "application/soap+xml; charset=utf-8";
             if (credential.UserAuthType == UserAuthType.IntegratedAuth)
             {
@@ -67,26 +69,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             StringBuilder messageBuilder = BuildMessage(DefaultAppliesTo, url.AbsoluteUri, credential);
-            Dictionary<string, string> headers = new Dictionary<string, string> 
-            { 
-                { "SOAPAction", XmlNamespace.Issue.ToString() }
-            };
+            request.Headers["SOAPAction"] = XmlNamespace.Issue.ToString();
 
             WsTrustResponse wstResponse;
 
             try
             {
-                HttpHelper.SetPostRequest(request, new RequestParameters(messageBuilder), callState, headers);
-                IHttpWebResponse response = await request.GetResponseSyncOrAsync(callState);
-                wstResponse = WsTrustResponse.CreateFromResponse(response.GetResponseStream());
+                request.BodyParameters = new RequestParameters(messageBuilder);
+                IHttpWebResponse response = await request.GetResponseAsync();
+                wstResponse = WsTrustResponse.CreateFromResponse(response.ResponseStream);
             }
-            catch (WebException ex)
+            catch (HttpRequestWrapperException ex)
             {
                 string errorMessage;
 
                 try
                 {
-                    XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(ex.Response.GetResponseStream());
+                    XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(ex.WebResponse.ResponseStream);
                     errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument, callState);
                 }
                 catch (AdalException)
@@ -104,7 +103,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return wstResponse;
         }
 
-        private static void SetKerberosOption(IHttpWebRequest request)
+        private static void SetKerberosOption(IHttpClient request)
         {
             request.UseDefaultCredentials = true;
         }
