@@ -28,11 +28,57 @@ using Test.ADAL.Common;
 
 namespace Test.ADAL.NET.Friend
 {
-    class RecorderHttpClientFactory : IHttpClientFactory
+    public static class RecorderJwtId
     {
+        public static int JwtIdIndex { get; set; }
+    }
+
+    class RecorderHttpClientFactory :  RecorderBase, IHttpClientFactory
+    {
+        public RecorderHttpClientFactory()
+        {
+            Initialize();
+        }
+
         public IHttpClient Create(string uri, CallState callState)
         {
             return new RecorderHttpClient(uri, callState);
+        }
+
+        public bool AddAdditionalHeaders
+        {
+            get { return false; }
+        }
+
+        public DateTime GetJsonWebTokenValidFrom()
+        {
+            const string JsonWebTokenValidFrom = "JsonWebTokenValidFrom";
+            if (IOMap.ContainsKey(JsonWebTokenValidFrom))
+            {
+                return new DateTime(long.Parse(IOMap[JsonWebTokenValidFrom]));
+            }
+
+            DateTime result = DateTime.UtcNow;
+
+            IOMap[JsonWebTokenValidFrom] = result.Ticks.ToString();
+
+            return result;
+        }
+
+        public string GetJsonWebTokenId()
+        {
+            const string JsonWebTokenIdPrefix = "JsonWebTokenId";
+            string jsonWebTokenId = JsonWebTokenIdPrefix + RecorderJwtId.JwtIdIndex;
+            if (IOMap.ContainsKey(jsonWebTokenId))
+            {
+                return IOMap[jsonWebTokenId];
+            }
+
+            string id = Guid.NewGuid().ToString();
+
+            IOMap[jsonWebTokenId] = id;
+
+            return id;
         }
     }
 }

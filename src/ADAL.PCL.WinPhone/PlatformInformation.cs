@@ -63,10 +63,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return null;
         }
 
-        public override void CloseHttpWebResponse(WebResponse response)
-        {
-        }
-
         public override Uri ValidateRedirectUri(Uri redirectUri, CallState callState)
         {
             if (redirectUri == null)

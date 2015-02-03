@@ -38,7 +38,7 @@ namespace Test.ADAL.NET.Friend
         public async static Task<string> AcquireAccessCodeAsync(AuthenticationContext context, string resource, string clientId, Uri redirectUri, UserIdentifier userId)
         {
             var handler = new AcquireTokenInteractiveHandler(context.Authenticator, context.TokenCache, resource, clientId, redirectUri, new AuthorizationParameters(PromptBehavior.Auto, null), userId, null,
-                context.CreateWebAuthenticationDialog(new AuthorizationParameters(PromptBehavior.Auto, null)), false);
+                context.CreateWebAuthenticationDialog(new AuthorizationParameters(PromptBehavior.Auto, null)));
             handler.CallState = null;
             context.Authenticator.AuthorizationUri = context.Authority + "oauth2/authorize";
             await handler.AcquireAuthorizationAsync();

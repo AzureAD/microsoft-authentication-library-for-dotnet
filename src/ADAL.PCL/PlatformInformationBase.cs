@@ -40,8 +40,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public abstract string GetDeviceModel();
 
-        public abstract void CloseHttpWebResponse(WebResponse response);
-
         public virtual string GetAssemblyFileVersionAttribute()
         {
             return typeof(AdalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;

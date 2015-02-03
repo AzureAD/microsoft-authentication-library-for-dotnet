@@ -77,7 +77,6 @@
     <Compile Include="RecorderHttpClient.cs" />
     <Compile Include="RecorderHttpClientFactory.cs" />
     <Compile Include="RecorderHttpWebResponse.cs" />
-    <Compile Include="RecorderRequestCreationHelper.cs" />
     <Compile Include="RecorderSettings.cs" />
     <Compile Include="RecorderWebUI.cs" />
     <Compile Include="RecorderWebUIFactory.cs" />

@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        internal static WsTrustResponse CreateFromResponseDocument(XDocument responseDocument)
+        private static WsTrustResponse CreateFromResponseDocument(XDocument responseDocument)
         {
             Dictionary<string, string> tokenResponseDictionary = new Dictionary<string, string>();
 

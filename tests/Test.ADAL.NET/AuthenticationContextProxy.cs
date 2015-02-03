@@ -308,7 +308,7 @@ namespace Test.ADAL.Common
             WindowsFormsWebAuthenticationDialog webAuthenticationDialog = this.GetWebAuthenticationDialog(1000);
             if (webAuthenticationDialog != null)
             {
-                ((Form)((WindowsFormsWebAuthenticationDialog)webAuthenticationDialog).WebBrowser.Parent.Parent).Close();
+                ((Form)(webAuthenticationDialog).WebBrowser.Parent.Parent).Close();
             }
 
             uiSupply.Stop();

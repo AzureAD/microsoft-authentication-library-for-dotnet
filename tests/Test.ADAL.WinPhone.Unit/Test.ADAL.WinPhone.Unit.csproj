@@ -106,9 +106,6 @@
     <Compile Include="..\Test.ADAL.WinRT.Unit\ReplayerHttpWebResponse.cs">
       <Link>CommonWinRT\ReplayerHttpWebResponse.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.WinRT.Unit\ReplayerRequestCreationHelper.cs">
-      <Link>CommonWinRT\ReplayerRequestCreationHelper.cs</Link>
-    </Compile>
     <Compile Include="..\Test.ADAL.WinRT.Unit\ReplayerWebUI.cs">
       <Link>CommonWinRT\ReplayerWebUI.cs</Link>
     </Compile>

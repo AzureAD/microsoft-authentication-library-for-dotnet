@@ -31,14 +31,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private readonly string uri;
         private int timeoutInMilliSeconds = 30000;
-        private readonly CallState callState;
 
         public HttpClientWrapper(string uri, CallState callState)
         {
             this.uri = uri;
             this.Headers = new Dictionary<string, string>();
-            this.callState = callState;
+            this.CallState = callState;
         }
+
+        protected CallState CallState { get; set; }
 
         public RequestParameters BodyParameters { get; set; }
 
@@ -69,10 +70,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     client.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);
                 }
 
-                bool addCorrelationId = (this.callState != null && this.callState.CorrelationId != Guid.Empty);
+                bool addCorrelationId = (this.CallState != null && this.CallState.CorrelationId != Guid.Empty);
                 if (addCorrelationId)
                 {
-                    client.DefaultRequestHeaders.Add(OAuthHeader.CorrelationId, this.callState.CorrelationId.ToString());
+                    client.DefaultRequestHeaders.Add(OAuthHeader.CorrelationId, this.CallState.CorrelationId.ToString());
                     client.DefaultRequestHeaders.Add(OAuthHeader.RequestCorrelationIdInResponse, "true");                   
                 }
 
@@ -146,13 +147,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Guid correlationIdInResponse;
                     if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
                     {
-                        PlatformPlugin.Logger.Warning(callState, string.Format("Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
+                        PlatformPlugin.Logger.Warning(CallState, string.Format("Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
                     }
-                    else if (correlationIdInResponse != this.callState.CorrelationId)
+                    else if (correlationIdInResponse != this.CallState.CorrelationId)
                     {
                         PlatformPlugin.Logger.Warning(
-                            this.callState,
-                            string.Format("Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, callState.CorrelationId));
+                            this.CallState,
+                            string.Format("Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, CallState.CorrelationId));
                     }
 
                     break;

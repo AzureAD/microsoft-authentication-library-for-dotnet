@@ -112,21 +112,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentNullException("resourceUrl");
             }
 
-            IHttpWebResponse response = null;
             AuthenticationParameters authParams;
 
             try
             {
                 IHttpClient request = PlatformPlugin.HttpClientFactory.Create(resourceUrl.AbsoluteUri, null);
-                request.ContentType = "application/x-www-form-urlencoded";
-                response = await request.GetResponseAsync();
-                var ex = new AdalException(AdalError.UnauthorizedResponseExpected);
-                PlatformPlugin.Logger.Error(null, ex);
-                throw ex;
+                using (await request.GetResponseAsync())
+                {
+                    var ex = new AdalException(AdalError.UnauthorizedResponseExpected);
+                    PlatformPlugin.Logger.Error(null, ex);
+                    throw ex;                    
+                }
             }
             catch (HttpRequestWrapperException ex)
             {
-                response = ex.WebResponse;
+                IHttpWebResponse response = ex.WebResponse;
                 if (response == null)
                 {
                     var serviceEx = new AdalServiceException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);
@@ -135,13 +135,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 authParams = CreateFromUnauthorizedResponseCommon(response);
-            }
-            finally
-            {
-                if (response != null)
-                {
-                    response.Close();
-                }
             }
 
             return authParams;

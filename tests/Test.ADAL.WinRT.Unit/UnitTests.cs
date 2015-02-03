@@ -52,7 +52,7 @@ namespace Test.ADAL.WinRT.Unit
         //[Description("Test to verify forms auth parameters.")]
         public async Task IncludeFormsAuthParamsTest()
         {
-            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(new Authenticator("https://dummy.com/tenant", false), null, "resource", "clientId", new Uri("https://dummy"), new AuthorizationParameters(PromptBehavior.Auto, false), UserIdentifier.AnyUser, null, null, false);
+            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(new Authenticator("https://dummy.com/tenant", false), null, "resource", "clientId", new Uri("https://dummy"), new AuthorizationParameters(PromptBehavior.Auto, false), UserIdentifier.AnyUser, null, null);
             Assert.IsFalse(await handler.IncludeFormsAuthParamsAsync());
         }
 

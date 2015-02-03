@@ -42,11 +42,6 @@ namespace Test.ADAL.WinRT.Unit
 
         public Stream ResponseStream { get; private set; }
 
-        public void Close()
-        {
-            throw new NotImplementedException();
-        }
-
         public void Dispose()
         {
             Dispose(true);
@@ -57,11 +52,11 @@ namespace Test.ADAL.WinRT.Unit
         {
             if (disposing)
             {
-                /*if (this.responseStream != null)
+                if (this.ResponseStream != null)
                 {
-                    ((IDisposable)this.responseStream).Dispose();
-                    this.responseStream = null;
-                }*/
+                    ((IDisposable)this.ResponseStream).Dispose();
+                    this.ResponseStream = null;
+                }
             }
         }
     }

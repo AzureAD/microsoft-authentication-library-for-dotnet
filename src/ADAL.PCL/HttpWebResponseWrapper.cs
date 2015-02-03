@@ -38,11 +38,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public Stream ResponseStream { get; private set; }
 
-        public void Close()
-        {
-            // TODO: Do we need a close method?
-        }
-
         public void Dispose()
         {
             Dispose(true);
@@ -54,11 +49,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (disposing)
             {
                 // TODO: Address the missing Dispose method issue.
-                /*if (response != null)
+                if (this.ResponseStream != null)
                 {
-                    ((IDisposable)response).Dispose();
-                    response = null;
-                }*/
+                    this.ResponseStream.Dispose();
+                    this.ResponseStream = null;
+                }
             }
         }
     }

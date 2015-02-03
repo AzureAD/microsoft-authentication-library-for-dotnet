@@ -28,8 +28,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private readonly string refreshToken;
 
-        public AcquireTokenByRefreshTokenHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, string refreshToken, bool callSync)
-            : base(authenticator, tokenCache, resource ?? NullResource, clientKey, TokenSubjectType.UserPlusClient, callSync)
+        public AcquireTokenByRefreshTokenHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, string refreshToken)
+            : base(authenticator, tokenCache, resource ?? NullResource, clientKey, TokenSubjectType.UserPlusClient)
         {
             if (string.IsNullOrWhiteSpace(refreshToken))
             {

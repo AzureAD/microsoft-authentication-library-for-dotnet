@@ -47,38 +47,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string userRealmEndpoint = userRealmUri;
             userRealmEndpoint += (userName + "?api-version=1.0");
 
-            userRealmEndpoint = HttpHelper.CheckForExtraQueryParameter(userRealmEndpoint);
             PlatformPlugin.Logger.Information(callState, string.Format("Sending user realm discovery request to '{0}'", userRealmEndpoint));
 
-            UserRealmDiscoveryResponse userRealmResponse;
-            ClientMetrics clientMetrics = new ClientMetrics();
-
-            try
-            {
-                IHttpClient request = PlatformPlugin.HttpClientFactory.Create(userRealmEndpoint, callState);
-                request.Accept = "application/json";
-                AdalIdHelper.AddAsHeaders(request.Headers);
-
-                clientMetrics.BeginClientMetricsRecord(request.Headers, callState);
-
-                using (var response = await request.GetResponseAsync())
-                {
-                    userRealmResponse = HttpHelper.DeserializeResponse<UserRealmDiscoveryResponse>(response.ResponseStream);
-                    clientMetrics.SetLastError(null);
-                }
-            }
-            catch (HttpRequestWrapperException ex)
-            {
-                var serviceException = new AdalServiceException(AdalError.UserRealmDiscoveryFailed, ex);
-                clientMetrics.SetLastError(new[] { serviceException.StatusCode.ToString() });
-                throw serviceException;
-            }
-            finally
-            {
-                clientMetrics.EndClientMetricsRecord(ClientMetricsEndpointType.UserRealmDiscovery, callState);
-            }
-
-            return userRealmResponse;
+            var client = new AdalHttpClient(userRealmEndpoint, callState) { Client = { Accept = "application/json" } };
+            return await client.GetResponseAsync<UserRealmDiscoveryResponse>(ClientMetricsEndpointType.UserRealmDiscovery);
         }
     }
 }

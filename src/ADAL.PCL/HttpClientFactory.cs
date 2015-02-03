@@ -16,13 +16,31 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class HttpClientFactory : IHttpClientFactory
     {
+        public bool AddAdditionalHeaders
+        {
+            get { return true; }
+        }
+
         public IHttpClient Create(string uri, CallState callState)
         {
             return new HttpClientWrapper(uri, callState);
+        }
+
+        public DateTime GetJsonWebTokenValidFrom()
+        {
+            return DateTime.UtcNow;
+        }
+
+        public string GetJsonWebTokenId()
+        {
+            return Guid.NewGuid().ToString();
         }
     }
 }

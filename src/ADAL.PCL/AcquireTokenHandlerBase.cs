@@ -28,10 +28,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected readonly static Task CompletedTask = Task.FromResult(false);
         private readonly TokenCache tokenCache;
 
-        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, TokenSubjectType subjectType, bool callSync)
+        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, TokenSubjectType subjectType)
         {
             this.Authenticator = authenticator;
-            this.CallState = CreateCallState(this.Authenticator.CorrelationId, callSync);
+            this.CallState = CreateCallState(this.Authenticator.CorrelationId);
             PlatformPlugin.Logger.Information(this.CallState,
                 string.Format("=== Token Acquisition started:\n\tAuthority: {0}\n\tResource: {1}\n\tClientId: {2}\n\tCacheType: {3}\n\tAuthentication Target: {4}\n\t",
                 authenticator.Authority, resource, clientKey.ClientId,
@@ -136,10 +136,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        public static CallState CreateCallState(Guid correlationId, bool callSync)
+        public static CallState CreateCallState(Guid correlationId)
         {
             correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
-            return new CallState(correlationId, callSync);
+            return new CallState(correlationId);
         }
 
         protected virtual Task PostRunAsync(AuthenticationResult result)
@@ -227,49 +227,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private async Task<AuthenticationResult> SendHttpMessageAsync(RequestParameters requestParameters)
         {
-            string uri = HttpHelper.CheckForExtraQueryParameter(this.Authenticator.TokenUri);
+            var client = new AdalHttpClient(this.Authenticator.TokenUri, this.CallState) { Client = { BodyParameters = requestParameters } };
+            TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>(ClientMetricsEndpointType.Token);
 
-            ClientMetrics clientMetrics = new ClientMetrics();
-            TokenResponse tokenResponse = null;
-
-            try
-            {
-                IHttpClient request = PlatformPlugin.HttpClientFactory.Create(uri, this.CallState);
-                //request.ContentType = "application/x-www-form-urlencoded";
-                AdalIdHelper.AddAsHeaders(request.Headers);
-
-                clientMetrics.BeginClientMetricsRecord(request.Headers, this.CallState);
-
-                request.BodyParameters = requestParameters;
-                using (IHttpWebResponse response = await request.GetResponseAsync())
-                {
-                    clientMetrics.SetLastError(null);
-                    tokenResponse = HttpHelper.DeserializeResponse<TokenResponse>(response.ResponseStream);
-                }
-            }
-            catch (HttpRequestWrapperException ex)
-            {
-                AdalServiceException serviceEx;
-                if (ex.WebResponse != null)
-                {
-                    tokenResponse = OAuth2Response.ReadErrorResponse(ex.WebResponse);
-                    serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, tokenResponse.ErrorCodes, ex);
-                }
-                else
-                {
-                    serviceEx = new AdalServiceException(AdalError.Unknown, ex);                    
-                }
-
-                clientMetrics.SetLastError(serviceEx.ServiceErrorCodes);
-                PlatformPlugin.Logger.Error(this.CallState, serviceEx);
-                throw serviceEx;
-            }
-            finally
-            {
-                clientMetrics.EndClientMetricsRecord(ClientMetricsEndpointType.Token, this.CallState);
-            }
-
-            return OAuth2Response.ParseTokenResponse(tokenResponse, this.CallState);
+            return tokenResponse.GetResult();
         }
 
         private void NotifyBeforeAccessCache()

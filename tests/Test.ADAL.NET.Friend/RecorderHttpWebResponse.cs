@@ -49,11 +49,6 @@ namespace Test.ADAL.NET.Friend
 
         public Stream ResponseStream { get; private set; }
 
-        public void Close()
-        {
-            throw new NotImplementedException();
-        }
-
         public void Dispose()
         {
             Dispose(true);

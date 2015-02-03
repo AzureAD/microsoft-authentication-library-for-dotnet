@@ -60,9 +60,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // Since ADAL .NET may be used on servers, for security reasons, we do not emit device type.
             return null;
         }
-
-        public override void CloseHttpWebResponse(WebResponse response)
-        {
-        }
     }
 }

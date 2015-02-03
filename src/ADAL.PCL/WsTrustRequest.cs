@@ -18,9 +18,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Http;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -151,11 +149,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 // Timestamp the message
                 //
                 DateTime currentTime = DateTime.UtcNow;
-                string currentTimeString = DateTimeHelper.BuildTimeString(currentTime);
+                string currentTimeString = BuildTimeString(currentTime);
 
                 // Expiry is 10 minutes after creation
                 DateTime expiryTime = currentTime.AddMinutes(10);    
-                string expiryTimString = DateTimeHelper.BuildTimeString(expiryTime);
+                string expiryTimString = BuildTimeString(expiryTime);
 
                 securityHeaderBuilder.AppendFormat(
                     "<o:Security s:mustUnderstand='1' xmlns:o='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd'><u:Timestamp u:Id='_0'><u:Created>{0}</u:Created><u:Expires>{1}</u:Expires></u:Timestamp>{2}</o:Security>", 
@@ -167,6 +165,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return securityHeaderBuilder;
+        }
+
+        private static string BuildTimeString(DateTime utcTime)
+        {
+            return utcTime.ToString("yyyy-MM-ddTHH:mm:ss.068Z", CultureInfo.InvariantCulture);
         }
     }
 }

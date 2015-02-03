@@ -22,15 +22,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class CallState
     {
-        public CallState(Guid correlationId, bool callSync)
+        public CallState(Guid correlationId)
         {
             this.CorrelationId = correlationId;
-            this.CallSync = callSync;
         }
 
         public Guid CorrelationId { get; set; }
-
-        public bool CallSync { get; private set; }
 
         public AuthorityType AuthorityType { get; internal set; }
     }

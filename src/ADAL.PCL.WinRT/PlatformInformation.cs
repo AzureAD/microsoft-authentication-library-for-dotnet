@@ -80,11 +80,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return deviceInformation.SystemProductName;
         }
 
-        public override void CloseHttpWebResponse(WebResponse response)
-        {
-            // There is no Close method on WebResponse in WinRT
-        }
-
         public override async Task<bool> IsUserLocalAsync(CallState callState)
         {
             if (!UserInformation.NameAccessAllowed)

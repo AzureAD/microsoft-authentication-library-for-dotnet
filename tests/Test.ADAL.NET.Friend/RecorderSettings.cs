@@ -74,7 +74,6 @@ namespace Test.ADAL.NET.Friend
         {
             PlatformPlugin.WebUIFactory = new RecorderWebUIFactory();
             PlatformPlugin.HttpClientFactory = new RecorderHttpClientFactory();
-            PlatformPlugin.RequestCreationHelper = new RecorderRequestCreationHelper();
         }
 
         private static void ResetRecorderNetworkPlugin()

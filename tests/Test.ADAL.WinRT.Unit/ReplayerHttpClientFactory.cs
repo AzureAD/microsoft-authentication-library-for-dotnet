@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -25,11 +26,31 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.WinRT.Unit
 {
-    class ReplayerHttpClientFactory : IHttpClientFactory
+    class ReplayerHttpClientFactory : ReplayerBase, IHttpClientFactory
     {
         public IHttpClient Create(string uri, CallState callState)
         {
             return new ReplayerHttpClient(uri, callState);
+        }
+        public bool AddAdditionalHeaders
+        {
+            get { return false; }
+        }
+
+        public DateTime GetJsonWebTokenValidFrom()
+        {
+            const string JsonWebTokenValidFrom = "JsonWebTokenValidFrom";
+            if (IOMap.ContainsKey(JsonWebTokenValidFrom))
+            {
+                return new DateTime(long.Parse(IOMap[JsonWebTokenValidFrom]));
+            }
+
+            throw new InvalidOperationException("Unexpected missing dictionary key");
+        }
+
+        public string GetJsonWebTokenId()
+        {
+            throw new NotImplementedException("AcquireToken using JWT is not supported in ADAL WinRT");
         }
     }
 }

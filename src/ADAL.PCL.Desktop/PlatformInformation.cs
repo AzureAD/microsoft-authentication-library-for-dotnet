@@ -77,11 +77,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return null;
         }
 
-        public override void CloseHttpWebResponse(WebResponse response)
-        {
-            response.Close();
-        }
-
         public override async Task<bool> IsUserLocalAsync(CallState callState)
         {
             string prefix = WindowsIdentity.GetCurrent().Name.Split('\\')[0].ToUpperInvariant();

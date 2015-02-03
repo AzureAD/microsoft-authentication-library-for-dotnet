@@ -60,10 +60,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return null;
         }
-
-        public override void CloseHttpWebResponse(WebResponse response)
-        {
-            response.Close();
-        }
     }
 }

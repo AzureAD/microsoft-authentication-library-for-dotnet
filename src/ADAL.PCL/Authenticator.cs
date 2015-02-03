@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (this.IsTenantless && !string.IsNullOrWhiteSpace(tenantId))
             {
-                this.Authority = ReplaceTenantlessTenant(this.Authority, tenantId);
+                this.ReplaceTenantlessTenant(tenantId);
                 this.updatedFromTemplate = false;
             }
         }
@@ -138,15 +138,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return uri;
         }
 
-        private static string ReplaceTenantlessTenant(string authority, string tenantId)
-        {
-            var regex = new Regex(Regex.Escape(TenantlessTenantName), RegexOptions.IgnoreCase);
-            return regex.Replace(authority, tenantId, 1);
-        }
-
         private static bool IsAdfsAuthority(string firstPath)
         {
             return string.Compare(firstPath, "adfs", StringComparison.OrdinalIgnoreCase) == 0;
+        }
+
+        private void ReplaceTenantlessTenant(string tenantId)
+        {
+            var regex = new Regex(Regex.Escape(TenantlessTenantName), RegexOptions.IgnoreCase);
+            this.Authority = regex.Replace(this.Authority, tenantId, 1);
         }
     }
 }

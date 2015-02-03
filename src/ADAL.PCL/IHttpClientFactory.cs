@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -25,5 +27,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     interface IHttpClientFactory
     {
         IHttpClient Create(string uri, CallState callState);
+
+        bool AddAdditionalHeaders { get; }
+
+        DateTime GetJsonWebTokenValidFrom();
+
+        string GetJsonWebTokenId();
     }
 }

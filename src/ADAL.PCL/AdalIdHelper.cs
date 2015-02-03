@@ -53,16 +53,34 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// This class adds additional query parameters or headers to the requests sent to STS. This can help us in
     /// collecting statistics and potentially on diagnostics.
     /// </summary>
-    internal partial class AdalIdHelper
+    internal static class AdalIdHelper
     {
-        public static void AddAsQueryParameters(RequestParameters parameters)
+        public static IDictionary<string, string> GetAdalIdParameters()
         {
-            PlatformPlugin.RequestCreationHelper.AddAdalIdParameters(parameters);
-        }
+            var parameters = new Dictionary<string, string>();
 
-        public static void AddAsHeaders(Dictionary<string, string> headers)
-        {
-            PlatformPlugin.RequestCreationHelper.AddAdalIdParameters(headers);
+            parameters[AdalIdParameter.Product] = PlatformPlugin.PlatformInformation.GetProductName();
+            parameters[AdalIdParameter.Version] = GetAdalVersion();
+
+            var processorInofrmation = PlatformPlugin.PlatformInformation.GetProcessorArchitecture();
+            if (processorInofrmation != null)
+            {
+                parameters[AdalIdParameter.CpuPlatform] = processorInofrmation;
+            }
+
+            var osInformation = PlatformPlugin.PlatformInformation.GetOperatingSystem();
+            if (osInformation != null)
+            {
+                parameters[AdalIdParameter.OS] = osInformation;
+            }
+
+            var deviceInformation = PlatformPlugin.PlatformInformation.GetDeviceModel();
+            if (deviceInformation != null)
+            {
+                parameters[AdalIdParameter.DeviceModel] = deviceInformation;
+            }
+
+            return parameters;
         }
 
         public static string GetAdalVersion()
