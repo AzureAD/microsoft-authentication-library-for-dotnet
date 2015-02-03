@@ -17,10 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
@@ -79,17 +76,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public override async Task<bool> IsUserLocalAsync(CallState callState)
         {
-            string prefix = WindowsIdentity.GetCurrent().Name.Split('\\')[0].ToUpperInvariant();
-            return prefix.Equals(Environment.MachineName.ToUpperInvariant());
+            WindowsIdentity current = WindowsIdentity.GetCurrent();
+            if (current != null)
+            {
+                string prefix = WindowsIdentity.GetCurrent().Name.Split('\\')[0].ToUpperInvariant();
+                return prefix.Equals(Environment.MachineName.ToUpperInvariant());
+            }
+
+            return false;
         }
 
         public override bool IsDomainJoined()
         {
             bool returnValue = false;
-            IntPtr pDomain = IntPtr.Zero;
             try
             {
-                NativeMethods.NetJoinStatus status = NativeMethods.NetJoinStatus.NetSetupUnknownStatus;
+                NativeMethods.NetJoinStatus status;
+                IntPtr pDomain;
                 int result = NativeMethods.NetGetJoinInformation(null, out pDomain, out status);
                 if (pDomain != IntPtr.Zero)
                 {
@@ -103,14 +106,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 // ignore the exception as the result is already set to false;
             }
-            finally
-            {
-                pDomain = IntPtr.Zero;
-            }
+
             return returnValue;
         }
 
-        public override void AddPromptBehaviorQueryParameter(IAuthorizationParameters parameters, RequestParameters authorizationRequestParameters)
+        public override void AddPromptBehaviorQueryParameter(IAuthorizationParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
         {
             AuthorizationParameters authorizationParameters = (parameters as AuthorizationParameters);
             if (authorizationParameters == null)
@@ -121,17 +121,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             PromptBehavior promptBehavior = (parameters as AuthorizationParameters).PromptBehavior;
 
             // ADFS currently ignores the parameter for now.
-            if (promptBehavior == PromptBehavior.Always)
+            switch (promptBehavior)
             {
-                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
-            }
-            else if (promptBehavior == PromptBehavior.RefreshSession)
-            {
-                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
-            }
-            else if (promptBehavior == PromptBehavior.Never)
-            {
-                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
+                case PromptBehavior.Always:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
+                    break;
+                case PromptBehavior.RefreshSession:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
+                    break;
+                case PromptBehavior.Never:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
+                    break;
             }            
         }
 

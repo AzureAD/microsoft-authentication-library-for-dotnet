@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -82,5 +83,31 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string ClientId { get; private set; }
 
         public bool HasCredential { get; private set; }
+
+
+        public void AddToParameters(IDictionary<string, string> parameters)
+        {
+            if (this.ClientId != null)
+            {
+                parameters[OAuthParameter.ClientId] = this.ClientId;
+            }
+
+            if (this.Credential != null)
+            {
+                parameters[OAuthParameter.ClientSecret] = this.Credential.ClientSecret;
+            }
+            else if (this.Assertion != null)
+            {
+                parameters[OAuthParameter.ClientAssertionType] = this.Assertion.AssertionType;
+                parameters[OAuthParameter.ClientAssertion] = this.Assertion.Assertion;
+            }
+            else if (this.Certificate != null)
+            {
+                JsonWebToken jwtToken = new JsonWebToken(this.Certificate, this.Authenticator.SelfSignedJwtAudience);
+                ClientAssertion clientAssertion = jwtToken.Sign(this.Certificate);
+                parameters[OAuthParameter.ClientAssertionType] = clientAssertion.AssertionType;
+                parameters[OAuthParameter.ClientAssertion] = clientAssertion.Assertion;
+            }
+        }
     }
 }

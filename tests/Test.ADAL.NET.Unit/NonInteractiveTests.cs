@@ -18,7 +18,6 @@
 
 using System;
 using System.IO;
-using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -32,7 +31,7 @@ namespace Test.ADAL.NET.Unit
     [DeploymentItem("TestMex.xml")]
     public class NonInteractiveTests : AdalTestsBase
     {
-        // Switch this to true to run test against actual service
+        // Switch this to false to run test against actual service
         private const bool MockService = true;
 
         [TestMethod]

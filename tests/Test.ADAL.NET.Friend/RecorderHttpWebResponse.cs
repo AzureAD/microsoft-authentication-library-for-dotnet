@@ -59,12 +59,11 @@ namespace Test.ADAL.NET.Friend
         {
             if (disposing)
             {
-                // TODO: Address the missing Dispose method issue.
-                /*if (response != null)
+                if (this.ResponseStream != null)
                 {
-                    ((IDisposable)response).Dispose();
-                    response = null;
-                }*/
+                    this.ResponseStream.Dispose();
+                    this.ResponseStream = null;
+                }
             }
         }
     }

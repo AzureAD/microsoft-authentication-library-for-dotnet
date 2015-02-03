@@ -18,9 +18,6 @@
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    using System;
-    using System.Runtime.Serialization;
-
     /// <summary>
     /// The exception type thrown when a token cannot be acquired silently.
     /// </summary>

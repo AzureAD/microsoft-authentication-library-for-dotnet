@@ -165,18 +165,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.Authenticator.UpdateTenantId(result.TenantId);
         }
 
-        protected abstract void AddAditionalRequestParameters(RequestParameters requestParameters);
+        protected abstract void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters);
 
         protected virtual async Task<AuthenticationResult> SendTokenRequestAsync()
         {
-            RequestParameters requestParameters = new RequestParameters(this.Resource, this.ClientKey);
+            var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
             this.AddAditionalRequestParameters(requestParameters);
             return await this.SendHttpMessageAsync(requestParameters);
         }
 
         protected async Task<AuthenticationResult> SendTokenRequestByRefreshTokenAsync(string refreshToken)
         {
-            RequestParameters requestParameters = new RequestParameters(this.Resource, this.ClientKey);
+            var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
             requestParameters[OAuthParameter.RefreshToken] = refreshToken;
             AuthenticationResult result = await this.SendHttpMessageAsync(requestParameters);
@@ -225,7 +225,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return newResult;
         }
 
-        private async Task<AuthenticationResult> SendHttpMessageAsync(RequestParameters requestParameters)
+        private async Task<AuthenticationResult> SendHttpMessageAsync(IRequestParameters requestParameters)
         {
             var client = new AdalHttpClient(this.Authenticator.TokenUri, this.CallState) { Client = { BodyParameters = requestParameters } };
             TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>(ClientMetricsEndpointType.Token);
@@ -262,18 +262,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (result.AccessToken != null)
             {
                 string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.AccessToken);
-                string refreshTokenHash;
-                if (result.RefreshToken != null)
-                {
-                    refreshTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.RefreshToken);
-                }
-                else
-                {
-                    refreshTokenHash = "[No Refresh Token]";
-                }
+                string refreshTokenHash = result.RefreshToken != null ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.RefreshToken) : "[No Refresh Token]";
 
                 PlatformPlugin.Logger.Information(this.CallState, string.Format("=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tRefresh Token Hash: {1}\n\tExpiration Time: {2}\n\tUser Hash: {3}\n\t",
-                    accessTokenHash, refreshTokenHash, result.ExpiresOn.ToString(),
+                    accessTokenHash, refreshTokenHash, result.ExpiresOn,
                     result.UserInfo != null ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.UserInfo.UniqueId) : "null"));
             }
         }

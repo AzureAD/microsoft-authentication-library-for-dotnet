@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// Contains the results of one token acquisition operation. 
     /// </summary>
-    public sealed partial class AuthenticationResult
+    public sealed class AuthenticationResult
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
 

@@ -19,8 +19,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Android.App;
 using Android.Content;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -29,7 +27,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private static SemaphoreSlim returnedUriReady;
         private static AuthorizationResult authorizationResult;
-        private AuthorizationParameters parameters;
+        private readonly AuthorizationParameters parameters;
 
         public WebUI(IAuthorizationParameters parameters)
         {

@@ -18,7 +18,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 
@@ -28,7 +27,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public AdalHttpClient(string uri, CallState callState)
         {
-            this.Client = PlatformPlugin.HttpClientFactory.Create(this.CheckForExtraQueryParameter(uri), callState);
+            this.Client = PlatformPlugin.HttpClientFactory.Create(CheckForExtraQueryParameter(uri), callState);
             this.CallState = callState;
         }
 
@@ -107,7 +106,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private string CheckForExtraQueryParameter(string url)
+        private static string CheckForExtraQueryParameter(string url)
         {
             string extraQueryParameter = PlatformPlugin.PlatformInformation.GetEnvironmentVariable("ExtraQueryParameter");
             string delimiter = (url.IndexOf('?') > 0) ? "&" : "?";

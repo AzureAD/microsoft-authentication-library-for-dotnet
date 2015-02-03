@@ -81,10 +81,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             this.DialogResult = DialogResult.OK;
         }
 
-        protected override void OnNavigationCanceled(int statusCode)
+        protected override void OnNavigationCanceled(int inputStatusCode)
         {
-            this.statusCode = statusCode;
-            this.DialogResult = (statusCode == 0) ? DialogResult.Cancel : DialogResult.Abort;
+            this.statusCode = inputStatusCode;
+            this.DialogResult = (inputStatusCode == 0) ? DialogResult.Cancel : DialogResult.Abort;
         }
 
         private void SetBrowserZoom()

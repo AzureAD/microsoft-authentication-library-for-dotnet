@@ -17,7 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
@@ -73,7 +72,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                request.BodyParameters = new RequestParameters(messageBuilder);
+                request.BodyParameters = new StringRequestParameters(messageBuilder);
                 IHttpWebResponse response = await request.GetResponseAsync();
                 wstResponse = WsTrustResponse.CreateFromResponse(response.ResponseStream);
             }

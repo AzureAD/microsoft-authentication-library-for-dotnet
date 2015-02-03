@@ -83,7 +83,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         [DataMember]
         public string IdentityProvider { get; internal set; }
-
-        internal bool ForcePrompt { get; private set; }
     }
 }

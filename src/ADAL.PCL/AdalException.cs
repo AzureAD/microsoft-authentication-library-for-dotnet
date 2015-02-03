@@ -21,8 +21,6 @@ using System.Globalization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    using System.Runtime.Serialization;
-
     /// <summary>
     /// The exception type thrown when an error occurs during token acquisition.
     /// </summary>
@@ -109,7 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected static string GetErrorMessage(string errorCode)
         {
-            string message = null;
+            string message;
             switch (errorCode)
             {
                 case AdalError.InvalidCredentialType: 

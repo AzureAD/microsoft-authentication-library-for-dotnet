@@ -16,14 +16,10 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Net;
-using System.Net.Http;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     using System;
     using System.Net;
-    using System.Runtime.Serialization;
     using System.Threading.Tasks;
 
     /// <summary>

@@ -75,8 +75,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             public int GetExternal(out object ppDispatch)
             {
-                WebBrowser host = this.host;
-                ppDispatch = host.ObjectForScripting;
+                ppDispatch = this.host.ObjectForScripting;
                 return S_OK;
             }
             public int GetHostInfo(NativeWrapper.DOCHOSTUIINFO info)
@@ -90,7 +89,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 const int DOCHOSTUIFLAG_THEME = 0x00040000;
                 const int DOCHOSTUIFLAG_DPI_AWARE = 0x40000000;
 
-                WebBrowser host = this.host;
                 info.dwDoubleClick = 0;
                 info.dwFlags = DOCHOSTUIFLAG_NO3DOUTERBORDER | DOCHOSTUIFLAG_DISABLE_SCRIPT_INACTIVE;
 
@@ -99,7 +97,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                     info.dwFlags |= DOCHOSTUIFLAG_DPI_AWARE;
                 }
 
-                if (host.ScrollBarsEnabled)
+                if (this.host.ScrollBarsEnabled)
                 {
                     info.dwFlags |= DOCHOSTUIFLAG_FLAT_SCROLLBAR;
                 }

@@ -16,7 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -44,7 +43,7 @@ namespace Test.ADAL.NET.Friend
             this.CallState = callState;
         }
 
-        public RequestParameters BodyParameters
+        public IRequestParameters BodyParameters
         {
             set
             {
@@ -106,9 +105,9 @@ namespace Test.ADAL.NET.Friend
                 this.keyElements["Header-CorrelationId"] = this.CallState.CorrelationId.ToString();
             }
 
-            if (this.internalHttpCilent.BodyParameters != null)
+            if (this.internalHttpCilent.BodyParameters is DictionaryRequestParameters)
             {
-                foreach (var kvp in this.internalHttpCilent.BodyParameters)
+                foreach (var kvp in (DictionaryRequestParameters)this.internalHttpCilent.BodyParameters)
                 {
                     string value = (kvp.Key == "password") ? "PASSWORD" : kvp.Value;
                     this.keyElements["Body-" + kvp.Key] = value;
@@ -149,7 +148,7 @@ namespace Test.ADAL.NET.Friend
             catch (HttpRequestWrapperException ex)
             {
                 IOMap[key] = 'N' + SerializationHelper.SerializeException(ex);
-                throw ex;
+                throw;
             }
         }
     }

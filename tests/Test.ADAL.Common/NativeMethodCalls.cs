@@ -392,7 +392,7 @@ namespace Test.ADAL.Common
         /// Send key inputs one char by one char
         /// </summary>
         /// <param name="hwnd"></param>
-        /// <param name="s"></param>
+        /// <param name="input"></param>
         public static void SendString(IntPtr hwnd, string input)
         {
             //return SetWindowText(hwnd, input);

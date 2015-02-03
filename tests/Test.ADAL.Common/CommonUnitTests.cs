@@ -52,7 +52,7 @@ namespace Test.ADAL.Common
             Verify.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
 #endif
 
-            RequestParameters parameters = new RequestParameters(null, new ClientKey("client_id"));
+            var parameters = new DictionaryRequestParameters(null, new ClientKey("client_id"));
             adalParameters = AdalIdHelper.GetAdalIdParameters();
 
             Verify.AreEqual(4, adalParameters.Count);

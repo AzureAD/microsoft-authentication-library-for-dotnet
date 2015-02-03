@@ -38,7 +38,7 @@ namespace Test.ADAL.WinRT.Unit
             this.CallState = callState;
         }
 
-        public RequestParameters BodyParameters
+        public IRequestParameters BodyParameters
         {
             set
             {
@@ -99,9 +99,9 @@ namespace Test.ADAL.WinRT.Unit
                 this.keyElements["Header-CorrelationId"] = this.CallState.CorrelationId.ToString();
             }
 
-            if (this.internalHttpCilent.BodyParameters != null)
+            if (this.internalHttpCilent.BodyParameters is DictionaryRequestParameters)
             {
-                foreach (var kvp in this.internalHttpCilent.BodyParameters)
+                foreach (var kvp in (DictionaryRequestParameters)this.internalHttpCilent.BodyParameters)
                 {
                     string value = (kvp.Key == "password") ? "PASSWORD" : kvp.Value;
                     this.keyElements["Body-" + kvp.Key] = value;

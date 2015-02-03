@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// Contains authentication parameters based on unauthorized response from resource server.
     /// </summary>
-    public sealed partial class AuthenticationParameters
+    public sealed class AuthenticationParameters
     {
         private const string AuthenticateHeader = "WWW-Authenticate";
         private const string Bearer = "bearer";

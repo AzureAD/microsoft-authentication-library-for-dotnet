@@ -16,16 +16,14 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal interface IHttpClient
     {
-        RequestParameters BodyParameters { get; set; }
+        IRequestParameters BodyParameters { get; set; }
 
         string Accept { set; }
 

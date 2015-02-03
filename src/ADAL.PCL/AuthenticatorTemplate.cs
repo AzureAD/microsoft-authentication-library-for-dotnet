@@ -16,10 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Globalization;
 using System.IO;
-using System.Net;
-using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;

@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -67,23 +66,23 @@ namespace Test.ADAL.NET.Unit
             const string AdditionalParameter2 = "additional_parameter2";
             string expectedString = string.Format("client_id=client_id&{0}={1}&{2}={3}", AdditionalParameter, EncodingHelper.UrlEncode(ComplexString), AdditionalParameter2, EncodingHelper.UrlEncode(ComplexString2));
 
-            RequestParameters param = new RequestParameters(null, new ClientKey(ClientId));
+            var param = new DictionaryRequestParameters(null, new ClientKey(ClientId));
             param[AdditionalParameter] = ComplexString;
             param[AdditionalParameter2] = ComplexString2;
             Verify.AreEqual(expectedString, param.ToString());
 
-            param = new RequestParameters(null, new ClientKey(ClientId));
+            param = new DictionaryRequestParameters(null, new ClientKey(ClientId));
             param[AdditionalParameter] = ComplexString;
             param[AdditionalParameter2] = ComplexString2;
             Verify.AreEqual(expectedString, param.ToString());
 
-            param = new RequestParameters(null, new ClientKey(ClientId));
+            param = new DictionaryRequestParameters(null, new ClientKey(ClientId));
             param[AdditionalParameter] = ComplexString;
             param[AdditionalParameter2] = ComplexString2;
             Verify.AreEqual(expectedString, param.ToString());
 
-            param = new RequestParameters(new StringBuilder(expectedString));
-            Verify.AreEqual(expectedString, param.ToString());
+            var stringParam = new StringRequestParameters(new StringBuilder(expectedString));
+            Verify.AreEqual(expectedString, stringParam.ToString());
         }
 
         [TestMethod]
@@ -191,7 +190,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public void IdTokenParsingPasswordClaimsTest()
         {
-            TokenResponse tr = this.CreateTokenResponse();
+            TokenResponse tr = CreateTokenResponse();
             tr.IdTokenString = "eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiI5MDgzY2NiOC04YTQ2LTQzZTctODQzOS0xZDY5NmRmOTg0YWUiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMGJhYTY2Ni04ZGY4LTQ4ZTctOTdlNi03N2NmZDA5OTU5NjMvIiwiaWF0IjoxNDAwNTQxMzk1LCJuYmYiOjE0MDA1NDEzOTUsImV4cCI6MTQwMDU0NTU5NSwidmVyIjoiMS4wIiwidGlkIjoiMzBiYWE2NjYtOGRmOC00OGU3LTk3ZTYtNzdjZmQwOTk1OTYzIiwib2lkIjoiNGY4NTk5ODktYTJmZi00MTFlLTkwNDgtYzMyMjI0N2FjNjJjIiwidXBuIjoiYWRtaW5AYWFsdGVzdHMub25taWNyb3NvZnQuY29tIiwidW5pcXVlX25hbWUiOiJhZG1pbkBhYWx0ZXN0cy5vbm1pY3Jvc29mdC5jb20iLCJzdWIiOiJCczVxVG4xQ3YtNC10VXIxTGxBb3pOS1NRd0Fjbm4ydHcyQjlmelduNlpJIiwiZmFtaWx5X25hbWUiOiJBZG1pbiIsImdpdmVuX25hbWUiOiJBREFMVGVzdHMiLCJwd2RfZXhwIjoiMzYwMDAiLCJwd2RfdXJsIjoiaHR0cHM6Ly9jaGFuZ2VfcHdkLmNvbSJ9.";
             AuthenticationResult result = tr.GetResult();
             Verify.AreEqual(result.UserInfo.PasswordChangeUrl, "https://change_pwd.com");
@@ -203,24 +202,25 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public void IdTokenParsingNoPasswordClaimsTest()
         {
-            TokenResponse tr = this.CreateTokenResponse();
+            TokenResponse tr = CreateTokenResponse();
             tr.IdTokenString = "eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiI5MDgzY2NiOC04YTQ2LTQzZTctODQzOS0xZDY5NmRmOTg0YWUiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMGJhYTY2Ni04ZGY4LTQ4ZTctOTdlNi03N2NmZDA5OTU5NjMvIiwiaWF0IjoxNDAwNTQxMzk1LCJuYmYiOjE0MDA1NDEzOTUsImV4cCI6MTQwMDU0NTU5NSwidmVyIjoiMS4wIiwidGlkIjoiMzBiYWE2NjYtOGRmOC00OGU3LTk3ZTYtNzdjZmQwOTk1OTYzIiwib2lkIjoiNGY4NTk5ODktYTJmZi00MTFlLTkwNDgtYzMyMjI0N2FjNjJjIiwidXBuIjoiYWRtaW5AYWFsdGVzdHMub25taWNyb3NvZnQuY29tIiwidW5pcXVlX25hbWUiOiJhZG1pbkBhYWx0ZXN0cy5vbm1pY3Jvc29mdC5jb20iLCJzdWIiOiJCczVxVG4xQ3YtNC10VXIxTGxBb3pOS1NRd0Fjbm4ydHcyQjlmelduNlpJIiwiZmFtaWx5X25hbWUiOiJBZG1pbiIsImdpdmVuX25hbWUiOiJBREFMVGVzdHMifQ.";
             AuthenticationResult result = tr.GetResult();
             Verify.IsNull(result.UserInfo.PasswordChangeUrl);
             Verify.IsNull(result.UserInfo.PasswordExpiresOn);
         }
 
-        private TokenResponse CreateTokenResponse()
+        private static TokenResponse CreateTokenResponse()
         {
-            TokenResponse tr = new TokenResponse();
-            tr.AccessToken = "access_token";
-            tr.RefreshToken = "refresh_token";
-            tr.CorrelationId = Guid.NewGuid().ToString();
-            tr.Resource = "my-resource";
-            tr.TokenType = "Bearer";
-            tr.ExpiresIn = 3899;
-            tr.ExpiresOn = 1400545595;
-            return tr;
+            return new TokenResponse
+                               {
+                                   AccessToken = "access_token",
+                                   RefreshToken = "refresh_token",
+                                   CorrelationId = Guid.NewGuid().ToString(),
+                                   Resource = "my-resource",
+                                   TokenType = "Bearer",
+                                   ExpiresIn = 3899,
+                                   ExpiresOn = 1400545595
+                               };
         }
 
         [TestMethod]
@@ -342,7 +342,7 @@ namespace Test.ADAL.NET.Unit
             }
         }
 
-        private void TestUrlEncoding(string str)
+        private static void TestUrlEncoding(string str)
         {
             string encodedStr = EncodingHelper.UrlEncode(str);
 
@@ -350,18 +350,6 @@ namespace Test.ADAL.NET.Unit
             string encodedStr2 = (encodedChars == null) ? null : new string(encodedChars);
 
             Verify.AreEqual(encodedStr, encodedStr2);            
-        }
-
-        private SecureString StringToSecureString(string str)
-        {
-            var secureStr = new SecureString();
-
-            foreach (char ch in str)
-                secureStr.AppendChar(ch);
-
-            secureStr.MakeReadOnly();
-
-            return secureStr;
         }
 
         internal class TestService

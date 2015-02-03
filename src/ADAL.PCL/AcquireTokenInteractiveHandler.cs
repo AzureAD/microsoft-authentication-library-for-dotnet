@@ -26,11 +26,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         internal AuthorizationResult authorizationResult;
 
-        private Uri redirectUri;
+        private readonly Uri redirectUri;
 
-        private string redirectUriRequestParameter;
+        private readonly string redirectUriRequestParameter;
 
-        private IAuthorizationParameters authorizationParameters;
+        private readonly IAuthorizationParameters authorizationParameters;
 
         private readonly string extraQueryParameters;
 
@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             await this.Authenticator.UpdateFromTemplateAsync(this.CallState);
             return this.CreateAuthorizationUri(false);
         }
-        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
+        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.AuthorizationCode;
             requestParameters[OAuthParameter.Code] = this.authorizationResult.Code;
@@ -143,14 +143,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 loginHint = userId.Id;
             }
 
-            RequestParameters requestParameters = this.CreateAuthorizationRequest(loginHint, includeFormsAuthParam);
+            IRequestParameters requestParameters = this.CreateAuthorizationRequest(loginHint, includeFormsAuthParam);
 
             return  new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + requestParameters);
         }
 
-        private RequestParameters CreateAuthorizationRequest(string loginHint, bool includeFormsAuthParam)
+        private DictionaryRequestParameters CreateAuthorizationRequest(string loginHint, bool includeFormsAuthParam)
         {
-            RequestParameters authorizationRequestParameters = new RequestParameters(this.Resource, this.ClientKey);
+            var authorizationRequestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
             authorizationRequestParameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
 
             authorizationRequestParameters[OAuthParameter.RedirectUri] = this.redirectUriRequestParameter;

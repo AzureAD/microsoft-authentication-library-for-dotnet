@@ -18,9 +18,7 @@
 
 using System;
 using System.Threading.Tasks;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Test.ADAL.NET.Friend
 {
@@ -50,7 +48,7 @@ namespace Test.ADAL.NET.Friend
                 if (value[0] == 'P')
                 {
                     value = value.Substring(1);
-                    string[] valueSegments = value.Split(new string[] {"::"}, StringSplitOptions.None);
+                    string[] valueSegments = value.Split(new [] {"::"}, StringSplitOptions.None);
                     return new AuthorizationResult((AuthorizationStatus)Enum.Parse(typeof(AuthorizationStatus), valueSegments[0]), valueSegments[1]);
                 }               
                 

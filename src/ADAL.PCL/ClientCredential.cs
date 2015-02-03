@@ -17,7 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Security;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

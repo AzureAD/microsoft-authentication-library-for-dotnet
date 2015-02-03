@@ -17,14 +17,11 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -63,7 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             finally
             {
-                if (newRsa != null && !object.ReferenceEquals(rsa, newRsa))
+                if (newRsa != null && !ReferenceEquals(rsa, newRsa))
                 {
                     newRsa.Dispose();
                 }

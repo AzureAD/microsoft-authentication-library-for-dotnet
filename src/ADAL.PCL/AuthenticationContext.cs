@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// The AuthenticationContext class retrieves authentication tokens from Azure Active Directory and ADFS services.
     /// </summary>
-    public sealed partial class AuthenticationContext
+    public sealed class AuthenticationContext
     {
         internal Authenticator Authenticator;
 
@@ -490,10 +490,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="parameters">An object of type AuthorizationParameters which may pass additional parameters used for authorization.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters)
         {
-            return this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, UserIdentifier.AnyUser, extraQueryParameters: null);
+            return this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, UserIdentifier.AnyUser);
         }
 
         /// <summary>
@@ -508,7 +509,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId)
         {
-            return this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId: userId, extraQueryParameters: null);
+            return this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId);
         }
 
         /// <summary>
@@ -524,7 +525,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId, string extraQueryParameters)
         {
-            return this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId: userId, extraQueryParameters: extraQueryParameters);
+            return this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId, extraQueryParameters);
         }
 
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode, Uri redirectUri, ClientKey clientKey, string resource)

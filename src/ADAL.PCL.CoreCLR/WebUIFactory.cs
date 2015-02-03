@@ -17,15 +17,11 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Net;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        private AuthorizationParameters parameters;
-
         public IWebUI CreateAuthenticationDialog(IAuthorizationParameters parameters)
         {
             throw new NotImplementedException();

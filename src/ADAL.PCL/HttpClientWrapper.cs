@@ -18,9 +18,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -42,7 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected CallState CallState { get; set; }
 
-        public RequestParameters BodyParameters { get; set; }
+        public IRequestParameters BodyParameters { get; set; }
 
         public string Accept { get; set; }
 
@@ -80,22 +78,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 client.Timeout = TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds);
 
-                HttpResponseMessage responseMessage = null;
+                HttpResponseMessage responseMessage;
 
                 try
                 {
-                    HttpContent content;
-
                     if (this.BodyParameters != null)
                     {
-                        if (this.BodyParameters.HasStringParameter)
+                        HttpContent content;
+                        if (this.BodyParameters is StringRequestParameters)
                         {
 
                             content = new StringContent(this.BodyParameters.ToString(), Encoding.UTF8, this.ContentType);
                         }
                         else
                         {
-                            content = new FormUrlEncodedContent(this.BodyParameters.ToList());
+                            content = new FormUrlEncodedContent(((DictionaryRequestParameters)this.BodyParameters).ToList());
                         }
 
                         responseMessage = await client.PostAsync(uri, content);

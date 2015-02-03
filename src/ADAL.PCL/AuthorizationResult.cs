@@ -62,8 +62,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public void ParseAuthorizeResponse(string webAuthenticationResult)
         {
-            AuthorizationResult result = null;
-
             var resultUri = new Uri(webAuthenticationResult);
 
             // NOTE: The Fragment property actually contains the leading '#' character and that must be dropped

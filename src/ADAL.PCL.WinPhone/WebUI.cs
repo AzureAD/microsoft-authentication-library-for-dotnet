@@ -17,13 +17,8 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Windows.ApplicationModel.Activation;
-using Windows.Foundation.Collections;
 using Windows.Security.Authentication.Web;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -44,23 +39,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static void SetAuthorizationResultUri(WebAuthenticationResult webAuthenticationResult)
         {
-            if (webAuthenticationResult.ResponseStatus == WebAuthenticationStatus.Success)
+            switch (webAuthenticationResult.ResponseStatus)
             {
-                authorizationResult = new AuthorizationResult(AuthorizationStatus.Success, webAuthenticationResult.ResponseData);    
+                case WebAuthenticationStatus.Success:
+                    authorizationResult = new AuthorizationResult(AuthorizationStatus.Success, webAuthenticationResult.ResponseData);
+                    break;
+                case WebAuthenticationStatus.ErrorHttp:
+                    authorizationResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp, null);
+                    break;
+                case WebAuthenticationStatus.UserCancel:
+                    authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+                    break;
+                default:
+                    authorizationResult = new AuthorizationResult(AuthorizationStatus.UnknownError, null);
+                    break;
             }
-            else if (webAuthenticationResult.ResponseStatus == WebAuthenticationStatus.ErrorHttp)
-            {
-                authorizationResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp, null);
-            }
-            else if (webAuthenticationResult.ResponseStatus == WebAuthenticationStatus.UserCancel)
-            {
-                authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
-            }
-            else
-            {
-                authorizationResult = new AuthorizationResult(AuthorizationStatus.UnknownError, null);
-            }
-            
+
             returnedUriReady.Release();
         }
 

@@ -16,9 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Net;
-using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
