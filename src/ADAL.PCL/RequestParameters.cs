@@ -40,7 +40,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public RequestParameters(StringBuilder stringBuilderParameter)
         {
             this.stringBuilderParameter = stringBuilderParameter;
+            this.HasStringParameter = true;
         }
+
+        public bool HasStringParameter { get; private set; }
 
         public string ExtraQueryParameter { get; set; }
 

@@ -23,6 +23,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -83,9 +84,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 try
                 {
+                    HttpContent content;
+
                     if (this.BodyParameters != null)
                     {
-                        var content = new FormUrlEncodedContent(this.BodyParameters.ToList());
+                        if (this.BodyParameters.HasStringParameter)
+                        {
+
+                            content = new StringContent(this.BodyParameters.ToString(), Encoding.UTF8, this.ContentType);
+                        }
+                        else
+                        {
+                            content = new FormUrlEncodedContent(this.BodyParameters.ToList());
+                        }
+
                         responseMessage = await client.PostAsync(uri, content);
                     }
                     else

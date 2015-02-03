@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static async Task<WsTrustResponse> SendRequestAsync(Uri url, UserCredential credential, CallState callState)
         {
             IHttpClient request = PlatformPlugin.HttpClientFactory.Create(url.AbsoluteUri, callState);
-            request.ContentType = "application/soap+xml; charset=utf-8";
+            request.ContentType = "application/soap+xml";
             if (credential.UserAuthType == UserAuthType.IntegratedAuth)
             {
                 SetKerberosOption(request);
