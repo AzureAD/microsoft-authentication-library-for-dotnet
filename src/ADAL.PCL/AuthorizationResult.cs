@@ -62,8 +62,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public void ParseAuthorizeResponse(string webAuthenticationResult)
         {
-            AuthorizationResult result = null;
-
             var resultUri = new Uri(webAuthenticationResult);
 
             // NOTE: The Fragment property actually contains the leading '#' character and that must be dropped
@@ -74,14 +72,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 // Remove the leading '?' first
                 Dictionary<string, string> response = EncodingHelper.ParseKeyValueList(resultData.Substring(1), '&', true, null);
 
-                if (response.ContainsKey(OAuthReservedClaim.Code))
+                if (response.ContainsKey(TokenResponseClaim.Code))
                 {
-                    this.Code = response[OAuthReservedClaim.Code];
+                    this.Code = response[TokenResponseClaim.Code];
                 }
-                else if (response.ContainsKey(OAuthReservedClaim.Error))
+                else if (response.ContainsKey(TokenResponseClaim.Error))
                 {
-                    this.Error = response[OAuthReservedClaim.Error];
-                    this.ErrorDescription = response.ContainsKey(OAuthReservedClaim.ErrorDescription) ? response[OAuthReservedClaim.ErrorDescription] : null;
+                    this.Error = response[TokenResponseClaim.Error];
+                    this.ErrorDescription = response.ContainsKey(TokenResponseClaim.ErrorDescription) ? response[TokenResponseClaim.ErrorDescription] : null;
                     this.Status = AuthorizationStatus.ProtocolError;
                 }
                 else

@@ -16,12 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Net;
-using System.Threading.Tasks;
-
-using Windows.System.Threading;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class WebUIFactory : IWebUIFactory
@@ -29,25 +23,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public IWebUI CreateAuthenticationDialog(IAuthorizationParameters parameters)
         {
             return new WebUI(parameters);
-        }
-
-        public async Task<IHttpWebResponse> GetResponseWithTimeoutSyncOrAsync(HttpWebRequest request, int timeoutInMilliSeconds, CallState callState)
-        {
-            var timer = Windows.System.Threading.ThreadPoolTimer.CreateTimer(
-                            delegate
-                            {
-                                request.Abort();
-                            },
-                            TimeSpan.FromMilliseconds(timeoutInMilliSeconds));
-
-            try
-            {
-                return PlatformPlugin.HttpWebRequestFactory.CreateResponse(await request.GetResponseAsync());
-            }
-            finally
-            {
-                timer.Cancel();
-            }
-        }       
+        }   
     }
 }

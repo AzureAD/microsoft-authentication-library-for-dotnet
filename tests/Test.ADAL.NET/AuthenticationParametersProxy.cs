@@ -18,6 +18,7 @@
 
 using System;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -37,9 +38,9 @@ namespace Test.ADAL.Common
             return new AuthenticationParametersProxy { Authority = parameters.Authority, Resource = parameters.Resource };
         }
 
-        internal static AuthenticationParametersProxy CreateFromUnauthorizedResponse(HttpWebResponse response)
+        internal static async Task<AuthenticationParametersProxy> CreateFromUnauthorizedResponseAsync(HttpResponseMessage responseMessage)
         {
-            AuthenticationParameters parameters = AuthenticationParameters.CreateFromUnauthorizedResponse(response);
+            AuthenticationParameters parameters = await AuthenticationParameters.CreateFromUnauthorizedResponseAsync(responseMessage);
             return new AuthenticationParametersProxy { Authority = parameters.Authority, Resource = parameters.Resource };
         }
     }

@@ -82,23 +82,20 @@
     <Compile Include="ClientKey.cs" />
     <Compile Include="ClientMetrics.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="DateTimeHelper.cs" />
-    <Compile Include="HttpHelper.cs" />
-    <Compile Include="HttpWebRequestFactory.cs" />
-    <Compile Include="HttpWebRequestWrapper.cs" />
-    <Compile Include="HttpWebResponseFactory.cs" />
+    <Compile Include="HttpClientWrapper.cs" />
+    <Compile Include="HttpClientFactory.cs" />
+    <Compile Include="HttpRequestWrapperException.cs" />
     <Compile Include="HttpWebResponseWrapper.cs" />
     <Compile Include="IAuthorizationParameters.cs" />
     <Compile Include="ICryptographyHelper.cs" />
-    <Compile Include="IHttpWebRequest.cs" />
-    <Compile Include="IHttpWebRequestFactory.cs" />
+    <Compile Include="IdToken.cs" />
+    <Compile Include="IHttpClient.cs" />
+    <Compile Include="IHttpClientFactory.cs" />
     <Compile Include="IHttpWebResponse.cs" />
-    <Compile Include="IRequestCreationHelper.cs" />
     <Compile Include="JsonWebToken.cs" />
-    <Compile Include="JsonWebTokenConstants.cs" />
     <Compile Include="LoggerBase.cs" />
     <Compile Include="MexParser.cs" />
-    <Compile Include="OAuth2Response.cs" />
+    <Compile Include="TokenResponse.cs" />
     <Compile Include="OAuthConstants.cs" />
     <Compile Include="PlatformInformationBase.cs" />
     <Compile Include="IWebUI.cs" />
@@ -106,8 +103,10 @@
     <Compile Include="IWebUIFactory.cs" />
     <Compile Include="PlatformPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RequestCreationHelper.cs" />
     <Compile Include="RequestParameters.cs" />
+    <Compile Include="AdalHttpClient.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TokenCache.cs" />
     <Compile Include="TokenCacheItem.cs" />
     <Compile Include="TokenCacheKey.cs" />

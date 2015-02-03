@@ -16,10 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Net;
-using System.Threading.Tasks;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.WinRT.Unit
@@ -29,11 +25,6 @@ namespace Test.ADAL.WinRT.Unit
         public IWebUI CreateAuthenticationDialog(IAuthorizationParameters parameters)
         {
             return new ReplayerWebUI(parameters);
-        }
-
-        public Task<IHttpWebResponse> GetResponseWithTimeoutSyncOrAsync(HttpWebRequest request, int timeoutInMilliSeconds, CallState callState)
-        {
-            throw new NotImplementedException();
         }
     }
 }

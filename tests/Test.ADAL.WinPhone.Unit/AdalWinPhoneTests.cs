@@ -216,13 +216,12 @@ namespace Test.ADAL.WinPhone.Unit
         private static void SetReplayerNetworkPlugin()
         {
             PlatformPlugin.WebUIFactory = new ReplayerWebUIFactory();
-            PlatformPlugin.HttpWebRequestFactory = new ReplayerHttpWebRequestFactory();
-            PlatformPlugin.RequestCreationHelper = new ReplayerRequestCreationHelper();
+            PlatformPlugin.HttpClientFactory = new ReplayerHttpClientFactory();
         }
 
         class TestPlatformInformation : PlatformInformation
         {
-            public override void AddPromptBehaviorQueryParameter(IAuthorizationParameters parameters, RequestParameters authorizationRequestParameters)
+            public override void AddPromptBehaviorQueryParameter(IAuthorizationParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
             {
                 // Do not add prompt=login to the query to be able to use the mock dictionary created by Test.ADAL.NET.
             }            

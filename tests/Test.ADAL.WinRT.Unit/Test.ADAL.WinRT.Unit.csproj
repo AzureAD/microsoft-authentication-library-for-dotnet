@@ -93,10 +93,9 @@
     <Compile Include="AdalWinRTTests.cs" />
     <Compile Include="AuthenticationContextProxy.cs" />
     <Compile Include="ReplayerBase.cs" />
-    <Compile Include="ReplayerHttpWebRequest.cs" />
-    <Compile Include="ReplayerHttpWebRequestFactory.cs" />
+    <Compile Include="ReplayerHttpClient.cs" />
+    <Compile Include="ReplayerHttpClientFactory.cs" />
     <Compile Include="ReplayerHttpWebResponse.cs" />
-    <Compile Include="ReplayerRequestCreationHelper.cs" />
     <Compile Include="ReplayerWebUI.cs" />
     <Compile Include="ReplayerWebUIFactory.cs" />
     <Compile Include="SerializationHelper.cs" />

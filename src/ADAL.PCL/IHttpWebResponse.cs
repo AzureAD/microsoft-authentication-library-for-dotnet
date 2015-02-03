@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
@@ -26,10 +27,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         HttpStatusCode StatusCode { get; }
 
-        WebHeaderCollection Headers { get; }
-        
-        Stream GetResponseStream();
+        Dictionary<string, string> Headers { get; }
 
-        void Close();
+        Stream ResponseStream { get; }
     }
 }

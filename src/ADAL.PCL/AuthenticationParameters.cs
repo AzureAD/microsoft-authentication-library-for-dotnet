@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -27,7 +28,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// Contains authentication parameters based on unauthorized response from resource server.
     /// </summary>
-    public sealed partial class AuthenticationParameters
+    public sealed class AuthenticationParameters
     {
         private const string AuthenticateHeader = "WWW-Authenticate";
         private const string Bearer = "bearer";
@@ -58,11 +59,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Creates authentication parameters from the response received from the response received from the resource. This method expects the response to have unauthorized status and
         /// WWW-Authenticate header containing authentication parameters.</summary>
-        /// <param name="response">Response received from the resource.</param>
+        /// <param name="responseMessage">Response received from the resource (e.g. via an http call using HttpClient).</param>
         /// <returns>AuthenticationParameters object containing authentication parameters</returns>
-        public static AuthenticationParameters CreateFromUnauthorizedResponse(HttpWebResponse response)
+
+        public static async Task<AuthenticationParameters> CreateFromUnauthorizedResponseAsync(HttpResponseMessage responseMessage)
         {
-            return CreateFromUnauthorizedResponseCommon(PlatformPlugin.HttpWebRequestFactory.CreateResponse(response));
+            return CreateFromUnauthorizedResponseCommon(await HttpClientWrapper.CreateResponseAsync(responseMessage));
         }
 
         /// <summary>
@@ -105,28 +107,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static async Task<AuthenticationParameters> CreateFromResourceUrlCommonAsync(Uri resourceUrl)
         {
-            CallState callState = new CallState(Guid.NewGuid(), false);
-
             if (resourceUrl == null)
             {
                 throw new ArgumentNullException("resourceUrl");
             }
 
-            IHttpWebResponse response = null;
             AuthenticationParameters authParams;
 
             try
             {
-                IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create(resourceUrl.AbsoluteUri);
-                request.ContentType = "application/x-www-form-urlencoded";
-                response = await request.GetResponseSyncOrAsync(callState);
-                var ex = new AdalException(AdalError.UnauthorizedResponseExpected);
-                PlatformPlugin.Logger.Error(null, ex);
-                throw ex;
+                IHttpClient request = PlatformPlugin.HttpClientFactory.Create(resourceUrl.AbsoluteUri, null);
+                using (await request.GetResponseAsync())
+                {
+                    var ex = new AdalException(AdalError.UnauthorizedResponseExpected);
+                    PlatformPlugin.Logger.Error(null, ex);
+                    throw ex;                    
+                }
             }
-            catch (WebException ex)
+            catch (HttpRequestWrapperException ex)
             {
-                response = PlatformPlugin.HttpWebRequestFactory.CreateResponse(ex.Response);
+                IHttpWebResponse response = ex.WebResponse;
                 if (response == null)
                 {
                     var serviceEx = new AdalServiceException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);
@@ -135,13 +135,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 authParams = CreateFromUnauthorizedResponseCommon(response);
-            }
-            finally
-            {
-                if (response != null)
-                {
-                    response.Close();
-                }
             }
 
             return authParams;
@@ -157,7 +150,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AuthenticationParameters authParams;
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                if (response.Headers.AllKeys.Contains(AuthenticateHeader))
+                if (response.Headers.Keys.Contains(AuthenticateHeader))
                 {
                     authParams = CreateFromResponseAuthenticateHeader(response.Headers[AuthenticateHeader]);
                 }

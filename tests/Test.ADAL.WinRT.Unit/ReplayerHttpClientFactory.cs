@@ -18,20 +18,23 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.WinRT.Unit
 {
-    class ReplayerRequestCreationHelper : ReplayerBase, IRequestCreationHelper
+    class ReplayerHttpClientFactory : ReplayerBase, IHttpClientFactory
     {
-        public bool RecordClientMetrics
+        public IHttpClient Create(string uri, CallState callState)
+        {
+            return new ReplayerHttpClient(uri, callState);
+        }
+        public bool AddAdditionalHeaders
         {
             get { return false; }
-        }
-
-        public void AddAdalIdParameters(IDictionary<string, string> parameters)
-        {
-            
         }
 
         public DateTime GetJsonWebTokenValidFrom()

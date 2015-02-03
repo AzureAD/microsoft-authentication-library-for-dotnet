@@ -16,25 +16,23 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Net;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal interface IHttpWebRequest
+    internal interface IHttpClient
     {
-        RequestParameters BodyParameters { get; set; }
+        IRequestParameters BodyParameters { get; set; }
 
         string Accept { set; }
 
         string ContentType { set; }
 
-        string Method { set; }
-
         bool UseDefaultCredentials { set; }
 
-        WebHeaderCollection Headers { get; }
+        Dictionary<string, string> Headers { get; }
 
-        Task<IHttpWebResponse> GetResponseSyncOrAsync(CallState callState);
+        Task<IHttpWebResponse> GetResponseAsync();
     }
 }

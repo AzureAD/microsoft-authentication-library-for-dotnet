@@ -177,7 +177,7 @@ namespace Test.ADAL.Common.Unit
 
             try
             {
-                var result = await acWithLocalCache.AcquireTokenAsync(resource, clientId, credential);
+                await acWithLocalCache.AcquireTokenAsync(resource, clientId, credential);
                 Verify.Fail("Exception expected");
             }
             catch (AdalException adae)
@@ -188,7 +188,7 @@ namespace Test.ADAL.Common.Unit
             try
             {
                 AuthenticationContext acWithDefaultCache = new AuthenticationContext(authority, false);
-                var result = await acWithDefaultCache.AcquireTokenAsync(resource, clientId, credential);
+                await acWithDefaultCache.AcquireTokenAsync(resource, clientId, credential);
                 Verify.Fail("Exception expected");
             }
             catch (AdalException adae)
@@ -461,7 +461,6 @@ namespace Test.ADAL.Common.Unit
 
         public static void CheckPublicGetSets()
         {
-            DateTimeOffset now = DateTimeOffset.UtcNow;
             TokenCacheKey tokenCacheKey = new TokenCacheKey("Authority", "Resource", "ClientId", TokenSubjectType.User, "UniqueId", "DisplayableId");
 
             Verify.IsTrue(tokenCacheKey.Authority == "Authority");
@@ -474,7 +473,7 @@ namespace Test.ADAL.Common.Unit
 
         private static void VerifyCacheItemCount(TokenCache cache, int expectedCount)
         {
-            Verify.AreEqual(cache.Count, expectedCount, null);
+            Verify.AreEqual(cache.Count, expectedCount);
         }
 
         private static void VerifyCacheItems(TokenCache cache, int expectedCount, TokenCacheKey firstKey)
@@ -569,10 +568,9 @@ namespace Test.ADAL.Common.Unit
 
         private static bool RemoveFromDictionary(TokenCache tokenCache, TokenCacheKey key)
         {
-            bool result;
             tokenCache.OnBeforeAccess(null);
             tokenCache.OnBeforeWrite(null);
-            result = tokenCache.tokenCacheDictionary.Remove(key);
+            bool result = tokenCache.tokenCacheDictionary.Remove(key);
             tokenCache.HasStateChanged = true;
             tokenCache.OnAfterAccess(null);
 

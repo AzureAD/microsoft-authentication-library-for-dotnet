@@ -25,6 +25,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System.Net.Http;
 
 namespace Test.ADAL.Common
 {
@@ -86,30 +87,20 @@ namespace Test.ADAL.Common
                 SetCredential(sts);
                 var context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheType.Null);
                 var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
-                AdalTests.VerifySuccessResult(sts, result);
+                VerifySuccessResult(sts, result);
 
                 // ADAL WinRT does not support AuthenticationParameters.CreateFromUnauthorizedResponse API
-                if (TestType != Common.TestType.WinRT)
+                if (TestType != TestType.WinRT)
                 {
-                    try
+                    using (HttpClient client = new HttpClient())
                     {
-                        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(RelyingPartyWithDiscoveryUrl);
-                        request.ContentType = "application/x-www-form-urlencoded";
-                        response = (HttpWebResponse)request.GetResponse();
-                    }
-                    catch (WebException ex)
-                    {
-                        response = (HttpWebResponse)ex.Response;
-                        authParams = AuthenticationParametersProxy.CreateFromUnauthorizedResponse(response);
-                    }
-                    finally
-                    {
-                        response.Close();
+                        HttpResponseMessage responseMessage = await client.GetAsync(RelyingPartyWithDiscoveryUrl);
+                        authParams = await AuthenticationParametersProxy.CreateFromUnauthorizedResponseAsync(responseMessage);
                     }
 
                     context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheType.Null);
                     result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
-                    AdalTests.VerifySuccessResult(sts, result);
+                    VerifySuccessResult(sts, result);
                 }
 
                 authParams = await AuthenticationParametersProxy.CreateFromResourceUrlAsync(new Uri(RelyingPartyWithDiscoveryUrl));

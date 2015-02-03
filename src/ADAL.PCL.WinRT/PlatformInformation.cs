@@ -17,12 +17,8 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Networking;
 using Windows.Networking.Connectivity;
@@ -80,11 +76,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return deviceInformation.SystemProductName;
         }
 
-        public override void CloseHttpWebResponse(WebResponse response)
-        {
-            // There is no Close method on WebResponse in WinRT
-        }
-
         public override async Task<bool> IsUserLocalAsync(CallState callState)
         {
             if (!UserInformation.NameAccessAllowed)
@@ -114,7 +105,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return NetworkInformation.GetHostNames().Any(entry => entry.Type == HostNameType.DomainName);
         }
 
-        public override void AddPromptBehaviorQueryParameter(IAuthorizationParameters parameters, RequestParameters authorizationRequestParameters)
+        public override void AddPromptBehaviorQueryParameter(IAuthorizationParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
         {
             AuthorizationParameters authorizationParameters = (parameters as AuthorizationParameters);
             if (authorizationParameters == null)
@@ -125,17 +116,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             PromptBehavior promptBehavior = (parameters as AuthorizationParameters).PromptBehavior;
 
             // ADFS currently ignores the parameter for now.
-            if (promptBehavior == PromptBehavior.Always)
+            switch (promptBehavior)
             {
-                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
-            }
-            else if (promptBehavior == PromptBehavior.RefreshSession)
-            {
-                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
-            }
-            else if (promptBehavior == PromptBehavior.Never)
-            {
-                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
+                case PromptBehavior.Always:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
+                    break;
+                case PromptBehavior.RefreshSession:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
+                    break;
+                case PromptBehavior.Never:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
+                    break;
             }
         }
 

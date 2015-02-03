@@ -16,9 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Globalization;
 using System.IO;
-using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
@@ -75,51 +73,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             instanceDiscoveryEndpoint = instanceDiscoveryEndpoint.Replace("{host}", host);
             instanceDiscoveryEndpoint = instanceDiscoveryEndpoint.Replace("{tenant}", tenant);
 
-            instanceDiscoveryEndpoint = HttpHelper.CheckForExtraQueryParameter(instanceDiscoveryEndpoint);
-
-            ClientMetrics clientMetrics = new ClientMetrics();
-
             try
             {
-                IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create(instanceDiscoveryEndpoint);
-                request.Method = "GET";
-                HttpHelper.AddCorrelationIdHeadersToRequest(request, callState);
-                AdalIdHelper.AddAsHeaders(request);
+                var client = new AdalHttpClient(instanceDiscoveryEndpoint, callState);
+                InstanceDiscoveryResponse discoveryResponse = await client.GetResponseAsync<InstanceDiscoveryResponse>(ClientMetricsEndpointType.InstanceDiscovery);
 
-                clientMetrics.BeginClientMetricsRecord(request, callState);
-
-                using (var response = await request.GetResponseSyncOrAsync(callState))
+                if (discoveryResponse.TenantDiscoveryEndpoint == null)
                 {
-                    HttpHelper.VerifyCorrelationIdHeaderInReponse(response, callState);
-                    InstanceDiscoveryResponse discoveryResponse = HttpHelper.DeserializeResponse<InstanceDiscoveryResponse>(response);
-                    clientMetrics.SetLastError(null);
-                    if (discoveryResponse.TenantDiscoveryEndpoint == null)
-                    {
-                        throw new AdalException(AdalError.AuthorityNotInValidList);
-                    }
+                    throw new AdalException(AdalError.AuthorityNotInValidList);
                 }
             }
-            catch (WebException ex)
+            catch (AdalServiceException ex)
             {
-                TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
-                clientMetrics.SetLastError(tokenResponse.ErrorCodes);
-
-                if (tokenResponse.Error == "invalid_instance")
-                {
-                    throw new AdalServiceException(AdalError.AuthorityNotInValidList, ex);
-                }
-                else
-                {
-                    throw new AdalServiceException(
-                        AdalError.AuthorityValidationFailed,
-                        string.Format(CultureInfo.InvariantCulture, "{0}. {1}: {2}", AdalErrorMessage.AuthorityValidationFailed, tokenResponse.Error, tokenResponse.ErrorDescription),
-                        tokenResponse.ErrorCodes,
-                        ex);
-                }
-            }
-            finally
-            {
-                clientMetrics.EndClientMetricsRecord(ClientMetricsEndpointType.InstanceDiscovery, callState);
+                throw new AdalException((ex.ErrorCode == "invalid_instance") ? AdalError.AuthorityNotInValidList : AdalError.AuthorityValidationFailed, ex);
             }
         }
 

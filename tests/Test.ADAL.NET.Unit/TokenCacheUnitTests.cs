@@ -16,7 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

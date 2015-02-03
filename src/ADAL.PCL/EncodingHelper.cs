@@ -53,28 +53,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return message;
         }
 
-        public static void AddKeyValueStringsWithUrlEncoding(StringBuilder messageBuilder, Dictionary<string, string> keyValuePairs)
-        {
-            foreach (KeyValuePair<string, string> kvp in keyValuePairs)
-            {
-                AddKeyValueString(messageBuilder, UrlEncode(kvp.Key), UrlEncode(kvp.Value));
-            }
-        }
-
-        public static void AddStringWithUrlEncoding(StringBuilder messageBuilder, string key, char[] value)
-        {
-            char[] encodedValue = null;
-            try
-            {
-                encodedValue = UrlEncode(value);
-                AddKeyValueString(messageBuilder, UrlEncode(key), encodedValue);
-            }
-            finally
-            {
-                encodedValue.SecureClear();
-            }
-        }
-
         public static void AddKeyValueString(StringBuilder messageBuilder, string key, string value)
         {
             AddKeyValueString(messageBuilder, key, value.ToCharArray());

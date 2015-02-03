@@ -16,12 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Net;
-using System.Threading.Tasks;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Test.ADAL.NET.Friend
 {
@@ -30,12 +25,6 @@ namespace Test.ADAL.NET.Friend
         public IWebUI CreateAuthenticationDialog(IAuthorizationParameters parameters)
         {
             return new RecorderWebUI(parameters);
-        }
-
-        public Task<IHttpWebResponse> GetResponseWithTimeoutSyncOrAsync(HttpWebRequest request, int timeoutInMilliSeconds, CallState callState)
-        {
-            IWebUIFactory webUiFactory = new WebUIFactory();
-            return webUiFactory.GetResponseWithTimeoutSyncOrAsync(request, timeoutInMilliSeconds, callState);
         }
     }
 }

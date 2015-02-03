@@ -23,8 +23,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class AcquireTokenSilentHandler : AcquireTokenHandlerBase
     {
-        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserIdentifier userId, bool callSync)
-            : base(authenticator, tokenCache, resource, clientKey, clientKey.HasCredential ? TokenSubjectType.UserPlusClient : TokenSubjectType.User, callSync)
+        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserIdentifier userId)
+            : base(authenticator, tokenCache, resource, clientKey, clientKey.HasCredential ? TokenSubjectType.UserPlusClient : TokenSubjectType.User)
         {
             if (userId == null)
             {
@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             throw new AdalSilentTokenAcquisitionException();
         }
 
-        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
+        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {            
         }
     }

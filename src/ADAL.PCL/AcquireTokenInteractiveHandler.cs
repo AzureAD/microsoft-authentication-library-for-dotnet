@@ -26,11 +26,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         internal AuthorizationResult authorizationResult;
 
-        private Uri redirectUri;
+        private readonly Uri redirectUri;
 
-        private string redirectUriRequestParameter;
+        private readonly string redirectUriRequestParameter;
 
-        private IAuthorizationParameters authorizationParameters;
+        private readonly IAuthorizationParameters authorizationParameters;
 
         private readonly string extraQueryParameters;
 
@@ -38,8 +38,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly UserIdentifier userId;
 
-        public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId, string extraQueryParameters, IWebUI webUI, bool callSync)
-            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User, callSync)
+        public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId, string extraQueryParameters, IWebUI webUI)
+            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User)
         {
             this.redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
 
@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             await this.Authenticator.UpdateFromTemplateAsync(this.CallState);
             return this.CreateAuthorizationUri(false);
         }
-        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
+        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.AuthorizationCode;
             requestParameters[OAuthParameter.Code] = this.authorizationResult.Code;
@@ -143,17 +143,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 loginHint = userId.Id;
             }
 
-            RequestParameters requestParameters = this.CreateAuthorizationRequest(loginHint, includeFormsAuthParam);
+            IRequestParameters requestParameters = this.CreateAuthorizationRequest(loginHint, includeFormsAuthParam);
 
-            var authorizationUri = new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + requestParameters);
-            authorizationUri = new Uri(HttpHelper.CheckForExtraQueryParameter(authorizationUri.AbsoluteUri));
-
-            return authorizationUri;
+            return  new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + requestParameters);
         }
 
-        private RequestParameters CreateAuthorizationRequest(string loginHint, bool includeFormsAuthParam)
+        private DictionaryRequestParameters CreateAuthorizationRequest(string loginHint, bool includeFormsAuthParam)
         {
-            RequestParameters authorizationRequestParameters = new RequestParameters(this.Resource, this.ClientKey);
+            var authorizationRequestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
             authorizationRequestParameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
 
             authorizationRequestParameters[OAuthParameter.RedirectUri] = this.redirectUriRequestParameter;
@@ -178,7 +175,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 authorizationRequestParameters[OAuthParameter.FormsAuth] = OAuthValue.FormsAuth;
             }
 
-            AdalIdHelper.AddAsQueryParameters(authorizationRequestParameters);
+            if (PlatformPlugin.HttpClientFactory.AddAdditionalHeaders)
+            {
+                IDictionary<string, string> adalIdParameters = AdalIdHelper.GetAdalIdParameters();
+                foreach (KeyValuePair<string, string> kvp in adalIdParameters)
+                {
+                    authorizationRequestParameters[kvp.Key] = kvp.Value;
+                }
+            }
 
             if (!string.IsNullOrWhiteSpace(extraQueryParameters))
             {

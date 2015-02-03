@@ -231,7 +231,6 @@ namespace Test.ADAL.Common
 
             try
             {
-                AuthenticationResult result = null;
                 using (Timer abortTest = new Timer(10 * 1000)) // 10 seconds for test execution
                 {
                     using (Timer uiSupply = new Timer(250))
@@ -308,7 +307,7 @@ namespace Test.ADAL.Common
             WindowsFormsWebAuthenticationDialog webAuthenticationDialog = this.GetWebAuthenticationDialog(1000);
             if (webAuthenticationDialog != null)
             {
-                ((Form)((WindowsFormsWebAuthenticationDialog)webAuthenticationDialog).WebBrowser.Parent.Parent).Close();
+                ((Form)(webAuthenticationDialog).WebBrowser.Parent.Parent).Close();
             }
 
             uiSupply.Stop();

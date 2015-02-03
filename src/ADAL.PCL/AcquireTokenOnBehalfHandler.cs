@@ -17,7 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -25,8 +24,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private readonly UserAssertion userAssertion;
 
-        public AcquireTokenOnBehalfHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserAssertion userAssertion, bool callSync)
-            : base(authenticator, tokenCache, resource, clientKey, TokenSubjectType.UserPlusClient, callSync)
+        public AcquireTokenOnBehalfHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserAssertion userAssertion)
+            : base(authenticator, tokenCache, resource, clientKey, TokenSubjectType.UserPlusClient)
         {
             if (userAssertion == null)
             {
@@ -39,7 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.SupportADFS = true;
         }
 
-        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
+        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.JwtBearer;
             requestParameters[OAuthParameter.Assertion] = this.userAssertion.Assertion;

@@ -97,17 +97,14 @@
     <Compile Include="..\Test.ADAL.WinRT.Unit\ReplayerBase.cs">
       <Link>CommonWinRT\ReplayerBase.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.WinRT.Unit\ReplayerHttpWebRequest.cs">
-      <Link>CommonWinRT\ReplayerHttpWebRequest.cs</Link>
+    <Compile Include="..\Test.ADAL.WinRT.Unit\ReplayerHttpClient.cs">
+      <Link>CommonWinRT\ReplayerHttpClient.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.WinRT.Unit\ReplayerHttpWebRequestFactory.cs">
-      <Link>CommonWinRT\ReplayerHttpWebRequestFactory.cs</Link>
+    <Compile Include="..\Test.ADAL.WinRT.Unit\ReplayerHttpClientFactory.cs">
+      <Link>CommonWinRT\ReplayerHttpClientFactory.cs</Link>
     </Compile>
     <Compile Include="..\Test.ADAL.WinRT.Unit\ReplayerHttpWebResponse.cs">
       <Link>CommonWinRT\ReplayerHttpWebResponse.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.ADAL.WinRT.Unit\ReplayerRequestCreationHelper.cs">
-      <Link>CommonWinRT\ReplayerRequestCreationHelper.cs</Link>
     </Compile>
     <Compile Include="..\Test.ADAL.WinRT.Unit\ReplayerWebUI.cs">
       <Link>CommonWinRT\ReplayerWebUI.cs</Link>

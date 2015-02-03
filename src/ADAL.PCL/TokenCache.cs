@@ -47,14 +47,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         // We do not want to return near expiry tokens, this is why we use this hard coded setting to refresh tokens which are close to expiration.
         private const int ExpirationMarginInMinutes = 5;
 
-        private volatile bool hasStateChanged = false; 
+        private volatile bool hasStateChanged; 
 
         static TokenCache()
         {
-            DefaultShared = new TokenCache();
-
-            DefaultShared.BeforeAccess = DefaultTokenCache_BeforeAccess;
-            DefaultShared.AfterAccess = DefaultTokenCache_AfterAccess;
+            DefaultShared = new TokenCache
+                            {
+                                BeforeAccess = DefaultTokenCache_BeforeAccess, 
+                                AfterAccess = DefaultTokenCache_AfterAccess
+                            };
 
             DefaultTokenCache_BeforeAccess(null);
         }
@@ -205,11 +206,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
             this.OnBeforeAccess(args);
 
-            List<TokenCacheItem> items = new List<TokenCacheItem>();
-            foreach (KeyValuePair<TokenCacheKey, AuthenticationResult> kvp in this.tokenCacheDictionary)
-            {
-                items.Add(new TokenCacheItem(kvp.Key, kvp.Value));
-            }
+            List<TokenCacheItem> items = this.tokenCacheDictionary.Select(kvp => new TokenCacheItem(kvp.Key, kvp.Value)).ToList();
 
             this.OnAfterAccess(args);
 
@@ -374,26 +371,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             int resourceValuesCount = resourceSpecificItems.Count();
             KeyValuePair<TokenCacheKey, AuthenticationResult>? returnValue = null;
-            if (resourceValuesCount == 1)
+            switch (resourceValuesCount)
             {
-                PlatformPlugin.Logger.Information(callState, "An item matching the requested resource was found in the cache");
-                returnValue = resourceSpecificItems.First();
-            }
-            else if (resourceValuesCount == 0)
-            {
-                // There are no resource specific tokens.  Choose any of the MRRT tokens if there are any.
-                List<KeyValuePair<TokenCacheKey, AuthenticationResult>> mrrtItems =
-                    items.Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
-
-                if (mrrtItems.Any())
+                case 1:
+                    PlatformPlugin.Logger.Information(callState, "An item matching the requested resource was found in the cache");
+                    returnValue = resourceSpecificItems.First();
+                    break;
+                case 0:
                 {
-                    returnValue = mrrtItems.First();
-                    PlatformPlugin.Logger.Information(callState, "A Multi Resource Refresh Token for a different resource was found which can be used");
+                    // There are no resource specific tokens.  Choose any of the MRRT tokens if there are any.
+                    List<KeyValuePair<TokenCacheKey, AuthenticationResult>> mrrtItems =
+                        items.Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
+
+                    if (mrrtItems.Any())
+                    {
+                        returnValue = mrrtItems.First();
+                        PlatformPlugin.Logger.Information(callState, "A Multi Resource Refresh Token for a different resource was found which can be used");
+                    }
                 }
-            }
-            else
-            {
-                throw new AdalException(AdalError.MultipleTokensMatched);
+                    break;
+                default:
+                    throw new AdalException(AdalError.MultipleTokensMatched);
             }
 
             return returnValue;

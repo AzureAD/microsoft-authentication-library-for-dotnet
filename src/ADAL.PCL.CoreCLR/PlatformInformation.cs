@@ -16,14 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -59,10 +51,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             // Since ADAL .NET may be used on servers, for security reasons, we do not emit device type.
             return null;
-        }
-
-        public override void CloseHttpWebResponse(WebResponse response)
-        {
         }
     }
 }

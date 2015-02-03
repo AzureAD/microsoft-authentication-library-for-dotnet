@@ -19,10 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Runtime.Serialization.Json;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -49,13 +45,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private long lastResponseTime;
         private string lastEndpoint;
 
-        public void BeginClientMetricsRecord(IHttpWebRequest request, CallState callState)
+        public void BeginClientMetricsRecord(CallState callState)
         {
             if (callState != null && callState.AuthorityType == AuthorityType.AAD)
             {
-                AddClientMetricsHeadersToRequest(request);
                 metricsTimer = Stopwatch.StartNew();
-            }            
+            }
+        }
+
+        public Dictionary<string, string> GetPreviousRequestRecord(CallState callState)
+        {
+            Dictionary<string, string> parameters;
+            if (callState != null && callState.AuthorityType == AuthorityType.AAD)
+            {
+                parameters = GetClientMetricsParameters();
+            }
+            else
+            {
+                parameters = new Dictionary<string, string>();
+            }
+
+            return parameters;
         }
 
         public void EndClientMetricsRecord(string endpoint, CallState callState)
@@ -81,26 +91,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             lastError = (errorCodes != null) ? string.Join(",", errorCodes) : null;
         }
 
-        private static void AddClientMetricsHeadersToRequest(IHttpWebRequest request)
+        private static Dictionary<string, string> GetClientMetricsParameters()
         {
+            var parameters = new Dictionary<string, string>();
             lock (PendingClientMetricsLock)
             {
-                if (pendingClientMetrics != null && PlatformPlugin.RequestCreationHelper.RecordClientMetrics)
+                if (pendingClientMetrics != null)
                 {
-                    Dictionary<string, string> headers = new Dictionary<string, string>();
                     if (pendingClientMetrics.lastError != null)
                     {
-                        headers[ClientMetricsHeaderLastError] = pendingClientMetrics.lastError;
+                        parameters[ClientMetricsHeaderLastError] = pendingClientMetrics.lastError;
                     }
 
-                    headers[ClientMetricsHeaderLastRequest] = pendingClientMetrics.lastCorrelationId.ToString();
-                    headers[ClientMetricsHeaderLastResponseTime] = pendingClientMetrics.lastResponseTime.ToString();
-                    headers[ClientMetricsHeaderLastEndpoint] = pendingClientMetrics.lastEndpoint;
+                    parameters[ClientMetricsHeaderLastRequest] = pendingClientMetrics.lastCorrelationId.ToString();
+                    parameters[ClientMetricsHeaderLastResponseTime] = pendingClientMetrics.lastResponseTime.ToString();
+                    parameters[ClientMetricsHeaderLastEndpoint] = pendingClientMetrics.lastEndpoint;
 
-                    HttpHelper.AddHeadersToRequest(request, headers);
                     pendingClientMetrics = null;
                 }
             }
+
+            return parameters;
         }
     }
 }

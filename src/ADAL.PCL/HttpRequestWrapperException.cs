@@ -17,28 +17,17 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal static class DateTimeHelper
+    internal class HttpRequestWrapperException : Exception
     {
-        public static long ConvertToTimeT(DateTime time)
+        public HttpRequestWrapperException(IHttpWebResponse webResponse, Exception innerException) 
+            : base(string.Empty, innerException)
         {
-            var startTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            TimeSpan diff = time - startTime;
-            return (long)(diff.TotalSeconds);
+            this.WebResponse = webResponse;
         }
 
-        public static DateTime ConvertFromTimeT(long seconds)
-        {
-            var startTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            return DateTime.SpecifyKind(startTime.AddSeconds(seconds), DateTimeKind.Utc);
-        }
-
-        public static string BuildTimeString(DateTime utcTime)
-        {
-            return utcTime.ToString("yyyy-MM-ddTHH:mm:ss.068Z", CultureInfo.InvariantCulture);
-        }
+        public IHttpWebResponse WebResponse { get; private set; }
     }
 }

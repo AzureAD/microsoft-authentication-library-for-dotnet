@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -17,18 +17,17 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal interface IRequestCreationHelper
+    interface IHttpClientFactory
     {
-        bool RecordClientMetrics { get; }
+        IHttpClient Create(string uri, CallState callState);
 
-        void AddAdalIdParameters(IDictionary<string, string> parameters);
+        bool AddAdditionalHeaders { get; }
 
         DateTime GetJsonWebTokenValidFrom();
-        
+
         string GetJsonWebTokenId();
     }
 }

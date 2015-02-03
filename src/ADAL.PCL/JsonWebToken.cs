@@ -24,6 +24,36 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    internal class JsonWebTokenConstants
+    {
+        public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
+
+        public const string HeaderType = "JWT";
+
+        internal class Algorithms
+        {
+            public const string RsaSha256 = "RS256";
+            public const string None = "none";
+        }
+
+        internal class ReservedClaims
+        {
+            public const string Audience = "aud";
+            public const string Issuer = "iss";
+            public const string Subject = "sub";
+            public const string NotBefore = "nbf";
+            public const string ExpiresOn = "exp";
+            public const string JwtIdentifier = "jti";
+        }
+
+        internal class ReservedHeaderParameters
+        {
+            public const string Algorithm = "alg";
+            public const string Type = "typ";
+            public const string X509CertificateThumbprint = "x5t";
+        }
+    }   
+
     internal class JsonWebToken
     {
         // (64K) This is an arbitrary large value for the token length. We can adjust it as needed.
@@ -33,20 +63,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public JsonWebToken(ClientAssertionCertificate certificate, string audience)
         {
-            DateTime validFrom = PlatformPlugin.RequestCreationHelper.GetJsonWebTokenValidFrom();
+            DateTime validFrom = PlatformPlugin.HttpClientFactory.GetJsonWebTokenValidFrom();
 
             DateTime validTo = validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds);
 
             this.payload = new JWTPayload
-                {
-                    Audience = audience,
-                    Issuer = certificate.ClientId,
-                    ValidFrom = DateTimeHelper.ConvertToTimeT(validFrom),
-                    ValidTo = DateTimeHelper.ConvertToTimeT(validTo),
-                    Subject = certificate.ClientId
-                };
-
-            this.payload.JwtIdentifier = PlatformPlugin.RequestCreationHelper.GetJsonWebTokenId();
+                           {
+                               Audience = audience,
+                               Issuer = certificate.ClientId,
+                               ValidFrom = ConvertToTimeT(validFrom),
+                               ValidTo = ConvertToTimeT(validTo),
+                               Subject = certificate.ClientId,
+                               JwtIdentifier = PlatformPlugin.HttpClientFactory.GetJsonWebTokenId()
+                           };
         }
 
         public ClientAssertion Sign(ClientAssertionCertificate credential)
@@ -89,6 +118,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return EncodeToJson(header);
         }
 
+        private static long ConvertToTimeT(DateTime time)
+        {
+            var startTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            TimeSpan diff = time - startTime;
+            return (long)(diff.TotalSeconds);
+        }
+
         private string Encode(ClientAssertionCertificate credential)
         {
             // Header segment
@@ -97,16 +133,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string encodedHeader = EncodeSegment(jsonHeader);
 
             // Payload segment
-            string jsonPayload = this.EncodePayloadToJson();
+            string jsonPayload = EncodeToJson(this.payload);
 
             string encodedPayload = EncodeSegment(jsonPayload);
 
             return string.Concat(encodedHeader, ".", encodedPayload);
-        }
-
-        private string EncodePayloadToJson()
-        {
-            return EncodeToJson(this.payload);
         }
 
         [DataContract]

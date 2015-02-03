@@ -17,29 +17,14 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Net;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        private AuthorizationParameters parameters;
-
         public IWebUI CreateAuthenticationDialog(IAuthorizationParameters parameters)
         {
             throw new NotImplementedException();
-        }
-
-        public async Task<IHttpWebResponse> GetResponseWithTimeoutSyncOrAsync(HttpWebRequest request, int timeoutInMilliSeconds, CallState callState)
-        {
-            if (callState != null && callState.CallSync)
-            {
-                throw new NotImplementedException();
-            }
-
-            Task<WebResponse> getResponseTask = request.GetResponseAsync();
-            return PlatformPlugin.HttpWebRequestFactory.CreateResponse(await getResponseTask);
-        }       
+        }   
     }
 }

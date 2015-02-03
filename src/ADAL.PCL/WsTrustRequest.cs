@@ -17,8 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Net;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -59,34 +58,31 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static async Task<WsTrustResponse> SendRequestAsync(Uri url, UserCredential credential, CallState callState)
         {
-            IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create(url.AbsoluteUri);
-            request.ContentType = "application/soap+xml; charset=utf-8";
+            IHttpClient request = PlatformPlugin.HttpClientFactory.Create(url.AbsoluteUri, callState);
+            request.ContentType = "application/soap+xml";
             if (credential.UserAuthType == UserAuthType.IntegratedAuth)
             {
                 SetKerberosOption(request);
             }
 
             StringBuilder messageBuilder = BuildMessage(DefaultAppliesTo, url.AbsoluteUri, credential);
-            Dictionary<string, string> headers = new Dictionary<string, string> 
-            { 
-                { "SOAPAction", XmlNamespace.Issue.ToString() }
-            };
+            request.Headers["SOAPAction"] = XmlNamespace.Issue.ToString();
 
             WsTrustResponse wstResponse;
 
             try
             {
-                HttpHelper.SetPostRequest(request, new RequestParameters(messageBuilder), callState, headers);
-                IHttpWebResponse response = await request.GetResponseSyncOrAsync(callState);
-                wstResponse = WsTrustResponse.CreateFromResponse(response.GetResponseStream());
+                request.BodyParameters = new StringRequestParameters(messageBuilder);
+                IHttpWebResponse response = await request.GetResponseAsync();
+                wstResponse = WsTrustResponse.CreateFromResponse(response.ResponseStream);
             }
-            catch (WebException ex)
+            catch (HttpRequestWrapperException ex)
             {
                 string errorMessage;
 
                 try
                 {
-                    XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(ex.Response.GetResponseStream());
+                    XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(ex.WebResponse.ResponseStream);
                     errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument, callState);
                 }
                 catch (AdalException)
@@ -104,7 +100,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return wstResponse;
         }
 
-        private static void SetKerberosOption(IHttpWebRequest request)
+        private static void SetKerberosOption(IHttpClient request)
         {
             request.UseDefaultCredentials = true;
         }
@@ -152,11 +148,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 // Timestamp the message
                 //
                 DateTime currentTime = DateTime.UtcNow;
-                string currentTimeString = DateTimeHelper.BuildTimeString(currentTime);
+                string currentTimeString = BuildTimeString(currentTime);
 
                 // Expiry is 10 minutes after creation
                 DateTime expiryTime = currentTime.AddMinutes(10);    
-                string expiryTimString = DateTimeHelper.BuildTimeString(expiryTime);
+                string expiryTimString = BuildTimeString(expiryTime);
 
                 securityHeaderBuilder.AppendFormat(
                     "<o:Security s:mustUnderstand='1' xmlns:o='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd'><u:Timestamp u:Id='_0'><u:Created>{0}</u:Created><u:Expires>{1}</u:Expires></u:Timestamp>{2}</o:Security>", 
@@ -168,6 +164,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return securityHeaderBuilder;
+        }
+
+        private static string BuildTimeString(DateTime utcTime)
+        {
+            return utcTime.ToString("yyyy-MM-ddTHH:mm:ss.068Z", CultureInfo.InvariantCulture);
         }
     }
 }

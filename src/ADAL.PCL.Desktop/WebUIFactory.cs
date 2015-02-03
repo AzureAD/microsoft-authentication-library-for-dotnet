@@ -17,11 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Net;
-using System.Threading;
-
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -29,9 +25,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private AuthorizationParameters parameters;
 
-        public IWebUI CreateAuthenticationDialog(IAuthorizationParameters parameters)
+        public IWebUI CreateAuthenticationDialog(IAuthorizationParameters inputParameters)
         {
-            this.parameters = parameters as AuthorizationParameters;
+            this.parameters = inputParameters as AuthorizationParameters;
             if (this.parameters == null)
             {
                 throw new ArgumentException("parameters should be of type AuthorizationParameters", "parameters");
@@ -49,31 +45,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 default:
                     throw new InvalidOperationException("Unexpected PromptBehavior value");
             }
-        }
-
-        public async Task<IHttpWebResponse> GetResponseWithTimeoutSyncOrAsync(HttpWebRequest request, int timeoutInMilliSeconds, CallState callState)
-        {
-            if (callState != null && callState.CallSync)
-            {
-                request.Timeout = timeoutInMilliSeconds;
-                return PlatformPlugin.HttpWebRequestFactory.CreateResponse(request.GetResponse());
-            }
-
-            Task<WebResponse> getResponseTask = request.GetResponseAsync();
-            ThreadPool.RegisterWaitForSingleObject(
-                ((IAsyncResult)getResponseTask).AsyncWaitHandle,
-                delegate(object state, bool timedOut)
-                {
-                    if (timedOut)
-                    {
-                        ((HttpWebRequest)state).Abort();
-                    }
-                },
-                request,
-                timeoutInMilliSeconds,
-                true);
-
-            return PlatformPlugin.HttpWebRequestFactory.CreateResponse(await getResponseTask);
-        }       
+        }  
     }
 }

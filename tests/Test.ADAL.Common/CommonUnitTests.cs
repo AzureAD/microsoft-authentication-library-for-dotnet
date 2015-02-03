@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.Common
@@ -35,34 +37,34 @@ namespace Test.ADAL.Common
 
         public static void AdalIdTest()
         {
-            IHttpWebRequest request = PlatformPlugin.HttpWebRequestFactory.Create("https://test");
-            AdalIdHelper.AddAsHeaders(request);
+            IHttpClient request = PlatformPlugin.HttpClientFactory.Create("https://test", null);
+            var adalParameters = AdalIdHelper.GetAdalIdParameters();
 
-            Verify.AreEqual(4, request.Headers.Count);
-            Verify.IsNotNull(request.Headers[AdalIdParameter.Product]);
-            Verify.IsNotNull(request.Headers[AdalIdParameter.Version]);
-            Verify.IsNotNull(request.Headers[AdalIdParameter.CpuPlatform]);
+            Verify.AreEqual(4, adalParameters.Count);
+            Verify.IsNotNull(adalParameters[AdalIdParameter.Product]);
+            Verify.IsNotNull(adalParameters[AdalIdParameter.Version]);
+            Verify.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
 #if TEST_ADAL_WINRT_UNIT
-            Verify.IsNull(request.Headers[AdalIdParameter.OS]);
-            Verify.IsNotNull(request.Headers[AdalIdParameter.DeviceModel]);
+            Verify.IsFalse(adalParameters.ContainsKey(AdalIdParameter.OS));
+            Verify.IsNotNull(adalParameters[AdalIdParameter.DeviceModel]);
 #else
-            Verify.IsNotNull(request.Headers[AdalIdParameter.OS]);
-            Verify.IsNull(request.Headers[AdalIdParameter.DeviceModel]);
+            Verify.IsNotNull(adalParameters[AdalIdParameter.OS]);
+            Verify.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
 #endif
 
-            RequestParameters parameters = new RequestParameters(null, new ClientKey("client_id"));
-            AdalIdHelper.AddAsQueryParameters(parameters);
+            var parameters = new DictionaryRequestParameters(null, new ClientKey("client_id"));
+            adalParameters = AdalIdHelper.GetAdalIdParameters();
 
-            Verify.AreEqual(5, parameters.Count);
-            Verify.IsNotNull(parameters[AdalIdParameter.Product]);
-            Verify.IsNotNull(parameters[AdalIdParameter.Version]);
-            Verify.IsNotNull(parameters[AdalIdParameter.CpuPlatform]);
+            Verify.AreEqual(4, adalParameters.Count);
+            Verify.IsNotNull(adalParameters[AdalIdParameter.Product]);
+            Verify.IsNotNull(adalParameters[AdalIdParameter.Version]);
+            Verify.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
 #if TEST_ADAL_WINRT_UNIT
-            Verify.IsFalse(parameters.ContainsKey(AdalIdParameter.OS));
-            Verify.IsNotNull(parameters[AdalIdParameter.DeviceModel]);
+            Verify.IsFalse(adalParameters.ContainsKey(AdalIdParameter.OS));
+            Verify.IsNotNull(adalParameters[AdalIdParameter.DeviceModel]);
 #else
-            Verify.IsNotNull(parameters[AdalIdParameter.OS]);
-            Verify.IsFalse(parameters.ContainsKey(AdalIdParameter.DeviceModel));
+            Verify.IsNotNull(adalParameters[AdalIdParameter.OS]);
+            Verify.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
 #endif
         }
     }

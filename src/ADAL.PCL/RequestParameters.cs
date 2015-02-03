@@ -17,62 +17,31 @@
 //----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.IO;
-using System.Security;
 using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class RequestParameters : Dictionary<string, string>
+    internal interface IRequestParameters
     {
-        private readonly StringBuilder stringBuilderParameter;
+    }
 
-        public RequestParameters(string resource, ClientKey clientKey)
+    internal class DictionaryRequestParameters : Dictionary<string, string>, IRequestParameters
+    {
+        public DictionaryRequestParameters(string resource, ClientKey clientKey)
         {
             if (!string.IsNullOrWhiteSpace(resource))
             {
                 this[OAuthParameter.Resource] = resource;
             }
 
-            this.AddClientKey(clientKey);    
-        }
-
-        public RequestParameters(StringBuilder stringBuilderParameter)
-        {
-            this.stringBuilderParameter = stringBuilderParameter;
+            clientKey.AddToParameters(this);    
         }
 
         public string ExtraQueryParameter { get; set; }
 
         public override string ToString()
         {
-            return this.ToStringBuilder().ToString();
-        }
-
-        public void WriteToStream(Stream stream)
-        {
-            StringBuilder stringBuilder = this.ToStringBuilder();
-            byte[] data = null;
-
-            try
-            {
-                data = stringBuilder.ToByteArray();
-                stream.Write(data, 0, data.Length);
-            }
-            finally
-            {
-                data.SecureClear();
-                stringBuilder.SecureClear();
-            }
-        }
-
-        private StringBuilder ToStringBuilder()
-        {
             StringBuilder messageBuilder = new StringBuilder();
-            if (this.stringBuilderParameter != null)
-            {
-                messageBuilder.Append(this.stringBuilderParameter);
-            }
             
             foreach (KeyValuePair<string, string> kvp in this)
             {
@@ -84,32 +53,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 messageBuilder.Append('&' + this.ExtraQueryParameter);
             }
 
-            return messageBuilder;
+            return messageBuilder.ToString();
+        }
+    }
+
+    internal class StringRequestParameters : IRequestParameters
+    {
+        private readonly StringBuilder parameter;
+
+        public StringRequestParameters(StringBuilder stringBuilderParameter)
+        {
+            this.parameter = stringBuilderParameter;
         }
 
-        private void AddClientKey(ClientKey clientKey)
+        public override string ToString()
         {
-            if (clientKey.ClientId != null)
-            {
-                this[OAuthParameter.ClientId] = clientKey.ClientId;
-            }
-
-            if (clientKey.Credential != null)
-            {
-                this[OAuthParameter.ClientSecret] = clientKey.Credential.ClientSecret;
-            }
-            else if (clientKey.Assertion != null)
-            {
-                this[OAuthParameter.ClientAssertionType] = clientKey.Assertion.AssertionType;
-                this[OAuthParameter.ClientAssertion] = clientKey.Assertion.Assertion;
-            }
-            else if (clientKey.Certificate != null)
-            {
-                JsonWebToken jwtToken = new JsonWebToken(clientKey.Certificate, clientKey.Authenticator.SelfSignedJwtAudience);
-                ClientAssertion clientAssertion = jwtToken.Sign(clientKey.Certificate);
-                this[OAuthParameter.ClientAssertionType] = clientAssertion.AssertionType;
-                this[OAuthParameter.ClientAssertion] = clientAssertion.Assertion;
-            }
+            return this.parameter.ToString();
         }
     }
 }

@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     timeoutInMilliSeconds,
                     true);
 
-                return PlatformPlugin.HttpWebRequestFactory.CreateResponse(await getResponseTask);
+                return PlatformPlugin.HttpClientFactory.CreateResponse(await getResponseTask);
             }
             catch (Exception ex)
             {

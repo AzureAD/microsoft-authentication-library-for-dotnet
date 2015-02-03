@@ -17,17 +17,10 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Android.Runtime;
-using Android.Views;
 using Android.Webkit;
-using Android.Widget;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -83,7 +76,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this.callback = callback;
             }
 
-            public Intent ReturnIntent { get; set; }
+            public Intent ReturnIntent { get; private set; }
 
             public override void OnLoadResource(WebView view, string url)
             {
@@ -98,16 +91,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             public override bool ShouldOverrideUrlLoading(WebView view, String url)
             {
                 return false;
-            }
-
-            public override WebResourceResponse ShouldInterceptRequest(WebView view, string url)
-            {
-                if (url.StartsWith(callback))
-                {
-                    return base.ShouldInterceptRequest(view, url);
-                }
-
-                return base.ShouldInterceptRequest(view, url);
             }
 
             public override void OnPageFinished(WebView view, string url)

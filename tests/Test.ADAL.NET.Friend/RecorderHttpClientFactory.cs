@@ -17,7 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.NET.Friend
@@ -27,28 +26,21 @@ namespace Test.ADAL.NET.Friend
         public static int JwtIdIndex { get; set; }
     }
 
-    class RecorderRequestCreationHelper : RecorderBase, IRequestCreationHelper
+    class RecorderHttpClientFactory :  RecorderBase, IHttpClientFactory
     {
-        private readonly IRequestCreationHelper internalRequestCreationHelper;
-
-        static RecorderRequestCreationHelper()
+        public RecorderHttpClientFactory()
         {
             Initialize();
         }
 
-        public bool RecordClientMetrics
+        public IHttpClient Create(string uri, CallState callState)
+        {
+            return new RecorderHttpClient(uri, callState);
+        }
+
+        public bool AddAdditionalHeaders
         {
             get { return false; }
-        }
-
-        public RecorderRequestCreationHelper()
-        {
-            this.internalRequestCreationHelper = new RequestCreationHelper();
-        }
-
-        public void AddAdalIdParameters(IDictionary<string, string> parameters)
-        {
-            
         }
 
         public DateTime GetJsonWebTokenValidFrom()
@@ -59,7 +51,7 @@ namespace Test.ADAL.NET.Friend
                 return new DateTime(long.Parse(IOMap[JsonWebTokenValidFrom]));
             }
 
-            DateTime result = this.internalRequestCreationHelper.GetJsonWebTokenValidFrom();
+            DateTime result = DateTime.UtcNow;
 
             IOMap[JsonWebTokenValidFrom] = result.Ticks.ToString();
 

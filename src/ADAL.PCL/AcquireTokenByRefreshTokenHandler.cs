@@ -17,9 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -28,8 +25,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private readonly string refreshToken;
 
-        public AcquireTokenByRefreshTokenHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, string refreshToken, bool callSync)
-            : base(authenticator, tokenCache, resource ?? NullResource, clientKey, TokenSubjectType.UserPlusClient, callSync)
+        public AcquireTokenByRefreshTokenHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, string refreshToken)
+            : base(authenticator, tokenCache, resource ?? NullResource, clientKey, TokenSubjectType.UserPlusClient)
         {
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
@@ -53,7 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await this.SendTokenRequestByRefreshTokenAsync(this.refreshToken);
         }
 
-        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
+        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {                
         }
     }

@@ -28,8 +28,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private UserAssertion userAssertion;
         
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserCredential userCredential, bool callSync)
-            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User, callSync)
+        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserCredential userCredential)
+            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User)
         {
             if (userCredential == null)
             {
@@ -39,8 +39,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.userCredential = userCredential;
         }
 
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserAssertion userAssertion, bool callSync)
-            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User, callSync)
+        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserAssertion userAssertion)
+            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User)
         {
             if (userAssertion == null)
             {
@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        protected override void AddAditionalRequestParameters(RequestParameters requestParameters)
+        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {
             if (this.userAssertion != null)
             {

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,14 +16,30 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Net;
+using System;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    interface IHttpWebRequestFactory
+    internal class HttpClientFactory : IHttpClientFactory
     {
-        IHttpWebRequest Create(string uri);
+        public bool AddAdditionalHeaders
+        {
+            get { return true; }
+        }
 
-        IHttpWebResponse CreateResponse(WebResponse response);
+        public IHttpClient Create(string uri, CallState callState)
+        {
+            return new HttpClientWrapper(uri, callState);
+        }
+
+        public DateTime GetJsonWebTokenValidFrom()
+        {
+            return DateTime.UtcNow;
+        }
+
+        public string GetJsonWebTokenId()
+        {
+            return Guid.NewGuid().ToString();
+        }
     }
 }
