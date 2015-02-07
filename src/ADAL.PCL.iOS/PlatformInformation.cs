@@ -62,11 +62,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return null;
         }
 
-        public override void CloseHttpWebResponse(WebResponse response)
-        {
-            response.Close();
-        }
-
         public override string GetAssemblyFileVersionAttribute()
         {
             // TODO: Check if assembly file version can be read in iOS assembly as well or not. For now, we use assembly version instead.

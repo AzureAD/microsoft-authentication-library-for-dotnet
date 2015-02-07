@@ -29,31 +29,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return new WebUI(parameters);
         }
-
-        public async Task<IHttpWebResponse> GetResponseWithTimeoutSyncOrAsync(HttpWebRequest request, int timeoutInMilliSeconds, CallState callState)
-        {
-            try
-            {
-                Task<WebResponse> getResponseTask = request.GetResponseAsync();
-                ThreadPool.RegisterWaitForSingleObject(
-                    ((IAsyncResult)getResponseTask).AsyncWaitHandle,
-                    delegate(object state, bool timedOut)
-                    {
-                        if (timedOut)
-                        {
-                            ((HttpWebRequest)state).Abort();
-                        }
-                    },
-                    request,
-                    timeoutInMilliSeconds,
-                    true);
-
-                return PlatformPlugin.HttpClientFactory.CreateResponse(await getResponseTask);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }       
     }
 }

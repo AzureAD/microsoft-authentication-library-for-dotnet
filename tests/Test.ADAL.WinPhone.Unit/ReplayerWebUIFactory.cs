@@ -30,10 +30,5 @@ namespace Test.ADAL.WinPhone.Unit
         {
             return new ReplayerWebUI(parameters);
         }
-
-        public Task<IHttpWebResponse> GetResponseWithTimeoutSyncOrAsync(HttpWebRequest request, int timeoutInMilliSeconds, CallState callState)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
