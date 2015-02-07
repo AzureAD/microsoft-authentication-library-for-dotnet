@@ -19,6 +19,7 @@
     <PackageCertificateKeyFile>Test.ADAL.WinRT.Unit_TemporaryKey.pfx</PackageCertificateKeyFile>
     <AppxBundle>Never</AppxBundle>
     <DefineConstants>TEST_ADAL_WINRT_UNIT</DefineConstants>
+    <PackageCertificateThumbprint>BED7099FF68DEB5484674C3DAFE85D2FFD9DB23A</PackageCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
