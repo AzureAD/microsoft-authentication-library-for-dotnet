@@ -554,6 +554,7 @@ Global
 		{2F80E14C-B186-4AEE-92BC-0DE3B6FDB107}.AppStore|x64.ActiveCfg = Release|Any CPU
 		{2F80E14C-B186-4AEE-92BC-0DE3B6FDB107}.AppStore|x86.ActiveCfg = Release|Any CPU
 		{2F80E14C-B186-4AEE-92BC-0DE3B6FDB107}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F80E14C-B186-4AEE-92BC-0DE3B6FDB107}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F80E14C-B186-4AEE-92BC-0DE3B6FDB107}.Debug|ARM.ActiveCfg = Debug|Any CPU
 		{2F80E14C-B186-4AEE-92BC-0DE3B6FDB107}.Debug|iPhone.ActiveCfg = Debug|Any CPU
 		{2F80E14C-B186-4AEE-92BC-0DE3B6FDB107}.Debug|iPhone.Build.0 = Debug|Any CPU
@@ -769,6 +770,7 @@ Global
 		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.AppStore|x64.ActiveCfg = AppStore|iPhone
 		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.AppStore|x86.ActiveCfg = AppStore|iPhone
 		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Debug|Any CPU.ActiveCfg = Debug|iPhoneSimulator
+		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Debug|Any CPU.Build.0 = Debug|iPhoneSimulator
 		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Debug|ARM.ActiveCfg = Debug|iPhone
 		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Debug|iPhone.ActiveCfg = Debug|iPhone
 		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Debug|iPhone.Build.0 = Debug|iPhone
@@ -779,10 +781,10 @@ Global
 		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Debug|Win32.ActiveCfg = Debug|iPhone
 		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Debug|x64.ActiveCfg = Debug|iPhone
 		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Debug|x86.ActiveCfg = Debug|iPhone
-		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Release|Any CPU.ActiveCfg = Release|iPhone
+		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Release|Any CPU.ActiveCfg = Release|iPhoneSimulator
+		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Release|Any CPU.Build.0 = Release|iPhoneSimulator
 		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Release|ARM.ActiveCfg = Release|iPhone
-		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Release|iPhone.ActiveCfg = Release|iPhone
-		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Release|iPhone.Build.0 = Release|iPhone
+		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Release|iPhone.ActiveCfg = Release|iPhoneSimulator
 		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
 		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
 		{2B675E51-98A2-4B44-8A37-A0661ABB931F}.Release|Mixed Platforms.ActiveCfg = Release|iPhone

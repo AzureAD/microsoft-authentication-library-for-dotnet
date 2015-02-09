@@ -5,28 +5,28 @@
 // Manual changes to this file will not be maintained.
 //
 using System;
-using MonoTouch.Foundation;
-using MonoTouch.UIKit;
+using Foundation;
+using UIKit;
 using System.CodeDom.Compiler;
 
 namespace AdaliOSTestApp
 {
-	[Register ("AdaliOSTestAppViewController")]
+	[Foundation.Register("AdaliOSTestAppViewController")]
 	partial class AdaliOSTestAppViewController
 	{
-		[Outlet]
+		[Foundation.Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		UILabel ReportLabel { get; set; }
 
-		[Action ("UIButton11_TouchUpInside:")]
+		[Foundation.Action("UIButton11_TouchUpInside:")]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		partial void UIButton11_TouchUpInside (UIButton sender);
 
-		[Action ("UIButton16_TouchUpInside:")]
+		[Foundation.Action("UIButton16_TouchUpInside:")]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		partial void UIButton16_TouchUpInside (UIButton sender);
 
-		[Action ("UIButton25_TouchUpInside:")]
+		[Foundation.Action("UIButton25_TouchUpInside:")]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		partial void UIButton25_TouchUpInside (UIButton sender);
 

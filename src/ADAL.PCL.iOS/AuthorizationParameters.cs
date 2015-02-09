@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using MonoTouch.UIKit;
+using UIKit;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

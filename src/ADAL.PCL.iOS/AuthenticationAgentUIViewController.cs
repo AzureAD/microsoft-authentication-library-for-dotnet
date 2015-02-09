@@ -17,15 +17,15 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Drawing;
+using CoreGraphics;
 
-using MonoTouch.CoreFoundation;
-using MonoTouch.UIKit;
-using MonoTouch.Foundation;
+using CoreFoundation;
+using UIKit;
+using Foundation;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    [Register("AuthenticationAgentUIViewController")]
+    [Foundation.Register("AuthenticationAgentUIViewController")]
     internal class AuthenticationAgentUIViewController : UIViewController
     {
 		UIWebView webView;
@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             View.BackgroundColor = UIColor.White;
 
-            webView = new UIWebView(View.Bounds);
+            webView = new UIWebView((CGRect)View.Bounds);
 		    webView.ShouldStartLoad = (wView, request, navType) =>
 		    {
                 if (request != null && request.Url.ToString().StartsWith(callback))

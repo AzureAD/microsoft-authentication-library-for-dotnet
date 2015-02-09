@@ -1,13 +1,13 @@
 using System;
-using System.Drawing;
+using CoreGraphics;
 
-using MonoTouch.CoreFoundation;
-using MonoTouch.UIKit;
-using MonoTouch.Foundation;
+using CoreFoundation;
+using UIKit;
+using Foundation;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    [Register("UniversalView")]
+    [Foundation.Register("UniversalView")]
     public class UniversalView : UIView
     {
         public UniversalView()
@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             Initialize();
         }
 
-        public UniversalView(RectangleF bounds)
+        public UniversalView(CGRect bounds)
             : base(bounds)
         {
             Initialize();
@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
     }
 
-    [Register("AuthenticationAgentUINavigationController")]
+    [Foundation.Register("AuthenticationAgentUINavigationController")]
     internal class AuthenticationAgentUINavigationController : UINavigationController
     {
         private string url;
