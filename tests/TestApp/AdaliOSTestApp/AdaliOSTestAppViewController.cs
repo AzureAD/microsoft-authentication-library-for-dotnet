@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -20,7 +20,7 @@ using System;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-using MonoTouch.UIKit;
+using UIKit;
 
 using TestApp.PCL;
 
