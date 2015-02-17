@@ -130,11 +130,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             // Security issue: we prohibit navigation with auth code
             // if redirect URI is URN, then we prohibit navigation, to prevent random browser popup.
             e.Cancel = this.CheckForClosingUrl(e.Url);
+
+            if (!e.Cancel)
+            {
+                PlatformPlugin.Logger.Verbose(null, string.Format("Navigating to '{0}'.", EncodingHelper.UrlDecode(e.Url.ToString())));
+            }
         }
 
         private void WebBrowserNavigatedHandler(object sender, WebBrowserNavigatedEventArgs e)
         {
-            this.CheckForClosingUrl(e.Url);
+            if (!this.CheckForClosingUrl(e.Url))
+            {
+                PlatformPlugin.Logger.Verbose(null, string.Format("Navigated to '{0}'.", EncodingHelper.UrlDecode(e.Url.ToString())));
+            }
         }
 
         protected virtual void WebBrowserNavigateErrorHandler(object sender, WebBrowserNavigateErrorEventArgs e)
@@ -188,9 +196,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             {
                 if (this.webBrowser.IsBusy)
                 {
-                    System.Diagnostics.Trace.WriteLine(string.Format("WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}", this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created, this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
+                    PlatformPlugin.Logger.Verbose(null, string.Format("WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}", this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created, this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
                     this.webBrowser.Stop();
-                    System.Diagnostics.Trace.WriteLine(string.Format("WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}", this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created, this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
+                    PlatformPlugin.Logger.Verbose(null, string.Format("WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}", this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created, this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
                 }
             }
         }
