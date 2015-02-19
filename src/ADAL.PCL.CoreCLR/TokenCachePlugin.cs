@@ -24,13 +24,14 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public static class AdalInitializer
+    internal class TokenCachePlugin : ITokenCachePlugin
     {
-        public static void Initialize()
+        public void BeforeAccess(TokenCacheNotificationArgs args)
         {
-            PlatformPluginSwitch.DynamicallyLinkAssembly = false;
-
-            PlatformPlugin.InjectDependecies(new WebUIFactory(), new TokenCachePlugin(), new Logger(), new PlatformInformation(), new CryptographyHelper());
+        }
+        
+        public void AfterAccess(TokenCacheNotificationArgs args)
+        {
         }
     }
 }

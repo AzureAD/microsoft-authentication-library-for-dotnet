@@ -36,7 +36,7 @@ namespace TestApp.PCL
         public TokenBroker()
         {
             this.sts = new AadSts();
-            context = new AuthenticationContext(this.sts.Authority, true, null);            
+            context = new AuthenticationContext(this.sts.Authority, true);            
         }
 
         public async Task<string> GetTokenInteractiveAsync(IAuthorizationParameters parameters)

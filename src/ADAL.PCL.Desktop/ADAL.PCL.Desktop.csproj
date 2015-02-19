@@ -85,6 +85,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="StaTaskScheduler.cs" />
+    <Compile Include="TokenCachePlugin.cs" />
     <Compile Include="WebBrowserInterfaces.cs" />
     <Compile Include="WebBrowserNavigateErrorEventArgs.cs" />
     <Compile Include="WebUI.cs" />

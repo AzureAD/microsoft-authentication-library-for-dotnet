@@ -33,10 +33,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Notification for certain token cache interactions during token acquisition.
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">Arguments related to the cache item impacted</param>
         public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
-
-        internal delegate Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result, string resource, ClientKey clientKey, CallState callState);
 
         private const int SchemaVersion = 2;
         
@@ -53,11 +51,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             DefaultShared = new TokenCache
                             {
-                                BeforeAccess = DefaultTokenCache_BeforeAccess, 
-                                AfterAccess = DefaultTokenCache_AfterAccess
+                                BeforeAccess = PlatformPlugin.TokenCachePlugin.BeforeAccess,
+                                AfterAccess = PlatformPlugin.TokenCachePlugin.AfterAccess
                             };
 
-            DefaultTokenCache_BeforeAccess(null);
+            DefaultShared.BeforeAccess(null);
         }
 
         /// <summary>
@@ -411,14 +409,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         && (string.IsNullOrWhiteSpace(uniqueId) || p.Key.UniqueId == uniqueId)
                         && (string.IsNullOrWhiteSpace(displayableId) || p.Key.DisplayableIdEquals(displayableId))
                         && p.Key.TokenSubjectType == subjectType).ToList();
-        }
-
-        private static void DefaultTokenCache_BeforeAccess(TokenCacheNotificationArgs args)
-        {
-        }
-
-        private static void DefaultTokenCache_AfterAccess(TokenCacheNotificationArgs args)
-        {
         }
     }
 }

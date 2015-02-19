@@ -20,17 +20,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public static class AdalInitializer
+    internal interface ITokenCachePlugin
     {
-        public static void Initialize()
-        {
-            PlatformPluginSwitch.DynamicallyLinkAssembly = false;
-
-            PlatformPlugin.InjectDependecies(new WebUIFactory(), new TokenCachePlugin(), new Logger(), new PlatformInformation(), new CryptographyHelper());
-        }
+        void BeforeAccess(TokenCacheNotificationArgs args);
+        void AfterAccess(TokenCacheNotificationArgs args);
     }
 }

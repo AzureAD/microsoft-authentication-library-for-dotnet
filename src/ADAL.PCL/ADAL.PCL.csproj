@@ -92,6 +92,7 @@
     <Compile Include="IHttpClient.cs" />
     <Compile Include="IHttpClientFactory.cs" />
     <Compile Include="IHttpWebResponse.cs" />
+    <Compile Include="ITokenCachePlugin.cs" />
     <Compile Include="JsonWebToken.cs" />
     <Compile Include="LoggerBase.cs" />
     <Compile Include="MexParser.cs" />

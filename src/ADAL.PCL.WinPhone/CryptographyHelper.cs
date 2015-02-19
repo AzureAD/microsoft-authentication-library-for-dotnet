@@ -17,15 +17,70 @@
 //----------------------------------------------------------------------
 
 using System;
-
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
+using Windows.Security.Cryptography.DataProtection;
 using Windows.Storage.Streams;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class CryptographyHelper : ICryptographyHelper
     {
+        // This descriptor does not require the enterprise authentication capability.
+        private const string ProtectionDescriptor = "LOCAL=user";
+        
+        public static string Encrypt(string message)
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                return message;
+            }
+
+            DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
+            IBuffer messageBuffer = CryptographicBuffer.ConvertStringToBinary(message, BinaryStringEncoding.Utf8);
+            IBuffer protectedBuffer = RunAsyncTaskAndWait(dataProtectionProvider.ProtectAsync(messageBuffer).AsTask());
+            return Convert.ToBase64String(protectedBuffer.ToArray(0, (int)protectedBuffer.Length));
+        }
+
+        public static string Decrypt(string encryptedMessage)
+        {
+            if (string.IsNullOrEmpty(encryptedMessage))
+            {
+                return encryptedMessage;
+            }
+
+            DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
+            IBuffer messageBuffer = Convert.FromBase64String(encryptedMessage).AsBuffer();
+            IBuffer unprotectedBuffer = RunAsyncTaskAndWait(dataProtectionProvider.UnprotectAsync(messageBuffer).AsTask());
+            return CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, unprotectedBuffer);
+        }
+
+        public static byte[] Encrypt(byte[] message)
+        {
+            if (message == null)
+            {
+                return null;
+            }
+
+            DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
+            IBuffer protectedBuffer = RunAsyncTaskAndWait(dataProtectionProvider.ProtectAsync(message.AsBuffer()).AsTask());
+            return protectedBuffer.ToArray(0, (int)protectedBuffer.Length);
+        }
+
+        public static byte[] Decrypt(byte[] encryptedMessage)
+        {
+            if (encryptedMessage == null)
+            {
+                return null;
+            }
+
+            DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
+            IBuffer buffer = RunAsyncTaskAndWait(dataProtectionProvider.UnprotectAsync(encryptedMessage.AsBuffer()).AsTask());
+            return buffer.ToArray(0, (int)buffer.Length);
+        }
+
         public string CreateSha256Hash(string input)
         {
             IBuffer inputBuffer = CryptographicBuffer.ConvertStringToBinary(input, BinaryStringEncoding.Utf8);
@@ -47,5 +102,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             throw new NotImplementedException();
         }
 
+        private static T RunAsyncTaskAndWait<T>(Task<T> task)
+        {
+            try
+            {
+                Task.Run(async () => await task.ConfigureAwait(false)).Wait();
+                return task.Result;
+            }
+            catch (AggregateException ae)
+            {
+                // Any exception thrown as a result of running task will cause AggregateException to be thrown with 
+                // actual exception as inner.
+                throw ae.InnerExceptions[0];
+            }
+        }
     }
 }
