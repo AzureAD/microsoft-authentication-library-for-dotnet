@@ -131,6 +131,7 @@
     <Compile Include="CryptographyHelper.cs" />
     <Compile Include="PlatformInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TokenCachePlugin.cs" />
     <Compile Include="WebUI.cs" />
     <Compile Include="WebUIFactory.cs" />
   </ItemGroup>
