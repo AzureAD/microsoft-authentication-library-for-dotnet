@@ -268,7 +268,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string EncodedTokenTooLong = "Encoded token size is beyond the upper limit";
         public const string FailedToAcquireTokenSilently = "Failed to acquire token silently. Call method AcquireToken";
         public const string FailedToRefreshToken = "Failed to refresh token";
-        public const string FederatedServiceReturnedErrorTemplate = "Federated serviced at {0} returned error: {1}";
+        public const string FederatedServiceReturnedErrorTemplate = "Federated service at {0} returned error: {1}";
         public const string IdentityProtocolLoginUrlNull = "The LoginUrl property in identityProvider cannot be null";
         public const string IdentityProtocolMismatch = "No identity provider matches the requested protocol";
         public const string IdentityProviderRequestFailed = "Token request to identity provider failed. Check InnerException for more details";
@@ -287,7 +287,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string ParsingWsTrustResponseFailed = "Parsing WS-Trust response failed";
         public const string PasswordRequiredForManagedUserError = "Password is required for managed user";
         public const string RedirectUriContainsFragment = "'redirectUri' must NOT include a fragment component";
-        public const string ServiceReturnedError = "Serviced returned error. Check InnerException for more details";
+        public const string ServiceReturnedError = "Service returned error. Check InnerException for more details";
         public const string StsMetadataRequestFailed = "Metadata request to Access Control service failed. Check InnerException for more details";
         public const string StsTokenRequestFailed = "Token request to security token service failed.  Check InnerException for more details";
         public const string UnauthorizedHttpStatusCodeExpected = "Unauthorized Http Status Code (401) was expected in the response";
