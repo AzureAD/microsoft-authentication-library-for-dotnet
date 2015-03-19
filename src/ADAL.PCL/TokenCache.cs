@@ -54,8 +54,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                                 BeforeAccess = PlatformPlugin.TokenCachePlugin.BeforeAccess,
                                 AfterAccess = PlatformPlugin.TokenCachePlugin.AfterAccess
                             };
-
-            DefaultShared.BeforeAccess(null);
         }
 
         /// <summary>
