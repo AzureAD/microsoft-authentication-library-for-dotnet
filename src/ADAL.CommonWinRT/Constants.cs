@@ -19,10 +19,25 @@
 using System;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+#if SILVERLIGHT
+    public static partial class AdalError
+#else
     internal static partial class AdalError
+#endif
     {
+        /// <summary>
+        /// Unauthorized user information access
+        /// </summary>
         public const string UnauthorizedUserInformationAccess = "unauthorized_user_information_access";
+
+        /// <summary>
+        /// Cannot access user information
+        /// </summary>
         public const string CannotAccessUserInformation = "user_information_access_failed";
+
+        /// <summary>
+        /// Need to set callback uri as local setting
+        /// </summary>
         public const string NeedToSetCallbackUriAsLocalSetting = "need_to_set_callback_uri_as_local_setting";
     }
 

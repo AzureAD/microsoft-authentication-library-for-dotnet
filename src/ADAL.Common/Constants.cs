@@ -25,6 +25,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// Error code returned as a property in AdalException
     /// </summary>
     public static class AdalError
+#elif SILVERLIGHT
+    /// <summary>
+    /// Error code returned as a property in AdalException
+    /// </summary>
+    public static partial class AdalError
 #else
     internal static partial class AdalError
 #endif
