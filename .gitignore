@@ -38,3 +38,6 @@ tests/TestApp/AdaliOSTestApp/obj/
 tests/TestApp/AdalUniversalTestApp/AdalUniversalTestApp.Windows/obj/
 tests/TestApp/AdalUniversalTestApp/AdalUniversalTestApp.WindowsPhone/obj/
 tests/TestApp/TestApp.PCL/obj/
+tests/TestApp/AdalXamarinFormsTestApp.Droid/obj/
+tests/TestApp/AdalXamarinFormsTestApp.iOS/obj/
+tests/TestApp/AdalXamarinFormsTestApp/obj/
