@@ -11,19 +11,10 @@ namespace AdalXamarinFormsTestApp
 
     public class App : Application
     {
-        private CreateParameters createParameters;
-
-        public App(CreateParameters createParameters)
+        public App()
         {
-            this.createParameters = createParameters;
-
             // The root page of your application
             MainPage = new NavigationPage(new MainPage());
-        }
-
-        public IAuthorizationParameters CreateAuthorizationParameters()
-        {
-            return this.createParameters();
         }
 
         protected override void OnStart()

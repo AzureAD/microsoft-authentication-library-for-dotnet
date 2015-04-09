@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -36,10 +37,12 @@ namespace AdalXamarinFormsTestApp
             };
         }
 
+        public IAuthorizationParameters Paramters { get; set; }
+
         async void browseButton_Clicked(object sender, EventArgs e)
         {
             this.result.Text = string.Empty;
-            string token = await tokenBroker.GetTokenInteractiveAsync(((App)Application.Current).CreateAuthorizationParameters());
+            string token = await tokenBroker.GetTokenInteractiveAsync(Paramters);
             this.result.Text = token;
         }
     }

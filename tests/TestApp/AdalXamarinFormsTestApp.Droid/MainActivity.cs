@@ -20,12 +20,7 @@ namespace AdalXamarinFormsTestApp.Droid
             base.OnCreate(bundle);
 
             global::Xamarin.Forms.Forms.Init(this, bundle);
-            LoadApplication(new App(this.CreateParameters));
-        }
-
-        private IAuthorizationParameters CreateParameters()
-        {
-            return new AuthorizationParameters(this);
+            LoadApplication(new App());
         }
     }
 }

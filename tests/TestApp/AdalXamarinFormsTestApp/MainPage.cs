@@ -31,7 +31,7 @@ namespace AdalXamarinFormsTestApp
 
         async void browseButton_Clicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new SecondPage());
+            await Navigation.PushModalAsync(new SecondPage());
         }
     }
 }

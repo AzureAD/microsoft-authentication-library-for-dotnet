@@ -25,14 +25,9 @@ namespace AdalXamarinFormsTestApp.iOS
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
             global::Xamarin.Forms.Forms.Init();
-            LoadApplication(new App(this.CreateParameters));
+            LoadApplication(new App());
 
             return base.FinishedLaunching(app, options);
-        }
-
-        private IAuthorizationParameters CreateParameters()
-        {
-            return new AuthorizationParameters(UIApplication.SharedApplication.KeyWindow.RootViewController);   
         }
     }
 }
