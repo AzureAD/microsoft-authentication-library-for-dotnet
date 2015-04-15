@@ -41,7 +41,7 @@ namespace Test.ADAL.NET
             AdalTests.TestType = TestType.DotNet;
 
             // To record request/response with actual service, switch mode to Record
-            RecorderSettings.Mode = RecorderMode.Replay;
+            RecorderSettings.Mode = RecorderMode.Record;
             ConsoleTraceListener myWriter = new ConsoleTraceListener();
             Trace.Listeners.Add(myWriter);
         }

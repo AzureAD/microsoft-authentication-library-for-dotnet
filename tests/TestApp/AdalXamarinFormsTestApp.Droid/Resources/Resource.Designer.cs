@@ -9,9 +9,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: global::Android.Runtime.ResourceDesignerAttribute("AdalAndroidTestApp.Resource", IsApplication=true)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("AdalXamarinFormsTestApp.Droid.Resource", IsApplication=true)]
 
-namespace AdalAndroidTestApp
+namespace AdalXamarinFormsTestApp.Droid
 {
 	
 	
@@ -26,9 +26,9 @@ namespace AdalAndroidTestApp
 		
 		public static void UpdateIdValues()
 		{
-			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Id.agentWebView = global::AdalAndroidTestApp.Resource.Id.agentWebView;
-			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Layout.WebAuthenticationBroker = global::AdalAndroidTestApp.Resource.Layout.WebAuthenticationBroker;
-			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.String.ApplicationName = global::AdalAndroidTestApp.Resource.String.ApplicationName;
+			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Id.agentWebView = global::AdalXamarinFormsTestApp.Droid.Resource.Id.agentWebView;
+			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Layout.WebAuthenticationBroker = global::AdalXamarinFormsTestApp.Droid.Resource.Layout.WebAuthenticationBroker;
+			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.String.ApplicationName = global::AdalXamarinFormsTestApp.Droid.Resource.String.ApplicationName;
 		}
 		
 		public partial class Attribute
@@ -48,7 +48,7 @@ namespace AdalAndroidTestApp
 		{
 			
 			// aapt resource value: 0x7f020000
-			public const int Icon = 2130837504;
+			public const int icon = 2130837504;
 			
 			static Drawable()
 			{
@@ -63,20 +63,8 @@ namespace AdalAndroidTestApp
 		public partial class Id
 		{
 			
-			// aapt resource value: 0x7f050003
-			public const int accessTokenTextView = 2131034115;
-			
-			// aapt resource value: 0x7f050002
-			public const int acquireTokenClientCredButton = 2131034114;
-			
 			// aapt resource value: 0x7f050000
-			public const int acquireTokenInteractiveButton = 2131034112;
-			
-			// aapt resource value: 0x7f050001
-			public const int acquireTokenUPButton = 2131034113;
-			
-			// aapt resource value: 0x7f050004
-			public const int agentWebView = 2131034116;
+			public const int agentWebView = 2131034112;
 			
 			static Id()
 			{
@@ -92,10 +80,7 @@ namespace AdalAndroidTestApp
 		{
 			
 			// aapt resource value: 0x7f030000
-			public const int Main = 2130903040;
-			
-			// aapt resource value: 0x7f030001
-			public const int WebAuthenticationBroker = 2130903041;
+			public const int WebAuthenticationBroker = 2130903040;
 			
 			static Layout()
 			{
@@ -112,9 +97,6 @@ namespace AdalAndroidTestApp
 			
 			// aapt resource value: 0x7f040000
 			public const int ApplicationName = 2130968576;
-			
-			// aapt resource value: 0x7f040001
-			public const int Hello = 2130968577;
 			
 			static String()
 			{

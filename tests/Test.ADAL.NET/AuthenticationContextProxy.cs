@@ -170,7 +170,7 @@ namespace Test.ADAL.Common
                 AuthenticationResult result = null;
                 using (Timer abortTest = new Timer(10 * 1000)) // 10 seconds for test execution
                 {
-                    using (Timer uiSupply = new Timer(250))
+                    using (Timer uiSupply = new Timer(1500))
                     {
                         if (userName != null || password != null)
                         {
@@ -233,7 +233,7 @@ namespace Test.ADAL.Common
             {
                 using (Timer abortTest = new Timer(10 * 1000)) // 10 seconds for test execution
                 {
-                    using (Timer uiSupply = new Timer(250))
+                    using (Timer uiSupply = new Timer(1500))
                     {
                         if (userName != null || password != null)
                         {
