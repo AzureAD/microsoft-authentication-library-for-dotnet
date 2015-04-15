@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (WebException ex)
             {
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
-                clientMetrics.SetLastError(tokenResponse.ErrorCodes);
+                clientMetrics.SetLastError(tokenResponse != null ? tokenResponse.ErrorCodes : null);
                 throw new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, tokenResponse.ErrorCodes, ex);
             }
             finally

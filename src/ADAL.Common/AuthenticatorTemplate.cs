@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (WebException ex)
             {
                 TokenResponse tokenResponse = OAuth2Response.ReadErrorResponse(ex.Response);
-                clientMetrics.SetLastError(tokenResponse.ErrorCodes);
+                clientMetrics.SetLastError(tokenResponse != null ? tokenResponse.ErrorCodes : null);
 
                 if (tokenResponse.Error == "invalid_instance")
                 {

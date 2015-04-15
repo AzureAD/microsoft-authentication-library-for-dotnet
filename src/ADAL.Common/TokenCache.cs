@@ -312,6 +312,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal AuthenticationResult LoadFromCache(string authority, string resource, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId, CallState callState)
         {
+            Logger.Verbose(callState, "Looking up cache for a token...");
+
             AuthenticationResult result = null;
 
             KeyValuePair<TokenCacheKey, AuthenticationResult>? kvp = this.LoadSingleItemFromCache(authority, resource, clientId, subjectType, uniqueId, displayableId, callState);
@@ -330,6 +332,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
                     }
                 }
+                else 
+                {
+                    Logger.Verbose(callState, string.Format("{0} minutes left until token in cache expires", (result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
+                }
 
                 if (result.AccessToken == null && result.RefreshToken == null)
                 {
@@ -341,7 +347,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (result != null)
                 {
-                    Logger.Information(callState, "A matching token was found in the cache");
+                    Logger.Information(callState, "A matching item (access token or refresh token or both) was found in the cache");
                 }
             }
             else
@@ -354,6 +360,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal void StoreToCache(AuthenticationResult result, string authority, string resource, string clientId, TokenSubjectType subjectType, CallState callState)
         {
+            Logger.Verbose(callState, "Storing token in the cache...");
+
             string uniqueId = (result.UserInfo != null) ? result.UserInfo.UniqueId : null;
             string displayableId = (result.UserInfo != null) ? result.UserInfo.DisplayableId : null;
 
