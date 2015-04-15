@@ -33,22 +33,20 @@ namespace Test.ADAL.Common
     {
         public static Sts CreateSts(StsType stsType)
         {
-            Sts sts = null;
-            if (stsType == StsType.ADFS)
+            Sts sts;
+            switch (stsType)
             {
-                sts = new AdfsSts();
-            }
-            else if (stsType == StsType.AADFederatedWithADFS3)
-            {
-                sts = new AadFederatedWithAdfs3Sts();
-            }
-            else if (stsType == StsType.AAD)
-            {
-                sts = new AadSts();
-            }
-            else
-            {
-                throw new ArgumentException(string.Format("Unsupported STS type '{0}'", stsType));
+                case StsType.ADFS:
+                    sts = new AdfsSts();
+                    break;
+                case StsType.AADFederatedWithADFS3:
+                    sts = new AadFederatedWithAdfs3Sts();
+                    break;
+                case StsType.AAD:
+                    sts = new AadSts();
+                    break;
+                default:
+                    throw new ArgumentException(string.Format("Unsupported STS type '{0}'", stsType));
             }
 
             return sts;
@@ -131,6 +129,8 @@ namespace Test.ADAL.Common
 
         public string ValidUserName2 { get; protected set; }
 
+        public string ValidUserName3 { get; protected set; }
+
         public UserIdentifier ValidRequiredUserId2
         {
             get
@@ -142,6 +142,8 @@ namespace Test.ADAL.Common
         public string ValidPassword { get; set; }
 
         public string ValidPassword2 { get; set; }
+
+        public string ValidPassword3 { get; set; }
 
         public string InvalidResource { get; protected set; }
 
@@ -161,9 +163,9 @@ namespace Test.ADAL.Common
 
         public string InvalidConfidentialClientCertificatePassword { get; set; }
 
-        public string InvalidUserName 
-        { 
-            get { return this.ValidUserName + "x"; } 
+        public string InvalidUserName
+        {
+            get { return this.ValidUserName + "x"; }
         }
 
         public UserIdentifier InvalidRequiredUserId
@@ -175,6 +177,9 @@ namespace Test.ADAL.Common
         }
 
         public string ValidNonExistentRedirectUriClientId { get; set; }
+
+        public string MsaUserName { get; protected set; }
+        public string MsaPassword { get; protected set; }
     }
 
     class AadSts : Sts
@@ -187,88 +192,86 @@ namespace Test.ADAL.Common
             this.ValidateAuthority = true;
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
             this.ValidExpiresIn = 28800;
-            this.ValidNonExistingRedirectUri = new Uri("https://non_existing_uri.com/");
+            this.ValidNonExistingRedirectUri = new Uri("http://foobar.com");
             this.ValidLoggedInFederatedUserName = "dummy\\dummy";
-            string[] segments = this.ValidLoggedInFederatedUserName.Split(new char[] { '\\' });
+            string[] segments = this.ValidLoggedInFederatedUserName.Split(new[] { '\\' });
             this.ValidLoggedInFederatedUserId = string.Format("{0}@microsoft.com", (segments.Length == 2) ? segments[1] : segments[0]);
 
-            this.TenantName = "aaltests.onmicrosoft.com";
+            this.TenantName = "aadadfs.onmicrosoft.com";
             this.Authority = string.Format("https://login.windows.net/{0}", this.TenantName);
             this.TenantlessAuthority = "https://login.windows.net/Common";
             this.Type = StsType.AAD;
-            this.ValidClientId = "e70b115e-ac0a-4823-85da-8f4b7b4f00e6";    // Test Client App2
+            this.ValidClientId = "4b8d1b32-ee16-4b30-9b5d-e374c43deb31";
             this.ValidNonExistentRedirectUriClientId = this.ValidClientId;
-            this.ValidClientIdWithExistingRedirectUri = "5c0986db-8d89-4442-b5f9-d281efae9bad";
-            this.ValidConfidentialClientId = "9083ccb8-8a46-43e7-8439-1d696df984ae";
-            this.ValidConfidentialClientSecret = "n+ZC/7zWCv7JDA+QsujTChJSC/ppt0iWXBFYSsaU+Ws=";
+            this.ValidClientIdWithExistingRedirectUri = this.ValidClientId;
+            this.ValidConfidentialClientId = "91ce6b56-776c-4e07-83c3-ebbb11726999";
+            this.ValidConfidentialClientSecret = "3VFF+M+V/UibacSYtzpGHbHmIIKeFBkurOfl+fIqhrM=";
             this.ValidWinRTClientId = "786067bc-40cc-4171-be40-a73b2d05a461";
-            this.ValidUserName = "admin@aaltests.onmicrosoft.com";
-            this.ValidUserName2 = "user@aaltests.onmicrosoft.com";
-            this.ValidDefaultRedirectUri = new Uri("https://non_existing_uri.com/");
+            this.ValidUserName = @"adaltest@aadadfs.onmicrosoft.com";
+            this.ValidUserName2 = "adaltest2@aadadfs.onmicrosoft.com";
+            this.ValidUserName3 = "adaltest3@aadadfs.onmicrosoft.com";
+            this.ValidDefaultRedirectUri = new Uri("https://login.live.com/");
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
-            this.ValidRedirectUriForConfidentialClient = new Uri("https://non_existing_uri_for_confidential_client.com/");
+            this.ValidRedirectUriForConfidentialClient = new Uri("https://confidential.foobar.com");
             this.ValidPassword = "<REPLACE>";
             this.ValidPassword2 = "<REPLACE>";
-            this.ValidResource = "b7a671d8-a408-42ff-86e0-aaf447fd17c4";
-            this.ValidResource2 = "4848e7b1-7a6e-450e-aedb-31fd3c196db4";
-            this.ValidResource3 = "3e5e5728-f57e-4d7f-b4be-87d0bdc39900";
+            this.ValidPassword3 = "<REPLACE>";
+            this.ValidResource = "http://testwebapp.com";
+            this.ValidResource2 = "http://testwebapp2.com";
+            this.ValidResource3 = "http://testwebapp3.com";
 
-            this.MsaUserName = "aaltests@outlook.com";
+            this.MsaUserName = "adaltest@outlook.com";
             this.MsaPassword = "<REPLACE>";
         }
 
         public string TenantName { get; protected set; }
-        public string MsaUserName { get; protected set; }        
-        public string MsaPassword { get; protected set; }
-    }
-
-    class AdfsSts : Sts
-    {
-        public AdfsSts()
-        {
-            this.Authority = "https://fs.bahush.info/adfs";
-            this.InvalidAuthority = "https://invalid_address.com/adfs";
-            this.InvalidClientId = "DE25CE3A-B772-4E6A-B431-96DCB5E7E558";
-            this.InvalidResource = "urn:msft:ad:test:oauth:teamdashboardx";
-            this.ValidConfidentialClientSecret = "client_secret";
-            this.Type = StsType.ADFS;
-            this.ValidateAuthority = false;
-            this.ValidClientId = "DE25CE3A-B772-4E6A-B431-96DCB5E7E559";
-            this.ValidNonExistentRedirectUriClientId = "58703C56-D485-4FFD-8A9E-9917C18BC8C0";
-            this.ValidClientIdWithExistingRedirectUri = "DE25CE3A-B772-4E6A-B431-96DCB5E7E559";
-            this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
-            this.InvalidExistingRedirectUri = new Uri("https://skydrive.live.com/");
-            this.ValidNonExistingRedirectUri = new Uri("https://non_existing_uri.com/");
-            this.ValidDefaultRedirectUri = new Uri("https://login.live.com/");
-            this.ValidExpiresIn = 3600;
-            this.ValidUserName = @"bahush.info\test";
-            this.ValidConfidentialClientId = this.ValidClientId;
-            this.ValidRedirectUriForConfidentialClient = this.ValidExistingRedirectUri;
-            this.ValidPassword = "<REPLACE>";
-            this.ValidResource = "urn:msft:ad:test:oauth:test";
-            this.ValidResource2 = "urn:msft:ad:test:oauth:Service2";
-        }
     }
 
     class AadFederatedWithAdfs3Sts : AadSts
     {
         public AadFederatedWithAdfs3Sts()
         {
-            this.TenantName = "aaltests.onmicrosoft.com";
-            this.Authority = string.Format("https://login.windows.net/{0}", this.TenantName);
             this.Type = StsType.AADFederatedWithADFS3;
-            this.ValidClientId = "e70b115e-ac0a-4823-85da-8f4b7b4f00e6";
             this.ValidNonExistentRedirectUriClientId = null;
             this.ValidClientIdWithExistingRedirectUri = this.ValidClientId;
-            this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
-            this.ValidNonExistingRedirectUri = new Uri("https://DontApply.com");
-            this.ValidDefaultRedirectUri = new Uri("https://login.live.com/");
             this.ValidExpiresIn = 25000;
-            this.ValidUserName = @"test@bahush.info";
+            this.ValidConfidentialClientId = this.ValidClientId;
+            this.ValidRedirectUriForConfidentialClient = this.ValidExistingRedirectUri;
+
+            this.ValidUserName = "testuser1@aadadfs.info";
+            this.ValidPassword = "<REPLACE>";
+        }
+
+        public string ValidFederatedUserName { get; protected set; }
+        public string ValidFederatedPassword { get; protected set; }
+    }
+
+    class AdfsSts : Sts
+    {
+        public AdfsSts()
+        {
+            this.Authority = "https://aadadfs.info/adfs";
+            this.InvalidAuthority = "https://invalid_address.com/adfs";
+            this.InvalidClientId = "DE25CE3A-B772-4E6A-B431-96DCB5E7E558";
+            this.InvalidResource = "urn:msft:ad:test:oauth:teamdashboardx";
+            this.ValidConfidentialClientSecret = "client_secret";
+            this.Type = StsType.ADFS;
+            this.ValidateAuthority = false;
+            this.ValidClientId = "DE25CE3A-B772-4E6A-B431-96DCB5E7E549";
+            this.ValidNonExistentRedirectUriClientId = "58703C56-D485-4FFD-8A9E-9917C18BC8C0";
+            this.ValidClientIdWithExistingRedirectUri = this.ValidClientId;
+            this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
+            this.InvalidExistingRedirectUri = new Uri("https://skydrive.live.com/");
+            this.ValidNonExistingRedirectUri = new Uri("https://non_existing_uri.com/");
+            this.ValidDefaultRedirectUri = new Uri("https://login.live.com/");
+            this.ValidExpiresIn = 3600;
+            this.ValidUserName = @"aadadfs.info\testuser1";
             this.ValidConfidentialClientId = this.ValidClientId;
             this.ValidRedirectUriForConfidentialClient = this.ValidExistingRedirectUri;
             this.ValidPassword = "<REPLACE>";
-            this.ValidResource = "b7a671d8-a408-42ff-86e0-aaf447fd17c4";
+            this.ValidResource = "urn:msft:ad:test:oauth:test";
+            this.ValidResource2 = "urn:msft:ad:test:oauth:test2";
         }
     }
+
 }

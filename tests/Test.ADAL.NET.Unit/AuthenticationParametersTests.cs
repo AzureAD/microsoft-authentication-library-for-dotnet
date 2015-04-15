@@ -31,7 +31,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public void AuthenticationParametersTest()
         {
-            const string Authority = "https://login.windows.net/aaltests.onmicrosoft.com/oauth2/authorize";
+            const string Authority = "https://login.windows.net/aadadfs.onmicrosoft.com/oauth2/authorize";
             const string Resource = "test_resource";
 
             AuthenticationParameters authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(@"Bearer authorization_uri=""{0}"",resource_id=""{1}""", Authority, Resource));

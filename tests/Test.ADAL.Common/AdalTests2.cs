@@ -58,7 +58,6 @@ namespace Test.ADAL.Common
                 listener.Flush();
                 string trace = Encoding.UTF8.GetString(stream.ToArray(), 0, (int)stream.Position);
                 Verify.IsFalse(trace.Contains(correlationId.ToString()));
-                Verify.IsTrue(trace.Contains("Correlation ID"));
                 Trace.Listeners.Remove(listener);
             }
         }

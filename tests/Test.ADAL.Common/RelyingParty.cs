@@ -28,8 +28,8 @@ namespace Test.ADAL.Common
             {
                 var response = ctx.Response;
                 response.StatusCode = 401;
-                response.Headers.Add("WWW-authenticate", 
-                    new string[] { @" Bearer     authorization_uri  =   ""https://login.windows.net/aaltests.onmicrosoft.com/oauth2/authorize""   ,    Resource_id  =  ""test_resource, test_resource2""  " });
+                response.Headers.Add("WWW-authenticate",
+                    new string[] { @" Bearer     authorization_uri  =   ""https://login.windows.net/aadadfs.onmicrosoft.com/oauth2/authorize""   ,    Resource_id  =  ""test_resource, test_resource2""  " });
                 
                 return response.WriteAsync("dummy");
             });
