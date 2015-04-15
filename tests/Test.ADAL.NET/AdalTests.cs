@@ -68,7 +68,7 @@ namespace Test.ADAL.Common
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, new Uri(sts.ValidRedirectUriForConfidentialClient.AbsoluteUri + "x"), credential);
 
-            VerifyErrorResult(result, "invalid_grant", "access grant is invalid or malformed", 400);
+            VerifyErrorResult(result, "invalid_grant", "does not match the reply address", 400);
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, (ClientCredential)null);
             VerifyErrorResult(result, "invalid_argument", "credential");
