@@ -42,7 +42,6 @@ namespace Test.ADAL.WinPhone.Unit
 
             try
             {
-                UserIdentifierType t = UserIdentifierType.RequiredDisplayableId;
                 context.AcquireTokenAndContinue(sts.ValidResource, sts.ValidClientId, new Uri("ms-app://test/"), null);
 
                 Verify.Fail("Argument exception expected");

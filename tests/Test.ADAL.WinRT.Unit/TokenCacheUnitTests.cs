@@ -49,7 +49,7 @@ namespace Test.ADAL.WinRT.Unit
         //[Description("Test for Cache Operations")]
         public void TokenCacheOperationsTest()
         {
-            TokenCacheTests.TokenCacheOperationsTest(new TokenCache());
+            TokenCacheTests.TokenCacheOperationsTest();
         }
 
         [TestMethod]
@@ -57,7 +57,7 @@ namespace Test.ADAL.WinRT.Unit
         //[Description("Test for Token Cache Capacity")]
         public void TokenCacheCapacityTest()
         {
-            TokenCacheTests.TokenCacheCapacityTest(new TokenCache());
+            TokenCacheTests.TokenCacheCapacityTest();
         }
 
         [TestMethod]
@@ -65,7 +65,7 @@ namespace Test.ADAL.WinRT.Unit
         //[Description("Test for Token Cache Value Split")]
         public void TokenCacheValueSplitTest()
         {
-            TokenCacheTests.TokenCacheValueSplitTest(new TokenCache());
+            TokenCacheTests.TokenCacheValueSplitTest();
         }
 
         [TestMethod]
@@ -90,6 +90,15 @@ namespace Test.ADAL.WinRT.Unit
             {
                 // Expected
             }
+        }
+
+
+        [TestMethod]
+        [TestCategory("AdalWinRTUnit")]
+        //[Description("Test for Token Cache Capacity")]
+        public void TokenCacheSerializationTest()
+        {
+            TokenCacheTests.TokenCacheSerializationTest();
         }
 
         public static void TestEncryption(string message)

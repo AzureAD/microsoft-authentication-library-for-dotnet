@@ -261,8 +261,10 @@ namespace Test.ADAL.Common.Unit
 
         }
 
-        internal static void TokenCacheOperationsTest(TokenCache tokenCache)
+        internal static void TokenCacheOperationsTest()
         {
+            var tokenCache = new TokenCache();
+
             var cacheDictionary = tokenCache.tokenCacheDictionary;
 
             tokenCache.Clear();
@@ -421,8 +423,10 @@ namespace Test.ADAL.Common.Unit
             Verify.AreEqual(0, cacheDictionary.Keys.Count);
         }
 
-        internal static void TokenCacheCapacityTest(TokenCache tokenCache)
+        internal static void TokenCacheCapacityTest()
         {
+            var tokenCache = new TokenCache();
+
             tokenCache.Clear();
 
             const int MaxItemCount = 100;
@@ -432,13 +436,7 @@ namespace Test.ADAL.Common.Unit
 
             for (int i = 0; i < MaxItemCount; i++)
             {
-                keys[i] = new TokenCacheKey(
-                    GenerateRandomString(MaxFieldSize),
-                    GenerateRandomString(MaxFieldSize),
-                    GenerateRandomString(MaxFieldSize),
-                    TokenSubjectType.User,
-                    GenerateRandomString(MaxFieldSize),
-                    GenerateRandomString(MaxFieldSize));
+                keys[i] = GenerateRandomTokenCacheKey(MaxFieldSize);
 
                 values[i] = CreateCacheValue(null, null);
                 AddToDictionary(tokenCache, keys[i], values[i]);
@@ -459,8 +457,9 @@ namespace Test.ADAL.Common.Unit
             tokenCache.Clear();
         }
 
-        internal static void TokenCacheValueSplitTest(TokenCache tokenCache)
+        internal static void TokenCacheValueSplitTest()
         {
+            var tokenCache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts", "resourc1", "client1", TokenSubjectType.User, null, "user1");
 
             tokenCache.Clear();
@@ -472,6 +471,29 @@ namespace Test.ADAL.Common.Unit
                 tokenCache.Clear();
                 AddToDictionary(tokenCache, key, value);
                 Verify.AreEqual(tokenCache.tokenCacheDictionary[key], value);
+            }
+        }
+
+        internal static void TokenCacheSerializationTest()
+        {
+            var context = new AuthenticationContext("https://login.windows.net/common", false);
+            var tokenCache = context.TokenCache;
+            const int MaxItemCount = 100;
+            const int MaxFieldSize = 1024;
+
+            for (int i = 0; i < 100; i++)
+            {
+                tokenCache.Clear();
+                for (int count = 0; count < Rand.Next(1, MaxItemCount); count++)
+                {
+                    TokenCacheKey key = GenerateRandomTokenCacheKey(MaxFieldSize);
+
+                    AuthenticationResult result = GenerateRandomCacheValue(MaxFieldSize);
+                    AddToDictionary(tokenCache, key, result);
+                }
+
+                byte[] serializedCache = tokenCache.Serialize();
+                tokenCache.Deserialize(serializedCache);
             }
         }
 
@@ -530,10 +552,11 @@ namespace Test.ADAL.Common.Unit
 
         public static string GenerateRandomString(int len)
         {
+            string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             char[] str = new char[len];
             for (int i = 0; i < len; i++)
             {
-                str[i] = (char)Rand.Next(0x20, 0x7F);
+                str[i] = chars[Rand.Next(chars.Length)];
             }
 
             return new string(str);
@@ -602,6 +625,29 @@ namespace Test.ADAL.Common.Unit
             tokenCache.OnAfterAccess(null);
 
             return result;
+        }
+
+        private static TokenCacheKey GenerateRandomTokenCacheKey(int maxFieldSize)
+        {
+            return new TokenCacheKey(GenerateRandomString(maxFieldSize),
+                GenerateRandomString(maxFieldSize),
+                GenerateRandomString(maxFieldSize),
+                TokenSubjectType.User,
+                GenerateRandomString(maxFieldSize),
+                GenerateRandomString(maxFieldSize));
+        }
+
+        public static AuthenticationResult GenerateRandomCacheValue(int maxFieldSize)
+        {
+            string refreshToken = GenerateRandomString(maxFieldSize);
+            return new AuthenticationResult(
+                null, 
+                GenerateRandomString(maxFieldSize),
+                GenerateRandomString(maxFieldSize), 
+                new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)))
+                {
+                    UserInfo = new UserInfo { UniqueId = GenerateRandomString(maxFieldSize), DisplayableId = GenerateRandomString(maxFieldSize) }
+                };
         }
     }
 }
