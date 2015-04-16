@@ -129,6 +129,8 @@ namespace Test.ADAL.Common
 
         public string ValidUserName2 { get; protected set; }
 
+        public string ValidUserName3 { get; protected set; }
+
         public UserIdentifier ValidRequiredUserId2
         {
             get
@@ -140,6 +142,8 @@ namespace Test.ADAL.Common
         public string ValidPassword { get; set; }
 
         public string ValidPassword2 { get; set; }
+
+        public string ValidPassword3 { get; set; }
 
         public string InvalidResource { get; protected set; }
 
@@ -199,23 +203,25 @@ namespace Test.ADAL.Common
             this.Type = StsType.AAD;
             this.ValidClientId = "4b8d1b32-ee16-4b30-9b5d-e374c43deb31";
             this.ValidNonExistentRedirectUriClientId = this.ValidClientId;
-            this.ValidClientIdWithExistingRedirectUri = "5c0986db-8d89-4442-b5f9-d281efae9bad";
+            this.ValidClientIdWithExistingRedirectUri = this.ValidClientId;
             this.ValidConfidentialClientId = "91ce6b56-776c-4e07-83c3-ebbb11726999";
             this.ValidConfidentialClientSecret = "3VFF+M+V/UibacSYtzpGHbHmIIKeFBkurOfl+fIqhrM=";
             this.ValidWinRTClientId = "786067bc-40cc-4171-be40-a73b2d05a461";
             this.ValidUserName = @"adaltest@aadadfs.onmicrosoft.com";
             this.ValidUserName2 = "adaltest2@aadadfs.onmicrosoft.com";
+            this.ValidUserName3 = "adaltest3@aadadfs.onmicrosoft.com";
             this.ValidDefaultRedirectUri = new Uri("https://login.live.com/");
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
             this.ValidRedirectUriForConfidentialClient = new Uri("https://confidential.foobar.com");
-            this.ValidPassword = "p@ssword1";
-            this.ValidPassword2 = "p@ssword2";
+            this.ValidPassword = "<REPLACE>";
+            this.ValidPassword2 = "<REPLACE>";
+            this.ValidPassword3 = "<REPLACE>";
             this.ValidResource = "http://testwebapp.com";
             this.ValidResource2 = "http://testwebapp2.com";
             this.ValidResource3 = "http://testwebapp3.com";
 
             this.MsaUserName = "adaltest@outlook.com";
-            this.MsaPassword = "SoMuch2Do";
+            this.MsaPassword = "<REPLACE>";
         }
 
         public string TenantName { get; protected set; }
@@ -233,7 +239,7 @@ namespace Test.ADAL.Common
             this.ValidRedirectUriForConfidentialClient = this.ValidExistingRedirectUri;
 
             this.ValidUserName = "testuser1@aadadfs.info";
-            this.ValidPassword = "p@ssword1";
+            this.ValidPassword = "<REPLACE>";
         }
 
         public string ValidFederatedUserName { get; protected set; }
@@ -262,10 +268,9 @@ namespace Test.ADAL.Common
             this.ValidUserName = @"aadadfs.info\testuser1";
             this.ValidConfidentialClientId = this.ValidClientId;
             this.ValidRedirectUriForConfidentialClient = this.ValidExistingRedirectUri;
-            this.ValidPassword = "p@ssword1";
+            this.ValidPassword = "<REPLACE>";
             this.ValidResource = "urn:msft:ad:test:oauth:test";
             this.ValidResource2 = "urn:msft:ad:test:oauth:test2";
         }
     }
-
 }

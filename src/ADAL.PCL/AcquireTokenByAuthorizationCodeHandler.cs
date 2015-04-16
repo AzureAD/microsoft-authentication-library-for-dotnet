@@ -63,6 +63,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (result.Resource != null)
             {
                 this.Resource = result.Resource;
+                PlatformPlugin.Logger.Verbose(this.CallState, "Resource value in the token response was used for storing tokens in the cache");
             }
 
             // If resource is not passed as an argument and is not returned by STS either, 

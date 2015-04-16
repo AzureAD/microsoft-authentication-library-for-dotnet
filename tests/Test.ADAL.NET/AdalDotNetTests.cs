@@ -501,5 +501,14 @@ namespace Test.ADAL.NET
         {
             await AdalTests.MsaTestAsync();
         }
+
+        [TestMethod]
+        [Description("Test for mixed case username and cache")]
+        [TestCategory("AdalDotNetMock")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
+        public async Task MixedCaseUserNameTest()
+        {
+            await AdalTests.MixedCaseUserNameTestAsync(Sts);
+        }
     }
 }

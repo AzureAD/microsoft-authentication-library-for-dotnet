@@ -565,6 +565,20 @@ namespace Test.ADAL.Common
             Verify.AreEqual(sts.ValidUserName2, result2.UserInfo.DisplayableId);
         }
 
+        public static async Task MixedCaseUserNameTestAsync(Sts sts)
+        {
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
+            UserCredentialProxy credential = new UserCredentialProxy(sts.ValidUserName3, sts.ValidPassword3);
+            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, credential);
+            VerifySuccessResult(sts, result);
+            Verify.IsNotNull(result.UserInfo);
+            Verify.AreNotEqual(result.UserInfo.DisplayableId, result.UserInfo.DisplayableId.ToLower());
+            AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
+            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, credential);
+            VerifySuccessResult(sts, result2);
+            Verify.IsTrue(AreDateTimeOffsetsEqual(result.ExpiresOn, result2.ExpiresOn));
+        }
+        
         public static void VerifyExpiresOnAreEqual(AuthenticationResultProxy result, AuthenticationResultProxy result2)
         {
             bool equal = AreDateTimeOffsetsEqual(result.ExpiresOn, result2.ExpiresOn);

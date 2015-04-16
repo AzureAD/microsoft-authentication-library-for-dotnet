@@ -195,6 +195,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (this.Resource != null)
             {
+                PlatformPlugin.Logger.Verbose(this.CallState, "Refreshing access token...");
+
                 try
                 {
                     newResult = await this.SendTokenRequestByRefreshTokenAsync(result.RefreshToken);
