@@ -145,7 +145,7 @@ namespace Test.ADAL.Common.Unit
             VerifyCacheItemCount(cache, 0);
         }
 
-        public static async Task TokenCacheKeyTestAsync(AuthorizationParameters parameters)
+        public static async Task TokenCacheKeyTestAsync(IPlatformParameters parameters)
         {
             CheckPublicGetSets();
 

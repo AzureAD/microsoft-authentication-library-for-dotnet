@@ -22,7 +22,7 @@ namespace Test.ADAL.NET.Friend
 {
     class RecorderWebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(IAuthorizationParameters parameters)
+        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
         {
             return new RecorderWebUI(parameters);
         }

@@ -23,14 +23,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        private AuthorizationParameters parameters;
+        private PlatformParameters parameters;
 
-        public IWebUI CreateAuthenticationDialog(IAuthorizationParameters inputParameters)
+        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters)
         {
-            this.parameters = inputParameters as AuthorizationParameters;
+            this.parameters = inputParameters as PlatformParameters;
             if (this.parameters == null)
             {
-                throw new ArgumentException("parameters should be of type AuthorizationParameters", "parameters");
+                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
 
             switch (this.parameters.PromptBehavior)

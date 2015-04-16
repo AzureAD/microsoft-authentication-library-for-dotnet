@@ -42,7 +42,7 @@ namespace Test.ADAL.Common
             eventListener.EnableEvents(AdalOption.AdalEventSource, EventLevel.Verbose);
 
             context.SetCorrelationId(correlationId);
-            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
+            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, result);
             Verify.IsTrue(eventListener.TraceBuffer.Contains(correlationId.ToString()));
 
@@ -86,7 +86,7 @@ namespace Test.ADAL.Common
 
                 SetCredential(sts);
                 var context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheType.Null);
-                var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
+                var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
                 VerifySuccessResult(sts, result);
 
                 // ADAL WinRT does not support AuthenticationParameters.CreateFromUnauthorizedResponse API
@@ -99,13 +99,13 @@ namespace Test.ADAL.Common
                     }
 
                     context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheType.Null);
-                    result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
+                    result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
                     VerifySuccessResult(sts, result);
                 }
 
                 authParams = await AuthenticationParametersProxy.CreateFromResourceUrlAsync(new Uri(RelyingPartyWithDiscoveryUrl));
                 context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheType.Null);
-                result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
+                result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
                 AdalTests.VerifySuccessResult(sts, result);
 
                 Log.Comment("Relying Party Terminating...");

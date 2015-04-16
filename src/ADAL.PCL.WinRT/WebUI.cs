@@ -28,15 +28,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private readonly PromptBehavior promptBehavior;
         private readonly bool useCorporateNetwork;
 
-        public WebUI(IAuthorizationParameters parameters)
+        public WebUI(IPlatformParameters parameters)
         {
-            if (!(parameters is AuthorizationParameters))
+            if (!(parameters is PlatformParameters))
             {
-                throw new ArgumentException("parameters should be of type AuthorizationParameters", "parameters");
+                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
 
-            this.promptBehavior = ((AuthorizationParameters)parameters).PromptBehavior;
-            this.useCorporateNetwork = ((AuthorizationParameters)parameters).UseCorporateNetwork;
+            this.promptBehavior = ((PlatformParameters)parameters).PromptBehavior;
+            this.useCorporateNetwork = ((PlatformParameters)parameters).UseCorporateNetwork;
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)

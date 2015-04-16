@@ -50,7 +50,7 @@ namespace Test.ADAL.WinPhone.Unit
 
             SetReplayerNetworkPlugin();
 
-            AdalTests.AuthorizationParameters = new AuthorizationParameters();
+            AdalTests.PlatformParameters = new PlatformParameters();
         }
 
         [TestMethod]
@@ -221,7 +221,7 @@ namespace Test.ADAL.WinPhone.Unit
 
         class TestPlatformInformation : PlatformInformation
         {
-            public override void AddPromptBehaviorQueryParameter(IAuthorizationParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
+            public override void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
             {
                 // Do not add prompt=login to the query to be able to use the mock dictionary created by Test.ADAL.NET.
             }            

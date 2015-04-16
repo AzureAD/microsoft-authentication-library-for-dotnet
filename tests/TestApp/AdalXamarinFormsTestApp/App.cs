@@ -7,7 +7,7 @@ using Xamarin.Forms;
 
 namespace AdalXamarinFormsTestApp
 {
-    public delegate IAuthorizationParameters CreateParameters();
+    public delegate IPlatformParameters CreateParameters();
 
     public class App : Application
     {

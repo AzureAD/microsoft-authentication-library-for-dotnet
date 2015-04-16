@@ -42,7 +42,7 @@
     <Compile Include="AdalInitializer.cs" />
     <Compile Include="AuthenticationAgentUINavigationController.cs" />
     <Compile Include="AuthenticationAgentUIViewController.cs" />
-    <Compile Include="AuthorizationParameters.cs" />
+    <Compile Include="PlatformParameters.cs" />
     <Compile Include="CryptographyHelper.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="PlatformInformation.cs" />

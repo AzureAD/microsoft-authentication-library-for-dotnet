@@ -16,12 +16,23 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using Android.App;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
     /// Additional parameters used in acquiring user's authorization
     /// </summary>
-    public class AuthorizationParameters : IAuthorizationParameters
+    public class PlatformParameters : IPlatformParameters
     {
+        public PlatformParameters(Activity callerActivity)
+        {
+            this.CallerActivity = callerActivity;
+        }
+
+        /// <summary>
+        /// Caller Android Activity
+        /// </summary>
+        public Activity CallerActivity { get; private set; } 
     }
 }

@@ -26,7 +26,7 @@ namespace Test.ADAL.WinPhone.Unit
 {
     class ReplayerWebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(IAuthorizationParameters parameters)
+        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
         {
             return new ReplayerWebUI(parameters);
         }

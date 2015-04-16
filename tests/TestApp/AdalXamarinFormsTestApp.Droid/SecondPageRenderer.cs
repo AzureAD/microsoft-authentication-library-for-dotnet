@@ -27,7 +27,7 @@ namespace AdalXamarinFormsTestApp.Droid
             SecondPage page = e.NewElement as SecondPage;
 
             var activity = this.Context as Activity;
-            page.Paramters = new AuthorizationParameters(activity);
+            page.Paramters = new PlatformParameters(activity);
         }
     }
 }

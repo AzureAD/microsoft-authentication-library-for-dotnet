@@ -39,7 +39,7 @@ namespace TestApp.PCL
             context = new AuthenticationContext(this.sts.Authority, true);            
         }
 
-        public async Task<string> GetTokenInteractiveAsync(IAuthorizationParameters parameters)
+        public async Task<string> GetTokenInteractiveAsync(IPlatformParameters parameters)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace TestApp.PCL
             }
         }
 
-        public async Task<string> GetTokenInteractiveWithMsAppAsync(IAuthorizationParameters parameters)
+        public async Task<string> GetTokenInteractiveWithMsAppAsync(IPlatformParameters parameters)
         {
             try
             {

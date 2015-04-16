@@ -78,7 +78,7 @@ namespace AdaliOSTestApp
             {
                 ReportLabel.Text = string.Empty;
                 TokenBroker tokenBroker = new TokenBroker();
-                string token = await tokenBroker.GetTokenInteractiveAsync(new AuthorizationParameters(this));
+                string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
                 ReportLabel.Text = token;
             }
             catch (Exception ex)

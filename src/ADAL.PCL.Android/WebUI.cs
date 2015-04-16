@@ -27,14 +27,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private static SemaphoreSlim returnedUriReady;
         private static AuthorizationResult authorizationResult;
-        private readonly AuthorizationParameters parameters;
+        private readonly PlatformParameters parameters;
 
-        public WebUI(IAuthorizationParameters parameters)
+        public WebUI(IPlatformParameters parameters)
         {
-            this.parameters = parameters as AuthorizationParameters;
+            this.parameters = parameters as PlatformParameters;
             if (this.parameters == null)
             {
-                throw new ArgumentException("parameters should be of type AuthorizationParameters", "parameters");
+                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
         }
 
