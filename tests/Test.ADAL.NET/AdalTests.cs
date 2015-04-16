@@ -68,7 +68,7 @@ namespace Test.ADAL.Common
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, new Uri(sts.ValidRedirectUriForConfidentialClient.AbsoluteUri + "x"), credential);
 
-            VerifyErrorResult(result, "invalid_grant", "does not match the reply address", 400);
+            VerifyErrorResult(result, "invalid_grant", "does not match the reply address", 400, "70002");
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, (ClientCredential)null);
             VerifyErrorResult(result, "invalid_argument", "credential");
@@ -117,13 +117,17 @@ namespace Test.ADAL.Common
 
         public static async Task ClientCredentialTestAsync(Sts sts)
         {
-            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheType.Null);
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
 
             AuthenticationResultProxy result = null;
 
             var credential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
             result = await context.AcquireTokenAsync(sts.ValidResource, credential);
             Verify.IsNotNullOrEmptyString(result.AccessToken);
+            AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
+            var result2 = await context.AcquireTokenAsync(sts.ValidResource, credential);
+            Verify.IsNotNullOrEmptyString(result2.AccessToken);
+            VerifyExpiresOnAreEqual(result, result2);
 
             result = await context.AcquireTokenAsync(null, credential);
             VerifyErrorResult(result, Sts.InvalidArgumentError, "resource");
@@ -133,7 +137,7 @@ namespace Test.ADAL.Common
 
             var invalidCredential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret + "x");
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
-            VerifyErrorResult(result, Sts.InvalidClientError, "50012");
+            VerifyErrorResult(result, Sts.InvalidClientError, "70002");
 
             invalidCredential = new ClientCredential(sts.ValidConfidentialClientId.Replace("0", "1"), sts.ValidConfidentialClientSecret + "x");
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
@@ -699,7 +703,6 @@ namespace Test.ADAL.Common
             await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
 
             Verify.IsTrue(eventListener.TraceBuffer.IndexOf("$$") < 0);
-            Verify.IsTrue(eventListener.TraceBuffer.IndexOf("Correlation ID") > 0);
 
             eventListener.TraceBuffer = string.Empty;
 
