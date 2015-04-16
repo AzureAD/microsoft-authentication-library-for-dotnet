@@ -65,7 +65,7 @@ namespace Test.ADAL.NET
             RecorderSettings.SetMockModeByTestContext(TestContext);
             AdalTests.EndBrowserDialogSession();
 
-            AdalTests.AuthorizationParameters = new AuthorizationParameters(PromptBehavior.Auto, null);
+            AdalTests.PlatformParameters = new PlatformParameters(PromptBehavior.Auto, null);
         }
 
         [TestMethod]

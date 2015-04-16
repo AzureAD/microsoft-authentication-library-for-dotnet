@@ -45,7 +45,7 @@ namespace Test.ADAL.WinRT.Unit
 
             SetReplayerNetworkPlugin();
 
-            AdalTests.AuthorizationParameters = new AuthorizationParameters(PromptBehavior.Auto, false);
+            AdalTests.PlatformParameters = new PlatformParameters(PromptBehavior.Auto, false);
         }
 
         [TestMethod]

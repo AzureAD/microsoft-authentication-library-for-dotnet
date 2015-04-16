@@ -105,15 +105,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return NetworkInformation.GetHostNames().Any(entry => entry.Type == HostNameType.DomainName);
         }
 
-        public override void AddPromptBehaviorQueryParameter(IAuthorizationParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
+        public override void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
         {
-            AuthorizationParameters authorizationParameters = (parameters as AuthorizationParameters);
+            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
             if (authorizationParameters == null)
             {
-                throw new ArgumentException("parameters should be of type AuthorizationParameters", "parameters");
+                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
 
-            PromptBehavior promptBehavior = (parameters as AuthorizationParameters).PromptBehavior;
+            PromptBehavior promptBehavior = (parameters as PlatformParameters).PromptBehavior;
 
             // ADFS currently ignores the parameter for now.
             switch (promptBehavior)

@@ -126,17 +126,17 @@ namespace Test.ADAL.Common
             this.context.CorrelationId = correlationId;
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters)
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters)
         {
             return await RunTaskInteractiveAsync(resource, clientId, redirectUri, parameters, UserIdentifier.AnyUser, null);
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId)
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId)
         {
             return await RunTaskInteractiveAsync(resource, clientId, redirectUri, parameters, userId, null);
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters parameters, UserIdentifier userId, string extraQueryParameters)
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters)
         {
             return await RunTaskInteractiveAsync(resource, clientId, redirectUri, parameters, userId, extraQueryParameters);
         }
@@ -158,12 +158,12 @@ namespace Test.ADAL.Common
             return resultProxy;
         }
 
-        private async Task<AuthenticationResultProxy> RunTaskInteractiveAsync(string resource, string clientId, Uri redirectUri, IAuthorizationParameters authorizationParameters, UserIdentifier userId, string extraQueryParameters, int retryCount = 0)
+        private async Task<AuthenticationResultProxy> RunTaskInteractiveAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters authorizationParameters, UserIdentifier userId, string extraQueryParameters, int retryCount = 0)
         {
             AuthenticationResultProxy resultProxy;
             bool exceptionOccured = false;
 
-            PromptBehavior promptBehavior = (authorizationParameters as AuthorizationParameters).PromptBehavior;
+            PromptBehavior promptBehavior = (authorizationParameters as PlatformParameters).PromptBehavior;
 
             try
             {
@@ -184,17 +184,17 @@ namespace Test.ADAL.Common
 
                         if (userId != null && !ReferenceEquals(userId, UserIdentifier.AnyUser) && userId.Id == NotSpecified)
                         {
-                            result = await context.AcquireTokenAsync(resource, clientId, redirectUri, new AuthorizationParameters(promptBehavior, null));
+                            result = await context.AcquireTokenAsync(resource, clientId, redirectUri, new PlatformParameters(promptBehavior, null));
                         }
                         else
                         {
                             if (extraQueryParameters == NotSpecified)
                             {
-                                result = await context.AcquireTokenAsync(resource, clientId, redirectUri, new AuthorizationParameters(promptBehavior, null), userId);
+                                result = await context.AcquireTokenAsync(resource, clientId, redirectUri, new PlatformParameters(promptBehavior, null), userId);
                             }
                             else
                             {
-                                result = await context.AcquireTokenAsync(resource, clientId, redirectUri, new AuthorizationParameters(promptBehavior, null), userId, extraQueryParameters);
+                                result = await context.AcquireTokenAsync(resource, clientId, redirectUri, new PlatformParameters(promptBehavior, null), userId, extraQueryParameters);
                             }
                         }
 

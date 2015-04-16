@@ -110,15 +110,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return returnValue;
         }
 
-        public override void AddPromptBehaviorQueryParameter(IAuthorizationParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
+        public override void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
         {
-            AuthorizationParameters authorizationParameters = (parameters as AuthorizationParameters);
+            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
             if (authorizationParameters == null)
             {
-                throw new ArgumentException("parameters should be of type AuthorizationParameters", "parameters");
+                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
 
-            PromptBehavior promptBehavior = (parameters as AuthorizationParameters).PromptBehavior;
+            PromptBehavior promptBehavior = (parameters as PlatformParameters).PromptBehavior;
 
             // ADFS currently ignores the parameter for now.
             switch (promptBehavior)
@@ -135,15 +135,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }            
         }
 
-        public override bool GetCacheLoadPolicy(IAuthorizationParameters parameters)
+        public override bool GetCacheLoadPolicy(IPlatformParameters parameters)
         {
-            AuthorizationParameters authorizationParameters = (parameters as AuthorizationParameters);
+            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
             if (authorizationParameters == null)
             {
-                throw new ArgumentException("parameters should be of type AuthorizationParameters", "parameters");
+                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
 
-            PromptBehavior promptBehavior = (parameters as AuthorizationParameters).PromptBehavior;
+            PromptBehavior promptBehavior = (parameters as PlatformParameters).PromptBehavior;
             
             return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession;
         }

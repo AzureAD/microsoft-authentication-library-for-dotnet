@@ -71,7 +71,7 @@ namespace AdalAndroidTestApp
         {
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
-            string token = await tokenBroker.GetTokenInteractiveAsync(new AuthorizationParameters(this));
+            string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
             this.accessTokenTextView.Text = token;
         }
 

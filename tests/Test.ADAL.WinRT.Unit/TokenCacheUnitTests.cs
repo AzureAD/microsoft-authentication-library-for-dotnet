@@ -41,7 +41,7 @@ namespace Test.ADAL.WinRT.Unit
         //[Description("Test for TokenCache")]
         public async Task TokenCacheKeyTestAsync()
         {
-            await TokenCacheTests.TokenCacheKeyTestAsync(new AuthorizationParameters(PromptBehavior.Auto, false));
+            await TokenCacheTests.TokenCacheKeyTestAsync(new PlatformParameters(PromptBehavior.Auto, false));
         }
 
         [TestMethod]

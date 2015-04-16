@@ -46,7 +46,7 @@
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AuthorizationParameters.cs" />
+    <Compile Include="PlatformParameters.cs" />
     <Compile Include="CryptographyHelper.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="PlatformInformation.cs" />

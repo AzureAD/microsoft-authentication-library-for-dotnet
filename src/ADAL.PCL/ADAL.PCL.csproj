@@ -86,7 +86,7 @@
     <Compile Include="HttpClientFactory.cs" />
     <Compile Include="HttpRequestWrapperException.cs" />
     <Compile Include="HttpWebResponseWrapper.cs" />
-    <Compile Include="IAuthorizationParameters.cs" />
+    <Compile Include="IPlatformParameters.cs" />
     <Compile Include="ICryptographyHelper.cs" />
     <Compile Include="IdToken.cs" />
     <Compile Include="IHttpClient.cs" />

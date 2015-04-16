@@ -26,7 +26,7 @@ namespace Test.ADAL.WinRT.Unit
     {
         private const string Delimiter = ":::";
 
-        public ReplayerWebUI(IAuthorizationParameters parameters)
+        public ReplayerWebUI(IPlatformParameters parameters)
         {
         }
 

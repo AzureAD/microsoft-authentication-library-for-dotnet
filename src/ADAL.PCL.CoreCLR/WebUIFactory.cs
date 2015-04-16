@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(IAuthorizationParameters parameters)
+        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
         {
             throw new NotImplementedException();
         }   

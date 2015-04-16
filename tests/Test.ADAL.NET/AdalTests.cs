@@ -254,7 +254,7 @@ namespace Test.ADAL.Common
 
             AuthenticationContextProxy.SetCredentials(sts.Type == StsType.ADFS ? sts.ValidUserName : null, sts.ValidPassword);
             var contextProxy = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
-            AuthenticationResultProxy resultProxy = await contextProxy.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
+            AuthenticationResultProxy resultProxy = await contextProxy.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, resultProxy);
 
             AuthenticationResult result = await context.AcquireTokenSilentAsync(sts.ValidResource, sts.ValidClientId, (sts.Type == StsType.ADFS) ? UserIdentifier.AnyUser : sts.ValidUserId);
@@ -268,7 +268,7 @@ namespace Test.ADAL.Common
         {
             SetCredential(sts);
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
-            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
+            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, result);
 
             AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
@@ -277,14 +277,14 @@ namespace Test.ADAL.Common
 
             var userId = (result.UserInfo != null) ? new UserIdentifier(result.UserInfo.DisplayableId, UserIdentifierType.OptionalDisplayableId) : UserIdentifier.AnyUser;
 
-            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, userId, SecondCallExtraQueryParameter);
+            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, userId, SecondCallExtraQueryParameter);
             VerifySuccessResult(sts, result2);
             VerifyExpiresOnAreEqual(result, result2);
 
             var dummyContext = new AuthenticationContext("https://dummy/dummy", false);
             AdalFriend.UpdateTokenExpiryOnTokenCache(dummyContext.TokenCache, DateTime.UtcNow + TimeSpan.FromSeconds(4 * 60 + 50));
 
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, userId);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, userId);
             VerifySuccessResult(sts, result2);
             Verify.AreNotEqual(result.AccessToken, result2.AccessToken);
         }
@@ -294,7 +294,7 @@ namespace Test.ADAL.Common
             SetCredential(sts);
 
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
-            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidConfidentialClientId, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
+            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidConfidentialClientId, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, result);
 
             ClientCredential clientCredential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret);
@@ -350,7 +350,7 @@ namespace Test.ADAL.Common
             SetCredential(sts);
 
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
-            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidConfidentialClientId, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
+            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidConfidentialClientId, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, result);
 
             var clientCertificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, ExportX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword), sts.ConfidentialClientCertificatePassword);
@@ -408,7 +408,7 @@ namespace Test.ADAL.Common
             SetCredential(sts);
 
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
-            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidConfidentialClientId, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
+            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidConfidentialClientId, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, result);
 
             RecorderJwtId.JwtIdIndex = 13;
@@ -535,17 +535,17 @@ namespace Test.ADAL.Common
         {
             SetCredential(sts);
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
-            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
+            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, result);
 
             AuthenticationContextProxy.SetCredentials(null, null);
-            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters,
+            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters,
                 (sts.Type == StsType.ADFS) ? null : sts.ValidUserId);
             VerifySuccessResult(sts, result2);
             Verify.AreEqual(result2.AccessToken, result.AccessToken);
 
             AuthenticationContextProxy.SetCredentials(sts.ValidUserName, sts.ValidPassword);
-            var neverAuthorizationParameters = new AuthorizationParameters(PromptBehavior.Always, null);
+            var neverAuthorizationParameters = new PlatformParameters(PromptBehavior.Always, null);
             result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, neverAuthorizationParameters);
             VerifySuccessResult(sts, result);
             Verify.AreNotEqual(result2.AccessToken, result.AccessToken);
@@ -555,13 +555,13 @@ namespace Test.ADAL.Common
         {
             // Should not be able to get a token silently on first try.
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
-            var neverAuthorizationParameters = new AuthorizationParameters(PromptBehavior.Never, null);
+            var neverAuthorizationParameters = new PlatformParameters(PromptBehavior.Never, null);
             AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, neverAuthorizationParameters);
             VerifyErrorResult(result, Sts.UserInteractionRequired, null);
 
             AuthenticationContextProxy.SetCredentials(sts.ValidUserName, sts.ValidPassword);
             // Obtain a token interactively.
-            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
+            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, result);
 
             AuthenticationContextProxy.SetCredentials(null, null);
@@ -586,18 +586,18 @@ namespace Test.ADAL.Common
             Log.Comment("Acquire token for user1 interactively");
             AuthenticationContextProxy.SetCredentials(null, sts.ValidPassword);
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
-            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, sts.ValidUserId);
+            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResultAndTokenContent(sts, result);
             Verify.AreEqual(sts.ValidUserName, result.UserInfo.DisplayableId);
 
             Log.Comment("Acquire token via cookie for user1 without user");
-            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters);
+            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters);
             VerifySuccessResultAndTokenContent(sts, result2);
             Verify.AreEqual(sts.ValidUserName, result2.UserInfo.DisplayableId);
 
             Log.Comment("Acquire token for user2 via force prompt and user");
             AuthenticationContextProxy.SetCredentials(sts.ValidUserName2, sts.ValidPassword2);
-            var alwaysAuthorizationParameters = new AuthorizationParameters(PromptBehavior.Always, null);
+            var alwaysAuthorizationParameters = new PlatformParameters(PromptBehavior.Always, null);
             result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, alwaysAuthorizationParameters, sts.ValidRequiredUserId2);
             VerifySuccessResultAndTokenContent(sts, result2);
             Verify.AreEqual(sts.ValidUserName2, result2.UserInfo.DisplayableId);
@@ -609,7 +609,7 @@ namespace Test.ADAL.Common
             Verify.AreEqual(sts.ValidUserName2, result2.UserInfo.DisplayableId);
 
             Log.Comment("Fail to acquire token without user while tokens for two users in the cache");
-            result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters);
+            result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters);
             VerifyErrorResult(result2, "multiple_matching_tokens_detected", null);
         }
 
@@ -619,10 +619,10 @@ namespace Test.ADAL.Common
 
             AuthenticationContextProxy.SetCredentials(userId.Id, sts.ValidPassword);
             var context = new AuthenticationContextProxy(sts.Authority, false, TokenCacheType.InMemory);
-            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, AuthorizationParameters, userId);
+            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, userId);
             VerifySuccessResult(sts, result);
             AuthenticationContextProxy.Delay(2000);
-            var refreshSessionAuthorizationParameters = new AuthorizationParameters(PromptBehavior.RefreshSession, null);
+            var refreshSessionAuthorizationParameters = new PlatformParameters(PromptBehavior.RefreshSession, null);
             AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, refreshSessionAuthorizationParameters, userId);
             VerifySuccessResult(sts, result2);
             Verify.AreNotEqual(result.AccessToken, result2.AccessToken);

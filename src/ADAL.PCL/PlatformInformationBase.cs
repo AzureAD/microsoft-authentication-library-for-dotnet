@@ -51,12 +51,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return false;
         }
 
-        public virtual void AddPromptBehaviorQueryParameter(IAuthorizationParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
+        public virtual void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
         {
             authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
         }
 
-        public virtual bool GetCacheLoadPolicy(IAuthorizationParameters parameters)
+        public virtual bool GetCacheLoadPolicy(IPlatformParameters parameters)
         {
             return true;
         }

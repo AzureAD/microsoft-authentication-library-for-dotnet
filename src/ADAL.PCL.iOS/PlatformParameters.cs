@@ -16,12 +16,28 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using UIKit;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
     /// Additional parameters used in acquiring user's authorization
     /// </summary>
-    public class AuthorizationParameters : IAuthorizationParameters
+    public class PlatformParameters : IPlatformParameters
     {
+        public PlatformParameters(UIViewController callerViewController)
+        {
+            this.CallerViewController = callerViewController;
+        }
+
+        /// <summary>
+        /// Caller UIViewController
+        /// </summary>
+        public UIViewController CallerViewController { get; private set; } 
     }
 }

@@ -20,6 +20,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     interface IWebUIFactory
     {
-        IWebUI CreateAuthenticationDialog(IAuthorizationParameters parameters);
+        IWebUI CreateAuthenticationDialog(IPlatformParameters parameters);
     }
 }

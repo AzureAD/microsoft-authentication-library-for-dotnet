@@ -39,7 +39,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public async Task TokenCacheKeyTestAsync()
         {
-            await TokenCacheTests.TokenCacheKeyTestAsync(new AuthorizationParameters(PromptBehavior.Auto, null));
+            await TokenCacheTests.TokenCacheKeyTestAsync(new PlatformParameters(PromptBehavior.Auto, null));
         }
 
         [TestMethod]

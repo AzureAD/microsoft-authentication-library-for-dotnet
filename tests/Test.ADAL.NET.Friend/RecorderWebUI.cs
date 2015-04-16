@@ -32,7 +32,7 @@ namespace Test.ADAL.NET.Friend
             Initialize();
         }
 
-        public RecorderWebUI(IAuthorizationParameters parameters)
+        public RecorderWebUI(IPlatformParameters parameters)
         {
             this.internalWebUI = (new WebUIFactory()).CreateAuthenticationDialog(parameters);
         }

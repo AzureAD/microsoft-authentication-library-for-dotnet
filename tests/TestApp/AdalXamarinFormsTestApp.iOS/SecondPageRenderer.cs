@@ -29,7 +29,7 @@ namespace AdalXamarinFormsTestApp.iOS
         public override void ViewDidLoad ()
         {
             base.ViewDidLoad ();
-            page.Paramters = new AuthorizationParameters(this);
+            page.Paramters = new PlatformParameters(this);
         }
     }
 }

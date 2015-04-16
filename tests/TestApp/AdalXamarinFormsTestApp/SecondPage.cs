@@ -37,7 +37,7 @@ namespace AdalXamarinFormsTestApp
             };
         }
 
-        public IAuthorizationParameters Paramters { get; set; }
+        public IPlatformParameters Paramters { get; set; }
 
         async void browseButton_Clicked(object sender, EventArgs e)
         {

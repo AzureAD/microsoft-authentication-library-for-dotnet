@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,23 +16,9 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using Android.App;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    /// <summary>
-    /// Additional parameters used in acquiring user's authorization
-    /// </summary>
-    public class AuthorizationParameters : IAuthorizationParameters
+    public interface IPlatformParameters
     {
-        public AuthorizationParameters(Activity callerActivity)
-        {
-            this.CallerActivity = callerActivity;
-        }
-
-        /// <summary>
-        /// Caller Android Activity
-        /// </summary>
-        public Activity CallerActivity { get; private set; } 
     }
 }
