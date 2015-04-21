@@ -644,12 +644,23 @@ namespace Test.ADAL.Common
             AadSts sts = new AadSts();
 
             string liveIdtoken = StsLoginFlow.TryGetSamlToken("https://login.live.com", sts.MsaUserName, sts.MsaPassword, "urn:federation:MicrosoftOnline");
-            var context = new AuthenticationContext(sts.Authority, sts.ValidateAuthority, null);
+            var context = new AuthenticationContext(sts.Authority, sts.ValidateAuthority);
 
             try
             {
                 var result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, new UserAssertion(liveIdtoken, "urn:ietf:params:oauth:grant-type:saml1_1-bearer"));
                 VerifySuccessResult(result);
+
+                var result2 = context.AcquireTokenSilent(sts.ValidResource2, sts.ValidClientId, new UserIdentifier(sts.MsaUserName, UserIdentifierType.OptionalDisplayableId));
+                VerifySuccessResult(result2);
+                Verify.IsNotNull(result2.RefreshToken);
+                Verify.IsTrue(result2.IsMultipleResourceRefreshToken);
+
+                AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
+
+                var result3 = context.AcquireTokenSilent(sts.ValidResource, sts.ValidClientId, new UserIdentifier(sts.MsaUserName, UserIdentifierType.OptionalDisplayableId));
+                VerifySuccessResult(result3);
+                Verify.IsTrue(AreDateTimeOffsetsEqual(result.ExpiresOn, result3.ExpiresOn));
             }
             catch (Exception ex)
             {
@@ -658,6 +669,7 @@ namespace Test.ADAL.Common
 
             try
             {
+                context.TokenCache.Clear();
                 var result = context.AcquireToken(sts.ValidResource, sts.ValidClientId, new UserAssertion("x", "urn:ietf:params:oauth:grant-type:saml1_1-bearer"));
                 Verify.Fail("Exception expected");
                 VerifySuccessResult(result);
