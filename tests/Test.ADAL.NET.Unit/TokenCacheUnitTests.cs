@@ -60,7 +60,7 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
-        [Description("Test for Token Cache Capacity")]
+        [Description("Test for Token Cache Serialization")]
         [TestCategory("AdalDotNetUnit")]
         public void TokenCacheSerializationTest()
         {

@@ -95,7 +95,7 @@ namespace Test.ADAL.WinRT.Unit
 
         [TestMethod]
         [TestCategory("AdalWinRTUnit")]
-        //[Description("Test for Token Cache Capacity")]
+        //[Description("Test for Token Cache Serialization")]
         public void TokenCacheSerializationTest()
         {
             TokenCacheTests.TokenCacheSerializationTest();

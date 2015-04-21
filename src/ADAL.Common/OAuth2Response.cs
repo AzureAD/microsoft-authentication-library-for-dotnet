@@ -121,7 +121,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         // to get it from the STS response.
                         Resource = tokenResponse.Resource,
 #endif                        
-                        IsMultipleResourceRefreshToken = (!string.IsNullOrWhiteSpace(tokenResponse.RefreshToken) && !string.IsNullOrWhiteSpace(tokenResponse.Resource)),
                     };
 
                 IdToken idToken = ParseIdToken(tokenResponse.IdToken);

@@ -182,14 +182,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             RequestParameters requestParameters = new RequestParameters(this.Resource, this.ClientKey);
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
             requestParameters[OAuthParameter.RefreshToken] = refreshToken;
-            AuthenticationResult result = await this.SendHttpMessageAsync(requestParameters);
-
-            if (result.RefreshToken == null)
-            {
-                result.RefreshToken = refreshToken;
-            }
-
-            return result;
+            return await this.SendHttpMessageAsync(requestParameters);
         }
 
         private async Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result)
@@ -236,7 +229,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             TokenResponse tokenResponse = await HttpHelper.SendPostRequestAndDeserializeJsonResponseAsync<TokenResponse>(uri, requestParameters, this.CallState);
 
-            return OAuth2Response.ParseTokenResponse(tokenResponse, this.CallState);
+            AuthenticationResult result = OAuth2Response.ParseTokenResponse(tokenResponse, this.CallState);
+
+            if (result.RefreshToken == null && requestParameters.ContainsKey(OAuthParameter.RefreshToken))
+            {
+                result.RefreshToken = requestParameters[OAuthParameter.RefreshToken];
+                Logger.Verbose(this.CallState, "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+            }
+
+            result.IsMultipleResourceRefreshToken = (!string.IsNullOrWhiteSpace(result.RefreshToken) && !string.IsNullOrWhiteSpace(tokenResponse.Resource));
+            return result;
         }
 
         private void NotifyBeforeAccessCache()
