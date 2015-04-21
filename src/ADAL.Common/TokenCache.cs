@@ -327,10 +327,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (tokenNearExpiry)
                 {
                     result.AccessToken = null;
-                    if (tokenNearExpiry)
-                    {
-                        Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
-                    }
+                    Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
                 }
                 else if (!cacheKey.ResourceEquals(resource))
                 {
