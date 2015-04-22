@@ -324,13 +324,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 result = kvp.Value.Value;
                 bool tokenNearExpiry = (result.ExpiresOn <= DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
 
-                if (tokenNearExpiry || !cacheKey.ResourceEquals(resource))
+                if (tokenNearExpiry)
                 {
                     result.AccessToken = null;
-                    if (tokenNearExpiry)
-                    {
-                        Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
-                    }
+                    Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
+                }
+                else if (!cacheKey.ResourceEquals(resource))
+                {
+                    Logger.Verbose(callState, 
+                        string.Format("Multi resource refresh token for resource '{0}' will be used to acquire token for '{1}'", cacheKey.Resource, resource));
+                    var newResult = new AuthenticationResult(null, null, result.RefreshToken, DateTimeOffset.MinValue);
+                    newResult.UpdateTenantAndUserInfo(result.TenantId, result.IdToken, result.UserInfo);
+                    result = newResult;
                 }
                 else 
                 {
