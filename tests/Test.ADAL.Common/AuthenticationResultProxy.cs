@@ -58,9 +58,6 @@ namespace Test.ADAL.Common
         public string AccessToken { get; set; }
 
         [DataMember]
-        public string RefreshToken { get; set; }
-
-        [DataMember]
         public string IdToken { get; set; }
 
         [DataMember]
@@ -71,9 +68,6 @@ namespace Test.ADAL.Common
 
         [DataMember]
         public UserInfo UserInfo { get; set; }
-
-        [DataMember]
-        public bool IsMultipleResourceRefreshToken { get; set; }
 
         [DataMember]
         public AuthenticationStatusProxy Status { get; set; }

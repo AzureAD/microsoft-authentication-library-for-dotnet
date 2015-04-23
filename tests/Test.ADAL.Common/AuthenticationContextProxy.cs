@@ -54,41 +54,6 @@ namespace Test.ADAL.Common
                 new UserCredential(credential.UserId, credential.Password)));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId)
-        {
-            return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId));
-        }
-
-        public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, string resource)
-        {
-            return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, clientId, resource));
-        }
-
-        public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, ClientCredential credential)
-        {
-            return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, credential));
-        }
-
-        public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, ClientCredential credential, string resource)
-        {
-            return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, credential, resource));
-        }
-
-        public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, ClientAssertionCertificate certificate)
-        {
-            return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, certificate));
-        }
-
-        public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, ClientAssertionCertificate certificate, string resource)
-        {
-            return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, certificate, resource));
-        }
-
-        public async Task<AuthenticationResultProxy> AcquireTokenByRefreshTokenAsync(string refreshToken, ClientAssertion credential, string resource)
-        {
-            return await RunTaskAsync(this.context.AcquireTokenByRefreshTokenAsync(refreshToken, credential, resource));
-        }
-
         public async Task<AuthenticationResultProxy> AcquireTokenSilentAsync(string resource, string clientId)
         {
             return await RunTaskAsync(this.context.AcquireTokenSilentAsync(resource, clientId));
@@ -155,7 +120,6 @@ namespace Test.ADAL.Common
             List<TokenCacheItem> items = this.context.TokenCache.ReadItems().ToList();
             Verify.AreEqual(1, items.Count);
             Verify.AreEqual(result.AccessToken, items[0].AccessToken);
-            Verify.AreEqual(result.RefreshToken, items[0].RefreshToken);
             Verify.AreEqual(result.IdToken ?? string.Empty, items[0].IdToken ?? string.Empty);
             Verify.IsTrue(stsType == StsType.ADFS || items[0].IdToken != null);
         }
@@ -168,8 +132,6 @@ namespace Test.ADAL.Common
                 AccessToken = result.AccessToken,
                 AccessTokenType = result.AccessTokenType,
                 ExpiresOn = result.ExpiresOn,
-                IsMultipleResourceRefreshToken = result.IsMultipleResourceRefreshToken,
-                RefreshToken = result.RefreshToken,
                 IdToken = result.IdToken,
                 TenantId = result.TenantId,
                 UserInfo = result.UserInfo

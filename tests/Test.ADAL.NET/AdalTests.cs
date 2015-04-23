@@ -51,12 +51,6 @@ namespace Test.ADAL.Common
             Verify.AreNotEqual(result.AccessToken, result2.AccessToken);
             AuthenticationContextProxy.ClearDefaultCache();
 
-            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, credential);
-            VerifySuccessResult(sts, result, true, false);
-
-            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, sts.ValidResource);
-            VerifyErrorResult(result, "invalid_request", null, 400, "90014");    // ACS90014: The request body must contain the following parameter: 'client_secret or client_assertion'.
-
             result = await context.AcquireTokenByAuthorizationCodeAsync(null, sts.ValidRedirectUriForConfidentialClient, credential);
             VerifyErrorResult(result, "invalid_argument", "authorizationCode");
 
@@ -91,12 +85,6 @@ namespace Test.ADAL.Common
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, certificate);
             VerifySuccessResult(sts, result);
-
-            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, certificate, sts.ValidResource);
-            VerifySuccessResult(sts, result, true, false);
-
-            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, sts.ValidResource);
-            VerifyErrorResult(result, Sts.InvalidRequest, null, 400, "90014");   // The request body must contain the following parameter: 'client_secret or client_assertion'.
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, certificate, null);
             VerifySuccessResult(sts, result);
@@ -135,6 +123,7 @@ namespace Test.ADAL.Common
             result = await context.AcquireTokenAsync(sts.ValidResource, (ClientCredential)null);
             VerifyErrorResult(result, Sts.InvalidArgumentError, "clientCredential");
 
+            context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheType.Null);
             var invalidCredential = new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret + "x");
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCredential);
             VerifyErrorResult(result, Sts.InvalidClientError, "70002");
@@ -184,12 +173,6 @@ namespace Test.ADAL.Common
             ClientAssertion assertion = CreateClientAssertion(sts.Authority, sts.ValidConfidentialClientId, sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword);
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, assertion, sts.ValidResource);
             VerifySuccessResult(sts, result);
-
-            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, assertion, sts.ValidResource);
-            VerifySuccessResult(sts, result, true, false);
-
-            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidConfidentialClientId, sts.ValidResource);
-            VerifyErrorResult(result, Sts.InvalidRequest, "90014");   // The request body must contain the following parameter: 'client_secret or client_assertion'.
 
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, assertion, null);
             VerifySuccessResult(sts, result);
@@ -517,7 +500,7 @@ namespace Test.ADAL.Common
             AuthenticationResultProxy result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, credential);
             VerifySuccessResult(sts, result);
 
-            AuthenticationResultProxy result2 = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, credential, sts.ValidResource2);
+            AuthenticationResultProxy result2 = await context.AcquireTokenSilentAsync(sts.ValidResource2, credential, UserIdentifier.AnyUser);
             VerifySuccessResult(sts, result2, true, false);
 
             AuthenticationContextProxy.ClearDefaultCache();
@@ -761,7 +744,6 @@ namespace Test.ADAL.Common
 
             Verify.IsNotNull(result);
             Verify.IsNotNullOrEmptyString(result.AccessToken, "AuthenticationResult.AccessToken");
-            Verify.IsNotNullOrEmptyString(result.RefreshToken, "AuthenticationResult.RefreshToken");
             long expiresIn = (long)(result.ExpiresOn - DateTime.UtcNow).TotalSeconds;
             Log.Comment("Verifying token expiration...");
             Verify.IsGreaterThanOrEqual(expiresIn, (long)0, "Token Expiration");

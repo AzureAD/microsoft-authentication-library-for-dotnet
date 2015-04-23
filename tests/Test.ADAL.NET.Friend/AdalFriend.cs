@@ -49,7 +49,7 @@ namespace Test.ADAL.NET.Friend
             var cacheDictionary = cache.tokenCacheDictionary;
 
             var key = cacheDictionary.Keys.First();
-            cache.tokenCacheDictionary[key].ExpiresOn = newExpiry; 
+            cache.tokenCacheDictionary[key].Result.ExpiresOn = newExpiry; 
             var value = cacheDictionary.Values.First();
             cache.Clear();
             cacheDictionary.Add(key, value);        

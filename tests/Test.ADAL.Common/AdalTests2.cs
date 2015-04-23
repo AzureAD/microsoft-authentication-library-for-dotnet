@@ -49,7 +49,7 @@ namespace Test.ADAL.Common
             eventListener.TraceBuffer = string.Empty;
 
             context.SetCorrelationId(Guid.Empty);
-            AuthenticationResultProxy result2 = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidClientId);
+            AuthenticationResultProxy result2 = await context.AcquireTokenSilentAsync(sts.ValidResource, sts.ValidClientId);
             Verify.IsNotNullOrEmptyString(result2.AccessToken);
             Verify.IsFalse(eventListener.TraceBuffer.Contains(correlationId.ToString()));
         }

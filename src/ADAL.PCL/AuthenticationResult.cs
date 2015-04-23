@@ -37,13 +37,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="accessTokenType">Type of the Access Token returned</param>
         /// <param name="accessToken">The Access Token requested</param>
-        /// <param name="refreshToken">The Refresh Token associated with the requested Access Token</param>
         /// <param name="expiresOn">The point in time in which the Access Token returned in the AccessToken property ceases to be valid</param>
-        internal AuthenticationResult(string accessTokenType, string accessToken, string refreshToken, DateTimeOffset expiresOn)
+        internal AuthenticationResult(string accessTokenType, string accessToken, DateTimeOffset expiresOn)
         {
             this.AccessTokenType = accessTokenType;
             this.AccessToken = accessToken;
-            this.RefreshToken = refreshToken;
             this.ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
         }
 
@@ -58,12 +56,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         [DataMember]
         public string AccessToken { get; internal set; }
-
-        /// <summary>
-        /// Gets the Refresh Token associated with the requested Access Token. Note: not all operations will return a Refresh Token.
-        /// </summary>
-        [DataMember]
-        public string RefreshToken { get; internal set; }
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid.
@@ -91,56 +83,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string IdToken { get; internal set; }
 
         /// <summary>
-        /// Gets a value indicating whether the refresh token can be used for requesting access token for other resources.
-        /// </summary>
-        [DataMember]
-        public bool IsMultipleResourceRefreshToken { get; internal set; }
-
-        // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
-        // to get it from the STS response.
-        internal string Resource { get; set; }
-
-        /// <summary>
-        /// Serializes the object to a JSON string
-        /// </summary>
-        /// <returns>Deserialized authentication result</returns>
-        public static AuthenticationResult Deserialize(string serializedObject)
-        {
-            AuthenticationResult result;
-            var serializer = new DataContractJsonSerializer(typeof(AuthenticationResult));
-            byte[] serializedObjectBytes = Encoding.UTF8.GetBytes(serializedObject);
-            using (var stream = new MemoryStream(serializedObjectBytes))
-            {
-                result = (AuthenticationResult)serializer.ReadObject(stream);
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Creates authorization header from authentication result.
         /// </summary>
         /// <returns>Created authorization header</returns>
         public string CreateAuthorizationHeader()
         {
             return Oauth2AuthorizationHeader + this.AccessToken;
-        }
-
-        /// <summary>
-        /// Serializes the object to a JSON string
-        /// </summary>
-        /// <returns>Serialized authentication result</returns>
-        public string Serialize()
-        {
-            string serializedObject;
-            var serializer = new DataContractJsonSerializer(typeof(AuthenticationResult));
-            using (MemoryStream stream = new MemoryStream())
-            {
-                serializer.WriteObject(stream, this);
-                serializedObject = Encoding.UTF8.GetString(stream.ToArray(), 0, (int)stream.Position);
-            }
-
-            return serializedObject;
         }
 
         internal void UpdateTenantAndUserInfo(string tenantId, string idToken, UserInfo userInfo)

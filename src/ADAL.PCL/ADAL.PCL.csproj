@@ -55,7 +55,6 @@
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AcquireTokenByAuthorizationCodeHandler.cs" />
-    <Compile Include="AcquireTokenByRefreshTokenHandler.cs" />
     <Compile Include="AcquireTokenForClientHandler.cs" />
     <Compile Include="AcquireTokenHandlerBase.cs" />
     <Compile Include="AcquireTokenInteractiveHandler.cs" />
@@ -96,6 +95,7 @@
     <Compile Include="JsonWebToken.cs" />
     <Compile Include="LoggerBase.cs" />
     <Compile Include="MexParser.cs" />
+    <Compile Include="AuthenticationResultEx.cs" />
     <Compile Include="TokenResponse.cs" />
     <Compile Include="OAuthConstants.cs" />
     <Compile Include="PlatformInformationBase.cs" />

@@ -110,16 +110,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             requestParameters[OAuthParameter.RedirectUri] = this.redirectUriRequestParameter;
         }
 
-        protected override void PostTokenRequest(AuthenticationResult result)
+        protected override void PostTokenRequest(AuthenticationResultEx resultEx)
         {
-            base.PostTokenRequest(result);
+            base.PostTokenRequest(resultEx);
             if ((this.DisplayableId == null && this.UniqueId == null) || this.UserIdentifierType == UserIdentifierType.OptionalDisplayableId)
             {
                 return;
             }
 
-            string uniqueId = (result.UserInfo != null && result.UserInfo.UniqueId != null) ? result.UserInfo.UniqueId : "NULL";
-            string displayableId = (result.UserInfo != null) ? result.UserInfo.DisplayableId : "NULL";
+            string uniqueId = (resultEx.Result.UserInfo != null && resultEx.Result.UserInfo.UniqueId != null) ? resultEx.Result.UserInfo.UniqueId : "NULL";
+            string displayableId = (resultEx.Result.UserInfo != null) ? resultEx.Result.UserInfo.DisplayableId : "NULL";
 
             if (this.UserIdentifierType == UserIdentifierType.UniqueId && string.Compare(uniqueId, this.UniqueId, StringComparison.Ordinal) != 0)
             {

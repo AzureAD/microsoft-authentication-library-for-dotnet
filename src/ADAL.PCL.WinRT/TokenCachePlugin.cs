@@ -37,26 +37,29 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public void BeforeAccess(TokenCacheNotificationArgs args)
         {
-            try
+            if (args != null && args.TokenCache != null)
             {
-                var localSettings = ApplicationData.Current.LocalSettings;
-                localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-                byte[] state = GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
-                if (state != null)
+                try
                 {
-                    args.TokenCache.Deserialize(state);
+                    var localSettings = ApplicationData.Current.LocalSettings;
+                    localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
+                    byte[] state = GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
+                    if (state != null)
+                    {
+                        args.TokenCache.Deserialize(state);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                PlatformPlugin.Logger.Warning(null, "Failed to load cache: " + ex);
-                // Ignore as the cache seems to be corrupt
+                catch (Exception ex)
+                {
+                    PlatformPlugin.Logger.Warning(null, "Failed to load cache: " + ex);
+                    // Ignore as the cache seems to be corrupt
+                }
             }
         }
         
         public void AfterAccess(TokenCacheNotificationArgs args)
         {
-            if (args.TokenCache.HasStateChanged)
+            if (args != null && args.TokenCache != null && args.TokenCache.HasStateChanged)
             {
                 try
                 {

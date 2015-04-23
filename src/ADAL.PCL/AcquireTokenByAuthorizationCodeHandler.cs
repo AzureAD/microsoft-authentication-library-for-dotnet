@@ -55,14 +55,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             requestParameters[OAuthParameter.RedirectUri] = this.redirectUri.AbsoluteUri;
         }
 
-        protected override void PostTokenRequest(AuthenticationResult result)
+        protected override void PostTokenRequest(AuthenticationResultEx resultEx)
         {
-            base.PostTokenRequest(result);
-            this.UniqueId = (result.UserInfo == null) ? null : result.UserInfo.UniqueId;
-            this.DisplayableId = (result.UserInfo == null) ? null : result.UserInfo.DisplayableId;
-            if (result.Resource != null)
+            base.PostTokenRequest(resultEx);
+            UserInfo userInfo = resultEx.Result.UserInfo;
+            this.UniqueId = (userInfo == null) ? null : userInfo.UniqueId;
+            this.DisplayableId = (userInfo == null) ? null : userInfo.DisplayableId;
+            if (resultEx.Resource != null)
             {
-                this.Resource = result.Resource;
+                this.Resource = resultEx.Resource;
                 PlatformPlugin.Logger.Verbose(this.CallState, "Resource value in the token response was used for storing tokens in the cache");
             }
 

@@ -38,9 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.DisplayableId = key.DisplayableId;
             this.TenantId = result.TenantId;
             this.ExpiresOn = result.ExpiresOn;
-            this.IsMultipleResourceRefreshToken = result.IsMultipleResourceRefreshToken;
             this.AccessToken = result.AccessToken;
-            this.RefreshToken = result.RefreshToken;
             this.IdToken = result.IdToken;
 
             if (result.UserInfo != null)
@@ -82,11 +80,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string IdentityProvider { get; internal set; }
 
         /// <summary>
-        /// Gets a value indicating whether the RefreshToken applies to multiple resources.
-        /// </summary>
-        public bool IsMultipleResourceRefreshToken { get; internal set; }
-
-        /// <summary>
         /// Gets the Resource.
         /// </summary>
         public string Resource { get; internal set; }
@@ -110,11 +103,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Gets the Access Token requested.
         /// </summary>
         public string AccessToken { get; internal set; }
-
-        /// <summary>
-        /// Gets the Refresh Token associated with the requested Access Token. Note: not all operations will return a Refresh Token.
-        /// </summary>
-        public string RefreshToken { get; internal set; }
 
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
