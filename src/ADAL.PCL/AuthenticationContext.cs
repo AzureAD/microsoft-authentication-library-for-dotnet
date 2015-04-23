@@ -279,102 +279,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Acquires a security token from the authority using a Refresh Token previously received.
-        /// </summary>
-        /// <param name="refreshToken">Refresh Token to use in the refresh flow.</param>
-        /// <param name="clientId">Name or ID of the client requesting the token.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId)
-        {
-            return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientId), null);
-        }
-
-        /// <summary>
-        /// Acquires a security token from the authority using a Refresh Token previously received.
-        /// </summary>
-        /// <param name="refreshToken">Refresh Token to use in the refresh flow.</param>
-        /// <param name="clientId">Name or ID of the client requesting the token.</param>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. If null, token is requested for the same resource refresh token was originally issued for.
-        /// If passed, resource should match the original resource used to acquire refresh token unless token service supports refresh token for multiple resources.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, string clientId, string resource)
-        {
-            return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientId), resource);
-        }
-
-        /// <summary>
-        /// Acquires a security token from the authority using a Refresh Token previously received.
-        /// </summary>
-        /// <param name="refreshToken">Refresh Token to use in the refresh flow.</param>
-        /// <param name="clientCredential">The client credential used for token acquisition.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, ClientCredential clientCredential)
-        {
-            return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientCredential), null);
-        }
-
-        /// <summary>
-        /// Acquires a security token from the authority using a Refresh Token previously received.
-        /// </summary>
-        /// <param name="refreshToken">Refresh Token to use in the refresh flow.</param>
-        /// <param name="clientCredential">The client credential used for token acquisition.</param>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. If null, token is requested for the same resource refresh token was originally issued for.
-        /// If passed, resource should match the original resource used to acquire refresh token unless token service supports refresh token for multiple resources.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, ClientCredential clientCredential, string resource)
-        {
-            return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientCredential), resource);
-        }
-
-        /// <summary>
-        /// Acquires a security token from the authority using a Refresh Token previously received.
-        /// </summary>
-        /// <param name="refreshToken">Refresh Token to use in the refresh flow.</param>
-        /// <param name="clientAssertion">The client assertion used for token acquisition.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, ClientAssertion clientAssertion)
-        {
-            return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientAssertion), null);
-        }
-
-        /// <summary>
-        /// Acquires a security token from the authority using a Refresh Token previously received.
-        /// </summary>
-        /// <param name="refreshToken">Refresh Token to use in the refresh flow.</param>
-        /// <param name="clientAssertion">The client assertion used for token acquisition.</param>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. If null, token is requested for the same resource refresh token was originally issued for.
-        /// If passed, resource should match the original resource used to acquire refresh token unless token service supports refresh token for multiple resources.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, ClientAssertion clientAssertion, string resource)
-        {
-            return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientAssertion), resource);
-        }
-
-        /// <summary>
-        /// Acquires a security token from the authority using a Refresh Token previously received.
-        /// </summary>
-        /// <param name="refreshToken">Refresh Token to use in the refresh flow.</param>
-        /// <param name="clientCertificate">The client certificate used for token acquisition.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, ClientAssertionCertificate clientCertificate)
-        {
-            return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientCertificate, this.Authenticator), null);
-        }
-
-        /// <summary>
-        /// Acquires a security token from the authority using a Refresh Token previously received.
-        /// </summary>
-        /// <param name="refreshToken">Refresh Token to use in the refresh flow.</param>
-        /// <param name="clientCertificate">The client certificate used for token acquisition.</param>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. If null, token is requested for the same resource refresh token was originally issued for.
-        /// If passed, resource should match the original resource used to acquire refresh token unless token service supports refresh token for multiple resources.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken, ClientAssertionCertificate clientCertificate, string resource)
-        {
-            return await this.AcquireTokenByRefreshTokenCommonAsync(refreshToken, new ClientKey(clientCertificate, this.Authenticator), resource);
-        }
-
-        /// <summary>
         /// Acquires an access token from the authority on behalf of a user. It requires using a user token previously received.
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
@@ -566,12 +470,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters = null)
         {
             var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, redirectUri, parameters, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters));
-            return await handler.RunAsync();
-        }
-
-        private async Task<AuthenticationResult> AcquireTokenByRefreshTokenCommonAsync(string refreshToken, ClientKey clientKey, string resource)
-        {
-            var handler = new AcquireTokenByRefreshTokenHandler(this.Authenticator, this.TokenCache, resource, clientKey, refreshToken);
             return await handler.RunAsync();
         }
 

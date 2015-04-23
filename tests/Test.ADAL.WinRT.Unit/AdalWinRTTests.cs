@@ -59,16 +59,6 @@ namespace Test.ADAL.WinRT.Unit
         }
 
         [TestMethod]
-        //[Description("Positive Test for AcquireToken with Refresh Token")]
-        [TestCategory("AdalWinRTMock")]
-        [DataRow("AAD")]
-        [DataRow("ADFS")]
-        public async Task AcquireTokenPositiveByRefreshTokenTest(string stsType)
-        {
-            await AdalTests.AcquireTokenPositiveByRefreshTokenTestAsync(SetupStsService(GetStsType(stsType)));
-        }
-
-        [TestMethod]
         //[Description("Test for autority validation to AuthenticationContext")]
         [TestCategory("AdalWinRTMock")]
         [DataRow("AAD")]

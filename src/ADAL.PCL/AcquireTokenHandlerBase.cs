@@ -84,28 +84,28 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 await this.PreRunAsync();
 
-                AuthenticationResult result = null;
+                AuthenticationResultEx resultEx = null;
                 if (this.LoadFromCache)
                 {
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    result = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.CallState);
-                    if (result != null && result.AccessToken == null && result.RefreshToken != null)
+                    resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.CallState);
+                    if (resultEx != null && resultEx.Result.AccessToken == null && resultEx.RefreshToken != null)
                     {
-                        result = await this.RefreshAccessTokenAsync(result);
-                        if (result != null)
+                        resultEx = await this.RefreshAccessTokenAsync(resultEx);
+                        if (resultEx != null)
                         {
-                            this.tokenCache.StoreToCache(result, this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
+                            this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
                         }
                     }
                 }
 
-                if (result == null)
+                if (resultEx == null)
                 {
                     await this.PreTokenRequest();
-                    result = await this.SendTokenRequestAsync();
-                    this.PostTokenRequest(result);
+                    resultEx = await this.SendTokenRequestAsync();
+                    this.PostTokenRequest(resultEx);
 
                     if (this.StoreToCache)
                     {
@@ -115,12 +115,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             notifiedBeforeAccessCache = true;
                         }
 
-                        this.tokenCache.StoreToCache(result, this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
+                        this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
                     }
                 }
 
-                await this.PostRunAsync(result);
-                return result;
+                await this.PostRunAsync(resultEx.Result);
+                return resultEx.Result;
             }
             catch (Exception ex)
             {
@@ -160,26 +160,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return CompletedTask;
         }
 
-        protected virtual void PostTokenRequest(AuthenticationResult result)
+        protected virtual void PostTokenRequest(AuthenticationResultEx result)
         {
-            this.Authenticator.UpdateTenantId(result.TenantId);
+            this.Authenticator.UpdateTenantId(result.Result.TenantId);
         }
 
         protected abstract void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters);
 
-        protected virtual async Task<AuthenticationResult> SendTokenRequestAsync()
+        protected virtual async Task<AuthenticationResultEx> SendTokenRequestAsync()
         {
             var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
             this.AddAditionalRequestParameters(requestParameters);
             return await this.SendHttpMessageAsync(requestParameters);
         }
 
-        protected async Task<AuthenticationResult> SendTokenRequestByRefreshTokenAsync(string refreshToken)
+        protected async Task<AuthenticationResultEx> SendTokenRequestByRefreshTokenAsync(string refreshToken)
         {
             var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
             requestParameters[OAuthParameter.RefreshToken] = refreshToken;
-            AuthenticationResult result = await this.SendHttpMessageAsync(requestParameters);
+            AuthenticationResultEx result = await this.SendHttpMessageAsync(requestParameters);
 
             if (result.RefreshToken == null)
             {
@@ -189,9 +189,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return result;
         }
 
-        private async Task<AuthenticationResult> RefreshAccessTokenAsync(AuthenticationResult result)
+        private async Task<AuthenticationResultEx> RefreshAccessTokenAsync(AuthenticationResultEx result)
         {
-            AuthenticationResult newResult = null;
+            AuthenticationResultEx newResultEx = null;
 
             if (this.Resource != null)
             {
@@ -199,13 +199,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 try
                 {
-                    newResult = await this.SendTokenRequestByRefreshTokenAsync(result.RefreshToken);
-                    this.Authenticator.UpdateTenantId(result.TenantId);
+                    newResultEx = await this.SendTokenRequestByRefreshTokenAsync(result.RefreshToken);
+                    this.Authenticator.UpdateTenantId(result.Result.TenantId);
 
-                    if (newResult.IdToken == null)
+                    if (newResultEx.Result.IdToken == null)
                     {
                         // If Id token is not returned by token endpoint when refresh token is redeemed, we should copy tenant and user information from the cached token.
-                        newResult.UpdateTenantAndUserInfo(result.TenantId, result.IdToken, result.UserInfo);
+                        newResultEx.Result.UpdateTenantAndUserInfo(result.Result.TenantId, result.Result.IdToken, result.Result.UserInfo);
                     }
                 }
                 catch (AdalException ex)
@@ -220,14 +220,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             serviceException.InnerException);
                     }
 
-                    newResult = null;
+                    newResultEx = null;
                 }
             }
 
-            return newResult;
+            return newResultEx;
         }
 
-        private async Task<AuthenticationResult> SendHttpMessageAsync(IRequestParameters requestParameters)
+        private async Task<AuthenticationResultEx> SendHttpMessageAsync(IRequestParameters requestParameters)
         {
             var client = new AdalHttpClient(this.Authenticator.TokenUri, this.CallState) { Client = { BodyParameters = requestParameters } };
             TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>(ClientMetricsEndpointType.Token);
@@ -264,10 +264,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (result.AccessToken != null)
             {
                 string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.AccessToken);
-                string refreshTokenHash = result.RefreshToken != null ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.RefreshToken) : "[No Refresh Token]";
 
-                PlatformPlugin.Logger.Information(this.CallState, string.Format("=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tRefresh Token Hash: {1}\n\tExpiration Time: {2}\n\tUser Hash: {3}\n\t",
-                    accessTokenHash, refreshTokenHash, result.ExpiresOn,
+                PlatformPlugin.Logger.Information(this.CallState, string.Format("=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tExpiration Time: {1}\n\tUser Hash: {2}\n\t",
+                    accessTokenHash,
+                    result.ExpiresOn,                    
                     result.UserInfo != null ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.UserInfo.UniqueId) : "null"));
             }
         }

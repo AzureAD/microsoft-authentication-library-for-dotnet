@@ -128,21 +128,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return tokenResponse;
         }
 
-        public AuthenticationResult GetResult()
+        public AuthenticationResultEx GetResult()
         {
-            AuthenticationResult result;
+            AuthenticationResultEx resultEx;
 
             if (this.AccessToken != null)
             {
                 DateTimeOffset expiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn);
 
-                result = new AuthenticationResult(this.TokenType, this.AccessToken, this.RefreshToken, expiresOn)
-                {
-                    // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
-                    // to get it from the STS response.
-                    Resource = this.Resource,
-                    IsMultipleResourceRefreshToken = (!string.IsNullOrWhiteSpace(this.RefreshToken) && !string.IsNullOrWhiteSpace(this.Resource)),
-                };
+                var result = new AuthenticationResult(this.TokenType, this.AccessToken, expiresOn);
 
                 IdToken idToken = IdToken.Parse(this.IdTokenString);
                 if (idToken != null)
@@ -186,6 +180,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     result.UpdateTenantAndUserInfo(tenantId, this.IdTokenString, new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider, PasswordExpiresOn = passwordExpiresOffest, PasswordChangeUrl = changePasswordUri });
                 }
+
+                resultEx = new AuthenticationResultEx
+                {
+                    Result = result,
+                    RefreshToken = this.RefreshToken,
+                    // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
+                    // to get it from the STS response.
+                    Resource = this.Resource,
+                    IsMultipleResourceRefreshToken = (!string.IsNullOrWhiteSpace(this.RefreshToken) && !string.IsNullOrWhiteSpace(this.Resource)),
+                };
             }
             else if (this.Error != null)
             {
@@ -196,7 +200,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new AdalServiceException(AdalError.Unknown, AdalErrorMessage.Unknown);
             }
 
-            return result;
+            return resultEx;
         }
 
         private static string ReadStreamContent(Stream stream)

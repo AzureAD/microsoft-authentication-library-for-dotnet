@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         
         private const string Delimiter = ":::";
 
-        internal readonly IDictionary<TokenCacheKey, AuthenticationResult> tokenCacheDictionary;
+        internal readonly IDictionary<TokenCacheKey, AuthenticationResultEx> tokenCacheDictionary;
 
         // We do not want to return near expiry tokens, this is why we use this hard coded setting to refresh tokens which are close to expiration.
         private const int ExpirationMarginInMinutes = 5;
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public TokenCache()
         {
-            this.tokenCacheDictionary = new ConcurrentDictionary<TokenCacheKey, AuthenticationResult>();
+            this.tokenCacheDictionary = new ConcurrentDictionary<TokenCacheKey, AuthenticationResultEx>();
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 writer.Write(SchemaVersion);
                 PlatformPlugin.Logger.Information(null, string.Format("Serializing token cache with {0} items.", this.tokenCacheDictionary.Count));
                 writer.Write(this.tokenCacheDictionary.Count);
-                foreach (KeyValuePair<TokenCacheKey, AuthenticationResult> kvp in this.tokenCacheDictionary)
+                foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> kvp in this.tokenCacheDictionary)
                 {
                     writer.Write(string.Format("{1}{0}{2}{0}{3}{0}{4}", Delimiter, kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId, (int)kvp.Key.TokenSubjectType));
                     writer.Write(kvp.Value.Serialize());
@@ -183,10 +183,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     string keyString = reader.ReadString();
 
                     string[] kvpElements = keyString.Split(new[] { Delimiter }, StringSplitOptions.None);
-                    AuthenticationResult result = AuthenticationResult.Deserialize(reader.ReadString());
-                    TokenCacheKey key = new TokenCacheKey(kvpElements[0], kvpElements[1], kvpElements[2], (TokenSubjectType)int.Parse(kvpElements[3]), result.UserInfo);
+                    AuthenticationResultEx resultEx = AuthenticationResultEx.Deserialize(reader.ReadString());
+                    TokenCacheKey key = new TokenCacheKey(kvpElements[0], kvpElements[1], kvpElements[2], (TokenSubjectType)int.Parse(kvpElements[3]), resultEx.Result.UserInfo);
 
-                    this.tokenCacheDictionary.Add(key, result);
+                    this.tokenCacheDictionary.Add(key, resultEx);
                 }
 
                 PlatformPlugin.Logger.Information(null, string.Format("Deserialized {0} items to token cache.", count));
@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
             this.OnBeforeAccess(args);
 
-            List<TokenCacheItem> items = this.tokenCacheDictionary.Select(kvp => new TokenCacheItem(kvp.Key, kvp.Value)).ToList();
+            List<TokenCacheItem> items = this.tokenCacheDictionary.Select(kvp => new TokenCacheItem(kvp.Key, kvp.Value.Result)).ToList();
 
             this.OnAfterAccess(args);
 
@@ -280,42 +280,42 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        internal AuthenticationResult LoadFromCache(string authority, string resource, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId, CallState callState)
+        internal AuthenticationResultEx LoadFromCache(string authority, string resource, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId, CallState callState)
         {
             PlatformPlugin.Logger.Verbose(callState, "Looking up cache for a token...");
 
-            AuthenticationResult result = null;
+            AuthenticationResultEx resultEx = null;
 
-            KeyValuePair<TokenCacheKey, AuthenticationResult>? kvp = this.LoadSingleItemFromCache(authority, resource, clientId, subjectType, uniqueId, displayableId, callState);
+            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? kvp = this.LoadSingleItemFromCache(authority, resource, clientId, subjectType, uniqueId, displayableId, callState);
 
             if (kvp.HasValue)
             {
                 TokenCacheKey cacheKey = kvp.Value.Key;
-                result = kvp.Value.Value;
-                bool tokenNearExpiry = (result.ExpiresOn <= DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
+                resultEx = kvp.Value.Value;
+                bool tokenNearExpiry = (resultEx.Result.ExpiresOn <= DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
 
                 if (tokenNearExpiry || !cacheKey.ResourceEquals(resource))
                 {
-                    result.AccessToken = null;
+                    resultEx.Result.AccessToken = null;
                     if (tokenNearExpiry)
                     {
                         PlatformPlugin.Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
                     }
                     else 
                     {
-                        PlatformPlugin.Logger.Verbose(callState, string.Format("{0} minutes left until token in cache expires", (result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
+                        PlatformPlugin.Logger.Verbose(callState, string.Format("{0} minutes left until token in cache expires", (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
                     }                
                 }
 
-                if (result.AccessToken == null && result.RefreshToken == null)
+                if (resultEx.Result.AccessToken == null && resultEx.RefreshToken == null)
                 {
                     this.tokenCacheDictionary.Remove(cacheKey);
                     PlatformPlugin.Logger.Information(callState, "An old item was removed from the cache");
                     this.HasStateChanged = true;
-                    result = null;
+                    resultEx = null;
                 }
 
-                if (result != null)
+                if (resultEx != null)
                 {
                     PlatformPlugin.Logger.Information(callState, "A matching item (access token or refresh token or both) was found in the cache");
                 }
@@ -325,15 +325,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 PlatformPlugin.Logger.Information(callState, "No matching token was found in the cache");
             }
 
-            return result;
+            return resultEx;
         }
 
-        internal void StoreToCache(AuthenticationResult result, string authority, string resource, string clientId, TokenSubjectType subjectType, CallState callState)
+        internal void StoreToCache(AuthenticationResultEx result, string authority, string resource, string clientId, TokenSubjectType subjectType, CallState callState)
         {
             PlatformPlugin.Logger.Verbose(callState, "Storing token in the cache...");
 
-            string uniqueId = (result.UserInfo != null) ? result.UserInfo.UniqueId : null;
-            string displayableId = (result.UserInfo != null) ? result.UserInfo.DisplayableId : null;
+            string uniqueId = (result.Result.UserInfo != null) ? result.Result.UserInfo.UniqueId : null;
+            string displayableId = (result.Result.UserInfo != null) ? result.Result.UserInfo.DisplayableId : null;
 
             this.OnBeforeWrite(new TokenCacheNotificationArgs
             {
@@ -343,7 +343,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 DisplayableId = displayableId
             });
 
-            TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, subjectType, result.UserInfo);
+            TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, subjectType, result.Result.UserInfo);
             this.tokenCacheDictionary[tokenCacheKey] = result;
             PlatformPlugin.Logger.Verbose(callState, "An item was stored in the cache");
             this.UpdateCachedMrrtRefreshTokens(result, authority, clientId, subjectType);
@@ -351,30 +351,30 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.HasStateChanged = true;
         }
 
-        private void UpdateCachedMrrtRefreshTokens(AuthenticationResult result, string authority, string clientId, TokenSubjectType subjectType)
+        private void UpdateCachedMrrtRefreshTokens(AuthenticationResultEx result, string authority, string clientId, TokenSubjectType subjectType)
         {
-            if (result.UserInfo != null && result.IsMultipleResourceRefreshToken)
+            if (result.Result.UserInfo != null && result.IsMultipleResourceRefreshToken)
             {
-                List<KeyValuePair<TokenCacheKey, AuthenticationResult>> mrrtItems =
-                    this.QueryCache(authority, clientId, subjectType, result.UserInfo.UniqueId, result.UserInfo.DisplayableId).Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
+                List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> mrrtItems =
+                    this.QueryCache(authority, clientId, subjectType, result.Result.UserInfo.UniqueId, result.Result.UserInfo.DisplayableId).Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
 
-                foreach (KeyValuePair<TokenCacheKey, AuthenticationResult> mrrtItem in mrrtItems)
+                foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> mrrtItem in mrrtItems)
                 {
                     mrrtItem.Value.RefreshToken = result.RefreshToken;
                 }
             }
         }
 
-        private KeyValuePair<TokenCacheKey, AuthenticationResult>? LoadSingleItemFromCache(string authority, string resource, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId, CallState callState)
+        private KeyValuePair<TokenCacheKey, AuthenticationResultEx>? LoadSingleItemFromCache(string authority, string resource, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId, CallState callState)
         {
             // First identify all potential tokens.
-            List<KeyValuePair<TokenCacheKey, AuthenticationResult>> items = this.QueryCache(authority, clientId, subjectType, uniqueId, displayableId);
+            List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> items = this.QueryCache(authority, clientId, subjectType, uniqueId, displayableId);
 
-            List<KeyValuePair<TokenCacheKey, AuthenticationResult>> resourceSpecificItems =
+            List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> resourceSpecificItems =
                 items.Where(p => p.Key.ResourceEquals(resource)).ToList();
 
             int resourceValuesCount = resourceSpecificItems.Count();
-            KeyValuePair<TokenCacheKey, AuthenticationResult>? returnValue = null;
+            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? returnValue = null;
             switch (resourceValuesCount)
             {
                 case 1:
@@ -384,7 +384,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 case 0:
                 {
                     // There are no resource specific tokens.  Choose any of the MRRT tokens if there are any.
-                    List<KeyValuePair<TokenCacheKey, AuthenticationResult>> mrrtItems =
+                    List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> mrrtItems =
                         items.Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
 
                     if (mrrtItems.Any())
@@ -406,7 +406,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// authority value that this AuthorizationContext was created with.  In every case passing
         /// null results in a wildcard evaluation.
         /// </summary>
-        private List<KeyValuePair<TokenCacheKey, AuthenticationResult>> QueryCache(string authority, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId)
+        private List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> QueryCache(string authority, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId)
         {
             return this.tokenCacheDictionary.Where(
                     p =>

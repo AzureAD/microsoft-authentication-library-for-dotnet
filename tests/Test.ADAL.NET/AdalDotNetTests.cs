@@ -41,7 +41,7 @@ namespace Test.ADAL.NET
             AdalTests.TestType = TestType.DotNet;
 
             // To record request/response with actual service, switch mode to Record
-            RecorderSettings.Mode = RecorderMode.Record;
+            RecorderSettings.Mode = RecorderMode.Replay;
             ConsoleTraceListener myWriter = new ConsoleTraceListener();
             Trace.Listeners.Add(myWriter);
         }
@@ -93,15 +93,6 @@ namespace Test.ADAL.NET
         public async Task AcquireTokenPositiveWithoutRedirectUriOrUserIdAsync()
         {
             await AdalTests.AcquireTokenPositiveWithoutRedirectUriOrUserIdTestAsync(Sts);
-        }
-
-        [TestMethod]
-        [Description("Positive Test for AcquireToken by Refresh Token")]
-        [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]
-        public async Task AcquireTokenPositiveByRefreshTokenTest()
-        {
-            await AdalTests.AcquireTokenPositiveByRefreshTokenTestAsync(Sts);
         }
 
         [TestMethod]

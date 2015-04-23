@@ -73,31 +73,6 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result);
         }
 
-        public static async Task AcquireTokenPositiveByRefreshTokenTestAsync(Sts sts)
-        {
-            SetCredential(sts);
-            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
-            AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
-            VerifySuccessResult(sts, result);
-
-            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidClientId, (string)null);
-            VerifySuccessResult(sts, result, true, false);
-
-            AuthenticationResultProxy result2 = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken + "x", sts.ValidClientId, (string)null);
-            
-            VerifyErrorResult(result2, "invalid_grant", "Refresh Token", 400);
-
-            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidClientId, sts.ValidResource);
-            if (sts.Type == StsType.ADFS)
-            {
-                VerifyErrorResult(result, Sts.InvalidArgumentError, "multiple resource");                
-            }
-            else
-            {
-                VerifySuccessResult(sts, result, true, false);
-            }
-        }
-
         public static async Task AuthenticationContextAuthorityValidationTestAsync(Sts sts)
         {
             SetCredential(sts);
@@ -357,30 +332,13 @@ namespace Test.ADAL.Common
             AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, result);
 
-            AuthenticationResultProxy result2 = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidClientId, sts.ValidResource2);
-            if (sts.Type == StsType.AAD)
-            {
-                VerifySuccessResult(sts, result2, true, false);
-                Verify.IsTrue(result.IsMultipleResourceRefreshToken);
-                Verify.IsTrue(result2.IsMultipleResourceRefreshToken);
-            }
-
-            result2 = await context.AcquireTokenAsync(sts.ValidResource2, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
+            AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource2, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, result2);
-            if (sts.Type == StsType.ADFS)
-            {
-                Verify.IsFalse(result.IsMultipleResourceRefreshToken);
-            }
-            else
-            {
-                Verify.IsTrue(result.IsMultipleResourceRefreshToken);                
-            }
 
             if (sts.Type == StsType.AAD)
             {
                 result2 = await context.AcquireTokenAsync(sts.ValidResource3, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
                 VerifySuccessResult(sts, result2);
-                Verify.IsTrue(result.IsMultipleResourceRefreshToken);
             }
         }
 
@@ -419,8 +377,8 @@ namespace Test.ADAL.Common
 
             // PROD discovery endpoint knows about PPE as well, so this passes discovery and fails later as refresh token is invalid for PPE.
             context = new AuthenticationContextProxy(sts.Authority.Replace("windows.net", "windows-ppe.net"), sts.ValidateAuthority);
-            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.ValidClientId, sts.ValidResource);
-            VerifyErrorResult(result, "invalid_grant", "Refresh Token");
+            result = await context.AcquireTokenAsync(sts.ValidResource, new ClientCredential(sts.ValidClientId, sts.ValidPassword));
+            VerifyErrorResult(result, "invalid_request", "No service namespace");
 
             try
             {
@@ -479,11 +437,9 @@ namespace Test.ADAL.Common
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
             AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, result);
-            result = await context.AcquireTokenByRefreshTokenAsync(result.RefreshToken, sts.InvalidClientId);
-            VerifyErrorResult(result, "unauthorized_client", "AADSTS70001");
+            result = await context.AcquireTokenSilentAsync(sts.ValidResource, sts.InvalidClientId);
+            VerifyErrorResult(result, "failed_to_acquire_token_silently", null);
             Verify.IsNotNull(result.Exception);
-            Verify.IsNotNull(result.Exception.InnerException);
-            Verify.IsTrue(result.Exception.InnerException is HttpRequestException);
         }
 
         public static async Task ExtraQueryParametersTestAsync(Sts sts)
@@ -649,14 +605,6 @@ namespace Test.ADAL.Common
 
             Verify.AreEqual(AuthenticationStatusProxy.Success, result.Status, "AuthenticationResult.Status");
             Verify.IsNotNullOrEmptyString(result.AccessToken, "AuthenticationResult.AccessToken");
-            if (supportRefreshToken)
-            {
-                Verify.IsNotNullOrEmptyString(result.RefreshToken, "AuthenticationResult.RefreshToken");
-            }
-            else
-            {
-                Verify.IsNullOrEmptyString(result.RefreshToken, "AuthenticationResult.RefreshToken");
-            }
 
             Verify.IsNullOrEmptyString(result.Error, "AuthenticationResult.Error");
             Verify.IsNullOrEmptyString(result.ErrorDescription, "AuthenticationResult.ErrorDescription");
@@ -745,7 +693,6 @@ namespace Test.ADAL.Common
         private static void ValidateAuthenticationResultsAreEqual(AuthenticationResultProxy result, AuthenticationResultProxy result2)
         {
             Verify.AreEqual(result.AccessToken, result2.AccessToken, "AuthenticationResult.AccessToken");
-            Verify.AreEqual(result.RefreshToken, result2.RefreshToken, "AuthenticationResult.RefreshToken");
             Verify.AreEqual(result.UserInfo.UniqueId, result2.UserInfo.UniqueId);
             Verify.AreEqual(result.UserInfo.DisplayableId, result2.UserInfo.DisplayableId);
             Verify.AreEqual(result.UserInfo.GivenName, result2.UserInfo.GivenName);
