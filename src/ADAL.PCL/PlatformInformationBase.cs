@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public virtual string GetRedirectUriAsString(Uri redirectUri, CallState callState)
         {
-            return redirectUri.AbsoluteUri;
+            return redirectUri.OriginalString;
         }
     }
 }

@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 var agentIntent = new Intent(this.parameters.CallerActivity, typeof(AuthenticationAgentActivity));
                 agentIntent.PutExtra("Url", authorizationUri.AbsoluteUri);
-                agentIntent.PutExtra("Callback", redirectUri.AbsoluteUri);
+                agentIntent.PutExtra("Callback", redirectUri.OriginalString);
                 this.parameters.CallerActivity.StartActivityForResult(agentIntent, 0);
             }
             catch (Exception ex)

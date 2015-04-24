@@ -32,7 +32,7 @@ namespace Test.ADAL.WinRT.Unit
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
-            string key = authorizationUri.AbsoluteUri + redirectUri.AbsoluteUri;
+            string key = authorizationUri.AbsoluteUri + redirectUri.OriginalString;
 
             if (IOMap.ContainsKey(key))
             {

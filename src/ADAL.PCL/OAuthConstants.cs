@@ -36,7 +36,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string Username = "username";
         public const string Password = "password";
 
-        public const string FormsAuth = "amr_values";
         public const string LoginHint = "login_hint"; // login_hint is not standard oauth2 parameter
         public const string CorrelationId = OAuthHeader.CorrelationId; // correlation id is not standard oauth2 parameter
         public const string Prompt = "prompt"; // prompt is not standard oauth2 parameter
@@ -81,7 +80,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
     internal class OAuthValue
     {
-        public const string FormsAuth = "pwd";
         public const string ScopeOpenId = "openid";
     }
 

@@ -49,16 +49,6 @@ namespace Test.ADAL.WinRT.Unit
         
         [TestMethod]
         [TestCategory("AdalWinRTUnit")]
-        //[Description("Test to verify forms auth parameters.")]
-        public async Task IncludeFormsAuthParamsTest()
-        {
-            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(new Authenticator("https://dummy.com/tenant", false), null, "resource", "clientId", new Uri("https://dummy"), new PlatformParameters(PromptBehavior.Auto, false), UserIdentifier.AnyUser, null, null);
-            Assert.IsFalse(await handler.IncludeFormsAuthParamsAsync());
-        }
-
-
-        [TestMethod]
-        [TestCategory("AdalWinRTUnit")]
         public void AdalTraceTest()
         {
             Verify.IsFalse(AdalOption.AdalEventSource.IsEnabled());

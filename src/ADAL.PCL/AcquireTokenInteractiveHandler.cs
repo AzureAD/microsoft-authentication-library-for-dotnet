@@ -88,20 +88,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal async Task AcquireAuthorizationAsync()
         {
-            Uri authorizationUri = this.CreateAuthorizationUri(await IncludeFormsAuthParamsAsync());
+            Uri authorizationUri = this.CreateAuthorizationUri();
             this.authorizationResult = await this.webUi.AcquireAuthorizationAsync(authorizationUri, this.redirectUri, this.CallState);
-        }
-
-        internal async Task<bool> IncludeFormsAuthParamsAsync()
-        {
-            return (await PlatformPlugin.PlatformInformation.IsUserLocalAsync(this.CallState)) && PlatformPlugin.PlatformInformation.IsDomainJoined();
         }
 
         internal async Task<Uri> CreateAuthorizationUriAsync(Guid correlationId)
         {
             this.CallState.CorrelationId = correlationId;
             await this.Authenticator.UpdateFromTemplateAsync(this.CallState);
-            return this.CreateAuthorizationUri(false);
+            return this.CreateAuthorizationUri();
         }
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {
@@ -132,7 +127,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private Uri CreateAuthorizationUri(bool includeFormsAuthParam)
+        private Uri CreateAuthorizationUri()
         {
             string loginHint = null;
 
@@ -143,12 +138,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 loginHint = userId.Id;
             }
 
-            IRequestParameters requestParameters = this.CreateAuthorizationRequest(loginHint, includeFormsAuthParam);
+            IRequestParameters requestParameters = this.CreateAuthorizationRequest(loginHint);
 
             return  new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + requestParameters);
         }
 
-        private DictionaryRequestParameters CreateAuthorizationRequest(string loginHint, bool includeFormsAuthParam)
+        private DictionaryRequestParameters CreateAuthorizationRequest(string loginHint)
         {
             var authorizationRequestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
             authorizationRequestParameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
@@ -168,11 +163,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (this.authorizationParameters != null)
             {
                 PlatformPlugin.PlatformInformation.AddPromptBehaviorQueryParameter(this.authorizationParameters, authorizationRequestParameters);
-            }
-
-            if (includeFormsAuthParam)
-            {
-                authorizationRequestParameters[OAuthParameter.FormsAuth] = OAuthValue.FormsAuth;
             }
 
             if (PlatformPlugin.HttpClientFactory.AddAdditionalHeaders)

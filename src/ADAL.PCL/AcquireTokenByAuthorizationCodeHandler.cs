@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.AuthorizationCode;
             requestParameters[OAuthParameter.Code] = this.authorizationCode;
-            requestParameters[OAuthParameter.RedirectUri] = this.redirectUri.AbsoluteUri;
+            requestParameters[OAuthParameter.RedirectUri] = this.redirectUri.OriginalString;
         }
 
         protected override void PostTokenRequest(AuthenticationResultEx resultEx)
@@ -61,9 +61,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             UserInfo userInfo = resultEx.Result.UserInfo;
             this.UniqueId = (userInfo == null) ? null : userInfo.UniqueId;
             this.DisplayableId = (userInfo == null) ? null : userInfo.DisplayableId;
-            if (resultEx.Resource != null)
+            if (resultEx.ResourceInResponse != null)
             {
-                this.Resource = resultEx.Resource;
+                this.Resource = resultEx.ResourceInResponse;
                 PlatformPlugin.Logger.Verbose(this.CallState, "Resource value in the token response was used for storing tokens in the cache");
             }
 

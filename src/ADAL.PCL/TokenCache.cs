@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="args">Arguments related to the cache item impacted</param>
         public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
 
-        private const int SchemaVersion = 2;
+        private const int SchemaVersion = 3;
         
         private const string Delimiter = ":::";
 
@@ -294,18 +294,29 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 resultEx = kvp.Value.Value;
                 bool tokenNearExpiry = (resultEx.Result.ExpiresOn <= DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
 
-                if (tokenNearExpiry || !cacheKey.ResourceEquals(resource))
+                if (tokenNearExpiry)
                 {
                     resultEx.Result.AccessToken = null;
-                    if (tokenNearExpiry)
-                    {
-                        PlatformPlugin.Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
-                    }
-                    else 
-                    {
-                        PlatformPlugin.Logger.Verbose(callState, string.Format("{0} minutes left until token in cache expires", (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
-                    }                
+                    PlatformPlugin.Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
                 }
+                else if (!cacheKey.ResourceEquals(resource))
+                {
+                    PlatformPlugin.Logger.Verbose(callState, 
+                        string.Format("Multi resource refresh token for resource '{0}' will be used to acquire token for '{1}'", cacheKey.Resource, resource));
+                    var newResultEx = new AuthenticationResultEx
+                    {
+                        Result = new AuthenticationResult(null, null, DateTimeOffset.MinValue),                            
+                        RefreshToken = resultEx.RefreshToken,
+                        ResourceInResponse = resultEx.ResourceInResponse
+                    };
+
+                    newResultEx.Result.UpdateTenantAndUserInfo(resultEx.Result.TenantId, resultEx.Result.IdToken, resultEx.Result.UserInfo);
+                    resultEx = newResultEx;
+                }
+                else
+                {
+                    PlatformPlugin.Logger.Verbose(callState, string.Format("{0} minutes left until token in cache expires", (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
+                }                
 
                 if (resultEx.Result.AccessToken == null && resultEx.RefreshToken == null)
                 {

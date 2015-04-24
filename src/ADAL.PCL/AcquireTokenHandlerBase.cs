@@ -184,6 +184,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (result.RefreshToken == null)
             {
                 result.RefreshToken = refreshToken;
+                PlatformPlugin.Logger.Verbose(this.CallState, "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
             }
 
             return result;

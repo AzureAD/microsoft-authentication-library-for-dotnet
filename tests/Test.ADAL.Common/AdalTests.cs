@@ -150,7 +150,7 @@ namespace Test.ADAL.Common
             result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.InvalidNonExistingRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifyErrorResult(result, Sts.AuthenticationCanceledError, null);
 
-            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, new Uri(sts.ValidNonExistingRedirectUri.AbsoluteUri + "#fragment"), PlatformParameters, sts.ValidUserId);
+            result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, new Uri(sts.ValidNonExistingRedirectUri.OriginalString + "#fragment"), PlatformParameters, sts.ValidUserId);
             VerifyErrorResult(result, Sts.InvalidArgumentError, "redirectUri");
             VerifyErrorResult(result, Sts.InvalidArgumentError, "fragment");
 
