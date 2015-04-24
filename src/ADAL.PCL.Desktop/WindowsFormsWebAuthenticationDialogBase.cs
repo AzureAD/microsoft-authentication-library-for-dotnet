@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) && url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath))
             {
-                this.Result = new AuthorizationResult(AuthorizationStatus.Success, url.AbsoluteUri);
+                this.Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
                 this.StopWebBrowser();
 
                 // in this handler object could be already disposed, so it should be the last method

@@ -60,7 +60,7 @@ namespace Test.ADAL.Common
             result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode + "x", sts.ValidRedirectUriForConfidentialClient, credential);
             VerifyErrorResult(result, "invalid_grant", "authorization code");
 
-            result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, new Uri(sts.ValidRedirectUriForConfidentialClient.AbsoluteUri + "x"), credential);
+            result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, new Uri(sts.ValidRedirectUriForConfidentialClient.OriginalString + "x"), credential);
 
             VerifyErrorResult(result, "invalid_grant", "does not match the reply address", 400, "70002");
 
@@ -712,12 +712,22 @@ namespace Test.ADAL.Common
             AadSts sts = new AadSts();
 
             string liveIdtoken = StsLoginFlow.TryGetSamlToken("https://login.live.com", sts.MsaUserName, sts.MsaPassword, "urn:federation:MicrosoftOnline");
-            var context = new AuthenticationContext(sts.Authority, sts.ValidateAuthority, null);
+            var context = new AuthenticationContext(sts.Authority, sts.ValidateAuthority);
 
             try
             {
                 var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, new UserAssertion(liveIdtoken, "urn:ietf:params:oauth:grant-type:saml1_1-bearer"));
                 VerifySuccessResult(result);
+
+
+                var result2 = await context.AcquireTokenSilentAsync(sts.ValidResource2, sts.ValidClientId, new UserIdentifier(sts.MsaUserName, UserIdentifierType.OptionalDisplayableId));
+                VerifySuccessResult(result2);
+
+                AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
+
+                var result3 = await context.AcquireTokenSilentAsync(sts.ValidResource, sts.ValidClientId, new UserIdentifier(sts.MsaUserName, UserIdentifierType.OptionalDisplayableId));
+                VerifySuccessResult(result3);
+                Verify.IsTrue(AreDateTimeOffsetsEqual(result.ExpiresOn, result3.ExpiresOn));
             }
             catch (Exception ex)
             {
@@ -726,6 +736,7 @@ namespace Test.ADAL.Common
 
             try
             {
+                context.TokenCache.Clear();
                 var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, new UserAssertion("x", "urn:ietf:params:oauth:grant-type:saml1_1-bearer"));
                 Verify.Fail("Exception expected");
                 VerifySuccessResult(result);

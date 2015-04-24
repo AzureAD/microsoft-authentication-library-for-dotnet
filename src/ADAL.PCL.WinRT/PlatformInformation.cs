@@ -144,8 +144,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public override string GetRedirectUriAsString(Uri redirectUri, CallState callState)
         {
             return ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri) ?
-                WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri :
-                redirectUri.AbsoluteUri;
+                WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString :
+                redirectUri.OriginalString;
         }
 
         private static class NativeMethods

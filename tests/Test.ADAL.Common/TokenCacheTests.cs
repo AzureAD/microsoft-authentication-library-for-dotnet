@@ -468,10 +468,13 @@ namespace Test.ADAL.Common.Unit
                 byte[] serializedCache = tokenCache.Serialize();
                 TokenCache tokenCache2 = new TokenCache(serializedCache);
                 Verify.AreEqual(tokenCache.Count, tokenCache2.Count);
-                var item = tokenCache.ReadItems().First();
-                var item2 = tokenCache2.ReadItems().First();
-                Verify.AreEqual(item.AccessToken, item2.AccessToken);
-                Verify.AreEqual(item.ExpiresOn, item2.ExpiresOn);
+                foreach (TokenCacheItem item in tokenCache.ReadItems())
+                {
+                    var item2 = tokenCache2.ReadItems().FirstOrDefault(it => it.AccessToken == item.AccessToken);
+                    Verify.IsNotNull(item2);
+                    double diff = Math.Abs((item.ExpiresOn - item2.ExpiresOn).TotalSeconds);
+                    Verify.IsLessThanOrEqual(diff, 1.0);
+                }
             }
         }
 

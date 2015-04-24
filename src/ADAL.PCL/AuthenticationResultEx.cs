@@ -42,13 +42,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Gets a value indicating whether the refresh token can be used for requesting access token for other resources.
         /// </summary>
-        [DataMember]
-        internal bool IsMultipleResourceRefreshToken { get; set; }
+        internal bool IsMultipleResourceRefreshToken
+        {
+            get
+            {
+                return (!string.IsNullOrWhiteSpace(this.RefreshToken) && !string.IsNullOrWhiteSpace(this.ResourceInResponse));
+            }            
+        }
 
         // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
         // to get it from the STS response.
         [DataMember]
-        internal string Resource { get; set; }
+        internal string ResourceInResponse { get; set; }
 
 
         /// <summary>

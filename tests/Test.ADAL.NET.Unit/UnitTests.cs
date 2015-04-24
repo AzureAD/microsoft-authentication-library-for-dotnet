@@ -225,15 +225,6 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("AdalDotNetUnit")]
-        [Description("Test to verify forms auth parameters.")]
-        public async Task IncludeFormsAuthParamsTest()
-        {
-            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(new Authenticator("https://dummy.com/tenant", false), null, "resource", "clientId", new Uri("https://dummy"), new PlatformParameters(PromptBehavior.Auto, null), UserIdentifier.AnyUser, null, null);
-            Assert.IsFalse(await handler.IncludeFormsAuthParamsAsync());
-        }
-
-        [TestMethod]
-        [TestCategory("AdalDotNetUnit")]
         [Description("Test to verify CryptographyHelper.SignWithCertificate")]
         public void SignWithCertificateTest()
         {

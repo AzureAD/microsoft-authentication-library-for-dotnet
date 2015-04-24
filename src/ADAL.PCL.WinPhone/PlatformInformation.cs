@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 try
                 {
-                    redirectUriString = WebAuthenticationBroker.GetCurrentApplicationCallbackUri().AbsoluteUri;
+                    redirectUriString = WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString;
                 }
                 catch (FormatException ex)
                 {
@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
-                redirectUriString = redirectUri.AbsoluteUri;
+                redirectUriString = redirectUri.OriginalString;
             }
 
             return redirectUriString;

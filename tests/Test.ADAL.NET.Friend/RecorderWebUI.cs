@@ -39,7 +39,7 @@ namespace Test.ADAL.NET.Friend
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri requestUri, Uri callbackUri, CallState callState)
         {
-            string key = requestUri.AbsoluteUri + callbackUri.AbsoluteUri;
+            string key = requestUri.AbsoluteUri + callbackUri.OriginalString;
             string value = null;
 
             if (IOMap.ContainsKey(key))
