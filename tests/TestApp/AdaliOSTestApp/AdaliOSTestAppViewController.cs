@@ -116,5 +116,11 @@ namespace AdaliOSTestApp
                 throw ex;
             }
         }
+
+        partial void UIButton30_TouchUpInside(UIButton sender)
+        {
+            TokenBroker tokenBroker = new TokenBroker();
+            tokenBroker.ClearTokenCache();
+        }
     }
 }

@@ -4,31 +4,35 @@
 // actions declared in your storyboard file.
 // Manual changes to this file will not be maintained.
 //
-using System;
 using Foundation;
-using UIKit;
+using System;
 using System.CodeDom.Compiler;
+using UIKit;
 
 namespace AdaliOSTestApp
 {
-	[Foundation.Register("AdaliOSTestAppViewController")]
+	[Register ("AdaliOSTestAppViewController")]
 	partial class AdaliOSTestAppViewController
 	{
-		[Foundation.Outlet]
+		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		UILabel ReportLabel { get; set; }
 
-		[Foundation.Action("UIButton11_TouchUpInside:")]
+		[Action ("UIButton11_TouchUpInside:")]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		partial void UIButton11_TouchUpInside (UIButton sender);
 
-		[Foundation.Action("UIButton16_TouchUpInside:")]
+		[Action ("UIButton16_TouchUpInside:")]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		partial void UIButton16_TouchUpInside (UIButton sender);
 
-		[Foundation.Action("UIButton25_TouchUpInside:")]
+		[Action ("UIButton25_TouchUpInside:")]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		partial void UIButton25_TouchUpInside (UIButton sender);
+
+		[Action ("UIButton30_TouchUpInside:")]
+		[GeneratedCode ("iOS Designer", "1.0")]
+		partial void UIButton30_TouchUpInside (UIButton sender);
 
 		void ReleaseDesignerOutlets ()
 		{

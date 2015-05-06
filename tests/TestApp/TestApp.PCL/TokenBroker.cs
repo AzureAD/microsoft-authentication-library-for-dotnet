@@ -36,7 +36,7 @@ namespace TestApp.PCL
         public TokenBroker()
         {
             this.sts = new AadSts();
-            context = new AuthenticationContext(this.sts.Authority, true);            
+            context = new AuthenticationContext(this.sts.Authority, true);
         }
 
         public async Task<string> GetTokenInteractiveAsync(IPlatformParameters parameters)
@@ -93,6 +93,11 @@ namespace TestApp.PCL
             {
                 return ex.Message;
             }
+        }
+
+        public void ClearTokenCache()
+        {
+            this.context.TokenCache.Clear();
         }
     }
 }

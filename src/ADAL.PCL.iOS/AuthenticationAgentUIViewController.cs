@@ -48,14 +48,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 		{
 			base.ViewDidLoad ();
 
-            this.Title = "Sign in";
-
             View.BackgroundColor = UIColor.White;
 
             webView = new UIWebView((CGRect)View.Bounds);
 		    webView.ShouldStartLoad = (wView, request, navType) =>
 		    {
-                if (request != null && request.Url.ToString().StartsWith(callback))
+		        if (request == null)
+		        {
+		            return true;
+		        }
+
+		        string requestUrl = request.Url.ToString().ToLower();
+                if (requestUrl.StartsWith(callback.ToLower()))
                 {
                     callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, request.Url.ToString()));
                     this.DismissViewController(true, null);
@@ -63,6 +67,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 return true;
+		    };
+
+		    webView.LoadFinished += delegate
+		    {
+                string title = webView.EvaluateJavascript(@"document.title") ?? "Sign in";
+		        if (title.Length > 20)  // 20 is the maximum title we want to show due to limited space on the title bar
+		        {
+                    this.Title = title.Substring(0, 20) + "...";		            
+		        }
 		    };
 
 			View.AddSubview(webView);

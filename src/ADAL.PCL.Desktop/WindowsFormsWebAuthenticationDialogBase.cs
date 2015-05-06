@@ -41,32 +41,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         private Keys key = Keys.None;
 
-        /// <summary>
-        /// From MSDN (http://msdn.microsoft.com/en-us/library/ie/dn720860(v=vs.85).aspx): 
-        /// The net session count tracks the number of instances of the web browser control. 
-        /// When a web browser control is created, the net session count is incremented. When the control 
-        /// is destroyed, the net session count is decremented. When the net session count reaches zero, 
-        /// the session cookies for the process are cleared. SetQueryNetSessionCount can be used to prevent 
-        /// the session cookies from being cleared for applications where web browser controls are being created 
-        /// and destroyed throughout the lifetime of the application. (Because the application lives longer than 
-        /// a given instance, session cookies must be retained for a longer periods of time.
-        /// </summary>
-        static WindowsFormsWebAuthenticationDialogBase()
+        internal AuthorizationResult Result { get; set; }
+
+        protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow)
         {
+            // From MSDN (http://msdn.microsoft.com/en-us/library/ie/dn720860(v=vs.85).aspx): 
+            // The net session count tracks the number of instances of the web browser control. 
+            // When a web browser control is created, the net session count is incremented. When the control 
+            // is destroyed, the net session count is decremented. When the net session count reaches zero, 
+            // the session cookies for the process are cleared. SetQueryNetSessionCount can be used to prevent 
+            // the session cookies from being cleared for applications where web browser controls are being created 
+            // and destroyed throughout the lifetime of the application. (Because the application lives longer than 
+            // a given instance, session cookies must be retained for a longer periods of time.
             int sessionCount = NativeMethods.SetQueryNetSessionCount(NativeMethods.SessionOp.SESSION_QUERY);
             if (sessionCount == 0)
             {
                 NativeMethods.SetQueryNetSessionCount(NativeMethods.SessionOp.SESSION_INCREMENT);
             }
-        }
 
-        internal AuthorizationResult Result { get; set; }
-
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow)
-        {
             if (ownerWindow == null)
             {
                 this.ownerWindow = null;

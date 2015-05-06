@@ -52,7 +52,7 @@ namespace AdalAndroidTestApp
             this.accessTokenTextView = FindViewById<TextView>(Resource.Id.accessTokenTextView);
         }
 
-        protected override async void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             AuthenticationAgentContinuationHelper.SetAuthenticationAgentContinuationEventArgs(requestCode, resultCode, data);
 
