@@ -71,11 +71,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
 		    webView.LoadFinished += delegate
 		    {
-                string title = webView.EvaluateJavascript(@"document.title") ?? "Sign in";
-		        if (title.Length > 20)  // 20 is the maximum title we want to show due to limited space on the title bar
-		        {
-                    this.Title = title.Substring(0, 20) + "...";		            
-		        }
+                // If the title is too long, iOS automatically truncates it and adds ...
+                this.Title = webView.EvaluateJavascript(@"document.title") ?? "Sign in";
 		    };
 
 			View.AddSubview(webView);
