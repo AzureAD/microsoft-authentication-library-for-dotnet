@@ -396,9 +396,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         /// <param name="parameters">An object of type PlatformParameters which may pass additional parameters used for authorization.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters)
         {
-            return this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, UserIdentifier.AnyUser);
+            return await this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, UserIdentifier.AnyUser);
         }
 
         /// <summary>
@@ -411,9 +411,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
         /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId)
         {
-            return this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId);
+            return await this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId);
         }
 
         /// <summary>
@@ -427,9 +427,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="parameters">Parameters needed for interactive flow requesting authorization code. Pass an instance of PlatformParameters.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters)
         {
-            return this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId, extraQueryParameters);
+            return await this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId, extraQueryParameters);
         }
 
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode, Uri redirectUri, ClientKey clientKey, string resource)
