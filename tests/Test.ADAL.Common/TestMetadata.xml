@@ -37,4 +37,14 @@
   <AADFederatedWithADFS3>
     <StsType>AADFederatedWithADFS3</StsType>
   </AADFederatedWithADFS3>
+  
+  <ResourceOwnerCredentials>
+    <StsType>AdfsPasswordGrant</StsType>
+    <CallSync>false</CallSync>
+  </ResourceOwnerCredentials>
+  
+  <ResourceOwnerCredentials>
+    <StsType>AadPasswordGrant</StsType>
+    <CallSync>false</CallSync>
+  </ResourceOwnerCredentials>
 </Rows>
