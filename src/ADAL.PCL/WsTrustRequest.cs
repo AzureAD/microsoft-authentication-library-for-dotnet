@@ -105,7 +105,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             request.UseDefaultCredentials = true;
         }
 
-        private static StringBuilder BuildMessage(string appliesTo, string resource, UserCredential credential)
+        public static StringBuilder BuildMessage(string appliesTo, string resource, UserCredential credential)
         {
             // securityHeader will be empty string for Kerberos.
             StringBuilder securityHeaderBuilder = BuildSecurityHeader(credential);
