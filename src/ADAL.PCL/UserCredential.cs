@@ -74,5 +74,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return (this.Password != null) ? this.Password.ToCharArray() : null;
         }
+
+        internal char[] EscapedPasswordToCharArray()
+        {
+            string password = this.Password;
+            password = password.Replace("&", "&amp;");
+            password = password.Replace("\"", "&quot;");
+            password = password.Replace("'", "&apos;");
+            password = password.Replace("<", "&lt;");
+            password = password.Replace(">", "&gt;");
+            return (password != null) ? password.ToCharArray() : null;
+        }
     }
 }
