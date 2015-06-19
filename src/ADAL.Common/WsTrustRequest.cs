@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static async Task<WsTrustResponse> SendRequestAsync(Uri url, UserCredential credential, CallState callState)
         {
             IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(url.AbsoluteUri);
-            request.ContentType = "application/soap+xml; charset=utf-8";
+            request.ContentType = "application/soap+xml;";
             if (credential.UserAuthType == UserAuthType.IntegratedAuth)
             {
                 SetKerberosOption(request);
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             request.UseDefaultCredentials = true;
         }
 
-        private static StringBuilder BuildMessage(string appliesTo, string resource, UserCredential credential)
+        public static StringBuilder BuildMessage(string appliesTo, string resource, UserCredential credential)
         {
             // securityHeader will be empty string for Kerberos.
             StringBuilder securityHeaderBuilder = BuildSecurityHeader(credential);
@@ -138,7 +138,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 char[] passwordChars = null;
                 try
                 {
-                    passwordChars = credential.PasswordToCharArray();
+                    passwordChars = credential.EscapedPasswordToCharArray();
                     messageCredentialsBuilder.Append(passwordChars);
                 }
                 finally
