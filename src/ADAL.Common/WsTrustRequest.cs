@@ -138,7 +138,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 char[] passwordChars = null;
                 try
                 {
-                    passwordChars = credential.EscapedPasswordToCharArray();
+                    passwordChars = credential.PasswordToCharArray();
                     messageCredentialsBuilder.Append(passwordChars);
                 }
                 finally
