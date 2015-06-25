@@ -19,7 +19,6 @@
 using System;
 using System.Threading;
 using System.Windows.Forms;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
@@ -29,6 +28,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         /// This is how long we allow between completed navigations.
         /// </summary>
         private const int NavigationWaitMiliSecs = 250;
+
+        /// <summary>
+        /// This is how long all redirect navigations are allowed to run for before a graceful 
+        /// termination of the entire browser based authentication process is attempted.
+        /// </summary>
+        private const int NavigationOverallTimeout = 20000;
 
         private bool disposed;
 
@@ -67,7 +72,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         /// <returns>Returns true if the UI thread completed on its own before the timeout.  Otherwise false.</returns>
         private void WaitForCompletionOrTimeout(Thread uiThread)
         {
-            long navigationOverallTimeout = WebUISettings.SilentWebUITimeout;
+            long navigationOverallTimeout = NavigationOverallTimeout;
             long navigationStartTime = DateTime.Now.Ticks;
 
             bool initialized = this.threadInitializedEvent.WaitOne((int)navigationOverallTimeout);
