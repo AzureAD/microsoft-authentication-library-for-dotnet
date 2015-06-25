@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         /// This is how long all redirect navigations are allowed to run for before a graceful 
         /// termination of the entire browser based authentication process is attempted.
         /// </summary>
-        private const int NavigationOverallTimeout = 2000;
+        private const int NavigationOverallTimeout = 20000;
 
         private bool disposed;
 
@@ -73,6 +73,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         private void WaitForCompletionOrTimeout(Thread uiThread)
         {
             long navigationOverallTimeout = NavigationOverallTimeout;
+
             long navigationStartTime = DateTime.Now.Ticks;
 
             bool initialized = this.threadInitializedEvent.WaitOne((int)navigationOverallTimeout);

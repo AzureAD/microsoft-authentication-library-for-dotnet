@@ -25,6 +25,7 @@ using System.Xml.Linq;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.Common;
+using System.Xml;
 
 namespace Test.ADAL.NET.Unit
 {
@@ -193,6 +194,24 @@ namespace Test.ADAL.NET.Unit
             {
                 Verify.IsNotNull(ex.ErrorCode, AdalError.FederatedServiceReturnedError);
                 Verify.IsNotNull(ex.InnerException);
+            }
+        }
+
+        [TestMethod]
+        [Description("WS-Trust Request Xml Format Test")]
+        [TestCategory("AdalDotNet")]
+        public async Task WsTrustRequestXmlFormatTest()
+        {
+            UserCredential cred = new UserCredential("user", "pass&<>\"'");
+            StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto", "resource", cred);
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml("<?xml version=\"1.0\"?>" + sb.ToString());
+            }
+            catch (Exception ex)
+            {
+                Verify.Fail("Not expected");
             }
         }
 

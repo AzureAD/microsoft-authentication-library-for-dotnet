@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -60,7 +61,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static async Task<WsTrustResponse> SendRequestAsync(Uri url, UserCredential credential, CallState callState)
         {
             IHttpWebRequest request = NetworkPlugin.HttpWebRequestFactory.Create(url.AbsoluteUri);
-            request.ContentType = "application/soap+xml; charset=utf-8";
+            request.ContentType = "application/soap+xml;";
             if (credential.UserAuthType == UserAuthType.IntegratedAuth)
             {
                 SetKerberosOption(request);
@@ -109,7 +110,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             request.UseDefaultCredentials = true;
         }
 
-        private static StringBuilder BuildMessage(string appliesTo, string resource, UserCredential credential)
+        public static StringBuilder BuildMessage(string appliesTo, string resource, UserCredential credential)
         {
             // securityHeader will be empty string for Kerberos.
             StringBuilder securityHeaderBuilder = BuildSecurityHeader(credential);
@@ -122,6 +123,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return messageBuilder;
         }
+
+        internal static string XmlEscape(string escapeStr)
+       {
+           escapeStr = escapeStr.Replace("&", "&amp;");
+           escapeStr = escapeStr.Replace("\"", "&quot;");
+           escapeStr = escapeStr.Replace("'", "&apos;");
+           escapeStr = escapeStr.Replace("<", "&lt;");
+           escapeStr = escapeStr.Replace(">", "&gt;");
+           return escapeStr;
+       }
 
         private static StringBuilder BuildSecurityHeader(UserCredential credential)
         {
@@ -139,7 +150,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 try
                 {
                     passwordChars = credential.PasswordToCharArray();
-                    messageCredentialsBuilder.Append(passwordChars);
+                    string escapeStr = XmlEscape(new string(passwordChars));
+                    messageCredentialsBuilder.Append(escapeStr);
+                    escapeStr = "";
                 }
                 finally
                 {
