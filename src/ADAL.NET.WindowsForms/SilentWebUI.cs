@@ -73,6 +73,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         private void WaitForCompletionOrTimeout(Thread uiThread)
         {
             long navigationOverallTimeout = NavigationOverallTimeout;
+
             long navigationStartTime = DateTime.Now.Ticks;
 
             bool initialized = this.threadInitializedEvent.WaitOne((int)navigationOverallTimeout);
