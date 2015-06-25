@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -123,6 +124,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return messageBuilder;
         }
 
+        internal static string XmlEscape(string escapeStr)
+       {
+           escapeStr = escapeStr.Replace("&", "&amp;");
+           escapeStr = escapeStr.Replace("\"", "&quot;");
+           escapeStr = escapeStr.Replace("'", "&apos;");
+           escapeStr = escapeStr.Replace("<", "&lt;");
+           escapeStr = escapeStr.Replace(">", "&gt;");
+           return escapeStr;
+       }
+
         private static StringBuilder BuildSecurityHeader(UserCredential credential)
         {
             StringBuilder securityHeaderBuilder = new StringBuilder(MaxExpectedMessageSize);
@@ -139,7 +150,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 try
                 {
                     passwordChars = credential.PasswordToCharArray();
-                    messageCredentialsBuilder.Append(passwordChars);
+                    string escapeStr = XmlEscape(new string(passwordChars));
+                    messageCredentialsBuilder.Append(escapeStr);
+                    escapeStr = "";
                 }
                 finally
                 {

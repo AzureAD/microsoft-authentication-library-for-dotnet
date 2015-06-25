@@ -19,7 +19,6 @@
 using System;
 using System.Threading;
 using System.Windows.Forms;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
@@ -67,7 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         /// <returns>Returns true if the UI thread completed on its own before the timeout.  Otherwise false.</returns>
         private void WaitForCompletionOrTimeout(Thread uiThread)
         {
-            long navigationOverallTimeout = WebUISettings.SilentWebUITimeout;
+            long navigationOverallTimeout = 20000;
             long navigationStartTime = DateTime.Now.Ticks;
 
             bool initialized = this.threadInitializedEvent.WaitOne((int)navigationOverallTimeout);
