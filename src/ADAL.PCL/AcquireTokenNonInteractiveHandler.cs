@@ -36,6 +36,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentNullException("userCredential");
             }
 
+            // We enable ADFS support only when it makes sense to do so
+            if (authenticator.AuthorityType == AuthorityType.ADFS)
+            {
+                this.SupportADFS = true;
+            }
+
             this.userCredential = userCredential;
         }
 
@@ -84,7 +90,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected override async Task PreTokenRequest()
         {
             await base.PreTokenRequest();
-            if (this.userAssertion == null)
+            if (this.PerformUserRealmDiscovery())
             {
                 UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, this.userCredential.UserName, this.CallState);
                 PlatformPlugin.Logger.Information(this.CallState, string.Format("User with hash '{0}' detected as '{1}'", PlatformPlugin.CryptographyHelper.CreateSha256Hash(this.userCredential.UserName), userRealmResponse.AccountType));
@@ -136,6 +142,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             // To request id_token in response
             requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
+        }
+        
+        private bool PerformUserRealmDiscovery()
+        {
+            // To decide whether user realm discovery is needed or not
+            // we should also consider if that is supported by the authority
+            return this.userAssertion == null &&
+                   this.SupportADFS == false;
         }
     }
 }

@@ -501,5 +501,14 @@ namespace Test.ADAL.NET
         {
             await AdalTests.MixedCaseUserNameTestAsync(Sts);
         }
+        
+        [TestMethod]
+        [Description("Positive Test for AcquireToken with valid user credentials")]
+        [TestCategory("AdalDotNet")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "ResourceOwnerCredentials", DataAccessMethod.Sequential)]
+        public async Task ResourceOwnerCredentialsTest()
+        {
+            await AdalTests.ResourceOwnerCredentialsTestAsync(Sts);
+        }
     }
 }
