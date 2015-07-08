@@ -5,6 +5,7 @@ src/ADAL.NET/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
 src/ADAL.NET.WindowsForms/obj/
 src/ADAL.WinRT/obj/
 src/ADAL.WinRT/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
+src/ADAL.WinPhoneSL/obj/
 tests/Test.ADAL.NET.Friend/obj/
 tests/Test.ADAL.NET.Unit/obj/
 tests/Test.ADAL.NET.WindowsForms/obj/
@@ -20,6 +21,7 @@ winphone/src/ADAL.WinPhone/obj/
 winphone/tests/Test.ADAL.WinPhone.UnitTest/obj/
 winphone/src/ADAL.WinPhone/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
 src/ADAL.WinPhone/obj/
+tests/Test.ADAL.WinPhoneSL.Dashboard/obj/
 tests/Test.ADAL.WinPhone.Dashboard/obj/
 src/ADAL.WinPhone/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
 tests/Test.ADAL.WinPhone.Unit/obj/
