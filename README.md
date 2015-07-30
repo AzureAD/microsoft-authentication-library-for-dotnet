@@ -138,7 +138,7 @@ and then use ```loggingSession.SaveToFileAsync(...)``` to copy the logs to a fil
 
 You can use various tools to capture the HTTP traffic that ADAL generates.  This is most useful if you are familiar with the OAuth protocol or if you need to provide diagnostic information to Microsoft or other support channels.
 
-Fiddler is the easiest HTTP tracing tool.  Use the following links to setup it up to correctly record ADAL network traffic.  In order to be useful it is necessary to configure fiddler to record unencrypted SSL traffic.  
+Fiddler is the easiest HTTP tracing tool.  In order to be useful it is necessary to configure fiddler to record unencrypted SSL traffic.  
 
 NOTE: Traces generated in this way may contain highly privileged information such as access tokens, usernames and passwords.  If you are using production accounts, do not share these traces with 3rd parties.  If you need to supply a trace to someone in order to get support, reproduce the issue with a temporary account with usernames and passwords that you don't mind sharing.
 
