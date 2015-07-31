@@ -115,7 +115,7 @@ namespace Test.ADAL.NET.Unit
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
             XDocument mexDocument = await FecthMexAsync(userRealmResponse.FederationMetadataUrl);
             Verify.IsNotNull(mexDocument);
-            Uri wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.IntegratedAuth, null);
+            WsTrustAddress wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.IntegratedAuth, null);
             Verify.IsNotNull(wsTrustAddress);
             wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
             Verify.IsNotNull(wsTrustAddress);
@@ -136,7 +136,7 @@ namespace Test.ADAL.NET.Unit
 
             try
             {
-                string modifiedMexDocumentContent = mexDocumentContent.Replace(wsTrustAddress.AbsoluteUri, string.Empty);
+                string modifiedMexDocumentContent = mexDocumentContent.Replace(wsTrustAddress.Uri.AbsoluteUri, string.Empty);
                 XDocument modifiedMexDocument = ConvertStringToXDocument(modifiedMexDocumentContent);
                 MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword, null);
                 Verify.Fail("Exception expected");
@@ -159,7 +159,7 @@ namespace Test.ADAL.NET.Unit
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
             XDocument mexDocument = await FecthMexAsync(userRealmResponse.FederationMetadataUrl);
             Verify.IsNotNull(mexDocument);
-            Uri wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
+            WsTrustAddress wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
             Verify.IsNotNull(wsTrustAddress);
 
             WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, new UserCredential(federatedSts.ValidUserName, federatedSts.ValidPassword), null);
@@ -178,7 +178,8 @@ namespace Test.ADAL.NET.Unit
 
             try
             {
-                await WsTrustRequest.SendRequestAsync(new Uri(wsTrustAddress.AbsoluteUri + "x"), new UserCredential(federatedSts.ValidUserName, federatedSts.ValidPassword), null);
+                await WsTrustRequest.SendRequestAsync(new WsTrustAddress{Uri = new Uri(wsTrustAddress.Uri.AbsoluteUri + "x")}, 
+                    new UserCredential(federatedSts.ValidUserName, federatedSts.ValidPassword), null);
             }
             catch (AdalException ex)
             {
@@ -188,7 +189,7 @@ namespace Test.ADAL.NET.Unit
 
             try
             {
-                await WsTrustRequest.SendRequestAsync(new Uri(wsTrustAddress.AbsoluteUri), new UserCredential(federatedSts.ValidUserName, "InvalidPassword"), null);
+                await WsTrustRequest.SendRequestAsync(new WsTrustAddress { Uri = new Uri(wsTrustAddress.Uri.AbsoluteUri) }, new UserCredential(federatedSts.ValidUserName, "InvalidPassword"), null);
             }
             catch (AdalException ex)
             {
@@ -203,7 +204,7 @@ namespace Test.ADAL.NET.Unit
         public async Task WsTrustRequestXmlFormatTest()
         {
             UserCredential cred = new UserCredential("user", "pass&<>\"'");
-            StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto", "resource", cred);
+            StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto", new WsTrustAddress { Uri = new Uri("resource") }, cred);
             try
             {
                 XmlDocument doc = new XmlDocument();
