@@ -17,7 +17,10 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -32,23 +35,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         // If both are specified, the wst:AppliesTo field takes precedence.
         // If we don't specify TokenType, it will return SAML v1.1
         private const string WsTrustEnvelopeTemplate =
-            @"<s:Envelope xmlns:s='http://www.w3.org/2003/05/soap-envelope' xmlns:a='http://www.w3.org/2005/08/addressing' xmlns:u='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd'>
+            @"<s:Envelope xmlns:s='http://www.w3.org/2003/05/soap-envelope' xmlns:a='http://www.w3.org/2005/08/addressing' xmlns:u='{0}'>
               <s:Header>
-              <a:Action s:mustUnderstand='1'>http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue</a:Action>
-              <a:messageID>urn:uuid:{0}</a:messageID>
+              <a:Action s:mustUnderstand='1'>{1}</a:Action>
+              <a:messageID>urn:uuid:{2}</a:messageID>
               <a:ReplyTo><a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address></a:ReplyTo>
-              <a:To s:mustUnderstand='1'>{1}</a:To>
-              {2}
+              <a:To s:mustUnderstand='1'>{3}</a:To>
+              {4}
               </s:Header>
               <s:Body>
-              <trust:RequestSecurityToken xmlns:trust='http://docs.oasis-open.org/ws-sx/ws-trust/200512'>
+              <trust:RequestSecurityToken xmlns:trust='{5}'>
               <wsp:AppliesTo xmlns:wsp='http://schemas.xmlsoap.org/ws/2004/09/policy'>
               <a:EndpointReference>
-              <a:Address>{3}</a:Address>
+              <a:Address>{6}</a:Address>
               </a:EndpointReference>
               </wsp:AppliesTo>
-              <trust:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer</trust:KeyType>
-              <trust:RequestType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue</trust:RequestType>
+              <trust:KeyType>{7}</trust:KeyType>
+              <trust:RequestType>{8}</trust:RequestType>
               </trust:RequestSecurityToken>
               </s:Body>
               </s:Envelope>";
@@ -56,17 +59,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         // We currently send this for all requests. We may need to change it in the future.
         private const string DefaultAppliesTo = "urn:federation:MicrosoftOnline";
 
-        public static async Task<WsTrustResponse> SendRequestAsync(Uri url, UserCredential credential, CallState callState)
+        public static async Task<WsTrustResponse> SendRequestAsync(WsTrustAddress wsTrustAddress, UserCredential credential, CallState callState)
         {
-            IHttpClient request = PlatformPlugin.HttpClientFactory.Create(url.AbsoluteUri, callState);
-            request.ContentType = "application/soap+xml";
+            IHttpClient request = PlatformPlugin.HttpClientFactory.Create(wsTrustAddress.Uri.AbsoluteUri, callState);
+            request.ContentType = "application/soap+xml;";
             if (credential.UserAuthType == UserAuthType.IntegratedAuth)
             {
                 SetKerberosOption(request);
             }
 
-            StringBuilder messageBuilder = BuildMessage(DefaultAppliesTo, url.AbsoluteUri, credential);
-            request.Headers["SOAPAction"] = XmlNamespace.Issue.ToString();
+            StringBuilder messageBuilder = BuildMessage(DefaultAppliesTo, wsTrustAddress, credential);
+            string soapAction = XmlNamespace.Issue.ToString();
+            if (wsTrustAddress.Version == WsTrustVersion.WsTrust2005)
+            {
+                soapAction = XmlNamespace.Issue2005.ToString();
+            }
+
+            Dictionary<string, string> headers = new Dictionary<string, string> 
+            { 
+                { "SOAPAction", soapAction }
+            };
 
             WsTrustResponse wstResponse;
 
@@ -74,15 +86,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 request.BodyParameters = new StringRequestParameters(messageBuilder);
                 IHttpWebResponse response = await request.GetResponseAsync();
-                wstResponse = WsTrustResponse.CreateFromResponse(response.ResponseStream);
+                wstResponse = WsTrustResponse.CreateFromResponse(response.ResponseStream, wsTrustAddress.Version);
             }
-            catch (HttpRequestWrapperException ex)
+            catch (WebException ex)
             {
                 string errorMessage;
 
                 try
                 {
-                    XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(ex.WebResponse.ResponseStream);
+                    XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(ex.Response.GetResponseStream());
                     errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument, callState);
                 }
                 catch (AdalException)
@@ -92,7 +104,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 throw new AdalServiceException(
                     AdalError.FederatedServiceReturnedError,
-                    string.Format(AdalErrorMessage.FederatedServiceReturnedErrorTemplate, url, errorMessage),
+                    string.Format(AdalErrorMessage.FederatedServiceReturnedErrorTemplate, wsTrustAddress.Uri, errorMessage),
                     null,
                     ex);
             }
@@ -105,21 +117,49 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             request.UseDefaultCredentials = true;
         }
 
-        public static StringBuilder BuildMessage(string appliesTo, string resource, UserCredential credential)
+        public static StringBuilder BuildMessage(string appliesTo, WsTrustAddress wsTrustAddress,
+            UserCredential credential)
         {
             // securityHeader will be empty string for Kerberos.
-            StringBuilder securityHeaderBuilder = BuildSecurityHeader(credential);
+            StringBuilder securityHeaderBuilder = BuildSecurityHeader(wsTrustAddress, credential);
 
             string guid = Guid.NewGuid().ToString();
             StringBuilder messageBuilder = new StringBuilder(MaxExpectedMessageSize);
-            messageBuilder.AppendFormat(WsTrustEnvelopeTemplate, guid, resource, securityHeaderBuilder, appliesTo);
+            String schemaLocation = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
+            String soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue";
+            String rstTrustNamespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
+            String keyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer";
+            String requestType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue";
 
+            if (wsTrustAddress.Version == WsTrustVersion.WsTrust2005)
+            {
+                soapAction = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue";
+                rstTrustNamespace = "http://schemas.xmlsoap.org/ws/2005/02/trust";
+                keyType = "http://schemas.xmlsoap.org/ws/2005/05/identity/NoProofKey";
+                requestType = "http://schemas.xmlsoap.org/ws/2005/02/trust/Issue";
+            }
+
+            messageBuilder.AppendFormat(WsTrustEnvelopeTemplate,
+                schemaLocation, soapAction,
+                                guid, wsTrustAddress.Uri, securityHeaderBuilder,
+                                rstTrustNamespace, appliesTo, keyType,
+                                requestType);
             securityHeaderBuilder.SecureClear();
 
             return messageBuilder;
         }
 
-        private static StringBuilder BuildSecurityHeader(UserCredential credential)
+        internal static string XmlEscape(string escapeStr)
+        {
+            escapeStr = escapeStr.Replace("&", "&amp;");
+            escapeStr = escapeStr.Replace("\"", "&quot;");
+            escapeStr = escapeStr.Replace("'", "&apos;");
+            escapeStr = escapeStr.Replace("<", "&lt;");
+            escapeStr = escapeStr.Replace(">", "&gt;");
+            return escapeStr;
+        }
+
+        private static StringBuilder BuildSecurityHeader(WsTrustAddress address, UserCredential credential)
         {
             StringBuilder securityHeaderBuilder = new StringBuilder(MaxExpectedMessageSize);
 
@@ -128,14 +168,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 StringBuilder messageCredentialsBuilder = new StringBuilder(MaxExpectedMessageSize);
                 string guid = Guid.NewGuid().ToString();
-
-                messageCredentialsBuilder.AppendFormat("<o:UsernameToken u:Id='uuid-{0}'><o:Username>{1}</o:Username><o:Password>", guid, credential.UserName);
-
+                messageCredentialsBuilder.AppendFormat(
+                    "<o:UsernameToken u:Id='uuid-{0}'><o:Username>{1}</o:Username><o:Password>", guid,
+                    credential.UserName);
                 char[] passwordChars = null;
                 try
                 {
-                    passwordChars = credential.EscapedPasswordToCharArray();
-                    messageCredentialsBuilder.Append(passwordChars);
+                    passwordChars = credential.PasswordToCharArray();
+                    string escapeStr = XmlEscape(new string(passwordChars));
+                    messageCredentialsBuilder.Append(escapeStr);
+                    escapeStr = "";
                 }
                 finally
                 {
@@ -151,13 +193,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 string currentTimeString = BuildTimeString(currentTime);
 
                 // Expiry is 10 minutes after creation
-                DateTime expiryTime = currentTime.AddMinutes(10);    
-                string expiryTimString = BuildTimeString(expiryTime);
+                DateTime expiryTime = currentTime.AddMinutes(10);
+                string expiryTimeString = BuildTimeString(expiryTime);
 
                 securityHeaderBuilder.AppendFormat(
-                    "<o:Security s:mustUnderstand='1' xmlns:o='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd'><u:Timestamp u:Id='_0'><u:Created>{0}</u:Created><u:Expires>{1}</u:Expires></u:Timestamp>{2}</o:Security>", 
-                    currentTimeString, 
-                    expiryTimString, 
+                    "<o:Security s:mustUnderstand='1' xmlns:o='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd'><u:Timestamp u:Id='_0'><u:Created>{0}</u:Created><u:Expires>{1}</u:Expires></u:Timestamp>{2}</o:Security>",
+                    currentTimeString,
+                    expiryTimeString,
                     messageCredentialsBuilder);
 
                 messageCredentialsBuilder.SecureClear();
