@@ -32,10 +32,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public string TokenType { get; private set; }
 
-        public static WsTrustResponse CreateFromResponse(Stream responseStream)
+        public static WsTrustResponse CreateFromResponse(Stream responseStream, WsTrustVersion version)
         {
             XDocument responseDocument = ReadDocumentFromResponse(responseStream);
-            return CreateFromResponseDocument(responseDocument);
+            return CreateFromResponseDocument(responseDocument, version);
         }
 
         public static string ReadErrorResponse(XDocument responseDocument, CallState callState)
@@ -87,34 +87,51 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private static WsTrustResponse CreateFromResponseDocument(XContainer responseDocument)
+        internal static WsTrustResponse CreateFromResponseDocument(XDocument responseDocument, WsTrustVersion version)
         {
             Dictionary<string, string> tokenResponseDictionary = new Dictionary<string, string>();
 
             try
             {
-                XElement requestSecurityTokenResponseCollection =
-                    responseDocument.Descendants(XmlNamespace.Trust + "RequestSecurityTokenResponseCollection").FirstOrDefault();
-
-                if (requestSecurityTokenResponseCollection != null)
+                XNamespace t = XmlNamespace.Trust;
+                if (version == WsTrustVersion.WsTrust2005)
                 {
-                    IEnumerable<XElement> tokenResponses = responseDocument.Descendants(XmlNamespace.Trust + "RequestSecurityTokenResponse");
+                    t = XmlNamespace.Trust2005;
+                }
+                bool parseResponse = true;
+                if (version == WsTrustVersion.WsTrust13)
+                {
+                    XElement requestSecurityTokenResponseCollection =
+                        responseDocument.Descendants(t + "RequestSecurityTokenResponseCollection").FirstOrDefault();
+
+                    if (requestSecurityTokenResponseCollection == null)
+                    {
+                        parseResponse = false;
+                    }
+                }
+
+                if (parseResponse)
+                {
+                    IEnumerable<XElement> tokenResponses =
+                        responseDocument.Descendants(t + "RequestSecurityTokenResponse");
                     foreach (var tokenResponse in tokenResponses)
                     {
-                        XElement tokenTypeElement = tokenResponse.Elements(XmlNamespace.Trust + "TokenType").FirstOrDefault();
+                        XElement tokenTypeElement = tokenResponse.Elements(t + "TokenType").FirstOrDefault();
                         if (tokenTypeElement == null)
                         {
                             continue;
                         }
 
-                        XElement requestedSecurityToken = tokenResponse.Elements(XmlNamespace.Trust + "RequestedSecurityToken").FirstOrDefault();
+                        XElement requestedSecurityToken =
+                            tokenResponse.Elements(t + "RequestedSecurityToken").FirstOrDefault();
                         if (requestedSecurityToken == null)
                         {
                             continue;
                         }
 
                         // TODO #123622: We need to disable formatting due to a potential service bug. Remove the ToString argument when problem is fixed.
-                        tokenResponseDictionary.Add(tokenTypeElement.Value, requestedSecurityToken.FirstNode.ToString(SaveOptions.DisableFormatting));
+                        tokenResponseDictionary.Add(tokenTypeElement.Value,
+                            requestedSecurityToken.FirstNode.ToString(SaveOptions.DisableFormatting));
                     }
                 }
             }
@@ -131,10 +148,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string tokenType = tokenResponseDictionary.ContainsKey(Saml1Assertion) ? Saml1Assertion : tokenResponseDictionary.Keys.First();
 
             WsTrustResponse wsTrustResponse = new WsTrustResponse
-                                              {
-                                                  TokenType = tokenType,
-                                                  Token = tokenResponseDictionary[tokenType]
-                                              };
+            {
+                TokenType = tokenType,
+                Token = tokenResponseDictionary[tokenType]
+            };
 
             return wsTrustResponse;
         }
