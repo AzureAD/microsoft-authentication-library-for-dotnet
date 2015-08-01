@@ -193,12 +193,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 // Expiry is 10 minutes after creation
                 DateTime expiryTime = currentTime.AddMinutes(10);    
-                string expiryTimString = DateTimeHelper.BuildTimeString(expiryTime);
+                string expiryTimeString = DateTimeHelper.BuildTimeString(expiryTime);
 
                     securityHeaderBuilder.AppendFormat(
                         "<o:Security s:mustUnderstand='1' xmlns:o='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd'><u:Timestamp u:Id='_0'><u:Created>{0}</u:Created><u:Expires>{1}</u:Expires></u:Timestamp>{2}</o:Security>",
                         currentTimeString,
-                        expiryTimString,
+                        expiryTimeString,
                         messageCredentialsBuilder);
 
                 messageCredentialsBuilder.SecureClear();
