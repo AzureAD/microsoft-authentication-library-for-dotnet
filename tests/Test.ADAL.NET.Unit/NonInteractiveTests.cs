@@ -31,6 +31,7 @@ namespace Test.ADAL.NET.Unit
 {
     [TestClass]
     [DeploymentItem("TestMex.xml")]
+    [DeploymentItem("TestMex2005.xml")]
     public class NonInteractiveTests : AdalTestsBase
     {
         // Switch this to true to run test against actual service
@@ -102,6 +103,26 @@ namespace Test.ADAL.NET.Unit
             {
                 Verify.AreEqual(ex.ErrorCode, AdalError.AccessingWsMetadataExchangeFailed);
             }
+        }
+
+        [TestMethod]
+        [Description("WS-Trust Address Extraction Test")]
+        [TestCategory("AdalDotNet")]
+        public async Task WsTrust2005AddressExtractionTest()
+        {
+            XDocument mexDocument = null;
+            using (Stream stream = new FileStream("TestMex2005.xml", FileMode.Open))
+            {
+                mexDocument = XDocument.Load(stream);
+            }
+
+            Verify.IsNotNull(mexDocument);
+            WsTrustAddress wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.IntegratedAuth, null);
+            Verify.IsNotNull(wsTrustAddress);
+            Verify.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust13);
+            wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
+            Verify.IsNotNull(wsTrustAddress);
+            Verify.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust2005);
         }
 
         [TestMethod]
