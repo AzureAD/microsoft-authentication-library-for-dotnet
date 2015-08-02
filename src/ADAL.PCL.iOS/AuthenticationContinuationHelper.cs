@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,31 +16,22 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Security.Cryptography;
-using System.Text;
+using Foundation;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class CryptographyHelper : ICryptographyHelper
+    public static class AuthenticationContinuationHelper
     {
-        public string CreateSha256Hash(string input)
+
+        public static bool IsBrokerResponse(string sourceApplication)
         {
-            using (SHA256Managed sha = new SHA256Managed())
-            {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
-            }
+            return sourceApplication != null && sourceApplication.Equals(new NSString("com.microsoft.azureAuthenticator"));
         }
 
-        public byte[] SignWithCertificate(string message, byte[] rawData, string password)
+        public static void SetBrokerContinuationEventArgs(NSUrl url)
         {
-            throw new NotImplementedException();            
+            
         }
 
-        public string GetX509CertificateThumbprint(ClientAssertionCertificate credential)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

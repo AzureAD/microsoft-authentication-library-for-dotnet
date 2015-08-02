@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 
@@ -25,6 +26,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     class AdalHttpClient
     {
+        private const string DeviceAuthHeaderName = "x-ms-PKeyAuth";
+        private const string DeviceAuthHeaderValue = "1.0";
+        private const string WwwAuthenticateHeader = "WWW-Authenticate";
+        private const string PKeyAuthName = "PKeyAuth";
+
         public AdalHttpClient(string uri, CallState callState)
         {
             this.Client = PlatformPlugin.HttpClientFactory.Create(CheckForExtraQueryParameter(uri), callState);
@@ -37,7 +43,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public async Task<T> GetResponseAsync<T>(string endpointType)
         {
-            T typedResponse;
+            return await this.GetResponseAsync<T>(endpointType, true);
+        }
+
+        private async Task<T> GetResponseAsync<T>(string endpointType, bool respondToDeviceAuthChallenge)
+        {
+            T typedResponse = default(T);
+            IHttpWebResponse response;
             ClientMetrics clientMetrics = new ClientMetrics();
 
             try
@@ -59,7 +71,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
                 }
 
-                using (IHttpWebResponse response = await this.Client.GetResponseAsync())
+                //add pkeyauth header
+                this.Client.Headers[DeviceAuthHeaderName] = DeviceAuthHeaderValue;
+                using (response = await this.Client.GetResponseAsync())
                 {
                     typedResponse = DeserializeResponse<T>(response.ResponseStream);
                     clientMetrics.SetLastError(null);
@@ -67,28 +81,78 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (HttpRequestWrapperException ex)
             {
-                AdalServiceException serviceEx;
-                if (ex.WebResponse != null)
+                if (!this.isDeviceAuthChallenge(endpointType, ex.WebResponse, respondToDeviceAuthChallenge))
                 {
-                    TokenResponse tokenResponse = TokenResponse.CreateFromErrorResponse(ex.WebResponse);
-                    string[] errorCodes = tokenResponse.ErrorCodes ?? new[] { ex.WebResponse.StatusCode.ToString() };
-                    serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, errorCodes, ex);
+                    AdalServiceException serviceEx;
+                    if (ex.WebResponse != null)
+                    {
+                        TokenResponse tokenResponse = TokenResponse.CreateFromErrorResponse(ex.WebResponse);
+                        string[] errorCodes = tokenResponse.ErrorCodes ?? new[] {ex.WebResponse.StatusCode.ToString()};
+                        serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
+                            errorCodes, ex);
+                    }
+                    else
+                    {
+                        serviceEx = new AdalServiceException(AdalError.Unknown, ex);
+                    }
+
+                    clientMetrics.SetLastError(serviceEx.ServiceErrorCodes);
+                    PlatformPlugin.Logger.Error(CallState, serviceEx);
+                    throw serviceEx;
                 }
                 else
                 {
-                    serviceEx = new AdalServiceException(AdalError.Unknown, ex);                                        
+                    response = ex.WebResponse;
                 }
-
-                clientMetrics.SetLastError(serviceEx.ServiceErrorCodes);
-                PlatformPlugin.Logger.Error(CallState, serviceEx);
-                throw serviceEx;
             }
             finally
             {
                 clientMetrics.EndClientMetricsRecord(endpointType, this.CallState);
             }
 
+            //check for pkeyauth challenge
+            if (this.isDeviceAuthChallenge(endpointType, response, respondToDeviceAuthChallenge))
+            {
+                return await HandleDeviceAuthChallenge<T>(endpointType, response);
+            }
+
             return typedResponse;
+        }
+
+        private bool isDeviceAuthChallenge(string endpointType, IHttpWebResponse response, bool respondToDeviceAuthChallenge)
+        {
+            return PlatformPlugin.DeviceAuthHelper.CanHandleDeviceAuthChallenge &&
+                   respondToDeviceAuthChallenge &&
+                   (response.Headers.ContainsKey(WwwAuthenticateHeader) &&
+                    response.Headers[WwwAuthenticateHeader].StartsWith(PKeyAuthName)) &&
+                   endpointType.Equals(ClientMetricsEndpointType.Token);
+        }
+
+        private IDictionary<string, string> ParseChallengeData(IHttpWebResponse response)
+        {
+            IDictionary<string, string> data = new Dictionary<string, string>();
+            string wwwAuthenticate = response.Headers[WwwAuthenticateHeader];
+            wwwAuthenticate = wwwAuthenticate.Substring(PKeyAuthName.Length + 1);
+            wwwAuthenticate = wwwAuthenticate.Replace("\"", "");
+            string[] headerPairs = wwwAuthenticate.Split(',');
+            foreach (string pair in headerPairs)
+            {
+                string[] keyValue = pair.Split('=');
+                data.Add(keyValue[0].Trim(),keyValue[1].Trim());
+            }
+
+            return data;
+        }
+
+        private async Task<T> HandleDeviceAuthChallenge<T>(string endpointType, IHttpWebResponse response)
+        {
+            IDictionary<string, string> responseDictionary = this.ParseChallengeData(response);
+            string responseHeader = PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(responseDictionary);
+            IRequestParameters rp = this.Client.BodyParameters;
+            this.Client = PlatformPlugin.HttpClientFactory.Create(CheckForExtraQueryParameter(responseDictionary["SubmitUrl"]), this.CallState);
+            this.Client.BodyParameters = rp;
+            this.Client.Headers["Authorization"] = responseHeader;
+            return await this.GetResponseAsync<T>(endpointType, false);
         }
 
         private static T DeserializeResponse<T>(Stream responseStream)

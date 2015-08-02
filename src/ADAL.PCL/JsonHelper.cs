@@ -16,31 +16,34 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Security.Cryptography;
+using System.IO;
+using System.Runtime.Serialization.Json;
 using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class CryptographyHelper : ICryptographyHelper
+    internal static class JsonHelper
     {
-        public string CreateSha256Hash(string input)
+        internal static string EncodeToJson<T>(T toEncode)
         {
-            using (SHA256Managed sha = new SHA256Managed())
+            using (MemoryStream stream = new MemoryStream())
             {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(T));
+                ser.WriteObject(stream, toEncode);
+                return Encoding.UTF8.GetString(stream.ToArray(), 0, (int)stream.Position);
             }
         }
 
-        public byte[] SignWithCertificate(string message, byte[] rawData, string password)
+        internal static T DecodeFromJson<T>(string json)
         {
-            throw new NotImplementedException();            
-        }
+            T response;
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (T));
+            using (MemoryStream stream = new MemoryStream(new StringBuilder(json).ToByteArray()))
+            {
+                response = ((T) serializer.ReadObject(stream));
+            }
 
-        public string GetX509CertificateThumbprint(ClientAssertionCertificate credential)
-        {
-            throw new NotImplementedException();
+            return response;
         }
     }
 }

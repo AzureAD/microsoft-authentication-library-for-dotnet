@@ -33,19 +33,38 @@ namespace AdalDesktopTestApp
         [STAThread]
         static void Main(string[] args)
         {
-            AcquireTokenAsync().Wait();
-            Console.ReadKey();
+            try
+            {
+                AcquireTokenAsync().Wait();
+            }
+            catch (AggregateException ae)
+            {
+                Console.WriteLine(ae.InnerException.Message);
+                Console.WriteLine(ae.InnerException.StackTrace);
+            }
+            finally
+            {
+                Console.ReadKey();
+            }
         }
 
         private static async Task AcquireTokenAsync()
         {
-            TokenBroker tokenBroker = new TokenBroker();
-            string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(PromptBehavior.Auto, null));
-            Console.WriteLine(token + "\n");
-            token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
+            
+            AuthenticationContext ctx = new AuthenticationContext("https://stsadweb.one.microsoft.com/adfs/", false);
+            
+            AuthenticationResult result =
+                await
+                    ctx.AcquireTokenAsync("urn:dumptoken", "DE25CE3A-B772-4E6A-B431-96DCB5E7E559", new Uri("msauth:com.example.adal.helloApp1"),
+                        new PlatformParameters(PromptBehavior.Auto, null));
+            Console.WriteLine(result.AccessToken + "\n");
+            result = await ctx.AcquireTokenSilentAsync("urn:adaltest", "DE25CE3A-B772-4E6A-B431-96DCB5E7E559");
+            Console.WriteLine(result.AccessToken + "\n");
+            
+/*            token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
             Console.WriteLine(token + "\n");
             token = await tokenBroker.GetTokenWithClientCredentialAsync();
-            Console.WriteLine(token);
+            Console.WriteLine(token);*/
         }
     }
 }

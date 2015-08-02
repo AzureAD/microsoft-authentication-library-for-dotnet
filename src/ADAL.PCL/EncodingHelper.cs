@@ -95,6 +95,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return response;
         }
 
+        public static byte[] ToByteArray(this String stringInput)
+        {
+            return ToByteArray(new StringBuilder(stringInput));
+        }
+
         public static byte[] ToByteArray(this StringBuilder stringBuilder)
         {
             if (stringBuilder == null)

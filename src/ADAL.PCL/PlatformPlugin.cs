@@ -51,6 +51,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static LoggerBase Logger { get; set; }
         public static PlatformInformationBase PlatformInformation { get; set; }
         public static ICryptographyHelper CryptographyHelper { get; set; }
+        public static IDeviceAuthHelper DeviceAuthHelper { get; set; }
+        public static IBrokerHelper BrokerHelper { get; set; }
 
         public static void InitializeByAssemblyDynamicLinking()
         {
@@ -61,17 +63,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 (ITokenCachePlugin)Activator.CreateInstance(assembly.GetType(Namespace + "TokenCachePlugin")),
                 (LoggerBase)Activator.CreateInstance(assembly.GetType(Namespace + "Logger")),
                 (PlatformInformationBase)Activator.CreateInstance(assembly.GetType(Namespace + "PlatformInformation")),
-                (ICryptographyHelper)Activator.CreateInstance(assembly.GetType(Namespace + "CryptographyHelper"))
+                (ICryptographyHelper)Activator.CreateInstance(assembly.GetType(Namespace + "CryptographyHelper")),
+                (IDeviceAuthHelper)Activator.CreateInstance(assembly.GetType(Namespace + "DeviceAuthHelper")),
+                (IBrokerHelper)Activator.CreateInstance(assembly.GetType(Namespace + "BrokerHelper"))
             );
         }
 
-        public static void InjectDependecies(IWebUIFactory webUIFactory, ITokenCachePlugin tokenCachePlugin, LoggerBase logger, PlatformInformationBase platformInformation, ICryptographyHelper cryptographyHelper)
+        public static void InjectDependecies(IWebUIFactory webUIFactory, ITokenCachePlugin tokenCachePlugin, LoggerBase logger, 
+            PlatformInformationBase platformInformation, ICryptographyHelper cryptographyHelper,
+            IDeviceAuthHelper deviceAuthHelper, IBrokerHelper brokerHelper)
         {
             WebUIFactory = webUIFactory;
             TokenCachePlugin = tokenCachePlugin;
             Logger = logger;
             PlatformInformation = platformInformation;
-            CryptographyHelper = cryptographyHelper;            
+            CryptographyHelper = cryptographyHelper;
+            DeviceAuthHelper = deviceAuthHelper;
+            BrokerHelper = brokerHelper;
         }
 
         private static Assembly LoadPlatformSpecificAssembly()

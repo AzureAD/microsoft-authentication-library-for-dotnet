@@ -103,10 +103,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (resultEx == null)
                 {
-                    await this.PreTokenRequest();
-                    resultEx = await this.SendTokenRequestAsync();
-                    this.PostTokenRequest(resultEx);
+                    if (PlatformPlugin.BrokerHelper.CanUseBroker)
+                    {
 
+                    }
+                    else
+                    {
+                        await this.PreTokenRequest();
+
+                        //broker installation required
+                        if (this.BrokerInvocationRequired())
+                        {
+
+                        }
+                        else
+                        {
+                            resultEx = await this.SendTokenRequestAsync();
+                        }
+                    }
+
+                    this.PostTokenRequest(resultEx);
                     if (this.StoreToCache)
                     {
                         if (!notifiedBeforeAccessCache)
@@ -134,6 +150,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.NotifyAfterAccessCache();
                 }
             }
+        }
+
+        protected virtual bool BrokerInvocationRequired()
+        {
+            return false;
         }
 
         public static CallState CreateCallState(Guid correlationId)

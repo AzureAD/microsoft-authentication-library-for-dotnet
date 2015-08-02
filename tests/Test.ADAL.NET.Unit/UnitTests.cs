@@ -218,8 +218,7 @@ namespace Test.ADAL.NET.Unit
                                    CorrelationId = Guid.NewGuid().ToString(),
                                    Resource = "my-resource",
                                    TokenType = "Bearer",
-                                   ExpiresIn = 3899,
-                                   ExpiresOn = 1400545595
+                                   ExpiresIn = 3899
                                };
         }
 

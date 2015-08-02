@@ -204,5 +204,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new AdalServiceException(this.authorizationResult.Error, this.authorizationResult.ErrorDescription);
             }
         }
+
+        protected override bool BrokerInvocationRequired()
+        {
+           return this.authorizationResult != null 
+               && !string.IsNullOrEmpty(this.authorizationResult.Code) 
+               && this.authorizationResult.Code.StartsWith("msauth://");
+        }
     }
 }

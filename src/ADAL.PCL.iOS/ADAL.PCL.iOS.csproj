@@ -42,6 +42,10 @@
     <Compile Include="AdalInitializer.cs" />
     <Compile Include="AuthenticationAgentUINavigationController.cs" />
     <Compile Include="AuthenticationAgentUIViewController.cs" />
+    <Compile Include="AuthenticationContinuationHelper.cs" />
+    <Compile Include="BrokerHelper.cs" />
+    <Compile Include="BrokerKeyHelper.cs" />
+    <Compile Include="DeviceAuthHelper.cs" />
     <Compile Include="PlatformParameters.cs" />
     <Compile Include="CryptographyHelper.cs" />
     <Compile Include="Logger.cs" />

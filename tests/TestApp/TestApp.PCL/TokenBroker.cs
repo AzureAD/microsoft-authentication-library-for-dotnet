@@ -43,7 +43,7 @@ namespace TestApp.PCL
         {
             try
             {
-                var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidNonExistingRedirectUri, parameters, new UserIdentifier(sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
+                var result = await context.AcquireTokenAsync("https://capeexch-my.sharepoint.com/", "d3590ed6-52b3-4102-aeff-aad2292ab01c", new Uri("urn:ietf:wg:oauth:2.0:oob"), parameters, new UserIdentifier("<userid>", UserIdentifierType.OptionalDisplayableId));
 
                 return result.AccessToken;
             }

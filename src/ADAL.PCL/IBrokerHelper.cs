@@ -16,31 +16,15 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Security.Cryptography;
-using System.Text;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class CryptographyHelper : ICryptographyHelper
+    internal interface IBrokerHelper
     {
-        public string CreateSha256Hash(string input)
-        {
-            using (SHA256Managed sha = new SHA256Managed())
-            {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
-            }
-        }
+        bool CanUseBroker { get; }
 
-        public byte[] SignWithCertificate(string message, byte[] rawData, string password)
-        {
-            throw new NotImplementedException();            
-        }
-
-        public string GetX509CertificateThumbprint(ClientAssertionCertificate credential)
-        {
-            throw new NotImplementedException();
-        }
+        Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload);
     }
 }

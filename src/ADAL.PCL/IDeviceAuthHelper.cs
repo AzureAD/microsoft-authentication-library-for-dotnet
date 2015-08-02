@@ -16,31 +16,14 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Security.Cryptography;
-using System.Text;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class CryptographyHelper : ICryptographyHelper
+    internal interface IDeviceAuthHelper
     {
-        public string CreateSha256Hash(string input)
-        {
-            using (SHA256Managed sha = new SHA256Managed())
-            {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
-            }
-        }
+        bool CanHandleDeviceAuthChallenge { get; }
 
-        public byte[] SignWithCertificate(string message, byte[] rawData, string password)
-        {
-            throw new NotImplementedException();            
-        }
-
-        public string GetX509CertificateThumbprint(ClientAssertionCertificate credential)
-        {
-            throw new NotImplementedException();
-        }
+        string CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData);
     }
 }

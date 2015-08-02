@@ -81,10 +81,13 @@
     <Compile Include="ClientKey.cs" />
     <Compile Include="ClientMetrics.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="DeviceAuthJWTResponse.cs" />
     <Compile Include="HttpClientWrapper.cs" />
     <Compile Include="HttpClientFactory.cs" />
     <Compile Include="HttpRequestWrapperException.cs" />
     <Compile Include="HttpWebResponseWrapper.cs" />
+    <Compile Include="IBrokerHelper.cs" />
+    <Compile Include="IDeviceAuthHelper.cs" />
     <Compile Include="IPlatformParameters.cs" />
     <Compile Include="ICryptographyHelper.cs" />
     <Compile Include="IdToken.cs" />
@@ -92,6 +95,7 @@
     <Compile Include="IHttpClientFactory.cs" />
     <Compile Include="IHttpWebResponse.cs" />
     <Compile Include="ITokenCachePlugin.cs" />
+    <Compile Include="JsonHelper.cs" />
     <Compile Include="JsonWebToken.cs" />
     <Compile Include="LoggerBase.cs" />
     <Compile Include="MexParser.cs" />

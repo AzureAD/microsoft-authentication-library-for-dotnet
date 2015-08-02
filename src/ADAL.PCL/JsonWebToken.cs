@@ -102,20 +102,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return Base64UrlEncoder.Encode(segment);
         }
 
-        private static string EncodeToJson<T>(T toEncode)
-        {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(T));
-                ser.WriteObject(stream, toEncode);
-                return Encoding.UTF8.GetString(stream.ToArray(), 0, (int)stream.Position);
-            }
-        }
-
         private static string EncodeHeaderToJson(ClientAssertionCertificate credential)
         {
             JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(credential);
-            return EncodeToJson(header);
+            return JsonHelper.EncodeToJson(header);
         }
 
         private static long ConvertToTimeT(DateTime time)
@@ -133,7 +123,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string encodedHeader = EncodeSegment(jsonHeader);
 
             // Payload segment
-            string jsonPayload = EncodeToJson(this.payload);
+            string jsonPayload = JsonHelper.EncodeToJson(this.payload);
 
             string encodedPayload = EncodeSegment(jsonPayload);
 

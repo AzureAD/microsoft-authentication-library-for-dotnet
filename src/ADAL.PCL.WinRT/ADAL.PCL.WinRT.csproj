@@ -127,6 +127,7 @@
     <Compile Include="..\ADAL.PCL\AdalOption.cs">
       <Link>AdalOption.cs</Link>
     </Compile>
+    <Compile Include="DeviceAuthHelper.cs" />
     <Compile Include="PlatformParameters.cs" />
     <Compile Include="CryptographyHelper.cs" />
     <Compile Include="PlatformInformation.cs" />

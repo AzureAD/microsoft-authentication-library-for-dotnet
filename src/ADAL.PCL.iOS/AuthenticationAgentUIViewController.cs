@@ -17,23 +17,22 @@
 //----------------------------------------------------------------------
 
 using System;
-using CoreGraphics;
-
 using CoreFoundation;
-using UIKit;
+using CoreGraphics;
 using Foundation;
+using UIKit;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     [Foundation.Register("AuthenticationAgentUIViewController")]
     internal class AuthenticationAgentUIViewController : UIViewController
     {
-		UIWebView webView;
+        private UIWebView webView;
 
-        private string url;
-        private string callback;
+        private readonly string url;
+        private readonly string callback;
 
-        private ReturnCodeCallback callbackMethod;
+        private readonly ReturnCodeCallback callbackMethod;
 
         public delegate void ReturnCodeCallback(AuthorizationResult result);
 
@@ -44,22 +43,31 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.callbackMethod = callbackMethod;
         }
 
-		public override void ViewDidLoad ()
-		{
-			base.ViewDidLoad ();
+        public override void ViewDidLoad()
+        {
+            base.ViewDidLoad();
 
             View.BackgroundColor = UIColor.White;
 
-            webView = new UIWebView((CGRect)View.Bounds);
-		    webView.ShouldStartLoad = (wView, request, navType) =>
-		    {
-		        if (request == null)
-		        {
-		            return true;
-		        }
+            webView = new UIWebView((CGRect) View.Bounds);
+            webView.ShouldStartLoad = (wView, request, navType) =>
+            {
+                if (request == null)
+                {
+                    return true;
+                }
 
-		        string requestUrl = request.Url.ToString().ToLower();
-                if (requestUrl.StartsWith(callback.ToLower()))
+                string requestUrlString = request.Url.ToString().ToLower();
+                if (requestUrlString.StartsWith("browser://"))
+                {
+                    DispatchQueue.MainQueue.DispatchAsync(() => CancelAuthentication(null, null));
+                    requestUrlString = requestUrlString.Replace("browser://", "https://");
+                    DispatchQueue.MainQueue.DispatchAsync(
+                        () => UIApplication.SharedApplication.OpenUrl(new NSUrl(requestUrlString)));
+                    return false;
+                }
+
+                if (requestUrlString.StartsWith(callback.ToLower()) || requestUrlString.StartsWith("msauth://"))
                 {
                     callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, request.Url.ToString()));
                     this.DismissViewController(true, null);
@@ -67,23 +75,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 return true;
-		    };
+            };
 
-		    webView.LoadFinished += delegate
-		    {
+            webView.LoadFinished += delegate
+            {
                 // If the title is too long, iOS automatically truncates it and adds ...
                 this.Title = webView.EvaluateJavascript(@"document.title") ?? "Sign in";
-		    };
+            };
 
-			View.AddSubview(webView);
+            View.AddSubview(webView);
 
-            this.NavigationItem.LeftBarButtonItem = new UIBarButtonItem(UIBarButtonSystemItem.Cancel, this.CancelAuthentication);
+            this.NavigationItem.LeftBarButtonItem = new UIBarButtonItem(UIBarButtonSystemItem.Cancel,
+                this.CancelAuthentication);
 
-			webView.LoadRequest (new NSUrlRequest (new NSUrl (this.url)));
-			
-			// if this is false, page will be 'zoomed in' to normal size
-			//webView.ScalesPageToFit = true;
-		}
+            webView.LoadRequest(new NSUrlRequest(new NSUrl(this.url)));
+
+            // if this is false, page will be 'zoomed in' to normal size
+            //webView.ScalesPageToFit = true;
+        }
 
         private void CancelAuthentication(object sender, EventArgs e)
         {

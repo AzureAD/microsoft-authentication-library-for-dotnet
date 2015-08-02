@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using Foundation;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using UIKit;
 
 namespace AdaliOSTestApp
@@ -60,5 +61,18 @@ namespace AdaliOSTestApp
         public override void WillTerminate(UIApplication application)
         {
         }
+
+        //This method must be overriden by the developer to consume token from the Broker and continue authentication
+        public override bool OpenUrl(UIApplication application, NSUrl url, string sourceApplication, NSObject annotation)
+        {
+            // you can make decisions here from the different parts of the url
+            if (AuthenticationContinuationHelper.IsBrokerResponse(sourceApplication))
+            {
+                AuthenticationContinuationHelper.SetBrokerContinuationEventArgs(url);    
+            }
+
+            return true;
+        }
+
     }
 }

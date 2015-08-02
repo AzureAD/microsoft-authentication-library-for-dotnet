@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             PlatformPluginSwitch.DynamicallyLinkAssembly = false;
 
-            PlatformPlugin.InjectDependecies(new WebUIFactory(), new TokenCachePlugin(), new Logger(), new PlatformInformation(), new CryptographyHelper());
+            PlatformPlugin.InjectDependecies(new WebUIFactory(), new TokenCachePlugin(), new Logger(), new PlatformInformation(), new CryptographyHelper(), new DeviceAuthHelper(), new BrokerHelper());
         }
     }
 }
