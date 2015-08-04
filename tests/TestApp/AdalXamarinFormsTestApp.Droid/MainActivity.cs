@@ -9,6 +9,7 @@ using Android.OS;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Xamarin.Forms;
 using AdalXamarinFormsTestApp;
+using Android.Content;
 
 namespace AdalXamarinFormsTestApp.Droid
 {
@@ -21,6 +22,12 @@ namespace AdalXamarinFormsTestApp.Droid
 
             global::Xamarin.Forms.Forms.Init(this, bundle);
             LoadApplication(new App());
+        }
+
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        {
+            base.OnActivityResult(requestCode, resultCode, data);
+            AuthenticationAgentContinuationHelper.SetAuthenticationAgentContinuationEventArgs(requestCode, resultCode, data);
         }
     }
 }

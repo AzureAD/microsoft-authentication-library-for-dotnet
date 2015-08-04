@@ -85,6 +85,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (url.StartsWith(callback))
                 {
                     base.OnLoadResource(view, url);
+                    this.Finish(view, url);
                 }
             }
 
@@ -95,12 +96,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             public override void OnPageFinished(WebView view, string url)
             {
-                if (url.StartsWith(callback))
+                if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
                 {
                     base.OnPageFinished(view, url);
-                    this.ReturnIntent = new Intent("Return");
-                    this.ReturnIntent.PutExtra("ReturnedUrl", url);
-                    ((Activity)view.Context).Finish();
+                    this.Finish(view, url);
                 }
 
                 base.OnPageFinished(view, url);
@@ -108,13 +107,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             public override void OnPageStarted(WebView view, string url, Android.Graphics.Bitmap favicon)
             {
-                if (url.StartsWith(callback))
+                if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
                 {
                     base.OnPageStarted(view, url, favicon);
                 }
 
                 base.OnPageStarted(view, url, favicon);
             }
+
+            private void Finish(WebView view, string url)
+            {
+                var activity = ((Activity)view.Context);
+                if (activity != null && !activity.IsFinishing)
+                {
+                    this.ReturnIntent = new Intent("Return");
+                    this.ReturnIntent.PutExtra("ReturnedUrl", url);
+                    ((Activity)view.Context).Finish();
+                }
+            }
+
         }
     }
 }

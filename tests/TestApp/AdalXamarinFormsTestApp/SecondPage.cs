@@ -42,7 +42,15 @@ namespace AdalXamarinFormsTestApp
         async void browseButton_Clicked(object sender, EventArgs e)
         {
             this.result.Text = string.Empty;
-            string token = await tokenBroker.GetTokenInteractiveAsync(Paramters);
+            string token = String.Empty;
+            try
+            {
+                token = await tokenBroker.GetTokenInteractiveAsync(Paramters);
+            }
+            catch (Exception exception)
+            {
+                token = exception.Message;
+            }
             this.result.Text = token;
         }
     }

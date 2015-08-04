@@ -43,7 +43,9 @@ namespace TestApp.PCL
         {
             try
             {
-                var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidNonExistingRedirectUri, parameters, new UserIdentifier(sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
+                var result = await context.AcquireTokenAsync("https://graph.windows.net", "dd9caee2-38bd-484e-998c-7529bdef220f",
+                    new Uri("MyTestiOSApp://com.MSOpenTech.MyTestiOSApp"), parameters, 
+                    new UserIdentifier("e2e@adalobjc.onmicrosoft.com", UserIdentifierType.OptionalDisplayableId));
 
                 return result.AccessToken;
             }
