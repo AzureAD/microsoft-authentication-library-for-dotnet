@@ -43,4 +43,7 @@ tests/TestApp/TestApp.PCL/obj/
 tests/TestApp/AdalXamarinFormsTestApp.Droid/obj/
 tests/TestApp/AdalXamarinFormsTestApp.iOS/obj/
 tests/TestApp/AdalXamarinFormsTestApp/obj/
+tests/TestApp/XFormsApp.Droid/obj/
+tests/TestApp/XFormsApp.iOS/obj/
+tests/TestApp/XFormsApp/obj/
 tests/TestApp/AdalAndroidTestApp/Resources/Resource.Designer.cs
