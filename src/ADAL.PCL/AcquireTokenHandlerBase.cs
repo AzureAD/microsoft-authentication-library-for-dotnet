@@ -17,6 +17,8 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 
@@ -27,6 +29,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected const string NullResource = "null_resource_as_optional";
         protected readonly static Task CompletedTask = Task.FromResult(false);
         private readonly TokenCache tokenCache;
+        protected readonly IDictionary<string, string> brokerParameters;
 
         protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, TokenSubjectType subjectType)
         {
@@ -52,6 +55,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.LoadFromCache = (tokenCache != null);
             this.StoreToCache = (tokenCache != null);
             this.SupportADFS = false;
+
+            this.brokerParameters = new Dictionary<string, string>();
+            brokerParameters["authority"] = authenticator.Authority;
+            brokerParameters["resource"] = resource;
+            brokerParameters["client_id"] = clientKey.ClientId;
+            brokerParameters["correlation_id"] = this.CallState.CorrelationId.ToString();
+            brokerParameters["client_version"] = AdalIdHelper.GetAdalVersion();
+
         }
 
         internal CallState CallState { get; set; }
@@ -105,19 +116,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     if (PlatformPlugin.BrokerHelper.CanUseBroker)
                     {
-
+                        PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker()
                     }
                     else
                     {
-                        await this.PreTokenRequest();
-
-                        //broker installation required
                         if (this.BrokerInvocationRequired())
                         {
-
+                            
                         }
                         else
                         {
+                            await this.PreTokenRequest();
                             resultEx = await this.SendTokenRequestAsync();
                         }
                     }
@@ -151,6 +160,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
         }
+
 
         protected virtual bool BrokerInvocationRequired()
         {

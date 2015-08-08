@@ -37,17 +37,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public async Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {
             brokerResponse = null;
-
-            /*- (void)callBrokerForAuthority:(NSString*)authority
-                      resource:(NSString*)resource
-                      clientId:(NSString*)clientId
-                   redirectUri:(NSURL*)redirectUri
-                promptBehavior:(ADPromptBehavior)promptBehavior
-                        userId:(ADUserIdentifier*)userId
-          extraQueryParameters:(NSString*)queryParams
-                 correlationId:(NSString*)correlationId
-               completionBlock:(ADAuthenticationCallback)completionBlock*/
-
             brokerResponseReady = new SemaphoreSlim(0);
             
             //call broker

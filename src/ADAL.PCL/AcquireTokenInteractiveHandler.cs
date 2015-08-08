@@ -65,16 +65,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.extraQueryParameters = extraQueryParameters;
-
             this.webUi = webUI;
-
             this.UniqueId = userId.UniqueId;
             this.DisplayableId = userId.DisplayableId;
             this.UserIdentifierType = userId.Type;
-
             this.LoadFromCache = (tokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters));
-
             this.SupportADFS = true;
+
+            this.brokerParameters["force"] = "NO";
+            this.brokerParameters["username"] = userId.Id;
+            this.brokerParameters["username_type"] = userId.Type.ToString();
+            this.brokerParameters["redirect_uri"] = redirectUri.AbsoluteUri;
         }
 
         protected override async Task PreTokenRequest()
