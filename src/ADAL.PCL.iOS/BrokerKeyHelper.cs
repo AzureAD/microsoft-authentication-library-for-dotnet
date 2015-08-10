@@ -31,7 +31,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal static String GetBrokerKey()
         {
-            NSString brokeyKeyString = null;
+            return EncodingHelper.Base64UrlEncode(GetBase64EncodedBrokerKey());
+        }
+
+
+        private static string GetBase64EncodedBrokerKey()
+        {
+            string brokeyKeyString = null;
             SecRecord record = new SecRecord(SecKind.GenericPassword)
             {
                 Generic = NSData.FromString(LocalSettingsContainerName),
@@ -45,34 +51,75 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             NSData key = SecKeyChain.QueryAsData(record);
             if (key == null)
             {
-                using (RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider())
+                AesManaged algo = GetCryptoAlgorithm();
+                algo.GenerateKey();
+                byte[] rawBytes = algo.Key;
+                NSData byteData = NSData.FromArray(rawBytes);
+                record = new SecRecord(SecKind.GenericPassword)
                 {
-                    byte[] rawBytes = new byte[32];
-                    provider.GetBytes(rawBytes);
-                    NSData byteData = NSData.FromArray(rawBytes);
-                    record = new SecRecord(SecKind.GenericPassword)
-                    {
-                        Generic = NSData.FromString(LocalSettingsContainerName),
-                        Service = "Service",
-                        Account = "brokerKey",
-                        Label = "BrokerKeyLabel",
-                        Comment = "Broker Comment",
-                        Description = "Storage for broker key",
-                        ValueData = byteData
+                    Generic = NSData.FromString(LocalSettingsContainerName),
+                    Service = "Service",
+                    Account = "brokerKey",
+                    Label = "BrokerKeyLabel",
+                    Comment = "Broker Comment",
+                    Description = "Storage for broker key",
+                    ValueData = byteData
                 };
 
-                    SecStatusCode code = SecKeyChain.Add(record);
-                    Console.WriteLine("code - " + code);
-                    string value = byteData.GetBase64EncodedString(NSDataBase64EncodingOptions.None);
-                    return value;
-                }
+                SecStatusCode code = SecKeyChain.Add(record);
+                Console.WriteLine("code - " + code);
+                brokeyKeyString = System.Text.Encoding.UTF8.GetString(byteData.ToArray());
             }
             else
             {
-                brokeyKeyString = new NSString(key, NSStringEncoding.UTF8);
+                brokeyKeyString = System.Text.Encoding.UTF8.GetString(key.ToArray());
             }
 
-            return brokeyKeyString.ToString();
+            return brokeyKeyString;
+        }
+
+
+        private static byte[] GetRawBrokerKey()
+        {
+            byte[] brokeyKey = null;
+            SecRecord record = new SecRecord(SecKind.GenericPassword)
+            {
+                Generic = NSData.FromString(LocalSettingsContainerName),
+                Service = "Service",
+                Account = "brokerKey",
+                Label = "BrokerKeyLabel",
+                Comment = "Broker Comment",
+                Description = "Storage for broker key"
+            };
+
+            NSData key = SecKeyChain.QueryAsData(record);
+            if (key == null)
+            {
+                AesManaged algo = GetCryptoAlgorithm();
+                algo.GenerateKey();
+                byte[] rawBytes = algo.Key;
+                NSData byteData = NSData.FromArray(rawBytes);
+                record = new SecRecord(SecKind.GenericPassword)
+                {
+                    Generic = NSData.FromString(LocalSettingsContainerName),
+                    Service = "Service",
+                    Account = "brokerKey",
+                    Label = "BrokerKeyLabel",
+                    Comment = "Broker Comment",
+                    Description = "Storage for broker key",
+                    ValueData = byteData
+                };
+
+                SecStatusCode code = SecKeyChain.Add(record);
+                Console.WriteLine("code - " + code);
+                brokeyKey = byteData.ToArray();
+            }
+            else
+            {
+                brokeyKey = key.ToArray();
+            }
+
+            return brokeyKey;
         }
 
         internal static String DecryptBrokerResponse(String encryptedBrokerResponse)
@@ -81,7 +128,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string plaintext = string.Empty;
             using (MemoryStream memoryStream = new MemoryStream(outputBytes))
             {
-                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, GetCryptoAlgorithm().CreateDecryptor(GetBrokerKey().ToByteArray(), GetBrokerKey().ToByteArray()), CryptoStreamMode.Read))
+                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, GetCryptoAlgorithm().CreateDecryptor(GetRawBrokerKey().ToByteArray(), GetRawBrokerKey().ToByteArray()), CryptoStreamMode.Read))
                 {
                     using (StreamReader srDecrypt = new StreamReader(cryptoStream))
                     {
@@ -93,9 +140,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return plaintext;
         }
 
-        private static RijndaelManaged GetCryptoAlgorithm()
+        private static AesManaged GetCryptoAlgorithm()
         {
-            RijndaelManaged algorithm = new RijndaelManaged();
+            AesManaged algorithm = new AesManaged();
             //set the mode, padding and block size
             algorithm.Padding = PaddingMode.PKCS7;
             algorithm.Mode = CipherMode.CBC;

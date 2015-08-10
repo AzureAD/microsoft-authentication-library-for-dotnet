@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using Foundation;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -25,12 +26,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static bool IsBrokerResponse(string sourceApplication)
         {
-            return sourceApplication != null && sourceApplication.Equals(new NSString("com.microsoft.azureAuthenticator"));
+            return sourceApplication != null && sourceApplication.Equals("com.microsoft.azureauthenticator", StringComparison.OrdinalIgnoreCase);
         }
 
         public static void SetBrokerContinuationEventArgs(NSUrl url)
         {
-            
+            BrokerHelper.SetBrokerResponse(url);
         }
 
     }

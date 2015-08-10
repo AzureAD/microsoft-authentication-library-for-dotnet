@@ -16,7 +16,7 @@ namespace AdaliOSTestApp
 	{
 		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
-		UILabel ReportLabel { get; set; }
+		UITextView ReportLabel { get; set; }
 
 		[Action ("UIButton11_TouchUpInside:")]
 		[GeneratedCode ("iOS Designer", "1.0")]

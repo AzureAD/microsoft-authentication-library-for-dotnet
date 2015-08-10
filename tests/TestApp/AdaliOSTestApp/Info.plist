@@ -20,5 +20,18 @@
     <string>MainStoryboard</string>
     <key>MinimumOSVersion</key>
     <string>7.0</string>
+    	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.your-company.AdaliOSTestApp</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>AdaliOSApp</string>
+			</array>
+		</dict>
+	</array>
   </dict>
 </plist>

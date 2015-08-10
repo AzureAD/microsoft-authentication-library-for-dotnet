@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreFoundation;
 using Foundation;
 using UIKit;
 
@@ -41,6 +42,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             
             //call broker
             brokerPayload["broker_key"] = EncodingHelper.UrlEncode(BrokerKeyHelper.GetBrokerKey());
+
+            NSUrl url = new NSUrl("msauth://broker?" + brokerPayload.ToQueryParameter());
+            DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url));
             await brokerResponseReady.WaitAsync();
             return ProcessBrokerResponse();
         }
@@ -54,6 +58,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 string[] keyValue = pair.Split('=');
                 responseDictionary[keyValue[0]] = EncodingHelper.UrlDecode(keyValue[1]);
+                if (responseDictionary[keyValue[0]].Equals("(null)") && keyValue[0].Equals("code"))
+                {
+                    responseDictionary["error"] = "broker_error";
+                }
             }
 
             return ResultFromBrokerResponse(responseDictionary);
@@ -63,7 +71,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             TokenResponse response = new TokenResponse();
 
-            if (responseDictionary.ContainsKey("error"))
+            if (responseDictionary.ContainsKey("error") || responseDictionary.ContainsKey("error_description"))
             {
                 response = TokenResponse.CreateFromBrokerResponse(responseDictionary);
             }

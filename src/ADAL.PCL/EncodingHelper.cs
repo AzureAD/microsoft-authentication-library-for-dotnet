@@ -27,6 +27,35 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     internal static class EncodingHelper
     {
+        public static string Base64UrlEncode(string inputString)
+        {
+            inputString = Base64Encode(inputString);
+            inputString = inputString.Split('=')[0]; // Remove any trailing '='s
+            inputString = inputString.Replace('+', '-'); // 62nd char of encoding
+            inputString = inputString.Replace('/', '_'); // 63rd char of encoding
+
+            return inputString;
+        }
+
+        public static string Base64UrlDecode(string input)
+        {
+            string s = input;
+            s = s.Replace('-', '+'); // 62nd char of encoding
+            s = s.Replace('_', '/'); // 63rd char of encoding
+            switch (s.Length % 4) // Pad with trailing '='s
+            {
+                case 0: break; // No pad chars in this case
+                case 2: s += "=="; break; // Two pad chars
+                case 3: s += "="; break; // One pad char
+                default:
+                    throw new System.Exception(
+             "Illegal base64url string!");
+            }
+
+            s= Base64Decode(s);
+            return s; // Standard base64 decoder
+        }
+
         public static string UrlEncode(string message)
         {
             if (string.IsNullOrEmpty(message))
@@ -56,6 +85,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static void AddKeyValueString(StringBuilder messageBuilder, string key, string value)
         {
             AddKeyValueString(messageBuilder, key, value.ToCharArray());
+        }
+
+        public static string ToQueryParameter(this IDictionary<string, string> input)
+        {
+            StringBuilder builder = new StringBuilder();
+            foreach (var key in input.Keys)
+            {
+                builder.AppendFormat("{0}={1}&", key, UrlEncode(input[key]));
+            }
+
+            builder.Remove(builder.Length - 1, 1);
+            return builder.ToString();
         }
 
         public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, CallState callState)
