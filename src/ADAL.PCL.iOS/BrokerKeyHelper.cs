@@ -32,20 +32,39 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         internal static String GetBrokerKey()
         {
             NSString brokeyKeyString = null;
-            SecRecord record = new SecRecord(SecKind.GenericPassword);
-            record.Generic = NSData.FromString(LocalSettingsContainerName);
-            record.ApplicationTag = NSData.FromString(SymmetricKeyTag);
-            NSData key = SecKeyChain.QueryAsData(record);
+            SecRecord record = new SecRecord(SecKind.GenericPassword)
+            {
+                Generic = NSData.FromString(LocalSettingsContainerName),
+                Service = "Service",
+                Account = "brokerKey",
+                Label = "BrokerKeyLabel",
+                Comment = "Broker Comment",
+                Description = "Storage for broker key"
+            };
 
+            NSData key = SecKeyChain.QueryAsData(record);
             if (key == null)
             {
                 using (RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider())
                 {
                     byte[] rawBytes = new byte[32];
                     provider.GetBytes(rawBytes);
-                    record.ValueData = NSData.FromArray(rawBytes);
-                    SecKeyChain.Add(record);
-                    brokeyKeyString = new NSString(record.ValueData, NSStringEncoding.UTF8);
+                    NSData byteData = NSData.FromArray(rawBytes);
+                    record = new SecRecord(SecKind.GenericPassword)
+                    {
+                        Generic = NSData.FromString(LocalSettingsContainerName),
+                        Service = "Service",
+                        Account = "brokerKey",
+                        Label = "BrokerKeyLabel",
+                        Comment = "Broker Comment",
+                        Description = "Storage for broker key",
+                        ValueData = byteData
+                };
+
+                    SecStatusCode code = SecKeyChain.Add(record);
+                    Console.WriteLine("code - " + code);
+                    string value = byteData.GetBase64EncodedString(NSDataBase64EncodingOptions.None);
+                    return value;
                 }
             }
             else

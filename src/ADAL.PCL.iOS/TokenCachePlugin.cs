@@ -39,7 +39,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 SecStatusCode res;
                 var rec = new SecRecord(SecKind.GenericPassword)
                 {
-                    Generic = NSData.FromString(LocalSettingsContainerName)
+                    Generic = NSData.FromString(LocalSettingsContainerName),
+                    Accessible = SecAccessible.Always,
+                    Service = "Service",
+                    Account = "Account"
+
                 };
 
                 var match = SecKeyChain.QueryAsRecord(rec, out res);

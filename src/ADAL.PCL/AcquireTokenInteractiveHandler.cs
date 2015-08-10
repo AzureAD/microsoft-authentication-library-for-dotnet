@@ -206,6 +206,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
+
+        protected override void UpdateBrokerParameters(IDictionary<string, string> parameters)
+        {
+            Uri uri = new Uri(this.authorizationResult.Code);
+            string query = EncodingHelper.UrlDecode(uri.Query);
+            Dictionary<string, string> kvps = EncodingHelper.ParseKeyValueList(query, '&', false, this.CallState);
+            parameters["username"] = kvps["username"];
+        }
+
         protected override bool BrokerInvocationRequired()
         {
            return this.authorizationResult != null 

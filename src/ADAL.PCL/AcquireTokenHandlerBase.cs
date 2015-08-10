@@ -116,13 +116,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     if (PlatformPlugin.BrokerHelper.CanUseBroker)
                     {
-                        PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker()
+                        resultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters);
                     }
                     else
                     {
                         if (this.BrokerInvocationRequired())
                         {
-                            
+                            //this.up
                         }
                         else
                         {
@@ -161,6 +161,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
+        protected virtual void UpdateBrokerParameters(IDictionary<string, string> parameters)
+        {
+            
+        }
 
         protected virtual bool BrokerInvocationRequired()
         {
