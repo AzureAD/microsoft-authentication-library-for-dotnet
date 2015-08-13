@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     class DeviceAuthHelper : IDeviceAuthHelper
     {
-        public bool CanHandleDeviceAuthChallenge { get { return false; } }
+        public bool CanHandleDeviceAuthChallenge { get { return true; } }
 
         public string CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
@@ -61,7 +61,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return null;
         }
-
-        public bool CanUseBroker { get { return false; } }
     }
 }
