@@ -20,6 +20,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
+using Windows.Security.Cryptography;
+using Windows.Security.Cryptography.Certificates;
+using Windows.Security.Cryptography.Core;
+using Windows.Storage.Streams;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -30,36 +35,39 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
             string authHeaderTemplate = "PKeyAuth {0} Context=\"{1}\", Version=\"{2}\"";
-            string expectedCertThumbprint = challengeData["CertThumbprint"];
-          var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-
-            try
+            string acceptedCertAuthorities = challengeData["CertAuthorities"];
+            CertificateQuery query = new CertificateQuery();
+            query.IssuerName = "MS-Organization-Access";
+            IReadOnlyList<Certificate> certificates = RunAsyncTaskAndWait(CertificateStores.FindAllAsync(query).AsTask());
+            if (certificates.Count > 0)
             {
-                store.Open(OpenFlags.ReadOnly);
-
-                var certCollection = store.Certificates;
-                var signingCert = certCollection.Find(X509FindType.FindByThumbprint, expectedCertThumbprint, false);
-                if (signingCert.Count == 0)
-                {
-                    throw new FileNotFoundException(string.Format("Cert with thumbprint: '{0}' not found in local machine cert store.", expectedCertThumbprint));
-                }
-
-                X509Certificate2 certificate = signingCert[0];
-                DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"], challengeData["nonce"], EncodingHelper.Base64Encode(certificate.GetRawCertDataString()));
-                RSACryptoServiceProvider csp = new RSACryptoServiceProvider();
-
-                byte[] sig = csp.SignData(new StringBuilder(response.GetResponseToSign()).ToByteArray(), CryptoConfig.MapNameToOID("SHA256"));
-                string signedJwt = String.Format("{0}.{1}", response.GetResponseToSign(),
-                    EncodingHelper.Base64Encode(Encoding.Default.GetString(sig)));
-
-                return string.Format(authHeaderTemplate, signedJwt, challengeData["Context"], challengeData["Version"]);
-            }
-            finally
-            {
-                store.Close();
+                Certificate certificate = certificates[0];
+                IBuffer input = CryptographicBuffer.ConvertStringToBinary("sign me", BinaryStringEncoding.Utf16BE);
+                CryptographicKey keyPair =
+                    RunAsyncTaskAndWait(
+                        PersistedKeyProvider.OpenKeyPairFromCertificateAsync(certificate, HashAlgorithmNames.Sha256,
+                            CryptographicPadding.RsaPkcs1V15).AsTask());
+                
+                    IBuffer Signed = CryptographicEngine.Sign(keyPair, input);
+                    bool bresult = CryptographicEngine.VerifySignature(keyPair, input, Signed);
             }
 
             return null;
+        }
+
+        private static T RunAsyncTaskAndWait<T>(Task<T> task)
+        {
+            try
+            {
+                Task.Run(async () => await task.ConfigureAwait(false)).Wait();
+                return task.Result;
+            }
+            catch (AggregateException ae)
+            {
+                // Any exception thrown as a result of running task will cause AggregateException to be thrown with 
+                // actual exception as inner.
+                throw ae.InnerExceptions[0];
+            }
         }
     }
 }

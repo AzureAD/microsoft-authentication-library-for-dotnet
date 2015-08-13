@@ -66,8 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     ValueData = byteData
                 };
 
-                SecStatusCode code = SecKeyChain.Add(record);
-                Console.WriteLine("code - " + code);
+                SecStatusCode code = SecKeyChain.Add(record);   
                 brokeyKeyString = System.Text.Encoding.UTF8.GetString(byteData.ToArray());
             }
             else
@@ -128,7 +127,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string plaintext = string.Empty;
             using (MemoryStream memoryStream = new MemoryStream(outputBytes))
             {
-                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, GetCryptoAlgorithm().CreateDecryptor(GetRawBrokerKey().ToByteArray(), GetRawBrokerKey().ToByteArray()), CryptoStreamMode.Read))
+                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, GetCryptoAlgorithm().CreateDecryptor(GetRawBrokerKey(), GetRawBrokerKey()), CryptoStreamMode.Read))
                 {
                     using (StreamReader srDecrypt = new StreamReader(cryptoStream))
                     {
