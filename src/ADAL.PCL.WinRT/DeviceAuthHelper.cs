@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             string authHeaderTemplate = "PKeyAuth {0} Context=\"{1}\", Version=\"{2}\"";
             string expectedCertThumbprint = challengeData["CertThumbprint"];
-/*            var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+          var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
 
             try
             {
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             finally
             {
                 store.Close();
-            }*/
+            }
 
             return null;
         }
