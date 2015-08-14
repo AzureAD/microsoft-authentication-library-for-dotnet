@@ -27,56 +27,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     static class BrokerKeyHelper
     {
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
-        private const string SymmetricKeyTag = "com.microsoft.adBrokerKey";
 
-        internal static String GetBrokerKey()
+        internal static String GetBase64UrlBrokerKey()
         {
-            return EncodingHelper.Base64UrlEncode(GetBase64EncodedBrokerKey());
+            return Base64UrlEncoder.Encode(GetRawBrokerKey());
         }
-
-
-        private static string GetBase64EncodedBrokerKey()
-        {
-            string brokeyKeyString = null;
-            SecRecord record = new SecRecord(SecKind.GenericPassword)
-            {
-                Generic = NSData.FromString(LocalSettingsContainerName),
-                Service = "Service",
-                Account = "brokerKey",
-                Label = "BrokerKeyLabel",
-                Comment = "Broker Comment",
-                Description = "Storage for broker key"
-            };
-
-            NSData key = SecKeyChain.QueryAsData(record);
-            if (key == null)
-            {
-                AesManaged algo = GetCryptoAlgorithm();
-                algo.GenerateKey();
-                byte[] rawBytes = algo.Key;
-                NSData byteData = NSData.FromArray(rawBytes);
-                record = new SecRecord(SecKind.GenericPassword)
-                {
-                    Generic = NSData.FromString(LocalSettingsContainerName),
-                    Service = "Service",
-                    Account = "brokerKey",
-                    Label = "BrokerKeyLabel",
-                    Comment = "Broker Comment",
-                    Description = "Storage for broker key",
-                    ValueData = byteData
-                };
-
-                SecStatusCode code = SecKeyChain.Add(record);   
-                brokeyKeyString = System.Text.Encoding.UTF8.GetString(byteData.ToArray());
-            }
-            else
-            {
-                brokeyKeyString = System.Text.Encoding.UTF8.GetString(key.ToArray());
-            }
-
-            return brokeyKeyString;
-        }
-
 
         private static byte[] GetRawBrokerKey()
         {
@@ -110,7 +65,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 };
 
                 SecStatusCode code = SecKeyChain.Add(record);
-                Console.WriteLine("code - " + code);
                 brokeyKey = byteData.ToArray();
             }
             else

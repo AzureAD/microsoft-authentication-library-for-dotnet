@@ -66,18 +66,15 @@ namespace TestApp.PCL
     {
         private AuthenticationContext context;
 
-        private Sts sts = new MobileAppSts();
-
-        public TokenBroker()
-        {
-            context = new AuthenticationContext(sts.Authority, true);
-        }
+        public Sts Sts = new AadSts();
+        
 
         public async Task<string> GetTokenInteractiveAsync(IPlatformParameters parameters)
         {
             try
             {
-                var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidNonExistingRedirectUri, parameters, new UserIdentifier(sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
+                context = new AuthenticationContext(Sts.Authority, true);
+                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, Sts.ValidNonExistingRedirectUri, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
 
                 return result.AccessToken;
             }
@@ -93,7 +90,8 @@ namespace TestApp.PCL
         {
             try
             {
-                var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, null, parameters, new UserIdentifier(sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
+                context = new AuthenticationContext(Sts.Authority, true);
+                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, null, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
 
                 return result.AccessToken;
             }
@@ -107,7 +105,8 @@ namespace TestApp.PCL
         {
             try
             {
-                var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, new UserCredential(sts.ValidUserName, sts.ValidPassword));
+                context = new AuthenticationContext(Sts.Authority, true);
+                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, new UserCredential(Sts.ValidUserName, Sts.ValidPassword));
 
                 return result.AccessToken;
             }
@@ -121,7 +120,8 @@ namespace TestApp.PCL
         {
             try
             {
-                var result = await context.AcquireTokenAsync(sts.ValidResource, new ClientCredential(sts.ValidConfidentialClientId, sts.ValidConfidentialClientSecret));
+                context = new AuthenticationContext(Sts.Authority, true);
+                var result = await context.AcquireTokenAsync(Sts.ValidResource, new ClientCredential(Sts.ValidConfidentialClientId, Sts.ValidConfidentialClientSecret));
 
                 return result.AccessToken;
             }

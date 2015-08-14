@@ -55,9 +55,10 @@ namespace AdalDesktopTestApp
             
             AuthenticationResult result =
                 await
-                    ctx.AcquireTokenAsync("urn:dumptoken", "DE25CE3A-B772-4E6A-B431-96DCB5E7E559", new Uri("msauth:com.example.adal.helloApp1"),
+                    ctx.AcquireTokenAsync("urn:adaltest", "DE25CE3A-B772-4E6A-B431-96DCB5E7E559", new Uri("msauth:com.example.adal.helloApp1"),
                         new PlatformParameters(PromptBehavior.Auto, null));
             Console.WriteLine(result.AccessToken + "\n");
+            
             result = await ctx.AcquireTokenSilentAsync("urn:adaltest", "DE25CE3A-B772-4E6A-B431-96DCB5E7E559");
             Console.WriteLine(result.AccessToken + "\n");
             

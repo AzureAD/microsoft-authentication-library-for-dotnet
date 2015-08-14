@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Security.Cryptography;
@@ -28,31 +29,53 @@ using Windows.Storage.Streams;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    class DeviceAuthHelper : IDeviceAuthHelper
+    internal class DeviceAuthHelper : IDeviceAuthHelper
     {
-        public bool CanHandleDeviceAuthChallenge { get { return true; } }
+        public bool CanHandleDeviceAuthChallenge
+        {
+            get { return true; }
+        }
 
         public string CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
             string authHeaderTemplate = "PKeyAuth {0} Context=\"{1}\", Version=\"{2}\"";
-            string acceptedCertAuthorities = challengeData["CertAuthorities"];
+
+
+            Certificate certificate = FindCertificate(challengeData);
+            DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
+                challengeData["nonce"], Convert.ToBase64String(certificate.GetCertificateBlob().ToArray()));
+            IBuffer input = CryptographicBuffer.ConvertStringToBinary(response.GetResponseToSign(),
+                BinaryStringEncoding.Utf16BE);
+            CryptographicKey keyPair =
+                RunAsyncTaskAndWait(
+                    PersistedKeyProvider.OpenKeyPairFromCertificateAsync(certificate, HashAlgorithmNames.Sha256,
+                        CryptographicPadding.RsaPkcs1V15).AsTask());
+
+            IBuffer signed = CryptographicEngine.Sign(keyPair, input);
+
+            return string.Format(authHeaderTemplate,
+                string.Format("{0}.{1}", response.GetResponseToSign(), EncodingHelper.GetString(signed.ToArray())), challengeData["Context"], challengeData["Version"]);
+        }
+
+        private Certificate FindCertificate(IDictionary<string, string> challengeData)
+        {
             CertificateQuery query = new CertificateQuery();
-            query.IssuerName = "MS-Organization-Access";
-            IReadOnlyList<Certificate> certificates = RunAsyncTaskAndWait(CertificateStores.FindAllAsync(query).AsTask());
-            if (certificates.Count > 0)
+            if (challengeData.ContainsKey("CertAuthorities"))
             {
-                Certificate certificate = certificates[0];
-                IBuffer input = CryptographicBuffer.ConvertStringToBinary("sign me", BinaryStringEncoding.Utf16BE);
-                CryptographicKey keyPair =
-                    RunAsyncTaskAndWait(
-                        PersistedKeyProvider.OpenKeyPairFromCertificateAsync(certificate, HashAlgorithmNames.Sha256,
-                            CryptographicPadding.RsaPkcs1V15).AsTask());
-                
-                    IBuffer Signed = CryptographicEngine.Sign(keyPair, input);
-                    bool bresult = CryptographicEngine.VerifySignature(keyPair, input, Signed);
+                query.IssuerName = challengeData["CertAuthorities"];
+            }
+            else
+            {
+                query.Thumbprint = challengeData["CertThumbprint"].ToByteArray();
+            }
+            IReadOnlyList<Certificate> certificates = RunAsyncTaskAndWait(CertificateStores.FindAllAsync(query).AsTask());
+
+            if (certificates.Count == 0)
+            {
+                throw new AdalException();
             }
 
-            return null;
+            return certificates[0];
         }
 
         private static T RunAsyncTaskAndWait<T>(Task<T> task)

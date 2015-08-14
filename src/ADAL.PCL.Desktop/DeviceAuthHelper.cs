@@ -29,6 +29,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Native;
 using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -57,19 +58,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 X509Certificate2 certificate = signingCert[0];
                 DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"], challengeData["nonce"], Convert.ToBase64String(certificate.GetRawCertData()));
                 CngKey key = GetCngPrivateKey(certificate);
-
-/*                AsymmetricAlgorithm algorithm = key.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, true);  
-                RSAPKCS1SignatureFormatter formatter = new RSAPKCS1SignatureFormatter(null);
-                formatter.SetHashAlgorithm("SHA256");
-                formatter.SetKey(key);
-                RSACng*/
-
-
-                byte[] sig = null;// key. SignData(new StringBuilder(response.GetResponseToSign()).ToByteArray());
-                string signedJwt = String.Format("{0}.{1}", response.GetResponseToSign(),
-                    EncodingHelper.Base64Encode(Encoding.Default.GetString(sig)));
-                string authToken = String.Format("AuthToken=\"{0}\"", signedJwt);
+                byte[] sig = null;
+                             using (RSACng rsa = new RSACng(key))
+                             {
+                                 rsa.SignatureHashAlgorithm = CngAlgorithm.Sha256;
+                    sig = rsa.SignData(response.GetResponseToSign().ToByteArray());
+                             }
+                
+                string signedJwt = string.Format("{0}.{1}", response.GetResponseToSign(),
+                    Base64UrlEncoder.Encode(Encoding.Default.GetString(sig)));
+                string authToken = string.Format("AuthToken=\"{0}\"", signedJwt);
                 return string.Format(authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
+                
             }
             finally
             {
