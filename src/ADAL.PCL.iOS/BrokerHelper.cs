@@ -82,9 +82,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 string encryptedResponse = responseDictionary["response"];
                 string decryptedResponse = BrokerKeyHelper.DecryptBrokerResponse(encryptedResponse);
                 string responseActualHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(decryptedResponse);
-
-                if (expectedHash.Equals(responseActualHash))
+                byte[] rawHash = Convert.FromBase64String(responseActualHash);
+                string hash  = BitConverter.ToString(rawHash);
+                if (expectedHash.Equals(hash.Replace("-","")))
                 {
+                    responseDictionary = EncodingHelper.ParseKeyValueList(decryptedResponse, '&', false, null);
                     response = TokenResponse.CreateFromBrokerResponse(responseDictionary);
                 }
                 else

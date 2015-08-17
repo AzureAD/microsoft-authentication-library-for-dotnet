@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     key = key.Trim().ToLower();
                     value = value.Trim().Trim(new[] { '\"' }).Trim();
 
-                    if (response.ContainsKey(key))
+                    if (response.ContainsKey(key) && callState!=null)
                     {
                         PlatformPlugin.Logger.Warning(callState, string.Format("Key/value pair list contains redundant key '{0}'.", key));
                     }

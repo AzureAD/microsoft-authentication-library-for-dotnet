@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     TokenType = "Bearer",
                     CorrelationId = responseDictionary["correlation_id"],
                     Resource = responseDictionary["resource"],
-                    ExpiresOn = long.Parse(responseDictionary["expires_on"])
+                    ExpiresOn = long.Parse(responseDictionary["expires_on"].Split('.')[0])
                 };
             }
         }

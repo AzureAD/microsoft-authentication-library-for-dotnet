@@ -35,8 +35,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal static byte[] GetRawBrokerKey()
         {
-            byte[] brokeyKey = null;
-            SecRecord record = new SecRecord(SecKind.GenericPassword)
+            byte[] brokeyKey = new byte[32];
+            for (int i = 0; i < brokeyKey.Length; i++)
+            {
+                brokeyKey[i] = 69;
+            }
+
+/*            SecRecord record = new SecRecord(SecKind.GenericPassword)
             {
                 Generic = NSData.FromString(LocalSettingsContainerName),
                 Service = "Service",
@@ -49,8 +54,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             NSData key = SecKeyChain.QueryAsData(record);
             if (key == null)
             {
-                AesManaged algo = GetCryptoAlgorithm();
-                algo.GenerateKey();
+                AesManaged algo = new AesManaged();
                 byte[] rawBytes = algo.Key;
                 NSData byteData = NSData.FromArray(rawBytes);
                 record = new SecRecord(SecKind.GenericPassword)
@@ -70,18 +74,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             else
             {
                 brokeyKey = key.ToArray();
-            }
-
-            string hex = BitConverter.ToString(brokeyKey);
+            }*/
+        
             return brokeyKey;
         }
 
         internal static String DecryptBrokerResponse(String encryptedBrokerResponse)
         {
             byte[] outputBytes = Base64UrlEncoder.DecodeBytes(encryptedBrokerResponse);
-            string hex = BitConverter.ToString(outputBytes);
             string plaintext = string.Empty;
-
+            
             using (MemoryStream memoryStream = new MemoryStream(outputBytes))
             {
                 AesManaged algo = GetCryptoAlgorithm(GetRawBrokerKey());
@@ -96,7 +98,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return plaintext;
         }
-
 
         private static AesManaged GetCryptoAlgorithm()
         {
