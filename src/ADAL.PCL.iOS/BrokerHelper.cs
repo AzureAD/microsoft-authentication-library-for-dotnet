@@ -41,7 +41,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             brokerResponseReady = new SemaphoreSlim(0);
             
             //call broker
-            brokerPayload["broker_key"] = EncodingHelper.UrlEncode(BrokerKeyHelper.GetBase64UrlBrokerKey());
+            string base64EncodedString = Base64UrlEncoder.Encode(BrokerKeyHelper.GetRawBrokerKey());
+            brokerPayload["broker_key"] = base64EncodedString;
 
             NSUrl url = new NSUrl("msauth://broker?" + brokerPayload.ToQueryParameter());
             DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url));

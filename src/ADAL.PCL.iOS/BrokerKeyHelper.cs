@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return Base64UrlEncoder.Encode(GetRawBrokerKey());
         }
 
-        private static byte[] GetRawBrokerKey()
+        internal static byte[] GetRawBrokerKey()
         {
             byte[] brokeyKey = null;
             SecRecord record = new SecRecord(SecKind.GenericPassword)
@@ -72,16 +72,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 brokeyKey = key.ToArray();
             }
 
+            string hex = BitConverter.ToString(brokeyKey);
             return brokeyKey;
         }
 
         internal static String DecryptBrokerResponse(String encryptedBrokerResponse)
         {
-            byte[] outputBytes = encryptedBrokerResponse.ToByteArray();
+            byte[] outputBytes = Base64UrlEncoder.DecodeBytes(encryptedBrokerResponse);
+            string hex = BitConverter.ToString(outputBytes);
             string plaintext = string.Empty;
+
             using (MemoryStream memoryStream = new MemoryStream(outputBytes))
             {
-                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, GetCryptoAlgorithm().CreateDecryptor(GetRawBrokerKey(), GetRawBrokerKey()), CryptoStreamMode.Read))
+                AesManaged algo = GetCryptoAlgorithm(GetRawBrokerKey());
+                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, algo.CreateDecryptor(), CryptoStreamMode.Read))
                 {
                     using (StreamReader srDecrypt = new StreamReader(cryptoStream))
                     {
@@ -93,14 +97,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return plaintext;
         }
 
+
         private static AesManaged GetCryptoAlgorithm()
         {
+            return GetCryptoAlgorithm(null);
+        }
+        private static AesManaged GetCryptoAlgorithm(byte[] key)
+        {
             AesManaged algorithm = new AesManaged();
+         
             //set the mode, padding and block size
             algorithm.Padding = PaddingMode.PKCS7;
             algorithm.Mode = CipherMode.CBC;
             algorithm.KeySize = 256;
             algorithm.BlockSize = 128;
+            if (key != null)
+            {
+                algorithm.Key = key;
+            }
+
+            algorithm.IV = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             return algorithm;
         }
     }

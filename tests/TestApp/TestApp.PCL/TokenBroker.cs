@@ -27,7 +27,7 @@ using Test.ADAL.Common;
 
 namespace TestApp.PCL
 {
-    class MobileAppSts : Sts
+    public class MobileAppSts : Sts
     {
         public MobileAppSts()
         {
@@ -62,6 +62,7 @@ namespace TestApp.PCL
 
         public string TenantName { get; protected set; }
     }
+
     public class TokenBroker
     {
         private AuthenticationContext context;

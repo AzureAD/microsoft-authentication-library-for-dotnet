@@ -78,6 +78,7 @@ namespace AdaliOSTestApp
             {
                 ReportLabel.Text = string.Empty;
                 TokenBroker tokenBroker = new TokenBroker();
+                tokenBroker.Sts = new MobileAppSts();
                 string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
                 ReportLabel.Text = token;
             }
