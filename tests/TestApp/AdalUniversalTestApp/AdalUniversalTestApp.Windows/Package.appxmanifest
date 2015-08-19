@@ -24,5 +24,7 @@
     <Capability Name="internetClient" />
     <Capability Name="sharedUserCertificates" />
     <Capability Name="enterpriseAuthentication" />
+    <Capability Name="internetClientServer" />
+    <Capability Name="privateNetworkClientServer" />
   </Capabilities>
 </Package>

@@ -38,9 +38,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public string CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
-            string authHeaderTemplate = "PKeyAuth {0} Context=\"{1}\", Version=\"{2}\"";
-
-
+            string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
+            
             Certificate certificate = FindCertificate(challengeData);
             DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
                 challengeData["nonce"], Convert.ToBase64String(certificate.GetCertificateBlob().ToArray()));
@@ -54,7 +53,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             IBuffer signed = CryptographicEngine.Sign(keyPair, input);
 
             return string.Format(authHeaderTemplate,
-                string.Format("{0}.{1}", response.GetResponseToSign(), EncodingHelper.GetString(signed.ToArray())), challengeData["Context"], challengeData["Version"]);
+                string.Format("{0}.{1}", response.GetResponseToSign(), Base64UrlEncoder.Encode(signed.ToArray())), challengeData["Context"], challengeData["Version"]);
         }
 
         private Certificate FindCertificate(IDictionary<string, string> challengeData)
@@ -72,6 +71,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (certificates.Count == 0)
             {
+                //TODO add specific message
                 throw new AdalException();
             }
 

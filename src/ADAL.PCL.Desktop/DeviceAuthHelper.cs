@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public string CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
-            string authHeaderTemplate = "PKeyAuth {0} Context=\"{1}\", Version=\"{2}\"";
+            string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
             string expectedCertThumbprint = challengeData["CertThumbprint"];
             var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
 
@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                              }
                 
                 string signedJwt = string.Format("{0}.{1}", response.GetResponseToSign(),
-                    Base64UrlEncoder.Encode(Encoding.Default.GetString(sig)));
+                    Base64UrlEncoder.Encode(sig));
                 string authToken = string.Format("AuthToken=\"{0}\"", signedJwt);
                 return string.Format(authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
                 
