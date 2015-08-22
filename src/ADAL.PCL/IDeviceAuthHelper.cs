@@ -25,6 +25,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         bool CanHandleDeviceAuthChallenge { get; }
 
-        string CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData);
+        Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData);
     }
 }

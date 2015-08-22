@@ -256,7 +256,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             });
 
 
-            /#1#/ Authenticator should throw OperationCanceledException if
+            // Authenticator should throw OperationCanceledException if
             // token is not available
             Intent intent = bundleResult.GetParcelable(AccountManager.KeyIntent);
 

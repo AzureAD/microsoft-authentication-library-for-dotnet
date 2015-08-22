@@ -36,27 +36,28 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             get { return true; }
         }
 
-        public string CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
+        public async Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
             
-            Certificate certificate = FindCertificate(challengeData);
+            Certificate certificate = await FindCertificate(challengeData);
             DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
                 challengeData["nonce"], Convert.ToBase64String(certificate.GetCertificateBlob().ToArray()));
             IBuffer input = CryptographicBuffer.ConvertStringToBinary(response.GetResponseToSign(),
-                BinaryStringEncoding.Utf16BE);
-            CryptographicKey keyPair =
-                RunAsyncTaskAndWait(
+                BinaryStringEncoding.Utf8);
+            CryptographicKey keyPair = await 
                     PersistedKeyProvider.OpenKeyPairFromCertificateAsync(certificate, HashAlgorithmNames.Sha256,
-                        CryptographicPadding.RsaPkcs1V15).AsTask());
+                        CryptographicPadding.RsaPkcs1V15);
 
-            IBuffer signed = CryptographicEngine.Sign(keyPair, input);
+            IBuffer signed = await CryptographicEngine.SignAsync(keyPair, input);
 
-            return string.Format(authHeaderTemplate,
-                string.Format("{0}.{1}", response.GetResponseToSign(), Base64UrlEncoder.Encode(signed.ToArray())), challengeData["Context"], challengeData["Version"]);
+            string signedJwt = string.Format("{0}.{1}", response.GetResponseToSign(),
+                Base64UrlEncoder.Encode(signed.ToArray()));
+            string authToken = string.Format("AuthToken=\"{0}\"", signedJwt);
+            return string.Format(authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
         }
 
-        private Certificate FindCertificate(IDictionary<string, string> challengeData)
+        private async Task<Certificate> FindCertificate(IDictionary<string, string> challengeData)
         {
             CertificateQuery query = new CertificateQuery();
             if (challengeData.ContainsKey("CertAuthorities"))
@@ -65,9 +66,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
-                query.Thumbprint = challengeData["CertThumbprint"].ToByteArray();
+                query.Thumbprint = HexStringToByteArray(challengeData["CertThumbprint"]);
             }
-            IReadOnlyList<Certificate> certificates = RunAsyncTaskAndWait(CertificateStores.FindAllAsync(query).AsTask());
+
+            IReadOnlyList<Certificate> certificates = await CertificateStores.FindAllAsync(query);
 
             if (certificates.Count == 0)
             {
@@ -78,19 +80,30 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return certificates[0];
         }
 
-        private static T RunAsyncTaskAndWait<T>(Task<T> task)
+        private byte[] HexStringToByteArray(string hex)
         {
-            try
+            if (hex.Length % 2 == 1)
+                throw new Exception("The binary key cannot have an odd number of digits");
+
+            byte[] arr = new byte[hex.Length >> 1];
+
+            for (int i = 0; i < hex.Length >> 1; ++i)
             {
-                Task.Run(async () => await task.ConfigureAwait(false)).Wait();
-                return task.Result;
+                arr[i] = (byte)((GetHexVal(hex[i << 1]) << 4) + (GetHexVal(hex[(i << 1) + 1])));
             }
-            catch (AggregateException ae)
-            {
-                // Any exception thrown as a result of running task will cause AggregateException to be thrown with 
-                // actual exception as inner.
-                throw ae.InnerExceptions[0];
-            }
+
+            return arr;
+        }
+
+        private int GetHexVal(char hex)
+        {
+            int val = (int)hex;
+            //For uppercase A-F letters:
+            return val - (val < 58 ? 48 : 55);
+            //For lowercase a-f letters:
+            //return val - (val < 58 ? 48 : 87);
+            //Or the two combined, but a bit slower:
+            //return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
         }
     }
 }

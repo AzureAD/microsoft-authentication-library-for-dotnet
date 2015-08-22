@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private async Task<T> HandleDeviceAuthChallenge<T>(string endpointType, IHttpWebResponse response)
         {
             IDictionary<string, string> responseDictionary = this.ParseChallengeData(response);
-            string responseHeader = PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(responseDictionary);
+            string responseHeader = await PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(responseDictionary);
             IRequestParameters rp = this.Client.BodyParameters;
             this.Client = PlatformPlugin.HttpClientFactory.Create(CheckForExtraQueryParameter(responseDictionary["SubmitUrl"]), this.CallState);
             this.Client.BodyParameters = rp;

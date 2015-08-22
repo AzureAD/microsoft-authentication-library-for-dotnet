@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public bool CanHandleDeviceAuthChallenge { get { return true; } }
 
-        public string CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
+        public async Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
             string expectedCertThumbprint = challengeData["CertThumbprint"];
@@ -68,8 +68,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 string signedJwt = string.Format("{0}.{1}", response.GetResponseToSign(),
                     Base64UrlEncoder.Encode(sig));
                 string authToken = string.Format("AuthToken=\"{0}\"", signedJwt);
-                return string.Format(authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
-                
+                Task<string> resultTask = Task.Factory.StartNew(() =>
+                {
+                    return string.Format(authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
+                });
+
+                return await resultTask;
             }
             finally
             {
