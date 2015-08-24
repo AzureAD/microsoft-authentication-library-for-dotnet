@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.OS;
@@ -17,7 +17,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public bool CanHandleDeviceAuthChallenge {
             get { return false; }
         }
-        public string CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
+
+        public Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
             throw new NotImplementedException();
         }
