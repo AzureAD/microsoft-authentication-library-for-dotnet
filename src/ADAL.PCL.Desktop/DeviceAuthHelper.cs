@@ -41,21 +41,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public async Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
-            string expectedCertThumbprint = challengeData["CertThumbprint"];
-            var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
 
-            try
-            {
-                store.Open(OpenFlags.ReadOnly);
-
-                var certCollection = store.Certificates;
-                var signingCert = certCollection.Find(X509FindType.FindByThumbprint, expectedCertThumbprint, false);
-                if (signingCert.Count == 0)
-                {
-                    throw new FileNotFoundException(string.Format("Cert with thumbprint: '{0}' not found in local machine cert store.", expectedCertThumbprint));
-                }
-
-                X509Certificate2 certificate = signingCert[0];
+            X509Certificate2 certificate = FindCertificate(challengeData);
                 DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"], challengeData["nonce"], Convert.ToBase64String(certificate.GetRawCertData()));
                 CngKey key = GetCngPrivateKey(certificate);
                 byte[] sig = null;
@@ -74,14 +61,67 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 });
 
                 return await resultTask;
+        }
+
+        public bool CanUseBroker { get { return false; } }
+
+        private X509Certificate2 FindCertificate(IDictionary<string, string> challengeData)
+        {
+            var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            try
+            {
+
+                store.Open(OpenFlags.ReadOnly);
+                var certCollection = store.Certificates;
+                X509Certificate2Collection signingCert = null;
+                if (challengeData.ContainsKey("CertAuthorities"))
+                {
+                    string[] certAuthorities = challengeData["CertAuthorities"].Split(new[] {";"},
+                        StringSplitOptions.None);
+                    foreach (var certAuthority in certAuthorities)
+                    {
+                        //reverse the tokenized string and replace "," with " + "
+                        string[] dNames = certAuthority.Split(new[] {","}, StringSplitOptions.None);
+                        string distinguishedIssuerName = dNames[dNames.Length - 1];
+                        for (int i = dNames.Length - 2; i >= 0; i--)
+                        {
+                            distinguishedIssuerName = distinguishedIssuerName.Insert(0, dNames[i] + " + ");
+                        }
+
+                        signingCert = certCollection.Find(X509FindType.FindByIssuerDistinguishedName,
+                            distinguishedIssuerName, false);
+                        if (signingCert.Count > 0)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (signingCert == null || signingCert.Count == 0)
+                    {
+                        throw new FileNotFoundException(
+                            string.Format("Certs with thumbprint: '{0}' not found in cert store.",
+                                challengeData["CertThumbprint"]));
+                    }
+                }
+                else
+                {
+                    signingCert = certCollection.Find(X509FindType.FindByThumbprint, challengeData["CertThumbprint"],
+                        false);
+                    if (signingCert.Count == 0)
+                    {
+                        throw new FileNotFoundException(
+                            string.Format("Cert with thumbprint: '{0}' not found in local machine cert store.",
+                                challengeData["CertThumbprint"]));
+                    }
+                }
+
+                return signingCert[0];
             }
             finally
             {
                 store.Close();
             }
         }
-
-        public bool CanUseBroker { get { return false; } }
 
 
         /// <summary>

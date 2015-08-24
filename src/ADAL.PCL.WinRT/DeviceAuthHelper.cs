@@ -73,8 +73,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (certificates.Count == 0)
             {
-                //TODO add specific message
-                throw new AdalException();
+                throw new FileNotFoundException(
+                    string.Format("Cert with thumbprint: '{0}' not found in local machine cert store.",
+                        challengeData["CertThumbprint"]));
             }
 
             return certificates[0];
