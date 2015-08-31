@@ -30,6 +30,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.CallerActivity = callerActivity;
         }
 
+        public PlatformParameters(Activity callerActivity, bool skipBroker) : this(callerActivity)
+        {
+            SkipBroker = skipBroker;
+        }
+
+        public bool SkipBroker { get; set; }
+
         /// <summary>
         /// Caller Android Activity
         /// </summary>

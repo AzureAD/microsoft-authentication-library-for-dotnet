@@ -23,7 +23,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal interface IBrokerHelper
     {
-        bool CanUseBroker { get; }
+        IPlatformParameters PlatformParameters { get; set; }
+
+        bool CanInvokeBroker { get; }
 
         Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload);
     }

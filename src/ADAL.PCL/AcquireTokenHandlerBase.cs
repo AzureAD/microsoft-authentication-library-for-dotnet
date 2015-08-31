@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (resultEx == null)
                 {
-                    if (PlatformPlugin.BrokerHelper.CanUseBroker)
+                    if (PlatformPlugin.BrokerHelper.CanInvokeBroker)
                     {
                         resultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters);
                     }

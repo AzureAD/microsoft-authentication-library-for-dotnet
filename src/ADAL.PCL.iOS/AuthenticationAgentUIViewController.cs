@@ -64,6 +64,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     requestUrlString = requestUrlString.Replace("browser://", "https://");
                     DispatchQueue.MainQueue.DispatchAsync(
                         () => UIApplication.SharedApplication.OpenUrl(new NSUrl(requestUrlString)));
+                    this.DismissViewController(true, null);
                     return false;
                 }
 

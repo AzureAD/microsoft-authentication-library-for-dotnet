@@ -68,14 +68,31 @@ namespace TestApp.PCL
         private AuthenticationContext context;
 
         public Sts Sts = new AadSts();
-        
+
+
+        public async Task<string> GetTokenSilentAsync(IPlatformParameters parameters)
+        {
+            try
+            {
+                context = new AuthenticationContext(Sts.Authority, true);
+                var result = await context.AcquireTokenSilentAsync(Sts.ValidResource, Sts.ValidClientId, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId), parameters);
+
+                return result.AccessToken;
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message + "\n" + ex.StackTrace;
+
+                return msg;
+            }
+        }
 
         public async Task<string> GetTokenInteractiveAsync(IPlatformParameters parameters)
         {
             try
             {
                 context = new AuthenticationContext(Sts.Authority, true);
-                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, Sts.ValidNonExistingRedirectUri, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
+                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, Sts.ValidNonExistingRedirectUri, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId),"nux=1");
 
                 return result.AccessToken;
             }
@@ -134,7 +151,7 @@ namespace TestApp.PCL
 
         public void ClearTokenCache()
         {
-            this.context.TokenCache.Clear();
+            TokenCache.DefaultShared.Clear();
         }
     }
 }

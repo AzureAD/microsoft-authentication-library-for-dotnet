@@ -76,6 +76,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.brokerParameters["username"] = userId.Id;
             this.brokerParameters["username_type"] = userId.Type.ToString();
             this.brokerParameters["redirect_uri"] = redirectUri.AbsoluteUri;
+            this.brokerParameters["extra_qp"] = extraQueryParameters;
+            PlatformPlugin.BrokerHelper.PlatformParameters = authorizationParameters;
         }
 
         protected override async Task PreTokenRequest()

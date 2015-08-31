@@ -32,8 +32,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private static SemaphoreSlim brokerResponseReady = null;
         private static NSUrl brokerResponse = null;
-        
-        public bool CanUseBroker { get { return UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://")); } }
+
+        public bool SkipBroker { get; set; }
+        public IPlatformParameters PlatformParameters { get; set; }
+
+        public bool CanInvokeBroker { get { return UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://")); } }
 
         public async Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {
@@ -48,6 +51,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url));
             await brokerResponseReady.WaitAsync();
             return ProcessBrokerResponse();
+        }
+
+        public Task<AuthenticationResultEx> AcquireTokenSilentUsingBroker(IDictionary<string, string> brokerPayload)
+        {
+            throw new NotImplementedException();
         }
 
         private AuthenticationResultEx ProcessBrokerResponse()
@@ -101,8 +109,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return response.GetResult();
         }
-
-
+        
         public static void SetBrokerResponse(NSUrl brokerResponse)
         {
             BrokerHelper.brokerResponse = brokerResponse;

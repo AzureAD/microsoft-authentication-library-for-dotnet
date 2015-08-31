@@ -26,10 +26,6 @@ namespace AdaliOSTestApp
 		[GeneratedCode ("iOS Designer", "1.0")]
 		partial void UIButton16_TouchUpInside (UIButton sender);
 
-		[Action ("UIButton25_TouchUpInside:")]
-		[GeneratedCode ("iOS Designer", "1.0")]
-		partial void UIButton25_TouchUpInside (UIButton sender);
-
 		[Action ("UIButton30_TouchUpInside:")]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		partial void UIButton30_TouchUpInside (UIButton sender);

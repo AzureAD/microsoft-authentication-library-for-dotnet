@@ -43,27 +43,33 @@ namespace AdalAndroidTestApp
             Button acquireTokenInteractiveButton = FindViewById<Button>(Resource.Id.acquireTokenInteractiveButton);
             acquireTokenInteractiveButton.Click += acquireTokenInteractiveButton_Click;
 
-            Button acquireTokenUPButton = FindViewById<Button>(Resource.Id.acquireTokenUPButton);
-            acquireTokenUPButton.Click += acquireTokenUPButton_Click;
+            Button acquireTokenSilentButton = FindViewById<Button>(Resource.Id.acquireTokenSilentButton);
+            acquireTokenSilentButton.Click += acquireTokenSilentButton_Click;
 
-            Button acquireTokenWithClientCredentialButton = FindViewById<Button>(Resource.Id.acquireTokenClientCredButton);
-            acquireTokenWithClientCredentialButton.Click += acquireTokenWithClientCredentialButton_Click;
+            Button clearCacheButton = FindViewById<Button>(Resource.Id.clearCacheButton);
+            clearCacheButton.Click += clearCacheButton_Click;
 
             this.accessTokenTextView = FindViewById<TextView>(Resource.Id.accessTokenTextView);
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
-            AuthenticationAgentContinuationHelper.SetAuthenticationAgentContinuationEventArgs(requestCode, resultCode, data);
+            foreach (string key in data.Extras.KeySet())
+            {
+                Object value = data.Extras.Get(key);
+                Console.WriteLine(key + " - " + value);
+            }
 
             base.OnActivityResult(requestCode, resultCode, data);
+            AuthenticationAgentContinuationHelper.SetAuthenticationAgentContinuationEventArgs(requestCode, resultCode, data);
         }
 
-        private async void acquireTokenUPButton_Click(object sender, EventArgs e)
+        private async void acquireTokenSilentButton_Click(object sender, EventArgs e)
         {
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
-            string token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
+            tokenBroker.Sts = new MobileAppSts();
+            string token = await tokenBroker.GetTokenSilentAsync(new PlatformParameters(this));
             this.accessTokenTextView.Text = token;
         }
 
@@ -71,16 +77,16 @@ namespace AdalAndroidTestApp
         {
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
+            tokenBroker.Sts = new MobileAppSts();
+           // tokenBroker.Sts.ValidClientId = 
+
             string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
             this.accessTokenTextView.Text = token;
         }
 
-        private async void acquireTokenWithClientCredentialButton_Click(object sender, EventArgs e)
+        private async void clearCacheButton_Click(object sender, EventArgs e)
         {
-            this.accessTokenTextView.Text = string.Empty;
-            TokenBroker tokenBroker = new TokenBroker();
-            string token = await tokenBroker.GetTokenWithClientCredentialAsync();
-            this.accessTokenTextView.Text = token;
+            TokenCache.DefaultShared.Clear();
         }
     }
 }

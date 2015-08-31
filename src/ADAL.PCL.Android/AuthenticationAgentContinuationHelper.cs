@@ -25,15 +25,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public static void SetAuthenticationAgentContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
-            AuthorizationResult authorizationResult;
-            switch (resultCode)
+            AuthorizationResult authorizationResult = null;
+            switch ((int)resultCode)
             {
-                case Result.Ok: authorizationResult= new AuthorizationResult(AuthorizationStatus.Success, data.GetStringExtra("ReturnedUrl")); break;
-                case Result.Canceled: authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null); break;
+                case (int)Result.Ok: authorizationResult= new AuthorizationResult(AuthorizationStatus.Success, data.GetStringExtra("ReturnedUrl")); break;
+                case (int)Result.Canceled: authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null); break;
+                case 2004: BrokerHelper.SetBrokerResult(data); break;
                 default: authorizationResult = new AuthorizationResult(AuthorizationStatus.UnknownError, null); break;
             }
 
-            WebUI.SetAuthorizationResult(authorizationResult);
+            if ((int) resultCode != 2004)
+            {
+                WebUI.SetAuthorizationResult(authorizationResult);
+            }
         }
     }
 }

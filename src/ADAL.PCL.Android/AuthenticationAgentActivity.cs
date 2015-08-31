@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using Android.App;
 using Android.Content;
 using Android.OS;
@@ -90,6 +91,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             public override bool ShouldOverrideUrlLoading(WebView view, String url)
             {
+                if (url.StartsWith(BrokerConstants.BROWSER_EXT_PREFIX))
+                {
+                    PlatformPlugin.Logger.Verbose(null, "It is an external website request");
+                   // OpenLinkInBrowser(url);
+                    view.StopLoading();
+                    ((Activity)view.Context).Finish();
+                    return true;
+                }
+                else if (url.StartsWith(BrokerConstants.BROWSER_EXT_INSTALL_PREFIX))
+                {
+                    PlatformPlugin.Logger.Verbose(null, "It is an install request");
+/*                    ApplicationReceiver.saveRequest(mCallingContext, mRequest, url);
+                    IDictionary<string, string> parameters = StringExtensions
+                            .getUrlParameters(url);*/
+                   // OpenLinkInBrowser(parameters.get(ApplicationReceiver.INSTALL_URL_KEY));
+                    view.StopLoading();
+                    ((Activity)view.Context).Finish();
+                    return true;
+                }
+
                 return false;
             }
 

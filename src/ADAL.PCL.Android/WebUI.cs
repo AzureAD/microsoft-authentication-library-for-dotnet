@@ -32,34 +32,6 @@ using Android.Util;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal static class BrokerKey
-    {
-        public const string AccountName = "account.name";
-        public const string AccountPrompt = "account.prompt";
-        public const string AdalVersionKey = "adal.version.key";
-        public const string AccountAuthority = "account.authority";
-        public const string BrokerRequest = "com.microsoft.aadbroker.adal.broker.request";
-        public const string RequestId = "com.microsoft.aad.adal:RequestId";
-        public const string Resource = "account.resource";
-        public const string ClientId = "account.clientid.key";
-        public const string LoginHint = "account.login.hint";
-        public const string RedirectUri = "account.redirect";
-    }
-
-    internal static class BrokerResultKey
-    {
-        public const string AccountAuthenticationResponse = "accountAuthenticatorResponse";
-        public const string AccountManagerResponse = "accountManagerResponse";
-        public const string AuthenticatorTypes = "authenticator_types";
-        public const string AuthFailedMessage = "authFailedMessage";
-        public const string AuthTokenLable = "authTokenLabelKey";
-        public const string BooleanResult = "booleanResult";
-        public const string ErrorCode = "errorCode";
-        public const string ErrorMessage = "errorMessage";
-        public const string UserData = "userdata";
-        public const string AccountInitialRequest = "account.initial.request";
-    }
-
     internal class WebUI : IWebUI
     {
 

@@ -15,7 +15,7 @@
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
-    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v5.1</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -48,7 +48,11 @@
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="ApplicationReceiver.cs" />
+    <Compile Include="AuthenticationRequest.cs" />
+    <Compile Include="BrokerConstants.cs" />
     <Compile Include="BrokerHelper.cs" />
+    <Compile Include="BrokerProxy.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="DeviceAuthHelper.cs" />
     <Compile Include="PlatformParameters.cs" />

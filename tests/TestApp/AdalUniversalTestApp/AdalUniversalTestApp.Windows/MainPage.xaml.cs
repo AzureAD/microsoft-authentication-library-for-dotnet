@@ -44,16 +44,7 @@ namespace AdalUniversalTestApp
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
-            AuthenticationContext context = new AuthenticationContext("https://login.windows.net/common", false);
-
-            var result = await context.AcquireTokenAsync("https://api.office.com/discovery/", "af124e86-4e96-495a-b70a-90f90ab96707", new Uri("ms-onedrive://com.microsoft.skydrive"),
-                new PlatformParameters(PromptBehavior.Auto, false), new UserIdentifier("kpanwar@microsoft.com", UserIdentifierType.OptionalDisplayableId));
-
-            result = await context.AcquireTokenSilentAsync("https://encana-my.sharepoint.com/",
-                "af124e86-4e96-495a-b70a-90f90ab96707",
-                new UserIdentifier("kpanwar@microsoft.com", UserIdentifierType.OptionalDisplayableId));
-            
-            this.AccessToken.Text = result.AccessToken;
+            this.AccessToken.Text = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(PromptBehavior.Auto, false));
         }
 
         private async void Button_Click_1(object sender, RoutedEventArgs e)

@@ -11,15 +11,17 @@
         android:layout_height="wrap_content"
         android:id="@+id/acquireTokenInteractiveButton" />
     <Button
-        android:text="Acquire Token Username/Password"
+        android:text="Acquire Token Silent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/acquireTokenUPButton" />
+        android:id="@+id/acquireTokenSilentButton" />
     <Button
-        android:text="Acquire Token with Client Credential"
+        android:text="CLEAR CACHE!"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/acquireTokenClientCredButton" />
+        android:id="@+id/clearCacheButton"
+        android:layout_marginBottom="175.6dp"
+        android:layout_marginTop="0.0dp" />
     <TextView
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"

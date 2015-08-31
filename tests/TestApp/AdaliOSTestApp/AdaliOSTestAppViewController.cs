@@ -79,6 +79,10 @@ namespace AdaliOSTestApp
                 ReportLabel.Text = string.Empty;
                 TokenBroker tokenBroker = new TokenBroker();
                 tokenBroker.Sts = new MobileAppSts();
+                tokenBroker.Sts.ValidClientId = "af124e86-4e96-495a-b70a-90f90ab96707";
+                tokenBroker.Sts.ValidNonExistingRedirectUri = new Uri("ms-onedrive://com.microsoft.skydrive");
+                tokenBroker.Sts.ValidUserName = "iwuser1@mamcafr.onmicrosoft.com";
+                tokenBroker.Sts.ValidResource = "https://mamcafr-my.sharepoint.com/";
                 string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
                 ReportLabel.Text = token;
             }
@@ -94,22 +98,8 @@ namespace AdaliOSTestApp
             {
                 ReportLabel.Text = string.Empty;
                 TokenBroker tokenBroker = new TokenBroker();
-                string token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
-                ReportLabel.Text = token;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        async partial void UIButton25_TouchUpInside(UIButton sender)
-        {
-            try
-            {
-                ReportLabel.Text = string.Empty;
-                TokenBroker tokenBroker = new TokenBroker();
-                string token = await tokenBroker.GetTokenWithClientCredentialAsync();
+                tokenBroker.Sts = new MobileAppSts();
+                string token = await tokenBroker.GetTokenSilentAsync(new PlatformParameters(this));
                 ReportLabel.Text = token;
             }
             catch (Exception ex)

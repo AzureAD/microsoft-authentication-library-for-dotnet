@@ -43,6 +43,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this.Error = AdalError.AuthenticationCanceled;
                 this.ErrorDescription = AdalErrorMessage.AuthenticationCanceled;
             }
+            else if (this.Status == AuthorizationStatus.UnknownError)
+            {
+                this.Error = AdalError.Unknown;
+                this.ErrorDescription = AdalErrorMessage.Unknown;
+            }
             else
             {
                 this.ParseAuthorizeResponse(returnedUriInput);
