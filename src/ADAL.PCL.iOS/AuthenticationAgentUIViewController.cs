@@ -58,6 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 string requestUrlString = request.Url.ToString().ToLower();
+
                 if (requestUrlString.StartsWith("browser://"))
                 {
                     DispatchQueue.MainQueue.DispatchAsync(() => CancelAuthentication(null, null));
@@ -74,7 +75,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.DismissViewController(true, null);
                     return false;
                 }
-
+                
                 return true;
             };
 

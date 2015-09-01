@@ -8,7 +8,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     class BrokerHelper : IBrokerHelper
     {
-        public bool SkipBroker { get; set; }
         public IPlatformParameters PlatformParameters { get; set; }
 
         public bool CanInvokeBroker {
@@ -19,10 +18,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             throw new NotImplementedException();
         }
-
-        public Task<AuthenticationResultEx> AcquireTokenSilentUsingBroker(IDictionary<string, string> brokerPayload)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }

@@ -106,7 +106,7 @@
     <Compile Include="WinFormWebAuthenticationDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="X509Native.cs" />
+    <Compile Include="Native\X509Native.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ADAL.PCL\ADAL.PCL.csproj">

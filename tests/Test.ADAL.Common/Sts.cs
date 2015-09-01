@@ -83,7 +83,7 @@ namespace Test.ADAL.Common
 
         public bool ValidateAuthority { get; protected set; }
 
-        public string Authority { get; protected set; }
+        public string Authority { get; set; }
 
         public string TenantlessAuthority { get; protected set; }
 

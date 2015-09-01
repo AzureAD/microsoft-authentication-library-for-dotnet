@@ -83,6 +83,7 @@ namespace AdaliOSTestApp
                 tokenBroker.Sts.ValidNonExistingRedirectUri = new Uri("ms-onedrive://com.microsoft.skydrive");
                 tokenBroker.Sts.ValidUserName = "iwuser1@mamcafr.onmicrosoft.com";
                 tokenBroker.Sts.ValidResource = "https://mamcafr-my.sharepoint.com/";
+                tokenBroker.Sts.Authority = tokenBroker.Sts.TenantlessAuthority;
                 string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
                 ReportLabel.Text = token;
             }
