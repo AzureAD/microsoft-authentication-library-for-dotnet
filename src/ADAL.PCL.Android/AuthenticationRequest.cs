@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Android.OS;
-using Java.IO;
 
-namespace com.microsoft.aad.adal
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public class AuthenticationRequest : ISerializable
+    class AuthenticationRequest
     {
         public int RequestId { get; set; }
 
@@ -26,9 +24,7 @@ namespace com.microsoft.aad.adal
         public Guid CorrelationId { get; set; }
 
         public string ExtraQueryParamsAuthentication { get; set; }
-
-        //public PromptBehavior Prompt;
-
+        
         public bool Silent { get; set; }
 
         public string Version { get; set; }
@@ -52,12 +48,5 @@ namespace com.microsoft.aad.adal
             CorrelationId = Guid.Parse(brokerPayload["correlation_id"]);
             Version = brokerPayload["client_version"];
         }
-
-        public void Dispose()
-        {
-
-        }
-
-        public IntPtr Handle { get; }
     }
 }

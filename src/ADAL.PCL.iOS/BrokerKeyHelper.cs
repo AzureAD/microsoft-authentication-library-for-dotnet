@@ -35,13 +35,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal static byte[] GetRawBrokerKey()
         {
-            byte[] brokeyKey = new byte[32];
-            for (int i = 0; i < brokeyKey.Length; i++)
-            {
-                brokeyKey[i] = 69;
-            }
-
-/*            SecRecord record = new SecRecord(SecKind.GenericPassword)
+            byte[] brokerKey = null;
+            SecRecord record = new SecRecord(SecKind.GenericPassword)
             {
                 Generic = NSData.FromString(LocalSettingsContainerName),
                 Service = "Service",
@@ -55,6 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (key == null)
             {
                 AesManaged algo = new AesManaged();
+                algo.GenerateKey();
                 byte[] rawBytes = algo.Key;
                 NSData byteData = NSData.FromArray(rawBytes);
                 record = new SecRecord(SecKind.GenericPassword)
@@ -69,14 +65,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 };
 
                 SecStatusCode code = SecKeyChain.Add(record);
-                brokeyKey = byteData.ToArray();
+                brokerKey = byteData.ToArray();
             }
             else
             {
-                brokeyKey = key.ToArray();
-            }*/
+                brokerKey = key.ToArray();
+            }
         
-            return brokeyKey;
+            return brokerKey;
         }
 
         internal static String DecryptBrokerResponse(String encryptedBrokerResponse)

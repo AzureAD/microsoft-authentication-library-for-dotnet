@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (url.StartsWith(BrokerConstants.BROWSER_EXT_PREFIX))
                 {
                     PlatformPlugin.Logger.Verbose(null, "It is an external website request");
-                   // OpenLinkInBrowser(url);
+                    OpenLinkInBrowser(url, ((Activity)view.Context));
                     view.StopLoading();
                     ((Activity)view.Context).Finish();
                     return true;
@@ -112,6 +112,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 return false;
+            }
+
+            private void OpenLinkInBrowser(string url, Activity activity)
+            {
+                String link = url
+                        .Replace(BrokerConstants.BROWSER_EXT_PREFIX, "https://");
+                Intent intent = new Intent(Intent.ActionView, Android.Net.Uri.Parse(link));
+                activity.StartActivity(intent);
             }
 
             public override void OnPageFinished(WebView view, string url)
