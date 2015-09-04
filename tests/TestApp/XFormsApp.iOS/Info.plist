@@ -23,9 +23,9 @@
     <key>MinimumOSVersion</key>
     <string>6.0</string>
     <key>CFBundleDisplayName</key>
-    <string>AdalXamarinFormsTestApp</string>
+    <string>XFormsApp</string>
     <key>CFBundleIdentifier</key>
-    <string>com.yourcompany.AdalXamarinFormsTestApp</string>
+    <string>com.yourcompany.XFormsApp</string>
     <key>CFBundleVersion</key>
     <string>1.0</string>
     <key>CFBundleIconFiles</key>

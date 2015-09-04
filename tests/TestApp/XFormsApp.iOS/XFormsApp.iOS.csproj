@@ -8,9 +8,9 @@
     <ProjectGuid>{FDED3627-94FD-4886-A540-3AC05380095B}</ProjectGuid>
     <ProjectTypeGuids>{FEACFBD2-3405-455C-9665-78FE426C6842};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Exe</OutputType>
-    <RootNamespace>AdalXamarinFormsTestApp.iOS</RootNamespace>
+    <RootNamespace>XFormsApp.iOS</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <AssemblyName>AdalXamarinFormsTestAppiOS</AssemblyName>
+    <AssemblyName>XFormsAppiOS</AssemblyName>
     <NuGetPackageImportStamp>7603b677</NuGetPackageImportStamp>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -112,9 +112,9 @@
       <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
       <Name>ADAL.PCL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AdalXamarinFormsTestApp\AdalXamarinFormsTestApp.csproj">
+    <ProjectReference Include="..\AdalXamarinFormsTestApp\XFormsApp.csproj">
       <Project>{856ea096-2283-49b6-b2cd-5c603551d150}</Project>
-      <Name>AdalXamarinFormsTestApp</Name>
+      <Name>XFormsApp</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -9,9 +9,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: global::Android.Runtime.ResourceDesignerAttribute("AdalXamarinFormsTestApp.Droid.Resource", IsApplication=true)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("XFormsApp.Droid.Resource", IsApplication=true)]
 
-namespace AdalXamarinFormsTestApp.Droid
+namespace XFormsApp.Droid
 {
 	
 	
@@ -26,9 +26,9 @@ namespace AdalXamarinFormsTestApp.Droid
 		
 		public static void UpdateIdValues()
 		{
-			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Id.agentWebView = global::AdalXamarinFormsTestApp.Droid.Resource.Id.agentWebView;
-			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Layout.WebAuthenticationBroker = global::AdalXamarinFormsTestApp.Droid.Resource.Layout.WebAuthenticationBroker;
-			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.String.ApplicationName = global::AdalXamarinFormsTestApp.Droid.Resource.String.ApplicationName;
+			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Id.agentWebView = global::XFormsApp.Droid.Resource.Id.agentWebView;
+			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Layout.WebAuthenticationBroker = global::XFormsApp.Droid.Resource.Layout.WebAuthenticationBroker;
+			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.String.ApplicationName = global::XFormsApp.Droid.Resource.String.ApplicationName;
 		}
 		
 		public partial class Attribute

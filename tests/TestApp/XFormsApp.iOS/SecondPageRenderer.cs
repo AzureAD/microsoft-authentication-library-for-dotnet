@@ -7,13 +7,13 @@ using Foundation;
 using UIKit;
 using Xamarin.Forms.Platform.iOS;
 using Xamarin.Forms;
-using AdalXamarinFormsTestApp;
-using AdalXamarinFormsTestApp.iOS;
+using XFormsApp;
+using XFormsApp.iOS;
 using System.Drawing;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 [assembly: ExportRenderer(typeof(SecondPage), typeof(SecondPageRenderer))]
-namespace AdalXamarinFormsTestApp.iOS
+namespace XFormsApp.iOS
 {
     class SecondPageRenderer : PageRenderer
     {

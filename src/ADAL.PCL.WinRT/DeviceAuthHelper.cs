@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (challengeData.ContainsKey("CertAuthorities"))
             {
-
+                PlatformPlugin.Logger.Verbose(null, "Looking up certificate matching authorities:" + challengeData["CertAuthorities"]);
                 string[] certAuthorities = challengeData["CertAuthorities"].Split(';');
                 foreach (var certAuthority in certAuthorities)
                 {
@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     string distinguishedIssuerName = dNames[dNames.Length - 1];
                     for (int i = dNames.Length - 2; i >= 0; i--)
                     {
-                        distinguishedIssuerName = distinguishedIssuerName.Insert(0, dNames[i] + " + ");
+                        distinguishedIssuerName = distinguishedIssuerName.Insert(0, dNames[i].Trim() + " + ");
                     }
 
                     query.IssuerName = distinguishedIssuerName;
@@ -87,15 +87,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
+                PlatformPlugin.Logger.Verbose(null, "Looking up certificate matching thumbprint:" + challengeData["CertThumbprint"]);
                 query.Thumbprint = HexStringToByteArray(challengeData["CertThumbprint"]);
                 certificates = await CertificateStores.FindAllAsync(query);
             }
 
             if (certificates == null || certificates.Count == 0)
             {
-                throw new FileNotFoundException(
-                    string.Format("Cert with thumbprint: '{0}' not found in local machine cert store.",
-                        challengeData["CertThumbprint"]));
+                throw new FileNotFoundException("Certificate not found in local machine cert store");
             }
 
             return certificates[0];
@@ -119,12 +118,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private int GetHexVal(char hex)
         {
             int val = (int)hex;
-            //For uppercase A-F letters:
             return val - (val < 58 ? 48 : 55);
-            //For lowercase a-f letters:
-            //return val - (val < 58 ? 48 : 87);
-            //Or the two combined, but a bit slower:
-            //return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
         }
     }
 }

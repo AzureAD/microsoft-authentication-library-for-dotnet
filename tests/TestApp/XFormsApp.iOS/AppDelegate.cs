@@ -7,7 +7,7 @@ using UIKit;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Xamarin.Forms;
 
-namespace AdalXamarinFormsTestApp.iOS
+namespace XFormsApp.iOS
 {
     // The UIApplicationDelegate for the application. This class is responsible for launching the 
     // User Interface of the application, as well as listening (and optionally responding) to 

@@ -9,8 +9,8 @@
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AdalXamarinFormsTestApp.Droid</RootNamespace>
-    <AssemblyName>AdalXamarinFormsTestApp.Droid</AssemblyName>
+    <RootNamespace>XFormsApp.Droid</RootNamespace>
+    <AssemblyName>XFormsApp.Droid</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <AndroidApplication>true</AndroidApplication>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
@@ -101,9 +101,9 @@
       <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
       <Name>ADAL.PCL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AdalXamarinFormsTestApp\AdalXamarinFormsTestApp.csproj">
+    <ProjectReference Include="..\AdalXamarinFormsTestApp\XFormsApp.csproj">
       <Project>{856ea096-2283-49b6-b2cd-5c603551d150}</Project>
-      <Name>AdalXamarinFormsTestApp</Name>
+      <Name>XFormsApp</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         string distinguishedIssuerName = dNames[dNames.Length - 1];
                         for (int i = dNames.Length - 2; i >= 0; i--)
                         {
-                            distinguishedIssuerName = distinguishedIssuerName.Insert(0, dNames[i] + " + ");
+                            distinguishedIssuerName = distinguishedIssuerName.Insert(0, dNames[i].Trim() + " + ");
                         }
 
                         signingCert = certCollection.Find(X509FindType.FindByIssuerDistinguishedName,

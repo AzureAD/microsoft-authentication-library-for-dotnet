@@ -8,11 +8,11 @@ using Android.Widget;
 using Android.OS;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Xamarin.Forms;
-using AdalXamarinFormsTestApp;
+using XFormsApp;
 
-namespace AdalXamarinFormsTestApp.Droid
+namespace XFormsApp.Droid
 {
-    [Activity(Label = "AdalXamarinFormsTestApp", Icon = "@drawable/icon", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    [Activity(Label = "XFormsApp", Icon = "@drawable/icon", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsApplicationActivity
     {
         protected override void OnCreate(Bundle bundle)

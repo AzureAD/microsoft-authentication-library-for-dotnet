@@ -5,7 +5,7 @@ using System.Linq;
 using Foundation;
 using UIKit;
 
-namespace AdalXamarinFormsTestApp.iOS
+namespace XFormsApp.iOS
 {
     public class Application
     {
