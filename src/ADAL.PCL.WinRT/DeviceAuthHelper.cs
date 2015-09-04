@@ -61,20 +61,37 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private async Task<Certificate> FindCertificate(IDictionary<string, string> challengeData)
         {
             CertificateQuery query = new CertificateQuery();
+            IReadOnlyList<Certificate> certificates = null;
+
             if (challengeData.ContainsKey("CertAuthorities"))
             {
-                query.IssuerName = challengeData["CertAuthorities"];
+
+                string[] certAuthorities = challengeData["CertAuthorities"].Split(';');
+                foreach (var certAuthority in certAuthorities)
+                {
+                    //reverse the tokenized string and replace "," with " + "
+                    string[] dNames = certAuthority.Split(new[] { "," }, StringSplitOptions.None);
+                    string distinguishedIssuerName = dNames[dNames.Length - 1];
+                    for (int i = dNames.Length - 2; i >= 0; i--)
+                    {
+                        distinguishedIssuerName = distinguishedIssuerName.Insert(0, dNames[i] + " + ");
+                    }
+
+                    query.IssuerName = distinguishedIssuerName;
+                    certificates = await CertificateStores.FindAllAsync(query);
+                    if (certificates.Count > 0)
+                    {
+                        break;
+                    }
+                }
             }
             else
             {
                 query.Thumbprint = HexStringToByteArray(challengeData["CertThumbprint"]);
+                certificates = await CertificateStores.FindAllAsync(query);
             }
 
-            IReadOnlyList<Certificate> certificates = await CertificateStores.FindAllAsync(query);
-
-            
-
-            if (certificates.Count == 0)
+            if (certificates == null || certificates.Count == 0)
             {
                 throw new FileNotFoundException(
                     string.Format("Cert with thumbprint: '{0}' not found in local machine cert store.",
