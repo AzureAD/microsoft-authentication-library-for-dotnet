@@ -120,13 +120,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
                     else
                     {
+                        await this.PreTokenRequest();
+                        
+                        // check if broker app is required for authentication.
                         if (this.BrokerInvocationRequired())
                         {
-                            //this.up
+                            resultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters);
                         }
                         else
                         {
-                            await this.PreTokenRequest();
                             resultEx = await this.SendTokenRequestAsync();
                         }
                     }

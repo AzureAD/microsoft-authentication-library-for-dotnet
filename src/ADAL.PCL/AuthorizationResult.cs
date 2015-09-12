@@ -81,10 +81,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     this.Code = response[TokenResponseClaim.Code];
                 }
+                else if (webAuthenticationResult.StartsWith("msauth://"))
+                {
+                    this.Code = webAuthenticationResult;
+                }
                 else if (response.ContainsKey(TokenResponseClaim.Error))
                 {
                     this.Error = response[TokenResponseClaim.Error];
-                    this.ErrorDescription = response.ContainsKey(TokenResponseClaim.ErrorDescription) ? response[TokenResponseClaim.ErrorDescription] : null;
+                    this.ErrorDescription = response.ContainsKey(TokenResponseClaim.ErrorDescription)
+                        ? response[TokenResponseClaim.ErrorDescription]
+                        : null;
                     this.Status = AuthorizationStatus.ProtocolError;
                 }
                 else

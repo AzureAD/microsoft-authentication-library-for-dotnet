@@ -47,15 +47,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string base64EncodedString = Base64UrlEncoder.Encode(BrokerKeyHelper.GetRawBrokerKey());
             brokerPayload["broker_key"] = base64EncodedString;
 
-            NSUrl url = new NSUrl("msauth://broker?" + brokerPayload.ToQueryParameter());
-            DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url));
+            if (brokerPayload.ContainsKey("broker_install_url"))
+            {
+                string url = brokerPayload["broker_install_url"];
+                Dictionary<string,string> keyValue = EncodingHelper.ParseKeyValueList(url, '&', false, null);
+
+            }
+            else
+            {
+                NSUrl url = new NSUrl("msauth://broker?" + brokerPayload.ToQueryParameter());
+                DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url));
+            }
+
             await brokerResponseReady.WaitAsync();
             return ProcessBrokerResponse();
-        }
-
-        public Task<AuthenticationResultEx> AcquireTokenSilentUsingBroker(IDictionary<string, string> brokerPayload)
-        {
-            throw new NotImplementedException();
         }
 
         private AuthenticationResultEx ProcessBrokerResponse()
@@ -88,7 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 string expectedHash = responseDictionary["hash"];
                 string encryptedResponse = responseDictionary["response"];
-                string decryptedResponse = BrokerKeyHelper.DecryptBrokerResponse(encryptedResponse);
+                string decryptedResponse = BrokerKeyHelper.DecryptBrokerResponse(encryptedResponse, responseDictionary.ContainsKey("broker_protocol_version"));
                 string responseActualHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(decryptedResponse);
                 byte[] rawHash = Convert.FromBase64String(responseActualHash);
                 string hash  = BitConverter.ToString(rawHash);

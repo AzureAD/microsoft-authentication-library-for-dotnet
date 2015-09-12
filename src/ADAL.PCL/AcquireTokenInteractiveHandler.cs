@@ -219,9 +219,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected override bool BrokerInvocationRequired()
         {
-           return this.authorizationResult != null 
-               && !string.IsNullOrEmpty(this.authorizationResult.Code) 
-               && this.authorizationResult.Code.StartsWith("msauth://");
+            if (this.authorizationResult != null
+                && !string.IsNullOrEmpty(this.authorizationResult.Code)
+                && this.authorizationResult.Code.StartsWith("msauth://"))
+            {
+                this.brokerParameters["broker_install_url"] = this.authorizationResult.Code;
+                return true;
+            }
+
+            return false;
         }
     }
 }

@@ -39,10 +39,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             SecRecord record = new SecRecord(SecKind.GenericPassword)
             {
                 Generic = NSData.FromString(LocalSettingsContainerName),
-                Service = "Service",
-                Account = "brokerKey",
-                Label = "BrokerKeyLabel",
-                Comment = "Broker Comment",
+                Service = "Broker Key Service",
+                Account = "Broker Key Account",
+                Label = "Broker Key Label",
+                Comment = "Broker Key Comment",
                 Description = "Storage for broker key"
             };
 
@@ -56,10 +56,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 record = new SecRecord(SecKind.GenericPassword)
                 {
                     Generic = NSData.FromString(LocalSettingsContainerName),
-                    Service = "Service",
-                    Account = "brokerKey",
-                    Label = "BrokerKeyLabel",
-                    Comment = "Broker Comment",
+                    Service = "Broker Key Service",
+                    Account = "Broker Key Account",
+                    Label = "Broker Key Label",
+                    Comment = "Broker Key Comment",
                     Description = "Storage for broker key",
                     ValueData = byteData
                 };
@@ -74,15 +74,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         
             return brokerKey;
         }
-
-        internal static String DecryptBrokerResponse(String encryptedBrokerResponse)
+        
+        internal static String DecryptBrokerResponse(String encryptedBrokerResponse, bool useKey)
         {
             byte[] outputBytes = Base64UrlEncoder.DecodeBytes(encryptedBrokerResponse);
             string plaintext = string.Empty;
             
             using (MemoryStream memoryStream = new MemoryStream(outputBytes))
             {
-                AesManaged algo = GetCryptoAlgorithm(GetRawBrokerKey());
+                byte[] key = new byte[256];
+                if (useKey)
+                {
+                    key = GetRawBrokerKey();
+                }
+
+                AesManaged algo = GetCryptoAlgorithm(key);
                 using (CryptoStream cryptoStream = new CryptoStream(memoryStream, algo.CreateDecryptor(), CryptoStreamMode.Read))
                 {
                     using (StreamReader srDecrypt = new StreamReader(cryptoStream))
@@ -94,11 +100,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return plaintext;
         }
-
-        private static AesManaged GetCryptoAlgorithm()
-        {
-            return GetCryptoAlgorithm(null);
-        }
+        
         private static AesManaged GetCryptoAlgorithm(byte[] key)
         {
             AesManaged algorithm = new AesManaged();

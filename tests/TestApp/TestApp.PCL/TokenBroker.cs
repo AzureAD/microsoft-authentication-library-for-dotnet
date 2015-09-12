@@ -92,7 +92,7 @@ namespace TestApp.PCL
             try
             {
                 context = new AuthenticationContext(Sts.Authority, true);
-                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, Sts.ValidNonExistingRedirectUri, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId),"nux=1");
+                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, Sts.ValidNonExistingRedirectUri, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId), "nux=1&slice=testslice&UxOptIn=true");
 
                 return result.AccessToken;
             }

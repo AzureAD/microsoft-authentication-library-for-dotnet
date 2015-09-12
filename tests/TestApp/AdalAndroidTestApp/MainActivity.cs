@@ -79,7 +79,7 @@ namespace AdalAndroidTestApp
             TokenBroker tokenBroker = new TokenBroker();
             tokenBroker.Sts = new MobileAppSts();
            // tokenBroker.Sts.ValidClientId = 
-
+            tokenBroker.Sts.ValidUserName = "test@adalobjc.onmicrosoft.com";
             string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
             this.accessTokenTextView.Text = token;
         }
