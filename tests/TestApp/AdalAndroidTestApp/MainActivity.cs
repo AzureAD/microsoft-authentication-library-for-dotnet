@@ -50,6 +50,10 @@ namespace AdalAndroidTestApp
             clearCacheButton.Click += clearCacheButton_Click;
 
             this.accessTokenTextView = FindViewById<TextView>(Resource.Id.accessTokenTextView);
+            
+            EditText email = FindViewById<EditText>(Resource.Id.email);
+            email.Text = new MobileAppSts().ValidUserName;
+
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
@@ -78,8 +82,9 @@ namespace AdalAndroidTestApp
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
             tokenBroker.Sts = new MobileAppSts();
-           // tokenBroker.Sts.ValidClientId = 
-            tokenBroker.Sts.ValidUserName = "test@adalobjc.onmicrosoft.com";
+            // tokenBroker.Sts.ValidClientId = 
+            EditText email = FindViewById<EditText>(Resource.Id.email);
+            tokenBroker.Sts.ValidUserName = email.Text;
             string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
             this.accessTokenTextView.Text = token;
         }
