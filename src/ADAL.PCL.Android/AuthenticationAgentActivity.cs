@@ -89,11 +89,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
 
-            public override bool ShouldOverrideUrlLoading(WebView view, String url)
+            public override bool ShouldOverrideUrlLoading(WebView view, string url)
             {
                 if (url.StartsWith(BrokerConstants.BROWSER_EXT_PREFIX))
                 {
-                    PlatformPlugin.Logger.Verbose(null, "It is an external website request");
+                    PlatformPlugin.Logger.Verbose(null, "It is browser launch request");
                     OpenLinkInBrowser(url, ((Activity)view.Context));
                     view.StopLoading();
                     ((Activity)view.Context).Finish();

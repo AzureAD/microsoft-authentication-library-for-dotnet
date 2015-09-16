@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Android.Accounts;
 using Android.App;
 using Android.Content;
+using Java.IO;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -65,7 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // BROKER flow intercepts here
             // cache and refresh call happens through the authenticator service
             if (mBrokerProxy.VerifyUser(request.LoginHint,
-                    request.UserId))
+                request.UserId))
             {
                 PlatformPlugin.Logger.Verbose(null, "It switched to broker for context: " + mContext.PackageName);
                 request.BrokerAccountName = request.LoginHint;
@@ -112,7 +113,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (brokerPayload.ContainsKey("silent_broker_flow"))
                 {
-                    throw new AdalSilentTokenAcquisitionException();    
+                    throw new AdalSilentTokenAcquisitionException();
                 }
 
                 // onActivityResult will receive the response
@@ -124,8 +125,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     try
                     {
                         PlatformPlugin.Logger.Verbose(null, "Calling activity pid:" + Android.OS.Process.MyPid()
-                                      + " tid:" + Android.OS.Process.MyTid() + "uid:"
-                                      + Android.OS.Process.MyUid());
+                                                            + " tid:" + Android.OS.Process.MyTid() + "uid:"
+                                                            + Android.OS.Process.MyUid());
                         platformParams.CallerActivity.StartActivityForResult(brokerIntent, 1001);
                     }
                     catch (ActivityNotFoundException e)
@@ -134,25 +135,34 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
                 }
             }
-        }
-
-        public Task<AuthenticationResultEx> AcquireTokenSilentUsingBroker(IDictionary<string, string> brokerPayload)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static void SetBrokerResult(Intent data)
-        {
-            string accessToken = data.GetStringExtra("account.access.token");
-            DateTimeOffset expiresOn = BrokerProxy.ConvertFromTimeT(data.GetLongExtra("account.expiredate", 0));
-            UserInfo userInfo = BrokerProxy.GetUserInfoFromBrokerResult(data.Extras);
-            resultEx = new AuthenticationResultEx
+            else
             {
-              Result  = new AuthenticationResult("Bearer", accessToken, expiresOn)
+                throw new AdalException(AdalErrorEx.NoBrokerAccountFound, "Add requested account as a Workplace account via Settings->Accounts or set SkipBroker=false.");
+            }
+        }
+        
+        internal static void SetBrokerResult(Intent data, int resultCode)
+        {
+            if (resultCode != 2004)
+            {
+                resultEx = new AuthenticationResultEx
                 {
-                    UserInfo = userInfo
-                }
-            };
+                    Exception = new AdalException(AdalError.AuthenticationCanceled, AdalErrorMessage.AuthenticationCanceled)
+                };
+            }
+            else
+            {
+                string accessToken = data.GetStringExtra("account.access.token");
+                DateTimeOffset expiresOn = BrokerProxy.ConvertFromTimeT(data.GetLongExtra("account.expiredate", 0));
+                UserInfo userInfo = BrokerProxy.GetUserInfoFromBrokerResult(data.Extras);
+                resultEx = new AuthenticationResultEx
+                {
+                    Result = new AuthenticationResult("Bearer", accessToken, expiresOn)
+                    {
+                        UserInfo = userInfo
+                    }
+                };
+            }
             readyForResponse.Release();
         }
     }

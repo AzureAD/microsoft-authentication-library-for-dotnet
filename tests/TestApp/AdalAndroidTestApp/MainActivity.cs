@@ -58,12 +58,6 @@ namespace AdalAndroidTestApp
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
-            foreach (string key in data.Extras.KeySet())
-            {
-                Object value = data.Extras.Get(key);
-                Console.WriteLine(key + " - " + value);
-            }
-
             base.OnActivityResult(requestCode, resultCode, data);
             AuthenticationAgentContinuationHelper.SetAuthenticationAgentContinuationEventArgs(requestCode, resultCode, data);
         }
@@ -73,8 +67,24 @@ namespace AdalAndroidTestApp
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
             tokenBroker.Sts = new MobileAppSts();
-            string token = await tokenBroker.GetTokenSilentAsync(new PlatformParameters(this));
-            this.accessTokenTextView.Text = token;
+            EditText email = FindViewById<EditText>(Resource.Id.email);
+            tokenBroker.Sts.ValidUserName = email.Text;
+            string value = null;
+            try
+            {
+                value = await tokenBroker.GetTokenSilentAsync(new PlatformParameters(this));
+            }
+            catch (Java.Lang.Exception ex)
+            {
+                throw new Exception(ex.Message + "\n" + ex.StackTrace);
+            }
+            catch (Exception exc)
+            {
+                value = exc.Message;
+            }
+
+            this.accessTokenTextView.Text = value;
+
         }
 
         private async void acquireTokenInteractiveButton_Click(object sender, EventArgs e)
@@ -82,16 +92,29 @@ namespace AdalAndroidTestApp
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
             tokenBroker.Sts = new MobileAppSts();
-            // tokenBroker.Sts.ValidClientId = 
             EditText email = FindViewById<EditText>(Resource.Id.email);
             tokenBroker.Sts.ValidUserName = email.Text;
-            string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
-            this.accessTokenTextView.Text = token;
+            string value = null;
+            try
+            {
+                value = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
+            }
+            catch (Java.Lang.Exception ex)
+            {
+                throw new Exception(ex.Message + "\n" + ex.StackTrace);
+            }
+            catch (Exception exc)
+            {
+                value = exc.Message;
+            }
+
+            this.accessTokenTextView.Text = value;
         }
 
         private async void clearCacheButton_Click(object sender, EventArgs e)
         {
             TokenCache.DefaultShared.Clear();
+            this.accessTokenTextView.Text = "Cache cleared";
         }
     }
 }

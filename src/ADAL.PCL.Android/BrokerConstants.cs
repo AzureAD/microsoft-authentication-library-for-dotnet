@@ -128,21 +128,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
          * Apk packagename that will install AD-Authenticator. It is used to
          * query if this app installed or not from package manager.
          */
-        public const string PACKAGE_NAME = "com.microsoft.windowsintune.companyportal";
+        public const string PackageName = "com.microsoft.windowsintune.companyportal";
 
         /**
          * Signature info for Intune Company portal app that installs authenticator
          * component.
          */
-        public const string SIGNATURE = "1L4Z9FJCgn5c0VLhyAxC5O9LdlE=";
+        //TODO - revert to original signature
+        public const string Signature = "IcB5PxIyvbLkbFVtBI/itkW/ejk=";//"1L4Z9FJCgn5c0VLhyAxC5O9LdlE=";
         
         /**
          * Signature info for Azure authenticator app that installs authenticator
          * component.
          */
-        public const string AZURE_AUTHENTICATOR_APP_SIGNATURE = "ho040S3ffZkmxqtQrSwpTVOn9r0=";
-        
-        public const string AZURE_AUTHENTICATOR_APP_PACKAGE_NAME = "com.azure.authenticator";
+        public const string AzureAuthenticatorAppSignature = "ho040S3ffZkmxqtQrSwpTVOn9r0=";
+
+        public const string AzureAuthenticatorAppPackageName = "com.azure.authenticator";
 
         public const string CLIENT_TLS_REDIRECT = "urn:http-auth:PKeyAuth";
 

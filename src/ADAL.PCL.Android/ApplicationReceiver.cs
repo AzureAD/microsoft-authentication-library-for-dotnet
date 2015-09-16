@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (intent.Data
                             .ToString()
                             .Equals(
-                                    "package:" + BrokerConstants.AZURE_AUTHENTICATOR_APP_PACKAGE_NAME, StringComparison.OrdinalIgnoreCase))
+                                    "package:" + BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase))
                     {
                         PlatformPlugin.Logger.Verbose(null, TAG + " - Message is related to the broker");
                        // string request = GetInstallRequestInthisApp(context);

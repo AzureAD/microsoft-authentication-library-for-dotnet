@@ -28,10 +28,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AuthorizationResult authorizationResult = null;
             switch ((int)resultCode)
             {
-                case (int)Result.Ok: authorizationResult= new AuthorizationResult(AuthorizationStatus.Success, data.GetStringExtra("ReturnedUrl")); break;
-                case (int)Result.Canceled: authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null); break;
-                case 2004: BrokerHelper.SetBrokerResult(data); break;
-                default: authorizationResult = new AuthorizationResult(AuthorizationStatus.UnknownError, null); break;
+                case (int)Result.Ok:
+                    authorizationResult = new AuthorizationResult(AuthorizationStatus.Success, data.GetStringExtra("ReturnedUrl"));
+                    break;
+
+                case (int)Result.Canceled:
+                    authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+                    break;
+
+                case 2001:
+                case 2004:
+                    BrokerHelper.SetBrokerResult(data, (int)resultCode);
+                    break;
+
+                default:
+                    authorizationResult = new AuthorizationResult(AuthorizationStatus.UnknownError, null);
+                    break;
             }
 
             if ((int) resultCode != 2004)

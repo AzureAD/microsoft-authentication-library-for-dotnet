@@ -133,6 +133,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         }
                     }
 
+                    //broker token acquisition failed
+                    if (resultEx != null && resultEx.Exception != null)
+                    {
+                        throw resultEx.Exception;
+                    }
+
                     this.PostTokenRequest(resultEx);
                     if (this.StoreToCache)
                     {

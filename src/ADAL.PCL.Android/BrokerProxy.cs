@@ -41,34 +41,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     class BrokerProxy
     {
         private const string RedirectUriScheme = "msauth";
-        private const string TAG = "BrokerProxy";
-
         private Context mContext;
-
         private AccountManager mAcctManager;
-        
         private string mBrokerTag;
-
-        private const string KEY_ACCOUNT_LIST_DELIM = "|";
-
-        private const string KEY_SHARED_PREF_ACCOUNT_LIST = "com.microsoft.aad.adal.account.list";
-
-        private const string KEY_APP_ACCOUNTS_FOR_TOKEN_REMOVAL = "AppAccountsForTokenRemoval";
-
         public const string DATA_USER_INFO = "com.microsoft.workaccount.user.info";
-
-        private const int ACCOUNT_MANAGER_ERROR_CODE_BAD_AUTHENTICATION = 9;
+        
 
         public BrokerProxy()
         {
-            mBrokerTag = BrokerConstants.SIGNATURE;
+            mBrokerTag = BrokerConstants.Signature;
         }
 
         public BrokerProxy(Context ctx)
         {
             mContext = ctx;
             mAcctManager = AccountManager.Get(mContext);
-            mBrokerTag = BrokerConstants.SIGNATURE;
+            mBrokerTag = BrokerConstants.Signature;
         }
 
         public bool CanSwitchToBroker()
@@ -84,9 +72,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // 5- account exists
             return  VerifyManifestPermissions()
                     && CheckAccount(mAcctManager, "", "")
-                    && !packageName.Equals(BrokerConstants.PACKAGE_NAME, StringComparison.OrdinalIgnoreCase)
+                    && !packageName.Equals(BrokerConstants.PackageName, StringComparison.OrdinalIgnoreCase)
                     && !packageName
-                            .Equals(BrokerConstants.AZURE_AUTHENTICATOR_APP_PACKAGE_NAME, StringComparison.OrdinalIgnoreCase)
+                            .Equals(BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase)
                     && VerifyAuthenticator(mAcctManager);
         }
         
@@ -424,6 +412,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             brokerOptions.PutInt("com.microsoft.aad.adal:RequestId", request.RequestId);
             brokerOptions.PutString(BrokerConstants.ACCOUNT_AUTHORITY,
                     request.Authority);
+            brokerOptions.PutInt("xamarin", 1);
             brokerOptions.PutString(BrokerConstants.ACCOUNT_RESOURCE,
                     request.Resource);
             string s = GetRedirectUriForBroker();
@@ -473,7 +462,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     // Authenticator installed from Company portal
                     // This supports only one account
                     if (authenticator.PackageName
-                            .Equals(BrokerConstants.PACKAGE_NAME, StringComparison.OrdinalIgnoreCase))
+                            .Equals(BrokerConstants.PackageName, StringComparison.OrdinalIgnoreCase))
                     {
                         // Adal should not connect if given username does not match
                         if (accountList != null && accountList.Length > 0)
@@ -487,9 +476,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         // versions
                     }
                     else if (authenticator.PackageName
-                          .Equals(BrokerConstants.AZURE_AUTHENTICATOR_APP_PACKAGE_NAME, StringComparison.OrdinalIgnoreCase)
+                          .Equals(BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase)
                           || authenticator.PackageName
-                                  .Equals(BrokerConstants.PACKAGE_NAME, StringComparison.OrdinalIgnoreCase))
+                                  .Equals(BrokerConstants.PackageName, StringComparison.OrdinalIgnoreCase))
                     {
 
                         // Existing broker logic only connects to broker for token
@@ -545,17 +534,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private bool HasSupportToAddUserThroughBroker()
         {
-/*                        Intent intent = new Intent();
-                        intent.SetPackage(BrokerConstants.AZURE_AUTHENTICATOR_APP_PACKAGE_NAME);
-                        intent.SetClassName(BrokerConstants.AZURE_AUTHENTICATOR_APP_PACKAGE_NAME,
-                                BrokerConstants.AZURE_AUTHENTICATOR_APP_PACKAGE_NAME
+                        Intent intent = new Intent();
+                        intent.SetPackage(BrokerConstants.AzureAuthenticatorAppPackageName);
+                        intent.SetClassName(BrokerConstants.AzureAuthenticatorAppPackageName,
+                                BrokerConstants.AzureAuthenticatorAppPackageName
                                         + ".ui.AccountChooserActivity");
                         PackageManager packageManager = mContext.PackageManager;
                         IList<ResolveInfo> infos = packageManager.QueryIntentActivities(intent, 0);
-                        return infos.Count > 0;*/
-
-            var descriptions = mAcctManager.GetAuthenticatorTypes();
-            return descriptions.Where(d => d.PackageName == "com.azure.authenticator").FirstOrDefault() != null;
+                        return infos.Count > 0;
             
         }
 
@@ -582,7 +568,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     // Company portal(Intune) app and Azure authenticator app
                     // have authenticator.
-                    if (tag == mBrokerTag || tag == BrokerConstants.AZURE_AUTHENTICATOR_APP_SIGNATURE)
+                    if (tag == mBrokerTag || tag == BrokerConstants.AzureAuthenticatorAppSignature)
                     {
                         return true;
                     }

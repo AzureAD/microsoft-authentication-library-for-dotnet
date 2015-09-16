@@ -89,5 +89,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return serializedObject;
         }
+
+        internal Exception Exception { get; set; }
     }
 }
