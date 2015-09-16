@@ -43,9 +43,17 @@ namespace XFormsApp
         {
             this.result.Text = string.Empty;
             tokenBroker.Sts = new MobileAppSts();
-            // tokenBroker.Sts.ValidClientId = 
             tokenBroker.Sts.ValidUserName = "e2e@adalobjc.onmicrosoft.com";
-            string token = await tokenBroker.GetTokenInteractiveAsync(Paramters);
+
+            string token = String.Empty;
+            try
+            {
+                token = await tokenBroker.GetTokenInteractiveAsync(Paramters);
+            }
+            catch (Exception exception)
+            {
+                token = exception.Message;
+            }
             this.result.Text = token;
         }
     }

@@ -36,6 +36,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentNullException("userCredential");
             }
 
+            // We enable ADFS support only when it makes sense to do so
+            if (authenticator.AuthorityType == AuthorityType.ADFS)
+            {
+                this.SupportADFS = true;
+            }
+
             this.userCredential = userCredential;
         }
 
@@ -84,7 +90,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected override async Task PreTokenRequest()
         {
             await base.PreTokenRequest();
-            if (this.userAssertion == null)
+            if (this.PerformUserRealmDiscovery())
             {
                 UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, this.userCredential.UserName, this.CallState);
                 PlatformPlugin.Logger.Information(this.CallState, string.Format("User with hash '{0}' detected as '{1}'", PlatformPlugin.CryptographyHelper.CreateSha256Hash(this.userCredential.UserName), userRealmResponse.AccountType));
@@ -96,10 +102,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         throw new AdalException(AdalError.MissingFederationMetadataUrl);
                     }
 
-                    Uri wsTrustUrl = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, this.userCredential.UserAuthType, this.CallState);
-                    PlatformPlugin.Logger.Information(this.CallState, string.Format("WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustUrl, userRealmResponse.FederationMetadataUrl));
+                    WsTrustAddress wsTrustAddress = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, this.userCredential.UserAuthType, this.CallState);
+                    PlatformPlugin.Logger.Information(this.CallState, string.Format("WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustAddress.Uri, userRealmResponse.FederationMetadataUrl));
 
-                    WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustUrl, this.userCredential, this.CallState);
+                    WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, this.userCredential, this.CallState);
                     PlatformPlugin.Logger.Information(this.CallState, string.Format("Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType));
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
@@ -136,6 +142,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             // To request id_token in response
             requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
+        }
+        
+        private bool PerformUserRealmDiscovery()
+        {
+            // To decide whether user realm discovery is needed or not
+            // we should also consider if that is supported by the authority
+            return this.userAssertion == null &&
+                   this.SupportADFS == false;
         }
     }
 }

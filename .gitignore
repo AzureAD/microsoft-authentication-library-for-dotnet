@@ -6,6 +6,7 @@ src/ADAL.NET.WindowsForms/obj/
 src/ADAL.WinRT/obj/
 src/ADAL.WinPhoneSL/obj/
 src/ADAL.WinRT/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
+src/ADAL.WinPhoneSL/obj/
 tests/Test.ADAL.NET.Friend/obj/
 tests/Test.ADAL.NET.Unit/obj/
 tests/Test.ADAL.NET.WindowsForms/obj/
@@ -46,4 +47,3 @@ tests/TestApp/AdalXamarinFormsTestApp/obj/
 tests/TestApp/XFormsApp.Droid/obj/
 tests/TestApp/XFormsApp.iOS/obj/
 tests/TestApp/XFormsApp/obj/
-tests/TestApp/AdalAndroidTestApp/Resources/Resource.Designer.cs

@@ -26,7 +26,9 @@ namespace Test.ADAL.Common
         Unknown,
         ADFS,
         AAD,
-        AADFederatedWithADFS3
+        AADFederatedWithADFS3,
+        AdfsPasswordGrant,
+        AadPasswordGrant
     }
 
     public static class StsFactory
@@ -44,6 +46,12 @@ namespace Test.ADAL.Common
                     break;
                 case StsType.AAD:
                     sts = new AadSts();
+                    break;
+                case StsType.AdfsPasswordGrant:
+                    sts = new AdfsPasswordGrantSts();
+                    break;
+                case StsType.AadPasswordGrant:
+                    sts = new AadPasswordGrantSts();
                     break;
                 default:
                     throw new ArgumentException(string.Format("Unsupported STS type '{0}'", stsType));
@@ -180,6 +188,38 @@ namespace Test.ADAL.Common
 
         public string MsaUserName { get; protected set; }
         public string MsaPassword { get; protected set; }
+    }
+    
+    class AadPasswordGrantSts : Sts
+    {
+        public AadPasswordGrantSts()
+        {
+            this.ValidateAuthority = true;
+            
+            this.TenantlessAuthority = "https://login.windows.net/common";
+            this.Authority = this.TenantlessAuthority;
+            this.Type = StsType.AAD;
+            
+            this.ValidClientId = "1950a258-227b-4e31-a9cf-717495945fc2";
+            this.ValidUserName = "<REPLACE>";
+            this.ValidPassword = "<REPLACE>";
+            this.ValidResource = "https://graph.windows.net";
+        }
+    }
+    
+    class AdfsPasswordGrantSts : Sts
+    {
+        public AdfsPasswordGrantSts()
+        {
+            this.Authority = "https://identity.contoso.com/adfs/ls";
+            this.Type = StsType.ADFS;
+            this.ValidateAuthority = false;
+            this.ValidClientId = "oic.resource.owner.flow";
+            this.ValidDefaultRedirectUri = new Uri("oic://resource-owner/flow");
+            this.ValidUserName = @"somedomain\username";
+            this.ValidPassword = "Password123";
+            this.ValidResource = "https://management.core.contoso.com/";
+        }
     }
 
     class AadSts : Sts

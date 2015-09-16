@@ -27,6 +27,7 @@ namespace XFormsApp.Droid
             SecondPage page = e.NewElement as SecondPage;
 
             var activity = this.Context as Activity;
+            
             page.Paramters = new PlatformParameters(activity);
         }
     }
