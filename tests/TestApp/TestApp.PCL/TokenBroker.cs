@@ -91,9 +91,8 @@ namespace TestApp.PCL
         {
             try
             {
-                context = new AuthenticationContext(Sts.Authority, true);
-                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, Sts.ValidNonExistingRedirectUri, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId), "nux=1&slice=testslice&UxOptIn=true");
 
+                var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidNonExistingRedirectUri, parameters, new UserIdentifier(sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
                 return result.AccessToken;
             }
             catch (Exception ex)

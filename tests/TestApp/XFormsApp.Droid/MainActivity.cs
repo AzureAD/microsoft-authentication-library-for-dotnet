@@ -10,6 +10,7 @@ using Android.OS;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Xamarin.Forms;
 using XFormsApp;
+using Android.Content;
 
 namespace XFormsApp.Droid
 {

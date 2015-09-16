@@ -41,9 +41,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     Generic = NSData.FromString(LocalSettingsContainerName),
                     Accessible = SecAccessible.Always,
-                    Service = "Service",
-                    Account = "Account"
-
+                    Service = "ADAL.PCL.iOS Service",
+                    Account = "ADAL.PCL.iOS cache",
+                    Label = "ADAL.PCL.iOS Label",
+                    Comment = "ADAL.PCL.iOS Cache",
+                    Description = "Storage for cache"
                 };
 
                 var match = SecKeyChain.QueryAsRecord(rec, out res);
@@ -71,7 +73,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     var s = new SecRecord(SecKind.GenericPassword)
                     {
-                        Generic = NSData.FromString(LocalSettingsContainerName)
+                        Generic = NSData.FromString(LocalSettingsContainerName),
+	                Accessible = SecAccessible.Always,
+                        Service = "ADAL.PCL.iOS Service",
+                        Account = "ADAL.PCL.iOS cache",
+                        Label = "ADAL.PCL.iOS Label",
+                        Comment = "ADAL.PCL.iOS Cache",
+                        Description = "Storage for cache"
                     };
 
                     var err = SecKeyChain.Remove(s);
