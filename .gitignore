@@ -47,3 +47,4 @@ tests/TestApp/AdalXamarinFormsTestApp/obj/
 tests/TestApp/XFormsApp.Droid/obj/
 tests/TestApp/XFormsApp.iOS/obj/
 tests/TestApp/XFormsApp/obj/
+.nuget/NuGet.Config
