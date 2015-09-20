@@ -112,6 +112,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     return true;
                 }
 
+                if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
+                {
+                    this.Finish(view, url);
+                    return true;
+                }
+
                 return false;
             }
 
