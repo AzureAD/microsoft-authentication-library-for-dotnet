@@ -357,17 +357,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, subjectType, result.Result.UserInfo);
             this.tokenCacheDictionary[tokenCacheKey] = result;
             PlatformPlugin.Logger.Verbose(callState, "An item was stored in the cache");
-            this.UpdateCachedMrrtRefreshTokens(result, authority, clientId, subjectType);
+            this.UpdateCachedMrrtRefreshTokens(result, clientId, subjectType);
 
             this.HasStateChanged = true;
         }
 
-        private void UpdateCachedMrrtRefreshTokens(AuthenticationResultEx result, string authority, string clientId, TokenSubjectType subjectType)
+        private void UpdateCachedMrrtRefreshTokens(AuthenticationResultEx result, string clientId, TokenSubjectType subjectType)
         {
             if (result.Result.UserInfo != null && result.IsMultipleResourceRefreshToken)
             {
                 List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> mrrtItems =
-                    this.QueryCache(authority, clientId, subjectType, result.Result.UserInfo.UniqueId, result.Result.UserInfo.DisplayableId).Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
+                    this.QueryCache(null, clientId, subjectType, result.Result.UserInfo.UniqueId, result.Result.UserInfo.DisplayableId).Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
 
                 foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> mrrtItem in mrrtItems)
                 {
@@ -421,7 +421,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return this.tokenCacheDictionary.Where(
                     p =>
-                        p.Key.Authority == authority
+                        (string.IsNullOrWhiteSpace(authority) || p.Key.Authority == authority)
                         && (string.IsNullOrWhiteSpace(clientId) || p.Key.ClientIdEquals(clientId))
                         && (string.IsNullOrWhiteSpace(uniqueId) || p.Key.UniqueId == uniqueId)
                         && (string.IsNullOrWhiteSpace(displayableId) || p.Key.DisplayableIdEquals(displayableId))
