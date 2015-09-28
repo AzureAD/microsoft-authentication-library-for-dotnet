@@ -31,7 +31,7 @@ using System.Reflection;
 
 // Keep major and minor versions in AssemblyFileVersion in sync with AssemblyVersion.
 // Build and revision numbers are replaced on build machine for official builds.
-[assembly: AssemblyFileVersion("3.5.00000.0000")]
+[assembly: AssemblyFileVersion("3.6.00000.0000")]
 
 // On official build, attribute AssemblyInformationalVersionAttribute is added as well
 // with its value equal to the hash of the last commit to the git branch.
