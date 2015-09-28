@@ -16,20 +16,29 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    class BrokerHelper : IBrokerHelper
+    /// <summary>
+    /// 
+    /// </summary>
+    public sealed class DeviceCodeResult
     {
-        public IPlatformParameters PlatformParameters { get; set; }
-
-        public bool CanInvokeBroker { get { return false; } }
-
-        public Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
+        internal DeviceCodeResult()
         {
-            throw new System.NotImplementedException();
         }
+
+        public string UserCode { get; internal set; }
+
+        public string DeviceCode { get; internal set; }
+
+        public string VerificationUrl { get; internal set; }
+
+        public DateTimeOffset ExpiresOn { get; internal set; }
+
+        public long Interval { get; internal set; }
+
+        public string Message { get; internal set; }
     }
 }

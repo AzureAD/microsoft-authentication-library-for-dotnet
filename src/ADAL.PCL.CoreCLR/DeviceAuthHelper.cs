@@ -17,15 +17,15 @@
 //----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class DeviceAuthHelper : IDeviceAuthHelper
+    class DeviceAuthHelper : IDeviceAuthHelper
     {
-        public bool CanHandleDeviceAuthChallenge {
-            get { return false; }
-        }
-        public string CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
+        public bool CanHandleDeviceAuthChallenge { get { return false; } }
+
+        public Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
             throw new System.NotImplementedException();
         }

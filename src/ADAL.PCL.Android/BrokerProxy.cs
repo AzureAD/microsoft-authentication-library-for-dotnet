@@ -412,7 +412,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             brokerOptions.PutInt("com.microsoft.aad.adal:RequestId", request.RequestId);
             brokerOptions.PutString(BrokerConstants.ACCOUNT_AUTHORITY,
                     request.Authority);
-            brokerOptions.PutInt("xamarin", 1);
+            brokerOptions.PutInt("json", 1);
             brokerOptions.PutString(BrokerConstants.ACCOUNT_RESOURCE,
                     request.Resource);
             string s = GetRedirectUriForBroker();

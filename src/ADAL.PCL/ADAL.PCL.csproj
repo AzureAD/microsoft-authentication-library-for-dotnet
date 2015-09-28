@@ -54,7 +54,9 @@
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="AcquireDeviceCodeHandler.cs" />
     <Compile Include="AcquireTokenByAuthorizationCodeHandler.cs" />
+    <Compile Include="AcquireTokenByDeviceCodeHandler.cs" />
     <Compile Include="AcquireTokenForClientHandler.cs" />
     <Compile Include="AcquireTokenHandlerBase.cs" />
     <Compile Include="AcquireTokenInteractiveHandler.cs" />
@@ -82,6 +84,8 @@
     <Compile Include="ClientMetrics.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="DeviceAuthJWTResponse.cs" />
+    <Compile Include="DeviceCodeResponse.cs" />
+    <Compile Include="DeviceCodeResult.cs" />
     <Compile Include="HttpClientWrapper.cs" />
     <Compile Include="HttpClientFactory.cs" />
     <Compile Include="HttpRequestWrapperException.cs" />

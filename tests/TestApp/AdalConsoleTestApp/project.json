@@ -1,0 +1,31 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "AdalConsoleTestApp Console Application",
+  "authors": [ "kpanwar" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "dependencies": {
+    "Microsoft.IdentityModel.Clients.ActiveDirectory": "1.0.0-*",
+    "Microsoft.IdentityModel.Clients.ActiveDirectory.Platform": "1.0.0-*"
+  },
+
+  "commands": {
+    "AdalConsoleTestApp": "AdalConsoleTestApp"
+  },
+
+  "frameworks": {
+    "dnxcore50": {
+      "dependencies": {
+        "System.Collections": "4.0.10-beta-23019",
+        "System.Console": "4.0.0-beta-23019",
+        "System.Linq": "4.0.0-beta-23019",
+        "System.Threading": "4.0.10-beta-23019",
+        "System.Threading.Tasks": "4.0.10-beta-23019",
+        "System.Net.Http": "4.0.0-beta-23019",
+        "Microsoft.CSharp": "4.0.0-beta-23019"
+      }
+    }
+  }
+}

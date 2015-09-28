@@ -140,6 +140,33 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
+
+
+        /// <summary>
+        /// Acquires device code from the authority.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        public async Task<DeviceCodeResult> AcquireDeviceCodeAsync(string resource, string clientId)
+        {
+            var handler = new AcquireDeviceCodeHandler(this.Authenticator, resource, clientId);
+            return await handler.RunHandlerAsync();
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority using an device code previously received.
+        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
+        /// </summary>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="deviceCodeResult">The device code result received from calling AcquireDeviceCodeAsync.</param>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        public async Task<AuthenticationResult> AcquireTokenByDeviceCodeAsync(string clientId, DeviceCodeResult deviceCodeResult)
+        {
+            var handler = new AcquireTokenByDeviceCodeHandler(this.Authenticator, this.TokenCache, clientId, deviceCodeResult);
+            return await handler.RunAsync();
+        }
+
         /// <summary>
         /// Acquires security token from the authority.
         /// </summary>
@@ -479,7 +506,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, userAssertion);
             return await handler.RunAsync();
         }
-
+        
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters = null)
         {
             var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, redirectUri, parameters, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters));

@@ -35,7 +35,7 @@ namespace AdalDesktopTestApp
         {
             try
             {
-                AcquireTokenAsync().Wait();
+                AcquireTokenUsingDeviceCodeAsync().Wait();
             }
             catch (AggregateException ae)
             {
@@ -61,11 +61,27 @@ namespace AdalDesktopTestApp
             
             result = await ctx.AcquireTokenSilentAsync("urn:adaltest", "DE25CE3A-B772-4E6A-B431-96DCB5E7E559");
             Console.WriteLine(result.AccessToken + "\n");
-            
+
 /*            token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
             Console.WriteLine(token + "\n");
             token = await tokenBroker.GetTokenWithClientCredentialAsync();
             Console.WriteLine(token);*/
+        }
+
+        private static async Task AcquireTokenUsingDeviceCodeAsync()
+        {
+
+            AuthenticationContext ctx = new AuthenticationContext("https://login.windows.net/common");
+            AuthenticationResult result = null;
+            DeviceCodeResult codeResult = await ctx.AcquireDeviceCodeAsync("https://graph.windows.net", "04b07795-8ddb-461a-bbee-02f9e1bf7b46");
+            Console.WriteLine("Message: "+ codeResult.Message + "\n");
+            result = await ctx.AcquireTokenByDeviceCodeAsync("04b07795-8ddb-461a-bbee-02f9e1bf7b46", codeResult);
+            Console.WriteLine(result.AccessToken + "\n");
+
+            /*            token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
+                        Console.WriteLine(token + "\n");
+                        token = await tokenBroker.GetTokenWithClientCredentialAsync();
+                        Console.WriteLine(token);*/
         }
     }
 }
