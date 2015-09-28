@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0-*",
+  "frameworks": {
+    "net45+win+wpa81+MonoAndroid10+Xamarin.iOS10+MonoTouch10": {
+      "wrappedProject": "../../src/ADAL.PCL.CoreCLR/ADAL.PCL.CoreCLR.csproj",
+      "bin": {
+        "assembly": "../../src/ADAL.PCL.CoreCLR/obj/{configuration}/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
+        "pdb": "../../src/ADAL.PCL.CoreCLR/obj/{configuration}/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb"
+      },
+      "dependencies": {
+        "Microsoft.IdentityModel.Clients.ActiveDirectory": "1.0.0-*"
+      }
+    }
+  }
+}
