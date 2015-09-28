@@ -28,13 +28,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private ClientKey clientKey;
         private string resource;
         private CallState callState;
+        private string extraQueryParameters;
 
-        public AcquireDeviceCodeHandler(Authenticator authenticator, string resource, string clientId)
+        public AcquireDeviceCodeHandler(Authenticator authenticator, string resource, string clientId, string extraQueryParameters)
         {
             this.authenticator = authenticator;
             this.callState = AcquireTokenHandlerBase.CreateCallState(this.authenticator.CorrelationId);
             this.clientKey = new ClientKey(clientId);
             this.resource = resource;
+            this.extraQueryParameters = extraQueryParameters;
         }
         
         private string CreateDeviceCodeRequestUriString()
@@ -53,6 +55,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     deviceCodeRequestParameters[kvp.Key] = kvp.Value;
                 }
+            }
+
+            if (!string.IsNullOrWhiteSpace(extraQueryParameters))
+            {
+                // Checks for extraQueryParameters duplicating standard parameters
+                Dictionary<string, string> kvps = EncodingHelper.ParseKeyValueList(extraQueryParameters, '&', false, this.callState);
+                foreach (KeyValuePair<string, string> kvp in kvps)
+                {
+                    if (deviceCodeRequestParameters.ContainsKey(kvp.Key))
+                    {
+                        throw new AdalException(AdalError.DuplicateQueryParameter, string.Format(AdalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
+                    }
+                }
+
+                deviceCodeRequestParameters.ExtraQueryParameter = extraQueryParameters;
             }
 
             return new Uri(new Uri(this.authenticator.DeviceCodeUri), "?" + deviceCodeRequestParameters).AbsoluteUri;

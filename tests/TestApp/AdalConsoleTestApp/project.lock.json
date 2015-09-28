@@ -673,6 +673,12 @@
         "runtime": {
           "lib/DNXCore50/System.Threading.Tasks.dll": {}
         }
+      },
+      "TestApp.PCL/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "Microsoft.IdentityModel.Clients.ActiveDirectory": "1.0.0"
+        }
       }
     }
   },
@@ -684,6 +690,10 @@
     "Microsoft.IdentityModel.Clients.ActiveDirectory.Platform/1.0.0": {
       "type": "project",
       "path": "../../../wrap/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform/project.json"
+    },
+    "TestApp.PCL/1.0.0": {
+      "type": "project",
+      "path": "../../../wrap/TestApp.PCL/project.json"
     },
     "Microsoft.CSharp/4.0.0-beta-23019": {
       "type": "package",
@@ -1817,8 +1827,7 @@
       "System.Threading.Tasks >= 4.0.10-beta-23019",
       "System.Net.Http >= 4.0.1-beta-23225",
       "Microsoft.CSharp >= 4.0.0-beta-23019",
-      "Microsoft.IdentityModel.Clients.ActiveDirectory >= 1.0.0-*",
-      "Microsoft.IdentityModel.Clients.ActiveDirectory.Platform >= 1.0.0-*"
+      "TestApp.PCL >= 1.0.0-*"
     ]
   }
 }

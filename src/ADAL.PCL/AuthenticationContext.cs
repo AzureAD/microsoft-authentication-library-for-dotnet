@@ -139,9 +139,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this.Authenticator.CorrelationId = value;                
             }
         }
-
-
-
+        
         /// <summary>
         /// Acquires device code from the authority.
         /// </summary>
@@ -150,7 +148,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public async Task<DeviceCodeResult> AcquireDeviceCodeAsync(string resource, string clientId)
         {
-            var handler = new AcquireDeviceCodeHandler(this.Authenticator, resource, clientId);
+            return await this.AcquireDeviceCodeAsync(resource, clientId, null);
+        }
+
+        /// <summary>
+        /// Acquires device code from the authority.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        public async Task<DeviceCodeResult> AcquireDeviceCodeAsync(string resource, string clientId, string extraQueryParameters)
+        {
+            var handler = new AcquireDeviceCodeHandler(this.Authenticator, resource, clientId, extraQueryParameters);
             return await handler.RunHandlerAsync();
         }
 
@@ -158,12 +168,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Acquires security token from the authority using an device code previously received.
         /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
         /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="deviceCodeResult">The device code result received from calling AcquireDeviceCodeAsync.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByDeviceCodeAsync(string clientId, DeviceCodeResult deviceCodeResult)
+        public async Task<AuthenticationResult> AcquireTokenByDeviceCodeAsync(string resource, string clientId,
+            DeviceCodeResult deviceCodeResult)
         {
-            var handler = new AcquireTokenByDeviceCodeHandler(this.Authenticator, this.TokenCache, clientId, deviceCodeResult);
+            var handler = new AcquireTokenByDeviceCodeHandler(this.Authenticator, this.TokenCache, resource, clientId, deviceCodeResult);
             return await handler.RunAsync();
         }
 
