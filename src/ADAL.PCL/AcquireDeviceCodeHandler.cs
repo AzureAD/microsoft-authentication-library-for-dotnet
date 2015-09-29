@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private CallState callState;
         private string extraQueryParameters;
 
-        public AcquireDeviceCodeHandler(Authenticator authenticator, string resource, string clientId, string extraQueryParameters)
+        public AcquireDeviceCodeHandler(Authenticator authenticator, string extraQueryParameters)
         {
             this.authenticator = authenticator;
             this.callState = AcquireTokenHandlerBase.CreateCallState(this.authenticator.CorrelationId);
@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new AdalException(response.Error, response.ErrorDescription);
             }
 
-            return response.GetResult();
+            return response.GetResult(clientKey.ClientId, resource);
         }
 
         private void ValidateAuthorityType()

@@ -52,6 +52,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal DeviceCodeResult GetResult()
         {
+        }
+
+        public DeviceCodeResult GetResult(string clientId, string resource)
+        {
             return new DeviceCodeResult()
             {
                 ExpiresOn = DateTime.UtcNow.AddSeconds(this.ExpiresIn),
@@ -59,7 +63,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 DeviceCode = this.DeviceCode,
                 UserCode = this.UserCode,
                 Interval = this.Interval,
-                VerificationUrl = this.VerificationUrl
+                VerificationUrl = this.VerificationUrl,
+                ClientId = clientId,
+                Resource = resource
             };
         }
     }
