@@ -70,11 +70,14 @@ namespace AdalDesktopTestApp
 
         private static async Task AcquireTokenUsingDeviceCodeAsync()
         {
-
+            string resource = "00000002-0000-0000-c000-000000000000";
+            string clientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
             AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
-            DeviceCodeResult codeResult = await ctx.AcquireDeviceCodeAsync("00000002-0000-0000-c000-000000000000", "04b07795-8ddb-461a-bbee-02f9e1bf7b46");
+            AuthenticationResult result = null;
+            result = await ctx.AcquireTokenSilentAsync(resource, clientId);
+            DeviceCodeResult codeResult = await ctx.AcquireDeviceCodeAsync(resource, clientId);
             Console.WriteLine("Message: "+ codeResult.Message + "\n");
-            AuthenticationResult  result = await ctx.AcquireTokenByDeviceCodeAsync("00000002-0000-0000-c000-000000000000", "04b07795-8ddb-461a-bbee-02f9e1bf7b46", codeResult);
+             result = await ctx.AcquireTokenByDeviceCodeAsync(resource, clientId, codeResult);
             Console.WriteLine(result.AccessToken + "\n");
 
             /*            token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
