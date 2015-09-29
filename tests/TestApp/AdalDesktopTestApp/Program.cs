@@ -35,7 +35,7 @@ namespace AdalDesktopTestApp
         {
             try
             {
-                AcquireTokenUsingDeviceCodeAsync().Wait();
+                AcquireTokenAsync().Wait();
             }
             catch (AggregateException ae)
             {
@@ -50,40 +50,11 @@ namespace AdalDesktopTestApp
 
         private static async Task AcquireTokenAsync()
         {
-            
-            AuthenticationContext ctx = new AuthenticationContext("https://stsadweb.one.microsoft.com/adfs/", false);
-            
-            AuthenticationResult result =
-                await
-                    ctx.AcquireTokenAsync("urn:adaltest", "DE25CE3A-B772-4E6A-B431-96DCB5E7E559", new Uri("msauth:com.example.adal.helloApp1"),
-                        new PlatformParameters(PromptBehavior.Auto, null));
-            Console.WriteLine(result.AccessToken + "\n");
-            
-            result = await ctx.AcquireTokenSilentAsync("urn:adaltest", "DE25CE3A-B772-4E6A-B431-96DCB5E7E559");
-            Console.WriteLine(result.AccessToken + "\n");
-
-/*            token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
+            TokenBroker tokenBroker = new TokenBroker();
+             string token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
             Console.WriteLine(token + "\n");
             token = await tokenBroker.GetTokenWithClientCredentialAsync();
-            Console.WriteLine(token);*/
-        }
-
-        private static async Task AcquireTokenUsingDeviceCodeAsync()
-        {
-            string resource = "00000002-0000-0000-c000-000000000000";
-            string clientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
-            AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
-            AuthenticationResult result = null;
-            result = await ctx.AcquireTokenSilentAsync(resource, clientId);
-            DeviceCodeResult codeResult = await ctx.AcquireDeviceCodeAsync(resource, clientId);
-            Console.WriteLine("Message: "+ codeResult.Message + "\n");
-             result = await ctx.AcquireTokenByDeviceCodeAsync(resource, clientId, codeResult);
-            Console.WriteLine(result.AccessToken + "\n");
-
-            /*            token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
-                        Console.WriteLine(token + "\n");
-                        token = await tokenBroker.GetTokenWithClientCredentialAsync();
-                        Console.WriteLine(token);*/
+            Console.WriteLine(token);
         }
     }
 }
