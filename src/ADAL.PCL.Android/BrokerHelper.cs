@@ -34,11 +34,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private BrokerProxy mBrokerProxy = new BrokerProxy(Application.Context);
 
-        public bool SkipBroker { get; set; }
-
         public IPlatformParameters PlatformParameters { get; set; }
 
-        public bool CanInvokeBroker { get { return !SkipBroker && mBrokerProxy.CanSwitchToBroker(); } }
+        private bool WillSkipBroker()
+        {
+            PlatformParameters pp = PlatformParameters as PlatformParameters;
+            if (pp != null)
+            {
+                return pp.SkipBroker;
+            }
+
+            return true;
+        }
+
+        public bool CanInvokeBroker { get { return !WillSkipBroker() && mBrokerProxy.CanSwitchToBroker(); } }
 
 
         public async Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
@@ -52,7 +61,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (Exception exc)
             {
                 PlatformPlugin.Logger.Error(null, exc);
-                throw exc;
+                throw;
             }
             await readyForResponse.WaitAsync();
             return resultEx;

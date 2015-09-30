@@ -58,21 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 string requestUrlString = request.Url.ToString().ToLower();
-
-                if (!requestUrlString.Contains("slice=testslice"))
-                {
-                    NSMutableUrlRequest req = (NSMutableUrlRequest)request.MutableCopy();
-                    string sep = "?";
-                    if (requestUrlString.Contains("?"))
-                    {
-                        sep = "&";
-                    }
-
-                    req.Url = new NSUrl(req.Url.AbsoluteString +sep+ "slice=testslice");
-                    webView.LoadRequest(req);
-                    return false;
-                }
-
+                
                 if (requestUrlString.StartsWith("browser://"))
                 {
                     DispatchQueue.MainQueue.DispatchAsync(() => CancelAuthentication(null, null));

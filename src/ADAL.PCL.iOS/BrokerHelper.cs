@@ -32,8 +32,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private static SemaphoreSlim brokerResponseReady = null;
         private static NSUrl brokerResponse = null;
-
-        public bool SkipBroker { get; set; }
+        
         public IPlatformParameters PlatformParameters { get; set; }
 
         public bool CanInvokeBroker { get { return UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://")); } }
