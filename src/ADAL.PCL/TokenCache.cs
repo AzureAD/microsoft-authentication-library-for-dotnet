@@ -366,6 +366,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (result.Result.UserInfo != null && result.IsMultipleResourceRefreshToken)
             {
+                //pass null for authority to update the token for all the tenants
                 List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> mrrtItems =
                     this.QueryCache(null, clientId, subjectType, result.Result.UserInfo.UniqueId, result.Result.UserInfo.DisplayableId).Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
 
@@ -407,6 +408,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     break;
                 default:
                     throw new AdalException(AdalError.MultipleTokensMatched);
+            }
+
+            // check for tokens issued to same client_id/user_id combination, but any tenant.
+            if (returnValue == null)
+            {
+                List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForAllTenants = this.QueryCache(null, clientId, subjectType, uniqueId, displayableId);
+                if (itemsForAllTenants.Count != 0)
+                {
+                    returnValue = itemsForAllTenants.First();
+                }
+
+                // check if the token was issued by AAD
+                if (returnValue != null && Authenticator.DetectAuthorityType(returnValue.Value.Key.Authority)!= AuthorityType.ADFS)
+                {
+                    //remove access token to redeem refresh token against a different tenant.
+                    returnValue.Value.Value.Result.AccessToken = null;
+                }
+                else
+                {
+                    returnValue = null;
+                }
             }
 
             return returnValue;

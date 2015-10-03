@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0-*",
+  "frameworks": {
+    "net45+win+wpa81+MonoAndroid10+Xamarin.iOS10+MonoTouch10": {
+      "wrappedProject": "../../tests/TestApp/TestApp.PCL/TestApp.PCL.csproj",
+      "bin": {
+        "assembly": "../../tests/TestApp/TestApp.PCL/obj/{configuration}/TestApp.PCL.dll",
+        "pdb": "../../tests/TestApp/TestApp.PCL/obj/{configuration}/TestApp.PCL.pdb"
+      },
+      "dependencies": {
+        "Microsoft.IdentityModel.Clients.ActiveDirectory": "1.0.0-*"
+      }
+    }
+  }
+}

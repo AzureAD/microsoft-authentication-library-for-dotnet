@@ -17,9 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -35,7 +32,7 @@ namespace AdalDesktopTestApp
         {
             try
             {
-                AcquireTokenUsingDeviceCodeAsync().Wait();
+                AcquireTokenAsync().Wait();
             }
             catch (AggregateException ae)
             {
@@ -50,38 +47,11 @@ namespace AdalDesktopTestApp
 
         private static async Task AcquireTokenAsync()
         {
-            
-            AuthenticationContext ctx = new AuthenticationContext("https://stsadweb.one.microsoft.com/adfs/", false);
-            
-            AuthenticationResult result =
-                await
-                    ctx.AcquireTokenAsync("urn:adaltest", "DE25CE3A-B772-4E6A-B431-96DCB5E7E559", new Uri("msauth:com.example.adal.helloApp1"),
-                        new PlatformParameters(PromptBehavior.Auto, null));
-            Console.WriteLine(result.AccessToken + "\n");
-            
-            result = await ctx.AcquireTokenSilentAsync("urn:adaltest", "DE25CE3A-B772-4E6A-B431-96DCB5E7E559");
-            Console.WriteLine(result.AccessToken + "\n");
-
-/*            token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
+            TokenBroker tokenBroker = new TokenBroker();
+             string token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
             Console.WriteLine(token + "\n");
             token = await tokenBroker.GetTokenWithClientCredentialAsync();
-            Console.WriteLine(token);*/
-        }
-
-        private static async Task AcquireTokenUsingDeviceCodeAsync()
-        {
-
-            AuthenticationContext ctx = new AuthenticationContext("https://login.windows.net/common");
-            AuthenticationResult result = null;
-            DeviceCodeResult codeResult = await ctx.AcquireDeviceCodeAsync("https://graph.windows.net", "04b07795-8ddb-461a-bbee-02f9e1bf7b46");
-            Console.WriteLine("Message: "+ codeResult.Message + "\n");
-            result = await ctx.AcquireTokenByDeviceCodeAsync("04b07795-8ddb-461a-bbee-02f9e1bf7b46", codeResult);
-            Console.WriteLine(result.AccessToken + "\n");
-
-            /*            token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
-                        Console.WriteLine(token + "\n");
-                        token = await tokenBroker.GetTokenWithClientCredentialAsync();
-                        Console.WriteLine(token);*/
+            Console.WriteLine(token);
         }
     }
 }

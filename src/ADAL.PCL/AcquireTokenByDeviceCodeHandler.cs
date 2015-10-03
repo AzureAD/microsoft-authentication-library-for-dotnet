@@ -25,14 +25,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private DeviceCodeResult deviceCodeResult = null;
 
-        public AcquireTokenByDeviceCodeHandler(Authenticator authenticator, TokenCache tokenCache, string clientId, DeviceCodeResult deviceCodeResult)
-            : base(authenticator, tokenCache, NullResource, new ClientKey(clientId), TokenSubjectType.User)
+        public AcquireTokenByDeviceCodeHandler(Authenticator authenticator, TokenCache tokenCache, DeviceCodeResult deviceCodeResult)
+            : base(authenticator, tokenCache, deviceCodeResult.Resource, new ClientKey(deviceCodeResult.ClientId), TokenSubjectType.User)
         {
             if (deviceCodeResult == null)
             {
                 throw new ArgumentNullException("deviceCodeResult");
             }
-
+            
             this.LoadFromCache = false; //no cache lookup for token
             this.StoreToCache = (tokenCache != null);
             this.SupportADFS = false;
@@ -52,16 +52,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 catch (AdalServiceException exc)
                 {
-                    if (exc.ErrorCode.Equals(AdalErrorEx.DeviceCodeAuthorizationPendingError))
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(deviceCodeResult.Interval));
-                        timeRemaining = deviceCodeResult.ExpiresOn - DateTimeOffset.UtcNow;
-                    }
-                    else
+                    if (!exc.ErrorCode.Equals(AdalErrorEx.DeviceCodeAuthorizationPendingError))
                     {
                         throw;
                     }
                 }
+
+                await Task.Delay(TimeSpan.FromSeconds(deviceCodeResult.Interval));
+                timeRemaining = deviceCodeResult.ExpiresOn - DateTimeOffset.UtcNow;
             }
 
             return resultEx;

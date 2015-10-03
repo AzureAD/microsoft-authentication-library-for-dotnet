@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\ADAL.PCL.CoreCLR\ADAL.PCL.CoreCLR.csproj" />
     <ProjectReference Include="..\..\..\src\ADAL.PCL\ADAL.PCL.csproj" />
+    <ProjectReference Include="..\TestApp.PCL\TestApp.PCL.csproj" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.targets" Condition="'$(VSToolsPath)' != ''" />
 </Project>

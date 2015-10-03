@@ -40,5 +40,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public long Interval { get; internal set; }
 
         public string Message { get; internal set; }
+
+        public string ClientId { get; internal set; }
+
+        public string Resource { get; internal set; }
     }
 }
