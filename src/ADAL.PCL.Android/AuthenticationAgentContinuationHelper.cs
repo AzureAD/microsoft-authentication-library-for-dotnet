@@ -36,8 +36,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
                     break;
 
-                case 2001:
-                case 2004:
+                case BrokerResponseCode.ResponseReceived:
+                case BrokerResponseCode.UserCancelled:
                     BrokerHelper.SetBrokerResult(data, (int)resultCode);
                     break;
 
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     break;
             }
 
-            if ((int) resultCode != 2004)
+            if ((int) resultCode != BrokerResponseCode.UserCancelled)
             {
                 WebUI.SetAuthorizationResult(authorizationResult);
             }

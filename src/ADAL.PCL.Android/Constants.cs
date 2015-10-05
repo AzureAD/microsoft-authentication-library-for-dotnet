@@ -37,4 +37,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string SignatureVerificationFailed = "Error in verifying broker app's signature";
         public const string NoBrokerAccountFound = "No account found in broker app";
     }
+
+    internal static class BrokerResponseCode
+    {
+        public const int UserCancelled = 2004;
+        public const int ResponseReceived = 2001;
+    }
 }
