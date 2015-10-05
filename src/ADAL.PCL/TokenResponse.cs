@@ -160,19 +160,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (this.AccessToken != null)
             {
-                DateTimeOffset expiresOn;
-                if (ExpiresOn == 0)
-                {
-                    expiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn);
-                }
-                else
-                {
-                    DateTime dtDateTime = new DateTime(1970,1,1,0,0,0,0, DateTimeKind.Utc);
-                    dtDateTime = dtDateTime.AddSeconds( ExpiresOn ).ToLocalTime();
-                    expiresOn = new DateTimeOffset(dtDateTime);
-                }
-
+                DateTimeOffset expiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn);
                 var result = new AuthenticationResult(this.TokenType, this.AccessToken, expiresOn);
+                
                 IdToken idToken = IdToken.Parse(this.IdTokenString);
                 if (idToken != null)
                 {

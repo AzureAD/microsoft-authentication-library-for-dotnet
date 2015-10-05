@@ -420,7 +420,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 // check if the token was issued by AAD
-                if (returnValue != null && Authenticator.DetectAuthorityType(returnValue.Value.Key.Authority)!= AuthorityType.ADFS)
+                if (returnValue != null && Authenticator.DetectAuthorityType(returnValue.Value.Key.Authority) != AuthorityType.ADFS)
                 {
                     //remove access token to redeem refresh token against a different tenant.
                     returnValue.Value.Value.Result.AccessToken = null;
