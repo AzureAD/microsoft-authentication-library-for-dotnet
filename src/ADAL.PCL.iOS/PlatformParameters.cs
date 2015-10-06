@@ -30,14 +30,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
+        private PlatformParameters()
+        {
+            SkipBroker = true;
+        }
+
         public PlatformParameters(UIViewController callerViewController)
         {
             this.CallerViewController = callerViewController;
+        }
+
+        public PlatformParameters(UIViewController callerViewController, bool skipBroker):this(callerViewController)
+        {
+            SkipBroker = skipBroker;
         }
 
         /// <summary>
         /// Caller UIViewController
         /// </summary>
         public UIViewController CallerViewController { get; private set; } 
+
+        public bool SkipBroker { get; set; }
     }
 }

@@ -17,6 +17,8 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -24,7 +26,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public string CreateSha256Hash(string input)
         {
-            return string.Empty;    // TODO: Update
+            using (SHA256Managed sha = new SHA256Managed())
+            {
+                UTF8Encoding encoding = new UTF8Encoding();
+                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
+            }
         }
 
         public byte[] SignWithCertificate(string message, byte[] rawData, string password)

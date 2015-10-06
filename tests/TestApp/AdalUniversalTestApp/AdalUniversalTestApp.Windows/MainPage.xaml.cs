@@ -16,11 +16,13 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 using TestApp.PCL;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Test.ADAL.Common;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -42,8 +44,7 @@ namespace AdalUniversalTestApp
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
-            string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(PromptBehavior.Auto, false));
-            this.AccessToken.Text = token;
+            this.AccessToken.Text = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(PromptBehavior.Auto, false));
         }
 
         private async void Button_Click_1(object sender, RoutedEventArgs e)

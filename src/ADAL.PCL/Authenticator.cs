@@ -60,6 +60,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public string AuthorizationUri { get; set; }
 
+        public string DeviceCodeUri { get; set; }
+
         public string TokenUri { get; private set; }
 
         public string UserRealmUri { get; private set; }
@@ -80,6 +82,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 AuthenticatorTemplate matchingTemplate = await AuthenticatorTemplateList.FindMatchingItemAsync(this.ValidateAuthority, host, tenant, callState);
 
                 this.AuthorizationUri = matchingTemplate.AuthorizeEndpoint.Replace("{tenant}", tenant);
+                this.DeviceCodeUri = matchingTemplate.DeviceCodeEndpoint.Replace("{tenant}", tenant);
                 this.TokenUri = matchingTemplate.TokenEndpoint.Replace("{tenant}", tenant);
                 this.UserRealmUri = CanonicalizeUri(matchingTemplate.UserRealmEndpoint);
                 this.IsTenantless = (string.Compare(tenant, TenantlessTenantName, StringComparison.OrdinalIgnoreCase) == 0);

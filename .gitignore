@@ -4,6 +4,7 @@ src/ADAL.NET/obj/
 src/ADAL.NET/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
 src/ADAL.NET.WindowsForms/obj/
 src/ADAL.WinRT/obj/
+src/ADAL.WinPhoneSL/obj/
 src/ADAL.WinRT/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
 src/ADAL.WinPhoneSL/obj/
 tests/Test.ADAL.NET.Friend/obj/
@@ -15,14 +16,13 @@ tests/Test.ADAL.WinRT.Dashboard/AppPackages/
 tests/Test.ADAL.WinRT.Unit/obj/
 tests/Test.ADAL.WinRT.Unit/AppPackages/
 tests/Test.ADAL.WinRT/obj/
+tests/Test.ADAL.WinPhoneSL.Dashboard/obj/
 TestResults/
 !.nuget/NuGet.exe
 winphone/src/ADAL.WinPhone/obj/
 winphone/tests/Test.ADAL.WinPhone.UnitTest/obj/
 winphone/src/ADAL.WinPhone/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
 src/ADAL.WinPhone/obj/
-tests/Test.ADAL.WinPhoneSL.Dashboard/obj/
-tests/Test.ADAL.WinPhone.Dashboard/obj/
 src/ADAL.WinPhone/Microsoft.IdentityModel.Clients.ActiveDirectory.XML
 tests/Test.ADAL.WinPhone.Unit/obj/
 src/ADAL.PCL.Android/obj/
@@ -34,6 +34,7 @@ src/ADAL.PCL/obj/
 tests/Test.ADAL.WinPhone.Unit/AppPackages/
 src/ADAL.PCL.CoreCLR/obj/
 ADAL.NET.sdf
+tests/Test.ADAL.WinPhone.Dashboard/obj/
 tests/TestApp/AdalAndroidTestApp/obj/
 tests/TestApp/AdalDesktopTestApp/obj/
 tests/TestApp/AdaliOSTestApp/obj/
@@ -46,3 +47,4 @@ tests/TestApp/AdalXamarinFormsTestApp/obj/
 tests/TestApp/XFormsApp.Droid/obj/
 tests/TestApp/XFormsApp.iOS/obj/
 tests/TestApp/XFormsApp/obj/
+.nuget/NuGet.Config

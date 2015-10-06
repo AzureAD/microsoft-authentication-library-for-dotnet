@@ -27,6 +27,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     internal static class EncodingHelper
     {
+
         public static string UrlEncode(string message)
         {
             if (string.IsNullOrEmpty(message))
@@ -58,6 +59,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AddKeyValueString(messageBuilder, key, value.ToCharArray());
         }
 
+        public static string ToQueryParameter(this IDictionary<string, string> input)
+        {
+            StringBuilder builder = new StringBuilder();
+            foreach (var key in input.Keys)
+            {
+                builder.AppendFormat("{0}={1}&", key, UrlEncode(input[key]));
+            }
+
+            builder.Remove(builder.Length - 1, 1);
+            return builder.ToString();
+        }
+
         public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, CallState callState)
         {
             var response = new Dictionary<string, string>();
@@ -83,7 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     key = key.Trim().ToLower();
                     value = value.Trim().Trim(new[] { '\"' }).Trim();
 
-                    if (response.ContainsKey(key))
+                    if (response.ContainsKey(key) && callState!=null)
                     {
                         PlatformPlugin.Logger.Warning(callState, string.Format("Key/value pair list contains redundant key '{0}'.", key));
                     }
@@ -93,6 +106,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return response;
+        }
+
+        public static byte[] ToByteArray(this String stringInput)
+        {
+            return ToByteArray(new StringBuilder(stringInput));
         }
 
         public static byte[] ToByteArray(this StringBuilder stringBuilder)
@@ -247,6 +265,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string delimiter = (messageBuilder.Length == 0) ? string.Empty : "&";
             messageBuilder.AppendFormat("{0}{1}=", delimiter, key);
             messageBuilder.Append(value);
+        }
+
+        internal static string GetString(byte[] bytes)
+        {
+            char[] chars = new char[bytes.Length / sizeof(char)];
+            System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
+            return new string(chars);
         }
     }
 }

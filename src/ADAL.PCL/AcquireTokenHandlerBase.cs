@@ -17,6 +17,8 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 
@@ -27,6 +29,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected const string NullResource = "null_resource_as_optional";
         protected readonly static Task CompletedTask = Task.FromResult(false);
         private readonly TokenCache tokenCache;
+        protected readonly IDictionary<string, string> brokerParameters;
 
         protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, TokenSubjectType subjectType)
         {
@@ -52,6 +55,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.LoadFromCache = (tokenCache != null);
             this.StoreToCache = (tokenCache != null);
             this.SupportADFS = false;
+
+            this.brokerParameters = new Dictionary<string, string>();
+            brokerParameters["authority"] = authenticator.Authority;
+            brokerParameters["resource"] = resource;
+            brokerParameters["client_id"] = clientKey.ClientId;
+            brokerParameters["correlation_id"] = this.CallState.CorrelationId.ToString();
+            brokerParameters["client_version"] = AdalIdHelper.GetAdalVersion();
+
         }
 
         internal CallState CallState { get; set; }
@@ -103,10 +114,32 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (resultEx == null)
                 {
-                    await this.PreTokenRequest();
-                    resultEx = await this.SendTokenRequestAsync();
-                    this.PostTokenRequest(resultEx);
+                    if (PlatformPlugin.BrokerHelper.CanInvokeBroker)
+                    {
+                        resultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters);
+                    }
+                    else
+                    {
+                        await this.PreTokenRequest();
+                        
+                        // check if broker app is required for authentication.
+                        if (this.BrokerInvocationRequired())
+                        {
+                            resultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters);
+                        }
+                        else
+                        {
+                            resultEx = await this.SendTokenRequestAsync();
+                        }
+                    }
 
+                    //broker token acquisition failed
+                    if (resultEx != null && resultEx.Exception != null)
+                    {
+                        throw resultEx.Exception;
+                    }
+
+                    this.PostTokenRequest(resultEx);
                     if (this.StoreToCache)
                     {
                         if (!notifiedBeforeAccessCache)
@@ -134,6 +167,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.NotifyAfterAccessCache();
                 }
             }
+        }
+
+        protected virtual void UpdateBrokerParameters(IDictionary<string, string> parameters)
+        {
+            
+        }
+
+        protected virtual bool BrokerInvocationRequired()
+        {
+            return false;
         }
 
         public static CallState CreateCallState(Guid correlationId)
@@ -179,6 +222,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
             requestParameters[OAuthParameter.RefreshToken] = refreshToken;
+            requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
+
             AuthenticationResultEx result = await this.SendHttpMessageAsync(requestParameters);
 
             if (result.RefreshToken == null)

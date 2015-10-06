@@ -17,14 +17,26 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
+using Android.Accounts;
+using Android.App;
+using Android.OS;
+using Java.Util.Concurrent;
+using Android.Content.PM;
+using Java.Security;
+using Java.IO;
+using Android.Util;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class WebUI : IWebUI
     {
+
+        private IAccountManagerFuture accountManagerFeature;
+
         private static SemaphoreSlim returnedUriReady;
         private static AuthorizationResult authorizationResult;
         private readonly PlatformParameters parameters;
@@ -41,7 +53,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
             returnedUriReady = new SemaphoreSlim(0);
-            Authenticate(authorizationUri, redirectUri, callState);
+
+            try
+            {
+                var agentIntent = new Intent(this.parameters.CallerActivity, typeof(AuthenticationAgentActivity));
+                agentIntent.PutExtra("Url", authorizationUri.AbsoluteUri);
+                agentIntent.PutExtra("Callback", redirectUri.AbsoluteUri);
+                this.parameters.CallerActivity.StartActivityForResult(agentIntent, 0);
+            }
+            catch (Exception ex)
+            {
+                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
+            }
+
             await returnedUriReady.WaitAsync();
             return authorizationResult;
         }
@@ -50,21 +74,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             authorizationResult = authorizationResultInput;
             returnedUriReady.Release();
-        }
-
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, CallState callState)
-        {
-            try
-            {
-                var agentIntent = new Intent(this.parameters.CallerActivity, typeof(AuthenticationAgentActivity));
-                agentIntent.PutExtra("Url", authorizationUri.AbsoluteUri);
-                agentIntent.PutExtra("Callback", redirectUri.OriginalString);
-                this.parameters.CallerActivity.StartActivityForResult(agentIntent, 0);
-            }
-            catch (Exception ex)
-            {
-                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
-            }
         }
     }
 }

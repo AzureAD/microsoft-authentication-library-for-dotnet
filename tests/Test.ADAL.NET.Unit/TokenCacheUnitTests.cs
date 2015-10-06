@@ -51,6 +51,14 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
+        [Description("Test for Token Cache Cross-Tenant operations")]
+        [TestCategory("AdalDotNetUnit")]
+        public void TokenCacheCrossTenantOperationsTest()
+        {
+            TokenCacheTests.TokenCacheCrossTenantOperationsTest();
+        }
+
+        [TestMethod]
         [Description("Test for Token Cache Capacity")]
         [TestCategory("AdalDotNetUnit")]
         public void TokenCacheCapacityTest()

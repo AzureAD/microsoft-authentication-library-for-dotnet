@@ -236,6 +236,18 @@ namespace Test.ADAL.Common.Unit
 
         }
 
+
+        internal static void TokenCacheCrossTenantOperationsTest()
+        {
+            var tokenCache = new TokenCache();
+            var cacheDictionary = tokenCache.tokenCacheDictionary;
+            tokenCache.Clear();
+
+            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1", TokenSubjectType.User, null, "user1");
+            AuthenticationResultEx value = CreateCacheValue(null, "user1");
+
+        }
+
         internal static void TokenCacheOperationsTest()
         {
             var tokenCache = new TokenCache();
@@ -243,9 +255,9 @@ namespace Test.ADAL.Common.Unit
 
             tokenCache.Clear();
 
-            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts", "resource1", "client1", TokenSubjectType.User, null, "user1");
-            TokenCacheKey key2 = new TokenCacheKey("https://localhost/MockSts", "resource1", "client1", TokenSubjectType.User, null, "user2");
-            TokenCacheKey key3 = new TokenCacheKey("https://localhost/MockSts", "resource1", "client1", TokenSubjectType.UserPlusClient, null, "user1");
+            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1", TokenSubjectType.User, null, "user1");
+            TokenCacheKey key2 = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1", TokenSubjectType.User, null, "user2");
+            TokenCacheKey key3 = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1", TokenSubjectType.UserPlusClient, null, "user1");
             Verify.AreNotEqual(key, key3);
 
             var value = CreateCacheValue(null, "user1");
@@ -276,6 +288,12 @@ namespace Test.ADAL.Common.Unit
             {
                 // Expected
             }
+            
+            Log.Comment("====== Verifying that correct values are retrieved when requested for different tenant with user and without user");
+            AuthenticationResultEx resultEx = tokenCache.LoadFromCache("https://localhost/MockSts1", "resource1", "client1", TokenSubjectType.User, null,
+                "user1", null);
+            Verify.IsNotNull(resultEx);
+            
 
             Verify.IsTrue(RemoveFromDictionary(tokenCache, key));
             Verify.IsFalse(RemoveFromDictionary(tokenCache, key));

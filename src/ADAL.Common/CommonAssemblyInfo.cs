@@ -27,11 +27,11 @@ using System.Reflection;
 [assembly: AssemblyCopyright("Copyright (c) Microsoft Open Technologies. All rights reserved.")]
 [assembly: AssemblyTrademark("")]
 
-[assembly: AssemblyVersion("3.5.0.0")]
+[assembly: AssemblyVersion("3.6.0.0")]
 
 // Keep major and minor versions in AssemblyFileVersion in sync with AssemblyVersion.
 // Build and revision numbers are replaced on build machine for official builds.
-[assembly: AssemblyFileVersion("3.5.00000.0000")]
+[assembly: AssemblyFileVersion("3.6.00000.0000")]
 
 // On official build, attribute AssemblyInformationalVersionAttribute is added as well
 // with its value equal to the hash of the last commit to the git branch.

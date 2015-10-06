@@ -17,9 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -33,16 +30,25 @@ namespace AdalDesktopTestApp
         [STAThread]
         static void Main(string[] args)
         {
-            AcquireTokenAsync().Wait();
-            Console.ReadKey();
+            try
+            {
+                AcquireTokenAsync().Wait();
+            }
+            catch (AggregateException ae)
+            {
+                Console.WriteLine(ae.InnerException.Message);
+                Console.WriteLine(ae.InnerException.StackTrace);
+            }
+            finally
+            {
+                Console.ReadKey();
+            }
         }
 
         private static async Task AcquireTokenAsync()
         {
             TokenBroker tokenBroker = new TokenBroker();
-            string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(PromptBehavior.Auto, null));
-            Console.WriteLine(token + "\n");
-            token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
+             string token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
             Console.WriteLine(token + "\n");
             token = await tokenBroker.GetTokenWithClientCredentialAsync();
             Console.WriteLine(token);

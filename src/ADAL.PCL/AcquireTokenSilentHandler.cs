@@ -23,7 +23,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class AcquireTokenSilentHandler : AcquireTokenHandlerBase
     {
-        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserIdentifier userId)
+        private IPlatformParameters parameters;
+
+        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserIdentifier userId, IPlatformParameters parameters)
             : base(authenticator, tokenCache, resource, clientKey, clientKey.HasCredential ? TokenSubjectType.UserPlusClient : TokenSubjectType.User)
         {
             if (userId == null)
@@ -34,8 +36,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.UniqueId = userId.UniqueId;
             this.DisplayableId = userId.DisplayableId;
             this.UserIdentifierType = userId.Type;
-
+            PlatformPlugin.BrokerHelper.PlatformParameters = parameters;    
             this.SupportADFS = true;
+
+            this.brokerParameters["username"] = userId.Id;
+            this.brokerParameters["username_type"] = userId.Type.ToString();
+            this.brokerParameters["silent_broker_flow"] = null; //add key
         }
 
         protected override Task<AuthenticationResultEx> SendTokenRequestAsync()

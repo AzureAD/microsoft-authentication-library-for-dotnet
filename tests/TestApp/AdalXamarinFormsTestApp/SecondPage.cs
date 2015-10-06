@@ -7,7 +7,7 @@ using System.Text;
 using TestApp.PCL;
 using Xamarin.Forms;
 
-namespace AdalXamarinFormsTestApp
+namespace XFormsApp
 {
     public class SecondPage : ContentPage
     {
@@ -42,6 +42,9 @@ namespace AdalXamarinFormsTestApp
         async void browseButton_Clicked(object sender, EventArgs e)
         {
             this.result.Text = string.Empty;
+            tokenBroker.Sts = new MobileAppSts();
+            tokenBroker.Sts.ValidUserName = "e2e@adalobjc.onmicrosoft.com";
+
             string token = String.Empty;
             try
             {

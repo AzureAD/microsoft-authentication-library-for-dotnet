@@ -18,6 +18,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -122,6 +123,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             // Security issue: we prohibit navigation with auth code
             // if redirect URI is URN, then we prohibit navigation, to prevent random browser popup.
             e.Cancel = this.CheckForClosingUrl(e.Url);
+
+            // check if the url scheme is of type browser-install://
+            // this means we need to launch external browser
+            if (e.Url.Scheme.Equals("browser", StringComparison.InvariantCultureIgnoreCase))
+            {
+                Process.Start(e.Url.AbsoluteUri.Replace("browser://", "https://"));
+                e.Cancel = true;
+            }
 
             if (!e.Cancel)
             {

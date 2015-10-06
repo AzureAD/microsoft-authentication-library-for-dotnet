@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using Xamarin.Forms;
 
-namespace AdalXamarinFormsTestApp
+namespace XFormsApp
 {
     public delegate IPlatformParameters CreateParameters();
 

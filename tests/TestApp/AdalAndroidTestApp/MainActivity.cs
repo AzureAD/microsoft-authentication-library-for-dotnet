@@ -43,44 +43,78 @@ namespace AdalAndroidTestApp
             Button acquireTokenInteractiveButton = FindViewById<Button>(Resource.Id.acquireTokenInteractiveButton);
             acquireTokenInteractiveButton.Click += acquireTokenInteractiveButton_Click;
 
-            Button acquireTokenUPButton = FindViewById<Button>(Resource.Id.acquireTokenUPButton);
-            acquireTokenUPButton.Click += acquireTokenUPButton_Click;
+            Button acquireTokenSilentButton = FindViewById<Button>(Resource.Id.acquireTokenSilentButton);
+            acquireTokenSilentButton.Click += acquireTokenSilentButton_Click;
 
-            Button acquireTokenWithClientCredentialButton = FindViewById<Button>(Resource.Id.acquireTokenClientCredButton);
-            acquireTokenWithClientCredentialButton.Click += acquireTokenWithClientCredentialButton_Click;
+            Button clearCacheButton = FindViewById<Button>(Resource.Id.clearCacheButton);
+            clearCacheButton.Click += clearCacheButton_Click;
 
             this.accessTokenTextView = FindViewById<TextView>(Resource.Id.accessTokenTextView);
+            
+            EditText email = FindViewById<EditText>(Resource.Id.email);
+            email.Text = new MobileAppSts().ValidUserName;
+
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
-            AuthenticationAgentContinuationHelper.SetAuthenticationAgentContinuationEventArgs(requestCode, resultCode, data);
-
             base.OnActivityResult(requestCode, resultCode, data);
+            AuthenticationAgentContinuationHelper.SetAuthenticationAgentContinuationEventArgs(requestCode, resultCode, data);
         }
 
-        private async void acquireTokenUPButton_Click(object sender, EventArgs e)
+        private async void acquireTokenSilentButton_Click(object sender, EventArgs e)
         {
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
-            string token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
-            this.accessTokenTextView.Text = token;
+            tokenBroker.Sts = new MobileAppSts();
+            EditText email = FindViewById<EditText>(Resource.Id.email);
+            tokenBroker.Sts.ValidUserName = email.Text;
+            string value = null;
+            try
+            {
+                value = await tokenBroker.GetTokenSilentAsync(new PlatformParameters(this));
+            }
+            catch (Java.Lang.Exception ex)
+            {
+                throw new Exception(ex.Message + "\n" + ex.StackTrace);
+            }
+            catch (Exception exc)
+            {
+                value = exc.Message;
+            }
+
+            this.accessTokenTextView.Text = value;
+
         }
 
         private async void acquireTokenInteractiveButton_Click(object sender, EventArgs e)
         {
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
-            string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
-            this.accessTokenTextView.Text = token;
+            tokenBroker.Sts = new MobileAppSts();
+            EditText email = FindViewById<EditText>(Resource.Id.email);
+            tokenBroker.Sts.ValidUserName = email.Text;
+            string value = null;
+            try
+            {
+                value = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
+            }
+            catch (Java.Lang.Exception ex)
+            {
+                throw new Exception(ex.Message + "\n" + ex.StackTrace);
+            }
+            catch (Exception exc)
+            {
+                value = exc.Message;
+            }
+
+            this.accessTokenTextView.Text = value;
         }
 
-        private async void acquireTokenWithClientCredentialButton_Click(object sender, EventArgs e)
+        private async void clearCacheButton_Click(object sender, EventArgs e)
         {
-            this.accessTokenTextView.Text = string.Empty;
-            TokenBroker tokenBroker = new TokenBroker();
-            string token = await tokenBroker.GetTokenWithClientCredentialAsync();
-            this.accessTokenTextView.Text = token;
+            TokenCache.DefaultShared.Clear();
+            this.accessTokenTextView.Text = "Cache cleared";
         }
     }
 }

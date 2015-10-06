@@ -16,7 +16,7 @@ namespace AdaliOSTestApp
 	{
 		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
-		UILabel ReportLabel { get; set; }
+		UITextView ReportLabel { get; set; }
 
 		[Action ("UIButton11_TouchUpInside:")]
 		[GeneratedCode ("iOS Designer", "1.0")]
@@ -25,10 +25,6 @@ namespace AdaliOSTestApp
 		[Action ("UIButton16_TouchUpInside:")]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		partial void UIButton16_TouchUpInside (UIButton sender);
-
-		[Action ("UIButton25_TouchUpInside:")]
-		[GeneratedCode ("iOS Designer", "1.0")]
-		partial void UIButton25_TouchUpInside (UIButton sender);
 
 		[Action ("UIButton30_TouchUpInside:")]
 		[GeneratedCode ("iOS Designer", "1.0")]

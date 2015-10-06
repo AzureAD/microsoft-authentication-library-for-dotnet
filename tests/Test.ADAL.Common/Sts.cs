@@ -91,11 +91,11 @@ namespace Test.ADAL.Common
 
         public bool ValidateAuthority { get; protected set; }
 
-        public string Authority { get; protected set; }
+        public string Authority { get; set; }
 
         public string TenantlessAuthority { get; protected set; }
 
-        public string ValidResource { get; protected set; }
+        public string ValidResource { get; set; }
 
         public string ValidResource2 { get; protected set; }
 
@@ -125,7 +125,7 @@ namespace Test.ADAL.Common
 
         public Uri ValidRedirectUriForConfidentialClient { get; set; }
 
-        public string ValidUserName { get; protected set; }
+        public string ValidUserName { get; set; }
 
         public UserIdentifier ValidUserId
         {

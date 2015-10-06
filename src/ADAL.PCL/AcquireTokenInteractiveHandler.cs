@@ -65,16 +65,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.extraQueryParameters = extraQueryParameters;
-
             this.webUi = webUI;
-
             this.UniqueId = userId.UniqueId;
             this.DisplayableId = userId.DisplayableId;
             this.UserIdentifierType = userId.Type;
-
             this.LoadFromCache = (tokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters));
-
             this.SupportADFS = true;
+
+            this.brokerParameters["force"] = "NO";
+            this.brokerParameters["username"] = userId.Id;
+            this.brokerParameters["username_type"] = userId.Type.ToString();
+            this.brokerParameters["redirect_uri"] = redirectUri.AbsoluteUri;
+            this.brokerParameters["extra_qp"] = extraQueryParameters;
+            PlatformPlugin.BrokerHelper.PlatformParameters = authorizationParameters;
         }
 
         protected override async Task PreTokenRequest()
@@ -203,6 +206,28 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 throw new AdalServiceException(this.authorizationResult.Error, this.authorizationResult.ErrorDescription);
             }
+        }
+
+
+        protected override void UpdateBrokerParameters(IDictionary<string, string> parameters)
+        {
+            Uri uri = new Uri(this.authorizationResult.Code);
+            string query = EncodingHelper.UrlDecode(uri.Query);
+            Dictionary<string, string> kvps = EncodingHelper.ParseKeyValueList(query, '&', false, this.CallState);
+            parameters["username"] = kvps["username"];
+        }
+
+        protected override bool BrokerInvocationRequired()
+        {
+            if (this.authorizationResult != null
+                && !string.IsNullOrEmpty(this.authorizationResult.Code)
+                && this.authorizationResult.Code.StartsWith("msauth://"))
+            {
+                this.brokerParameters["broker_install_url"] = this.authorizationResult.Code;
+                return true;
+            }
+
+            return false;
         }
     }
 }

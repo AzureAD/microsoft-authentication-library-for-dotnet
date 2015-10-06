@@ -19,11 +19,6 @@
 using Foundation;
 using Security;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -45,6 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 var rec = new SecRecord(SecKind.GenericPassword)
                 {
                     Generic = NSData.FromString(LocalSettingsContainerName),
+                    Accessible = SecAccessible.Always,
                     Service = "ADAL.PCL.iOS Service",
                     Account = "ADAL.PCL.iOS cache",
                     Label = "ADAL.PCL.iOS Label",
@@ -78,6 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     var s = new SecRecord(SecKind.GenericPassword)
                     {
                         Generic = NSData.FromString(LocalSettingsContainerName),
+	                Accessible = SecAccessible.Always,
                         Service = "ADAL.PCL.iOS Service",
                         Account = "ADAL.PCL.iOS cache",
                         Label = "ADAL.PCL.iOS Label",

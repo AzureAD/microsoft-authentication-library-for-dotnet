@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
@@ -81,6 +82,31 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = CorrelationIdClaim, IsRequired = false)]
         public string CorrelationId { get; set; }
 
+        internal static TokenResponse CreateFromBrokerResponse(IDictionary<string, string> responseDictionary)
+        {
+            if (responseDictionary.ContainsKey(TokenResponseClaim.ErrorDescription))
+            {
+                return new TokenResponse
+                {
+                    Error = responseDictionary[TokenResponseClaim.Error],
+                    ErrorDescription = responseDictionary[TokenResponseClaim.ErrorDescription]
+                };
+            }
+            else
+            {
+                return new TokenResponse
+                {
+                    AccessToken = responseDictionary["access_token"],
+                    RefreshToken = responseDictionary["refresh_token"],
+                    IdTokenString = responseDictionary["id_token"],
+                    TokenType = "Bearer",
+                    CorrelationId = responseDictionary["correlation_id"],
+                    Resource = responseDictionary["resource"],
+                    ExpiresOn = long.Parse(responseDictionary["expires_on"].Split('.')[0])
+                };
+            }
+        }
+
         public static TokenResponse CreateFromErrorResponse(IHttpWebResponse webResponse)
         {
             if (webResponse == null)
@@ -135,9 +161,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (this.AccessToken != null)
             {
                 DateTimeOffset expiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn);
-
                 var result = new AuthenticationResult(this.TokenType, this.AccessToken, expiresOn);
-
+                
                 IdToken idToken = IdToken.Parse(this.IdTokenString);
                 if (idToken != null)
                 {

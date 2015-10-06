@@ -24,6 +24,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static class ClientMetricsEndpointType
     {
+        public const string DeviceCode = "device_code";
         public const string Token = "token";
         public const string UserRealmDiscovery = "user_realm";
         public const string InstanceDiscovery = "instance";

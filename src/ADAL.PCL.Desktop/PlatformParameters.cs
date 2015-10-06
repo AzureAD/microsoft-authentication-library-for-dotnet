@@ -23,6 +23,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="promptBehavior"></param>
+        public PlatformParameters(PromptBehavior promptBehavior):this(promptBehavior, null)
+        {
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="promptBehavior"></param>
+        /// <param name="ownerWindow"></param>
         public PlatformParameters(PromptBehavior promptBehavior, object ownerWindow)
         {
             this.PromptBehavior = promptBehavior;
