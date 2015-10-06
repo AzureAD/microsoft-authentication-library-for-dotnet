@@ -222,6 +222,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
             requestParameters[OAuthParameter.RefreshToken] = refreshToken;
+            requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
+
             AuthenticationResultEx result = await this.SendHttpMessageAsync(requestParameters);
 
             if (result.RefreshToken == null)

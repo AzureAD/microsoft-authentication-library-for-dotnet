@@ -236,6 +236,18 @@ namespace Test.ADAL.Common.Unit
 
         }
 
+
+        internal static void TokenCacheCrossTenantOperationsTest()
+        {
+            var tokenCache = new TokenCache();
+            var cacheDictionary = tokenCache.tokenCacheDictionary;
+            tokenCache.Clear();
+
+            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1", TokenSubjectType.User, null, "user1");
+            AuthenticationResultEx value = CreateCacheValue(null, "user1");
+
+        }
+
         internal static void TokenCacheOperationsTest()
         {
             var tokenCache = new TokenCache();
@@ -281,6 +293,7 @@ namespace Test.ADAL.Common.Unit
             AuthenticationResultEx resultEx = tokenCache.LoadFromCache("https://localhost/MockSts1", "resource1", "client1", TokenSubjectType.User, null,
                 "user1", null);
             Verify.IsNotNull(resultEx);
+            
 
             Verify.IsTrue(RemoveFromDictionary(tokenCache, key));
             Verify.IsFalse(RemoveFromDictionary(tokenCache, key));

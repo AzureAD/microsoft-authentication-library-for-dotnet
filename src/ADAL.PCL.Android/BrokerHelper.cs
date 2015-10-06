@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         
         internal static void SetBrokerResult(Intent data, int resultCode)
         {
-            if (resultCode != 2004)
+            if (resultCode != BrokerResponseCode.ResponseReceived)
             {
                 resultEx = new AuthenticationResultEx
                 {
