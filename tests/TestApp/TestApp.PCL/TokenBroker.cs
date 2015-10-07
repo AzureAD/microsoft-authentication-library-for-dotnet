@@ -37,26 +37,26 @@ namespace TestApp.PCL
             this.ValidateAuthority = true;
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
             this.ValidExpiresIn = 28800;
-            this.ValidNonExistingRedirectUri = new Uri("adaliosapp://com.your-company.adaliostestapp");
+            this.ValidNonExistingRedirectUri = new Uri("<REPLACE>");
             this.ValidLoggedInFederatedUserName = "dummy\\dummy";
             string[] segments = this.ValidLoggedInFederatedUserName.Split(new[] { '\\' });
             this.ValidLoggedInFederatedUserId = string.Format("{0}@microsoft.com", (segments.Length == 2) ? segments[1] : segments[0]);
 
-            this.TenantName = "adalobjc.onmicrosoft.com";
+            this.TenantName = "<REPLACE>";
             this.Authority = string.Format("https://login.windows.net/{0}", this.TenantName);
             this.TenantlessAuthority = "https://login.windows.net/Common";
             this.Type = StsType.AAD;
             this.ValidClientId = "dd9caee2-38bd-484e-998c-7529bdef220f";
             this.ValidNonExistentRedirectUriClientId = this.ValidClientId;
             this.ValidClientIdWithExistingRedirectUri = this.ValidClientId;
-            this.ValidUserName = @"e2e@adalobjc.onmicrosoft.com";
+            this.ValidUserName = @"<REPLACE>";
             this.ValidDefaultRedirectUri = new Uri("https://login.live.com/");
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
             this.ValidRedirectUriForConfidentialClient = new Uri("https://confidential.foobar.com");
             this.ValidPassword = "<REPLACE>";
             this.ValidResource = "https://graph.windows.net";
 
-            this.MsaUserName = "adaltest@outlook.com";
+            this.MsaUserName = "<REPLACE>";
             this.MsaPassword = "<REPLACE>";
         }
 

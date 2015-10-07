@@ -43,7 +43,7 @@ namespace XFormsApp
         {
             this.result.Text = string.Empty;
             tokenBroker.Sts = new MobileAppSts();
-            tokenBroker.Sts.ValidUserName = "e2e@adalobjc.onmicrosoft.com";
+            tokenBroker.Sts.ValidUserName = "<REPLACE>";
 
             string token = String.Empty;
             try
