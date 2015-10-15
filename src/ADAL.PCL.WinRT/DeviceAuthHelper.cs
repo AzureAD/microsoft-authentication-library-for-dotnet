@@ -62,9 +62,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             CertificateQuery query = new CertificateQuery();
             IReadOnlyList<Certificate> certificates = null;
+            string errMessage = null;
 
             if (challengeData.ContainsKey("CertAuthorities"))
             {
+                errMessage = "Cert Authorities:" + challengeData["CertAuthorities"];
                 PlatformPlugin.Logger.Verbose(null, "Looking up certificate matching authorities:" + challengeData["CertAuthorities"]);
                 string[] certAuthorities = challengeData["CertAuthorities"].Split(';');
                 foreach (var certAuthority in certAuthorities)
@@ -87,6 +89,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
+                errMessage = "Cert Thumbprint:" + challengeData["CertThumbprint"];
                 PlatformPlugin.Logger.Verbose(null, "Looking up certificate matching thumbprint:" + challengeData["CertThumbprint"]);
                 query.Thumbprint = HexStringToByteArray(challengeData["CertThumbprint"]);
                 certificates = await CertificateStores.FindAllAsync(query);
@@ -94,7 +97,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (certificates == null || certificates.Count == 0)
             {
-                throw new FileNotFoundException("Certificate not found in local machine cert store");
+                throw new AdalException(AdalError.DeviceCertificateNotFound,
+                    string.Format(AdalErrorMessage.DeviceCertificateNotFoundTemplate, errMessage));
             }
 
             return certificates[0];

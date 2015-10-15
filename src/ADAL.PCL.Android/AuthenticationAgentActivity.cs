@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             public override bool ShouldOverrideUrlLoading(WebView view, string url)
             {
-                if (url.StartsWith(BrokerConstants.BROWSER_EXT_PREFIX))
+                if (url.StartsWith(BrokerConstants.BrowserExtPrefix))
                 {
                     PlatformPlugin.Logger.Verbose(null, "It is browser launch request");
                     OpenLinkInBrowser(url, ((Activity)view.Context));
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     ((Activity)view.Context).Finish();
                     return true;
                 }
-                else if (url.StartsWith(BrokerConstants.BROWSER_EXT_INSTALL_PREFIX))
+                else if (url.StartsWith(BrokerConstants.BrowserExtInstallPrefix))
                 {
                     PlatformPlugin.Logger.Verbose(null, "It is an install request");
 /*                    ApplicationReceiver.saveRequest(mCallingContext, mRequest, url);
@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             private void OpenLinkInBrowser(string url, Activity activity)
             {
                 String link = url
-                        .Replace(BrokerConstants.BROWSER_EXT_PREFIX, "https://");
+                        .Replace(BrokerConstants.BrowserExtPrefix, "https://");
                 Intent intent = new Intent(Intent.ActionView, Android.Net.Uri.Parse(link));
                 activity.StartActivity(intent);
             }

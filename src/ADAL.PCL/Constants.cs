@@ -269,6 +269,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Broker response hash did not match
         /// </summary>
         public const string BrokerReponseHashMismatch = "broker_response_hash_mismatch";
+
+        /// <summary>
+        /// Device certificate not found.
+        /// </summary>
+        public const string DeviceCertificateNotFound = "device_certificate_not_found";
     }
 
     /// <summary>
@@ -381,6 +386,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             "Integrated authentication failed. You may try an alternative authentication method";
 
         public const string DuplicateQueryParameterTemplate = "Duplicate query parameter '{0}' in extraQueryParameters";
+        
+        public const string DeviceCertificateNotFoundTemplate = "Device Certificate was not found for {0}";
     }
 
     internal class XmlNamespace
