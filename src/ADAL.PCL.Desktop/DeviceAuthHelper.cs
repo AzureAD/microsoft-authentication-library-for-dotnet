@@ -98,9 +98,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     if (signingCert == null || signingCert.Count == 0)
                     {
-                        throw new FileNotFoundException(
-                            string.Format("Certs with thumbprint: '{0}' not found in cert store.",
-                                challengeData["CertThumbprint"]));
+                        throw new AdalException(AdalError.DeviceCertificateNotFound,
+                            string.Format(AdalErrorMessage.DeviceCertificateNotFoundTemplate, "Cert Authorities:" + challengeData["CertAuthorities"]));
                     }
                 }
                 else
@@ -109,9 +108,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         false);
                     if (signingCert.Count == 0)
                     {
-                        throw new FileNotFoundException(
-                            string.Format("Cert with thumbprint: '{0}' not found in local machine cert store.",
-                                challengeData["CertThumbprint"]));
+                        throw new AdalException(AdalError.DeviceCertificateNotFound,
+                            string.Format(AdalErrorMessage.DeviceCertificateNotFoundTemplate, "Cert thumbprint:" + challengeData["CertThumbprint"]));
                     }
                 }
 

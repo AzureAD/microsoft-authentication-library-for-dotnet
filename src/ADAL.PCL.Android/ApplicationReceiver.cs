@@ -53,10 +53,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AuthenticationRequest pendingRequest = gson.fromJson(request, AuthenticationRequest.class);
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_PICK);
-        intent.putExtra(AuthenticationConstants.Broker.BROKER_REQUEST, pendingRequest);
-        intent.putExtra(AuthenticationConstants.Broker.CALLER_INFO_PACKAGE, ctx.getPackageName());
-        intent.putExtra(AuthenticationConstants.Broker.BROKER_REQUEST_RESUME,
-                AuthenticationConstants.Broker.BROKER_REQUEST_RESUME);
+        intent.putExtra(AuthenticationConstants.Broker.BrokerRequest, pendingRequest);
+        intent.putExtra(AuthenticationConstants.Broker.CallerInfoPackage, ctx.getPackageName());
+        intent.putExtra(AuthenticationConstants.Broker.BrokerRequestResume,
+                AuthenticationConstants.Broker.BrokerRequestResume);
         intent.setPackage(AuthenticationSettings.INSTANCE.getBrokerPackageName());
         intent.setClassName(AuthenticationSettings.INSTANCE.getBrokerPackageName(),
                 AuthenticationSettings.INSTANCE.getBrokerPackageName()

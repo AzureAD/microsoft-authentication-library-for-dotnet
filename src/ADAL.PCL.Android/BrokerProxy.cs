@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // if there is not any user added to account, it returns empty
             Account targetAccount = null;
             Account[] accountList = mAcctManager
-                    .GetAccountsByType(BrokerConstants.BROKER_ACCOUNT_TYPE);
+                    .GetAccountsByType(BrokerConstants.BrokerAccountType);
 
             if (!String.IsNullOrEmpty(request.BrokerAccountName))
             {
@@ -216,7 +216,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     // AccountManager.
                     //
                     result = mAcctManager.GetAuthToken(targetAccount,
-                            BrokerConstants.AUTHTOKEN_TYPE, brokerOptions, false,
+                            BrokerConstants.AuthtokenType, brokerOptions, false,
                             null /*
                               * set to null to avoid callback
                               */, new Handler(callerActivity.MainLooper));
@@ -271,7 +271,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
-                bool initialRequest = bundleResult.ContainsKey(BrokerConstants.ACCOUNT_INITIAL_REQUEST);
+                bool initialRequest = bundleResult.ContainsKey(BrokerConstants.AccountInitialRequest);
                 if (initialRequest)
                 {
                     // Initial request from app to Authenticator needs to launch
@@ -281,14 +281,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 // IDtoken is not present in the current broker user model
                 UserInfo userinfo = GetUserInfoFromBrokerResult(bundleResult);
+                AuthenticationResult result = 
+                        new AuthenticationResult("Bearer", bundleResult.GetString(AccountManager.KeyAuthtoken),
+                            ConvertFromTimeT(bundleResult.GetLong("account.expiredate", 0)))
+                        {
+                            UserInfo = userinfo
+                        };
+
+                result.UpdateTenantAndUserInfo(bundleResult.GetString(BrokerConstants.AccountUserInfoTenantId),null, userinfo);
+                
                 return new AuthenticationResultEx
                 {
                     RefreshToken = null,
                     ResourceInResponse = null,
-                    Result = new AuthenticationResult("Bearer", bundleResult.GetString(AccountManager.KeyAuthtoken), ConvertFromTimeT(bundleResult.GetLong("account.expiredate", 0)))
-                    {
-                      UserInfo = userinfo
-                    }
                 };
             }
         }
@@ -304,15 +309,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             // Broker has one user and related to ADFS WPJ user. It does not return
             // idtoken
-            String userid = bundle.GetString(BrokerConstants.ACCOUNT_USERINFO_USERID);
+            String userid = bundle.GetString(BrokerConstants.AccountUserInfoUserId);
             String givenName = bundle
-                    .GetString(BrokerConstants.ACCOUNT_USERINFO_GIVEN_NAME);
+                    .GetString(BrokerConstants.AccountUserInfoGivenName);
             String familyName = bundle
-                    .GetString(BrokerConstants.ACCOUNT_USERINFO_FAMILY_NAME);
+                    .GetString(BrokerConstants.AccountUserInfoFamilyName);
             String identityProvider = bundle
-                    .GetString(BrokerConstants.ACCOUNT_USERINFO_IDENTITY_PROVIDER);
+                    .GetString(BrokerConstants.AccountUserInfoIdentityProvider);
             String displayableId = bundle
-                    .GetString(BrokerConstants.ACCOUNT_USERINFO_USERID_DISPLAYABLE);
+                    .GetString(BrokerConstants.AccountUserInfoUserIdDisplayable);
             return new UserInfo
             {
                 UniqueId = userid,
@@ -333,8 +338,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 // intent. Activity needs to be launched from calling app
                 // to get the calling app's metadata if needed at BrokerActivity.
                 Bundle addAccountOptions = GetBrokerOptions(request);
-                result = mAcctManager.AddAccount(BrokerConstants.BROKER_ACCOUNT_TYPE,
-                        BrokerConstants.AUTHTOKEN_TYPE, null, addAccountOptions, null,
+                result = mAcctManager.AddAccount(BrokerConstants.BrokerAccountType,
+                        BrokerConstants.AuthtokenType, null, addAccountOptions, null,
                         null, new Handler(callerActivity.MainLooper));
 
                 // Making blocking request here
@@ -347,7 +352,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 // logic
                 if (intent != null)
                 {
-                    intent.PutExtra(BrokerConstants.BROKER_REQUEST, BrokerConstants.BROKER_REQUEST);
+                    intent.PutExtra(BrokerConstants.BrokerRequest, BrokerConstants.BrokerRequest);
                 }
             }
             catch (OperationCanceledException e)
@@ -410,22 +415,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             Bundle brokerOptions = new Bundle();
             // request needs to be parcelable to send across process
             brokerOptions.PutInt("com.microsoft.aad.adal:RequestId", request.RequestId);
-            brokerOptions.PutString(BrokerConstants.ACCOUNT_AUTHORITY,
+            brokerOptions.PutString(BrokerConstants.AccountAuthority,
                     request.Authority);
             brokerOptions.PutInt("json", 1);
-            brokerOptions.PutString(BrokerConstants.ACCOUNT_RESOURCE,
+            brokerOptions.PutString(BrokerConstants.AccountResource,
                     request.Resource);
             string s = GetRedirectUriForBroker();
-            brokerOptions.PutString(BrokerConstants.ACCOUNT_REDIRECT, s);
-            brokerOptions.PutString(BrokerConstants.ACCOUNT_CLIENTID_KEY,
+            brokerOptions.PutString(BrokerConstants.AccountRedirect, s);
+            brokerOptions.PutString(BrokerConstants.AccountClientIdKey,
                     request.ClientId);
-            brokerOptions.PutString(BrokerConstants.ADAL_VERSION_KEY,
+            brokerOptions.PutString(BrokerConstants.AdalVersionKey,
                     request.Version);
-            brokerOptions.PutString(BrokerConstants.ACCOUNT_EXTRA_QUERY_PARAM,
+            brokerOptions.PutString(BrokerConstants.AccountExtraQueryParam,
                     request.ExtraQueryParamsAuthentication);
             if (request.CorrelationId != null)
             {
-                brokerOptions.PutString(BrokerConstants.ACCOUNT_CORRELATIONID, request
+                brokerOptions.PutString(BrokerConstants.AccountCorrelationId, request
                         .CorrelationId.ToString());
             }
 
@@ -435,8 +440,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 username = request.LoginHint;
             }
 
-            brokerOptions.PutString(BrokerConstants.ACCOUNT_LOGIN_HINT, username);
-            brokerOptions.PutString(BrokerConstants.ACCOUNT_NAME, username);
+            brokerOptions.PutString(BrokerConstants.AccountLoginHint, username);
+            brokerOptions.PutString(BrokerConstants.AccountName, username);
 
             return brokerOptions;
         }
@@ -444,7 +449,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private string GetCurrentUser()
         {
             // authenticator is not used if there is not any user
-            Account[] accountList = mAcctManager.GetAccountsByType(BrokerConstants.BROKER_ACCOUNT_TYPE);
+            Account[] accountList = mAcctManager.GetAccountsByType(BrokerConstants.BrokerAccountType);
             return (accountList != null && accountList.Length > 0) ? accountList[0].Name : null;
         }
 
@@ -453,11 +458,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AuthenticatorDescription[] authenticators = am.GetAuthenticatorTypes();
             foreach (AuthenticatorDescription authenticator in authenticators)
             {
-                if (authenticator.Type.Equals(BrokerConstants.BROKER_ACCOUNT_TYPE))
+                if (authenticator.Type.Equals(BrokerConstants.BrokerAccountType))
                 {
 
                     Account[] accountList = mAcctManager
-                            .GetAccountsByType(BrokerConstants.BROKER_ACCOUNT_TYPE);
+                            .GetAccountsByType(BrokerConstants.BrokerAccountType);
 
                     // Authenticator installed from Company portal
                     // This supports only one account
@@ -602,7 +607,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AuthenticatorDescription[] authenticators = am.GetAuthenticatorTypes();
             foreach (AuthenticatorDescription authenticator in authenticators)
             {
-                if (authenticator.Type.Equals(BrokerConstants.BROKER_ACCOUNT_TYPE)
+                if (authenticator.Type.Equals(BrokerConstants.BrokerAccountType)
                         && VerifySignature(authenticator.PackageName))
                 {
                     return true;
@@ -622,7 +627,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
     Account[] accountList = mAcctManager
-            .GetAccountsByType(BrokerConstants.BROKER_ACCOUNT_TYPE);
+            .GetAccountsByType(BrokerConstants.BrokerAccountType);
     Bundle bundle = new Bundle();
     bundle.PutBoolean(DATA_USER_INFO, true);
 
@@ -634,7 +639,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 // Use AccountManager Api method to get extended user info
                 IAccountManagerFuture result = mAcctManager.UpdateCredentials(
-                        accountList[i], BrokerConstants.AUTHTOKEN_TYPE, bundle,
+                        accountList[i], BrokerConstants.AuthtokenType, bundle,
                         null, null, null);
     PlatformPlugin.Logger.Verbose(null, "Waiting for the result");
                 Bundle userInfoBundle = (Bundle)result.Result;
@@ -642,15 +647,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 users[i] = new UserInfo
                 {
                     UniqueId = userInfoBundle
-                    .GetString(BrokerConstants.ACCOUNT_USERINFO_USERID),
+                    .GetString(BrokerConstants.AccountUserInfoUserId),
                     GivenName = userInfoBundle
-                                .GetString(BrokerConstants.ACCOUNT_USERINFO_GIVEN_NAME),
+                                .GetString(BrokerConstants.AccountUserInfoGivenName),
                     FamilyName = userInfoBundle
-                                .GetString(BrokerConstants.ACCOUNT_USERINFO_FAMILY_NAME),
+                                .GetString(BrokerConstants.AccountUserInfoFamilyName),
                     IdentityProvider = userInfoBundle
-                                .GetString(BrokerConstants.ACCOUNT_USERINFO_IDENTITY_PROVIDER),
+                                .GetString(BrokerConstants.AccountUserInfoIdentityProvider),
                     DisplayableId = userInfoBundle
-                                .GetString(BrokerConstants.ACCOUNT_USERINFO_USERID_DISPLAYABLE)
+                                .GetString(BrokerConstants.AccountUserInfoUserIdDisplayable),
             };
             
             }
