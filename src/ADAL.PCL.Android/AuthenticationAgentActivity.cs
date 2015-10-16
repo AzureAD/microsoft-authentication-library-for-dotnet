@@ -42,6 +42,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             WebView webView = FindViewById<WebView>(Resource.Id.agentWebView);
             WebSettings webSettings = webView.Settings;
+            string userAgent = webSettings.UserAgentString;
+            webSettings.UserAgentString = 
+                    userAgent + BrokerConstants.ClientTlsNotSupported;
+            PlatformPlugin.Logger.Verbose(null, "UserAgent:" + webSettings.UserAgentString);
+
             webSettings.JavaScriptEnabled = true;
 
             webSettings.LoadWithOverviewMode = true;
@@ -91,7 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             public override bool ShouldOverrideUrlLoading(WebView view, string url)
-            {
+            { 
                 if (url.StartsWith(BrokerConstants.BrowserExtPrefix))
                 {
                     PlatformPlugin.Logger.Verbose(null, "It is browser launch request");
@@ -102,13 +107,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else if (url.StartsWith(BrokerConstants.BrowserExtInstallPrefix))
                 {
-                    PlatformPlugin.Logger.Verbose(null, "It is an install request");
-/*                    ApplicationReceiver.saveRequest(mCallingContext, mRequest, url);
-                    IDictionary<string, string> parameters = StringExtensions
-                            .getUrlParameters(url);*/
-                   // OpenLinkInBrowser(parameters.get(ApplicationReceiver.INSTALL_URL_KEY));
+                    PlatformPlugin.Logger.Verbose(null, "It is an azure authenticator install request");
                     view.StopLoading();
-                    ((Activity)view.Context).Finish();
+                    this.Finish(view, url);
+                    return true;
+                }
+                else if(url.StartsWith(BrokerConstants.ClientTlsRedirect, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    Uri uri = new Uri(url);
+                    string query = uri.Query;
+                    if (query.StartsWith("?"))
+                    {
+                        query = query.Substring(1);
+                    }
+
+                    Dictionary<string, string> keyPair = EncodingHelper.ParseKeyValueList(query, '&', true, false, null);
+                    string responseHeader = PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(keyPair).Result;
+                    Dictionary<string, string> pkeyAuthEmptyResponse = new Dictionary<string, string>();
+                    pkeyAuthEmptyResponse[BrokerConstants.ChallangeResponseHeader] = responseHeader;
+                    view.LoadUrl(keyPair["SubmitUrl"], pkeyAuthEmptyResponse);
                     return true;
                 }
 

@@ -71,7 +71,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return builder.ToString();
         }
 
-        public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, CallState callState)
+        public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, bool lowercaseKeys,
+            CallState callState)
         {
             var response = new Dictionary<string, string>();
 
@@ -93,10 +94,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         value = UrlDecode(value);
                     }
 
-                    key = key.Trim().ToLower();
+                    if (lowercaseKeys)
+                    {
+                        key = key.Trim().ToLower();
+                    }
+
                     value = value.Trim().Trim(new[] { '\"' }).Trim();
 
-                    if (response.ContainsKey(key) && callState!=null)
+                    if (response.ContainsKey(key) && callState != null)
                     {
                         PlatformPlugin.Logger.Warning(callState, string.Format("Key/value pair list contains redundant key '{0}'.", key));
                     }
@@ -106,6 +111,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return response;
+        }
+
+        public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, CallState callState)
+        {
+            return ParseKeyValueList(input, delimiter, urlDecode, true, callState);
         }
 
         public static byte[] ToByteArray(this String stringInput)

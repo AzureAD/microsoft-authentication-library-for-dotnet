@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(string.Format(@"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData[BrokerConstants.ChallangeResponseContext], challengeData[BrokerConstants.ChallangeResponseVersion]));
         }
     }
 }
