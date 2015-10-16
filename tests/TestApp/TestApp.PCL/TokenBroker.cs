@@ -37,7 +37,7 @@ namespace TestApp.PCL
             this.ValidateAuthority = true;
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
             this.ValidExpiresIn = 28800;
-            this.ValidNonExistingRedirectUri = new Uri("<REPLACE>");
+            this.ValidNonExistingRedirectUri = new Uri("urn:ietf:wg:oauth:2.0:oob");
             this.ValidLoggedInFederatedUserName = "dummy\\dummy";
             string[] segments = this.ValidLoggedInFederatedUserName.Split(new[] { '\\' });
             this.ValidLoggedInFederatedUserId = string.Format("{0}@microsoft.com", (segments.Length == 2) ? segments[1] : segments[0]);

@@ -68,6 +68,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
         public void AcquireToken(IDictionary<string, string> brokerPayload)
         {
+
+            if (brokerPayload.ContainsKey("broker_install_url"))
+            {
+                string url = brokerPayload["broker_install_url"];
+                Uri uri = new Uri(url);
+                string query = uri.Query;
+                if (query.StartsWith("?"))
+                {
+                    query = query.Substring(1);
+                }
+
+                Dictionary<string, string> keyPair = EncodingHelper.ParseKeyValueList(query, '&', true, false, null);
+
+                PlatformParameters pp = PlatformParameters as PlatformParameters;
+                pp.CallerActivity.StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse(keyPair["app_link"])));
+                
+                throw new AdalException(AdalErrorEx.BrokerApplicationRequired, AdalErrorMessageEx.BrokerApplicationRequired);
+            }
+
             Context mContext = Application.Context;
             AuthenticationRequest request = new AuthenticationRequest(brokerPayload);
             PlatformParameters platformParams = PlatformParameters as PlatformParameters;
@@ -108,12 +127,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 // Only happens with callback since silent call does not show UI
                 PlatformPlugin.Logger.Verbose(null, "Launch activity for Authenticator");
-                /*mAuthorizationCallback = callbackHandle.callback;
-                request.setRequestId(callbackHandle.callback.hashCode());*/
                 PlatformPlugin.Logger.Verbose(null, "Starting Authentication Activity");
-                /*putWaitingRequest(callbackHandle.callback.hashCode(),
-                    new AuthenticationRequestState(callbackHandle.callback.hashCode(), request,
-                        callbackHandle.callback));*/
                 if (resultEx == null)
                 {
                     PlatformPlugin.Logger.Verbose(null, "Initial request to authenticator");

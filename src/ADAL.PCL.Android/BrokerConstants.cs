@@ -119,6 +119,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public const string ChallangeResponseContext = "Context";
 
+        public const string ChallangeResponseVersion = "Version";
+
         /**
          * Certificate authorities are passed with delimiter.
          */

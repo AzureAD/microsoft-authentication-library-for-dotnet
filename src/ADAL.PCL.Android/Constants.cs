@@ -23,6 +23,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string MissingDigestShaAlgorithm = "missing_digest_sha_algorithm";
         public const string SignatureVerificationFailed = "signature_verification_failed";
         public const string NoBrokerAccountFound = "broker_account_not_found";
+        public const string BrokerApplicationRequired = "broker_application_required";
     }
 
     internal static class AdalErrorMessageEx
@@ -36,6 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string MissingDigestShaAlgorithm = "Digest SHA algorithm does not exists";
         public const string SignatureVerificationFailed = "Error in verifying broker app's signature";
         public const string NoBrokerAccountFound = "No account found in broker app";
+        public const string BrokerApplicationRequired = "Broker application must be installed to continue authentication";
     }
 
     internal static class BrokerResponseCode

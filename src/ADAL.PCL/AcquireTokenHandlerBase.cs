@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     {
                         await this.PreTokenRequest();
                         
-                        // check if broker app is required for authentication.
+                        // check if broker app installation is required for authentication.
                         if (this.BrokerInvocationRequired())
                         {
                             resultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters);
