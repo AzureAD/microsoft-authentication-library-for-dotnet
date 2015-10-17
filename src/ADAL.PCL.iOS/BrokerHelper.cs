@@ -48,9 +48,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (brokerPayload.ContainsKey("broker_install_url"))
             {
-                string url = brokerPayload["broker_install_url"];
-                Dictionary<string,string> keyValue = EncodingHelper.ParseKeyValueList(url, '&', false, null);
+                    string url = brokerPayload["broker_install_url"];
+                    Uri uri = new Uri(url);
+                    string query = uri.Query;
+                    if (query.StartsWith("?"))
+                    {
+                        query = query.Substring(1);
+                    }
 
+                    Dictionary<string, string> keyPair = EncodingHelper.ParseKeyValueList(query, '&', true, false, null);
+
+                DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(keyPair["app_link"])));
+
+                    throw new AdalException(AdalErrorEx.BrokerApplicationRequired, AdalErrorMessageEx.BrokerApplicationRequired);
             }
             else
             {

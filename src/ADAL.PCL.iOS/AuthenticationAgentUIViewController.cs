@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using CoreFoundation;
 using CoreGraphics;
 using Foundation;
@@ -41,6 +42,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.url = url;
             this.callback = callback;
             this.callbackMethod = callbackMethod;
+            NSUrlProtocol.RegisterClass(new ObjCRuntime.Class(typeof(AdalCustomUrlProtocol)));
         }
 
         public override void ViewDidLoad()
@@ -59,23 +61,41 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 string requestUrlString = request.Url.ToString().ToLower();
                 
-                if (requestUrlString.StartsWith("browser://"))
+                if (requestUrlString.StartsWith(BrokerConstants.BrowserExtPrefix))
                 {
                     DispatchQueue.MainQueue.DispatchAsync(() => CancelAuthentication(null, null));
-                    requestUrlString = requestUrlString.Replace("browser://", "https://");
+                    requestUrlString = requestUrlString.Replace(BrokerConstants.BrowserExtPrefix, "https://");
                     DispatchQueue.MainQueue.DispatchAsync(
                         () => UIApplication.SharedApplication.OpenUrl(new NSUrl(requestUrlString)));
                     this.DismissViewController(true, null);
                     return false;
                 }
 
-                if (requestUrlString.StartsWith(callback.ToLower()) || requestUrlString.StartsWith("msauth://"))
+                if (requestUrlString.StartsWith(callback.ToLower()) || requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix))
                 {
                     callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, request.Url.ToString()));
                     this.DismissViewController(true, null);
                     return false;
                 }
-                
+
+                if (url.StartsWith(BrokerConstants.DeviceAuthChallengeRedirect, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    Uri uri = new Uri(url);
+                    string query = uri.Query;
+                    if (query.StartsWith("?"))
+                    {
+                        query = query.Substring(1);
+                    }
+
+                    Dictionary<string, string> keyPair = EncodingHelper.ParseKeyValueList(query, '&', true, false, null);
+                    string responseHeader = PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(keyPair).Result;
+                    
+                    NSMutableUrlRequest newRequest = (NSMutableUrlRequest)request.MutableCopy();
+                    newRequest.Headers.SetValueForKey(new NSString(responseHeader), new NSString(BrokerConstants.ChallengeResponseHeader));
+                    wView.LoadRequest(newRequest);
+                    return false;
+                }
+
                 return true;
             };
 
@@ -100,6 +120,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             callbackMethod(new AuthorizationResult(AuthorizationStatus.UserCancel, null));
             this.DismissViewController(true, null);
+        }
+
+        public override void DismissViewController(bool animated, Action completionHandler)
+        {
+            NSUrlProtocol.UnregisterClass(new ObjCRuntime.Class(typeof(AdalCustomUrlProtocol)));
+            base.DismissViewController(animated, completionHandler);
         }
     }
 }

@@ -105,14 +105,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     ((Activity)view.Context).Finish();
                     return true;
                 }
-                else if (url.StartsWith(BrokerConstants.BrowserExtInstallPrefix))
+
+                if (url.StartsWith(BrokerConstants.BrowserExtInstallPrefix))
                 {
                     PlatformPlugin.Logger.Verbose(null, "It is an azure authenticator install request");
                     view.StopLoading();
                     this.Finish(view, url);
                     return true;
                 }
-                else if(url.StartsWith(BrokerConstants.ClientTlsRedirect, StringComparison.CurrentCultureIgnoreCase))
+
+                if (url.StartsWith(BrokerConstants.ClientTlsRedirect, StringComparison.CurrentCultureIgnoreCase))
                 {
                     Uri uri = new Uri(url);
                     string query = uri.Query;
