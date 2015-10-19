@@ -28,6 +28,7 @@ namespace AdaliOSTestApp
 {
     public partial class AdaliOSTestAppViewController : UIViewController
     {
+        MobileAppSts sts = new  MobileAppSts();
         public AdaliOSTestAppViewController(IntPtr handle)
             : base(handle)
         {
@@ -78,6 +79,12 @@ namespace AdaliOSTestApp
             {
                 ReportLabel.Text = string.Empty;
                 TokenBroker tokenBroker = new TokenBroker();
+
+                sts.Authority = "https://login.microsoftonline.com/common";
+                sts.ValidClientId = "b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+                sts.ValidResource = "https://msdevex-my.sharepoint.com";
+                sts.ValidUserName = "mam@msdevex.onmicrosoft.com";
+                tokenBroker.Sts = sts;
                 string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
                 ReportLabel.Text = token;
             }
@@ -93,7 +100,11 @@ namespace AdaliOSTestApp
             {
                 ReportLabel.Text = string.Empty;
                 TokenBroker tokenBroker = new TokenBroker();
-                tokenBroker.Sts = new MobileAppSts();
+                sts.Authority = "https://login.microsoftonline.com/common";
+                sts.ValidClientId = "b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+                sts.ValidResource = "https://msdevex-my.sharepoint.com";
+                sts.ValidUserName = "mam@msdevex.onmicrosoft.com";
+                tokenBroker.Sts = sts;
                 string token = await tokenBroker.GetTokenSilentAsync(new PlatformParameters(this));
                 ReportLabel.Text = token;
             }

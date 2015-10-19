@@ -32,7 +32,7 @@ namespace AdalAndroidTestApp
     public class MainActivity : Activity
     {
         private TextView accessTokenTextView;
-
+        private MobileAppSts sts = new MobileAppSts();
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
@@ -50,10 +50,14 @@ namespace AdalAndroidTestApp
             clearCacheButton.Click += clearCacheButton_Click;
 
             this.accessTokenTextView = FindViewById<TextView>(Resource.Id.accessTokenTextView);
-            
-            EditText email = FindViewById<EditText>(Resource.Id.email);
-            email.Text = new MobileAppSts().ValidUserName;
 
+            sts.Authority = "https://login.microsoftonline.com/common";
+            sts.ValidClientId = "b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+            sts.ValidResource = "https://msdevex-my.sharepoint.com";
+            sts.ValidUserName = "mam@msdevex.onmicrosoft.com";
+
+            EditText email = FindViewById<EditText>(Resource.Id.email);
+            email.Text = sts.ValidUserName;
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
@@ -66,7 +70,7 @@ namespace AdalAndroidTestApp
         {
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
-            tokenBroker.Sts = new MobileAppSts();
+            tokenBroker.Sts = sts;
             EditText email = FindViewById<EditText>(Resource.Id.email);
             tokenBroker.Sts.ValidUserName = email.Text;
             string value = null;
@@ -91,7 +95,7 @@ namespace AdalAndroidTestApp
         {
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
-            tokenBroker.Sts = new MobileAppSts();
+            tokenBroker.Sts = sts;
             EditText email = FindViewById<EditText>(Resource.Id.email);
             tokenBroker.Sts.ValidUserName = email.Text;
             string value = null;
