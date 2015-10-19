@@ -36,5 +36,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string BrowserExtInstallPrefix = "msauth://";
 
         public const string DeviceAuthChallengeRedirect = "urn:http-auth:PKeyAuth";
+        public const string ChallengeHeaderKey = "x-ms-PKeyAuth";
+        public const string ChallengeHeaderValue = "1.0";
     }
 }

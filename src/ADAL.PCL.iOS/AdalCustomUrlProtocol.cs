@@ -17,20 +17,25 @@
 //----------------------------------------------------------------------
 
 
+using System;
+using CoreFoundation;
 using Foundation;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     public class AdalCustomUrlProtocol : NSUrlProtocol
     {
+        private NSUrlConnection connection;
+
         [Export("canInitWithRequest:")]
         public static bool canInitWithRequest(NSUrlRequest request)
         {
-            if (null != request.Headers && request.Headers.ContainsKey(NSObject.FromObject("PKeyAuth")))
+            if (request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
             {
-                return false; // request has already been handled
+                return GetProperty("ADURLProtocol", request) == null;
             }
-            return true;
+
+            return false;
         }
 
         [Export("canonicalRequestForRequest:")]
@@ -40,39 +45,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         [Export("initWithRequest:cachedResponse:client:")]
-        public AdalCustomUrlProtocol(NSUrlRequest request, NSCachedUrlResponse cachedResponse, INSUrlProtocolClient client)
+        public AdalCustomUrlProtocol(NSUrlRequest request, NSCachedUrlResponse cachedResponse,
+            INSUrlProtocolClient client)
             : base(request, cachedResponse, client)
         {
         }
 
-        public override NSUrlRequest Request
-        {
-            get
-            {
-                // inject the HTTP header
-                NSMutableDictionary headers = null;
-                if (null == base.Request.Headers)
-                {
-                    headers = new NSMutableDictionary();
-                }
-                else
-                {
-                    headers = new NSMutableDictionary(base.Request.Headers);
-                }
-                headers.Add(NSObject.FromObject("PKeyAuth"), NSObject.FromObject("1.0"));
-                NSMutableUrlRequest newRequest = (NSMutableUrlRequest) base.Request.MutableCopy();
-                newRequest.Headers = headers;
-                return newRequest;
-            }
-        }
-
         public override void StartLoading()
         {
-            new NSUrlConnection(Request, new AdalCustomConnectionDelegate(this), true);
+            if (this.Request == null)
+            {
+                return;
+            }
+
+            NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest) this.Request.MutableCopy();
+            SetProperty(new NSString("YES"), "ADURLProtocol", mutableRequest);
+            this.connection = new NSUrlConnection(mutableRequest, new AdalCustomConnectionDelegate(this), true);
         }
 
         public override void StopLoading()
         {
+            this.connection.Cancel();
         }
 
         private class AdalCustomConnectionDelegate : NSUrlConnectionDataDelegate
@@ -98,6 +91,30 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             public override void ReceivedResponse(NSUrlConnection connection, NSUrlResponse response)
             {
                 handler.Client.ReceivedResponse(handler, response, NSUrlCacheStoragePolicy.NotAllowed);
+            }
+
+            public override NSUrlRequest WillSendRequest(NSUrlConnection connection, NSUrlRequest request,
+                NSUrlResponse response)
+            {
+                NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest) request.MutableCopy();
+                if (response != null)
+                {
+                    RemoveProperty("ADURLProtocol", mutableRequest);
+                    handler.Client.Redirected(handler, mutableRequest, response);
+                    connection.Cancel();
+                    if (!request.Headers.ContainsKey(new NSString("x-ms-PkeyAuth")))
+                    {
+                        mutableRequest[BrokerConstants.ChallengeHeaderKey] = BrokerConstants.ChallengeHeaderValue;
+                    }
+                    return mutableRequest;
+                }
+
+                if (!request.Headers.ContainsKey(new NSString(BrokerConstants.ChallengeHeaderKey)))
+                {
+                    mutableRequest[BrokerConstants.ChallengeHeaderKey] = BrokerConstants.ChallengeHeaderValue;
+                }
+
+                return mutableRequest;
             }
 
             public override void FinishedLoading(NSUrlConnection connection)

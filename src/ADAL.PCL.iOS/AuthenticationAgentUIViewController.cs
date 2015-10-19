@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     return true;
                 }
 
-                string requestUrlString = request.Url.ToString().ToLower();
+                string requestUrlString = request.Url.ToString();
                 
                 if (requestUrlString.StartsWith(BrokerConstants.BrowserExtPrefix))
                 {
@@ -78,9 +78,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     return false;
                 }
 
-                if (url.StartsWith(BrokerConstants.DeviceAuthChallengeRedirect, StringComparison.CurrentCultureIgnoreCase))
+                if (requestUrlString.StartsWith(BrokerConstants.DeviceAuthChallengeRedirect, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    Uri uri = new Uri(url);
+                    Uri uri = new Uri(requestUrlString);
                     string query = uri.Query;
                     if (query.StartsWith("?"))
                     {
@@ -91,7 +91,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     string responseHeader = PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(keyPair).Result;
                     
                     NSMutableUrlRequest newRequest = (NSMutableUrlRequest)request.MutableCopy();
-                    newRequest.Headers.SetValueForKey(new NSString(responseHeader), new NSString(BrokerConstants.ChallengeResponseHeader));
+                    newRequest.Url = new NSUrl(keyPair["SubmitUrl"]);
+                    newRequest[BrokerConstants.ChallengeResponseHeader] = responseHeader;
                     wView.LoadRequest(newRequest);
                     return false;
                 }
