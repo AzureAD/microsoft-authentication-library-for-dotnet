@@ -50,7 +50,6 @@
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="ApplicationReceiver.cs" />
     <Compile Include="AuthenticationRequest.cs" />
     <Compile Include="BrokerConstants.cs" />
     <Compile Include="BrokerHelper.cs" />
