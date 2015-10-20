@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     return false;
                 }
 
-                if (requestUrlString.StartsWith(callback.ToLower()) || requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix))
+                if (requestUrlString.ToLower().StartsWith(callback.ToLower()) || requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix))
                 {
                     callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, request.Url.ToString()));
                     this.DismissViewController(true, null);

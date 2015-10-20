@@ -17,7 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
-
+using Foundation;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 using UIKit;
@@ -83,9 +83,10 @@ namespace AdaliOSTestApp
                 sts.Authority = "https://login.microsoftonline.com/common";
                 sts.ValidClientId = "b92e0ba5-f86e-4411-8e18-6b5f928d968a";
                 sts.ValidResource = "https://msdevex-my.sharepoint.com";
-                sts.ValidUserName = "mam@msdevex.onmicrosoft.com";
+                sts.ValidUserName = "user@msdevex.onmicrosoft.com";
+                sts.ValidNonExistingRedirectUri = new Uri("adaliosapp://com.your-company.adaliostestapp");
                 tokenBroker.Sts = sts;
-                string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
+                string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this, false));
                 ReportLabel.Text = token;
             }
             catch (Exception ex)
@@ -103,9 +104,10 @@ namespace AdaliOSTestApp
                 sts.Authority = "https://login.microsoftonline.com/common";
                 sts.ValidClientId = "b92e0ba5-f86e-4411-8e18-6b5f928d968a";
                 sts.ValidResource = "https://msdevex-my.sharepoint.com";
-                sts.ValidUserName = "mam@msdevex.onmicrosoft.com";
+                sts.ValidUserName = "user@msdevex.onmicrosoft.com";
+                sts.ValidNonExistingRedirectUri = new Uri("adaliosapp://com.your-company.adaliostestapp");
                 tokenBroker.Sts = sts;
-                string token = await tokenBroker.GetTokenSilentAsync(new PlatformParameters(this));
+                string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this, false));
                 ReportLabel.Text = token;
             }
             catch (Exception ex)
@@ -118,6 +120,12 @@ namespace AdaliOSTestApp
         {
             TokenBroker tokenBroker = new TokenBroker();
             tokenBroker.ClearTokenCache();
+        }
+
+        partial void UIButton41_TouchUpInside(UIButton sender)
+        {
+
+            ReportLabel.Text = "Can Launch Broker? - " + UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://"));
         }
     }
 }
