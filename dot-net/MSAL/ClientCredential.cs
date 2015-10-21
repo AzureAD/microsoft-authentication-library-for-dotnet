@@ -14,16 +14,19 @@ namespace MSAL
 
     public class ClientCredential
     {
-        private string Secret { get; private set; }
+        private string Secret { get; set; }
 
         public ClientCredential(string secret, ClientCredentialType clientCredentialType)
         {
             
         }
 
-        internal abstract IDictionary<string, string> ToParameters();
+        internal IDictionary<string, string> ToParameters()
+        {
+            return null;
+        }
 
-        public static ClientCredential()
+        //public static ClientCredential()
 
     }
 }

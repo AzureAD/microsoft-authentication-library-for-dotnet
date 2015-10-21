@@ -13,9 +13,4 @@ namespace MSAL
 
     }
 
-    class User
-    {
-        
-    }
-
 }
