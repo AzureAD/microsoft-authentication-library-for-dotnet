@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             //call broker
             string base64EncodedString = Base64UrlEncoder.Encode(BrokerKeyHelper.GetRawBrokerKey());
             brokerPayload["broker_key"] = base64EncodedString;
-            brokerPayload["broker_protocol_ver"] = "2";
+            brokerPayload["max_protocol_ver"] = "2";
 
             if (brokerPayload.ContainsKey("broker_install_url"))
             {
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 string expectedHash = responseDictionary["hash"];
                 string encryptedResponse = responseDictionary["response"];
-                string decryptedResponse = BrokerKeyHelper.DecryptBrokerResponse(encryptedResponse, responseDictionary.ContainsKey("broker_protocol_ver"));
+                string decryptedResponse = BrokerKeyHelper.DecryptBrokerResponse(encryptedResponse, responseDictionary.ContainsKey("msg_protocol_ver"));
                 string responseActualHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(decryptedResponse);
                 byte[] rawHash = Convert.FromBase64String(responseActualHash);
                 string hash  = BitConverter.ToString(rawHash);
