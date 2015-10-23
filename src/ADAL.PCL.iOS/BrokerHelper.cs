@@ -43,6 +43,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public async Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {
+            if (brokerPayload.ContainsKey("silent_broker_flow"))
+            {
+                throw new AdalSilentTokenAcquisitionException();
+            }
+
             brokerResponse = null;
             brokerResponseReady = new SemaphoreSlim(0);
             
