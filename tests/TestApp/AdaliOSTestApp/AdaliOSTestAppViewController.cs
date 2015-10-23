@@ -121,11 +121,5 @@ namespace AdaliOSTestApp
             TokenBroker tokenBroker = new TokenBroker();
             tokenBroker.ClearTokenCache();
         }
-
-        partial void UIButton41_TouchUpInside(UIButton sender)
-        {
-
-            ReportLabel.Text = "Can Launch Broker? - " + UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://"));
-        }
     }
 }
