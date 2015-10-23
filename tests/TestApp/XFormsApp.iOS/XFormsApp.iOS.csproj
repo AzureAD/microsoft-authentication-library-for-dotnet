@@ -113,9 +113,9 @@
       <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
       <Name>ADAL.PCL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\XFormsApp.Droid\XFormsApp.Droid.csproj">
-      <Project>{fa4caeec-da6a-493b-90b7-e17a20a61600}</Project>
-      <Name>XFormsApp.Droid</Name>
+    <ProjectReference Include="..\XFormsApp\XFormsApp.csproj">
+      <Project>{856ea096-2283-49b6-b2cd-5c603551d150}</Project>
+      <Name>XFormsApp</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

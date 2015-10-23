@@ -7,7 +7,7 @@ using System.Text;
 using TestApp.PCL;
 using Xamarin.Forms;
 
-namespace AdalXamarinFormsTestApp
+namespace XFormsApp
 {
     public class SecondPage : ContentPage
     {
