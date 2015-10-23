@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "AdalConsoleTestApp": {
-      "commandName": "AdalConsoleTestApp",
-      "sdkVersion": "dnx-coreclr-win-x64.1.0.0-beta7"
-    }
-  }
-}
