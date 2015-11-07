@@ -8,22 +8,28 @@ namespace MSAL
 {
     public enum ClientCredentialType
     {
-        ClientSecret,
-        ClientAssertion,
+        ClientSecret, //client_secret
+        ClientAssertion, //urn:ietf:params:oauth:client-assertion-type:jwt-bearer
     }
 
     public class ClientCredential
     {
-        private string Secret { get; private set; }
+        private string Secret { get; set; }
 
         public ClientCredential(string secret, ClientCredentialType clientCredentialType)
         {
             
         }
 
-        internal abstract IDictionary<string, string> ToParameters();
+        internal IDictionary<string, string> ToParameters()
+        {
+            return null;
+        }
 
-        public static ClientCredential()
+        public static ClientCredential(byte[] certificate, string password)
+        {
+            return null;
+        }
 
     }
 }
