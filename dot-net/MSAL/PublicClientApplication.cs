@@ -16,12 +16,17 @@ namespace MSAL
         {
         }
 
-        public PublicClientApplication(string clientId, string redirectUri, TokenCache tokenCache)
+        //consider this for other platforms
+/*        public PublicClientApplication(string clientId, string redirectUri, TokenCache tokenCache)
         {
             this.ClientId = clientId;
             this.RedirectUri = redirectUri;
             this.TokenCache = tokenCache;
-        }
+        }*/
+
+
+        //default is true
+        public bool ValidateAuthority { get; set; }
 
         public string ClientId { get; set; }
         
@@ -37,30 +42,7 @@ namespace MSAL
 
         public TokenCache TokenCache { get; set; }
 
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, IPlatformParameters parameters)
-        {
-            return null;
-        }
-
-        // AcquireTokenAsync(string[] scope, IPlatformParameters parameters) will collide with AcquireTokenAsync(string[] scope, UserIdentifier userId)
-        // if null is passed for 2nd parameter
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId)
-        {
-            return null;
-        }
-
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId,
-            string extraQueryParameters)
-        {
-            return null;
-        }
-
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId,
-            string extraQueryParameters, string[] additionalScope, string authority)
-        {
-            return null;
-        }
-
+        //TODO look into adding user identifier when domain cannot be queried or privacy settings are against you
         public async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthAsync(string[] scope)
         {
             return null;
@@ -81,6 +63,7 @@ namespace MSAL
             return null;
         }
 
+        //Iplatformparameter is required for android.
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, UserIdentifier userId,
             string authority)
         {
@@ -88,5 +71,8 @@ namespace MSAL
         }
 
         //what about device code methods?
+        //TODO we should look at them later.
+
+
     }
 }

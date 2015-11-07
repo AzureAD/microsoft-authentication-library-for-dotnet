@@ -9,7 +9,8 @@ namespace MSAL
 {
     public class TokenCache
     {
-
+        // TODO use v3 for now.
+        // Investigate breaking storage vs cache logic
 
     }
 

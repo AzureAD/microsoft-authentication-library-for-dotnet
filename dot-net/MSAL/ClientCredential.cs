@@ -26,7 +26,10 @@ namespace MSAL
             return null;
         }
 
-        //public static ClientCredential()
+        public static ClientCredential(byte[] certificate, string password)
+        {
+            return null;
+        }
 
     }
 }
