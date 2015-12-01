@@ -10,19 +10,19 @@ namespace MSAL
         //  Property = prop
         // }
         // It would be more developer friendly to have a constructor instead.
-        // what about validateAuthority? Do we really need it?
+        //TODO: what about validateAuthority? Do we really need it?
 
         public PublicClientApplication()
         {
         }
 
-        //consider this for other platforms
-/*        public PublicClientApplication(string clientId, string redirectUri, TokenCache tokenCache)
-        {
-            this.ClientId = clientId;
-            this.RedirectUri = redirectUri;
-            this.TokenCache = tokenCache;
-        }*/
+        //TODO: consider this for other platforms
+        /*        public PublicClientApplication(string clientId, string redirectUri, TokenCache tokenCache)
+                {
+                    this.ClientId = clientId;
+                    this.RedirectUri = redirectUri;
+                    this.TokenCache = tokenCache;
+                }*/
 
 
         //default is true
@@ -32,12 +32,14 @@ namespace MSAL
         
         public string RedirectUri { get; set; }
 
+        public IPlatformParameters PlatformParameters { get; set; }
+
         /// <summary>
         /// default false
         /// </summary>
         public string RestrictToSingleUser { get; set; }
 
-        //how to efficiently tell people to set only  scheme://hostname/tenant/ part as the authority?
+        //TODO: how to efficiently tell people to set only  scheme://hostname/tenant/ part as the authority?
         public string DefaultAuthority { get; set; }
 
         public TokenCache TokenCache { get; set; }

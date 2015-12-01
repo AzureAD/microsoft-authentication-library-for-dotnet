@@ -13,6 +13,8 @@ namespace MSAL
     // It would feel weird to simply have only a signout method in the class.
     public class User
     {
-        public void SignOut();
+        public void SignOut()
+        {
+        }
     }
 }
