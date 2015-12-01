@@ -72,6 +72,32 @@ namespace MSAL
             return null;
         }
 
+        //TODO try this with extension method. investigate if they work on mono
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope)
+        {
+            return null;
+        }
+
+        // AcquireTokenAsync(string[] scope, IPlatformParameters parameters) will collide with 
+        // AcquireTokenAsync(string[] scope, UserIdentifier userId)
+        // if null is passed for 2nd parameter
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId)
+        {
+            return null;
+        }
+
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId,
+            string extraQueryParameters)
+        {
+            return null;
+        }
+
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId,
+            string extraQueryParameters, string[] additionalScope, string authority)
+        {
+            return null;
+        }
+
         //what about device code methods?
         //TODO we should look at them later.
 
