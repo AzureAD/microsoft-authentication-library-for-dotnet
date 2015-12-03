@@ -16,10 +16,6 @@ namespace MSAL
         /// <param name="args">Arguments related to the cache item impacted</param>
         public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
 
-        private const int SchemaVersion = 3;
-
-        private const string Delimiter = ":::";
-
         internal readonly IDictionary tokenCacheDictionary;
 
         // We do not want to return near expiry tokens, this is why we use this hard coded setting to refresh tokens which are close to expiration.
@@ -84,6 +80,32 @@ namespace MSAL
         }
 
         /// <summary>
+        /// Reads a copy of the list of all items in the cache. 
+        /// </summary>
+        /// <returns>The items in the cache</returns>
+        public virtual IEnumerable<TokenCacheItem> ReadItems()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Deletes an item from the cache.
+        /// </summary>
+        /// <param name="item">The item to delete from the cache</param>
+        public virtual void DeleteItem(TokenCacheItem item)
+        {
+        }
+
+        /// <summary>
+        /// Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
+        /// impact all the instances of <see cref="AuthenticationContext"/> which share that cache.
+        /// </summary>
+        public virtual void Clear()
+        {
+
+        }
+
+        /// <summary>
         /// Gets the nunmber of items in the cache.
         /// </summary>
         public int Count
@@ -110,32 +132,6 @@ namespace MSAL
         /// <param name="state">State of the cache as a blob</param>
         public void Deserialize(byte[] state)
         {
-        }
-
-        /// <summary>
-        /// Reads a copy of the list of all items in the cache. 
-        /// </summary>
-        /// <returns>The items in the cache</returns>
-        public virtual IEnumerable<TokenCacheItem> ReadItems()
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// Deletes an item from the cache.
-        /// </summary>
-        /// <param name="item">The item to delete from the cache</param>
-        public virtual void DeleteItem(TokenCacheItem item)
-        {
-        }
-
-        /// <summary>
-        /// Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
-        /// impact all the instances of <see cref="AuthenticationContext"/> which share that cache.
-        /// </summary>
-        public virtual void Clear()
-        {
-
         }
 
         internal void OnAfterAccess(TokenCacheNotificationArgs args)
