@@ -9,13 +9,23 @@ namespace MSAL
     /// </summary>
     public class PublicClientApplication
     {
-
+        private const string DEFAULT_AUTHORITY = "https://login.microsoftonline.com/common";
         
         /// <summary>
         /// Default consutructor of the application. It is here to emphasise the lack of parameters.
         /// </summary>
         public PublicClientApplication()
         {
+            this.Authority = DEFAULT_AUTHORITY;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authority"></param>
+        public PublicClientApplication(string authority)
+        {
+            this.Authority = authority;
         }
 
         //TODO: consider this for other platforms
@@ -26,14 +36,6 @@ namespace MSAL
         ///  Property = prop
         /// }
         /// It would be more developer friendly to have a constructor instead.
-        /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="redirectUri"></param>
-        public PublicClientApplication(string clientId, string redirectUri)
-                {
-                    this.ClientId = clientId;
-                    this.RedirectUri = redirectUri;
-                }
 
 
         //default is true
@@ -47,12 +49,14 @@ namespace MSAL
         
 
         /// <summary>
-        /// Redirect Uri configured in the portal. Will have a default value. Not required, if the developer is using the default client ID.
+        /// Redirect Uri configured in the portal. Will have a default value. Not required, if the developer 
+        /// is using the default client ID.
         /// </summary>
         public string RedirectUri { get; set; }
 
         /// <summary>
-        /// .NET specific property that allows configuration of platform specific properties. For example, in iOS/Android it woul include the flag to enable/disable broker.
+        /// .NET specific property that allows configuration of platform specific properties. For example, 
+        /// in iOS/Android it woul include the flag to enable/disable broker.
         /// </summary>
         public IPlatformParameters PlatformParameters { get; set; }
 
@@ -62,12 +66,13 @@ namespace MSAL
         public string RestrictToSingleUser { get; set; }
 
         /// <summary>
-        /// Default will point to login.microsoftonline.com/common. Developer will be able to point to other instances like china/fairfax/blackforest.
+        /// Default will point to login.microsoftonline.com/common. Developer will be able to point to other 
+        /// instances like china/fairfax/blackforest or tenant specific endpoint.
         /// </summary>
-        public string DefaultAuthority { get; set; }
+        public string Authority { get; private set; }
 
         /// <summary>
-        /// Default cache will be 
+        /// .NET specific. Default cache will be In Memory
         /// </summary>
         public TokenCache TokenCache { get; set; }
 
