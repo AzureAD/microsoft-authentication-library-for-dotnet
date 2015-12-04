@@ -45,9 +45,12 @@
     <Compile Include="PublicClientApplication.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TokenCache.cs" />
+    <Compile Include="TokenCacheItem.cs" />
+    <Compile Include="TokenCacheNotificationArgs.cs" />
     <Compile Include="User.cs" />
     <Compile Include="UserAssertion.cs" />
     <Compile Include="UserIdentifier.cs" />
+    <Compile Include="UserInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System">
