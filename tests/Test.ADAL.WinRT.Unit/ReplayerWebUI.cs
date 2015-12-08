@@ -32,26 +32,34 @@ namespace Test.ADAL.WinRT.Unit
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
-            string key = authorizationUri.AbsoluteUri + redirectUri.OriginalString;
-
-            if (IOMap.ContainsKey(key))
+            return await Task.Factory.StartNew(() =>
             {
-                string value = IOMap[key];
-                if (value[0] == 'P')
-                {
-                    value = value.Substring(1);
-                    string[] valueSegments = value.Split(new string[] { "::" }, StringSplitOptions.None);
-                    return new AuthorizationResult((AuthorizationStatus)Enum.Parse(typeof(AuthorizationStatus), valueSegments[0]), valueSegments[1]);
-                }
-                
-                if (value[0] == 'A')
-                {
-                    string []segments = value.Substring(1).Split(new [] { Delimiter }, StringSplitOptions.RemoveEmptyEntries);
-                    return new AuthorizationResult(AuthorizationStatus.Success, string.Format("https://dummy?error={0}&error_description={1}", segments[0], segments[1]));
-                }
-            }
+                string key = authorizationUri.AbsoluteUri + redirectUri.OriginalString;
 
-            return null;
+                if (IOMap.ContainsKey(key))
+                {
+                    string value = IOMap[key];
+                    if (value[0] == 'P')
+                    {
+                        value = value.Substring(1);
+                        string[] valueSegments = value.Split(new string[] {"::"}, StringSplitOptions.None);
+                        return
+                            new AuthorizationResult(
+                                (AuthorizationStatus) Enum.Parse(typeof (AuthorizationStatus), valueSegments[0]),
+                                valueSegments[1]);
+                    }
+
+                    if (value[0] == 'A')
+                    {
+                        string[] segments = value.Substring(1)
+                            .Split(new[] {Delimiter}, StringSplitOptions.RemoveEmptyEntries);
+                        return new AuthorizationResult(AuthorizationStatus.Success,
+                            string.Format("https://dummy?error={0}&error_description={1}", segments[0], segments[1]));
+                    }
+                }
+
+                return null;
+            });
         }
     }
 }

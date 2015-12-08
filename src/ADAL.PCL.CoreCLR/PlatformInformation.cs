@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public override async Task<string> GetUserPrincipalNameAsync()
         {
-            return null;
+            return await Task.Factory.StartNew(() => string.Empty);
         }
 
         public override string GetEnvironmentVariable(string variable)

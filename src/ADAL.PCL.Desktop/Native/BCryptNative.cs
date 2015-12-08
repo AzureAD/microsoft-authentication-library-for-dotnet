@@ -1193,7 +1193,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
         ///     is the salt and <param name="iterations"/> is the iteration count. 
         /// </summary>
         [SecurityCritical]
-        [SecurityTreatAsSafe]
+        [SecuritySafeCritical]
         internal static byte[] PBKDF2BCryptDeriveKeyPBKDF2(string hashName,
                                       byte[] password,
                                       byte[] salt,

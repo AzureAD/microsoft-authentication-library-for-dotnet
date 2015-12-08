@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.Widget;
@@ -117,8 +118,11 @@ namespace AdalAndroidTestApp
 
         private async void clearCacheButton_Click(object sender, EventArgs e)
         {
-            TokenCache.DefaultShared.Clear();
-            this.accessTokenTextView.Text = "Cache cleared";
+            await Task.Factory.StartNew(() =>
+            {
+                TokenCache.DefaultShared.Clear();
+                this.accessTokenTextView.Text = "Cache cleared";
+            });
         }
     }
 }

@@ -21,15 +21,8 @@ using System;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 using Android.OS;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Xamarin.Forms;
-using XFormsApp;
-using Android.Content;
-
 namespace XFormsApp.Droid
 {
     [Activity(Label = "XFormsApp", Icon = "@drawable/icon", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]

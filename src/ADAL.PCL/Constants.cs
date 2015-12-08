@@ -16,11 +16,12 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.Xml.Linq;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public static class AdalErrorEx
+    internal static class AdalErrorEx
     {
         public const string UnauthorizedUserInformationAccess = "unauthorized_user_information_access";
         public const string CannotAccessUserInformation = "user_information_access_failed";
@@ -34,6 +35,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string RedirectUriUnsupportedWithPromptBehaviorNever = "PromptBehavior.Never is supported in SSO mode only (null or application's callback URI as redirectUri)";
         public const string UnauthorizedUserInformationAccess = "Unauthorized accessing user information. Check application's 'Enterprise Authentication' capability";
         public const string NeedToSetCallbackUriAsLocalSetting = "You need to add the value of WebAuthenticationBroker.GetCurrentApplicationCallbackUri() to an application's local setting named CurrentApplicationCallbackUri.";
+    }
+
+    internal static class Constant
+    {
+        public const string MsAppScheme = "ms-app";
+        public static readonly Uri SsoPlaceHolderUri = new Uri("https://sso");
     }
 
     /// <summary>
@@ -409,8 +416,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static readonly XNamespace Issue2005 = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue";
         public static readonly XNamespace SoapEnvelope = "http://www.w3.org/2003/05/soap-envelope";
     }
-
-    internal class AdalConstants
-    {
-    }
+    
 }

@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public async virtual Task<bool> IsUserLocalAsync(CallState callState)
         {
-            return false;
+            return await Task.Factory.StartNew(() => false);
         }
 
         public virtual bool IsDomainJoined()
