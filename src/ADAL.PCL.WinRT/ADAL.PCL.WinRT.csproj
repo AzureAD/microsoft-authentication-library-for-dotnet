@@ -115,9 +115,6 @@
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\Constants.cs">
-      <Link>Constants.cs</Link>
-    </Compile>
     <Compile Include="..\ADAL.Common\Logger.cs">
       <Link>Logger.cs</Link>
     </Compile>

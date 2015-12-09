@@ -26,6 +26,7 @@ using Android.Webkit;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     [Activity(Label = "Sign in")]
+    [CLSCompliant(false)]
     public class AuthenticationAgentActivity : Activity
     {
         private AdalWebViewClient client;

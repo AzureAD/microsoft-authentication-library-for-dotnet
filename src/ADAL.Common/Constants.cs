@@ -19,7 +19,7 @@
 using System;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public static class AdalErrorEx
+    internal static class AdalErrorEx
     {
         public const string UnauthorizedUserInformationAccess = "unauthorized_user_information_access";
         public const string CannotAccessUserInformation = "user_information_access_failed";
@@ -34,9 +34,4 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string NeedToSetCallbackUriAsLocalSetting = "You need to add the value of WebAuthenticationBroker.GetCurrentApplicationCallbackUri() to an application's local setting named CurrentApplicationCallbackUri.";
     }
 
-    internal static class Constant
-    {
-        public const string MsAppScheme = "ms-app";
-        public static readonly Uri SsoPlaceHolderUri = new Uri("https://sso");
-    }
 }

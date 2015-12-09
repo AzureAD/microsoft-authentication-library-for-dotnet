@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 sendAuthorizeRequest();
             }
 
-            return authorizationResult;
+            return await Task.Factory.StartNew(() => authorizationResult);
         }
 
         internal AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri)

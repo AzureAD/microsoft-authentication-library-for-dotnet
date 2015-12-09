@@ -40,15 +40,9 @@ namespace Test.ADAL.WinRT.Unit
 
         public IRequestParameters BodyParameters
         {
-            set
-            {
-                this.internalHttpCilent.BodyParameters = value;
-            }
+            set { this.internalHttpCilent.BodyParameters = value; }
 
-            get
-            {
-                return this.internalHttpCilent.BodyParameters;
-            }
+            get { return this.internalHttpCilent.BodyParameters; }
         }
 
         public string Accept
@@ -71,62 +65,59 @@ namespace Test.ADAL.WinRT.Unit
 
         public bool UseDefaultCredentials
         {
-            set
-            {
-                this.keyElements["UseDefaultCredentials"] = value.ToString();
-            }
+            set { this.keyElements["UseDefaultCredentials"] = value.ToString(); }
         }
 
         public Dictionary<string, string> Headers
         {
-            get
-            {
-                return this.internalHttpCilent.Headers;
-            }
+            get { return this.internalHttpCilent.Headers; }
         }
 
         public CallState CallState { get; set; }
 
         public async Task<IHttpWebResponse> GetResponseAsync()
         {
-            foreach (var headerKey in this.internalHttpCilent.Headers.Keys)
+            return await Task.Factory.StartNew(() =>
             {
-                this.keyElements["Header-" + headerKey] = this.internalHttpCilent.Headers[headerKey];
-            }
-
-            if (this.CallState != null)
-            {
-                this.keyElements["Header-CorrelationId"] = this.CallState.CorrelationId.ToString();
-            }
-
-            if (this.internalHttpCilent.BodyParameters is DictionaryRequestParameters)
-            {
-                foreach (var kvp in (DictionaryRequestParameters)this.internalHttpCilent.BodyParameters)
+                foreach (var headerKey in this.internalHttpCilent.Headers.Keys)
                 {
-                    string value = (kvp.Key == "password") ? "PASSWORD" : kvp.Value;
-                    this.keyElements["Body-" + kvp.Key] = value;
-                }
-            }
-
-            string key = string.Empty;
-            foreach (var kvp in this.keyElements)
-            {
-                key += string.Format("{0}={1},", kvp.Key, kvp.Value);
-            }
-
-            if (IOMap.ContainsKey(key))
-            {
-                string value = IOMap[key];
-                if (value[0] == 'P')
-                {
-                    value = value.Substring(1);
-                    return new ReplayerHttpWebResponse(value, HttpStatusCode.OK);
+                    this.keyElements["Header-" + headerKey] = this.internalHttpCilent.Headers[headerKey];
                 }
 
-                throw SerializationHelper.DeserializeException(value.Substring(1));
-            }
+                if (this.CallState != null)
+                {
+                    this.keyElements["Header-CorrelationId"] = this.CallState.CorrelationId.ToString();
+                }
 
-            throw new Exception("There is no recorded response to replay");
+                if (this.internalHttpCilent.BodyParameters is DictionaryRequestParameters)
+                {
+                    foreach (var kvp in (DictionaryRequestParameters) this.internalHttpCilent.BodyParameters)
+                    {
+                        string value = (kvp.Key == "password") ? "PASSWORD" : kvp.Value;
+                        this.keyElements["Body-" + kvp.Key] = value;
+                    }
+                }
+
+                string key = string.Empty;
+                foreach (var kvp in this.keyElements)
+                {
+                    key += string.Format("{0}={1},", kvp.Key, kvp.Value);
+                }
+
+                if (IOMap.ContainsKey(key))
+                {
+                    string value = IOMap[key];
+                    if (value[0] == 'P')
+                    {
+                        value = value.Substring(1);
+                        return new ReplayerHttpWebResponse(value, HttpStatusCode.OK);
+                    }
+
+                    throw SerializationHelper.DeserializeException(value.Substring(1));
+                }
+
+                throw new Exception("There is no recorded response to replay");
+            });
         }
     }
 }

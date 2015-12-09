@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 PlatformParameters pp = PlatformParameters as PlatformParameters;
                 pp.CallerActivity.StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse(keyPair["app_link"])));
                 
-                throw new AdalException(AdalErrorEx.BrokerApplicationRequired, AdalErrorMessageEx.BrokerApplicationRequired);
+                throw new AdalException(AdalErrorAndroidEx.BrokerApplicationRequired, AdalErrorMessageAndroidEx.BrokerApplicationRequired);
             }
 
             Context mContext = Application.Context;
@@ -160,7 +160,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
-                throw new AdalException(AdalErrorEx.NoBrokerAccountFound, "Add requested account as a Workplace account via Settings->Accounts or set SkipBroker=false.");
+                throw new AdalException(AdalErrorAndroidEx.NoBrokerAccountFound, "Add requested account as a Workplace account via Settings->Accounts or set SkipBroker=false.");
             }
         }
         

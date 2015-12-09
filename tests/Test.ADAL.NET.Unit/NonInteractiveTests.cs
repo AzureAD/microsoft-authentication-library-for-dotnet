@@ -110,19 +110,21 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNet")]
         public async Task WsTrust2005AddressExtractionTest()
         {
-            XDocument mexDocument = null;
-            using (Stream stream = new FileStream("TestMex2005.xml", FileMode.Open))
-            {
-                mexDocument = XDocument.Load(stream);
-            }
+            await Task.Factory.StartNew(() => {
+                XDocument mexDocument = null;
+                using (Stream stream = new FileStream("TestMex2005.xml", FileMode.Open))
+                {
+                    mexDocument = XDocument.Load(stream);
+                }
 
-            Verify.IsNotNull(mexDocument);
-            WsTrustAddress wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.IntegratedAuth, null);
-            Verify.IsNotNull(wsTrustAddress);
-            Verify.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust13);
-            wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
-            Verify.IsNotNull(wsTrustAddress);
-            Verify.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust2005);
+                Verify.IsNotNull(mexDocument);
+                WsTrustAddress wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.IntegratedAuth, null);
+                Verify.IsNotNull(wsTrustAddress);
+                Verify.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust13);
+                wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
+                Verify.IsNotNull(wsTrustAddress);
+                Verify.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust2005);
+            });
         }
 
         [TestMethod]
@@ -217,17 +219,21 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNet")]
         public async Task WsTrustRequestXmlFormatTest()
         {
-            UserCredential cred = new UserCredential("user", "pass&<>\"'");
-            StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto", new WsTrustAddress { Uri = new Uri("resource") }, cred);
-            try
+            await Task.Factory.StartNew(() =>
             {
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml("<?xml version=\"1.0\"?>" + sb.ToString());
-            }
-            catch (Exception ex)
-            {
-                Verify.Fail("Not expected");
-            }
+                UserCredential cred = new UserCredential("user", "pass&<>\"'");
+                StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto",
+                    new WsTrustAddress {Uri = new Uri("resource")}, cred);
+                try
+                {
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml("<?xml version=\"1.0\"?>" + sb.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Verify.Fail("Not expected -- " + ex.Message);
+                }
+            });
         }
 
         private static void VerifyUserRealmResponse(UserRealmDiscoveryResponse userRealmResponse, string expectedAccountType)
@@ -259,7 +265,7 @@ namespace Test.ADAL.NET.Unit
 
         private async static Task<XDocument> FecthMexAsync(string metadataUrl)
         {
-            if (MockService)
+            return await Task.Factory.StartNew(() =>
             {
                 if (metadataUrl.EndsWith("xx"))
                 {
@@ -270,11 +276,7 @@ namespace Test.ADAL.NET.Unit
                 {
                     return XDocument.Load(stream);
                 }
-            }
-            else
-            {
-                return await MexParser.FetchMexAsync(metadataUrl, null);
-            }
+            });
         }
     }
 }

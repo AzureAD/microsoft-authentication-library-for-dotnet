@@ -34,22 +34,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public override async Task<string> GetUserPrincipalNameAsync()
         {
-            const int NameUserPrincipal = 8;
-            uint userNameSize = 0;
-            NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
-            if (userNameSize == 0)
+            return await Task.Factory.StartNew(() =>
             {
-                throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
-            }
+                const int NameUserPrincipal = 8;
+                uint userNameSize = 0;
+                NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
+                if (userNameSize == 0)
+                {
+                    throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                }
 
-            StringBuilder sb = new StringBuilder((int)userNameSize);
-            if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
-            {
-                throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
-            }
+                StringBuilder sb = new StringBuilder((int) userNameSize);
+                if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
+                {
+                    throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                }
 
-            return sb.ToString();
-            
+                return sb.ToString();
+            });
         }
 
         public override string GetEnvironmentVariable(string variable)
@@ -76,14 +78,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public override async Task<bool> IsUserLocalAsync(CallState callState)
         {
-            WindowsIdentity current = WindowsIdentity.GetCurrent();
-            if (current != null)
+            return await Task.Factory.StartNew(() =>
             {
-                string prefix = WindowsIdentity.GetCurrent().Name.Split('\\')[0].ToUpperInvariant();
-                return prefix.Equals(Environment.MachineName.ToUpperInvariant());
-            }
+                WindowsIdentity current = WindowsIdentity.GetCurrent();
+                if (current != null)
+                {
+                    string prefix = WindowsIdentity.GetCurrent().Name.Split('\\')[0].ToUpperInvariant();
+                    return prefix.Equals(Environment.MachineName.ToUpperInvariant());
+                }
 
-            return false;
+                return false;
+            });
         }
 
         public override bool IsDomainJoined()

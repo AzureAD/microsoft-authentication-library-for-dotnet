@@ -37,5 +37,4 @@ using System.Reflection;
 // with its value equal to the hash of the last commit to the git branch.
 // e.g.: [assembly: AssemblyInformationalVersionAttribute("4392c9835a38c27516fc0cd7bad7bccdcaeab161")]
 
-// Assembly marked as compliant.
-[assembly: CLSCompliant(true)]
+[assembly: CLSCompliant(false)]

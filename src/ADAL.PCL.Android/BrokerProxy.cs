@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (Permission.Granted != Application.Context.PackageManager.CheckPermission(permission, Application.Context.PackageName))
             {
-                PlatformPlugin.Logger.Information(null, String.Format(AdalErrorMessageEx.MissingPackagePermissionTemplate, permission));
+                PlatformPlugin.Logger.Information(null, String.Format(AdalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission));
                 return false;
             }
 
@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 Exception exception = new Exception(
                         "calling this from your main thread can lead to deadlock");
                 PlatformPlugin.Logger.Error(null, exception);
-                if (mContext.ApplicationInfo.TargetSdkVersion >= Build.VERSION_CODES.Froyo)
+                if (mContext.ApplicationInfo.TargetSdkVersion >= BuildVersionCodes.Froyo)
                 {
                     throw exception;
                 }
@@ -557,7 +557,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 PackageInfo info = Application.Context.PackageManager.GetPackageInfo(brokerPackageName, PackageInfoFlags.Signatures);
                 if (info == null || info.Signatures == null)
                 {
-                    PlatformPlugin.Logger.Information(null, AdalErrorMessageEx.FailedToGetBrokerAppSignature);
+                    PlatformPlugin.Logger.Information(null, AdalErrorMessageAndroidEx.FailedToGetBrokerAppSignature);
                     return false;
                 }
 
@@ -579,20 +579,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
                 }
 
-                PlatformPlugin.Logger.Information(null, AdalErrorMessageEx.IncorrectBrokerAppSignate);
+                PlatformPlugin.Logger.Information(null, AdalErrorMessageAndroidEx.IncorrectBrokerAppSignate);
                 return false;
             }
             catch (PackageManager.NameNotFoundException ex)
             {
-                throw new AdalException(AdalErrorEx.MissingBrokerRelatedPackage, AdalErrorMessageEx.MissingBrokerRelatedPackage, ex);
+                throw new AdalException(AdalErrorAndroidEx.MissingBrokerRelatedPackage, AdalErrorMessageAndroidEx.MissingBrokerRelatedPackage, ex);
             }
             catch (NoSuchAlgorithmException ex)
             {
-                throw new AdalException(AdalErrorEx.MissingDigestShaAlgorithm, AdalErrorMessageEx.MissingDigestShaAlgorithm, ex);
+                throw new AdalException(AdalErrorAndroidEx.MissingDigestShaAlgorithm, AdalErrorMessageAndroidEx.MissingDigestShaAlgorithm, ex);
             }
             catch (Exception ex)
             {
-                throw new AdalException(AdalErrorEx.SignatureVerificationFailed, AdalErrorMessageEx.SignatureVerificationFailed, ex);
+                throw new AdalException(AdalErrorAndroidEx.SignatureVerificationFailed, AdalErrorMessageAndroidEx.SignatureVerificationFailed, ex);
             }
         }
 
