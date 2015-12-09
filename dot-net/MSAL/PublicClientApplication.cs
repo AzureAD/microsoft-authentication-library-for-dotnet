@@ -57,7 +57,7 @@ namespace MSAL
         public IPlatformParameters PlatformParameters { get; set; }
 
         /// <summary>
-        /// default false
+        /// default false. TODO - We can uniquely identify the user. So, it can solve common problem. Why not have a flag in the cache that tells us if the user logged in at common endpoint
         /// </summary>
         public string RestrictToSingleUser { get; set; }
 
