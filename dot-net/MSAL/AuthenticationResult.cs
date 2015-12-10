@@ -8,9 +8,10 @@ using System.Threading.Tasks;
 namespace MSAL
 {
     public class AuthenticationResult
-    {        /// <summary>
-             /// Gets the type of the Access Token returned. 
-             /// </summary>
+    {
+        /// <summary>
+        /// Gets the type of the Access Token returned. 
+        /// </summary>
         [DataMember]
         public string AccessTokenType { get; private set; }
 
