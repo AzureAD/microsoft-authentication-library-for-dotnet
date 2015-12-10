@@ -50,6 +50,7 @@
     <Compile Include="User.cs" />
     <Compile Include="UserAssertion.cs" />
     <Compile Include="UserIdentifier.cs" />
+    <Compile Include="UserIdentifierType.cs" />
     <Compile Include="UserInfo.cs" />
   </ItemGroup>
   <ItemGroup>

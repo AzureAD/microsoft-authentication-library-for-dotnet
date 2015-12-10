@@ -51,6 +51,9 @@ namespace MSAL
         [DataMember]
         public string IdentityProvider { get; internal set; }
 
+        /// <summary>
+        /// returns all the claims in a keypair.
+        /// </summary>
         public IDictionary<string, string> AllClaims { get; }
     }
 }

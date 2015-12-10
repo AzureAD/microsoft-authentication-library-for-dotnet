@@ -9,12 +9,13 @@ namespace MSAL
     /// </summary>
     public class PublicClientApplication
     {
-        private const string DEFAULT_AUTHORITY = "https://login.microsoftonline.com/common";
-        
+
+        private const string DEFAULT_AUTHORTIY = "default-authority";
+
         /// <summary>
         /// Default consutructor of the application. It is here to emphasise the lack of parameters.
         /// </summary>
-        public PublicClientApplication()
+        public PublicClientApplication():this(DEFAULT_AUTHORTIY)
         {
             this.Authority = DEFAULT_AUTHORITY;
         }
@@ -23,6 +24,11 @@ namespace MSAL
         /// 
         /// </summary>
         /// <param name="authority"></param>
+        public PublicClientApplication(string authority)
+        {
+            this.Authority = authority;
+        }
+
         public PublicClientApplication(string authority)
         {
             this.Authority = authority;
@@ -61,7 +67,7 @@ namespace MSAL
         public IPlatformParameters PlatformParameters { get; set; }
 
         /// <summary>
-        /// default false
+        /// default false. TODO - We can uniquely identify the user. So, it can solve common problem. Why not have a flag in the cache that tells us if the user logged in at common endpoint
         /// </summary>
         public string RestrictToSingleUser { get; set; }
 
@@ -119,7 +125,7 @@ namespace MSAL
         /// <param name="scope"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, UserIdentifier userId)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId)
         {
             return null;
         }
@@ -131,7 +137,7 @@ namespace MSAL
         /// <param name="userId"></param>
         /// <param name="authority"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, UserIdentifier userId,
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId,
             string authority)
         {
             return null;
@@ -153,7 +159,7 @@ namespace MSAL
         /// <param name="scope"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId)
         {
             return null;
         }
@@ -165,7 +171,7 @@ namespace MSAL
         /// <param name="userId"></param>
         /// <param name="extraQueryParameters"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId,
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId,
             string extraQueryParameters)
         {
             return null;
@@ -180,14 +186,33 @@ namespace MSAL
         /// <param name="additionalScope"></param>
         /// <param name="authority"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId,
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId,
             string extraQueryParameters, string[] additionalScope, string authority)
         {
             return null;
         }
 
+        //TODO - evaluate signout method in here vs in User class.
+        /// <summary>
+        /// Deletes all tokens acquired for the user.
+        /// </summary>
+        /// <param name="user"></param>
+        public void SignOut(User user)
+        {
+            
+        }
+
+        /// <summary>
+        /// Deletes all tokens for the given UPN.
+        /// </summary>
+        /// <param name="username"></param>
+        public void SignOut(string username)
+        {
+
+        }
+
         //what about device code methods?
         //TODO we should look at them later.
-        
+
     }
 }
