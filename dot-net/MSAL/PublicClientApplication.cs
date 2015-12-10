@@ -9,13 +9,18 @@ namespace MSAL
     /// </summary>
     public class PublicClientApplication
     {
+        private const string DEFAULT_AUTHORTIY = "default-authority";
 
-        
         /// <summary>
         /// Default consutructor of the application. It is here to emphasise the lack of parameters.
         /// </summary>
-        public PublicClientApplication()
+        public PublicClientApplication():this(DEFAULT_AUTHORTIY)
         {
+        }
+
+        public PublicClientApplication(string authority)
+        {
+            this.Authority = authority;
         }
 
         //TODO: consider this for other platforms
@@ -64,7 +69,8 @@ namespace MSAL
         /// <summary>
         /// Default will point to login.microsoftonline.com/common. Developer will be able to point to other instances like china/fairfax/blackforest.
         /// </summary>
-        public string DefaultAuthority { get; set; }
+        public string Authority { get; private set; }
+
 
         /// <summary>
         /// Default cache will be 
