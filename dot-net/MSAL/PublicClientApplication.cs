@@ -120,7 +120,7 @@ namespace MSAL
         /// <param name="scope"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, UserIdentifier userId)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId)
         {
             return null;
         }
@@ -132,7 +132,7 @@ namespace MSAL
         /// <param name="userId"></param>
         /// <param name="authority"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, UserIdentifier userId,
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId,
             string authority)
         {
             return null;
@@ -154,7 +154,7 @@ namespace MSAL
         /// <param name="scope"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId)
         {
             return null;
         }
@@ -166,7 +166,7 @@ namespace MSAL
         /// <param name="userId"></param>
         /// <param name="extraQueryParameters"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId,
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId,
             string extraQueryParameters)
         {
             return null;
@@ -181,7 +181,7 @@ namespace MSAL
         /// <param name="additionalScope"></param>
         /// <param name="authority"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId,
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId,
             string extraQueryParameters, string[] additionalScope, string authority)
         {
             return null;
