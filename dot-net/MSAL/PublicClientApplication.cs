@@ -190,25 +190,6 @@ namespace MSAL
             return null;
         }
 
-        //TODO - evaluate signout method in here vs in User class.
-        /// <summary>
-        /// Deletes all tokens acquired for the user.
-        /// </summary>
-        /// <param name="user"></param>
-        public void SignOut(User user)
-        {
-            
-        }
-
-        /// <summary>
-        /// Deletes all tokens for the given UPN.
-        /// </summary>
-        /// <param name="username"></param>
-        public void SignOut(string username)
-        {
-
-        }
-
         //what about device code methods?
         //TODO we should look at them later.
 
