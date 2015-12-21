@@ -38,7 +38,7 @@ namespace MSAL
         /// Gets user information including user Id. Some elements in UserInfo might be null if not returned by the service.
         /// </summary>
         [DataMember]
-        public UserInfo UserInfo { get; internal set; }
+        public User User { get; internal set; }
 
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.

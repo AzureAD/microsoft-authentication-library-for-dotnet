@@ -51,7 +51,7 @@ namespace MSAL
             return null;
         }
 
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserHint userId)
         {
             return null;
         }
@@ -72,12 +72,12 @@ namespace MSAL
             return null;
         }
 
-        public Uri GetAuthorizationRequestURL(string[] scope, UserIdentifier userId, string extraQueryParameters)
+        public Uri GetAuthorizationRequestURL(string[] scope, UserHint userId, string extraQueryParameters)
         {
             return null;
         }
 
-        public Uri GetAuthorizationRequestURL(string[] scope, string redirectUri, UserIdentifier userId, string extraQueryParameters, string[] additionalScope, string authority)
+        public Uri GetAuthorizationRequestURL(string[] scope, string redirectUri, UserHint userId, string extraQueryParameters, string[] additionalScope, string authority)
         {
             return null;
         }
