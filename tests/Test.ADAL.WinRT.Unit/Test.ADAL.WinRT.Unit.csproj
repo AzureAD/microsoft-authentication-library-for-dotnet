@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3B48ABB3-C493-4BAA-8165-5FD0A57DC0E4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Test.ADAL.WinRT.Unit</RootNamespace>
+    <AssemblyName>Test.ADAL.WinRT.Unit</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetPlatformVersion>8.1</TargetPlatformVersion>
+    <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <PackageCertificateKeyFile>Test.ADAL.WinRT.Unit_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <AppxBundle>Never</AppxBundle>
+    <DefineConstants>TEST_ADAL_WINRT_UNIT</DefineConstants>
+    <PackageCertificateThumbprint>BED7099FF68DEB5484674C3DAFE85D2FFD9DB23A</PackageCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>$(DefineConstants);DEBUG;TRACE;NETFX_CORE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>$(DefineConstants);TRACE;NETFX_CORE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AppXPackage>True</AppXPackage>
+    <AppxPackageIncludePrivateSymbols>true</AppxPackageIncludePrivateSymbols>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>true</DelaySign>
+  </PropertyGroup>
+  <ItemGroup>
+    <!--A reference to the entire .Net Framework and Windows SDK are automatically included-->
+    <SDKReference Include="MSTestFramework, Version=11.0" />
+    <SDKReference Include="TestPlatform, Version=11.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Test.ADAL.Common\AdalTests.cs">
+      <Link>Common\AdalTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\AdalTestsBase.cs">
+      <Link>Common\AdalTestsBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\AuthenticationContextProxy.cs">
+      <Link>Common\AuthenticationContextProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\AuthenticationResultProxy.cs">
+      <Link>Common\AuthenticationResultProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\CommonUnitTests.cs">
+      <Link>Common\CommonUnitTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\Log.cs">
+      <Link>Common\Log.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\SerializationHelper.cs">
+      <Link>Common\SerializationHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\Sts.cs">
+      <Link>Common\Sts.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\TokenCacheTests.cs">
+      <Link>Common\TokenCacheTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\UserCredentialProxy.cs">
+      <Link>Common\UserCredentialProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Test.ADAL.Common\Verify.cs">
+      <Link>Common\Verify.cs</Link>
+    </Compile>
+    <Compile Include="AdalTests.cs" />
+    <Compile Include="AdalWinRTTests.cs" />
+    <Compile Include="AuthenticationContextProxy.cs" />
+    <Compile Include="ReplayerBase.cs" />
+    <Compile Include="ReplayerHttpClient.cs" />
+    <Compile Include="ReplayerHttpClientFactory.cs" />
+    <Compile Include="ReplayerHttpWebResponse.cs" />
+    <Compile Include="ReplayerWebUI.cs" />
+    <Compile Include="ReplayerWebUIFactory.cs" />
+    <Compile Include="SerializationHelper.cs" />
+    <Compile Include="TokenCacheUnitTests.cs" />
+    <Compile Include="UnitTests.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+    <Content Include="..\Test.ADAL.Common\recorded_data.dat">
+      <Link>recorded_data.dat</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Test.ADAL.WinRT.Unit_TemporaryKey.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Images\UnitTestLogo.scale-100.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\UnitTestSmallLogo.scale-100.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\UnitTestSplashScreen.scale-100.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\UnitTestStoreLogo.scale-100.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ADAL.PCL.WinRT\ADAL.PCL.WinRT.csproj">
+      <Project>{826d90f4-ca79-4788-918c-b66aa5cc6df0}</Project>
+      <Name>ADAL.PCL.WinRT</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ADAL.PCL\ADAL.PCL.csproj">
+      <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
+      <Name>ADAL.PCL</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
+    <VisualStudioVersion>12.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>  
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
