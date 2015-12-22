@@ -203,7 +203,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         changePasswordUri = new Uri(idToken.PasswordChangeUrl);
                     }
 
-                    result.UpdateTenantAndUserInfo(tenantId, this.IdTokenString, new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider, PasswordExpiresOn = passwordExpiresOffest, PasswordChangeUrl = changePasswordUri });
+                    result.UpdateTenantAndUser(tenantId, this.IdTokenString, new User { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider, PasswordExpiresOn = passwordExpiresOffest, PasswordChangeUrl = changePasswordUri });
                 }
 
                 resultEx = new AuthenticationResultEx

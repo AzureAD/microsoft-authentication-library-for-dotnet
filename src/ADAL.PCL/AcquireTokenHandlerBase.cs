@@ -251,7 +251,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (newResultEx.Result.IdToken == null)
                     {
                         // If Id token is not returned by token endpoint when refresh token is redeemed, we should copy tenant and user information from the cached token.
-                        newResultEx.Result.UpdateTenantAndUserInfo(result.Result.TenantId, result.Result.IdToken, result.Result.UserInfo);
+                        newResultEx.Result.UpdateTenantAndUser(result.Result.TenantId, result.Result.IdToken, result.Result.User);
                     }
                 }
                 catch (AdalException ex)
@@ -314,7 +314,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 PlatformPlugin.Logger.Information(this.CallState, string.Format("=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tExpiration Time: {1}\n\tUser Hash: {2}\n\t",
                     accessTokenHash,
                     result.ExpiresOn,                    
-                    result.UserInfo != null ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.UserInfo.UniqueId) : "null"));
+                    result.User != null ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.User.UniqueId) : "null"));
             }
         }
 

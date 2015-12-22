@@ -134,7 +134,7 @@ namespace Test.ADAL.Common
                 ExpiresOn = result.ExpiresOn,
                 IdToken = result.IdToken,
                 TenantId = result.TenantId,
-                UserInfo = result.UserInfo
+                User = result.User
             };
         }
 

@@ -172,7 +172,7 @@ namespace Test.ADAL.Common.Unit
             AreAuthenticationResultsEqual(authenticationResult.Result, authenticationResultFromCache);
 
             // Duplicate throws error
-            authenticationResult.Result.UserInfo.UniqueId = null;
+            authenticationResult.Result.User.UniqueId = null;
             AddToDictionary(localCache, new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User, null, displayableId), authenticationResult);
 
             try
@@ -501,7 +501,7 @@ namespace Test.ADAL.Common.Unit
             string refreshToken = string.Format("RefreshToken{0}", Rand.Next());
             var result = new AuthenticationResult(null, ValidAccessToken, new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
                 {
-                    UserInfo = new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId }
+                    User = new User { UniqueId = uniqueId, DisplayableId = displayableId }
                 };
 
             return new AuthenticationResultEx
@@ -609,14 +609,14 @@ namespace Test.ADAL.Common.Unit
                     && AreStringsEqual(result1.AccessTokenType, result2.AccessTokenType)
                     && AreStringsEqual(result1.IdToken, result2.IdToken)
                     && AreStringsEqual(result1.TenantId, result2.TenantId)
-                    && (result1.UserInfo == null || result2.UserInfo == null ||
-                        (AreStringsEqual(result1.UserInfo.DisplayableId, result2.UserInfo.DisplayableId)
-                        && AreStringsEqual(result1.UserInfo.FamilyName, result2.UserInfo.FamilyName)
-                        && AreStringsEqual(result1.UserInfo.GivenName, result2.UserInfo.GivenName)
-                        && AreStringsEqual(result1.UserInfo.IdentityProvider, result2.UserInfo.IdentityProvider)
-                        && result1.UserInfo.PasswordChangeUrl == result2.UserInfo.PasswordChangeUrl
-                        && result1.UserInfo.PasswordExpiresOn == result2.UserInfo.PasswordExpiresOn
-                        && result1.UserInfo.UniqueId == result2.UserInfo.UniqueId)));
+                    && (result1.User == null || result2.User == null ||
+                        (AreStringsEqual(result1.User.DisplayableId, result2.User.DisplayableId)
+                        && AreStringsEqual(result1.User.FamilyName, result2.User.FamilyName)
+                        && AreStringsEqual(result1.User.GivenName, result2.User.GivenName)
+                        && AreStringsEqual(result1.User.IdentityProvider, result2.User.IdentityProvider)
+                        && result1.User.PasswordChangeUrl == result2.User.PasswordChangeUrl
+                        && result1.User.PasswordExpiresOn == result2.User.PasswordExpiresOn
+                        && result1.User.UniqueId == result2.User.UniqueId)));
         }
 
         private static bool AreStringsEqual(string str1, string str2)
@@ -663,7 +663,7 @@ namespace Test.ADAL.Common.Unit
                     GenerateRandomString(maxFieldSize),
                     new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)))
                 {
-                    UserInfo = new UserInfo { UniqueId = GenerateRandomString(maxFieldSize), DisplayableId = GenerateRandomString(maxFieldSize) }
+                    User = new User { UniqueId = GenerateRandomString(maxFieldSize), DisplayableId = GenerateRandomString(maxFieldSize) }
                 },
                 RefreshToken = GenerateRandomString(maxFieldSize)
             };

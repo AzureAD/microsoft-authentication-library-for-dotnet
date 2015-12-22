@@ -25,13 +25,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// Contains information of a single user. This information is used for token cache lookup. Also if created with userId, userId is sent to the service when login_hint is accepted.
     /// </summary>
     [DataContract]
-    public sealed class UserInfo
+    public sealed class User
     {
-        internal UserInfo()
+        internal User()
         {            
         }
 
-        internal UserInfo(UserInfo other)
+        internal User(User other)
         {
             this.UniqueId = other.UniqueId;
             this.DisplayableId = other.DisplayableId;

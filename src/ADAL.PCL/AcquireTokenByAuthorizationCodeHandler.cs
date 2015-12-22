@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected override void PostTokenRequest(AuthenticationResultEx resultEx)
         {
             base.PostTokenRequest(resultEx);
-            UserInfo userInfo = resultEx.Result.UserInfo;
+            User userInfo = resultEx.Result.User;
             this.UniqueId = (userInfo == null) ? null : userInfo.UniqueId;
             this.DisplayableId = (userInfo == null) ? null : userInfo.DisplayableId;
             if (resultEx.ResourceInResponse != null)

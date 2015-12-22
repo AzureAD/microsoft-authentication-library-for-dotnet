@@ -211,7 +211,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result);
 
             result = await context.AcquireTokenAsync(sts.ValidResource.ToUpper(), sts.ValidClientId.ToUpper(), sts.ValidDefaultRedirectUri, PlatformParameters,
-                (result.UserInfo != null) ? new UserIdentifier(result.UserInfo.UniqueId, UserIdentifierType.UniqueId) : UserIdentifier.AnyUser);
+                (result.User != null) ? new UserIdentifier(result.User.UniqueId, UserIdentifierType.UniqueId) : UserIdentifier.AnyUser);
             VerifySuccessResult(sts, result);
         }
 
@@ -286,17 +286,17 @@ namespace Test.ADAL.Common
             AuthenticationResultProxy result2;
             if (sts.Type == StsType.AAD)
             {
-                Verify.AreEqual(sts.ValidUserName, result.UserInfo.DisplayableId);
-                Verify.IsNotNullOrEmptyString(result.UserInfo.UniqueId);
-                Verify.IsNotNullOrEmptyString(result.UserInfo.GivenName);
-                Verify.IsNotNullOrEmptyString(result.UserInfo.FamilyName);
+                Verify.AreEqual(sts.ValidUserName, result.User.DisplayableId);
+                Verify.IsNotNullOrEmptyString(result.User.UniqueId);
+                Verify.IsNotNullOrEmptyString(result.User.GivenName);
+                Verify.IsNotNullOrEmptyString(result.User.FamilyName);
 
                 EndBrowserDialogSession();
                 Log.Comment("Waiting 2 seconds before next token request...");
                 AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
                 AuthenticationContextProxy.SetCredentials(null, null);
                 result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters,
-                    new UserIdentifier(result.UserInfo.DisplayableId, UserIdentifierType.OptionalDisplayableId), 
+                    new UserIdentifier(result.User.DisplayableId, UserIdentifierType.OptionalDisplayableId), 
                     SecondCallExtraQueryParameter);
                 ValidateAuthenticationResultsAreEqual(result, result2);
             }
@@ -308,7 +308,7 @@ namespace Test.ADAL.Common
             SetCredential(sts);
             result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId, ThirdCallExtraQueryParameter);
             VerifySuccessResult(sts, result2);
-            if (result.UserInfo != null)
+            if (result.User != null)
             {
                 ValidateAuthenticationResultsAreEqual(result, result2);
             }
@@ -419,9 +419,9 @@ namespace Test.ADAL.Common
             UserCredentialProxy credential = new UserCredentialProxy(sts.ValidUserName, sts.ValidPassword);
             AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, credential);
             VerifySuccessResult(sts, result);
-            Verify.IsNotNull(result.UserInfo);
-            Verify.IsNotNullOrEmptyString(result.UserInfo.UniqueId);
-            Verify.IsNotNullOrEmptyString(result.UserInfo.DisplayableId);
+            Verify.IsNotNull(result.User);
+            Verify.IsNotNullOrEmptyString(result.User.UniqueId);
+            Verify.IsNotNullOrEmptyString(result.User.DisplayableId);
 
             AuthenticationContextProxy.Delay(2000);
 
@@ -481,44 +481,44 @@ namespace Test.ADAL.Common
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
             AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResultAndTokenContent(sts, result);
-            Verify.AreEqual(sts.ValidUserName, result.UserInfo.DisplayableId);
+            Verify.AreEqual(sts.ValidUserName, result.User.DisplayableId);
 
             Log.Comment("Acquire token for user1 returning cached token");
             AuthenticationContextProxy.SetCredentials(null, null);
             result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResultAndTokenContent(sts, result);
-            Verify.AreEqual(sts.ValidUserName, result.UserInfo.DisplayableId);
+            Verify.AreEqual(sts.ValidUserName, result.User.DisplayableId);
 
             Log.Comment("Clear cookie and acquire token for user2 interactively");
             EndBrowserDialogSession();
             AuthenticationContextProxy.SetCredentials(null, sts.ValidPassword2);
             AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidRequiredUserId2);
             VerifySuccessResultAndTokenContent(sts, result2);
-            Verify.AreEqual(sts.ValidUserName2, result2.UserInfo.DisplayableId);
+            Verify.AreEqual(sts.ValidUserName2, result2.User.DisplayableId);
 
             Log.Comment("Acquire token for user1 returning cached token");
             AuthenticationContextProxy.SetCredentials(null, null);
             result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResultAndTokenContent(sts, result);
-            Verify.AreEqual(sts.ValidUserName, result.UserInfo.DisplayableId);
+            Verify.AreEqual(sts.ValidUserName, result.User.DisplayableId);
 
             Log.Comment("Acquire token for user2 returning cached token");
             AuthenticationContextProxy.SetCredentials(null, null);
             result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidRequiredUserId2);
             VerifySuccessResultAndTokenContent(sts, result2);
-            Verify.AreEqual(sts.ValidUserName2, result2.UserInfo.DisplayableId);
+            Verify.AreEqual(sts.ValidUserName2, result2.User.DisplayableId);
 
             Log.Comment("Acquire token for user1 and resource2 using cached multi resource refresh token");
             AuthenticationContextProxy.SetCredentials(null, null);
             result = await context.AcquireTokenAsync(sts.ValidResource2, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResultAndTokenContent(sts, result);
-            Verify.AreEqual(sts.ValidUserName, result.UserInfo.DisplayableId);
+            Verify.AreEqual(sts.ValidUserName, result.User.DisplayableId);
 
             Log.Comment("Acquire token for user2 and resource2 using cached multi resource refresh token");
             AuthenticationContextProxy.SetCredentials(null, null);
             result2 = await context.AcquireTokenAsync(sts.ValidResource2, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidRequiredUserId2);
             VerifySuccessResultAndTokenContent(sts, result2);
-            Verify.AreEqual(sts.ValidUserName2, result2.UserInfo.DisplayableId);
+            Verify.AreEqual(sts.ValidUserName2, result2.User.DisplayableId);
         }
         
         public static async Task ResourceOwnerCredentialsTestAsync(Sts sts)
@@ -527,10 +527,10 @@ namespace Test.ADAL.Common
             UserCredentialProxy credential = new UserCredentialProxy(sts.ValidUserName, sts.ValidPassword);
             AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, credential);
             VerifySuccessResult(sts, result);
-            Verify.IsNotNull(result.UserInfo);
+            Verify.IsNotNull(result.User);
             
             // TODO: Figure out if we should we use mixed case user name to run tests?
-            // Verify.AreNotEqual(result.UserInfo.DisplayableId, result.UserInfo.DisplayableId.ToLower());
+            // Verify.AreNotEqual(result.User.DisplayableId, result.User.DisplayableId.ToLower());
             
             AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
             AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, credential);
@@ -544,8 +544,8 @@ namespace Test.ADAL.Common
             UserCredentialProxy credential = new UserCredentialProxy(sts.ValidUserName3, sts.ValidPassword3);
             AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, credential);
             VerifySuccessResult(sts, result);
-            Verify.IsNotNull(result.UserInfo);
-            Verify.AreNotEqual(result.UserInfo.DisplayableId, result.UserInfo.DisplayableId.ToLower());
+            Verify.IsNotNull(result.User);
+            Verify.AreNotEqual(result.User.DisplayableId, result.User.DisplayableId.ToLower());
             AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
             AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, credential);
             VerifySuccessResult(sts, result2);
@@ -596,8 +596,8 @@ namespace Test.ADAL.Common
             AuthenticationContextProxy.Delay(2000);   // 2 seconds delay
 
             AuthenticationResultProxy result2;
-            if (result.UserInfo != null)
-                result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, new UserIdentifier(result.UserInfo.DisplayableId, UserIdentifierType.OptionalDisplayableId), SecondCallExtraQueryParameter);
+            if (result.User != null)
+                result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, new UserIdentifier(result.User.DisplayableId, UserIdentifierType.OptionalDisplayableId), SecondCallExtraQueryParameter);
             else
                 result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters);
 
@@ -648,11 +648,11 @@ namespace Test.ADAL.Common
                 };
 
                 ValidateUserInfo(result.TenantId, "tenant id", true);
-                ValidateUserInfo(result.UserInfo.UniqueId, "user unique id", true);
-                ValidateUserInfo(result.UserInfo.DisplayableId, "user displayable id", true);
-                ValidateUserInfo(result.UserInfo.IdentityProvider, "identity provider", true);
-                ValidateUserInfo(result.UserInfo.GivenName, "given name", false);
-                ValidateUserInfo(result.UserInfo.FamilyName, "family name", false);
+                ValidateUserInfo(result.User.UniqueId, "user unique id", true);
+                ValidateUserInfo(result.User.DisplayableId, "user displayable id", true);
+                ValidateUserInfo(result.User.IdentityProvider, "identity provider", true);
+                ValidateUserInfo(result.User.GivenName, "given name", false);
+                ValidateUserInfo(result.User.FamilyName, "family name", false);
             }
 
             long expiresIn = (long)(result.ExpiresOn - DateTime.UtcNow).TotalSeconds;
@@ -710,10 +710,10 @@ namespace Test.ADAL.Common
         private static void ValidateAuthenticationResultsAreEqual(AuthenticationResultProxy result, AuthenticationResultProxy result2)
         {
             Verify.AreEqual(result.AccessToken, result2.AccessToken, "AuthenticationResult.AccessToken");
-            Verify.AreEqual(result.UserInfo.UniqueId, result2.UserInfo.UniqueId);
-            Verify.AreEqual(result.UserInfo.DisplayableId, result2.UserInfo.DisplayableId);
-            Verify.AreEqual(result.UserInfo.GivenName, result2.UserInfo.GivenName);
-            Verify.AreEqual(result.UserInfo.FamilyName, result2.UserInfo.FamilyName);
+            Verify.AreEqual(result.User.UniqueId, result2.User.UniqueId);
+            Verify.AreEqual(result.User.DisplayableId, result2.User.DisplayableId);
+            Verify.AreEqual(result.User.GivenName, result2.User.GivenName);
+            Verify.AreEqual(result.User.FamilyName, result2.User.FamilyName);
             Verify.AreEqual(result.TenantId, result2.TenantId);
         }
         

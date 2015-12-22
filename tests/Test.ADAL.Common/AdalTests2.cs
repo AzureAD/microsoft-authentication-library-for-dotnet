@@ -115,18 +115,18 @@ namespace Test.ADAL.Common
         private static void VerifyTokenContent(AuthenticationResultProxy result)
         {
 
-            // Verify the token content confirms the user in AuthenticationResult.UserInfo
+            // Verify the token content confirms the user in AuthenticationResult.User
             var token = new System.IdentityModel.Tokens.JwtSecurityToken(result.AccessToken);
             foreach (var claim in token.Claims)
             {
                 if (claim.Type == "oid")
                 {
-                    Verify.AreEqual(result.UserInfo.UniqueId, claim.Value);
+                    Verify.AreEqual(result.User.UniqueId, claim.Value);
                 }
 
                 if (claim.Type == "upn")
                 {
-                    Verify.AreEqual(result.UserInfo.DisplayableId, claim.Value);
+                    Verify.AreEqual(result.User.DisplayableId, claim.Value);
                 }
             }
         }

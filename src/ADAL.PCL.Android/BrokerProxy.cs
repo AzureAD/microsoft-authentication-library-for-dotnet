@@ -153,11 +153,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return null;
         }
 
-        private UserInfo FindUserInfo(String userid, UserInfo[] userList)
+        private User FindUserInfo(String userid, User[] userList)
         {
             if (userList != null)
             {
-                foreach (UserInfo user in userList)
+                foreach (User user in userList)
                 {
                     if (user != null && !String.IsNullOrEmpty(user.UniqueId)
                             && user.UniqueId.Equals(userid, StringComparison.OrdinalIgnoreCase))
@@ -189,8 +189,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 try
                 {
-                    UserInfo[] users = GetBrokerUsers();
-                    UserInfo matchingUser = FindUserInfo(request.UserId, users);
+                    User[] users = GetBrokerUsers();
+                    User matchingUser = FindUserInfo(request.UserId, users);
                     if (matchingUser != null)
                     {
                         targetAccount = FindAccount(matchingUser.DisplayableId, accountList);
@@ -280,15 +280,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 // IDtoken is not present in the current broker user model
-                UserInfo userinfo = GetUserInfoFromBrokerResult(bundleResult);
+                User user = GetUserInfoFromBrokerResult(bundleResult);
                 AuthenticationResult result = 
                         new AuthenticationResult("Bearer", bundleResult.GetString(AccountManager.KeyAuthtoken),
                             ConvertFromTimeT(bundleResult.GetLong("account.expiredate", 0)))
                         {
-                            UserInfo = userinfo
+                            User = user
                         };
 
-                result.UpdateTenantAndUserInfo(bundleResult.GetString(BrokerConstants.AccountUserInfoTenantId),null, userinfo);
+                result.UpdateTenantAndUser(bundleResult.GetString(BrokerConstants.AccountUserInfoTenantId),null, user);
                 
                 return new AuthenticationResultEx
                 {
@@ -305,7 +305,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
 
-        internal static UserInfo GetUserInfoFromBrokerResult(Bundle bundle)
+        internal static User GetUserInfoFromBrokerResult(Bundle bundle)
         {
             // Broker has one user and related to ADFS WPJ user. It does not return
             // idtoken
@@ -318,7 +318,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     .GetString(BrokerConstants.AccountUserInfoIdentityProvider);
             String displayableId = bundle
                     .GetString(BrokerConstants.AccountUserInfoUserIdDisplayable);
-            return new UserInfo
+            return new User
             {
                 UniqueId = userid,
                 GivenName = givenName,
@@ -516,11 +516,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 // Uniqueid for account at authenticator is not available with
                 // Account
-                UserInfo[] users;
+                User[] users;
                 try
                 {
                     users = GetBrokerUsers();
-                    UserInfo matchingUser = FindUserInfo(uniqueId, users);
+                    User matchingUser = FindUserInfo(uniqueId, users);
                     return matchingUser != null;
                 }
                 catch (Exception e)
@@ -618,7 +618,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
 
-    public UserInfo[] GetBrokerUsers() {
+    public User[] GetBrokerUsers() {
 
         // Calling this on main thread will cause exception since this is
         // waiting on AccountManagerFuture
@@ -634,7 +634,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         if (accountList != null) {
 
             // get info for each user
-            UserInfo[] users = new UserInfo[accountList.Length];
+            User[] users = new User[accountList.Length];
             for (int i = 0; i<accountList.Length; i++) {
 
                 // Use AccountManager Api method to get extended user info
@@ -644,7 +644,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     PlatformPlugin.Logger.Verbose(null, "Waiting for the result");
                 Bundle userInfoBundle = (Bundle)result.Result;
 
-                users[i] = new UserInfo
+                users[i] = new User
                 {
                     UniqueId = userInfoBundle
                     .GetString(BrokerConstants.AccountUserInfoUserId),

@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     internal sealed class TokenCacheKey
     {
-        internal TokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, UserInfo userInfo)
+        internal TokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, User userInfo)
             : this(authority, resource, clientId, tokenSubjectType, (userInfo != null) ? userInfo.UniqueId : null, (userInfo != null) ? userInfo.DisplayableId : null)
         {
         }

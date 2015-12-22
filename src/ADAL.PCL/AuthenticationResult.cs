@@ -71,10 +71,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string TenantId { get; private set; }
 
         /// <summary>
-        /// Gets user information including user Id. Some elements in UserInfo might be null if not returned by the service.
+        /// Gets user information including user Id. Some elements in User might be null if not returned by the service.
         /// </summary>
         [DataMember]
-        public UserInfo UserInfo { get; internal set; }
+        public User User { get; internal set; }
 
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
@@ -91,13 +91,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return Oauth2AuthorizationHeader + this.AccessToken;
         }
 
-        internal void UpdateTenantAndUserInfo(string tenantId, string idToken, UserInfo userInfo)
+        internal void UpdateTenantAndUser(string tenantId, string idToken, User user)
         {
             this.TenantId = tenantId;
             this.IdToken = idToken;
-            if (userInfo != null)
+            if (User != null)
             {
-                this.UserInfo = new UserInfo(userInfo);
+                this.User = new User(user);
             }
         }
     }

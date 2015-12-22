@@ -262,7 +262,7 @@ namespace Test.ADAL.Common
 
             AuthenticationContextProxy.SetCredentials(null, null);
 
-            var userId = (result.UserInfo != null) ? new UserIdentifier(result.UserInfo.DisplayableId, UserIdentifierType.OptionalDisplayableId) : UserIdentifier.AnyUser;
+            var userId = (result.User != null) ? new UserIdentifier(result.User.DisplayableId, UserIdentifierType.OptionalDisplayableId) : UserIdentifier.AnyUser;
 
             AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, userId, SecondCallExtraQueryParameter);
             VerifySuccessResult(sts, result2);
@@ -575,25 +575,25 @@ namespace Test.ADAL.Common
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
             AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResultAndTokenContent(sts, result);
-            Verify.AreEqual(sts.ValidUserName, result.UserInfo.DisplayableId);
+            Verify.AreEqual(sts.ValidUserName, result.User.DisplayableId);
 
             Log.Comment("Acquire token via cookie for user1 without user");
             AuthenticationResultProxy result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters);
             VerifySuccessResultAndTokenContent(sts, result2);
-            Verify.AreEqual(sts.ValidUserName, result2.UserInfo.DisplayableId);
+            Verify.AreEqual(sts.ValidUserName, result2.User.DisplayableId);
 
             Log.Comment("Acquire token for user2 via force prompt and user");
             AuthenticationContextProxy.SetCredentials(sts.ValidUserName2, sts.ValidPassword2);
             var alwaysAuthorizationParameters = new PlatformParameters(PromptBehavior.Always, null);
             result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, alwaysAuthorizationParameters, sts.ValidRequiredUserId2);
             VerifySuccessResultAndTokenContent(sts, result2);
-            Verify.AreEqual(sts.ValidUserName2, result2.UserInfo.DisplayableId);
+            Verify.AreEqual(sts.ValidUserName2, result2.User.DisplayableId);
 
             Log.Comment("Acquire token for user2 via force prompt");
             AuthenticationContextProxy.SetCredentials(sts.ValidUserName2, sts.ValidPassword2);
             result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, alwaysAuthorizationParameters);
             VerifySuccessResultAndTokenContent(sts, result2);
-            Verify.AreEqual(sts.ValidUserName2, result2.UserInfo.DisplayableId);
+            Verify.AreEqual(sts.ValidUserName2, result2.User.DisplayableId);
 
             Log.Comment("Fail to acquire token without user while tokens for two users in the cache");
             result2 = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters);

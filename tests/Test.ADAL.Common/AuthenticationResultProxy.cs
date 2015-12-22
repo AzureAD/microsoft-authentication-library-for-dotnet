@@ -67,7 +67,7 @@ namespace Test.ADAL.Common
         public string TenantId { get; set; }
 
         [DataMember]
-        public UserInfo UserInfo { get; set; }
+        public User User { get; set; }
 
         [DataMember]
         public AuthenticationStatusProxy Status { get; set; }

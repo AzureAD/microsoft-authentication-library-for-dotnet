@@ -41,11 +41,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.AccessToken = result.AccessToken;
             this.IdToken = result.IdToken;
 
-            if (result.UserInfo != null)
+            if (result.User != null)
             {
-                this.FamilyName = result.UserInfo.FamilyName;
-                this.GivenName = result.UserInfo.GivenName;
-                this.IdentityProvider = result.UserInfo.IdentityProvider;
+                this.FamilyName = result.User.FamilyName;
+                this.GivenName = result.User.GivenName;
+                this.IdentityProvider = result.User.IdentityProvider;
             }
         }
 

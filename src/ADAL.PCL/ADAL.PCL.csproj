@@ -123,7 +123,7 @@
     <Compile Include="UserAssertion.cs" />
     <Compile Include="UserCredential.cs" />
     <Compile Include="UserIdentifier.cs" />
-    <Compile Include="UserInfo.cs" />
+    <Compile Include="User.cs" />
     <Compile Include="UserRealmDiscoveryResponse.cs" />
     <Compile Include="WsTrustRequest.cs" />
     <Compile Include="WsTrustResponse.cs" />

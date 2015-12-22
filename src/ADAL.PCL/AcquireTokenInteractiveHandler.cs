@@ -116,8 +116,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 return;
             }
 
-            string uniqueId = (resultEx.Result.UserInfo != null && resultEx.Result.UserInfo.UniqueId != null) ? resultEx.Result.UserInfo.UniqueId : "NULL";
-            string displayableId = (resultEx.Result.UserInfo != null) ? resultEx.Result.UserInfo.DisplayableId : "NULL";
+            string uniqueId = (resultEx.Result.User != null && resultEx.Result.User.UniqueId != null) ? resultEx.Result.User.UniqueId : "NULL";
+            string displayableId = (resultEx.Result.User != null) ? resultEx.Result.User.DisplayableId : "NULL";
 
             if (this.UserIdentifierType == UserIdentifierType.UniqueId && string.Compare(uniqueId, this.UniqueId, StringComparison.Ordinal) != 0)
             {

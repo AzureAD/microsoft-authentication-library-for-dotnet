@@ -177,12 +177,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 string accessToken = data.GetStringExtra("account.access.token");
                 DateTimeOffset expiresOn = BrokerProxy.ConvertFromTimeT(data.GetLongExtra("account.expiredate", 0));
-                UserInfo userInfo = BrokerProxy.GetUserInfoFromBrokerResult(data.Extras);
+                User userInfo = BrokerProxy.GetUserInfoFromBrokerResult(data.Extras);
                 resultEx = new AuthenticationResultEx
                 {
                     Result = new AuthenticationResult("Bearer", accessToken, expiresOn)
                     {
-                        UserInfo = userInfo
+                        User = userInfo
                     }
                 };
             }

@@ -184,7 +184,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     string[] kvpElements = keyString.Split(new[] { Delimiter }, StringSplitOptions.None);
                     AuthenticationResultEx resultEx = AuthenticationResultEx.Deserialize(reader.ReadString());
-                    TokenCacheKey key = new TokenCacheKey(kvpElements[0], kvpElements[1], kvpElements[2], (TokenSubjectType)int.Parse(kvpElements[3]), resultEx.Result.UserInfo);
+                    TokenCacheKey key = new TokenCacheKey(kvpElements[0], kvpElements[1], kvpElements[2], (TokenSubjectType)int.Parse(kvpElements[3]), resultEx.Result.User);
 
                     this.tokenCacheDictionary.Add(key, resultEx);
                 }
@@ -310,7 +310,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         ResourceInResponse = resultEx.ResourceInResponse
                     };
 
-                    newResultEx.Result.UpdateTenantAndUserInfo(resultEx.Result.TenantId, resultEx.Result.IdToken, resultEx.Result.UserInfo);
+                    newResultEx.Result.UpdateTenantAndUser(resultEx.Result.TenantId, resultEx.Result.IdToken, resultEx.Result.User);
                     resultEx = newResultEx;
                 }
                 else
@@ -343,8 +343,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             PlatformPlugin.Logger.Verbose(callState, "Storing token in the cache...");
 
-            string uniqueId = (result.Result.UserInfo != null) ? result.Result.UserInfo.UniqueId : null;
-            string displayableId = (result.Result.UserInfo != null) ? result.Result.UserInfo.DisplayableId : null;
+            string uniqueId = (result.Result.User != null) ? result.Result.User.UniqueId : null;
+            string displayableId = (result.Result.User != null) ? result.Result.User.DisplayableId : null;
 
             this.OnBeforeWrite(new TokenCacheNotificationArgs
             {
@@ -354,7 +354,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 DisplayableId = displayableId
             });
 
-            TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, subjectType, result.Result.UserInfo);
+            TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, subjectType, result.Result.User);
             this.tokenCacheDictionary[tokenCacheKey] = result;
             PlatformPlugin.Logger.Verbose(callState, "An item was stored in the cache");
             this.UpdateCachedMrrtRefreshTokens(result, clientId, subjectType);
@@ -364,11 +364,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private void UpdateCachedMrrtRefreshTokens(AuthenticationResultEx result, string clientId, TokenSubjectType subjectType)
         {
-            if (result.Result.UserInfo != null && result.IsMultipleResourceRefreshToken)
+            if (result.Result.User != null && result.IsMultipleResourceRefreshToken)
             {
                 //pass null for authority to update the token for all the tenants
                 List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> mrrtItems =
-                    this.QueryCache(null, clientId, subjectType, result.Result.UserInfo.UniqueId, result.Result.UserInfo.DisplayableId).Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
+                    this.QueryCache(null, clientId, subjectType, result.Result.User.UniqueId, result.Result.User.DisplayableId).Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
 
                 foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> mrrtItem in mrrtItems)
                 {
