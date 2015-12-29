@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 || authenticateHeader.Length < Bearer.Length + 2
                 || !char.IsWhiteSpace(authenticateHeader[Bearer.Length]))
             {
-                var ex = new ArgumentException(AdalErrorMessage.InvalidAuthenticateHeaderFormat, "authenticateHeader");
+                var ex = new ArgumentException(MsalErrorMessage.InvalidAuthenticateHeaderFormat, "authenticateHeader");
                 PlatformPlugin.Logger.Error(null, ex);
                 throw ex;
             }
@@ -119,7 +119,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 IHttpClient request = PlatformPlugin.HttpClientFactory.Create(resourceUrl.AbsoluteUri, null);
                 using (await request.GetResponseAsync())
                 {
-                    var ex = new AdalException(AdalError.UnauthorizedResponseExpected);
+                    var ex = new MsalException(MsalError.UnauthorizedResponseExpected);
                     PlatformPlugin.Logger.Error(null, ex);
                     throw ex;                    
                 }
@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 IHttpWebResponse response = ex.WebResponse;
                 if (response == null)
                 {
-                    var serviceEx = new AdalServiceException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);
+                    var serviceEx = new MsalServiceException(MsalErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);
                     PlatformPlugin.Logger.Error(null, serviceEx);
                     throw serviceEx;
                 }
@@ -156,14 +156,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else
                 {
-                    var ex = new ArgumentException(AdalErrorMessage.MissingAuthenticateHeader, "response");
+                    var ex = new ArgumentException(MsalErrorMessage.MissingAuthenticateHeader, "response");
                     PlatformPlugin.Logger.Error(null, ex);
                     throw ex;
                 }
             }
             else
             {
-                var ex = new ArgumentException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, "response");
+                var ex = new ArgumentException(MsalErrorMessage.UnauthorizedHttpStatusCodeExpected, "response");
                 PlatformPlugin.Logger.Error(null, ex);
                 throw ex;
             }

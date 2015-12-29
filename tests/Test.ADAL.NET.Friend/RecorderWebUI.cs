@@ -55,7 +55,7 @@ namespace Test.ADAL.NET.Friend
                 if (value[0] == 'A')
                 {
                     string []segments = value.Substring(1).Split(new [] { Delimiter }, StringSplitOptions.RemoveEmptyEntries);
-                    throw new AdalServiceException(errorCode: segments[0], message: segments[1])
+                    throw new MsalServiceException(errorCode: segments[0], message: segments[1])
                           {
                               StatusCode = int.Parse(segments[2])
                           };
@@ -78,9 +78,9 @@ namespace Test.ADAL.NET.Friend
 
                 return result;
             }
-            catch (AdalException ex)
+            catch (MsalException ex)
             {
-                AdalServiceException serviceException = ex as AdalServiceException;
+                MsalServiceException serviceException = ex as MsalServiceException;
                 if (serviceException != null && serviceException.StatusCode == 503)
                 {
                     value = null;

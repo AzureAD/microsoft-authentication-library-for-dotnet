@@ -113,8 +113,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 return new TokenResponse
                 {
-                    Error = AdalError.ServiceReturnedError,
-                    ErrorDescription = AdalErrorMessage.ServiceReturnedError
+                    Error = MsalError.ServiceReturnedError,
+                    ErrorDescription = MsalErrorMessage.ServiceReturnedError
                 };
             }
 
@@ -124,8 +124,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 return new TokenResponse
                 {
-                    Error = AdalError.Unknown,
-                    ErrorDescription = AdalErrorMessage.Unknown
+                    Error = MsalError.Unknown,
+                    ErrorDescription = MsalErrorMessage.Unknown
                 };
             }
 
@@ -145,8 +145,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 tokenResponse = new TokenResponse
                 {
                     Error = (webResponse.StatusCode == HttpStatusCode.ServiceUnavailable) ?
-                        AdalError.ServiceUnavailable :
-                        AdalError.Unknown,
+                        MsalError.ServiceUnavailable :
+                        MsalError.Unknown,
                     ErrorDescription = ReadStreamContent(responseStream)
                 };
             }
@@ -217,11 +217,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else if (this.Error != null)
             {
-                throw new AdalServiceException(this.Error, this.ErrorDescription);
+                throw new MsalServiceException(this.Error, this.ErrorDescription);
             }
             else
             {
-                throw new AdalServiceException(AdalError.Unknown, AdalErrorMessage.Unknown);
+                throw new MsalServiceException(MsalError.Unknown, MsalErrorMessage.Unknown);
             }
 
             return resultEx;

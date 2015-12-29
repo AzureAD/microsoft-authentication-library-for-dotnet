@@ -20,10 +20,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class AcquireTokenForClientHandler : AcquireTokenHandlerBase
     {
-        public AcquireTokenForClientHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey)
-            : base(authenticator, tokenCache, resource, clientKey, TokenSubjectType.Client)
+        public AcquireTokenForClientHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey)
+            : base(authenticator, tokenCache, scope, clientKey, TokenSubjectType.Client)
         {
-            this.SupportADFS = true;
+            this.SupportADFS = false;
         }
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)

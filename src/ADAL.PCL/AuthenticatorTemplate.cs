@@ -84,12 +84,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (discoveryResponse.TenantDiscoveryEndpoint == null)
                 {
-                    throw new AdalException(AdalError.AuthorityNotInValidList);
+                    throw new MsalException(MsalError.AuthorityNotInValidList);
                 }
             }
-            catch (AdalServiceException ex)
+            catch (MsalServiceException ex)
             {
-                throw new AdalException((ex.ErrorCode == "invalid_instance") ? AdalError.AuthorityNotInValidList : AdalError.AuthorityValidationFailed, ex);
+                throw new MsalException((ex.ErrorCode == "invalid_instance") ? MsalError.AuthorityNotInValidList : MsalError.AuthorityValidationFailed, ex);
             }
         }
 

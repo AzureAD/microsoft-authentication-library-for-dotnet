@@ -38,7 +38,7 @@ namespace Test.ADAL.Common
         public static void AdalIdTest()
         {
             IHttpClient request = PlatformPlugin.HttpClientFactory.Create("https://test", null);
-            var adalParameters = AdalIdHelper.GetAdalIdParameters();
+            var adalParameters = MsalIdHelper.GetAdalIdParameters();
 
             Verify.AreEqual(4, adalParameters.Count);
             Verify.IsNotNull(adalParameters[AdalIdParameter.Product]);
@@ -53,7 +53,7 @@ namespace Test.ADAL.Common
 #endif
 
             var parameters = new DictionaryRequestParameters(null, new ClientKey("client_id"));
-            adalParameters = AdalIdHelper.GetAdalIdParameters();
+            adalParameters = MsalIdHelper.GetAdalIdParameters();
 
             Verify.AreEqual(4, adalParameters.Count);
             Verify.IsNotNull(adalParameters[AdalIdParameter.Product]);

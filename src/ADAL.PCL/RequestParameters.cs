@@ -27,11 +27,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
     internal class DictionaryRequestParameters : Dictionary<string, string>, IRequestParameters
     {
-        public DictionaryRequestParameters(string resource, ClientKey clientKey)
+        public DictionaryRequestParameters(string scopeAsString, ClientKey clientKey)
         {
-            if (!string.IsNullOrWhiteSpace(resource))
+            if (!string.IsNullOrWhiteSpace(scopeAsString))
             {
-                this[OAuthParameter.Resource] = resource;
+                this[OAuthParameter.Resource] = scopeAsString;
             }
 
             clientKey.AddToParameters(this);    

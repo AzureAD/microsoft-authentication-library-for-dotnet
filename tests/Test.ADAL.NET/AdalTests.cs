@@ -213,7 +213,7 @@ namespace Test.ADAL.Common
             VerifyErrorResult(result, Sts.InvalidClientError, "50012", 401); // AADSTS50012: Client assertion contains an invalid signature.
 
             result = await context.AcquireTokenAsync(sts.InvalidResource, validCredential);
-            VerifyErrorResult(result, Sts.InvalidResourceError, "50001", 400);   // ACS50001: Resource not found.
+            VerifyErrorResult(result, Sts.InvalidResourceError, "50001", 400);   // ACS50001: Scope not found.
 
             RecorderJwtId.JwtIdIndex = 12;
             invalidCredential = CreateClientAssertion(sts.Authority, sts.InvalidClientId, sts.InvalidConfidentialClientCertificateName, sts.InvalidConfidentialClientCertificatePassword);
@@ -230,9 +230,9 @@ namespace Test.ADAL.Common
                 await context.AcquireTokenSilentAsync(sts.ValidResource, sts.ValidClientId, sts.ValidUserId);
                 Verify.Fail("AdalSilentTokenAcquisitionException was expected");
             }
-            catch (AdalSilentTokenAcquisitionException ex)
+            catch (MsalSilentTokenAcquisitionException ex)
             {
-                Verify.AreEqual(AdalError.FailedToAcquireTokenSilently, ex.ErrorCode);
+                Verify.AreEqual(MsalError.FailedToAcquireTokenSilently, ex.ErrorCode);
             }
             catch
             {
@@ -325,7 +325,7 @@ namespace Test.ADAL.Common
 
             // Using MRRT in cached token to acquire token for a different resource
             result3 = await context.AcquireTokenSilentAsync(sts.ValidResource2, sts.ValidConfidentialClientId);
-            VerifyErrorResult(result3, AdalError.FailedToAcquireTokenSilently, null);
+            VerifyErrorResult(result3, MsalError.FailedToAcquireTokenSilently, null);
 
             // Using MRRT in cached token to acquire token for a different resource
             result3 = await context.AcquireTokenSilentAsync(sts.ValidResource2, clientCredential, UserIdentifier.AnyUser);
@@ -383,7 +383,7 @@ namespace Test.ADAL.Common
 
             // Using MRRT in cached token to acquire token for a different resource
             result3 = await context.AcquireTokenSilentAsync(sts.ValidResource2, sts.ValidConfidentialClientId);
-            VerifyErrorResult(result3, AdalError.FailedToAcquireTokenSilently, null);
+            VerifyErrorResult(result3, MsalError.FailedToAcquireTokenSilently, null);
 
             // Using MRRT in cached token to acquire token for a different resource
             result3 = await context.AcquireTokenSilentAsync(sts.ValidResource2, clientCertificate, UserIdentifier.AnyUser);
@@ -512,7 +512,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result2, true, false);
 
             result2 = await context.AcquireTokenSilentAsync(sts.ValidResource2, sts.ValidConfidentialClientId);
-            VerifyErrorResult(result2, AdalError.FailedToAcquireTokenSilently, null);
+            VerifyErrorResult(result2, MsalError.FailedToAcquireTokenSilently, null);
 
             result2 = await context.AcquireTokenSilentAsync(sts.ValidResource2, credential, UserIdentifier.AnyUser);
             VerifySuccessResult(sts, result2, true, false);
@@ -741,7 +741,7 @@ namespace Test.ADAL.Common
                 Verify.Fail("Exception expected");
                 VerifySuccessResult(result);
             }
-            catch (AdalServiceException ex)
+            catch (MsalServiceException ex)
             {
                 Verify.AreEqual(ex.ErrorCode, "invalid_grant");
                 Verify.AreEqual(ex.StatusCode, 400);

@@ -38,14 +38,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly UserIdentifier userId;
 
-        public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters, IWebUI webUI)
-            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User)
+        public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters, IWebUI webUI)
+            : base(authenticator, tokenCache, scope, new ClientKey(clientId), TokenSubjectType.User)
         {
             this.redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
 
             if (!string.IsNullOrWhiteSpace(this.redirectUri.Fragment))
             {
-                throw new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
+                throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
 
             this.authorizationParameters = parameters;
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (userId == null)
             {
-                throw new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
+                throw new ArgumentNullException("userId", MsalErrorMessage.SpecifyAnyUser);
             }
 
             this.userId = userId;
@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         internal async Task AcquireAuthorizationAsync()
         {
             Uri authorizationUri = this.CreateAuthorizationUri();
-            this.authorizationResult = await this.webUi.AcquireAuthorizationAsync(authorizationUri, this.redirectUri, this.CallState);
+            this.authorizationResult = await this.webUi.AcquireAuthorizationAsync(authorizationUri, this.redirectUri, null, this.CallState);
         }
 
         internal async Task<Uri> CreateAuthorizationUriAsync(Guid correlationId)
@@ -121,12 +121,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (this.UserIdentifierType == UserIdentifierType.UniqueId && string.Compare(uniqueId, this.UniqueId, StringComparison.Ordinal) != 0)
             {
-                throw new AdalUserMismatchException(this.UniqueId, uniqueId);
+                throw new MsalUserMismatchException(this.UniqueId, uniqueId);
             }
 
             if (this.UserIdentifierType == UserIdentifierType.RequiredDisplayableId && string.Compare(displayableId, this.DisplayableId, StringComparison.OrdinalIgnoreCase) != 0)
             {
-                throw new AdalUserMismatchException(this.DisplayableId, displayableId);
+                throw new MsalUserMismatchException(this.DisplayableId, displayableId);
             }
         }
 
@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private DictionaryRequestParameters CreateAuthorizationRequest(string loginHint)
         {
-            var authorizationRequestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
+            var authorizationRequestParameters = new DictionaryRequestParameters(this.Scope, this.ClientKey);
             authorizationRequestParameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
 
             authorizationRequestParameters[OAuthParameter.RedirectUri] = this.redirectUriRequestParameter;
@@ -170,7 +170,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (PlatformPlugin.HttpClientFactory.AddAdditionalHeaders)
             {
-                IDictionary<string, string> adalIdParameters = AdalIdHelper.GetAdalIdParameters();
+                IDictionary<string, string> adalIdParameters = MsalIdHelper.GetAdalIdParameters();
                 foreach (KeyValuePair<string, string> kvp in adalIdParameters)
                 {
                     authorizationRequestParameters[kvp.Key] = kvp.Value;
@@ -185,7 +185,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     if (authorizationRequestParameters.ContainsKey(kvp.Key))
                     {
-                        throw new AdalException(AdalError.DuplicateQueryParameter, string.Format(AdalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
+                        throw new MsalException(MsalError.DuplicateQueryParameter, string.Format(MsalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
                     }
                 }
 
@@ -199,12 +199,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (this.authorizationResult.Error == OAuthError.LoginRequired)
             {
-                throw new AdalException(AdalError.UserInteractionRequired);
+                throw new MsalException(MsalError.UserInteractionRequired);
             }
 
             if (this.authorizationResult.Status != AuthorizationStatus.Success)
             {
-                throw new AdalServiceException(this.authorizationResult.Error, this.authorizationResult.ErrorDescription);
+                throw new MsalServiceException(this.authorizationResult.Error, this.authorizationResult.ErrorDescription);
             }
         }
 

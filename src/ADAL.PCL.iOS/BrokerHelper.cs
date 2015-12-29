@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (brokerPayload.ContainsKey("silent_broker_flow"))
             {
-                throw new AdalSilentTokenAcquisitionException();
+                throw new MsalSilentTokenAcquisitionException();
             }
 
             brokerResponse = null;
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(keyPair["app_link"])));
 
-                    throw new AdalException(AdalErrorIOSEx.BrokerApplicationRequired, AdalErrorMessageIOSEx.BrokerApplicationRequired);
+                    throw new MsalException(AdalErrorIOSEx.BrokerApplicationRequired, AdalErrorMessageIOSEx.BrokerApplicationRequired);
             }
             else
             {
@@ -125,8 +125,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     response = new TokenResponse
                     {
-                        Error = AdalError.BrokerReponseHashMismatch,
-                        ErrorDescription = AdalErrorMessage.BrokerReponseHashMismatch
+                        Error = MsalError.BrokerReponseHashMismatch,
+                        ErrorDescription = MsalErrorMessage.BrokerReponseHashMismatch
                     };
                 }
             }

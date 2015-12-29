@@ -54,6 +54,7 @@
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="AbstractClientApplication.cs" />
     <Compile Include="AcquireDeviceCodeHandler.cs" />
     <Compile Include="AcquireTokenByAuthorizationCodeHandler.cs" />
     <Compile Include="AcquireTokenByDeviceCodeHandler.cs" />
@@ -63,11 +64,12 @@
     <Compile Include="AcquireTokenNonInteractiveHandler.cs" />
     <Compile Include="AcquireTokenOnBehalfHandler.cs" />
     <Compile Include="AcquireTokenSilentHandler.cs" />
-    <Compile Include="AdalException.cs" />
-    <Compile Include="AdalIdHelper.cs" />
-    <Compile Include="AdalServiceException.cs" />
-    <Compile Include="AdalSilentTokenAcquisitionException.cs" />
-    <Compile Include="AdalUserMismatchException.cs" />
+    <Compile Include="MsalException.cs" />
+    <Compile Include="MsalStringHelper.cs" />
+    <Compile Include="MsalIdHelper.cs" />
+    <Compile Include="MsalServiceException.cs" />
+    <Compile Include="MsalSilentTokenAcquisitionException.cs" />
+    <Compile Include="MsalUserMismatchException.cs" />
     <Compile Include="AuthenticationContext.cs" />
     <Compile Include="AuthenticationParameters.cs" />
     <Compile Include="AuthenticationResult.cs" />
@@ -82,6 +84,7 @@
     <Compile Include="ClientCredential.cs" />
     <Compile Include="ClientKey.cs" />
     <Compile Include="ClientMetrics.cs" />
+    <Compile Include="ConfidentialClientApplication.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="DeviceAuthJWTResponse.cs" />
     <Compile Include="DeviceCodeResponse.cs" />
@@ -104,6 +107,7 @@
     <Compile Include="LoggerBase.cs" />
     <Compile Include="MexParser.cs" />
     <Compile Include="AuthenticationResultEx.cs" />
+    <Compile Include="PublicClientApplication.cs" />
     <Compile Include="TokenResponse.cs" />
     <Compile Include="OAuthConstants.cs" />
     <Compile Include="PlatformInformationBase.cs" />
@@ -120,6 +124,7 @@
     <Compile Include="TokenCacheItem.cs" />
     <Compile Include="TokenCacheKey.cs" />
     <Compile Include="TokenCacheNotificationArgs.cs" />
+    <Compile Include="UIOptions.cs" />
     <Compile Include="UserAssertion.cs" />
     <Compile Include="UserCredential.cs" />
     <Compile Include="UserIdentifier.cs" />

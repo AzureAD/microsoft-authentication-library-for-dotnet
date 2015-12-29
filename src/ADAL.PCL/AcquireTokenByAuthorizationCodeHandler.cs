@@ -26,8 +26,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly Uri redirectUri;
 
-        public AcquireTokenByAuthorizationCodeHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, string authorizationCode, Uri redirectUri)
-            : base(authenticator, tokenCache, resource ?? NullResource, clientKey, TokenSubjectType.UserPlusClient)
+        public AcquireTokenByAuthorizationCodeHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string authorizationCode, Uri redirectUri)
+            : base(authenticator, tokenCache, scope, clientKey, TokenSubjectType.UserPlusClient)
         {
             if (string.IsNullOrWhiteSpace(authorizationCode))
             {
@@ -44,8 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.redirectUri = redirectUri;
 
             this.LoadFromCache = false;
-
-            this.SupportADFS = true;
+            this.SupportADFS = false;
         }
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
@@ -63,14 +62,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.DisplayableId = (userInfo == null) ? null : userInfo.DisplayableId;
             if (resultEx.ResourceInResponse != null)
             {
-                this.Resource = resultEx.ResourceInResponse;
-                PlatformPlugin.Logger.Verbose(this.CallState, "Resource value in the token response was used for storing tokens in the cache");
+                this.Scope = resultEx.ResourceInResponse;
+                PlatformPlugin.Logger.Verbose(this.CallState, "Scope value in the token response was used for storing tokens in the cache");
             }
 
-            // If resource is not passed as an argument and is not returned by STS either, 
-            // we cannot store the token in the cache with null resource.
+            // If scope is not passed as an argument and is not returned by STS either, 
+            // we cannot store the token in the cache with null scope.
             // TODO: Store refresh token though if STS supports MRRT.
-            this.StoreToCache = this.StoreToCache && (this.Resource != null);
+            this.StoreToCache = this.StoreToCache && (this.Scope != null);
         }
     }
 }

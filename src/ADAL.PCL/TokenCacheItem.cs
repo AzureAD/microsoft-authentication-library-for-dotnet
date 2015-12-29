@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string IdentityProvider { get; internal set; }
 
         /// <summary>
-        /// Gets the Resource.
+        /// Gets the Scope.
         /// </summary>
         public string Resource { get; internal set; }
 

@@ -97,8 +97,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (certificates == null || certificates.Count == 0)
             {
-                throw new AdalException(AdalError.DeviceCertificateNotFound,
-                    string.Format(AdalErrorMessage.DeviceCertificateNotFoundTemplate, errMessage));
+                throw new MsalException(MsalError.DeviceCertificateNotFound,
+                    string.Format(MsalErrorMessage.DeviceCertificateNotFoundTemplate, errMessage));
             }
 
             return certificates[0];

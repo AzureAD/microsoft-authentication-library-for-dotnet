@@ -21,14 +21,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// The exception type thrown when user returned by service does not match user in the request.
     /// </summary>
-    public class AdalUserMismatchException : AdalException
+    public class MsalUserMismatchException : MsalException
     {
         /// <summary>
         ///  Initializes a new instance of the exception class.
         /// </summary>
-        public AdalUserMismatchException(string requestedUser, string returnedUser)
-            : base(AdalError.UserMismatch, 
-                   string.Format(AdalErrorMessage.UserMismatch, returnedUser, requestedUser))
+        public MsalUserMismatchException(string requestedUser, string returnedUser)
+            : base(MsalError.UserMismatch, 
+                   string.Format(MsalErrorMessage.UserMismatch, returnedUser, requestedUser))
         {
             this.RequestedUser = requestedUser;
             this.ReturnedUser = returnedUser;

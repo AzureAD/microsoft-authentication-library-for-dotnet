@@ -40,13 +40,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (this.Status == AuthorizationStatus.UserCancel)
             {
-                this.Error = AdalError.AuthenticationCanceled;
-                this.ErrorDescription = AdalErrorMessage.AuthenticationCanceled;
+                this.Error = MsalError.AuthenticationCanceled;
+                this.ErrorDescription = MsalErrorMessage.AuthenticationCanceled;
             }
             else if (this.Status == AuthorizationStatus.UnknownError)
             {
-                this.Error = AdalError.Unknown;
-                this.ErrorDescription = AdalErrorMessage.Unknown;
+                this.Error = MsalError.Unknown;
+                this.ErrorDescription = MsalErrorMessage.Unknown;
             }
             else
             {
@@ -95,15 +95,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else
                 {
-                    this.Error = AdalError.AuthenticationFailed;
-                    this.ErrorDescription = AdalErrorMessage.AuthorizationServerInvalidResponse;
+                    this.Error = MsalError.AuthenticationFailed;
+                    this.ErrorDescription = MsalErrorMessage.AuthorizationServerInvalidResponse;
                     this.Status = AuthorizationStatus.UnknownError;
                 }
             }
             else
             {
-                this.Error = AdalError.AuthenticationFailed;
-                this.ErrorDescription = AdalErrorMessage.AuthorizationServerInvalidResponse;
+                this.Error = MsalError.AuthenticationFailed;
+                this.ErrorDescription = MsalErrorMessage.AuthorizationServerInvalidResponse;
                 this.Status = AuthorizationStatus.UnknownError;
             }
         }

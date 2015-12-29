@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             }
             else
             {
-                throw new AdalException(AdalError.InvalidOwnerWindowType, 
+                throw new MsalException(MsalError.InvalidOwnerWindowType, 
                     "Invalid owner window type. Expected types are IWin32Window or IntPtr (for window handle).");
             }
 
@@ -301,17 +301,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             base.Dispose(disposing);
         }
 
-        protected AdalException CreateExceptionForAuthenticationUiFailed(int statusCode)
+        protected MsalException CreateExceptionForAuthenticationUiFailed(int statusCode)
         {
             if (NavigateErrorStatus.Messages.ContainsKey(statusCode))
             {
-                return new AdalServiceException(
-                    AdalError.AuthenticationUiFailed,
+                return new MsalServiceException(
+                    MsalError.AuthenticationUiFailed,
                     string.Format("The browser based authentication dialog failed to complete. Reason: {0}", NavigateErrorStatus.Messages[statusCode])) { StatusCode = statusCode };
             }
 
-            return new AdalServiceException(
-                AdalError.AuthenticationUiFailed,
+            return new MsalServiceException(
+                MsalError.AuthenticationUiFailed,
                 string.Format("The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}", statusCode)) { StatusCode = statusCode };
         }
 

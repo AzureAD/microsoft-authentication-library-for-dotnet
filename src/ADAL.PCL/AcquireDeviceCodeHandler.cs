@@ -26,22 +26,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private Authenticator authenticator;
         private ClientKey clientKey;
-        private string resource;
+        private string[] scope;
         private CallState callState;
         private string extraQueryParameters;
 
-        public AcquireDeviceCodeHandler(Authenticator authenticator, string resource, string clientId, string extraQueryParameters)
+        public AcquireDeviceCodeHandler(Authenticator authenticator, string[] scope, string clientId, string extraQueryParameters)
         {
             this.authenticator = authenticator;
             this.callState = AcquireTokenHandlerBase.CreateCallState(this.authenticator.CorrelationId);
             this.clientKey = new ClientKey(clientId);
-            this.resource = resource;
+            this.scope = scope;
             this.extraQueryParameters = extraQueryParameters;
         }
         
         private string CreateDeviceCodeRequestUriString()
         {
-            var deviceCodeRequestParameters = new DictionaryRequestParameters(this.resource, this.clientKey);
+            var deviceCodeRequestParameters = new DictionaryRequestParameters(MsalStringHelper.CreateSingleStringFromArray(this.scope), this.clientKey);
 
             if (this.callState != null && this.callState.CorrelationId != Guid.Empty)
             {
@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             
             if (PlatformPlugin.HttpClientFactory.AddAdditionalHeaders)
             {
-                IDictionary<string, string> adalIdParameters = AdalIdHelper.GetAdalIdParameters();
+                IDictionary<string, string> adalIdParameters = MsalIdHelper.GetAdalIdParameters();
                 foreach (KeyValuePair<string, string> kvp in adalIdParameters)
                 {
                     deviceCodeRequestParameters[kvp.Key] = kvp.Value;
@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     if (deviceCodeRequestParameters.ContainsKey(kvp.Key))
                     {
-                        throw new AdalException(AdalError.DuplicateQueryParameter, string.Format(AdalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
+                        throw new MsalException(MsalError.DuplicateQueryParameter, string.Format(MsalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
                     }
                 }
 
@@ -84,18 +84,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (!string.IsNullOrEmpty(response.Error))
             {
-                throw new AdalException(response.Error, response.ErrorDescription);
+                throw new MsalException(response.Error, response.ErrorDescription);
             }
 
-            return response.GetResult(clientKey.ClientId, resource);
+            return response.GetResult(clientKey.ClientId, scope);
         }
 
         private void ValidateAuthorityType()
         {
             if (this.authenticator.AuthorityType == AuthorityType.ADFS)
             {
-                throw new AdalException(AdalError.InvalidAuthorityType,
-                    string.Format(AdalErrorMessage.InvalidAuthorityTypeTemplate, this.authenticator.Authority));
+                throw new MsalException(MsalError.InvalidAuthorityType,
+                    string.Format(MsalErrorMessage.InvalidAuthorityTypeTemplate, this.authenticator.Authority));
             }
         }
 

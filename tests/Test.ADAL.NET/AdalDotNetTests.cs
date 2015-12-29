@@ -449,7 +449,7 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [Description("Test for token refresh for confidnetial client using Multi Resource Refresh Token (MRRT) in cache")]
+        [Description("Test for token refresh for confidnetial client using Multi Scope Refresh Token (MRRT) in cache")]
         [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
         public async Task ConfidentialClientTokenRefreshWithMrrtTest()

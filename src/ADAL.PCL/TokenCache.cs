@@ -402,12 +402,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (mrrtItems.Any())
                     {
                         returnValue = mrrtItems.First();
-                        PlatformPlugin.Logger.Information(callState, "A Multi Resource Refresh Token for a different resource was found which can be used");
+                        PlatformPlugin.Logger.Information(callState, "A Multi Scope Refresh Token for a different resource was found which can be used");
                     }
                 }
                     break;
                 default:
-                    throw new AdalException(AdalError.MultipleTokensMatched);
+                    throw new MsalException(MsalError.MultipleTokensMatched);
             }
 
             // check for tokens issued to same client_id/user_id combination, but any tenant.

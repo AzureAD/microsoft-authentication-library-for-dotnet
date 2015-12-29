@@ -162,7 +162,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             if (this.result == null)
             {
-                throw new AdalException(AdalError.UserInteractionRequired);
+                throw new MsalException(MsalError.UserInteractionRequired);
             }
 
             return this.result;

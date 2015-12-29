@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         this.Client.Headers[kvp.Key] = kvp.Value;
                     }
 
-                    IDictionary<string, string> adalIdHeaders = AdalIdHelper.GetAdalIdParameters();
+                    IDictionary<string, string> adalIdHeaders = MsalIdHelper.GetAdalIdParameters();
                     foreach (KeyValuePair<string, string> kvp in adalIdHeaders)
                     {
                         this.Client.Headers[kvp.Key] = kvp.Value;
@@ -83,17 +83,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 if (!this.isDeviceAuthChallenge(endpointType, ex.WebResponse, respondToDeviceAuthChallenge))
                 {
-                    AdalServiceException serviceEx;
+                    MsalServiceException serviceEx;
                     if (ex.WebResponse != null)
                     {
                         TokenResponse tokenResponse = TokenResponse.CreateFromErrorResponse(ex.WebResponse);
                         string[] errorCodes = tokenResponse.ErrorCodes ?? new[] {ex.WebResponse.StatusCode.ToString()};
-                        serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
+                        serviceEx = new MsalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
                             errorCodes, ex);
                     }
                     else
                     {
-                        serviceEx = new AdalServiceException(AdalError.Unknown, ex);
+                        serviceEx = new MsalServiceException(MsalError.Unknown, ex);
                     }
 
                     clientMetrics.SetLastError(serviceEx.ServiceErrorCodes);

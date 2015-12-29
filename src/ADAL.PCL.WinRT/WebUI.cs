@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Security.Authentication.Web;
@@ -39,7 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.useCorporateNetwork = ((PlatformParameters)parameters).UseCorporateNetwork;
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionaHeaders, CallState callState)
         {
             bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
             if (this.promptBehavior == PromptBehavior.Never && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
@@ -69,16 +70,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (FileNotFoundException ex)
             {
-                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
+                throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
             catch (Exception ex)
             {
                 if (this.promptBehavior == PromptBehavior.Never)
                 {
-                    throw new AdalException(AdalError.UserInteractionRequired, ex);
+                    throw new MsalException(MsalError.UserInteractionRequired, ex);
                 }
 
-                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
+                throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
 
             AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult, callState);

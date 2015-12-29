@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private DeviceCodeResult deviceCodeResult = null;
 
         public AcquireTokenByDeviceCodeHandler(Authenticator authenticator, TokenCache tokenCache, DeviceCodeResult deviceCodeResult)
-            : base(authenticator, tokenCache, deviceCodeResult.Resource, new ClientKey(deviceCodeResult.ClientId), TokenSubjectType.User)
+            : base(authenticator, tokenCache, deviceCodeResult.Scope, new ClientKey(deviceCodeResult.ClientId), TokenSubjectType.User)
         {
             if (deviceCodeResult == null)
             {
@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     resultEx = await base.SendTokenRequestAsync();
                     break;
                 }
-                catch (AdalServiceException exc)
+                catch (MsalServiceException exc)
                 {
                     if (!exc.ErrorCode.Equals(AdalErrorEx.DeviceCodeAuthorizationPendingError))
                     {

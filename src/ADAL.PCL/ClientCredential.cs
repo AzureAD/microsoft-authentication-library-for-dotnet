@@ -17,9 +17,16 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    public enum ClientCredentialType
+    {
+        ClientSecret, //client_secret
+        ClientAssertion, //urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+    }
+
     /// <summary>
     /// Credential including client id and secret.
     /// </summary>
@@ -28,29 +35,45 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Constructor to create credential with client id and secret
         /// </summary>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="clientSecret">Secret of the client requesting the token.</param>
-        public ClientCredential(string clientId, string clientSecret)
+        /// <param name="credential">Secret of the client requesting the token.</param>
+        public ClientCredential(string credential, ClientCredentialType clientCredentialType)
         {
-            if (string.IsNullOrWhiteSpace(clientId))
-            {
-                throw new ArgumentNullException("clientId");
-            }
 
-            if (string.IsNullOrWhiteSpace(clientSecret))
+            if (string.IsNullOrWhiteSpace(credential))
             {
-                throw new ArgumentNullException("clientSecret");
+                throw new ArgumentNullException("credential");
             }
-
-            this.ClientId = clientId;
-            this.ClientSecret = clientSecret;
+            
+            this.Credential = credential;
+            this.ClientCredentialType = clientCredentialType;
         }
 
-        /// <summary>
-        /// Gets the identifier of the client requesting the token.
-        /// </summary>
-        public string ClientId { get; private set; }
+        internal string ClientId { get; set; }
 
-        internal string ClientSecret { get; private set; }
+        internal string Credential { get; private set; }
+
+        internal ClientCredentialType ClientCredentialType { get; private set; }
+
+
+        internal void AddToParameters(IDictionary<string, string> parameters)
+        {
+            if (this.ClientId != null)
+            {
+                parameters[OAuthParameter.ClientId] = this.ClientId;
+            }
+
+            if (this.ClientCredentialType == ClientCredentialType.ClientSecret)
+            {
+                parameters[OAuthParameter.ClientSecret] = this.Credential;
+            }
+            else if (this.ClientCredentialType == ClientCredentialType.ClientAssertion)
+            {
+                //TODO - handle JWT certificate assertion
+                /*JsonWebToken jwtToken = new JsonWebToken(this.Certificate, this.Authenticator.SelfSignedJwtAudience);
+                ClientAssertion clientAssertion = jwtToken.Sign(this.Certificate);*/
+                parameters[OAuthParameter.ClientAssertionType] = OAuthAssertionType.JwtBearer;
+                parameters[OAuthParameter.ClientAssertion] = this.Credential;
+            }
+        }
     }
 }

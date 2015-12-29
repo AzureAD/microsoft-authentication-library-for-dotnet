@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public override string GetAssemblyFileVersionAttribute()
         {
             // TODO: Check if assembly file version can be read in iOS assembly as well or not. For now, we use assembly version instead.
-            return typeof(AdalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
+            return typeof(MsalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
         }
     }
 }

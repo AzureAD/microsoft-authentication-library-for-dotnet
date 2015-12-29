@@ -28,25 +28,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private UserAssertion userAssertion;
         
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserCredential userCredential)
-            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User)
+        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserCredential userCredential)
+            : base(authenticator, tokenCache, scope, new ClientKey(clientId), TokenSubjectType.User)
         {
             if (userCredential == null)
             {
                 throw new ArgumentNullException("userCredential");
             }
 
-            // We enable ADFS support only when it makes sense to do so
-            if (authenticator.AuthorityType == AuthorityType.ADFS)
-            {
-                this.SupportADFS = true;
-            }
-
             this.userCredential = userCredential;
         }
 
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserAssertion userAssertion)
-            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User)
+        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserAssertion userAssertion)
+            : base(authenticator, tokenCache, scope, new ClientKey(clientId), TokenSubjectType.User)
         {
             if (userAssertion == null)
             {
@@ -55,7 +49,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (string.IsNullOrWhiteSpace(userAssertion.AssertionType))
             {
-                throw new ArgumentException(AdalErrorMessage.UserCredentialAssertionTypeEmpty, "userAssertion");
+                throw new ArgumentException(MsalErrorMessage.UserCredentialAssertionTypeEmpty, "userAssertion");
             }
 
             this.userAssertion = userAssertion;
@@ -73,7 +67,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (string.IsNullOrWhiteSpace(userCredential.UserName))
                     {
                         PlatformPlugin.Logger.Information(this.CallState, "Could not find UPN for logged in user");
-                        throw new AdalException(AdalError.UnknownUser);
+                        throw new MsalException(MsalError.UnknownUser);
                     }
 
                     PlatformPlugin.Logger.Verbose(this.CallState, string.Format("Logged in user with hash '{0}' detected", PlatformPlugin.CryptographyHelper.CreateSha256Hash(userCredential.UserName)));
@@ -99,7 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     if (string.IsNullOrWhiteSpace(userRealmResponse.FederationMetadataUrl))
                     {
-                        throw new AdalException(AdalError.MissingFederationMetadataUrl);
+                        throw new MsalException(MsalError.MissingFederationMetadataUrl);
                     }
 
                     WsTrustAddress wsTrustAddress = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, this.userCredential.UserAuthType, this.CallState);
@@ -116,12 +110,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     // handle password grant flow for the managed user
                     if (this.userCredential.PasswordToCharArray() == null)
                     {
-                        throw new AdalException(AdalError.PasswordRequiredForManagedUserError);
+                        throw new MsalException(MsalError.PasswordRequiredForManagedUserError);
                     }
                 }
                 else
                 {
-                    throw new AdalException(AdalError.UnknownUserType);
+                    throw new MsalException(MsalError.UnknownUserType);
                 }
             }
         }

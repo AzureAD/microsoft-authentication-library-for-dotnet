@@ -148,26 +148,26 @@ namespace Test.ADAL.Common
             output.Status = AuthenticationStatusProxy.ClientError;
             if (ex is ArgumentNullException)
             {
-                output.Error = AdalError.InvalidArgument;
+                output.Error = MsalError.InvalidArgument;
             }
             else if (ex is ArgumentException)
             {
-                output.Error = AdalError.InvalidArgument;
+                output.Error = MsalError.InvalidArgument;
             }
-            else if (ex is AdalServiceException)
+            else if (ex is MsalServiceException)
             {
-                output.Error = ((AdalServiceException)ex).ErrorCode;
-                output.ExceptionStatusCode = ((AdalServiceException)ex).StatusCode;
-                output.ExceptionServiceErrorCodes = ((AdalServiceException)ex).ServiceErrorCodes;
+                output.Error = ((MsalServiceException)ex).ErrorCode;
+                output.ExceptionStatusCode = ((MsalServiceException)ex).StatusCode;
+                output.ExceptionServiceErrorCodes = ((MsalServiceException)ex).ServiceErrorCodes;
                 output.Status = AuthenticationStatusProxy.ServiceError;
             }
-            else if (ex is AdalException)
+            else if (ex is MsalException)
             {
-                output.Error = ((AdalException)ex).ErrorCode;
+                output.Error = ((MsalException)ex).ErrorCode;
             }
             else
             {
-                output.Error = AdalError.AuthenticationFailed;
+                output.Error = MsalError.AuthenticationFailed;
             }
 
             output.Exception = ex;

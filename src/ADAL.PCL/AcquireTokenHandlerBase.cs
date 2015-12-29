@@ -26,29 +26,28 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal abstract class AcquireTokenHandlerBase
     {
-        protected const string NullResource = "null_resource_as_optional";
         protected readonly static Task CompletedTask = Task.FromResult(false);
         private readonly TokenCache tokenCache;
         protected readonly IDictionary<string, string> brokerParameters;
 
-        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, TokenSubjectType subjectType)
+        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, TokenSubjectType subjectType)
         {
             this.Authenticator = authenticator;
             this.CallState = CreateCallState(this.Authenticator.CorrelationId);
             PlatformPlugin.Logger.Information(this.CallState,
                 string.Format("=== Token Acquisition started:\n\tAuthority: {0}\n\tResource: {1}\n\tClientId: {2}\n\tCacheType: {3}\n\tAuthentication Target: {4}\n\t",
-                authenticator.Authority, resource, clientKey.ClientId,
+                authenticator.Authority, scope, clientKey.ClientId,
                 (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(" ({0} items)", tokenCache.Count) : "null",
                 subjectType));
 
             this.tokenCache = tokenCache;
 
-            if (string.IsNullOrWhiteSpace(resource))
+            if (MsalStringHelper.IsNullOrEmpty(scope))
             {
-                throw new ArgumentNullException("resource");
+                throw new ArgumentNullException("scope");
             }
 
-            this.Resource = (resource != NullResource) ? resource : null;
+            this.Scope = Scope;
             this.ClientKey = clientKey;
             this.TokenSubjectType = subjectType;
 
@@ -58,10 +57,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.brokerParameters = new Dictionary<string, string>();
             brokerParameters["authority"] = authenticator.Authority;
-            brokerParameters["resource"] = resource;
+            brokerParameters["scope"] = scope.CreateSingleStringFromArray();
             brokerParameters["client_id"] = clientKey.ClientId;
             brokerParameters["correlation_id"] = this.CallState.CorrelationId.ToString();
-            brokerParameters["client_version"] = AdalIdHelper.GetAdalVersion();
+            brokerParameters["client_version"] = MsalIdHelper.GetMsalVersion();
 
         }
 
@@ -71,7 +70,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected Authenticator Authenticator { get; private set; }
 
-        protected string Resource { get; set; }
+        protected string Scope { get; set; }
 
         protected ClientKey ClientKey { get; private set; }
 
@@ -101,13 +100,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.CallState);
+                    resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.CallState);
                     if (resultEx != null && resultEx.Result.AccessToken == null && resultEx.RefreshToken != null)
                     {
                         resultEx = await this.RefreshAccessTokenAsync(resultEx);
                         if (resultEx != null)
                         {
-                            this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
+                            this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
                         }
                     }
                 }
@@ -148,7 +147,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             notifiedBeforeAccessCache = true;
                         }
 
-                        this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
+                        this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
                     }
                 }
 
@@ -212,14 +211,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected virtual async Task<AuthenticationResultEx> SendTokenRequestAsync()
         {
-            var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
+            var requestParameters = new DictionaryRequestParameters(this.Scope, this.ClientKey);
             this.AddAditionalRequestParameters(requestParameters);
             return await this.SendHttpMessageAsync(requestParameters);
         }
 
         protected async Task<AuthenticationResultEx> SendTokenRequestByRefreshTokenAsync(string refreshToken)
         {
-            var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
+            var requestParameters = new DictionaryRequestParameters(this.Scope, this.ClientKey);
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
             requestParameters[OAuthParameter.RefreshToken] = refreshToken;
             requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
@@ -239,7 +238,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             AuthenticationResultEx newResultEx = null;
 
-            if (this.Resource != null)
+            if (this.Scope != null)
             {
                 PlatformPlugin.Logger.Verbose(this.CallState, "Refreshing access token...");
 
@@ -254,14 +253,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         newResultEx.Result.UpdateTenantAndUser(result.Result.TenantId, result.Result.IdToken, result.Result.User);
                     }
                 }
-                catch (AdalException ex)
+                catch (MsalException ex)
                 {
-                    AdalServiceException serviceException = ex as AdalServiceException;
+                    MsalServiceException serviceException = ex as MsalServiceException;
                     if (serviceException != null && serviceException.ErrorCode == "invalid_request")
                     {
-                        throw new AdalServiceException(
-                            AdalError.FailedToRefreshToken,
-                            AdalErrorMessage.FailedToRefreshToken + ". " + serviceException.Message,
+                        throw new MsalServiceException(
+                            MsalError.FailedToRefreshToken,
+                            MsalErrorMessage.FailedToRefreshToken + ". " + serviceException.Message,
                             serviceException.ServiceErrorCodes,
                             serviceException.InnerException);
                     }
@@ -286,7 +285,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.tokenCache.OnBeforeAccess(new TokenCacheNotificationArgs
             {
                 TokenCache = this.tokenCache,
-                Resource = this.Resource,
+                Resource = this.Scope,
                 ClientId = this.ClientKey.ClientId,
                 UniqueId = this.UniqueId,
                 DisplayableId = this.DisplayableId
@@ -298,7 +297,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.tokenCache.OnAfterAccess(new TokenCacheNotificationArgs
             {
                 TokenCache = this.tokenCache,
-                Resource = this.Resource,
+                Resource = this.Scope,
                 ClientId = this.ClientKey.ClientId,
                 UniqueId = this.UniqueId,
                 DisplayableId = this.DisplayableId
@@ -322,8 +321,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (!this.SupportADFS && this.Authenticator.AuthorityType == AuthorityType.ADFS)
             {
-                throw new AdalException(AdalError.InvalidAuthorityType,
-                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.InvalidAuthorityTypeTemplate, this.Authenticator.Authority));
+                throw new MsalException(MsalError.InvalidAuthorityType,
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.InvalidAuthorityTypeTemplate, this.Authenticator.Authority));
             }
         }
     }

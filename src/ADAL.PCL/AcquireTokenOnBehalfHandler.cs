@@ -24,8 +24,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private readonly UserAssertion userAssertion;
 
-        public AcquireTokenOnBehalfHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserAssertion userAssertion)
-            : base(authenticator, tokenCache, resource, clientKey, TokenSubjectType.UserPlusClient)
+        public AcquireTokenOnBehalfHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, UserAssertion userAssertion)
+            : base(authenticator, tokenCache, scope, clientKey, TokenSubjectType.UserPlusClient)
         {
             if (userAssertion == null)
             {
@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.userAssertion = userAssertion;
             this.DisplayableId = userAssertion.UserName;
 
-            this.SupportADFS = true;
+            this.SupportADFS = false;
         }
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)

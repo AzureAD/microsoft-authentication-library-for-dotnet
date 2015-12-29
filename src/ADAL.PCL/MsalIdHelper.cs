@@ -53,14 +53,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// This class adds additional query parameters or headers to the requests sent to STS. This can help us in
     /// collecting statistics and potentially on diagnostics.
     /// </summary>
-    internal static class AdalIdHelper
+    internal static class MsalIdHelper
     {
         public static IDictionary<string, string> GetAdalIdParameters()
         {
             var parameters = new Dictionary<string, string>();
 
             parameters[AdalIdParameter.Product] = PlatformPlugin.PlatformInformation.GetProductName();
-            parameters[AdalIdParameter.Version] = GetAdalVersion();
+            parameters[AdalIdParameter.Version] = GetMsalVersion();
 
             var processorInofrmation = PlatformPlugin.PlatformInformation.GetProcessorArchitecture();
             if (processorInofrmation != null)
@@ -83,9 +83,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return parameters;
         }
 
-        public static string GetAdalVersion()
+        public static string GetMsalVersion()
         {
-            return typeof(AdalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
+            return typeof(MsalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
         }
 
         public static string GetAssemblyFileVersion()
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static string GetAssemblyInformationalVersion()
         {
-            AssemblyInformationalVersionAttribute attribute = typeof(AdalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            AssemblyInformationalVersionAttribute attribute = typeof(MsalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
             return (attribute != null) ? attribute.InformationalVersion : string.Empty;
         }
     }

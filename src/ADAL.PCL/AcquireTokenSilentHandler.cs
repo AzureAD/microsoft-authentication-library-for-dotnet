@@ -25,19 +25,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private IPlatformParameters parameters;
 
-        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserIdentifier userId, IPlatformParameters parameters)
-            : base(authenticator, tokenCache, resource, clientKey, clientKey.HasCredential ? TokenSubjectType.UserPlusClient : TokenSubjectType.User)
+        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, UserIdentifier userId, IPlatformParameters parameters)
+            : base(authenticator, tokenCache, scope, clientKey, clientKey.HasCredential ? TokenSubjectType.UserPlusClient : TokenSubjectType.User)
         {
             if (userId == null)
             {
-                throw new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
+                throw new ArgumentNullException("userId", MsalErrorMessage.SpecifyAnyUser);
             }
 
             this.UniqueId = userId.UniqueId;
             this.DisplayableId = userId.DisplayableId;
             this.UserIdentifierType = userId.Type;
             PlatformPlugin.BrokerHelper.PlatformParameters = parameters;    
-            this.SupportADFS = true;
+            this.SupportADFS = false;
 
             this.brokerParameters["username"] = userId.Id;
             this.brokerParameters["username_type"] = userId.Type.ToString();
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected override Task<AuthenticationResultEx> SendTokenRequestAsync()
         {
             PlatformPlugin.Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
-            throw new AdalSilentTokenAcquisitionException();
+            throw new MsalSilentTokenAcquisitionException();
         }
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)

@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         private void OnUserInteractionRequired()
         {
             this.SignalDone(
-                new AdalException(AdalError.UserInteractionRequired));
+                new MsalException(MsalError.UserInteractionRequired));
         }
 
         protected override void OnClosingUrl()

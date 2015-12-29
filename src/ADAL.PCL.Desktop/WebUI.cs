@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         public Object OwnerWindow { get; set; }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionaHeaders, CallState callState)
         {
             AuthorizationResult authorizationResult = null;
 
@@ -88,7 +89,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             if (!NetworkInterface.GetIsNetworkAvailable())
             {
-                throw new AdalException(AdalError.NetworkNotAvailable);
+                throw new MsalException(MsalError.NetworkNotAvailable);
             }
         }
 

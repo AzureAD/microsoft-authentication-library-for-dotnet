@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = "error_description", IsRequired = false)]
         public string ErrorDescription { get; internal set; }
 
-        public DeviceCodeResult GetResult(string clientId, string resource)
+        public DeviceCodeResult GetResult(string clientId, string[] scope)
         {
             return new DeviceCodeResult()
             {
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 Interval = this.Interval,
                 VerificationUrl = this.VerificationUrl,
                 ClientId = clientId,
-                Resource = resource
+                Scope = scope
             };
         }
     }

@@ -62,9 +62,9 @@ namespace Test.ADAL.NET.Unit
                 await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, null, null);
                 Verify.Fail("Exception expected");
             }
-            catch (AdalException ex)
+            catch (MsalException ex)
             {
-                Verify.IsNotNull(ex.ErrorCode, AdalError.UnknownUser);
+                Verify.IsNotNull(ex.ErrorCode, MsalError.UnknownUser);
             }
 
             userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, "ab@cd@ef", null);
@@ -75,9 +75,9 @@ namespace Test.ADAL.NET.Unit
                 await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, "#$%@#$(%@#$&%@#$&jahgfk2!#@$%346", null);
                 Verify.Fail("Exception expected");
             }
-            catch (AdalException ex)
+            catch (MsalException ex)
             {
-                Verify.IsNotNull(ex.ErrorCode, AdalError.UserRealmDiscoveryFailed);
+                Verify.IsNotNull(ex.ErrorCode, MsalError.UserRealmDiscoveryFailed);
                 Verify.IsNotNull(ex.InnerException);
             }
         }
@@ -99,9 +99,9 @@ namespace Test.ADAL.NET.Unit
                 await FecthMexAsync(userRealmResponse.FederationMetadataUrl + "x");
                 Verify.Fail("Exception expected");
             }
-            catch (AdalException ex)
+            catch (MsalException ex)
             {
-                Verify.AreEqual(ex.ErrorCode, AdalError.AccessingWsMetadataExchangeFailed);
+                Verify.AreEqual(ex.ErrorCode, MsalError.AccessingWsMetadataExchangeFailed);
             }
         }
 
@@ -152,9 +152,9 @@ namespace Test.ADAL.NET.Unit
                 MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword, null);
                 Verify.Fail("Exception expected");
             }
-            catch (AdalException ex)
+            catch (MsalException ex)
             {
-                Verify.AreEqual(ex.ErrorCode, AdalError.WsTrustEndpointNotFoundInMetadataDocument);
+                Verify.AreEqual(ex.ErrorCode, MsalError.WsTrustEndpointNotFoundInMetadataDocument);
             }
 
             try
@@ -164,9 +164,9 @@ namespace Test.ADAL.NET.Unit
                 MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword, null);
                 Verify.Fail("Exception expected");
             }
-            catch (AdalException ex)
+            catch (MsalException ex)
             {
-                Verify.AreEqual(ex.ErrorCode, AdalError.WsTrustEndpointNotFoundInMetadataDocument);
+                Verify.AreEqual(ex.ErrorCode, MsalError.WsTrustEndpointNotFoundInMetadataDocument);
             }
         }
 
@@ -197,9 +197,9 @@ namespace Test.ADAL.NET.Unit
                 await WsTrustRequest.SendRequestAsync(new WsTrustAddress { Uri = new Uri(wsTrustAddress.Uri.AbsoluteUri + "x") },
                     new UserCredential(federatedSts.ValidUserName, federatedSts.ValidPassword), null);
             }
-            catch (AdalException ex)
+            catch (MsalException ex)
             {
-                Verify.IsNotNull(ex.ErrorCode, AdalError.FederatedServiceReturnedError);
+                Verify.IsNotNull(ex.ErrorCode, MsalError.FederatedServiceReturnedError);
                 Verify.IsNotNull(ex.InnerException);
             }
 
@@ -207,9 +207,9 @@ namespace Test.ADAL.NET.Unit
             {
                 await WsTrustRequest.SendRequestAsync(new WsTrustAddress { Uri = new Uri(wsTrustAddress.Uri.AbsoluteUri) }, new UserCredential(federatedSts.ValidUserName, "InvalidPassword"), null);
             }
-            catch (AdalException ex)
+            catch (MsalException ex)
             {
-                Verify.IsNotNull(ex.ErrorCode, AdalError.FederatedServiceReturnedError);
+                Verify.IsNotNull(ex.ErrorCode, MsalError.FederatedServiceReturnedError);
                 Verify.IsNotNull(ex.InnerException);
             }
         }
@@ -269,7 +269,7 @@ namespace Test.ADAL.NET.Unit
             {
                 if (metadataUrl.EndsWith("xx"))
                 {
-                    throw new AdalException(AdalError.AccessingWsMetadataExchangeFailed);
+                    throw new MsalException(MsalError.AccessingWsMetadataExchangeFailed);
                 }
 
                 using (Stream stream = new FileStream("TestMex.xml", FileMode.Open))

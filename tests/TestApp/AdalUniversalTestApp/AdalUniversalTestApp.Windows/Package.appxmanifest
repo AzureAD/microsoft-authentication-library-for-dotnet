@@ -10,9 +10,9 @@
     <OSMinVersion>6.3.0</OSMinVersion>
     <OSMaxVersionTested>6.3.0</OSMaxVersionTested>
   </Prerequisites>
-  <Resources>
-    <Resource Language="x-generate" />
-  </Resources>
+  <Scopes>
+    <Scope Language="x-generate" />
+  </Scopes>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="AdalUniversalTestApp.Windows.App">
       <m2:VisualElements DisplayName="AdalUniversalTestApp.Windows" Square150x150Logo="Assets\Logo.png" Square30x30Logo="Assets\SmallLogo.png" Description="AdalUniversalTestApp.Windows" ForegroundText="light" BackgroundColor="#464646">

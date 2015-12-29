@@ -90,8 +90,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     if (signingCert == null || signingCert.Count == 0)
                     {
-                        throw new AdalException(AdalError.DeviceCertificateNotFound,
-                            string.Format(AdalErrorMessage.DeviceCertificateNotFoundTemplate, "Cert Authorities:" + challengeData["CertAuthorities"]));
+                        throw new MsalException(MsalError.DeviceCertificateNotFound,
+                            string.Format(MsalErrorMessage.DeviceCertificateNotFoundTemplate, "Cert Authorities:" + challengeData["CertAuthorities"]));
                     }
                 }
                 else
@@ -100,8 +100,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         false);
                     if (signingCert.Count == 0)
                     {
-                        throw new AdalException(AdalError.DeviceCertificateNotFound,
-                            string.Format(AdalErrorMessage.DeviceCertificateNotFoundTemplate, "Cert thumbprint:" + challengeData["CertThumbprint"]));
+                        throw new MsalException(MsalError.DeviceCertificateNotFound,
+                            string.Format(MsalErrorMessage.DeviceCertificateNotFoundTemplate, "Cert thumbprint:" + challengeData["CertThumbprint"]));
                     }
                 }
 

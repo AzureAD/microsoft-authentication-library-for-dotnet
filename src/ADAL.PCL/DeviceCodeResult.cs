@@ -43,6 +43,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public string ClientId { get; internal set; }
 
-        public string Resource { get; internal set; }
+        public string[] Scope { get; internal set; }
     }
 }

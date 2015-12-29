@@ -44,9 +44,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     }
 
     /// <summary>
-    /// Error code returned as a property in AdalException
+    /// Error code returned as a property in MsalException
     /// </summary>
-    public static class AdalError
+    public static class MsalError
     {
         /// <summary>
         /// Unknown error.
@@ -286,7 +286,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// The active directory authentication error message.
     /// </summary>
-    internal static class AdalErrorMessage
+    internal static class MsalErrorMessage
     {
         public const string AccessingMetadataDocumentFailed = "Accessing WS metadata exchange failed";
 

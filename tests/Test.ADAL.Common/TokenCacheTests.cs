@@ -164,7 +164,7 @@ namespace Test.ADAL.Common.Unit
             var localCache = tempContext.TokenCache;
             localCache.Clear();
 
-            // @Resource, Credential
+            // @Scope, Credential
             TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User, uniqueId, displayableId);
             AddToDictionary(localCache, tokenCacheKey, authenticationResult);
             AuthenticationContext acWithLocalCache = new AuthenticationContext(authority, false, localCache);
@@ -180,7 +180,7 @@ namespace Test.ADAL.Common.Unit
                 await acWithLocalCache.AcquireTokenAsync(resource, clientId, credential);
                 Verify.Fail("Exception expected");
             }
-            catch (AdalException adae)
+            catch (MsalException adae)
             {
                 Verify.IsTrue(adae.ErrorCode == "multiple_matching_tokens_detected" && adae.Message.Contains("The cache contains multiple tokens satisfying the requirements"));
             }
@@ -191,7 +191,7 @@ namespace Test.ADAL.Common.Unit
                 await acWithDefaultCache.AcquireTokenAsync(resource, clientId, credential);
                 Verify.Fail("Exception expected");
             }
-            catch (AdalException adae)
+            catch (MsalException adae)
             {
                 Verify.IsTrue(adae.ErrorCode == "multiple_matching_tokens_detected" && adae.Message.Contains("The cache contains multiple tokens satisfying the requirements"));
             }
@@ -513,11 +513,11 @@ namespace Test.ADAL.Common.Unit
 
         public static void CheckPublicGetSets()
         {
-            TokenCacheKey tokenCacheKey = new TokenCacheKey("Authority", "Resource", "ClientId", TokenSubjectType.User, "UniqueId", "DisplayableId");
+            TokenCacheKey tokenCacheKey = new TokenCacheKey("Authority", "Scope", "ClientId", TokenSubjectType.User, "UniqueId", "DisplayableId");
 
             Verify.IsTrue(tokenCacheKey.Authority == "Authority");
             Verify.IsTrue(tokenCacheKey.ClientId == "ClientId");
-            Verify.IsTrue(tokenCacheKey.Resource == "Resource");
+            Verify.IsTrue(tokenCacheKey.Resource == "Scope");
             Verify.IsTrue(tokenCacheKey.UniqueId == "UniqueId");
             Verify.IsTrue(tokenCacheKey.DisplayableId == "DisplayableId");
             Verify.IsTrue(tokenCacheKey.TokenSubjectType == TokenSubjectType.User);

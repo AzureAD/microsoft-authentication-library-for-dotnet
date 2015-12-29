@@ -97,14 +97,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(ex.Response.GetResponseStream());
                     errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument, callState);
                 }
-                catch (AdalException)
+                catch (MsalException)
                 {
                     errorMessage = "See inner exception for detail.";
                 }
 
-                throw new AdalServiceException(
-                    AdalError.FederatedServiceReturnedError,
-                    string.Format(AdalErrorMessage.FederatedServiceReturnedErrorTemplate, wsTrustAddress.Uri, errorMessage),
+                throw new MsalServiceException(
+                    MsalError.FederatedServiceReturnedError,
+                    string.Format(MsalErrorMessage.FederatedServiceReturnedErrorTemplate, wsTrustAddress.Uri, errorMessage),
                     null,
                     ex);
             }

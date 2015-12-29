@@ -21,13 +21,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// The exception type thrown when a token cannot be acquired silently.
     /// </summary>
-    public class AdalSilentTokenAcquisitionException : AdalException
+    public class MsalSilentTokenAcquisitionException : MsalException
     {
         /// <summary>
         ///  Initializes a new instance of the exception class.
         /// </summary>
-        public AdalSilentTokenAcquisitionException()
-            : base(AdalError.FailedToAcquireTokenSilently, AdalErrorMessage.FailedToAcquireTokenSilently)
+        public MsalSilentTokenAcquisitionException()
+            : base(MsalError.FailedToAcquireTokenSilently, MsalErrorMessage.FailedToAcquireTokenSilently)
         {
         }
     }

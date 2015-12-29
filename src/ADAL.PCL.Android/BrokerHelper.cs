@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 PlatformParameters pp = PlatformParameters as PlatformParameters;
                 pp.CallerActivity.StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse(keyPair["app_link"])));
                 
-                throw new AdalException(AdalErrorAndroidEx.BrokerApplicationRequired, AdalErrorMessageAndroidEx.BrokerApplicationRequired);
+                throw new MsalException(AdalErrorAndroidEx.BrokerApplicationRequired, AdalErrorMessageAndroidEx.BrokerApplicationRequired);
             }
 
             Context mContext = Application.Context;
@@ -136,7 +136,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (brokerPayload.ContainsKey("silent_broker_flow"))
                 {
-                    throw new AdalSilentTokenAcquisitionException();
+                    throw new MsalSilentTokenAcquisitionException();
                 }
 
                 // onActivityResult will receive the response
@@ -160,7 +160,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
-                throw new AdalException(AdalErrorAndroidEx.NoBrokerAccountFound, "Add requested account as a Workplace account via Settings->Accounts or set SkipBroker=false.");
+                throw new MsalException(AdalErrorAndroidEx.NoBrokerAccountFound, "Add requested account as a Workplace account via Settings->Accounts or set SkipBroker=false.");
             }
         }
         
@@ -170,7 +170,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 resultEx = new AuthenticationResultEx
                 {
-                    Exception = new AdalException(AdalError.AuthenticationCanceled, AdalErrorMessage.AuthenticationCanceled)
+                    Exception = new MsalException(MsalError.AuthenticationCanceled, MsalErrorMessage.AuthenticationCanceled)
                 };
             }
             else

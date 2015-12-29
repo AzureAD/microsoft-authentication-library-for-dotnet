@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: global::Android.Runtime.ResourceDesignerAttribute("AdalAndroidTestApp.Resource", IsApplication=true)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("AdalAndroidTestApp.Scope", IsApplication=true)]
 
 namespace AdalAndroidTestApp
 {

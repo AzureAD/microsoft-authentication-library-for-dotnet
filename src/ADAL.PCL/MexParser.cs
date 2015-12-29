@@ -73,11 +73,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (WebException ex)
             {
-                throw new AdalServiceException(AdalError.AccessingWsMetadataExchangeFailed, ex);
+                throw new MsalServiceException(MsalError.AccessingWsMetadataExchangeFailed, ex);
             }
             catch (XmlException ex)
             {
-                throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
+                throw new MsalException(MsalError.ParsingWsMetadataExchangeFailed, ex);
             }
 
             return mexDocument;
@@ -105,16 +105,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else if (userAuthType == UserAuthType.IntegratedAuth)
                 {
-                    throw new AdalException(AdalError.IntegratedAuthFailed, new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument));
+                    throw new MsalException(MsalError.IntegratedAuthFailed, new MsalException(MsalError.WsTrustEndpointNotFoundInMetadataDocument));
                 }
                 else
                 {
-                    throw new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument);
+                    throw new MsalException(MsalError.WsTrustEndpointNotFoundInMetadataDocument);
                 }
             }
             catch (XmlException ex)
             {
-                throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
+                throw new MsalException(MsalError.ParsingWsMetadataExchangeFailed, ex);
             }
 
             return address;
