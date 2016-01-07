@@ -21,6 +21,8 @@ namespace MSAL
             
         }
 
+        internal Object Certificate { get; set; }
+
         internal IDictionary<string, string> ToParameters()
         {
             return null;

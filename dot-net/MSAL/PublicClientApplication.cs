@@ -80,6 +80,14 @@ namespace MSAL
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the signed in users.
         /// </summary>
+        public IEnumerable<User> GetUsers()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Returns a User centric view over the cache that provides a list of all the signed in users matching the identifier.
+        /// </summary>
         public IEnumerable<User> GetUsers(string identifier)
         {
             return null;
@@ -189,9 +197,6 @@ namespace MSAL
         {
             return null;
         }
-
-        //what about device code methods?
-        //TODO we should look at them later.
 
     }
 }

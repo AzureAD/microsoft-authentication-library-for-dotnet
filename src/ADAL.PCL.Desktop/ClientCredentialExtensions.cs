@@ -6,7 +6,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public static ClientCredential ClientCredential(this ClientCredential cc, X509Certificate2 certificate)
         {
-            return new ClientCredential("", ClientCredentialType.ClientAssertion);
+            return null;
         }
+
+        public static 
     }
 }

@@ -17,6 +17,8 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -44,30 +46,43 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     internal sealed class TokenCacheKey
     {
-        internal TokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, User userInfo)
-            : this(authority, resource, clientId, tokenSubjectType, (userInfo != null) ? userInfo.UniqueId : null, (userInfo != null) ? userInfo.DisplayableId : null)
+        internal TokenCacheKey(string authority, string[] scope, string policy, string clientId, TokenSubjectType tokenSubjectType, User user)
+            : this(authority, scope, clientId, tokenSubjectType, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, policy)
         {
         }
 
-        internal TokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId)
+        internal TokenCacheKey(string authority, string[] scope, string clientId, TokenSubjectType tokenSubjectType, User user)
+            : this(authority, scope, clientId, tokenSubjectType, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, "")
+        {
+        }
+
+        internal TokenCacheKey(string authority, string[] scope, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId)
+            : this(authority, scope, clientId, tokenSubjectType, uniqueId, displayableId, "")
+        {
+        }
+
+        internal TokenCacheKey(string authority, string[] scope, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId, string policy)
         {
             this.Authority = authority;
-            this.Resource = resource;
+            this.Scope = scope;
             this.ClientId = clientId;
             this.TokenSubjectType = tokenSubjectType;
             this.UniqueId = uniqueId;
             this.DisplayableId = displayableId;
+            this.Policy = policy;
         }
 
         public string Authority { get; private set; }
 
-        public string Resource { get; internal set; }
+        public string[] Scope { get; internal set; }
 
         public string ClientId { get; private set; }
 
         public string UniqueId { get; private set; }
 
         public string DisplayableId { get; private set; }
+
+        public string Policy { get; private set; }
 
         public TokenSubjectType TokenSubjectType { get; private set; }
 
@@ -96,10 +111,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return ReferenceEquals(this, other) ||
                (other != null
                && (other.Authority == this.Authority)
-               && this.ResourceEquals(other.Resource)
+               && this.ScopeEquals(other.Scope)
                && this.ClientIdEquals(other.ClientId)
                && (other.UniqueId == this.UniqueId)
                && this.DisplayableIdEquals(other.DisplayableId)
+               && this.PolicyEquals(other.Policy)
                && (other.TokenSubjectType == this.TokenSubjectType));
         }
 
@@ -112,17 +128,63 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public override int GetHashCode()
         {
             const string Delimiter = ":::";
-            return (this.Authority + Delimiter 
-                + this.Resource.ToLower() + Delimiter
+            return (this.Authority + Delimiter
+                + MsalStringHelper.CreateSingleStringFromArray(this.Scope).ToLower() + Delimiter
                 + this.ClientId.ToLower() + Delimiter
                 + this.UniqueId + Delimiter
                 + ((this.DisplayableId != null) ? this.DisplayableId.ToLower() : null) + Delimiter
+                + ((this.Policy != null) ? this.Policy.ToLower() : null) + Delimiter
                 + (int)this.TokenSubjectType).GetHashCode();
         }
 
-        internal bool ResourceEquals(string otherResource)
+        internal bool ScopeContains(string[] otherScope)
         {
-            return (string.Compare(otherResource, this.Resource, StringComparison.OrdinalIgnoreCase) == 0);
+            ISet<string> self = MsalStringHelper.CreateSetFromArray(this.Scope);
+            ISet<string> other = MsalStringHelper.CreateSetFromArray(otherScope);
+
+            foreach (string otherString in other)
+            {
+                if (!self.Contains(otherString))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        internal bool ScopeEquals(string[] otherScope)
+        {
+            ISet<string> self = MsalStringHelper.CreateSetFromArray(this.Scope);
+            ISet<string> other = MsalStringHelper.CreateSetFromArray(otherScope);
+
+            if (self.Count == other.Count)
+            {
+                return self.Intersect(other).Count() == self.Count;
+            }
+
+            return false;
+        }
+
+        public bool ScopeIntersects(string[] otherScope)
+        {
+            return this.Scope.Intersect(otherScope).ToArray().Length > 0;
+        }
+
+        internal bool PolicyEquals(string otherPolicy)
+        {
+            if (string.IsNullOrEmpty(this.Policy) && string.IsNullOrEmpty(otherPolicy))
+            {
+                return true;
+            }
+
+            if (string.IsNullOrEmpty(this.Policy) || string.IsNullOrEmpty(otherPolicy))
+            {
+                return false;
+            }
+
+
+            return (string.Compare(otherPolicy, this.Policy, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         internal bool ClientIdEquals(string otherClientId)

@@ -34,9 +34,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string ClientId { get; internal set; }
 
         /// <summary>
-        /// Gets the Scope.
+        /// Gets the Resource.
         /// </summary>
-        public string Resource { get; internal set; }
+        public string[] Scope { get; internal set; }
 
         /// <summary>
         /// Gets the user's unique Id.
@@ -47,5 +47,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Gets the user's displayable Id.
         /// </summary>
         public string DisplayableId { get; internal set; }
+
+        /// <summary>
+        /// Gets the policy.
+        /// </summary>
+        public string Policy { get; internal set; }
     }
 }
