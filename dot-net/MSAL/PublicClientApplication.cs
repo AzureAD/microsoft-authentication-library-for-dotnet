@@ -85,7 +85,10 @@ namespace MSAL
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the signed in users.
         /// </summary>
-        public IEnumerable<User> Users { get; }
+        public IEnumerable<User> GetUsers(string identifier)
+        {
+            return null;
+        }
 
         //TODO look into adding user identifier when domain cannot be queried or privacy settings are against you
         /// <summary>
@@ -159,7 +162,7 @@ namespace MSAL
         /// <param name="scope"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string identifier)
         {
             return null;
         }
@@ -171,8 +174,8 @@ namespace MSAL
         /// <param name="userId"></param>
         /// <param name="extraQueryParameters"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId,
-            string extraQueryParameters)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string identifier,
+            UiOptions options, string extraQueryParameters)
         {
             return null;
         }
@@ -186,29 +189,10 @@ namespace MSAL
         /// <param name="additionalScope"></param>
         /// <param name="authority"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId,
-            string extraQueryParameters, string[] additionalScope, string authority)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string identifier,
+            UiOptions options, string extraQueryParameters, string[] additionalScope, string authority)
         {
             return null;
-        }
-
-        //TODO - evaluate signout method in here vs in User class.
-        /// <summary>
-        /// Deletes all tokens acquired for the user.
-        /// </summary>
-        /// <param name="user"></param>
-        public void SignOut(User user)
-        {
-            
-        }
-
-        /// <summary>
-        /// Deletes all tokens for the given UPN.
-        /// </summary>
-        /// <param name="username"></param>
-        public void SignOut(string username)
-        {
-
         }
 
         //what about device code methods?
