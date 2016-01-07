@@ -17,24 +17,49 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class CryptographyHelper : ICryptographyHelper
     {
+        private RSA _rsa;
+        private HashAlgorithmName _hashAlgorithm = HashAlgorithmName.SHA256;
+        private ECDsa _ecdsaCng;
+
         public string CreateSha256Hash(string input)
         {
-            return null;
+            using (SHA256 sha = SHA256.Create())
+            {
+                UTF8Encoding encoding = new UTF8Encoding();
+                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
+            }
         }
 
         public byte[] SignWithCertificate(string message, byte[] rawData, string password)
         {
-            throw new NotImplementedException();
+            X509Certificate2 x509Certificate = new X509Certificate2(rawData, password);
+
+            if (x509Certificate.GetPublicKey().Length < ClientAssertionCertificate.MinKeySizeInBits/8)
+            {
+                throw new ArgumentOutOfRangeException("rawData",
+                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.CertificateKeySizeTooSmallTemplate, ClientAssertionCertificate.MinKeySizeInBits));
+            }
+
+            _rsa = x509Certificate.GetRSAPrivateKey();
+            return _rsa.SignData(message.ToByteArray(), _hashAlgorithm, RSASignaturePadding.Pkcs1);
         }
+
 
         public string GetX509CertificateThumbprint(ClientAssertionCertificate credential)
         {
-            throw new NotImplementedException();
+            X509Certificate2 x509Certificate = new X509Certificate2(credential.Certificate, credential.Password);
+            
+            // Thumbprint should be url encoded
+            return Base64UrlEncoder.Encode(x509Certificate.GetCertHash());
         }
     }
 }
