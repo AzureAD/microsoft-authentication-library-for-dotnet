@@ -60,9 +60,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             User userInfo = resultEx.Result.User;
             this.UniqueId = (userInfo == null) ? null : userInfo.UniqueId;
             this.DisplayableId = (userInfo == null) ? null : userInfo.DisplayableId;
-            if (resultEx.ResourceInResponse != null)
+            if (resultEx.ScopeInResponse != null)
             {
-                this.Scope = resultEx.ResourceInResponse;
+                this.Scope = resultEx.ScopeInResponse;
                 PlatformPlugin.Logger.Verbose(this.CallState, "Scope value in the token response was used for storing tokens in the cache");
             }
 

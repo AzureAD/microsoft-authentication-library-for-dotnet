@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private readonly TokenCache tokenCache;
         protected readonly IDictionary<string, string> brokerParameters;
 
-        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, TokenSubjectType subjectType)
+        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string policy, TokenSubjectType subjectType)
         {
             this.Authenticator = authenticator;
             this.CallState = CreateCallState(this.Authenticator.CorrelationId);
@@ -50,6 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.Scope = Scope;
             this.ClientKey = clientKey;
             this.TokenSubjectType = subjectType;
+            this.Policy = policy;
 
             this.LoadFromCache = (tokenCache != null);
             this.StoreToCache = (tokenCache != null);
@@ -70,7 +71,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected Authenticator Authenticator { get; private set; }
 
-        protected string Scope { get; set; }
+        protected string[] Scope { get; set; }
 
         protected ClientKey ClientKey { get; private set; }
 
@@ -81,6 +82,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected string DisplayableId { get; set; }
 
         protected UserIdentifierType UserIdentifierType { get; set; }
+
+        protected string Policy { get; set; }
 
         protected bool LoadFromCache { get; set; }
         

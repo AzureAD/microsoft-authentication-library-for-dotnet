@@ -8,7 +8,7 @@ namespace MSAL
 {
    public class ConfidentialClientApplication
    {
-       private const string DEFAULT_AUTHORTIY = "default-authority";
+       private const string DEFAULT_AUTHORTIY = "https://login.microsoftonline.com/common";
         /// <summary>
         /// default false. TODO - Why would anyone build a single user, single tenant app. Consider removal.
         /// </summary>

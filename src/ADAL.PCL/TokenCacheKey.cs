@@ -87,6 +87,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public TokenSubjectType TokenSubjectType { get; private set; }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return
+                string.Format(
+                    "Authority:{0}, Scope:{1}, ClientId:{2}, UniqueId:{3}, DisplayableId:{4}, Policy:{5}, TokenSubjectType:{6}",
+                    this.Authority, MsalStringHelper.CreateSingleStringFromArray(this.Scope), this.ClientId,
+                    this.UniqueId, this.DisplayableId, this.Policy, this.TokenSubjectType);
+        }
+
+        /// <summary>
         /// Determines whether the specified object is equal to the current object.
         /// </summary>
         /// <returns>

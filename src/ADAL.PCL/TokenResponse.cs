@@ -212,7 +212,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     RefreshToken = this.RefreshToken,
                     // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
                     // to get it from the STS response.
-                    ResourceInResponse = this.Resource                    
+                    ScopeInResponse = this.Resource                    
                 };
             }
             else if (this.Error != null)
