@@ -56,14 +56,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             readyForResponse = new SemaphoreSlim(0);
             try
             {
-                await Task.Run(() => AcquireToken(brokerPayload));
+                await Task.Run(() => AcquireToken(brokerPayload)).ConfigureAwait(false);
             }
             catch (Exception exc)
             {
                 PlatformPlugin.Logger.Error(null, exc);
                 throw;
             }
-            await readyForResponse.WaitAsync();
+            await readyForResponse.WaitAsync().ConfigureAwait(false);
             return resultEx;
         }
         public void AcquireToken(IDictionary<string, string> brokerPayload)

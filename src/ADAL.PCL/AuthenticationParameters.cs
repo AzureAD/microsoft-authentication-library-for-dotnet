@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>AuthenticationParameters object containing authentication parameters</returns>
         public static async Task<AuthenticationParameters> CreateFromResourceUrlAsync(Uri resourceUrl)
         {
-            return await CreateFromResourceUrlCommonAsync(resourceUrl);
+            return await CreateFromResourceUrlCommonAsync(resourceUrl).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static async Task<AuthenticationParameters> CreateFromUnauthorizedResponseAsync(HttpResponseMessage responseMessage)
         {
-            return CreateFromUnauthorizedResponseCommon(await HttpClientWrapper.CreateResponseAsync(responseMessage));
+            return CreateFromUnauthorizedResponseCommon(await HttpClientWrapper.CreateResponseAsync(responseMessage).ConfigureAwait(false));
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             try
             {
                 IHttpClient request = PlatformPlugin.HttpClientFactory.Create(resourceUrl.AbsoluteUri, null);
-                using (await request.GetResponseAsync())
+                using (await request.GetResponseAsync().ConfigureAwait(false))
                 {
                     var ex = new MsalException(MsalError.UnauthorizedResponseExpected);
                     PlatformPlugin.Logger.Error(null, ex);

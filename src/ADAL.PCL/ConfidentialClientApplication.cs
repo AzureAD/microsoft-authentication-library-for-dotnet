@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public async Task<Uri> GetAuthorizationRequestURL(string[] scope, string redirectUri, string userId, string extraQueryParameters, string[] additionalScope, string authority)
         {
             var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, scope, this.ClientId, new Uri(this.RedirectUri), null, userId, extraQueryParameters, null);
-            return await handler.CreateAuthorizationUriAsync(this.CorrelationId);
+            return await handler.CreateAuthorizationUriAsync(this.CorrelationId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters)
         {
             var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, scope, clientId, redirectUri, null, userId, extraQueryParameters, null);
-            return await handler.CreateAuthorizationUriAsync(this.CorrelationId);
+            return await handler.CreateAuthorizationUriAsync(this.CorrelationId).ConfigureAwait(false);
         }
     }
 }

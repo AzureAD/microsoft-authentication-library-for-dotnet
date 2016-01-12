@@ -20,6 +20,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -89,13 +90,44 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         
         protected bool StoreToCache { get; set; }
 
+        protected string[] GetDecoratedScope(string[] inputScope)
+        {
+            ISet<string> set = inputScope.CreateSetFromArray();
+            set.Remove(ClientKey.ClientId); //remove client id if it exists
+            set.Add("openid");
+            set.Add("offline_access");
+            return set.ToArray();
+        }
+
+        protected void ValidateScopeInput(string[] scopeInput)
+        {
+            ISet<string> set = scopeInput.CreateSetFromArray();
+            //make sure developer does not pass openid scope.
+            if (set.Contains("openid"))
+            {
+                throw new ArgumentException("API does not accept openid as a user-provided scope");
+            }
+
+            //make sure developer does not pass offline_access scope.
+            if (set.Contains("offline_access"))
+            {
+                throw new ArgumentException("API does not accept offline_access as a user-provided scope");
+            }
+
+            //check if scope or additional scope contains client ID.
+            if (set.Contains(this.ClientKey.ClientId))
+            {
+                throw new ArgumentException("API does not accept client id value as a user-provided scope");
+            }
+        }
+
         public async Task<AuthenticationResult> RunAsync()
         {
             bool notifiedBeforeAccessCache = false;
 
             try
             {
-                await this.PreRunAsync();
+                await this.PreRunAsync().ConfigureAwait(false);
 
                 AuthenticationResultEx resultEx = null;
                 if (this.LoadFromCache)
@@ -103,13 +135,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.CallState);
+                    resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.Policy, this.CallState);
                     if (resultEx != null && resultEx.Result.AccessToken == null && resultEx.RefreshToken != null)
                     {
-                        resultEx = await this.RefreshAccessTokenAsync(resultEx);
+                        resultEx = await this.RefreshAccessTokenAsync(resultEx).ConfigureAwait(false);
                         if (resultEx != null)
                         {
-                            this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
+                            this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.Policy, this.CallState);
                         }
                     }
                 }
@@ -118,20 +150,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     if (PlatformPlugin.BrokerHelper.CanInvokeBroker)
                     {
-                        resultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters);
+                        resultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters).ConfigureAwait(false);
                     }
                     else
                     {
-                        await this.PreTokenRequest();
+                        await this.PreTokenRequest().ConfigureAwait(false);
                         
                         // check if broker app installation is required for authentication.
                         if (this.BrokerInvocationRequired())
                         {
-                            resultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters);
+                            resultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters).ConfigureAwait(false);
                         }
                         else
                         {
-                            resultEx = await this.SendTokenRequestAsync();
+                            resultEx = await this.SendTokenRequestAsync().ConfigureAwait(false);
                         }
                     }
 
@@ -150,11 +182,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             notifiedBeforeAccessCache = true;
                         }
 
-                        this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
+                        this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.Policy, this.CallState);
                     }
                 }
 
-                await this.PostRunAsync(resultEx.Result);
+                await this.PostRunAsync(resultEx.Result).ConfigureAwait(false);
                 return resultEx.Result;
             }
             catch (Exception ex)
@@ -196,7 +228,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected virtual async Task PreRunAsync()
         {
-            await this.Authenticator.UpdateFromTemplateAsync(this.CallState);
+            await this.Authenticator.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
             this.ValidateAuthorityType();
         }
 
@@ -214,9 +246,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected virtual async Task<AuthenticationResultEx> SendTokenRequestAsync()
         {
-            var requestParameters = new DictionaryRequestParameters(this.Scope, this.ClientKey);
+            var requestParameters = new DictionaryRequestParameters(this.GetDecoratedScope(this.Scope), this.ClientKey);
             this.AddAditionalRequestParameters(requestParameters);
-            return await this.SendHttpMessageAsync(requestParameters);
+            return await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
         }
 
         protected async Task<AuthenticationResultEx> SendTokenRequestByRefreshTokenAsync(string refreshToken)
@@ -226,7 +258,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             requestParameters[OAuthParameter.RefreshToken] = refreshToken;
             requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
 
-            AuthenticationResultEx result = await this.SendHttpMessageAsync(requestParameters);
+            AuthenticationResultEx result = await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
 
             if (result.RefreshToken == null)
             {
@@ -247,7 +279,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 try
                 {
-                    newResultEx = await this.SendTokenRequestByRefreshTokenAsync(result.RefreshToken);
+                    newResultEx = await this.SendTokenRequestByRefreshTokenAsync(result.RefreshToken).ConfigureAwait(false);
                     this.Authenticator.UpdateTenantId(result.Result.TenantId);
 
                     if (newResultEx.Result.IdToken == null)
@@ -278,7 +310,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private async Task<AuthenticationResultEx> SendHttpMessageAsync(IRequestParameters requestParameters)
         {
             var client = new AdalHttpClient(this.Authenticator.TokenUri, this.CallState) { Client = { BodyParameters = requestParameters } };
-            TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>(ClientMetricsEndpointType.Token);
+            TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>(ClientMetricsEndpointType.Token).ConfigureAwait(false);
 
             return tokenResponse.GetResult();
         }

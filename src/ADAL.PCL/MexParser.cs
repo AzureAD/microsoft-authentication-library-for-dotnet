@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static async Task<WsTrustAddress> FetchWsTrustAddressFromMexAsync(string federationMetadataUrl, UserAuthType userAuthType, CallState callState)
         {
-            XDocument mexDocument = await FetchMexAsync(federationMetadataUrl, callState);
+            XDocument mexDocument = await FetchMexAsync(federationMetadataUrl, callState).ConfigureAwait(false);
             return ExtractWsTrustAddressFromMex(mexDocument, userAuthType, callState);
         }
 
@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             try
             {
                 IHttpClient request = PlatformPlugin.HttpClientFactory.Create(federationMetadataUrl, callState);
-                using (var response = await request.GetResponseAsync())
+                using (var response = await request.GetResponseAsync().ConfigureAwait(false))
                 {
                     mexDocument = XDocument.Load(response.ResponseStream, LoadOptions.None);
                 }

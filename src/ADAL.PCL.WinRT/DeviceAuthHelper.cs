@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
             
-            Certificate certificate = await FindCertificate(challengeData);
+            Certificate certificate = await FindCertificate(challengeData).ConfigureAwait(false);
             DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
                 challengeData["nonce"], Convert.ToBase64String(certificate.GetCertificateBlob().ToArray()));
             IBuffer input = CryptographicBuffer.ConvertStringToBinary(response.GetResponseToSign(),

@@ -172,19 +172,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(string[] scope, string clientId, UserCredential userCredential)
         {
             var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, scope, clientId, userCredential);
-            return await handler.RunAsync();
+            return await handler.RunAsync().ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string[] scope, string clientId, UserAssertion userAssertion)
         {
             var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, scope, clientId, userAssertion);
-            return await handler.RunAsync();
+            return await handler.RunAsync().ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string[] scope, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters = null)
         {
             var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, scope, clientId, redirectUri, parameters, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters));
-            return await handler.RunAsync();
+            return await handler.RunAsync().ConfigureAwait(false);
         }
 
 

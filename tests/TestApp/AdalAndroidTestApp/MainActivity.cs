@@ -77,7 +77,7 @@ namespace AdalAndroidTestApp
             string value = null;
             try
             {
-                value = await tokenBroker.GetTokenSilentAsync(new PlatformParameters(this));
+                value = await tokenBroker.GetTokenSilentAsync(new PlatformParameters(this)).ConfigureAwait(false);
             }
             catch (Java.Lang.Exception ex)
             {
@@ -102,7 +102,7 @@ namespace AdalAndroidTestApp
             string value = null;
             try
             {
-                value = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
+                value = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this)).ConfigureAwait(false);
             }
             catch (Java.Lang.Exception ex)
             {
@@ -122,7 +122,7 @@ namespace AdalAndroidTestApp
             {
                 TokenCache.DefaultShared.Clear();
                 this.accessTokenTextView.Text = "Cache cleared";
-            });
+            }).ConfigureAwait(false);
         }
     }
 }

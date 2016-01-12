@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             PlatformPlugin.Logger.Information(callState, string.Format("Sending user realm discovery request to '{0}'", userRealmEndpoint));
 
             var client = new AdalHttpClient(userRealmEndpoint, callState) { Client = { Accept = "application/json" } };
-            return await client.GetResponseAsync<UserRealmDiscoveryResponse>(ClientMetricsEndpointType.UserRealmDiscovery);
+            return await client.GetResponseAsync<UserRealmDiscoveryResponse>(ClientMetricsEndpointType.UserRealmDiscovery).ConfigureAwait(false);
         }
     }
 }

@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private DeviceCodeResult deviceCodeResult = null;
 
         public AcquireTokenByDeviceCodeHandler(Authenticator authenticator, TokenCache tokenCache, DeviceCodeResult deviceCodeResult)
-            : base(authenticator, tokenCache, deviceCodeResult.Scope, new ClientKey(deviceCodeResult.ClientId), TokenSubjectType.User)
+            : base(authenticator, tokenCache, deviceCodeResult.Scope, new ClientKey(deviceCodeResult.ClientId), null, TokenSubjectType.User)
         {
             if (deviceCodeResult == null)
             {
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 try
                 {
-                    resultEx = await base.SendTokenRequestAsync();
+                    resultEx = await base.SendTokenRequestAsync().ConfigureAwait(false);
                     break;
                 }
                 catch (MsalServiceException exc)
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(deviceCodeResult.Interval));
+                await Task.Delay(TimeSpan.FromSeconds(deviceCodeResult.Interval)).ConfigureAwait(false);
                 timeRemaining = deviceCodeResult.ExpiresOn - DateTimeOffset.UtcNow;
             }
 

@@ -26,8 +26,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly Uri redirectUri;
 
-        public AcquireTokenByAuthorizationCodeHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string authorizationCode, Uri redirectUri)
-            : base(authenticator, tokenCache, scope, clientKey, TokenSubjectType.UserPlusClient)
+        public AcquireTokenByAuthorizationCodeHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string authorizationCode, Uri redirectUri, string policy)
+            : base(authenticator, tokenCache, scope, clientKey, policy, TokenSubjectType.UserPlusClient)
         {
             if (string.IsNullOrWhiteSpace(authorizationCode))
             {
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // If scope is not passed as an argument and is not returned by STS either, 
             // we cannot store the token in the cache with null scope.
             // TODO: Store refresh token though if STS supports MRRT.
-            this.StoreToCache = this.StoreToCache && (this.Scope != null);
+            this.StoreToCache = this.StoreToCache && (!MsalStringHelper.IsNullOrEmpty(this.Scope));
         }
     }
 }

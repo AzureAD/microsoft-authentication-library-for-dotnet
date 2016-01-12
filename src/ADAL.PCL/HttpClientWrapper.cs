@@ -95,11 +95,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             content = new FormUrlEncodedContent(((DictionaryRequestParameters)this.BodyParameters).ToList());
                         }
 
-                        responseMessage = await client.PostAsync(uri, content);
+                        responseMessage = await client.PostAsync(uri, content).ConfigureAwait(false);
                     }
                     else
                     {
-                        responseMessage = await client.GetAsync(uri);
+                        responseMessage = await client.GetAsync(uri).ConfigureAwait(false);
                     }
                 }
                 catch (TaskCanceledException ex)
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     throw new HttpRequestWrapperException(null, ex);
                 }
 
-                IHttpWebResponse webResponse = await CreateResponseAsync(responseMessage);
+                IHttpWebResponse webResponse = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
 
                 if (!responseMessage.IsSuccessStatusCode)
                 {
@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
 
-            return new HttpWebResponseWrapper(await response.Content.ReadAsStreamAsync(), headers, response.StatusCode);
+            return new HttpWebResponseWrapper(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), headers, response.StatusCode);
         }
 
         private void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers)

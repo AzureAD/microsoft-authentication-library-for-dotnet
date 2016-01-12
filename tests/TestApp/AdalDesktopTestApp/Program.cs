@@ -48,9 +48,9 @@ namespace AdalDesktopTestApp
         private static async Task AcquireTokenAsync()
         {
             TokenBroker tokenBroker = new TokenBroker();
-             string token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
+             string token = await tokenBroker.GetTokenWithUsernamePasswordAsync().ConfigureAwait(false);
             Console.WriteLine(token + "\n");
-            token = await tokenBroker.GetTokenWithClientCredentialAsync();
+            token = await tokenBroker.GetTokenWithClientCredentialAsync().ConfigureAwait(false);
             Console.WriteLine(token);
         }
     }

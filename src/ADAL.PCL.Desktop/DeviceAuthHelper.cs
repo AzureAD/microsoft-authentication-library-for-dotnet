@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     return string.Format(authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
                 });
 
-                return await resultTask;
+                return await resultTask.ConfigureAwait(false);
         }
 
         public bool CanUseBroker { get { return false; } }

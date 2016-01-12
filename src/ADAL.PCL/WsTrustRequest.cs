@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             try
             {
                 request.BodyParameters = new StringRequestParameters(messageBuilder);
-                IHttpWebResponse response = await request.GetResponseAsync();
+                IHttpWebResponse response = await request.GetResponseAsync().ConfigureAwait(false);
                 wstResponse = WsTrustResponse.CreateFromResponse(response.ResponseStream, wsTrustAddress.Version);
             }
             catch (WebException ex)

@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public async Task<T> GetResponseAsync<T>(string endpointType)
         {
-            return await this.GetResponseAsync<T>(endpointType, true);
+            return await this.GetResponseAsync<T>(endpointType, true).ConfigureAwait(false);
         }
 
         private async Task<T> GetResponseAsync<T>(string endpointType, bool respondToDeviceAuthChallenge)
@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 //add pkeyauth header
                 this.Client.Headers[DeviceAuthHeaderName] = DeviceAuthHeaderValue;
-                using (response = await this.Client.GetResponseAsync())
+                using (response = await this.Client.GetResponseAsync().ConfigureAwait(false))
                 {
                     typedResponse = DeserializeResponse<T>(response.ResponseStream);
                     clientMetrics.SetLastError(null);
@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             //check for pkeyauth challenge
             if (this.isDeviceAuthChallenge(endpointType, response, respondToDeviceAuthChallenge))
             {
-                return await HandleDeviceAuthChallenge<T>(endpointType, response);
+                return await HandleDeviceAuthChallenge<T>(endpointType, response).ConfigureAwait(false);
             }
 
             return typedResponse;
@@ -147,12 +147,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private async Task<T> HandleDeviceAuthChallenge<T>(string endpointType, IHttpWebResponse response)
         {
             IDictionary<string, string> responseDictionary = this.ParseChallengeData(response);
-            string responseHeader = await PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(responseDictionary);
+            string responseHeader = await PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(responseDictionary).ConfigureAwait(false);
             IRequestParameters rp = this.Client.BodyParameters;
             this.Client = PlatformPlugin.HttpClientFactory.Create(CheckForExtraQueryParameter(responseDictionary["SubmitUrl"]), this.CallState);
             this.Client.BodyParameters = rp;
             this.Client.Headers["Authorization"] = responseHeader;
-            return await this.GetResponseAsync<T>(endpointType, false);
+            return await this.GetResponseAsync<T>(endpointType, false).ConfigureAwait(false);
         }
 
         private static T DeserializeResponse<T>(Stream responseStream)

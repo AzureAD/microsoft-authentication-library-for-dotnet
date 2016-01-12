@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string[] scope, ClientKey clientKey, UserIdentifier userId, IPlatformParameters parameters)
         {
             var handler = new AcquireTokenSilentHandler(this.Authenticator, this.TokenCache, scope, clientKey, userId, parameters);
-            return await handler.RunAsync();
+            return await handler.RunAsync().ConfigureAwait(false);
         }
 
 

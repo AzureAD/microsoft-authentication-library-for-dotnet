@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
 
-            await returnedUriReady.WaitAsync();
+            await returnedUriReady.WaitAsync().ConfigureAwait(false);
             return authorizationResult;
         }
 
