@@ -129,7 +129,7 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         [Description("WS-Trust Address Extraction Test")]
         [TestCategory("AdalDotNet")]
-        public async Task WsTrustPolicyExtractionTest()
+        public async Task WsTrustPolicyExtraction()
         {
             XDocument mexDocument = null;
             using (Stream stream = new FileStream("TestMex2005.xml", FileMode.Open))
@@ -140,9 +140,13 @@ namespace Test.ADAL.NET.Unit
             Verify.IsNotNull(mexDocument);
             Dictionary<string, MexPolicy> policies = MexParser.ReadPolicies(mexDocument);
             Verify.IsNotNull(policies);
-            Verify.IsTrue(policies.Count == 4);
-
+            Verify.IsTrue(policies.Count == 2);
+            foreach (var policy in policies)
+            {
+                Verify.IsTrue(policy.Value.Version== WsTrustVersion.WsTrust2005);
+            }
         }
+
 
         [TestMethod]
         [Description("WS-Trust Address Extraction Test")]
