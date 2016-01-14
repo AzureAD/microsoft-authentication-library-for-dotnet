@@ -22,6 +22,7 @@ using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -232,24 +233,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             TokenResponse tokenResponse;
-
+            StringBuilder responseStreamString = new StringBuilder();
             try
             {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(TokenResponse));
-                tokenResponse = ((TokenResponse)serializer.ReadObject(responseStream));
-
-                // Reset stream position to make it possible for application to read WebException body again
-                responseStream.Position = 0;
+                responseStreamString.Append(HttpHelper.ReadStreamContent(responseStream));
+                using (MemoryStream ms = new MemoryStream(responseStreamString.ToByteArray()))
+                {
+                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (TokenResponse));
+                    tokenResponse = ((TokenResponse) serializer.ReadObject(ms));
+                }
             }
             catch (SerializationException)
             {
-                responseStream.Position = 0;
                 tokenResponse = new TokenResponse
                 {
                     Error = (((HttpWebResponse)response).StatusCode == HttpStatusCode.ServiceUnavailable) ? 
                         AdalError.ServiceUnavailable : 
                         AdalError.Unknown,
-                    ErrorDescription = HttpHelper.ReadStreamContent(responseStream)
+                    ErrorDescription = responseStreamString.ToString()
                 };
             }
 
