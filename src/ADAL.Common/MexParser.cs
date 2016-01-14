@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return address;
         }
 
-        private static Dictionary<string, MexPolicy> ReadPolicies(XContainer mexDocument)
+        internal static Dictionary<string, MexPolicy> ReadPolicies(XContainer mexDocument)
         {
             var policies = new Dictionary<string, MexPolicy>();
             IEnumerable<XElement> policyElements = mexDocument.Elements().First().Elements(XmlNamespace.Wsp + "Policy");
