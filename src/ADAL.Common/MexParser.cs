@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return address;
         }
 
-        private static Dictionary<string, MexPolicy> ReadPolicies(XContainer mexDocument)
+        internal static Dictionary<string, MexPolicy> ReadPolicies(XContainer mexDocument)
         {
             var policies = new Dictionary<string, MexPolicy>();
             IEnumerable<XElement> policyElements = mexDocument.Elements().First().Elements(XmlNamespace.Wsp + "Policy");
@@ -141,7 +141,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     XElement auth = element.Elements(XmlNamespace.Http + "NegotiateAuthentication").FirstOrDefault();
                     if (auth != null)
                     {
-                        AddPolicy(policies, policy, UserAuthType.IntegratedAuth, securityPolicy.Equals(XmlNamespace.Sp2005));
+                        AddPolicy(policies, policy, UserAuthType.IntegratedAuth, policy.Descendants(XmlNamespace.Sp2005 + "TransportBinding").Any());
                     }
 
                     auth = element.Elements(securityPolicy + "SignedEncryptedSupportingTokens").FirstOrDefault();

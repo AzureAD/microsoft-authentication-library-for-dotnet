@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security;
 using System.Text;
@@ -124,6 +125,28 @@ namespace Test.ADAL.NET.Unit
             Verify.IsNotNull(wsTrustAddress);
             Verify.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust2005);
         }
+
+        [TestMethod]
+        [Description("WS-Trust Address Extraction Test")]
+        [TestCategory("AdalDotNet")]
+        public async Task WsTrustPolicyExtraction()
+        {
+            XDocument mexDocument = null;
+            using (Stream stream = new FileStream("TestMex2005.xml", FileMode.Open))
+            {
+                mexDocument = XDocument.Load(stream);
+            }
+
+            Verify.IsNotNull(mexDocument);
+            Dictionary<string, MexPolicy> policies = MexParser.ReadPolicies(mexDocument);
+            Verify.IsNotNull(policies);
+            Verify.IsTrue(policies.Count == 2);
+            foreach (var policy in policies)
+            {
+                Verify.IsTrue(policy.Value.Version== WsTrustVersion.WsTrust2005);
+            }
+        }
+
 
         [TestMethod]
         [Description("WS-Trust Address Extraction Test")]
