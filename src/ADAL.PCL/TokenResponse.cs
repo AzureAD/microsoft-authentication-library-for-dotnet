@@ -22,6 +22,7 @@ using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -118,37 +119,38 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 };
             }
 
-            Stream responseStream = webResponse.ResponseStream;
-
-            if (responseStream == null)
+            StringBuilder responseStreamString = new StringBuilder();
+            TokenResponse tokenResponse = null;
+            using (Stream responseStream = webResponse.ResponseStream)
             {
-                return new TokenResponse
+                if (responseStream == null)
                 {
-                    Error = AdalError.Unknown,
-                    ErrorDescription = AdalErrorMessage.Unknown
-                };
-            }
+                    return new TokenResponse
+                    {
+                        Error = AdalError.Unknown,
+                        ErrorDescription = AdalErrorMessage.Unknown
+                    };
+                }
 
-            TokenResponse tokenResponse;
-
-            try
-            {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(TokenResponse));
-                tokenResponse = ((TokenResponse)serializer.ReadObject(responseStream));
-
-                // Reset stream position to make it possible for application to read HttpRequestException body again
-                responseStream.Position = 0;
-            }
-            catch (SerializationException)
-            {
-                responseStream.Position = 0;
-                tokenResponse = new TokenResponse
+                try
                 {
-                    Error = (webResponse.StatusCode == HttpStatusCode.ServiceUnavailable) ?
-                        AdalError.ServiceUnavailable :
-                        AdalError.Unknown,
-                    ErrorDescription = ReadStreamContent(responseStream)
-                };
+                    responseStreamString.Append(ReadStreamContent(responseStream));
+                    using (MemoryStream ms = new MemoryStream(responseStreamString.ToByteArray()))
+                    {
+                        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (TokenResponse));
+                        tokenResponse = ((TokenResponse) serializer.ReadObject(ms));
+                    }
+                }
+                catch (SerializationException)
+                {
+                    tokenResponse = new TokenResponse
+                    {
+                        Error = (webResponse.StatusCode == HttpStatusCode.ServiceUnavailable)
+                            ? AdalError.ServiceUnavailable
+                            : AdalError.Unknown,
+                        ErrorDescription = responseStreamString.ToString()
+                    };
+                }
             }
 
             return tokenResponse;
