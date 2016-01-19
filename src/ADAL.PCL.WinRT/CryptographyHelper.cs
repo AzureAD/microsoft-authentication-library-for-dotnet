@@ -41,17 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return CryptographicBuffer.EncodeToBase64String(hashed);
         }
-
-        public byte[] SignWithCertificate(string message, byte[] rawData, string password)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetX509CertificateThumbprint(ClientAssertionCertificate credential)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public static string Encrypt(string message)
         {
             if (string.IsNullOrEmpty(message))

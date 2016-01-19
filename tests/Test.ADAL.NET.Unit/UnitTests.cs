@@ -231,17 +231,15 @@ namespace Test.ADAL.NET.Unit
             string[] certs = { "valid_cert.pfx", "valid_cert2.pfx" };
             for (int i = 0; i < 2; i++)
             {
-                X509Certificate2 x509Certificate = new X509Certificate2(certs[i], "password", X509KeyStorageFlags.Exportable);
-                byte[] rawData = x509Certificate.Export(X509ContentType.Pkcs12, "password");
-
-                ICryptographyHelper cryptoHelper = new CryptographyHelper();
-                byte[] signature = cryptoHelper.SignWithCertificate(Message, rawData, "password");
+                X509Certificate2 x509Certificate = new X509Certificate2(certs[i], "password");
+                ClientAssertionCertificate cac = new ClientAssertionCertificate("some_id", x509Certificate);
+                byte[] signature = cac.Sign(Message);
                 Verify.IsNotNull(signature);
 
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
 
-                signature = cryptoHelper.SignWithCertificate(Message, rawData, "password");
+                signature = cac.Sign(Message);
                 Verify.IsNotNull(signature);
             }
         }

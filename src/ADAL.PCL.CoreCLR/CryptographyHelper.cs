@@ -26,15 +26,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return null;
         }
-
-        public byte[] SignWithCertificate(string message, byte[] rawData, string password)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetX509CertificateThumbprint(ClientAssertionCertificate credential)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -36,7 +36,7 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenAsync(resource, credential));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, ClientAssertionCertificate certificate)
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, IClientAssertionCertificate certificate)
         {
             return await RunTaskAsync(this.context.AcquireTokenAsync(resource, certificate));
         }
@@ -74,7 +74,7 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenSilentAsync(resource, clientAssertion, userId));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenSilentAsync(string resource, ClientAssertionCertificate clientCertificate, UserIdentifier userId)
+        public async Task<AuthenticationResultProxy> AcquireTokenSilentAsync(string resource, IClientAssertionCertificate clientCertificate, UserIdentifier userId)
         {
             return await RunTaskAsync(this.context.AcquireTokenSilentAsync(resource, clientCertificate, userId));
         }
@@ -84,12 +84,12 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, redirectUri, credential));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, ClientAssertionCertificate certificate)
+        public async Task<AuthenticationResultProxy> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, IClientAssertionCertificate certificate)
         {
             return await RunTaskAsync(this.context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, redirectUri, certificate));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, ClientAssertionCertificate certificate, string resource)
+        public async Task<AuthenticationResultProxy> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, Uri redirectUri, IClientAssertionCertificate certificate, string resource)
         {
             return await RunTaskAsync(this.context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, redirectUri, certificate, resource));
         }
@@ -104,7 +104,7 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientCredential, (userAssertion == null) ? null : new UserAssertion(userAssertion)));
         }
 
-        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, ClientAssertionCertificate clientCertificate, string userAssertion)
+        public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, IClientAssertionCertificate clientCertificate, string userAssertion)
         {
             return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientCertificate, (userAssertion == null) ? null : new UserAssertion(userAssertion)));
         }
