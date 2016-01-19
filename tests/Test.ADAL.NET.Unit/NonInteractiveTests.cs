@@ -144,11 +144,13 @@ namespace Test.ADAL.NET.Unit
             Verify.IsNotNull(wsTrustAddress);
 
             string mexDocumentContent = mexDocument.ToString();
+            string modifiedMexDocumentContent = null;
+            XDocument modifiedMexDocument = null;
 
             try
             {
-                string modifiedMexDocumentContent = mexDocumentContent.Replace("securitypolicy", string.Empty);
-                XDocument modifiedMexDocument = ConvertStringToXDocument(modifiedMexDocumentContent);
+                modifiedMexDocumentContent = mexDocumentContent.Replace("securitypolicy", string.Empty);
+                modifiedMexDocument = ConvertStringToXDocument(modifiedMexDocumentContent);
                 MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword, null);
                 Verify.Fail("Exception expected");
             }
@@ -156,18 +158,12 @@ namespace Test.ADAL.NET.Unit
             {
                 Verify.AreEqual(ex.ErrorCode, AdalError.WsTrustEndpointNotFoundInMetadataDocument);
             }
-
-            try
-            {
-                string modifiedMexDocumentContent = mexDocumentContent.Replace(wsTrustAddress.Uri.AbsoluteUri, string.Empty);
-                XDocument modifiedMexDocument = ConvertStringToXDocument(modifiedMexDocumentContent);
-                MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword, null);
-                Verify.Fail("Exception expected");
-            }
-            catch (AdalException ex)
-            {
-                Verify.AreEqual(ex.ErrorCode, AdalError.WsTrustEndpointNotFoundInMetadataDocument);
-            }
+            
+                modifiedMexDocumentContent = mexDocumentContent.Replace(wsTrustAddress.Uri.AbsoluteUri, string.Empty);
+                modifiedMexDocument = ConvertStringToXDocument(modifiedMexDocumentContent);
+                wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword, null);
+                //falls back to WS-Trust 2005
+                Assert.IsTrue(wsTrustAddress.Version == WsTrustVersion.WsTrust2005);
         }
 
 
@@ -223,7 +219,7 @@ namespace Test.ADAL.NET.Unit
             {
                 UserCredential cred = new UserCredential("user", "pass&<>\"'");
                 StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto",
-                    new WsTrustAddress {Uri = new Uri("resource")}, cred);
+                    new WsTrustAddress {Uri = new Uri("some://resource")}, cred);
                 try
                 {
                     XmlDocument doc = new XmlDocument();

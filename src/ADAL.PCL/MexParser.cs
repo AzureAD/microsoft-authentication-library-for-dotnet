@@ -139,7 +139,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     XElement auth = element.Elements(XmlNamespace.Http + "NegotiateAuthentication").FirstOrDefault();
                     if (auth != null)
                     {
-                        AddPolicy(policies, policy, UserAuthType.IntegratedAuth, policy.Descendants(XmlNamespace.Sp + "TransportBinding").Any());
+                        AddPolicy(policies, policy, UserAuthType.IntegratedAuth, policy.Descendants(XmlNamespace.Sp2005 + "TransportBinding").Any());
                     }
 
                     auth = element.Elements(securityPolicy + "SignedEncryptedSupportingTokens").FirstOrDefault();
