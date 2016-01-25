@@ -1,0 +1,12 @@
+{
+  "supports": {
+    "dnxcore50.app": {}
+  },
+  "dependencies": {
+    "Microsoft.NETCore": "5.0.0",
+  },
+  "frameworks": {
+    "dotnet": {
+    }
+  }
+}

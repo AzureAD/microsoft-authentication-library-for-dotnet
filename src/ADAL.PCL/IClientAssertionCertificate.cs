@@ -16,21 +16,17 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Security.Cryptography;
-using System.Text;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class CryptographyHelper : ICryptographyHelper
+    public interface IClientAssertionCertificate
     {
-        public string CreateSha256Hash(string input)
-        {
-            using (SHA256Managed sha = new SHA256Managed())
-            {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
-            }
-        }
+        byte[] Sign(string message);
+
+        /// <summary>
+        /// Gets the identifier of the client requesting the token.
+        /// </summary>
+        string ClientId { get; }
+
+        string Thumbprint { get; }
     }
 }
