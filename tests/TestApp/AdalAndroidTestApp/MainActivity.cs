@@ -53,9 +53,9 @@ namespace AdalAndroidTestApp
             this.accessTokenTextView = FindViewById<TextView>(Resource.Id.accessTokenTextView);
 
             sts.Authority = "https://login.microsoftonline.com/common";
-            sts.ValidClientId = "b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+            sts.ValidClientId = "<CLIENT_ID>";
             sts.ValidResource = "https://graph.windows.net";
-            sts.ValidUserName = "mdm@msdevex.onmicrosoft.com";
+            sts.ValidUserName = "<USER_NAME>";
 
             EditText email = FindViewById<EditText>(Resource.Id.email);
             email.Text = sts.ValidUserName;
