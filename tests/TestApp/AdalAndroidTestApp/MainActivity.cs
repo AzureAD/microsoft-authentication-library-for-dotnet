@@ -54,8 +54,8 @@ namespace AdalAndroidTestApp
 
             sts.Authority = "https://login.microsoftonline.com/common";
             sts.ValidClientId = "b92e0ba5-f86e-4411-8e18-6b5f928d968a";
-            sts.ValidResource = "https://msdevex-my.sharepoint.com";
-            sts.ValidUserName = "mam@msdevex.onmicrosoft.com";
+            sts.ValidResource = "https://graph.windows.net";
+            sts.ValidUserName = "mdm@msdevex.onmicrosoft.com";
 
             EditText email = FindViewById<EditText>(Resource.Id.email);
             email.Text = sts.ValidUserName;
@@ -77,7 +77,7 @@ namespace AdalAndroidTestApp
             string value = null;
             try
             {
-                value = await tokenBroker.GetTokenSilentAsync(new PlatformParameters(this));
+                value = await tokenBroker.GetTokenSilentAsync(new PlatformParameters(this, false));
             }
             catch (Java.Lang.Exception ex)
             {
@@ -102,7 +102,7 @@ namespace AdalAndroidTestApp
             string value = null;
             try
             {
-                value = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
+                value = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this, false));
             }
             catch (Java.Lang.Exception ex)
             {
