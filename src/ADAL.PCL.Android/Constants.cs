@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
     internal static class BrokerResponseCode
     {
-        public const int UserCancelled = 2004;
-        public const int ResponseReceived = 2001;
+        public const int UserCancelled = 2001;
+        public const int ResponseReceived = 2004;
     }
 }

@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     break;
             }
 
-            if ((int) resultCode != BrokerResponseCode.UserCancelled)
+            if (authorizationResult!=null)
             {
                 WebUI.SetAuthorizationResult(authorizationResult);
             }

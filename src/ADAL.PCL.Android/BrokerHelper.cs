@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     PlatformPlugin.Logger.Verbose(null, "User is not specified for background token request");
                 }
 
-                if (resultEx != null && !string.IsNullOrEmpty(resultEx.Result.AccessToken))
+                if (resultEx != null && resultEx.Result!=null && !string.IsNullOrEmpty(resultEx.Result.AccessToken))
                 {
                     PlatformPlugin.Logger.Verbose(null, "Token is returned from background call ");
                     readyForResponse.Release();
