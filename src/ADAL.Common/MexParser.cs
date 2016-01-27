@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public WsTrustVersion Version { get; set; }
 
-        public string Id { get; set; }   
+        public string Id { get; set; }
 
         public UserAuthType AuthType { get; set; }
 
@@ -54,7 +54,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private const string WsTrustSoapTransport = "http://schemas.xmlsoap.org/soap/http";
 
-        public static async Task<WsTrustAddress> FetchWsTrustAddressFromMexAsync(string federationMetadataUrl, UserAuthType userAuthType, CallState callState)
+        public static async Task<WsTrustAddress> FetchWsTrustAddressFromMexAsync(string federationMetadataUrl,
+            UserAuthType userAuthType, CallState callState)
         {
             XDocument mexDocument = await FetchMexAsync(federationMetadataUrl, callState);
             return ExtractWsTrustAddressFromMex(mexDocument, userAuthType, callState);
@@ -85,7 +86,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return mexDocument;
         }
 
-        internal static WsTrustAddress ExtractWsTrustAddressFromMex(XDocument mexDocument, UserAuthType userAuthType, CallState callState)
+        internal static WsTrustAddress ExtractWsTrustAddressFromMex(XDocument mexDocument, UserAuthType userAuthType,
+            CallState callState)
         {
             WsTrustAddress address = null;
             MexPolicy policy = null;
@@ -96,18 +98,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 SetPolicyEndpointAddresses(mexDocument, bindings);
                 Random random = new Random();
                 //try ws-trust 1.3 first
-                policy = policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType && p.Version == WsTrustVersion.WsTrust13).OrderBy(p => random.Next()).FirstOrDefault() ??
-                         policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType).OrderBy(p => random.Next()).FirstOrDefault();
+                policy =
+                    policies.Values.Where(
+                        p => p.Url != null && p.AuthType == userAuthType && p.Version == WsTrustVersion.WsTrust13)
+                        .OrderBy(p => random.Next())
+                        .FirstOrDefault() ??
+                    policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType)
+                        .OrderBy(p => random.Next())
+                        .FirstOrDefault();
 
                 if (policy != null)
                 {
                     address = new WsTrustAddress();
-                    address.Uri  = policy.Url;
+                    address.Uri = policy.Url;
                     address.Version = policy.Version;
                 }
                 else if (userAuthType == UserAuthType.IntegratedAuth)
                 {
-                    throw new AdalException(AdalError.IntegratedAuthFailed, new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument));
+                    throw new AdalException(AdalError.IntegratedAuthFailed,
+                        new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument));
                 }
                 else
                 {
@@ -141,7 +150,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     XElement auth = element.Elements(XmlNamespace.Http + "NegotiateAuthentication").FirstOrDefault();
                     if (auth != null)
                     {
-                        AddPolicy(policies, policy, UserAuthType.IntegratedAuth, policy.Descendants(XmlNamespace.Sp2005 + "TransportBinding").Any());
+                        AddPolicy(policies, policy, UserAuthType.IntegratedAuth);
                     }
 
                     auth = element.Elements(securityPolicy + "SignedEncryptedSupportingTokens").FirstOrDefault();
@@ -174,10 +183,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         continue;
                     }
 
-                    XElement wssUsernameToken10 = wspPolicy2.Elements(securityPolicy + "WssUsernameToken10").FirstOrDefault();
+                    XElement wssUsernameToken10 =
+                        wspPolicy2.Elements(securityPolicy + "WssUsernameToken10").FirstOrDefault();
                     if (wssUsernameToken10 != null)
                     {
-                        AddPolicy(policies, policy, UserAuthType.UsernamePassword, securityPolicy.Equals(XmlNamespace.Sp2005));
+                        AddPolicy(policies, policy, UserAuthType.UsernamePassword);
                     }
                 }
             }
@@ -185,10 +195,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return policies;
         }
 
-        private static Dictionary<string, MexPolicy> ReadPolicyBindings(XContainer mexDocument, IReadOnlyDictionary<string, MexPolicy> policies)
+        private static Dictionary<string, MexPolicy> ReadPolicyBindings(XContainer mexDocument,
+            IReadOnlyDictionary<string, MexPolicy> policies)
         {
             var bindings = new Dictionary<string, MexPolicy>();
-            IEnumerable<XElement> bindingElements = mexDocument.Elements().First().Elements(XmlNamespace.Wsdl + "binding");
+            IEnumerable<XElement> bindingElements =
+                mexDocument.Elements().First().Elements(XmlNamespace.Wsdl + "binding");
             foreach (XElement binding in bindingElements)
             {
                 IEnumerable<XElement> policyReferences = binding.Elements(XmlNamespace.Wsp + "PolicyReference");
@@ -212,18 +224,31 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         continue;
                     }
 
-                    XElement soapOperation = bindingOperation.Elements(XmlNamespace.Soap12 + "operation").FirstOrDefault();
+                    XElement soapOperation =
+                        bindingOperation.Elements(XmlNamespace.Soap12 + "operation").FirstOrDefault();
                     if (soapOperation == null)
                     {
                         continue;
                     }
 
                     XAttribute soapAction = soapOperation.Attribute("soapAction");
-                    if (soapAction == null || (string.Compare(XmlNamespace.Issue.ToString(), soapAction.Value, StringComparison.OrdinalIgnoreCase) != 0
-                        && string.Compare(XmlNamespace.Issue2005.ToString(), soapAction.Value, StringComparison.OrdinalIgnoreCase) != 0))
+                    if (soapAction == null ||
+                        (string.Compare(XmlNamespace.Issue.ToString(), soapAction.Value,
+                            StringComparison.OrdinalIgnoreCase) != 0
+                         &&
+                         string.Compare(XmlNamespace.Issue2005.ToString(), soapAction.Value,
+                             StringComparison.OrdinalIgnoreCase) != 0))
                     {
                         continue;
                     }
+
+                    bool isWsTrust2005 =
+                        string.Compare(XmlNamespace.Issue2005.ToString(), soapAction.Value,
+                            StringComparison.OrdinalIgnoreCase) == 0;
+
+                    policies[policyUri.Value].Version = isWsTrust2005
+                        ? WsTrustVersion.WsTrust2005
+                        : WsTrustVersion.WsTrust13;
 
                     XElement soapBinding = binding.Elements(XmlNamespace.Soap12 + "binding").FirstOrDefault();
                     if (soapBinding == null)
@@ -232,7 +257,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
 
                     XAttribute soapBindingTransport = soapBinding.Attribute("transport");
-                    if (soapBindingTransport != null && string.Compare(WsTrustSoapTransport, soapBindingTransport.Value, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (soapBindingTransport != null &&
+                        string.Compare(WsTrustSoapTransport, soapBindingTransport.Value,
+                            StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         bindings.Add(bindingName.Value, policies[policyUri.Value]);
                     }
@@ -242,7 +269,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return bindings;
         }
 
-        private static void SetPolicyEndpointAddresses(XContainer mexDocument, IReadOnlyDictionary<string, MexPolicy> bindings)
+        private static void SetPolicyEndpointAddresses(XContainer mexDocument,
+            IReadOnlyDictionary<string, MexPolicy> bindings)
         {
             XElement serviceElement = mexDocument.Elements().First().Elements(XmlNamespace.Wsdl + "service").First();
             IEnumerable<XElement> portElements = serviceElement.Elements(XmlNamespace.Wsdl + "port");
@@ -255,7 +283,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 string portBindingName = portBinding.Value;
-                string[] portBindingNameSegments = portBindingName.Split(new[] { ':' }, 2);
+                string[] portBindingNameSegments = portBindingName.Split(new[] {':'}, 2);
                 if (portBindingNameSegments.Length < 2 || !bindings.ContainsKey(portBindingNameSegments[1]))
                 {
                     continue;
@@ -275,24 +303,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private static void AddPolicy(IDictionary<string, MexPolicy> policies, XElement policy, UserAuthType policyAuthType, bool isWsTrust2005)
+        private static void AddPolicy(IDictionary<string, MexPolicy> policies, XElement policy,
+            UserAuthType policyAuthType)
         {
             XElement binding = policy.Descendants(XmlNamespace.Sp + "TransportBinding").FirstOrDefault()
-                          ?? policy.Descendants(XmlNamespace.Sp2005 + "TransportBinding").FirstOrDefault();
+                               ?? policy.Descendants(XmlNamespace.Sp2005 + "TransportBinding").FirstOrDefault();
 
             if (binding != null)
             {
                 XAttribute id = policy.Attribute(XmlNamespace.Wsu + "Id");
-                WsTrustVersion version = WsTrustVersion.WsTrust13;
-
-                if (isWsTrust2005)
-                {
-                    version = WsTrustVersion.WsTrust2005;
-                }
 
                 if (id != null)
                 {
-                    policies.Add("#" + id.Value, new MexPolicy { Id = id.Value, AuthType = policyAuthType, Version = version });
+                    policies.Add("#" + id.Value, new MexPolicy {Id = id.Value, AuthType = policyAuthType});
                 }
             }
         }
