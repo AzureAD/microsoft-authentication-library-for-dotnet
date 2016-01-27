@@ -96,7 +96,31 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return null;
         }
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userId)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="userId"></param>
+        /// <param name="authority"></param>
+        /// <returns></returns>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userId,
+            string authority, string policy)
+        {
+            return null;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -105,7 +129,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="authority"></param>
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId,
-            string authority)
+            string authority, string policy)
         {
             return null;
         }
@@ -181,7 +205,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string[] scope, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters = null)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string[] scope, string clientId, Uri redirectUri, IPlatformParameters parameters, User userId, string extraQueryParameters = null)
         {
             var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, scope, clientId, redirectUri, parameters, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters));
             return await handler.RunAsync().ConfigureAwait(false);

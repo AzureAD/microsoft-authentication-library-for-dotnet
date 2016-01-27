@@ -28,52 +28,42 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     }
 
     /// <summary>
-    /// Credential including client id and secret.
+    /// Secret including client id and secret.
     /// </summary>
     public sealed class ClientCredential
     {
+
         /// <summary>
-        /// Constructor to create credential with client id and secret
+        /// Constructor to create Secret with client id and secret
         /// </summary>
         /// <param name="credential">Secret of the client requesting the token.</param>
-        public ClientCredential(string credential, ClientCredentialType clientCredentialType)
+        public ClientCredential(IClientAssertionCertificate certificate)
+        {
+            this.Certificate = certificate;
+            this.ClientCredentialType = ClientCredentialType.ClientAssertion;
+        }
+
+        /// <summary>
+        /// Constructor to create Secret with client id and secret
+        /// </summary>
+        /// <param name="secret">Secret of the client requesting the token.</param>
+        public ClientCredential(string secret, ClientCredentialType clientCredentialType)
         {
 
-            if (string.IsNullOrWhiteSpace(credential))
+            if (string.IsNullOrWhiteSpace(secret))
             {
-                throw new ArgumentNullException("credential");
+                throw new ArgumentNullException("secret");
             }
             
-            this.Credential = credential;
+            this.Secret = secret;
             this.ClientCredentialType = clientCredentialType;
         }
 
-        internal string ClientId { get; set; }
-
-        internal string Credential { get; private set; }
+        internal string Secret { get; private set; }
 
         internal ClientCredentialType ClientCredentialType { get; private set; }
 
+        internal IClientAssertionCertificate Certificate { get; private set; }
 
-        internal void AddToParameters(IDictionary<string, string> parameters)
-        {
-            if (this.ClientId != null)
-            {
-                parameters[OAuthParameter.ClientId] = this.ClientId;
-            }
-
-            if (this.ClientCredentialType == ClientCredentialType.ClientSecret)
-            {
-                parameters[OAuthParameter.ClientSecret] = this.Credential;
-            }
-            else if (this.ClientCredentialType == ClientCredentialType.ClientAssertion)
-            {
-                //TODO - handle JWT certificate assertion
-                /*JsonWebToken jwtToken = new JsonWebToken(this.Certificate, this.Authenticator.SelfSignedJwtAudience);
-                ClientAssertion clientAssertion = jwtToken.Sign(this.Certificate);*/
-                parameters[OAuthParameter.ClientAssertionType] = OAuthAssertionType.JwtBearer;
-                parameters[OAuthParameter.ClientAssertion] = this.Credential;
-            }
-        }
     }
 }

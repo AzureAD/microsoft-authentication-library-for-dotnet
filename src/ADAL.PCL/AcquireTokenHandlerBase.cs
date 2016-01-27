@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentNullException("scope");
             }
 
-            this.Scope = Scope;
+            this.Scope = scope.CreateSetFromArray();
             this.ClientKey = clientKey;
             this.TokenSubjectType = subjectType;
             this.Policy = policy;
@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.brokerParameters = new Dictionary<string, string>();
             brokerParameters["authority"] = authenticator.Authority;
-            brokerParameters["scope"] = scope.CreateSingleStringFromArray();
+            brokerParameters["scope"] = this.Scope.CreateSingleStringFromSet();
             brokerParameters["client_id"] = clientKey.ClientId;
             brokerParameters["correlation_id"] = this.CallState.CorrelationId.ToString();
             brokerParameters["client_version"] = MsalIdHelper.GetMsalVersion();
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected Authenticator Authenticator { get; private set; }
 
-        protected string[] Scope { get; set; }
+        protected HashSet<string> Scope { get; set; }
 
         protected ClientKey ClientKey { get; private set; }
 
@@ -82,42 +82,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected string DisplayableId { get; set; }
 
-        protected UserIdentifierType UserIdentifierType { get; set; }
-
         protected string Policy { get; set; }
 
         protected bool LoadFromCache { get; set; }
         
         protected bool StoreToCache { get; set; }
 
-        protected string[] GetDecoratedScope(string[] inputScope)
+        protected HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
         {
-            ISet<string> set = inputScope.CreateSetFromArray();
-            set.Remove(ClientKey.ClientId); //remove client id if it exists
-            set.Add("openid");
-            set.Add("offline_access");
-            return set.ToArray();
+            HashSet<string> set = new HashSet<string>(inputScope.ToArray());
+            set.UnionWith(OAuthValue.ReservedScopes.CreateSetFromArray());
+            return set;
         }
 
-        protected void ValidateScopeInput(string[] scopeInput)
+        protected void ValidateScopeInput()
         {
-            ISet<string> set = scopeInput.CreateSetFromArray();
-            //make sure developer does not pass openid scope.
-            if (set.Contains("openid"))
-            {
-                throw new ArgumentException("API does not accept openid as a user-provided scope");
-            }
-
-            //make sure developer does not pass offline_access scope.
-            if (set.Contains("offline_access"))
-            {
-                throw new ArgumentException("API does not accept offline_access as a user-provided scope");
-            }
-
             //check if scope or additional scope contains client ID.
-            if (set.Contains(this.ClientKey.ClientId))
+            if (Scope.Intersect(OAuthValue.ReservedScopes.CreateSetFromArray()).Any())
             {
-                throw new ArgumentException("API does not accept client id value as a user-provided scope");
+                throw new ArgumentException(string.Format("API does not accept '{0}' value as a user-provided scope", OAuthValue.ReservedScopes));
             }
         }
 
@@ -320,7 +303,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.tokenCache.OnBeforeAccess(new TokenCacheNotificationArgs
             {
                 TokenCache = this.tokenCache,
-                Resource = this.Scope,
+                Scope = this.Scope,
                 ClientId = this.ClientKey.ClientId,
                 UniqueId = this.UniqueId,
                 DisplayableId = this.DisplayableId
@@ -332,7 +315,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.tokenCache.OnAfterAccess(new TokenCacheNotificationArgs
             {
                 TokenCache = this.tokenCache,
-                Resource = this.Scope,
+                Scope = this.Scope,
                 ClientId = this.ClientKey.ClientId,
                 UniqueId = this.UniqueId,
                 DisplayableId = this.DisplayableId

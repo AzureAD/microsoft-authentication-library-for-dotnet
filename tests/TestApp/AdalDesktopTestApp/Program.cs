@@ -47,11 +47,21 @@ namespace AdalDesktopTestApp
 
         private static async Task AcquireTokenAsync()
         {
-            TokenBroker tokenBroker = new TokenBroker();
-             string token = await tokenBroker.GetTokenWithUsernamePasswordAsync().ConfigureAwait(false);
-            Console.WriteLine(token + "\n");
-            token = await tokenBroker.GetTokenWithClientCredentialAsync().ConfigureAwait(false);
-            Console.WriteLine(token);
+            string[] tenantAuthority = {"https://login.microsoftonline.com/fabrikam.com", "https://login.microsoftonline.com/megadeth.com", "https://login.microsoftonline.com/starbucks.com" };
+            string[] scope = {"Mail.Read"};
+            PublicClientApplication app = new PublicClientApplication();
+            AuthenticationResult result = await app.AcquireTokenAsync(scope, "ceo@contoso.com");
+
+            foreach (var authority in tenantAuthority)
+            {
+                result = await app.AcquireTokenSilentAsync(scope, result.User, authority);
+                ReadMail(result.AccessToken);
+            }
+        }
+
+        private static void ReadMail(string accessToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

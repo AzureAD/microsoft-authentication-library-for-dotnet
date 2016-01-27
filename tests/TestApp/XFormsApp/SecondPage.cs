@@ -24,7 +24,6 @@ namespace XFormsApp
             };
 
             result = new Label { };
-
             browseButton.Clicked += browseButton_Clicked;
 
             Content = new StackLayout

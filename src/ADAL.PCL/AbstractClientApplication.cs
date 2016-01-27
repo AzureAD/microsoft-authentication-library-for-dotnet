@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         static AbstractClientApplication()
         {
-            PlatformPlugin.Logger.Information(null, string.Format("ADAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
+            PlatformPlugin.Logger.Information(null, string.Format("MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
                 PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(), MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
         }
 
@@ -70,13 +70,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.ClientId = clientId;
             this.RedirectUri = redirectUri;
         }
-        
-        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string[] scope, ClientKey clientKey, UserIdentifier userId, IPlatformParameters parameters)
+
+        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string[] scope, ClientKey clientKey, string userId, IPlatformParameters parameters)
         {
-            var handler = new AcquireTokenSilentHandler(this.Authenticator, this.TokenCache, scope, clientKey, userId, parameters);
+            var handler = new AcquireTokenSilentHandler(this.Authenticator, this.TokenCache, scope, clientKey, userId,  parameters);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
+        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string[] scope, ClientKey clientKey, User user, IPlatformParameters parameters)
+        {
+            var handler = new AcquireTokenSilentHandler(this.Authenticator, this.TokenCache, scope, clientKey, user, parameters);
+            return await handler.RunAsync().ConfigureAwait(false);
+        }
 
+        private bool isUserIdDisplayable(string userId)
+        {
+            return false;
+        }
     }
 }

@@ -23,9 +23,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
-        public PlatformParameters(PromptBehavior promptBehavior, bool useCorporateNetwork)
+        public PlatformParameters(bool useCorporateNetwork)
         {
-            this.PromptBehavior = promptBehavior;
             this.UseCorporateNetwork = useCorporateNetwork;
         }
 
@@ -34,10 +33,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// This flag only works in SSO mode and is ignored otherwise. To enable SSO mode, call AcquireTokenAsync with null or application's callback URI as redirectUri.
         /// </summary>
         public bool UseCorporateNetwork { get; private set; }
-
-        /// <summary>
-        /// Gets prompt behavior. If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.
-        /// </summary>
-        public PromptBehavior PromptBehavior { get; private set; }
     }
 }

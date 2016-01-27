@@ -46,22 +46,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     internal sealed class TokenCacheKey
     {
-        internal TokenCacheKey(string authority, string[] scope, string policy, string clientId, TokenSubjectType tokenSubjectType, User user)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string policy, string clientId, TokenSubjectType tokenSubjectType, User user)
             : this(authority, scope, clientId, tokenSubjectType, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, policy)
         {
         }
 
-        internal TokenCacheKey(string authority, string[] scope, string clientId, TokenSubjectType tokenSubjectType, User user)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, User user)
             : this(authority, scope, clientId, tokenSubjectType, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, "")
         {
         }
 
-        internal TokenCacheKey(string authority, string[] scope, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId)
             : this(authority, scope, clientId, tokenSubjectType, uniqueId, displayableId, "")
         {
         }
 
-        internal TokenCacheKey(string authority, string[] scope, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId, string policy)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId, string policy)
         {
             this.Authority = authority;
             this.Scope = scope;
@@ -74,13 +74,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public string Authority { get; private set; }
 
-        public string[] Scope { get; internal set; }
+        public HashSet<string> Scope { get; internal set; }
 
         public string ClientId { get; private set; }
 
         public string UniqueId { get; private set; }
 
         public string DisplayableId { get; private set; }
+
+        public string RootId { get; private set; }
 
         public string Policy { get; private set; }
 
@@ -94,9 +96,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return
                 string.Format(
-                    "Authority:{0}, Scope:{1}, ClientId:{2}, UniqueId:{3}, DisplayableId:{4}, Policy:{5}, TokenSubjectType:{6}",
-                    this.Authority, MsalStringHelper.CreateSingleStringFromArray(this.Scope), this.ClientId,
-                    this.UniqueId, this.DisplayableId, this.Policy, this.TokenSubjectType);
+                    "Authority:{0}, Scope:{1}, ClientId:{2}, UniqueId:{3}, DisplayableId:{4}, RootId:{5}, Policy:{6}, TokenSubjectType:{7}",
+                    this.Authority, MsalStringHelper.CreateSingleStringFromArray(this.Scope.ToArray()), this.ClientId,
+                    this.UniqueId, this.DisplayableId, this.RootId, this.Policy, this.TokenSubjectType);
         }
 
         /// <summary>
@@ -142,7 +144,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             const string Delimiter = ":::";
             return (this.Authority + Delimiter
-                + MsalStringHelper.CreateSingleStringFromArray(this.Scope).ToLower() + Delimiter
+                + MsalStringHelper.CreateSingleStringFromSet(this.Scope) + Delimiter
                 + this.ClientId.ToLower() + Delimiter
                 + this.UniqueId + Delimiter
                 + ((this.DisplayableId != null) ? this.DisplayableId.ToLower() : null) + Delimiter
@@ -150,14 +152,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 + (int)this.TokenSubjectType).GetHashCode();
         }
 
-        internal bool ScopeContains(string[] otherScope)
+        internal bool ScopeContains(HashSet<string> otherScope)
         {
-            ISet<string> self = MsalStringHelper.CreateSetFromArray(this.Scope);
-            ISet<string> other = MsalStringHelper.CreateSetFromArray(otherScope);
-
-            foreach (string otherString in other)
+            foreach (string otherString in otherScope)
             {
-                if (!self.Contains(otherString))
+                if (!this.Scope.Contains(otherString))
                 {
                     return false;
                 }
@@ -166,14 +165,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return true;
         }
 
-        internal bool ScopeEquals(string[] otherScope)
+        internal bool ScopeEquals(HashSet<string> otherScope)
         {
-            ISet<string> self = MsalStringHelper.CreateSetFromArray(this.Scope);
-            ISet<string> other = MsalStringHelper.CreateSetFromArray(otherScope);
-
-            if (self.Count == other.Count)
+            if (Scope.Count == otherScope.Count)
             {
-                return self.Intersect(other).Count() == self.Count;
+                return this.Scope.Intersect(otherScope).Count() == this.Scope.Count;
             }
 
             return false;

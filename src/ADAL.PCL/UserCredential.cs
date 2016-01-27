@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
     // Disabled Non-Interactive Feature
     /// <summary>
-    /// Credential used for integrated authentication on domain-joined machines.
+    /// Secret used for integrated authentication on domain-joined machines.
     /// </summary>
     public sealed class UserCredential
     {

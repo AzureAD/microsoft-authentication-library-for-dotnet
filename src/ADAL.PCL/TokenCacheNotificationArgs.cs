@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string ClientId { get; internal set; }
 
         /// <summary>
-        /// Gets the Resource.
+        /// Gets the Scope.
         /// </summary>
         public string[] Scope { get; internal set; }
 

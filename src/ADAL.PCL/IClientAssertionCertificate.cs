@@ -18,12 +18,11 @@
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal interface ICryptographyHelper
+    public interface IClientAssertionCertificate
     {
-        string CreateSha256Hash(string input);
+        byte[] Sign(string message);
 
-        byte[] SignWithCertificate(string message, byte[] rawData, string password);
+        string Thumbprint { get; }
 
-        string GetX509CertificateThumbprint(IClientAssertionCertificate credential);
     }
 }

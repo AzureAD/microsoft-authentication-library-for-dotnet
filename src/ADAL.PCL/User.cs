@@ -83,5 +83,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         [DataMember]
         public string IdentityProvider { get; internal set; }
+
+        
+        [DataMember]
+        internal string RootId { get; set; }
     }
 }

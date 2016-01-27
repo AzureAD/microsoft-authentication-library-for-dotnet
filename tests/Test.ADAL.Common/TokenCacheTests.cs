@@ -164,7 +164,7 @@ namespace Test.ADAL.Common.Unit
             var localCache = tempContext.TokenCache;
             localCache.Clear();
 
-            // @Scope, Credential
+            // @Scope, Secret
             TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User, uniqueId, displayableId);
             AddToDictionary(localCache, tokenCacheKey, authenticationResult);
             AuthenticationContext acWithLocalCache = new AuthenticationContext(authority, false, localCache);

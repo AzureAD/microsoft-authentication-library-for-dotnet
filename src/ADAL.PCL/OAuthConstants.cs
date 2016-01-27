@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class OAuthParameter
@@ -81,7 +83,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
     internal class OAuthValue
     {
-        public const string ScopeOpenId = "openid";
+        public static readonly string[] ReservedScopes = {"openid", "email", "profile", "offline_access"};
     }
 
     internal class PromptValue

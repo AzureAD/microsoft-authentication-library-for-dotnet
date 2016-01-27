@@ -31,7 +31,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string TokenType = "token_type";
         public const string AccessToken = "access_token";
         public const string RefreshToken = "refresh_token";
-        public const string Resource = "resource";
+        public const string Scope = "scope";
+        public const string FamilyOfClientId = "TO_BE_DECIDED";
         public const string IdToken = "id_token";
         public const string CreatedOn = "created_on";
         public const string ExpiresOn = "expires_on";
@@ -55,8 +56,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = TokenResponseClaim.RefreshToken, IsRequired = false)]
         public string RefreshToken { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.Resource, IsRequired = false)]
-        public string Resource { get; set; }
+        [DataMember(Name = TokenResponseClaim.Scope, IsRequired = false)]
+        public string Scope { get; set; }
+
+        [DataMember(Name = TokenResponseClaim.FamilyOfClientId, IsRequired = false)]
+        public string FamilyOfClientId { get; set; }
 
         [DataMember(Name = TokenResponseClaim.IdToken, IsRequired = false)]
         public string IdTokenString { get; set; }
@@ -101,7 +105,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     IdTokenString = responseDictionary["id_token"],
                     TokenType = "Bearer",
                     CorrelationId = responseDictionary["correlation_id"],
-                    Resource = responseDictionary["resource"],
+                    //TODO - Get scopes instead. Resource = responseDictionary["resource"],
                     ExpiresOn = long.Parse(responseDictionary["expires_on"].Split('.')[0])
                 };
             }
@@ -212,7 +216,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     RefreshToken = this.RefreshToken,
                     // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
                     // to get it from the STS response.
-                    ScopeInResponse = this.Resource                    
+                    ScopeInResponse = Scope.CreateArrayFromSingleString()
                 };
             }
             else if (this.Error != null)

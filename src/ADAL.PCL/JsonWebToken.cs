@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             public const string Algorithm = "alg";
             public const string Type = "typ";
-            public const string X509CertificateThumbprint = "x5t";
+            public const string X509CertificateThumbprint = "kid";
         }
     }   
 
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly JWTPayload payload;
 
-        public JsonWebToken(ClientAssertionCertificate certificate, string audience)
+        public JsonWebToken(string clientId, string audience)
         {
             DateTime validFrom = PlatformPlugin.HttpClientFactory.GetJsonWebTokenValidFrom();
 
@@ -70,15 +70,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.payload = new JWTPayload
                            {
                                Audience = audience,
-                               Issuer = certificate.ClientId,
+                               Issuer = clientId,
                                ValidFrom = ConvertToTimeT(validFrom),
                                ValidTo = ConvertToTimeT(validTo),
-                               Subject = certificate.ClientId,
+                               Subject = clientId,
                                JwtIdentifier = PlatformPlugin.HttpClientFactory.GetJsonWebTokenId()
                            };
         }
 
-        public ClientAssertion Sign(ClientAssertionCertificate credential)
+        public ClientAssertion Sign(IClientAssertionCertificate credential)
         {
             // Base64Url encoded header and claims
             string token = this.Encode(credential);     
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new MsalException(MsalError.EncodedTokenTooLong);
             }
 
-            return new ClientAssertion(this.payload.Issuer, string.Concat(token, ".", UrlEncodeSegment(credential.Sign(token))));
+            return new ClientAssertion(string.Concat(token, ".", UrlEncodeSegment(credential.Sign(token))));
         }
 
         private static string EncodeSegment(string segment)
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return Base64UrlEncoder.Encode(segment);
         }
 
-        private static string EncodeHeaderToJson(ClientAssertionCertificate credential)
+        private static string EncodeHeaderToJson(IClientAssertionCertificate credential)
         {
             JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(credential);
             return JsonHelper.EncodeToJson(header);
@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return (long)(diff.TotalSeconds);
         }
 
-        private string Encode(ClientAssertionCertificate credential)
+        private string Encode(IClientAssertionCertificate credential)
         {
             // Header segment
             string jsonHeader = EncodeHeaderToJson(credential);
@@ -133,9 +133,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataContract]
         internal class JWTHeader
         {
-            protected ClientAssertionCertificate Credential { get; private set; }
+            protected IClientAssertionCertificate Credential { get; private set; }
 
-            public JWTHeader(ClientAssertionCertificate credential)
+            public JWTHeader(IClientAssertionCertificate credential)
             {
                 this.Credential = credential;
             }
@@ -195,7 +195,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataContract]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
-            public JWTHeaderWithCertificate(ClientAssertionCertificate credential)
+            public JWTHeaderWithCertificate(IClientAssertionCertificate credential)
                 : base(credential)
             {
             }

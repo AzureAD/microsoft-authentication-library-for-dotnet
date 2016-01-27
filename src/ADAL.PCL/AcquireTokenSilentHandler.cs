@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private IPlatformParameters parameters;
 
-        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, UserIdentifier userId, IPlatformParameters parameters)
+        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, User userId, IPlatformParameters parameters)
             : base(authenticator, tokenCache, scope, clientKey, clientKey.HasCredential ? TokenSubjectType.UserPlusClient : TokenSubjectType.User)
         {
             if (userId == null)
@@ -35,12 +35,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.UniqueId = userId.UniqueId;
             this.DisplayableId = userId.DisplayableId;
-            this.UserIdentifierType = userId.Type;
             PlatformPlugin.BrokerHelper.PlatformParameters = parameters;    
             this.SupportADFS = false;
-
-            this.brokerParameters["username"] = userId.Id;
-            this.brokerParameters["username_type"] = userId.Type.ToString();
+            
+            this.brokerParameters["username"] = userId.DisplayableId;
             this.brokerParameters["silent_broker_flow"] = null; //add key
         }
 

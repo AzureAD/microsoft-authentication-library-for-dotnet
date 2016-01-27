@@ -34,33 +34,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.HasCredential = false;
         }
 
-        public ClientKey(string clientId, ClientCredential clientCredential)
+        public ClientKey(string clientId, ClientCredential clientCredential, Authenticator authenticator):this(clientId)
         {
             if (clientCredential == null)
             {
                 throw new ArgumentNullException("clientCredential");
             }
 
+            this.Authenticator = Authenticator;
             this.Credential = clientCredential;
-            this.ClientId = clientId;
             this.HasCredential = true;
         }
 
-        public ClientKey(ClientAssertionCertificate clientCertificate, Authenticator authenticator)
-        {
-            this.Authenticator = authenticator;
-
-            if (clientCertificate == null)
-            {
-                throw new ArgumentNullException("clientCertificate");
-            }
-
-            this.Certificate = clientCertificate;
-            this.ClientId = clientCertificate.ClientId;
-            this.HasCredential = true;
-        }
-
-        public ClientKey(ClientAssertion clientAssertion)
+        public ClientKey(string clientId, ClientAssertion clientAssertion):this(clientId)
         {
             if (clientAssertion == null)
             {
@@ -68,13 +54,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.Assertion = clientAssertion;
-            this.ClientId = clientAssertion.ClientId;
             this.HasCredential = true;
         }
 
         public ClientCredential Credential { get; private set; }
-
-        public ClientAssertionCertificate Certificate { get; private set; }
 
         public ClientAssertion Assertion { get; private set; }
 
@@ -93,20 +76,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (this.Credential != null)
             {
-                parameters[OAuthParameter.ClientSecret] = this.Credential.ClientSecret;
+                if (this.Credential.ClientCredentialType == ClientCredentialType.ClientSecret)
+                {
+                    parameters[OAuthParameter.ClientSecret] = this.Credential.Secret;
+                }
+                else
+                {
+                    JsonWebToken jwtToken = new JsonWebToken(this.ClientId, this.Authenticator.SelfSignedJwtAudience);
+                    ClientAssertion clientAssertion = jwtToken.Sign(this.Credential.Certificate);
+                    parameters[OAuthParameter.ClientAssertionType] = clientAssertion.AssertionType;
+                    parameters[OAuthParameter.ClientAssertion] = clientAssertion.Assertion;
+                }
             }
+
             else if (this.Assertion != null)
             {
                 parameters[OAuthParameter.ClientAssertionType] = this.Assertion.AssertionType;
                 parameters[OAuthParameter.ClientAssertion] = this.Assertion.Assertion;
             }
-            else if (this.Certificate != null)
-            {
-                JsonWebToken jwtToken = new JsonWebToken(this.Certificate, this.Authenticator.SelfSignedJwtAudience);
-                ClientAssertion clientAssertion = jwtToken.Sign(this.Certificate);
-                parameters[OAuthParameter.ClientAssertionType] = clientAssertion.AssertionType;
-                parameters[OAuthParameter.ClientAssertion] = clientAssertion.Assertion;
-            }
+            
         }
     }
 }

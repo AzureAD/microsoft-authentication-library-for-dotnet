@@ -18,12 +18,37 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static class MsalStringHelper
     {
+        internal static string CreateSingleStringFromSet(this HashSet<string> setOfStrings)
+        {
+            if (setOfStrings == null || setOfStrings.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append(setOfStrings.ElementAt(0));
+
+            for (int i = 1; i < setOfStrings.Count; i++)
+            {
+                sb.Append(" ");
+                sb.Append(setOfStrings.ElementAt(i));
+            }
+
+            return sb.ToString();
+        }
+        
+        internal static HashSet<string> CreateSetFromSingleString(this string singleString)
+        {
+            return new HashSet<string>(singleString.Split(new[] { " " }, StringSplitOptions.None));
+        }
+
         internal static string[] CreateArrayFromSingleString(this string singleString)
         {
             if (string.IsNullOrWhiteSpace(singleString))
@@ -34,27 +59,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return singleString.Split(new[] { " " }, StringSplitOptions.None);
         }
 
-        internal static string CreateSingleStringFromArray(this string[] arrayStrings)
+        internal static HashSet<string> CreateSetFromArray(this string[] arrayStrings)
         {
-            if (arrayStrings == null || arrayStrings.Length == 0)
-            {
-                return string.Empty;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            sb.Append(arrayStrings[0]);
-            for (int i = 1; i < arrayStrings.Length; i++)
-            {
-                sb.Append(" ");
-                sb.Append(arrayStrings[i]);
-            }
-
-            return sb.ToString();
-        }
-
-        internal static ISet<string> CreateSetFromArray(this string[] arrayStrings)
-        {
-            ISet<string> set = new HashSet<string>();
+            HashSet<string> set = new HashSet<string>();
             if (arrayStrings == null || arrayStrings.Length == 0)
             {
                 return set;

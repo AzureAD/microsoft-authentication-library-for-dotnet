@@ -64,6 +64,7 @@
     <Compile Include="AcquireTokenNonInteractiveHandler.cs" />
     <Compile Include="AcquireTokenOnBehalfHandler.cs" />
     <Compile Include="AcquireTokenSilentHandler.cs" />
+    <Compile Include="IClientAssertionCertificate.cs" />
     <Compile Include="MsalException.cs" />
     <Compile Include="MsalStringHelper.cs" />
     <Compile Include="MsalIdHelper.cs" />
@@ -80,7 +81,6 @@
     <Compile Include="Base64UrlEncoder.cs" />
     <Compile Include="CallState.cs" />
     <Compile Include="ClientAssertion.cs" />
-    <Compile Include="ClientAssertionCertificate.cs" />
     <Compile Include="ClientCredential.cs" />
     <Compile Include="ClientKey.cs" />
     <Compile Include="ClientMetrics.cs" />
@@ -127,7 +127,6 @@
     <Compile Include="UIOptions.cs" />
     <Compile Include="UserAssertion.cs" />
     <Compile Include="UserCredential.cs" />
-    <Compile Include="UserIdentifier.cs" />
     <Compile Include="User.cs" />
     <Compile Include="UserRealmDiscoveryResponse.cs" />
     <Compile Include="WsTrustRequest.cs" />

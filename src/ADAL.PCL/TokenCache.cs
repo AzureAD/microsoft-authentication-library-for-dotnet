@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> kvp in this.tokenCacheDictionary)
                 {
                     writer.Write(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}", Delimiter, kvp.Key.Authority,
-                        kvp.Key.Scope.CreateSingleStringFromArray(), kvp.Key.ClientId,
+                        kvp.Key.Scope.CreateSingleStringFromSet(), kvp.Key.ClientId,
                         (int)kvp.Key.TokenSubjectType, kvp.Key.Policy));
                     writer.Write(kvp.Value.Serialize());
                 }
@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     AuthenticationResultEx resultEx = AuthenticationResultEx.Deserialize(reader.ReadString());
 
                     TokenCacheKey key = new TokenCacheKey(kvpElements[0],
-                        kvpElements[1].CreateArrayFromSingleString(), kvpElements[4], kvpElements[2],
+                        kvpElements[1].CreateSetFromSingleString(), kvpElements[4], kvpElements[2],
                         (TokenSubjectType)int.Parse(kvpElements[3]), resultEx.Result.User);
 
                     this.tokenCacheDictionary.Add(key, resultEx);
@@ -278,7 +278,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        internal virtual AuthenticationResultEx LoadFromCache(string authority, string[] scope, string clientId,
+        internal virtual AuthenticationResultEx LoadFromCache(string authority, HashSet<string> scope, string clientId,
             TokenSubjectType subjectType, string uniqueId, string displayableId, string policy, CallState callState)
         {
             PlatformPlugin.Logger.Verbose(callState, "Looking up cache for a token...");
@@ -305,8 +305,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     //requested scope are not a subset.
                     PlatformPlugin.Logger.Verbose(callState,
                         string.Format("Refresh token for scope '{0}' will be used to acquire token for '{1}'",
-                            cacheKey.Scope.CreateSingleStringFromArray(),
-                            scope.CreateSingleStringFromArray()));
+                            cacheKey.Scope.CreateSingleStringFromSet(),
+                            scope.CreateSingleStringFromSet()));
                     
                     resultEx = CreateResultExFromCacheResultEx(resultEx);
                 }
@@ -365,7 +365,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
 
-        internal void StoreToCache(AuthenticationResultEx result, string authority, string[] scope, string clientId,
+        internal void StoreToCache(AuthenticationResultEx result, string authority, HashSet<string> scope, string clientId,
             TokenSubjectType subjectType, string policy, CallState callState)
         {
             PlatformPlugin.Logger.Verbose(callState, "Storing token in the cache...");
@@ -436,7 +436,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         private KeyValuePair<TokenCacheKey, AuthenticationResultEx>? LoadSingleItemFromCache(string authority,
-            string[] scope, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId,
+            HashSet<string> scope, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId,
             string policy, CallState callState)
         {
             // First identify all potential tokens.
@@ -466,7 +466,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         {
                             returnValue = mrrtItems.First();
                             PlatformPlugin.Logger.Information(callState,
-                                "A Multi Resource Refresh accessToken for a different resource was found which can be used");
+                                "A Multi Scope Refresh accessToken for a different resource was found which can be used");
                         }
                     }
                     break;
