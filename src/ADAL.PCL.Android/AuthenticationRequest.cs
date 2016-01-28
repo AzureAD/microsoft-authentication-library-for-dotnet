@@ -57,8 +57,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 RedirectUri = brokerPayload["redirect_uri"];
             }
 
-            LoginHint = brokerPayload["username"];
-            BrokerAccountName = LoginHint;
+            if (brokerPayload.ContainsKey("username"))
+            {
+                LoginHint = brokerPayload["username"];
+                BrokerAccountName = LoginHint;
+            }
+
             if (brokerPayload.ContainsKey("extra_qp"))
             {
                 ExtraQueryParamsAuthentication = brokerPayload["extra_qp"];
