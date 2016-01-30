@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -52,8 +53,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this._additionalScope = additionalScope.CreateSetFromArray();
             }
 
-            ValidateScopeInput(scope.Union(this.additionalScope).ToArray());
-
+            ValidateScopeInput(this._additionalScope);
             this._authorizationParameters = parameters;
             this._redirectUriRequestParameter = PlatformPlugin.PlatformInformation.GetRedirectUriAsString(this._redirectUri, this.CallState);
             
@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this._extraQueryParameters = extraQueryParameters;
             this._webUi = webUI;
-            this.LoadFromCache = (tokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters));
+            this.LoadFromCache = tokenCache != null;
             this.SupportADFS = true;
 
             this.brokerParameters["force"] = "NO";

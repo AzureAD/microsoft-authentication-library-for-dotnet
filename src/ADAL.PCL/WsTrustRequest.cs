@@ -69,17 +69,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             StringBuilder messageBuilder = BuildMessage(DefaultAppliesTo, wsTrustAddress, credential);
-            string soapAction = XmlNamespace.Issue.ToString();
-            if (wsTrustAddress.Version == WsTrustVersion.WsTrust2005)
-            {
-                soapAction = XmlNamespace.Issue2005.ToString();
-            }
-
-            Dictionary<string, string> headers = new Dictionary<string, string> 
-            { 
-                { "SOAPAction", soapAction }
-            };
-
             WsTrustResponse wstResponse;
 
             try
@@ -121,15 +110,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             UserCredential credential)
         {
             // securityHeader will be empty string for Kerberos.
-            StringBuilder securityHeaderBuilder = BuildSecurityHeader(wsTrustAddress, credential);
+            StringBuilder securityHeaderBuilder = new StringBuilder(MaxExpectedMessageSize);
 
             string guid = Guid.NewGuid().ToString();
             StringBuilder messageBuilder = new StringBuilder(MaxExpectedMessageSize);
-            String schemaLocation = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
-            String soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue";
-            String rstTrustNamespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
-            String keyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer";
-            String requestType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue";
+            string schemaLocation = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
+            string soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue";
+            string rstTrustNamespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
+            string keyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer";
+            string requestType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue";
 
             if (wsTrustAddress.Version == WsTrustVersion.WsTrust2005)
             {
@@ -157,55 +146,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             escapeStr = escapeStr.Replace("<", "&lt;");
             escapeStr = escapeStr.Replace(">", "&gt;");
             return escapeStr;
-        }
-
-        private static StringBuilder BuildSecurityHeader(WsTrustAddress address, UserCredential credential)
-        {
-            StringBuilder securityHeaderBuilder = new StringBuilder(MaxExpectedMessageSize);
-
-            // Not add <Security> element if the credential type is kerberos
-            if (credential.UserAuthType == UserAuthType.UsernamePassword)
-            {
-                StringBuilder messageCredentialsBuilder = new StringBuilder(MaxExpectedMessageSize);
-                string guid = Guid.NewGuid().ToString();
-                messageCredentialsBuilder.AppendFormat(
-                    "<o:UsernameToken u:Id='uuid-{0}'><o:Username>{1}</o:Username><o:Password>", guid,
-                    credential.UserName);
-                char[] passwordChars = null;
-                try
-                {
-                    passwordChars = credential.PasswordToCharArray();
-                    string escapeStr = XmlEscape(new string(passwordChars));
-                    messageCredentialsBuilder.Append(escapeStr);
-                    escapeStr = "";
-                }
-                finally
-                {
-                    passwordChars.SecureClear();
-                }
-
-                messageCredentialsBuilder.AppendFormat("</o:Password></o:UsernameToken>");
-
-                //
-                // Timestamp the message
-                //
-                DateTime currentTime = DateTime.UtcNow;
-                string currentTimeString = BuildTimeString(currentTime);
-
-                // Expiry is 10 minutes after creation
-                DateTime expiryTime = currentTime.AddMinutes(10);
-                string expiryTimeString = BuildTimeString(expiryTime);
-
-                securityHeaderBuilder.AppendFormat(
-                    "<o:Security s:mustUnderstand='1' xmlns:o='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd'><u:Timestamp u:Id='_0'><u:Created>{0}</u:Created><u:Expires>{1}</u:Expires></u:Timestamp>{2}</o:Security>",
-                    currentTimeString,
-                    expiryTimeString,
-                    messageCredentialsBuilder);
-
-                messageCredentialsBuilder.SecureClear();
-            }
-
-            return securityHeaderBuilder;
         }
 
         private static string BuildTimeString(DateTime utcTime)

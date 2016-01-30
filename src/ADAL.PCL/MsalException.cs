@@ -146,8 +146,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     message = MsalErrorMessage.AuthorityNotInValidList;
                     break;
 
-                case MsalError.UnknownUserType:
-                    message = MsalErrorMessage.UnknownUserType;
+                case MsalError.UnsupportedUserType:
+                    message = MsalErrorMessage.UnsupportedUserType;
                     break;
 
                 case MsalError.UnknownUser:

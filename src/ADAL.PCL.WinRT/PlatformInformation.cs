@@ -105,31 +105,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return NetworkInformation.GetHostNames().Any(entry => entry.Type == HostNameType.DomainName);
         }
 
-        public override void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
-        {
-            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
-            if (authorizationParameters == null)
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
-            }
-
-            PromptBehavior promptBehavior = (parameters as PlatformParameters).PromptBehavior;
-
-            // ADFS currently ignores the parameter for now.
-            switch (promptBehavior)
-            {
-                case PromptBehavior.Always:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
-                    break;
-                case PromptBehavior.RefreshSession:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
-                    break;
-                case PromptBehavior.Never:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
-                    break;
-            }
-        }
-
         public override Uri ValidateRedirectUri(Uri redirectUri, CallState callState)
         {
             if (redirectUri == null)

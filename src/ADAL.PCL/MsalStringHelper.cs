@@ -25,20 +25,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal static class MsalStringHelper
     {
+
         internal static string CreateSingleStringFromSet(this HashSet<string> setOfStrings)
         {
-            if (setOfStrings == null || setOfStrings.Count == 0)
+            return CreateSingleStringFromArray(setOfStrings.ToArray());
+        }
+
+        internal static string CreateSingleStringFromArray(this string[] arrayOfStrings)
+        {
+
+            if (IsNullOrEmpty(arrayOfStrings))
             {
                 return string.Empty;
             }
 
             StringBuilder sb = new StringBuilder();
-            sb.Append(setOfStrings.ElementAt(0));
+            sb.Append(arrayOfStrings[0]);
 
-            for (int i = 1; i < setOfStrings.Count; i++)
+            for (int i = 1; i < arrayOfStrings.Length; i++)
             {
                 sb.Append(" ");
-                sb.Append(setOfStrings.ElementAt(i));
+                sb.Append(arrayOfStrings[i]);
             }
 
             return sb.ToString();

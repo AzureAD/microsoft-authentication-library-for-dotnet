@@ -369,12 +369,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             TokenSubjectType subjectType, string policy, CallState callState)
         {
             PlatformPlugin.Logger.Verbose(callState, "Storing token in the cache...");
-
-            if (MsalStringHelper.IsNullOrEmpty(scope) || scope.CreateSetFromArray().Contains("openid"))
-            {
-                scope = new[] { clientId };
-            }
-
             string uniqueId = (result.Result.User != null) ? result.Result.User.UniqueId : null;
             string displayableId = (result.Result.User != null) ? result.Result.User.DisplayableId : null;
 

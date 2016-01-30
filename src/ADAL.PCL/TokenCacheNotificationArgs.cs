@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
@@ -36,7 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Gets the Scope.
         /// </summary>
-        public string[] Scope { get; internal set; }
+        public HashSet<string> Scope { get; internal set; }
 
         /// <summary>
         /// Gets the user's unique Id.

@@ -103,19 +103,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     PlatformPlugin.Logger.Information(this.CallState, string.Format("Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType));
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
-                    this.userAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
-                }
-                else if (string.Compare(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    // handle password grant flow for the managed user
-                    if (this.userCredential.PasswordToCharArray() == null)
-                    {
-                        throw new MsalException(MsalError.PasswordRequiredForManagedUserError);
-                    }
+                    this.userAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer, this.userCredential.UserName);
                 }
                 else
                 {
-                    throw new MsalException(MsalError.UnknownUserType);
+                    throw new MsalException(MsalError.UnsupportedUserType);
                 }
             }
         }
@@ -127,15 +119,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 requestParameters[OAuthParameter.GrantType] = this.userAssertion.AssertionType;
                 requestParameters[OAuthParameter.Assertion] = Convert.ToBase64String(Encoding.UTF8.GetBytes(this.userAssertion.Assertion));
             }
-            else
-            {
-                requestParameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
-                requestParameters[OAuthParameter.Username] = this.userCredential.UserName;
-                requestParameters[OAuthParameter.Password] = this.userCredential.Password;
-            }
-
-            // To request id_token in response
-            requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
         }
         
         private bool PerformUserRealmDiscovery()

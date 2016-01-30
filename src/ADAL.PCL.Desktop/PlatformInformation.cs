@@ -114,45 +114,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return returnValue;
         }
-
-        public override void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
-        {
-            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
-            if (authorizationParameters == null)
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
-            }
-
-            PromptBehavior promptBehavior = (parameters as PlatformParameters).PromptBehavior;
-
-            // ADFS currently ignores the parameter for now.
-            switch (promptBehavior)
-            {
-                case PromptBehavior.Always:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
-                    break;
-                case PromptBehavior.RefreshSession:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
-                    break;
-                case PromptBehavior.Never:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
-                    break;
-            }            
-        }
-
-        public override bool GetCacheLoadPolicy(IPlatformParameters parameters)
-        {
-            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
-            if (authorizationParameters == null)
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
-            }
-
-            PromptBehavior promptBehavior = (parameters as PlatformParameters).PromptBehavior;
-            
-            return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession;
-        }
-
+        
         private static class NativeMethods
         {
             private const int PROCESSOR_ARCHITECTURE_AMD64 = 9;

@@ -32,19 +32,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
-
-            switch (this.parameters.PromptBehavior)
-            {
-                case PromptBehavior.Auto:
-                    return new InteractiveWebUI { OwnerWindow = this.parameters.OwnerWindow };
-                case PromptBehavior.Always:
-                case PromptBehavior.RefreshSession:
-                    return new InteractiveWebUI { OwnerWindow = this.parameters.OwnerWindow };
-                case PromptBehavior.Never:
-                    return new SilentWebUI { OwnerWindow = this.parameters.OwnerWindow };
-                default:
-                    throw new InvalidOperationException("Unexpected PromptBehavior value");
-            }
+            
+            return new InteractiveWebUI { OwnerWindow = this.parameters.OwnerWindow };
         }  
     }
 }

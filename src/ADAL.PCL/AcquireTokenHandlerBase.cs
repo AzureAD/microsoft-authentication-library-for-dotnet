@@ -47,8 +47,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 throw new ArgumentNullException("scope");
             }
-
+            
             this.Scope = scope.CreateSetFromArray();
+            ValidateScopeInput(this.Scope);
+
             this.ClientKey = clientKey;
             this.TokenSubjectType = subjectType;
             this.Policy = policy;
@@ -95,12 +97,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return set;
         }
 
-        protected void ValidateScopeInput()
+        protected void ValidateScopeInput(HashSet<string> scopesToValidate)
         {
             //check if scope or additional scope contains client ID.
-            if (Scope.Intersect(OAuthValue.ReservedScopes.CreateSetFromArray()).Any())
+            if (scopesToValidate.Intersect(OAuthValue.ReservedScopes.CreateSetFromArray()).Any())
             {
-                throw new ArgumentException(string.Format("API does not accept '{0}' value as a user-provided scope", OAuthValue.ReservedScopes));
+                throw new ArgumentException(string.Format("API does not accept '{0}' value as user-provided scopes", OAuthValue.ReservedScopes.CreateSingleStringFromArray()));
             }
         }
 
@@ -236,10 +238,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected async Task<AuthenticationResultEx> SendTokenRequestByRefreshTokenAsync(string refreshToken)
         {
-            var requestParameters = new DictionaryRequestParameters(this.Scope, this.ClientKey);
+            var requestParameters = new DictionaryRequestParameters(this.GetDecoratedScope(this.Scope), this.ClientKey);
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
             requestParameters[OAuthParameter.RefreshToken] = refreshToken;
-            requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
 
             AuthenticationResultEx result = await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
 

@@ -51,14 +51,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return false;
         }
 
-        public virtual void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
+        public virtual void AddUiOptionsQueryParameter(UiOptions options, DictionaryRequestParameters authorizationRequestParameters)
         {
             authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
-        }
-
-        public virtual bool GetCacheLoadPolicy(IPlatformParameters parameters)
-        {
-            return true;
         }
 
         public virtual Uri ValidateRedirectUri(Uri redirectUri, CallState callState)

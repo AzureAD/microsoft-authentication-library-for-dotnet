@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -50,7 +51,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = "error_description", IsRequired = false)]
         public string ErrorDescription { get; internal set; }
 
-        public DeviceCodeResult GetResult(string clientId, string[] scope)
+        public DeviceCodeResult GetResult(string clientId, HashSet<string> scope)
         {
             return new DeviceCodeResult()
             {
@@ -61,7 +62,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 Interval = this.Interval,
                 VerificationUrl = this.VerificationUrl,
                 ClientId = clientId,
-                Scope = scope
+                Scope = scope.ToArray()
             };
         }
     }

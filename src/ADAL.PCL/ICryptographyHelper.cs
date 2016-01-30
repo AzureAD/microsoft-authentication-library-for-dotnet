@@ -21,9 +21,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal interface ICryptographyHelper
     {
         string CreateSha256Hash(string input);
-
-        byte[] SignWithCertificate(string message, byte[] rawData, string password);
-
-        string GetX509CertificateThumbprint(IClientAssertionCertificate credential);
     }
 }

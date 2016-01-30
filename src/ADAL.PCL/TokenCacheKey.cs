@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return false;
         }
 
-        public bool ScopeIntersects(string[] otherScope)
+        public bool ScopeIntersects(HashSet<string> otherScope)
         {
             return this.Scope.Intersect(otherScope).ToArray().Length > 0;
         }

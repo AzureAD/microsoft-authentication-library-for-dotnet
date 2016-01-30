@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private Authenticator authenticator;
         private ClientKey clientKey;
-        private string[] scope;
+        private HashSet<string> scope;
         private CallState callState;
         private string extraQueryParameters;
 
@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.authenticator = authenticator;
             this.callState = AcquireTokenHandlerBase.CreateCallState(this.authenticator.CorrelationId);
             this.clientKey = new ClientKey(clientId);
-            this.scope = scope;
+            this.scope = scope.CreateSetFromArray();
             this.extraQueryParameters = extraQueryParameters;
         }
         

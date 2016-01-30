@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Unknown User Type.
         /// </summary>
-        public const string UnknownUserType = "unknown_user_type";
+        public const string UnsupportedUserType = "unsupported_user_type";
 
         /// <summary>
         /// Unknown User.
@@ -357,7 +357,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string UnexpectedAuthorityValidList = "Unexpected list of valid addresses";
         public const string Unknown = "Unknown error";
         public const string UnknownUser = "Could not identify logged in user";
-        public const string UnknownUserType = "Unknown User Type";
+        public const string UnsupportedUserType = "Unsupported User Type";
 
         public const string UnsupportedAuthorityValidation =
             "Authority validation is not supported for this type of authority";
