@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private IPlatformParameters parameters;
 
-        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, User userId, IPlatformParameters parameters)
+        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, User userId, IPlatformParameters parameters, string policy)
             : base(authenticator, tokenCache, scope, clientKey, clientKey.HasCredential ? TokenSubjectType.UserPlusClient : TokenSubjectType.User)
         {
             if (userId == null)

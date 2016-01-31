@@ -71,7 +71,6 @@
     <Compile Include="MsalServiceException.cs" />
     <Compile Include="MsalSilentTokenAcquisitionException.cs" />
     <Compile Include="MsalUserMismatchException.cs" />
-    <Compile Include="AuthenticationContext.cs" />
     <Compile Include="AuthenticationParameters.cs" />
     <Compile Include="AuthenticationResult.cs" />
     <Compile Include="Authenticator.cs" />

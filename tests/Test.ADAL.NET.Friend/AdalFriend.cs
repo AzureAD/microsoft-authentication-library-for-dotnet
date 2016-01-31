@@ -18,6 +18,7 @@
 
 using System;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -26,11 +27,11 @@ namespace Test.ADAL.NET.Friend
 {
     public static class AdalFriend
     {
-        public static ClientAssertion CreateJwt(byte[] cert, string password, string issuer, string aud)
+        public static ClientAssertion CreateJwt(X509Certificate2 cert, string issuer, string aud)
         {
-            ClientAssertionCertificate certificate = new ClientAssertionCertificate(issuer, cert, password);
+            ClientAssertionCertificate certificate = new ClientAssertionCertificate(issuer, cert);
 
-            JsonWebToken jwtToken = new JsonWebToken(certificate, aud);
+            JsonWebToken jwtToken = new JsonWebToken(issuer, aud);
             return jwtToken.Sign(certificate);
         }
 
