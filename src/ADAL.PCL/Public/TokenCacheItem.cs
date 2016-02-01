@@ -37,6 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.TokenSubjectType = key.TokenSubjectType;
             this.UniqueId = key.UniqueId;
             this.DisplayableId = key.DisplayableId;
+            this.DisplayableId = key.RootId;
             this.TenantId = result.TenantId;
             this.ExpiresOn = result.ExpiresOn;
             this.Token = result.AccessToken;
@@ -105,6 +106,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string DisplayableId { get; internal set; }
 
         /// <summary>
+        ///     Gets the user's displayable Id.
+        /// </summary>
+        public string RootId { get; internal set; }
+
+        /// <summary>
         ///     Gets the Access Token requested.
         /// </summary>
         public string Token { get; internal set; }
@@ -118,9 +124,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal bool Match(TokenCacheKey key)
         {
-            return (key.Authority == this.Authority && key.ScopeEquals(this.Scope) && key.ClientIdEquals(this.ClientId)
+            return (key.Authority == this.Authority && key.ScopeEquals(this.Scope) && key.Equals(key.ClientId, this.ClientId)
                     && key.TokenSubjectType == this.TokenSubjectType && key.UniqueId == this.UniqueId &&
-                    key.DisplayableIdEquals(this.DisplayableId) && key.PolicyEquals(this.Policy));
+                    key.Equals(key.DisplayableId, this.DisplayableId) && key.Equals(key.RootId, this.RootId) && key.Equals(key.Policy, this.Policy));
         }
     }
 }

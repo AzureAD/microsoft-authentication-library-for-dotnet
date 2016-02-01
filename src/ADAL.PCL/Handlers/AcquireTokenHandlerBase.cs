@@ -36,8 +36,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.Authenticator = authenticator;
             this.CallState = CreateCallState(this.Authenticator.CorrelationId);
             PlatformPlugin.Logger.Information(this.CallState,
-                string.Format("=== Token Acquisition started:\n\tAuthority: {0}\n\tResource: {1}\n\tClientId: {2}\n\tCacheType: {3}\n\tAuthentication Target: {4}\n\t",
-                authenticator.Authority, scope, clientKey.ClientId,
+                string.Format("=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}\n\tAuthentication Target: {4}\n\t",
+                authenticator.Authority, scope.CreateSingleStringFromArray(), clientKey.ClientId,
                 (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(" ({0} items)", tokenCache.Count) : "null",
                 subjectType));
 
@@ -84,6 +84,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected string DisplayableId { get; set; }
 
+        protected string RootId { get; set; }
+
         protected string Policy { get; set; }
 
         protected bool LoadFromCache { get; set; }
@@ -120,7 +122,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.Policy, this.CallState);
+                    resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.RootId, this.Policy, this.CallState);
                     if (resultEx != null && resultEx.Result.AccessToken == null && resultEx.RefreshToken != null)
                     {
                         resultEx = await this.RefreshAccessTokenAsync(resultEx).ConfigureAwait(false);

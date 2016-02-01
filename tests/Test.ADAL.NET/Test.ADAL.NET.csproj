@@ -148,9 +148,6 @@
     <Compile Include="..\Test.ADAL.Common\Verify.cs">
       <Link>Common\Verify.cs</Link>
     </Compile>
-    <Compile Include="AdalDotNetTests.cs" />
-    <Compile Include="AdalTests.cs" />
-    <Compile Include="AuthenticationParametersProxy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StaSynchronizationContext.cs" />
     <Compile Include="StsLoginFlow.cs" />

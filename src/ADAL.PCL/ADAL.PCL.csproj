@@ -54,25 +54,26 @@
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AbstractClientApplication.cs" />
-    <Compile Include="AcquireDeviceCodeHandler.cs" />
-    <Compile Include="AcquireTokenByAuthorizationCodeHandler.cs" />
-    <Compile Include="AcquireTokenByDeviceCodeHandler.cs" />
-    <Compile Include="AcquireTokenForClientHandler.cs" />
-    <Compile Include="AcquireTokenHandlerBase.cs" />
-    <Compile Include="AcquireTokenInteractiveHandler.cs" />
-    <Compile Include="AcquireTokenNonInteractiveHandler.cs" />
-    <Compile Include="AcquireTokenOnBehalfHandler.cs" />
-    <Compile Include="AcquireTokenSilentHandler.cs" />
-    <Compile Include="IClientAssertionCertificate.cs" />
+    <Compile Include="MsalError.cs" />
+    <Compile Include="Public\AbstractClientApplication.cs" />
+    <Compile Include="Handlers\AcquireDeviceCodeHandler.cs" />
+    <Compile Include="Handlers\AcquireTokenByAuthorizationCodeHandler.cs" />
+    <Compile Include="Handlers\AcquireTokenByDeviceCodeHandler.cs" />
+    <Compile Include="Handlers\AcquireTokenForClientHandler.cs" />
+    <Compile Include="Handlers\AcquireTokenHandlerBase.cs" />
+    <Compile Include="Handlers\AcquireTokenInteractiveHandler.cs" />
+    <Compile Include="Handlers\AcquireTokenNonInteractiveHandler.cs" />
+    <Compile Include="Handlers\AcquireTokenOnBehalfHandler.cs" />
+    <Compile Include="Handlers\AcquireTokenSilentHandler.cs" />
+    <Compile Include="Public\IClientAssertionCertificate.cs" />
     <Compile Include="MsalException.cs" />
     <Compile Include="MsalStringHelper.cs" />
     <Compile Include="MsalIdHelper.cs" />
     <Compile Include="MsalServiceException.cs" />
     <Compile Include="MsalSilentTokenAcquisitionException.cs" />
     <Compile Include="MsalUserMismatchException.cs" />
-    <Compile Include="AuthenticationParameters.cs" />
-    <Compile Include="AuthenticationResult.cs" />
+    <Compile Include="Public\AuthenticationParameters.cs" />
+    <Compile Include="Public\AuthenticationResult.cs" />
     <Compile Include="Authenticator.cs" />
     <Compile Include="AuthenticatorTemplate.cs" />
     <Compile Include="AuthenticatorTemplateList.cs" />
@@ -83,7 +84,7 @@
     <Compile Include="ClientCredential.cs" />
     <Compile Include="ClientKey.cs" />
     <Compile Include="ClientMetrics.cs" />
-    <Compile Include="ConfidentialClientApplication.cs" />
+    <Compile Include="Public\ConfidentialClientApplication.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="DeviceAuthJWTResponse.cs" />
     <Compile Include="DeviceCodeResponse.cs" />
@@ -94,7 +95,7 @@
     <Compile Include="HttpWebResponseWrapper.cs" />
     <Compile Include="IBrokerHelper.cs" />
     <Compile Include="IDeviceAuthHelper.cs" />
-    <Compile Include="IPlatformParameters.cs" />
+    <Compile Include="Public\IPlatformParameters.cs" />
     <Compile Include="ICryptographyHelper.cs" />
     <Compile Include="IdToken.cs" />
     <Compile Include="IHttpClient.cs" />
@@ -106,11 +107,11 @@
     <Compile Include="LoggerBase.cs" />
     <Compile Include="MexParser.cs" />
     <Compile Include="AuthenticationResultEx.cs" />
-    <Compile Include="PublicClientApplication.cs" />
+    <Compile Include="Public\PublicClientApplication.cs" />
     <Compile Include="TokenResponse.cs" />
     <Compile Include="OAuthConstants.cs" />
     <Compile Include="PlatformInformationBase.cs" />
-    <Compile Include="IWebUI.cs" />
+    <Compile Include="Public\IWebUI.cs" />
     <Compile Include="EncodingHelper.cs" />
     <Compile Include="IWebUIFactory.cs" />
     <Compile Include="PlatformPlugin.cs" />
@@ -119,18 +120,19 @@
     <Compile Include="AdalHttpClient.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="TokenCache.cs" />
-    <Compile Include="TokenCacheItem.cs" />
+    <Compile Include="Public\TokenCache.cs" />
+    <Compile Include="Public\TokenCacheItem.cs" />
     <Compile Include="TokenCacheKey.cs" />
     <Compile Include="TokenCacheNotificationArgs.cs" />
-    <Compile Include="UIOptions.cs" />
-    <Compile Include="UserAssertion.cs" />
-    <Compile Include="UserCredential.cs" />
-    <Compile Include="User.cs" />
+    <Compile Include="Public\UIOptions.cs" />
+    <Compile Include="Public\UserAssertion.cs" />
+    <Compile Include="Public\UserCredential.cs" />
+    <Compile Include="Public\User.cs" />
     <Compile Include="UserRealmDiscoveryResponse.cs" />
     <Compile Include="WsTrustRequest.cs" />
     <Compile Include="WsTrustResponse.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
