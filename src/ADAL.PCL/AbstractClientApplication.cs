@@ -71,15 +71,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.RedirectUri = redirectUri;
         }
 
-        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string[] scope, ClientKey clientKey, string userId, IPlatformParameters parameters)
+        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string[] scope, ClientKey clientKey, string userId, IPlatformParameters parameters, string policy)
         {
-            var handler = new AcquireTokenSilentHandler(this.Authenticator, this.TokenCache, scope, clientKey, userId,  parameters);
+            var handler = new AcquireTokenSilentHandler(this.Authenticator, this.TokenCache, scope, clientKey, userId,  parameters, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string[] scope, ClientKey clientKey, User user, IPlatformParameters parameters)
+        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string[] scope, ClientKey clientKey, User user, IPlatformParameters parameters, string policy)
         {
-            var handler = new AcquireTokenSilentHandler(this.Authenticator, this.TokenCache, scope, clientKey, user, parameters);
+            var handler = new AcquireTokenSilentHandler(this.Authenticator, this.TokenCache, scope, clientKey, user, parameters, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

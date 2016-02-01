@@ -23,26 +23,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public PublicClientApplication(string authority):base(authority, DEFAULT_CLIENT_ID, DEFAULT_REDIRECT_URI)
         {
         }
-
-        //TODO: consider this for other platforms
+        
         /// <summary>
-        /// TODO it would be nice to have a uber constructor just match API footprint with other platforms.
-        /// Other platforms do not have syntatic sugar like
-        /// new Instance(value){
-        ///  Property = prop
-        /// }
-        /// It would be more developer friendly to have a constructor instead.
-        /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="redirectUri"></param>
-/*        public PublicClientApplication(string clientId, string redirectUri)
-                {
-                    this.ClientId = clientId;
-                    this.RedirectUri = redirectUri;
-                }*/
-
-        /// <summary>
-        /// .NET specific property that allows configuration of platform specific properties. For example, in iOS/Android it woul include the flag to enable/disable broker.
+        /// .NET specific property that allows configuration of platform specific properties. For example, in iOS/Android it would include the flag to enable/disable broker.
         /// </summary>
         public IPlatformParameters PlatformParameters { get; set; }
 
@@ -205,7 +188,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string[] scope, string clientId, Uri redirectUri, IPlatformParameters parameters, User userId, string extraQueryParameters = null)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string[] scope, string clientId, Uri redirectUri, User userId, string extraQueryParameters = null)
         {
             var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, scope, clientId, redirectUri, parameters, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters));
             return await handler.RunAsync().ConfigureAwait(false);

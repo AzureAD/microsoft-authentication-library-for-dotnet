@@ -42,7 +42,6 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNet")]
         public async Task UserRealmDiscoveryTest()
         {
-            var federatedSts = SetupStsService(StsType.AADFederatedWithADFS3);
             AuthenticationContext context = new AuthenticationContext(federatedSts.Authority, federatedSts.ValidateAuthority);
             await context.Authenticator.UpdateFromTemplateAsync(null);
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);

@@ -47,21 +47,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal sealed class TokenCacheKey
     {
         internal TokenCacheKey(string authority, HashSet<string> scope, string policy, string clientId, TokenSubjectType tokenSubjectType, User user)
-            : this(authority, scope, clientId, tokenSubjectType, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, policy)
+            : this(authority, scope, clientId, tokenSubjectType, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.RootId : null, policy)
         {
         }
 
         internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, User user)
-            : this(authority, scope, clientId, tokenSubjectType, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, "")
+            : this(authority, scope, clientId, tokenSubjectType, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.RootId : null, string.Empty)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId)
-            : this(authority, scope, clientId, tokenSubjectType, uniqueId, displayableId, "")
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId, string rootId)
+            : this(authority, scope, clientId, tokenSubjectType, uniqueId, displayableId, rootId, string.Empty)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId, string policy)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId, string rootId, string policy)
         {
             this.Authority = authority;
             this.Scope = scope;
@@ -127,10 +127,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                (other != null
                && (other.Authority == this.Authority)
                && this.ScopeEquals(other.Scope)
-               && this.ClientIdEquals(other.ClientId)
-               && (other.UniqueId == this.UniqueId)
-               && this.DisplayableIdEquals(other.DisplayableId)
-               && this.PolicyEquals(other.Policy)
+               && this.Equals(this.ClientId, other.ClientId)
+               && this.Equals(other.UniqueId, this.UniqueId)
+               && this.Equals(this.DisplayableId, other.DisplayableId)
+               && this.Equals(this.RootId, other.RootId)
+               && this.Equals(this.Policy, other.Policy)
                && (other.TokenSubjectType == this.TokenSubjectType));
         }
 
@@ -179,31 +180,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return this.Scope.Intersect(otherScope).ToArray().Length > 0;
         }
-
-        internal bool PolicyEquals(string otherPolicy)
+        
+        internal bool Equals(string string1, string string2)
         {
-            if (string.IsNullOrEmpty(this.Policy) && string.IsNullOrEmpty(otherPolicy))
-            {
-                return true;
-            }
-
-            if (string.IsNullOrEmpty(this.Policy) || string.IsNullOrEmpty(otherPolicy))
-            {
-                return false;
-            }
-
-
-            return (string.Compare(otherPolicy, this.Policy, StringComparison.OrdinalIgnoreCase) == 0);
-        }
-
-        internal bool ClientIdEquals(string otherClientId)
-        {
-            return (string.Compare(otherClientId, this.ClientId, StringComparison.OrdinalIgnoreCase) == 0);
-        }
-
-        internal bool DisplayableIdEquals(string otherDisplayableId)
-        {
-            return (string.Compare(otherDisplayableId, this.DisplayableId, StringComparison.OrdinalIgnoreCase) == 0);
+            return (string.Compare(string2, string1, StringComparison.OrdinalIgnoreCase) == 0);
         }
     }
 }

@@ -31,7 +31,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public void AuthenticationParametersTest()
         {
-            Sts sts = new AadSts();
+            Sts sts = new Sts();
             string authority = sts.Authority + "/oauth2/authorize";
             const string Resource = "test_resource";
 

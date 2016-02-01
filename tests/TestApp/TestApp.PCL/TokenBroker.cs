@@ -70,7 +70,7 @@ namespace TestApp.PCL
             try
             {
                 app = new PublicClientApplication(sts.Authority);
-                var result = await app.AcquireTokenSilentAsync(sts.ValidScope, sts.ValidClientId, sts.ValidUserName);
+                var result = await app.AcquireTokenSilentAsync(sts.ValidScope, sts.ValidUserName);
 
                 return result.AccessToken;
             }
@@ -86,8 +86,8 @@ namespace TestApp.PCL
         {
             try
             {
-                app = new AuthenticationContext(Sts.Authority, true);
-                var result = await app.AcquireTokenAsync(Sts.ValidScope, Sts.ValidClientId, Sts.ValidNonExistingRedirectUri, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
+                app = new AuthenticationContext(sts.Authority, true);
+                var result = await app.AcquireTokenAsync(sts.ValidScope, sts.ValidUserName, parameters);
                 return result.AccessToken;
             }
             catch (Exception ex)

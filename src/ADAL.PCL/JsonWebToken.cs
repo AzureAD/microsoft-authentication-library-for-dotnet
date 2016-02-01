@@ -206,7 +206,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 get
                 {
                     // Thumbprint should be url encoded
-                    return PlatformPlugin.CryptographyHelper.GetX509CertificateThumbprint(this.Credential);
+                    return this.Credential.Thumbprint;
                 }
 
                 set

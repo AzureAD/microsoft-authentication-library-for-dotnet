@@ -28,8 +28,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private UserAssertion userAssertion;
         
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserCredential userCredential)
-            : base(authenticator, tokenCache, scope, new ClientKey(clientId), TokenSubjectType.User)
+        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserCredential userCredential, string policy)
+            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, TokenSubjectType.User)
         {
             if (userCredential == null)
             {
@@ -39,8 +39,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.userCredential = userCredential;
         }
 
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserAssertion userAssertion)
-            : base(authenticator, tokenCache, scope, new ClientKey(clientId), TokenSubjectType.User)
+        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserAssertion userAssertion, string policy)
+            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, TokenSubjectType.User)
         {
             if (userAssertion == null)
             {

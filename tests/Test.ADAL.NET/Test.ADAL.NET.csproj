@@ -150,7 +150,6 @@
     </Compile>
     <Compile Include="AdalDotNetTests.cs" />
     <Compile Include="AdalTests.cs" />
-    <Compile Include="AuthenticationContextProxy.cs" />
     <Compile Include="AuthenticationParametersProxy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StaSynchronizationContext.cs" />

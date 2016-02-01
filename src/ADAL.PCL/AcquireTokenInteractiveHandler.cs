@@ -132,12 +132,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 authorizationRequestParameters[OAuthParameter.CorrelationId] = this.CallState.CorrelationId.ToString();
             }
-
-            if (this._authorizationParameters != null)
-            {
-                PlatformPlugin.PlatformInformation.AddPromptBehaviorQueryParameter(this._authorizationParameters, authorizationRequestParameters);
-            }
-
+            
             if (PlatformPlugin.HttpClientFactory.AddAdditionalHeaders)
             {
                 IDictionary<string, string> adalIdParameters = MsalIdHelper.GetAdalIdParameters();

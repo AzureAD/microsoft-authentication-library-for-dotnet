@@ -26,7 +26,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class WebUI : IWebUI
     {
-        private readonly PromptBehavior promptBehavior;
         private readonly bool useCorporateNetwork;
 
         public WebUI(IPlatformParameters parameters)
@@ -35,15 +34,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
-
-            this.promptBehavior = ((PlatformParameters)parameters).PromptBehavior;
+            
             this.useCorporateNetwork = ((PlatformParameters)parameters).UseCorporateNetwork;
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionaHeaders, CallState callState)
         {
             bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
-            if (this.promptBehavior == PromptBehavior.Never && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
+            if (!ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
             {
                 throw new ArgumentException(AdalErrorMessageEx.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
             }
@@ -51,11 +49,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             WebAuthenticationResult webAuthenticationResult;
 
             WebAuthenticationOptions options = (this.useCorporateNetwork && (ssoMode || redirectUri.Scheme == Constant.MsAppScheme)) ? WebAuthenticationOptions.UseCorporateNetwork : WebAuthenticationOptions.None;
-
-            if (this.promptBehavior == PromptBehavior.Never)
-            {
-                options |= WebAuthenticationOptions.SilentMode;
-            }
 
             try
             {
@@ -74,11 +67,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (Exception ex)
             {
-                if (this.promptBehavior == PromptBehavior.Never)
-                {
-                    throw new MsalException(MsalError.UserInteractionRequired, ex);
-                }
-
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
 

@@ -24,8 +24,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private readonly UserAssertion userAssertion;
 
-        public AcquireTokenOnBehalfHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, UserAssertion userAssertion)
-            : base(authenticator, tokenCache, scope, clientKey, TokenSubjectType.UserPlusClient)
+        public AcquireTokenOnBehalfHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, UserAssertion userAssertion, string policy)
+            : base(authenticator, tokenCache, scope, clientKey, policy, TokenSubjectType.UserPlusClient)
         {
             if (userAssertion == null)
             {
@@ -44,8 +44,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             requestParameters[OAuthParameter.Assertion] = this.userAssertion.Assertion;
             requestParameters[OAuthParameter.RequestedTokenUse] = OAuthRequestedTokenUse.OnBehalfOf;
 
-            // To request id_token in response
-            requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
+            //TODO To request id_token in response
+            //requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
         }
     }
 }
