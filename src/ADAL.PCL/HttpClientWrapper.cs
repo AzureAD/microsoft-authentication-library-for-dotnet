@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class HttpClientWrapper : IHttpClient
+    internal class HttpClientWrapper
     {
         private readonly string uri;
         private int timeoutInMilliSeconds = 30000;
@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
 
-            return new HttpWebResponseWrapper(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), headers, response.StatusCode);
+            return new MsalHttpWebResponse(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), headers, response.StatusCode);
         }
 
         private void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers)

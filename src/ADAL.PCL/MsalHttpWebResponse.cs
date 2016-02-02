@@ -23,9 +23,9 @@ using System.Net;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class HttpWebResponseWrapper : IHttpWebResponse
+    internal class MsalHttpWebResponse : IHttpWebResponse
     {
-        public HttpWebResponseWrapper(Stream responseStream, Dictionary<string, string> headers, HttpStatusCode statusCode)
+        public MsalHttpWebResponse(Stream responseStream, Dictionary<string, string> headers, HttpStatusCode statusCode)
         {
             this.ResponseStream = responseStream;
             this.Headers = headers;

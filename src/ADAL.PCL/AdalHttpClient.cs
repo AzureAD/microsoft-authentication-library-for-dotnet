@@ -33,11 +33,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public AdalHttpClient(string uri, CallState callState)
         {
-            this.Client = PlatformPlugin.HttpClientFactory.Create(CheckForExtraQueryParameter(uri), callState);
+            this.Client = new HttpClientWrapper(CheckForExtraQueryParameter(uri), callState);
             this.CallState = callState;
         }
 
-        public IHttpClient Client { get; private set; }
+        public HttpClientWrapper Client { get; private set; }
 
         public CallState CallState { get; private set; }
 
@@ -55,9 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             try
             {
                 clientMetrics.BeginClientMetricsRecord(this.CallState);
-
-                if (PlatformPlugin.HttpClientFactory.AddAdditionalHeaders)
-                {
+                
                     Dictionary<string, string> clientMetricsHeaders = clientMetrics.GetPreviousRequestRecord(this.CallState);
                     foreach (KeyValuePair<string, string> kvp in clientMetricsHeaders)
                     {
@@ -69,7 +67,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     {
                         this.Client.Headers[kvp.Key] = kvp.Value;
                     }
-                }
+                
 
                 //add pkeyauth header
                 this.Client.Headers[DeviceAuthHeaderName] = DeviceAuthHeaderValue;
@@ -149,7 +147,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             IDictionary<string, string> responseDictionary = this.ParseChallengeData(response);
             string responseHeader = await PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(responseDictionary).ConfigureAwait(false);
             IRequestParameters rp = this.Client.BodyParameters;
-            this.Client = PlatformPlugin.HttpClientFactory.Create(CheckForExtraQueryParameter(responseDictionary["SubmitUrl"]), this.CallState);
+            this.Client = new HttpClientWrapper(CheckForExtraQueryParameter(responseDictionary["SubmitUrl"]), this.CallState);
             this.Client.BodyParameters = rp;
             this.Client.Headers["Authorization"] = responseHeader;
             return await this.GetResponseAsync<T>(endpointType, false).ConfigureAwait(false);

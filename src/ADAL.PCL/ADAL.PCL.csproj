@@ -90,16 +90,13 @@
     <Compile Include="DeviceCodeResponse.cs" />
     <Compile Include="Public\DeviceCodeResult.cs" />
     <Compile Include="HttpClientWrapper.cs" />
-    <Compile Include="HttpClientFactory.cs" />
     <Compile Include="HttpRequestWrapperException.cs" />
-    <Compile Include="HttpWebResponseWrapper.cs" />
+    <Compile Include="MsalHttpWebResponse.cs" />
     <Compile Include="Interfaces\IBrokerHelper.cs" />
     <Compile Include="Interfaces\IDeviceAuthHelper.cs" />
     <Compile Include="Public\IPlatformParameters.cs" />
     <Compile Include="Interfaces\ICryptographyHelper.cs" />
     <Compile Include="IdToken.cs" />
-    <Compile Include="Interfaces\IHttpClient.cs" />
-    <Compile Include="Interfaces\IHttpClientFactory.cs" />
     <Compile Include="Interfaces\IHttpWebResponse.cs" />
     <Compile Include="Interfaces\ITokenCachePlugin.cs" />
     <Compile Include="JsonHelper.cs" />

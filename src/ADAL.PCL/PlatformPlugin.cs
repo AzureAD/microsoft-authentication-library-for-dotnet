@@ -37,8 +37,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         static PlatformPlugin()
         {
-            HttpClientFactory = new HttpClientFactory();
-
             if (PlatformPluginSwitch.DynamicallyLinkAssembly)
             {
                 InitializeByAssemblyDynamicLinking();
@@ -46,7 +44,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         public static IWebUIFactory WebUIFactory { get; set; }
-        public static IHttpClientFactory HttpClientFactory { get; set; }
         public static ITokenCachePlugin TokenCachePlugin { get; set; }
         public static LoggerBase Logger { get; set; }
         public static PlatformInformationBase PlatformInformation { get; set; }

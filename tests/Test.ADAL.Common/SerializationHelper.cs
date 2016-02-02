@@ -62,31 +62,5 @@ namespace Test.ADAL.Common
 
             stream.Seek(0, SeekOrigin.Begin);
         }
-
-        public static HttpRequestWrapperException DeserializeException(string str)
-        {
-            using (Stream stream = new MemoryStream())
-            {
-                StringToStream(EncodingHelper.Base64Decode(str), stream);
-                stream.Seek(0, SeekOrigin.Begin);
-                Dictionary<string, string> dictionary = DeserializeDictionary(stream);
-                Stream bodyStream = new MemoryStream();
-
-                var headers = new Dictionary<string, string>();
-                foreach (var key in dictionary.Keys)
-                {
-                    if (key.StartsWith("Header-"))
-                    {
-                        headers.Add(key.Substring(7), dictionary[key]);
-                    }
-                }
-
-                StringToStream(dictionary["Body"], bodyStream);
-                bodyStream.Position = 0;
-                return new HttpRequestWrapperException(
-                    new HttpWebResponseWrapper(bodyStream, headers, (HttpStatusCode)Enum.Parse(typeof(HttpStatusCode), dictionary["StatusCode"])), 
-                    new HttpRequestException());
-            }
-        }
     }
 }
