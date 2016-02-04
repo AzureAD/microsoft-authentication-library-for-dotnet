@@ -17,25 +17,24 @@
 //----------------------------------------------------------------------
 
 using System;
-using Android.Provider;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class Logger : LoggerBase
     {
-        internal override void Error(CallState callState, Exception ex, [Settings.System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        internal override void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
         }
 
-        internal override void Verbose(CallState callState, string message, [Settings.System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        internal override void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
         }
 
-        internal override void Information(CallState callState, string message, [Settings.System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        internal override void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
         }
 
-        internal override void Warning(CallState callState, string message, [Settings.System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        internal override void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
         }
     }
