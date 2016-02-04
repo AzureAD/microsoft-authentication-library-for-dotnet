@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.Common
 {

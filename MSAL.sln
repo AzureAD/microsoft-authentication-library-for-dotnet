@@ -65,7 +65,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XFormsApp", "tests\TestApp\
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		tests\TestApp\AdalUniversalTestApp\AdalUniversalSample.Shared\AdalUniversalSample.Shared.projitems*{3e89ccea-0c4b-461e-95a6-a906e5583af9}*SharedItemsImports = 4
 		tests\TestApp\AdalUniversalTestApp\AdalUniversalSample.Shared\AdalUniversalSample.Shared.projitems*{cf7d7734-1856-4ce7-879a-9410ab4f45d9}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

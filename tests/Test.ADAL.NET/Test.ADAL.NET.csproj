@@ -39,7 +39,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
@@ -107,7 +107,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StaSynchronizationContext.cs" />
     <Compile Include="StsLoginFlow.cs" />
-    <Compile Include="TestConstants.cs" />
     <Compile Include="TokenCacheKeyTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -144,9 +143,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ADAL.PCL\ADAL.PCL.csproj">
-      <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
-      <Name>ADAL.PCL</Name>
+    <ProjectReference Include="..\Test.ADAL.NET.Unit\Test.ADAL.NET.Unit.csproj">
+      <Project>{91e9e564-8a44-457b-a97c-e76c9f6275d6}</Project>
+      <Name>Test.ADAL.NET.Unit</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

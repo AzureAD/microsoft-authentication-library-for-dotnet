@@ -27,7 +27,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
             Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
-            Assert.AreEqual(policyMissing, key.Policy.Equals(string.Empty));
+            Assert.AreEqual(policyMissing, key.Policy == null);
             if (!policyMissing)
             {
                 Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy.Equals(string.Empty));
