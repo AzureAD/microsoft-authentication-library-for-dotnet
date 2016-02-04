@@ -267,7 +267,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             String msg = bundleResult.GetString(AccountManager.KeyErrorMessage);
             if (!String.IsNullOrEmpty(msg))
             {
-                throw new AdalException(errCode.ToString(), msg);
+                throw new MsalException(errCode.ToString(), msg);
             }
             else
             {
@@ -293,7 +293,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 return new AuthenticationResultEx
                 {
                     RefreshToken = null,
-                    ResourceInResponse = null,
+                    ScopeInResponse = null,
                 };
             }
         }
@@ -362,7 +362,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (Exception e)
             {
                 // Authenticator gets problem from webrequest or file read/write
-                PlatformPlugin.Logger.Error(null, new AdalException("Authenticator cancels the request", e));
+                PlatformPlugin.Logger.Error(null, new MsalException("Authenticator cancels the request", e));
             }
 
             return intent;
@@ -584,15 +584,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (PackageManager.NameNotFoundException ex)
             {
-                throw new AdalException(AdalErrorAndroidEx.MissingBrokerRelatedPackage, AdalErrorMessageAndroidEx.MissingBrokerRelatedPackage, ex);
+                throw new MsalException(AdalErrorAndroidEx.MissingBrokerRelatedPackage, AdalErrorMessageAndroidEx.MissingBrokerRelatedPackage, ex);
             }
             catch (NoSuchAlgorithmException ex)
             {
-                throw new AdalException(AdalErrorAndroidEx.MissingDigestShaAlgorithm, AdalErrorMessageAndroidEx.MissingDigestShaAlgorithm, ex);
+                throw new MsalException(AdalErrorAndroidEx.MissingDigestShaAlgorithm, AdalErrorMessageAndroidEx.MissingDigestShaAlgorithm, ex);
             }
             catch (Exception ex)
             {
-                throw new AdalException(AdalErrorAndroidEx.SignatureVerificationFailed, AdalErrorMessageAndroidEx.SignatureVerificationFailed, ex);
+                throw new MsalException(AdalErrorAndroidEx.SignatureVerificationFailed, AdalErrorMessageAndroidEx.SignatureVerificationFailed, ex);
             }
         }
 

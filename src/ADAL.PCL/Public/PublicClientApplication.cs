@@ -176,21 +176,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parameters);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(string[] scope, string clientId, UserCredential userCredential)
+        private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(string[] scope, string clientId, UserCredential userCredential, string policy)
         {
-            var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, scope, clientId, userCredential);
+            var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, scope, clientId, userCredential, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string[] scope, string clientId, UserAssertion userAssertion)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string[] scope, string clientId, UserAssertion userAssertion, string policy)
         {
-            var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, scope, clientId, userAssertion);
+            var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, scope, clientId, userAssertion, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string[] scope, string clientId, Uri redirectUri, User userId, string extraQueryParameters = null)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string[] scope, string[] additionalScope, string clientId, Uri redirectUri, string loginHint, string extraQueryParameters, string policy)
         {
-            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, scope, clientId, redirectUri, this.PlatformParameters, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(this.PlatformParameters));
+            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, scope, additionalScope, clientId, redirectUri, this.PlatformParameters, loginHint, extraQueryParameters, policy, this.CreateWebAuthenticationDialog(this.PlatformParameters));
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

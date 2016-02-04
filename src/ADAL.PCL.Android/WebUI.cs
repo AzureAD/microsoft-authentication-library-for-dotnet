@@ -29,6 +29,7 @@ using Android.Content.PM;
 using Java.Security;
 using Java.IO;
 using Android.Util;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -50,7 +51,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionaHeaders, CallState callState)
         {
             returnedUriReady = new SemaphoreSlim(0);
 
