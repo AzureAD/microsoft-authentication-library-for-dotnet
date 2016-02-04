@@ -32,40 +32,13 @@ namespace Test.ADAL.Common
 {
     public abstract class AdalTestsBase
     {
-        static AdalTestsBase()
-        {
-            StsDictionary = new Dictionary<StsType, Sts>();
-        }
-
-        public static Dictionary<StsType, Sts> StsDictionary { get; private set; }
 
         protected Sts Sts { get; set; }
 
 #if !TEST_ADAL_WINRT_UNIT
         public Microsoft.VisualStudio.TestTools.UnitTesting.TestContext TestContext { get; set; }
-
-        protected StsType GetStsTypeFromContext()
-        {
-            return GetStsType((string)TestContext.DataRow["StsType"]);
-        }
+        
 #endif
-
-        protected static StsType GetStsType(string stsType)
-        {
-            return (StsType)Enum.Parse(typeof(StsType), stsType);
-        }
-
-        protected static Sts SetupStsService(StsType stsType)
-        {
-            Sts sts;
-
-            if (!StsDictionary.TryGetValue(stsType, out sts))
-            {
-                sts = StsFactory.CreateSts(stsType);
-                StsDictionary.Add(stsType, sts);
-            }
-
-            return sts;
-        }
+        
     }
 }

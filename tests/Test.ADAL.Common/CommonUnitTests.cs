@@ -37,7 +37,6 @@ namespace Test.ADAL.Common
 
         public static void AdalIdTest()
         {
-            IHttpClient request = PlatformPlugin.HttpClientFactory.Create("https://test", null);
             var adalParameters = MsalIdHelper.GetAdalIdParameters();
 
             Verify.AreEqual(4, adalParameters.Count);

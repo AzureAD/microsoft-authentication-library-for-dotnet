@@ -26,10 +26,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.Owin.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using Owin;
 
 using Test.ADAL.Common;
 
@@ -227,62 +225,24 @@ namespace Test.ADAL.NET.Unit
         [Description("Test to verify CryptographyHelper.SignWithCertificate")]
         public void SignWithCertificateTest()
         {
-            const string Message = "This is a test message";
+            string message = "This is a test message";
             string[] certs = { "valid_cert.pfx", "valid_cert2.pfx" };
             for (int i = 0; i < 2; i++)
             {
                 X509Certificate2 x509Certificate = new X509Certificate2(certs[i], "password", X509KeyStorageFlags.Exportable);
-                byte[] rawData = x509Certificate.Export(X509ContentType.Pkcs12, "password");
 
-                ICryptographyHelper cryptoHelper = new CryptographyHelper();
-                byte[] signature = cryptoHelper.SignWithCertificate(Message, rawData, "password");
+                IClientAssertionCertificate cryptoHelper = new ClientAssertionCertificate("client_id", x509Certificate);
+                byte[] signature = cryptoHelper.Sign(message);
                 Verify.IsNotNull(signature);
 
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
 
-                signature = cryptoHelper.SignWithCertificate(Message, rawData, "password");
+                signature = cryptoHelper.Sign(message);
                 Verify.IsNotNull(signature);
             }
         }
-
-        [TestMethod]
-        [TestCategory("AdalDotNetUnit")]
-        public async Task TimeoutTest()
-        {
-            const string TestServiceUrl = "http://localhost:8080";
-            using (WebApp.Start<TestService>(TestServiceUrl))
-            {
-                HttpClientWrapper webClient = new HttpClientWrapper(TestServiceUrl + "?delay=0&response_code=200", null) { TimeoutInMilliSeconds = 10000 };
-                await webClient.GetResponseAsync();
-
-                webClient = new HttpClientWrapper(TestServiceUrl + "?delay=0&response_code=200", null) { TimeoutInMilliSeconds = 10000 };
-                await webClient.GetResponseAsync();
-
-                try
-                {
-                    webClient = new HttpClientWrapper(TestServiceUrl + "?delay=0&response_code=400", null) { TimeoutInMilliSeconds = 10000 };
-                    await webClient.GetResponseAsync();
-                }
-                catch (HttpRequestWrapperException ex)
-                {
-                    Verify.AreEqual(ex.WebResponse.StatusCode, HttpStatusCode.BadRequest);
-                }
-
-
-                try
-                {
-                    webClient = new HttpClientWrapper(TestServiceUrl + "?delay=10000&response_code=200", null) { TimeoutInMilliSeconds = 500 };
-                    await webClient.GetResponseAsync();
-                }
-                catch (HttpRequestWrapperException ex)
-                {
-                    Verify.IsTrue(ex.InnerException is TaskCanceledException);
-                    var serviceException = new MsalServiceException(MsalError.Unknown, ex);
-                    Verify.AreEqual(serviceException.StatusCode, (int)HttpStatusCode.RequestTimeout);
-                }
-            }
-        }
+        
         
         private static void RunAuthenticationParametersPositive(string authenticateHeader, string expectedAuthority, string excepectedResource)
         {
