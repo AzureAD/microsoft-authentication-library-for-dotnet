@@ -44,7 +44,7 @@ namespace AdalUniversalTestApp
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
-            this.AccessToken.Text = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(PromptBehavior.Auto, false));
+            this.AccessToken.Text = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(false));
         }
 
         private async void Button_Click_1(object sender, RoutedEventArgs e)
@@ -57,7 +57,7 @@ namespace AdalUniversalTestApp
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
-            string token = await tokenBroker.GetTokenInteractiveWithMsAppAsync(new PlatformParameters(PromptBehavior.Auto, false));
+            string token = await tokenBroker.GetTokenInteractiveWithMsAppAsync(new PlatformParameters(false));
             this.AccessToken.Text = token;
         }
 

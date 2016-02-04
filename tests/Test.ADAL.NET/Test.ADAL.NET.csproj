@@ -100,24 +100,6 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="..\Test.ADAL.Common\AdalTests.cs">
-      <Link>Common\AdalTests.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.ADAL.Common\AdalTests2.cs">
-      <Link>Common\AdalTests2.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.ADAL.Common\AdalTestsBase.cs">
-      <Link>Common\AdalTestsBase.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.ADAL.Common\AuthenticationContextProxy.cs">
-      <Link>Common\AuthenticationContextProxy.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.ADAL.Common\AuthenticationParametersProxy.cs">
-      <Link>Common\AuthenticationParametersProxy.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.ADAL.Common\AuthenticationResultProxy.cs">
-      <Link>Common\AuthenticationResultProxy.cs</Link>
-    </Compile>
     <Compile Include="..\Test.ADAL.Common\DialogHandler.cs">
       <Link>Common\DialogHandler.cs</Link>
     </Compile>
@@ -189,7 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Test.ADAL.Common\Certs\invalid_cert.pfx">
-      <Link>invalid_cert.pfx</Link>
+      <Link>Common\invalid_cert.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\Test.ADAL.Common\Certs\valid_cert.pfx">

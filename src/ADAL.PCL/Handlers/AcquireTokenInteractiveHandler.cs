@@ -133,15 +133,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 authorizationRequestParameters[OAuthParameter.CorrelationId] = this.CallState.CorrelationId.ToString();
             }
             
-            if (PlatformPlugin.HttpClientFactory.AddAdditionalHeaders)
-            {
                 IDictionary<string, string> adalIdParameters = MsalIdHelper.GetAdalIdParameters();
                 foreach (KeyValuePair<string, string> kvp in adalIdParameters)
                 {
                     authorizationRequestParameters[kvp.Key] = kvp.Value;
                 }
-            }
-
+        
             if (!string.IsNullOrWhiteSpace(_extraQueryParameters))
             {
                 // Checks for _extraQueryParameters duplicating standard parameters

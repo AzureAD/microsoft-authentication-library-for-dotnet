@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                IHttpClient request = PlatformPlugin.HttpClientFactory.Create(resourceUrl.AbsoluteUri, null);
+                HttpClientWrapper request = new HttpClientWrapper(resourceUrl.AbsoluteUri, null);
                 using (await request.GetResponseAsync().ConfigureAwait(false))
                 {
                     var ex = new MsalException(MsalError.UnauthorizedResponseExpected);

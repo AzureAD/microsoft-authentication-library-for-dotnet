@@ -179,8 +179,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     AuthenticationResultEx resultEx = AuthenticationResultEx.Deserialize(reader.ReadString());
 
                     TokenCacheKey key = new TokenCacheKey(kvpElements[0],
-                        kvpElements[1].CreateSetFromSingleString(), kvpElements[4], kvpElements[2],
-                        (TokenSubjectType)int.Parse(kvpElements[3]), resultEx.Result.User);
+                        kvpElements[1].CreateSetFromSingleString(), kvpElements[2],
+                        (TokenSubjectType)int.Parse(kvpElements[3]), resultEx.Result.User, kvpElements[4]);
 
                     this.tokenCacheDictionary.Add(key, resultEx);
                 }
@@ -384,8 +384,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 Policy = policy
             });
 
-            TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, scope, policy, clientId, subjectType,
-                result.Result.User);
+            TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, scope, clientId, subjectType,
+                result.Result.User, policy);
             // First identify all potential tokens.
             List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> items = this.QueryCache(authority, clientId,
                 subjectType, uniqueId, displayableId, rootId, policy);

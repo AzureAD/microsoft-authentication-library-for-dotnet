@@ -216,7 +216,7 @@ namespace Test.ADAL.NET.Unit
                                    AccessToken = "access_token",
                                    RefreshToken = "refresh_token",
                                    CorrelationId = Guid.NewGuid().ToString(),
-                                   Resource = "my-resource",
+                                   Scope = "my-resource",
                                    TokenType = "Bearer",
                                    ExpiresIn = 3899
                                };
@@ -340,25 +340,6 @@ namespace Test.ADAL.NET.Unit
             string encodedStr2 = (encodedChars == null) ? null : new string(encodedChars);
 
             Verify.AreEqual(encodedStr, encodedStr2);            
-        }
-
-        internal class TestService
-        {
-            public void Configuration(IAppBuilder app)
-            {
-                app.Run(ctx =>
-                {
-                    int delay = int.Parse(ctx.Request.Query["delay"]);
-                    if (delay > 0)
-                    {
-                        Thread.Sleep(delay);
-                    }
-
-                    var response = ctx.Response;
-                    response.StatusCode = int.Parse(ctx.Request.Query["response_code"]);
-                    return response.WriteAsync("dummy");
-                });
-            }
         }
     }
 }

@@ -30,6 +30,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private readonly string uri;
         private int timeoutInMilliSeconds = 30000;
+        private static readonly Lazy<HttpClient> clientForUsingCredential =
+            new Lazy<HttpClient>(() => new HttpClient(new HttpClientHandler {UseDefaultCredentials = true}));
+        private static readonly Lazy<HttpClient> clientWithoutCredential=
+            new Lazy<HttpClient>(() => new HttpClient(new HttpClientHandler { UseDefaultCredentials = false}));
 
         public HttpClientWrapper(string uri, CallState callState)
         {
@@ -104,7 +108,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 catch (TaskCanceledException ex)
                 {
-                    throw new HttpRequestWrapperException(null, ex);
+                    throw new MsalException(MsalError.HttpRequestCancelled, ex);
                 }
 
                 IHttpWebResponse webResponse = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
@@ -118,7 +122,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     catch (HttpRequestException ex)
                     {
                         webResponse.ResponseStream.Position = 0;
-                        throw new HttpRequestWrapperException(webResponse, ex);
+                        throw new MsalServiceException(webResponse, ex);
                     }
                 }
 

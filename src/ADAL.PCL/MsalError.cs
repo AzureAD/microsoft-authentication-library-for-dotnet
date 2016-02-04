@@ -53,6 +53,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string AuthenticationCanceled = "authentication_canceled";
 
         /// <summary>
+        /// Invalid credential type.
+        /// </summary>
+        public const string HttpRequestCancelled = "http_request_cancelled";
+
+        /// <summary>
         /// Unauthorized response expected from resource server.
         /// </summary>
         public const string UnauthorizedResponseExpected = "unauthorized_response_expected";

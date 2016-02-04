@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     internal sealed class TokenCacheKey
     {
-        internal TokenCacheKey(string authority, HashSet<string> scope, string policy, string clientId, TokenSubjectType tokenSubjectType, User user)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, User user, string policy)
             : this(authority, scope, clientId, tokenSubjectType, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.RootId : null, policy)
         {
         }
@@ -78,6 +78,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.TokenSubjectType = tokenSubjectType;
             this.UniqueId = uniqueId;
             this.DisplayableId = displayableId;
+            this.RootId = rootId;
             this.Policy = policy;
         }
 
@@ -157,6 +158,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 + MsalStringHelper.CreateSingleStringFromSet(this.Scope) + Delimiter
                 + this.ClientId.ToLower() + Delimiter
                 + this.UniqueId + Delimiter
+                + this.RootId + Delimiter
                 + ((this.DisplayableId != null) ? this.DisplayableId.ToLower() : null) + Delimiter
                 + ((this.Policy != null) ? this.Policy.ToLower() : null) + Delimiter
                 + (int)this.TokenSubjectType).GetHashCode();

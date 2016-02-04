@@ -74,6 +74,13 @@
     </Compile>
     <Compile Include="BrokerHelper.cs" />
     <Compile Include="DeviceAuthHelper.cs" />
+    <Compile Include="Native\BCryptNative.cs" />
+    <Compile Include="Native\ICngAlgorithm.cs" />
+    <Compile Include="Native\ICngAsymmetricAlgorithm.cs" />
+    <Compile Include="Native\NCryptNative.cs" />
+    <Compile Include="Native\RSACng.cs" />
+    <Compile Include="Native\Win32Native.cs" />
+    <Compile Include="Native\X509Native.cs" />
     <Compile Include="PlatformParameters.cs" />
     <Compile Include="CryptographyHelper.cs" />
     <Compile Include="CustomWebBrowser.cs">
@@ -115,6 +122,7 @@
       <Link>35MSSharedLib1024.snk</Link>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
