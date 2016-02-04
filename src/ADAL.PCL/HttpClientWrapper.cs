@@ -30,10 +30,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private readonly string uri;
         private int timeoutInMilliSeconds = 30000;
+
         private static readonly Lazy<HttpClient> clientForUsingCredential =
             new Lazy<HttpClient>(() => new HttpClient(new HttpClientHandler {UseDefaultCredentials = true}));
-        private static readonly Lazy<HttpClient> clientWithoutCredential=
-            new Lazy<HttpClient>(() => new HttpClient(new HttpClientHandler { UseDefaultCredentials = false}));
+
+        private static readonly Lazy<HttpClient> clientWithoutCredential =
+            new Lazy<HttpClient>(() => new HttpClient(new HttpClientHandler {UseDefaultCredentials = false}));
 
         public HttpClientWrapper(string uri, CallState callState)
         {
@@ -56,86 +58,101 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public int TimeoutInMilliSeconds
         {
-            set
-            {
-                this.timeoutInMilliSeconds = value;
-            }
+            set { this.timeoutInMilliSeconds = value; }
         }
+
 
         public async Task<IHttpWebResponse> GetResponseAsync()
         {
-            using (HttpClient client = new HttpClient(new HttpClientHandler { UseDefaultCredentials = this.UseDefaultCredentials }))
+            if (UseDefaultCredentials)
             {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(this.Accept ?? "application/json"));
-                foreach (KeyValuePair<string, string> kvp in this.Headers)
-                {
-                    client.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);
-                }
-
-                bool addCorrelationId = (this.CallState != null && this.CallState.CorrelationId != Guid.Empty);
-                if (addCorrelationId)
-                {
-                    client.DefaultRequestHeaders.Add(OAuthHeader.CorrelationId, this.CallState.CorrelationId.ToString());
-                    client.DefaultRequestHeaders.Add(OAuthHeader.RequestCorrelationIdInResponse, "true");                   
-                }
-
-                client.Timeout = TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds);
-
-                HttpResponseMessage responseMessage;
-
-                try
-                {
-                    if (this.BodyParameters != null)
-                    {
-                        HttpContent content;
-                        if (this.BodyParameters is StringRequestParameters)
-                        {
-
-                            content = new StringContent(this.BodyParameters.ToString(), Encoding.UTF8, this.ContentType);
-                        }
-                        else
-                        {
-                            content = new FormUrlEncodedContent(((DictionaryRequestParameters)this.BodyParameters).ToList());
-                        }
-
-                        responseMessage = await client.PostAsync(uri, content).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        responseMessage = await client.GetAsync(uri).ConfigureAwait(false);
-                    }
-                }
-                catch (TaskCanceledException ex)
-                {
-                    throw new MsalException(MsalError.HttpRequestCancelled, ex);
-                }
-
-                IHttpWebResponse webResponse = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
-
-                if (!responseMessage.IsSuccessStatusCode)
-                {
-                    try
-                    {
-                        throw new HttpRequestException(string.Format("Response status code does not indicate success: {0} ({1}).", (int)webResponse.StatusCode, webResponse.StatusCode));
-                    }
-                    catch (HttpRequestException ex)
-                    {
-                        webResponse.ResponseStream.Position = 0;
-                        throw new MsalServiceException(webResponse, ex);
-                    }
-                }
-
-                if (addCorrelationId)
-                {
-                    VerifyCorrelationIdHeaderInReponse(webResponse.Headers);
-                }
-
-                return webResponse;
+                return await GetResponseAsync(clientForUsingCredential.Value);
+            }
+            else
+            {
+                return await GetResponseAsync(clientWithoutCredential.Value);
             }
         }
 
-        public async static Task<IHttpWebResponse> CreateResponseAsync(HttpResponseMessage response)
+        public async Task<IHttpWebResponse> GetResponseAsync(HttpClient client)
+        {
+            client.DefaultRequestHeaders.Accept.Clear();
+            HttpRequestMessage requestMessage = new HttpRequestMessage();
+            requestMessage.RequestUri = new Uri(uri);
+            requestMessage.Headers.Accept.Clear();
+
+            requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(this.Accept ?? "application/json"));
+            foreach (KeyValuePair<string, string> kvp in this.Headers)
+            {
+                requestMessage.Headers.Add(kvp.Key, kvp.Value);
+            }
+
+            bool addCorrelationId = (this.CallState != null && this.CallState.CorrelationId != Guid.Empty);
+            if (addCorrelationId)
+            {
+                requestMessage.Headers.Add(OAuthHeader.CorrelationId, this.CallState.CorrelationId.ToString());
+                requestMessage.Headers.Add(OAuthHeader.RequestCorrelationIdInResponse, "true");
+            }
+
+            client.Timeout = TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds);
+            HttpResponseMessage responseMessage;
+
+            try
+            {
+                if (this.BodyParameters != null)
+                {
+                    HttpContent content;
+                    if (this.BodyParameters is StringRequestParameters)
+                    {
+                        content = new StringContent(this.BodyParameters.ToString(), Encoding.UTF8, this.ContentType);
+                    }
+                    else
+                    {
+                        content = new FormUrlEncodedContent(((DictionaryRequestParameters) this.BodyParameters).ToList());
+                    }
+
+                    requestMessage.Method = HttpMethod.Post;
+                    requestMessage.Content = content;
+                }
+                else
+                {
+                    requestMessage.Method = HttpMethod.Get;
+                }
+
+                responseMessage = await client.SendAsync(requestMessage).ConfigureAwait(false);
+            }
+            catch (TaskCanceledException ex)
+            {
+                throw new MsalException(MsalError.HttpRequestCancelled, ex);
+            }
+
+            IHttpWebResponse webResponse = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
+
+            if (!responseMessage.IsSuccessStatusCode)
+            {
+                try
+                {
+                    throw new HttpRequestException(
+                        string.Format("Response status code does not indicate success: {0} ({1}).",
+                            (int) webResponse.StatusCode, webResponse.StatusCode));
+                }
+                catch (HttpRequestException ex)
+                {
+                    webResponse.ResponseStream.Position = 0;
+                    //TODO remove stream.position and fix MSALServiceException
+                    //throw new MsalServiceException(webResponse, ex);
+                }
+            }
+
+            if (addCorrelationId)
+            {
+                VerifyCorrelationIdHeaderInReponse(webResponse.Headers);
+            }
+
+            return webResponse;
+        }
+
+        public static async Task<IHttpWebResponse> CreateResponseAsync(HttpResponseMessage response)
         {
             var headers = new Dictionary<string, string>();
             if (response.Headers != null)
@@ -146,7 +163,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
 
-            return new MsalHttpWebResponse(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), headers, response.StatusCode);
+            return new MsalHttpWebResponse(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), headers,
+                response.StatusCode);
         }
 
         private void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers)
@@ -160,13 +178,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Guid correlationIdInResponse;
                     if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
                     {
-                        PlatformPlugin.Logger.Warning(CallState, string.Format("Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
+                        PlatformPlugin.Logger.Warning(CallState,
+                            string.Format("Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
                     }
                     else if (correlationIdInResponse != this.CallState.CorrelationId)
                     {
                         PlatformPlugin.Logger.Warning(
                             this.CallState,
-                            string.Format("Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, CallState.CorrelationId));
+                            string.Format("Returned correlation id '{0}' does not match the sent correlation id '{1}'",
+                                correlationIdHeader, CallState.CorrelationId));
                     }
 
                     break;
