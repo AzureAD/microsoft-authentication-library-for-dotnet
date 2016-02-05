@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, User user)
-            : this(authority, scope, clientId, tokenSubjectType, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.RootId : null, string.Empty)
+            : this(authority, scope, clientId, tokenSubjectType, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.RootId : null, null)
         {
         }
 

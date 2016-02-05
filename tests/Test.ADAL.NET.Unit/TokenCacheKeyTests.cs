@@ -11,10 +11,34 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         public void ConstructorInitCombinations()
         {
+            //no policy, user properties
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId);
             this.ValidateTokenCacheKey(key, true);
+
+            //with policy, user properties
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
+            this.ValidateTokenCacheKey(key, false);
+
+
+            User user = new User();
+            user.DisplayableId = TestConstants.DefaultDisplayableId;
+            user.UniqueId = TestConstants.DefaultUniqueId;
+            user.RootId = TestConstants.DefaultRootId;
+
+            //no policy, user object
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType, user);
+            this.ValidateTokenCacheKey(key, true);
+
+            //with policy, user object
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType, user, TestConstants.DefaultPolicy);
+            this.ValidateTokenCacheKey(key, false);
+
         }
 
         private void ValidateTokenCacheKey(TokenCacheKey key, bool policyMissing)
@@ -28,10 +52,13 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
             Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
             Assert.AreEqual(policyMissing, key.Policy == null);
+
             if (!policyMissing)
             {
-                Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy.Equals(string.Empty));
+                Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             }
         }
+
+
     }
 }
