@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.24606.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34FFBC9F-C270-4B10-98C8-F6882606DDFE}"
 EndProject
@@ -65,6 +65,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XFormsApp", "tests\TestApp\
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		tests\TestApp\AdalUniversalTestApp\AdalUniversalSample.Shared\AdalUniversalSample.Shared.projitems*{3e89ccea-0c4b-461e-95a6-a906e5583af9}*SharedItemsImports = 4
 		tests\TestApp\AdalUniversalTestApp\AdalUniversalSample.Shared\AdalUniversalSample.Shared.projitems*{cf7d7734-1856-4ce7-879a-9410ab4f45d9}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

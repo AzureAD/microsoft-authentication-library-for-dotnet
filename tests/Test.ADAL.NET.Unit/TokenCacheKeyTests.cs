@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.ADAL.NET.Unit
 {
-    [TestClass]
     public class TokenCacheKeyTests
     {
-        [TestMethod]
         public void ConstructorInitCombinations()
         {
             //no policy, user properties
@@ -58,7 +54,21 @@ namespace Test.ADAL.NET.Unit
                 Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             }
         }
+        
+        public void TestEquals()
+        {
+            TokenCacheKey key1 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
 
+            TokenCacheKey key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
 
+            Assert.IsTrue(key1.Equals(key2));
+
+            // mistmatched object
+            Assert.IsFalse(key1.Equals(new object()));
+        }
     }
 }

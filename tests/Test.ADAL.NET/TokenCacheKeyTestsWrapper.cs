@@ -14,6 +14,12 @@ namespace Test.ADAL.NET
             TokenCacheKeyTests tests = new TokenCacheKeyTests();
             tests.ConstructorInitCombinations();
         }
-        
+
+        [TestMethod]
+        public void TestEquals()
+        {
+            TokenCacheKeyTests tests = new TokenCacheKeyTests();
+            tests.TestEquals();
+        }
     }
 }
