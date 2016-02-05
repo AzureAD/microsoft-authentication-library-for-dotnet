@@ -8,14 +8,14 @@ namespace Test.ADAL.NET
     [TestClass]
     public class TokenCacheKeyTestsWrapper
     {
-        [TestMethod]
+       // [TestMethod]
         public void ConstructorInitCombinations()
         {
             TokenCacheKeyTests tests = new TokenCacheKeyTests();
             tests.ConstructorInitCombinations();
         }
 
-        [TestMethod]
+       // [TestMethod]
         public void TestEquals()
         {
             TokenCacheKeyTests tests = new TokenCacheKeyTests();

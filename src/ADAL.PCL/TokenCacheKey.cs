@@ -179,6 +179,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal bool ScopeEquals(HashSet<string> otherScope)
         {
+            if (this.Scope == null)
+            {
+                return otherScope == null;
+            }
+
+            if (otherScope == null)
+            {
+                return this.Scope == null;
+            }
+
             if (Scope.Count == otherScope.Count)
             {
                 return this.Scope.Intersect(otherScope).Count() == this.Scope.Count;
