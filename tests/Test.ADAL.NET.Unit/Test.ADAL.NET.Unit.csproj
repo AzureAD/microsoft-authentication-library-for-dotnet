@@ -87,10 +87,7 @@
       <Link>Common\TestConstants.cs</Link>
     </Compile>
     <Compile Include="..\Test.ADAL.Common\TokenCacheTests.cs">
-      <Link>Common\TokenCacheTests.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.ADAL.Common\Verify.cs">
-      <Link>Common\Verify.cs</Link>
+      <Link>TokenCacheTests.cs</Link>
     </Compile>
     <Compile Include="AuthenticationParametersTests.cs" />
     <Compile Include="NonInteractiveTests.cs" />

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -8,6 +9,7 @@ namespace Test.ADAL.NET.Unit
     public class TokenCacheKeyTests
     {
         [TestMethod]
+        [TestCategory("TokenCacheKeyTests")]
         public void ConstructorInitCombinations()
         {
             //no policy, user properties
@@ -19,7 +21,8 @@ namespace Test.ADAL.NET.Unit
             //with policy, user properties
             key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
             this.ValidateTokenCacheKey(key, false);
 
 
@@ -35,7 +38,8 @@ namespace Test.ADAL.NET.Unit
 
             //with policy, user object
             key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
-                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType, user, TestConstants.DefaultPolicy);
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType, user,
+                TestConstants.DefaultPolicy);
             this.ValidateTokenCacheKey(key, false);
 
         }
@@ -57,112 +61,204 @@ namespace Test.ADAL.NET.Unit
                 Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             }
         }
-        
+
+        [TestMethod]
+        [TestCategory("TokenCacheKeyTests")]
         public void TestEquals()
         {
             TokenCacheKey key1 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
 
             TokenCacheKey key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
             Assert.IsTrue(key1.Equals(key2));
 
             //authority
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon+"more",
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon + "more",
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
-            
+
             key2 = new TokenCacheKey(null,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             //null scope
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
                 null, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             //client id
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
-               TestConstants.DefaultScope, null, TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
+                TestConstants.DefaultScope, null, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
-               TestConstants.DefaultScope, TestConstants.DefaultClientId+"more", TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
+                TestConstants.DefaultScope, TestConstants.DefaultClientId + "more",
+                TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
 
             //token subject type
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
-               TestConstants.DefaultScope, TestConstants.DefaultClientId, TokenSubjectType.Client,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TokenSubjectType.Client,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             //unique id
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
-               TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 null, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
-               TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId+"more", TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             //displayable id
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
-               TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, null, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
-               TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId + "more", TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId + "more", TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             //root id
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
-               TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, null, TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
-               TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId + "more", TestConstants.DefaultPolicy);
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId + "more",
+                TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             //policy
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
-               TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, null);
             Assert.IsFalse(key1.Equals(key2));
 
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
-               TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy + "more");
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy + "more");
             Assert.IsFalse(key1.Equals(key2));
 
             // mistmatched object
             Assert.IsFalse(key1.Equals(new object()));
         }
 
+        [TestMethod]
+        [TestCategory("TokenCacheKeyTests")]
         public void TestScopeEquals()
         {
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
 
-            HashSet<string> otherScope = new HashSet<string>();
+            HashSet<string> otherScope = null;
+            Assert.IsFalse(key.ScopeEquals(otherScope));
 
+            otherScope = new HashSet<string>(TestConstants.DefaultScope.ToArray());
+            Assert.IsTrue(key.ScopeEquals(otherScope));
+
+            otherScope.Add("anotherscope");
+            Assert.IsFalse(key.ScopeEquals(otherScope));
+
+            otherScope.Clear();
+            Assert.IsFalse(key.ScopeEquals(otherScope));
         }
 
+        [TestMethod]
+        [TestCategory("TokenCacheKeyTests")]
+        public void TestScopeIntersects()
+        {
+            //null scope
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+                null, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
 
+            //null will intersect with null
+            HashSet<string> otherScope = null;
+            Assert.IsTrue(key.ScopeIntersects(otherScope));
+
+            //put scope value
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            Assert.IsFalse(key.ScopeIntersects(otherScope));
+
+            otherScope = new HashSet<string>(TestConstants.DefaultScope.ToArray());
+            Assert.IsTrue(key.ScopeIntersects(otherScope));
+
+            otherScope.Add("anotherscope");
+            Assert.IsTrue(key.ScopeIntersects(otherScope));
+
+            //put values in scope for the key
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+                otherScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+
+            Assert.IsTrue(key.ScopeIntersects(TestConstants.DefaultScope));
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheKeyTests")]
+        public void TestScopeContains()
+        {
+            //null scope
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+                null, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+
+            //null will contain null
+            HashSet<string> otherScope = null;
+            Assert.IsTrue(key.ScopeContains(otherScope));
+            Assert.IsFalse(key.ScopeContains(new HashSet<string>()));
+
+            //put scope value
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            Assert.IsTrue(key.ScopeContains(otherScope));
+            Assert.IsTrue(key.ScopeContains(new HashSet<string>()));
+
+            otherScope = new HashSet<string>(TestConstants.DefaultScope.ToArray());
+            Assert.IsTrue(key.ScopeContains(otherScope));
+
+            // other scope has more
+            otherScope.Add("anotherscope");
+            Assert.IsFalse(key.ScopeContains(otherScope));
+        }
     }
 }

@@ -166,6 +166,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal bool ScopeContains(HashSet<string> otherScope)
         {
+            if (this.Scope == null)
+            {
+                return otherScope == null;
+            }
+
+            if (otherScope == null)
+            {
+                return true;
+            }
+
             foreach (string otherString in otherScope)
             {
                 if (!this.Scope.Contains(otherString))
@@ -199,6 +209,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public bool ScopeIntersects(HashSet<string> otherScope)
         {
+            if (this.Scope == null)
+            {
+                return otherScope == null;
+            }
+
+            if (otherScope == null)
+            {
+                return this.Scope == null;
+            }
+
             return this.Scope.Intersect(otherScope).ToArray().Length > 0;
         }
         

@@ -299,6 +299,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (tokenNearExpiry)
                 {
+                    //TODO stop setting to null when service hardening requirements are clear
                     resultEx.Result.AccessToken = null;
                     PlatformPlugin.Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
                 }
@@ -410,19 +411,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 PlatformPlugin.Logger.Verbose(callState, "An item was updated in the cache");
             }
 
-            this.UpdateCachedMrrtRefreshTokens(result, authority, clientId, subjectType, policy);
+            this.UpdateCachedRefreshTokens(result, authority, clientId, subjectType, policy);
             this.HasStateChanged = true;
         }
 
-        private void UpdateCachedMrrtRefreshTokens(AuthenticationResultEx result, string authority, string clientId,
+        private void UpdateCachedRefreshTokens(AuthenticationResultEx result, string authority, string clientId,
             TokenSubjectType subjectType, string policy)
         {
-            if (result.Result.User != null && result.IsMultipleResourceRefreshToken)
+            if (result.Result.User != null && result.IsMultipleScopeRefreshToken)
             {
                 List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> mrrtItems =
                     this.QueryCache(authority, clientId, subjectType, result.Result.User.UniqueId,
                         result.Result.User.DisplayableId, result.Result.User.RootId, policy)
-                        .Where(p => p.Value.IsMultipleResourceRefreshToken)
+                        .Where(p => p.Value.IsMultipleScopeRefreshToken)
                         .ToList();
 
                 foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> mrrtItem in mrrtItems)
@@ -432,7 +433,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private KeyValuePair<TokenCacheKey, AuthenticationResultEx>? LoadSingleItemFromCache(string authority,
+        internal KeyValuePair<TokenCacheKey, AuthenticationResultEx>? LoadSingleItemFromCache(string authority,
             HashSet<string> scope, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId, string rootId,
             string policy, CallState callState)
         {
@@ -441,23 +442,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 subjectType, uniqueId, displayableId, rootId, policy);
 
             //using ScopeContains because user could be accessing a subset of the scope.
-            List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> resourceSpecificItems =
+            List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> scopeSpecificItems =
                 items.Where(p => p.Key.ScopeContains(scope)).ToList();
 
-            int resourceValuesCount = resourceSpecificItems.Count();
+            int scopeValuesCount = scopeSpecificItems.Count();
             KeyValuePair<TokenCacheKey, AuthenticationResultEx>? returnValue = null;
-            switch (resourceValuesCount)
+            switch (scopeValuesCount)
             {
                 case 1:
                     PlatformPlugin.Logger.Information(callState,
                         "An item matching the requested scope set was found in the cache");
-                    returnValue = resourceSpecificItems.First();
+                    returnValue = scopeSpecificItems.First();
                     break;
                 case 0:
                     {
                         // There are no resource specific tokens.  Choose any of the MRRT tokens if there are any.
                         List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> mrrtItems =
-                            items.Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
+                            items.Where(p => p.Value.IsMultipleScopeRefreshToken).ToList();
 
                         if (mrrtItems.Any())
                         {
@@ -483,11 +484,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return this.tokenCacheDictionary.Where(
                 p =>
-                    (string.IsNullOrWhiteSpace(authority) || p.Key.Authority == authority)
+                    (string.IsNullOrWhiteSpace(authority) || p.Key.Equals(p.Key.Authority, authority))
                     && (string.IsNullOrWhiteSpace(clientId) || p.Key.Equals(p.Key.ClientId, clientId))
-                    && (string.IsNullOrWhiteSpace(uniqueId) || p.Key.UniqueId == uniqueId)
+                    && (string.IsNullOrWhiteSpace(uniqueId) || p.Key.Equals(p.Key.UniqueId, uniqueId))
                     && (string.IsNullOrWhiteSpace(displayableId) || p.Key.Equals(p.Key.DisplayableId, displayableId))
-                    && (string.IsNullOrWhiteSpace(displayableId) || p.Key.Equals(p.Key.RootId, rootId))
+                    && (string.IsNullOrWhiteSpace(rootId) || p.Key.Equals(p.Key.RootId, rootId))
                     && (string.IsNullOrWhiteSpace(policy) || p.Key.Equals(p.Key.Policy, policy))
                     && p.Key.TokenSubjectType == subjectType).ToList();
         }

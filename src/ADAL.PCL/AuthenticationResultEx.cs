@@ -42,11 +42,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Gets a value indicating whether the refresh token can be used for requesting access token for other resources.
         /// </summary>
-        internal bool IsMultipleResourceRefreshToken
+        internal bool IsMultipleScopeRefreshToken
         {
             get
             {
-                return (!string.IsNullOrWhiteSpace(this.RefreshToken) && this.ScopeInResponse!=null && this.ScopeInResponse.Length > 0);
+                return (!string.IsNullOrWhiteSpace(this.RefreshToken));
+                    // && this.ScopeInResponse!=null && this.ScopeInResponse.Length > 0);
             }            
         }
 

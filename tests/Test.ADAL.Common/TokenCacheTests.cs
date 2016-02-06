@@ -21,10 +21,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Test.ADAL.NET.Unit;
 
 namespace Test.ADAL.Common.Unit
 {
-    internal class TokenCacheTests
+    [TestClass]
+    public class TokenCacheTests
     {
         public static long ValidExpiresIn = 28800;
 
@@ -40,111 +43,182 @@ namespace Test.ADAL.Common.Unit
         // Passing a seed to make repro possible
         private static readonly Random Rand = new Random(42);
 
-        public static void DefaultTokenCacheTest()
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void LoadFromCacheExpiredToken()
         {
-            var cache = TokenCache.DefaultShared;
-            cache.Clear();
-            Log.Comment("====== Verifying that cache is empty...");
-            VerifyCacheItemCount(cache, 0);
+            TokenCache cache = new TokenCache();
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            AuthenticationResultEx ex = new AuthenticationResultEx();
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow));
+            ex.RefreshToken = "someRT";
+            cache.tokenCacheDictionary[key] = ex;
 
-            const string DisplayableId = "testuser@microsoft.com";
-            Log.Comment("====== Creating a set of keys and values for the test...");
-            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts", new HashSet<string>(ValidResource), ValidClientId, TokenSubjectType.User, null, DisplayableId, null);
-            var value = CreateCacheValue(key.UniqueId, key.DisplayableId);
-            Log.Comment(string.Format("Cache Key (with User): {0}", key));
-            Log.Comment(string.Format("Cache Value 1: {0}", value));
-            TokenCacheKey key2 = new TokenCacheKey("https://localhost/MockSts", new HashSet<string>(InvalidResource), ValidClientId, TokenSubjectType.User, null, DisplayableId);
-            var value2 = CreateCacheValue(null, DisplayableId);
-            Log.Comment(string.Format("Cache Key (with User): {0}", key));
-            Log.Comment(string.Format("Cache Value 2: {0}", value2));
-            TokenCacheKey userlessKey = new TokenCacheKey("https://localhost/MockSts", new HashSet<string>(ValidResource), ValidClientId, TokenSubjectType.User, null, null);
-            var userlessValue = CreateCacheValue(null, null);
-            Log.Comment(string.Format("Cache Key (withoutUser): {0}", userlessKey));
-            Log.Comment(string.Format("Cache Value 3: {0}", userlessValue));
+            AuthenticationResultEx resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityCommon,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy, null);
+            Assert.IsNotNull(resultEx);
+            Assert.IsNotNull(resultEx.Result);
+            Assert.AreEqual(resultEx.RefreshToken, "someRT");
 
-            TokenCacheKey incorrectUserKey = new TokenCacheKey("https://localhost/MockSts", new HashSet<string>(InvalidResource), ValidClientId, TokenSubjectType.User, null, "testuser2@microsoft.com");
-
-            Log.Comment("====== Verifying that cache stores the first key/value pair...");
-            AddToDictionary(cache, key, value);
-            VerifyCacheItems(cache, 1, key);
-
-            Log.Comment("====== Verifying that the only existing value (with user) is retrieved when requested with user and NOT without...");
-            Log.Comment("Retrieving with user...");
-            var valueInCache = cache.tokenCacheDictionary[key];
-            VerifyAuthenticationResultExsAreEqual(value, valueInCache);
-            Log.Comment("Retrieving without user...");
-            cache.tokenCacheDictionary.TryGetValue(userlessKey, out valueInCache);
-            Verify.IsNull(valueInCache);
-
-            Log.Comment("====== Verifying that two entries can exist at the same time, one with user and one without...");
-            AddToDictionary(cache, userlessKey, userlessValue);
-            VerifyCacheItems(cache, 2, key, userlessKey);
-
-            Log.Comment("====== Verifying that correct values are retrieved when requested with and without user (when two entries exist)...");
-            Log.Comment("Retrieving without user...");
-            valueInCache = cache.tokenCacheDictionary[userlessKey];
-            VerifyAuthenticationResultExsAreEqual(userlessValue, valueInCache);
-            Log.Comment("Retrieving with user...");
-            valueInCache = cache.tokenCacheDictionary[key];
-            VerifyAuthenticationResultExsAreEqual(value, valueInCache);
-
-            Log.Comment("====== Verifying that correct entry is deleted when the key with user is passed...");
-            RemoveFromDictionary(cache, key);
-            VerifyCacheItems(cache, 1, userlessKey);
-
-            Log.Comment("====== Verifying that correct entry is deleted when the key without user is passed...");
-            AddToDictionary(cache, key, value);
-            RemoveFromDictionary(cache, userlessKey);
-            VerifyCacheItems(cache, 1, key);
-
-            Log.Comment("====== Verifying that correct entry is retrieve and later deleted when the key with user is passed, even if entries are in reverse order...");
-            cache.Clear();
-            Log.Comment("Storing without user first and then with user...");
-            AddToDictionary(cache, userlessKey, userlessValue);
-            AddToDictionary(cache, key2, value2);
-            valueInCache = cache.tokenCacheDictionary[key2];
-            VerifyAuthenticationResultExsAreEqual(value2, valueInCache);
-            RemoveFromDictionary(cache, key2);
-            VerifyCacheItems(cache, 1, userlessKey);
-
-            Log.Comment("====== Verifying that the userless entry is retrieved ONLY when requested without user...");
-            cache.Clear();
-            AddToDictionary(cache, userlessKey, value);
-            Log.Comment("Retrieving with user...");
-            cache.tokenCacheDictionary.TryGetValue(key, out valueInCache);
-            Verify.IsNull(valueInCache);
-            Log.Comment("Retrieving without user...");
-            valueInCache = cache.tokenCacheDictionary[userlessKey];
-            VerifyAuthenticationResultExsAreEqual(value, valueInCache);
-
-            Log.Comment("====== Verifying that entry cannot be retrieved with incorrect key...");
-            cache.Clear();
-            AddToDictionary(cache, key, value);
-            Log.Comment("Retrieving with incorrect key...");
-            cache.tokenCacheDictionary.TryGetValue(key2, out valueInCache);
-            Verify.IsNull(valueInCache);
-            Log.Comment("Retrieving with incorrect user...");
-            cache.tokenCacheDictionary.TryGetValue(incorrectUserKey, out valueInCache);
-            Verify.IsNull(valueInCache);
-            Log.Comment("Retrieving with correct user...");
-            valueInCache = cache.tokenCacheDictionary[key];
-            VerifyAuthenticationResultExsAreEqual(value, valueInCache);
-
-            Log.Comment("====== Verifying that removing items from an empty cache will not throw...");
-            Log.Comment("Clearing cache...");
-            cache.Clear();
-            Log.Comment("Storing an entry...");
-            AddToDictionary(cache, key, value);
-            VerifyCacheItemCount(cache, 1);
-            Log.Comment("Remvoing the only entry...");
-            RemoveFromDictionary(cache, key);
-            VerifyCacheItemCount(cache, 0);
-            Log.Comment("Trying to remove from an empty cache...");
-            RemoveFromDictionary(cache, key);
-            VerifyCacheItemCount(cache, 0);
         }
 
-        internal static void TokenCacheCrossTenantOperationsTest()
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void LoadFromCacheIntersectingScopeDifferentAuthorities()
+        {
+            TokenCache cache = new TokenCache();
+            loadCacheItems(cache);
+            HashSet<string> scope = new HashSet<string>(new[] { "scope1" });
+
+            AuthenticationResultEx resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityCommon,
+                scope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy, null);
+            Assert.IsNotNull(resultEx);
+            Assert.IsTrue(resultEx.Result.AccessToken.Contains(string.Format("Scope:{0},", TestConstants.DefaultScope.CreateSingleStringFromSet())));
+
+            scope.Add("unique-scope");
+            //look for intersection. only RT will be returned for refresh_token grant flow.
+            resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityCommon,
+                scope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy, null);
+            Assert.IsNotNull(resultEx);
+            Assert.IsNotNull(resultEx.Result);
+            Assert.AreEqual(resultEx.Result.ExpiresOn, DateTimeOffset.MinValue);
+            Assert.AreEqual(resultEx.RefreshToken, "someRT");
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void LoadSingleItemFromCacheMatchingScopeDifferentAuthorities()
+        {
+            TokenCache cache = new TokenCache();
+            loadCacheItems(cache);
+            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityCommon,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy, null);
+            Assert.IsNotNull(item);
+            TokenCacheKey key = item.Value.Key;
+            AuthenticationResultEx resultEx = item.Value.Value;
+
+            Assert.AreEqual(TestConstants.DefaultAuthorityCommon, key.Authority);
+            Assert.AreEqual(TestConstants.DefaultScope, key.Scope);
+            Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
+            Assert.AreEqual(TestConstants.DefaultTokenSubjectType, key.TokenSubjectType);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
+
+            Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
+        }
+
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void LoadSingleItemFromCacheIntersectingScopeDifferentAuthorities()
+        {
+            TokenCache cache = new TokenCache();
+            loadCacheItems(cache);
+            HashSet<string> scope = new HashSet<string>(new[] {"scope1"});
+
+            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityCommon,
+                scope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy, null);
+            Assert.IsNotNull(item);
+            TokenCacheKey key = item.Value.Key;
+            AuthenticationResultEx resultEx = item.Value.Value;
+
+            Assert.AreEqual(TestConstants.DefaultAuthorityCommon, key.Authority);
+            Assert.AreEqual(TestConstants.DefaultScope, key.Scope);
+            Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
+            Assert.AreEqual(TestConstants.DefaultTokenSubjectType, key.TokenSubjectType);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
+            Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
+
+            scope.Add("unique-scope");
+            item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityCommon,
+                scope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy, null);
+            Assert.IsNotNull(item);
+            key = item.Value.Key;
+            resultEx = item.Value.Value;
+
+            Assert.AreEqual(TestConstants.DefaultAuthorityCommon, key.Authority);
+            Assert.AreEqual(TestConstants.DefaultScope, key.Scope);
+            Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
+            Assert.AreEqual(TestConstants.DefaultTokenSubjectType, key.TokenSubjectType);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
+            Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
+
+
+            //invoke multiple tokens error
+            TokenCacheKey cacheKey = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId+ "more", TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            AuthenticationResultEx ex = new AuthenticationResultEx();
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
+            ex.RefreshToken = "someRT";
+            cache.tokenCacheDictionary[cacheKey] = ex;
+
+            try
+            {
+                item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityCommon,
+                    TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                    TestConstants.DefaultUniqueId, null, TestConstants.DefaultRootId,
+                    TestConstants.DefaultPolicy, null);
+                Assert.Fail("multiple tokens should have been detected");
+            }
+            catch (MsalException exception)
+            {
+                Assert.AreEqual("multiple_matching_tokens_detected", exception.ErrorCode);
+            }
+        }
+
+
+
+
+        private void loadCacheItems(TokenCache cache)
+        {
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            AuthenticationResultEx ex = new AuthenticationResultEx();
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
+            ex.RefreshToken = "someRT";
+            cache.tokenCacheDictionary[key] = ex;
+
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon+"more",
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            ex = new AuthenticationResultEx();
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
+            ex.RefreshToken = "someRT";
+            cache.tokenCacheDictionary[key] = ex;
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void CrossTenantLookupTest()
         {
             var tokenCache = new TokenCache();
             var cacheDictionary = tokenCache.tokenCacheDictionary;
@@ -155,174 +229,9 @@ namespace Test.ADAL.Common.Unit
 
         }
 
-        internal static void TokenCacheOperationsTest()
-        {
-            var tokenCache = new TokenCache();
-            var cacheDictionary = tokenCache.tokenCacheDictionary;
-
-            tokenCache.Clear();
-
-            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts/", new HashSet<string>(new[] { "resource1" }), "client1", TokenSubjectType.User, null, "user1");
-            TokenCacheKey key2 = new TokenCacheKey("https://localhost/MockSts/", new HashSet<string>(new[] { "resource1" }), "client1", TokenSubjectType.User, null, "user2");
-            TokenCacheKey key3 = new TokenCacheKey("https://localhost/MockSts/", new HashSet<string>(new[] { "resource1" }), "client1", TokenSubjectType.UserPlusClient, null, "user1");
-            Verify.AreNotEqual(key, key3);
-
-            var value = CreateCacheValue(null, "user1");
-            AuthenticationResultEx value2;
-            do
-            {
-                value2 = CreateCacheValue(null, "user2");
-            }
-            while (value2 == value);
-
-            Verify.AreEqual(0, cacheDictionary.Count);
-            AddToDictionary(tokenCache, key, value);
-            Verify.AreEqual(1, cacheDictionary.Count);
-            var valueInCache = cacheDictionary[key];
-            VerifyAuthenticationResultExsAreEqual(valueInCache, value);
-            VerifyAuthenticationResultExsAreNotEqual(valueInCache, value2);
-            cacheDictionary[key] = value2;
-            Verify.AreEqual(1, cacheDictionary.Count);
-            valueInCache = cacheDictionary[key];
-            VerifyAuthenticationResultExsAreEqual(valueInCache, value2);
-            VerifyAuthenticationResultExsAreNotEqual(valueInCache, value);
-            try
-            {
-                AddToDictionary(tokenCache, key, value);
-                Verify.Fail("Exception expected due to duplicate key");
-            }
-            catch (ArgumentException)
-            {
-                // Expected
-            }
-            
-            Log.Comment("====== Verifying that correct values are retrieved when requested for different tenant with user and without user");
-            AuthenticationResultEx resultEx = tokenCache.LoadFromCache("https://localhost/MockSts1", new HashSet<string>(new[] { "resource1" }), "client1", TokenSubjectType.User, null,
-                "user1", "root1", null, null);
-            Verify.IsNotNull(resultEx);
-            
-
-            Verify.IsTrue(RemoveFromDictionary(tokenCache, key));
-            Verify.IsFalse(RemoveFromDictionary(tokenCache, key));
-            Verify.AreEqual(0, cacheDictionary.Count);
-
-            AddToDictionary(tokenCache, key, value);
-            AddToDictionary(tokenCache, key2, value2);
-            Verify.AreEqual(2, cacheDictionary.Count);
-            Verify.AreEqual(cacheDictionary[key], value);
-            Verify.AreEqual(cacheDictionary[key2], value2);
-
-            try
-            {
-                AddToDictionary(tokenCache, null, value);
-                Verify.Fail("Exception expected due to duplicate key");
-            }
-            catch (ArgumentNullException)
-            {
-                // Expected
-            }
-
-            try
-            {
-                cacheDictionary[null] = value;
-                Verify.Fail("Exception expected due to duplicate key");
-            }
-            catch (ArgumentNullException)
-            {
-                // Expected
-            }
-
-            Verify.IsFalse(cacheDictionary.IsReadOnly);
-
-            var keys = cacheDictionary.Keys.ToList();
-            var values = cacheDictionary.Values.ToList();
-            Verify.AreEqual(2, keys.Count);
-            Verify.AreEqual(2, values.Count);
-            if (keys[0].Equals(key))
-            {
-                Verify.AreEqual(keys[1], key2);
-                Verify.AreEqual(values[0], value);
-                Verify.AreEqual(values[1], value2);
-            }
-            else
-            {
-                Verify.AreEqual(keys[0], key2);
-                Verify.AreEqual(keys[1], key);
-                Verify.AreEqual(values[0], value2);
-                Verify.AreEqual(values[1], value);
-            }
-
-            Verify.IsTrue(cacheDictionary.ContainsKey(key));
-            Verify.IsTrue(cacheDictionary.ContainsKey(key2));
-            Verify.IsFalse(cacheDictionary.ContainsKey(key3));
-
-            Verify.IsTrue(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AuthenticationResultEx>(key, value)));
-            Verify.IsTrue(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AuthenticationResultEx>(key2, value2)));
-            Verify.IsFalse(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AuthenticationResultEx>(key, value2)));
-            Verify.IsFalse(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AuthenticationResultEx>(key2, value)));
-
-            try
-            {
-                AddToDictionary(tokenCache, key, value);
-                Verify.Fail("Exception expected due to duplicate key");
-            }
-            catch (ArgumentException)
-            {
-                // Expected
-            }
-
-            AddToDictionary(tokenCache, key3, value);
-            Verify.AreEqual(3, cacheDictionary.Keys.Count);
-            Verify.IsTrue(cacheDictionary.ContainsKey(key3));
-
-            var cacheItemsCopy = new KeyValuePair<TokenCacheKey, AuthenticationResultEx>[cacheDictionary.Count + 1];
-            cacheDictionary.CopyTo(cacheItemsCopy, 1);
-            for (int i = 0; i < cacheDictionary.Count; i++)
-            {
-                Verify.AreEqual(cacheItemsCopy[i + 1].Value, cacheDictionary[cacheItemsCopy[i + 1].Key]);
-            }
-
-            try
-            {
-                cacheDictionary.CopyTo(cacheItemsCopy, 2);
-                Verify.Fail("Exception expected");
-            }
-            catch (ArgumentException)
-            {
-                // Expected
-            }
-
-            try
-            {
-                cacheDictionary.CopyTo(cacheItemsCopy, -1);
-                Verify.Fail("Exception expected");
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                // Expected
-            }
-
-            RemoveFromDictionary(tokenCache, key2);
-            Verify.AreEqual(2, cacheDictionary.Keys.Count);
-
-            foreach (var kvp in cacheDictionary)
-            {
-                Verify.IsTrue(kvp.Key.Equals(key) || kvp.Key.Equals(key3));
-                Verify.IsTrue(kvp.Value.Equals(value));
-            }
-
-            AuthenticationResultEx cacheValue;
-            Verify.IsTrue(cacheDictionary.TryGetValue(key, out cacheValue));
-            Verify.AreEqual(cacheValue, value);
-            Verify.IsTrue(cacheDictionary.TryGetValue(key3, out cacheValue));
-            Verify.AreEqual(cacheValue, value);
-            Verify.IsFalse(cacheDictionary.TryGetValue(key2, out cacheValue));
-
-            cacheDictionary.Clear();
-            Verify.AreEqual(0, cacheDictionary.Keys.Count);
-        }
-
-        internal static void TokenCacheValueSplitTest()
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void TokenCacheValueSplitTest()
         {
             var tokenCache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts", new HashSet<string>(new[] { "resourc1" }), "client1", TokenSubjectType.User, null, "user1");
@@ -339,7 +248,7 @@ namespace Test.ADAL.Common.Unit
             }
         }
 
-        public static AuthenticationResultEx CreateCacheValue(string uniqueId, string displayableId)
+        internal AuthenticationResultEx CreateCacheValue(string uniqueId, string displayableId)
         {
             string refreshToken = string.Format("RefreshToken{0}", Rand.Next());
             var result = new AuthenticationResult(null, ValidAccessToken, new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
@@ -431,7 +340,7 @@ namespace Test.ADAL.Common.Unit
         {
             return AreAuthenticationResultsEqual(resultEx1.Result, resultEx2.Result) &&
                 resultEx1.RefreshToken == resultEx2.RefreshToken &&
-                resultEx1.IsMultipleResourceRefreshToken == resultEx2.IsMultipleResourceRefreshToken;
+                resultEx1.IsMultipleScopeRefreshToken == resultEx2.IsMultipleScopeRefreshToken;
         }
 
         private static bool AreAuthenticationResultsEqual(AuthenticationResult result1, AuthenticationResult result2)
@@ -476,7 +385,7 @@ namespace Test.ADAL.Common.Unit
             return result;
         }
 
-        public static AuthenticationResultEx GenerateRandomCacheValue(int maxFieldSize)
+        internal AuthenticationResultEx GenerateRandomCacheValue(int maxFieldSize)
         {
             return new AuthenticationResultEx
             {
