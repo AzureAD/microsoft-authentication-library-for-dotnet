@@ -43,7 +43,7 @@ namespace Test.ADAL.Common
 
         internal static void Error(string message, params object[] args)
         {
-            Verify.Fail("ERROR: " + message, args);
+            Debug.WriteLine("ERROR: " + message, args);
         }
     }
 }

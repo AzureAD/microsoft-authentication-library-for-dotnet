@@ -47,13 +47,13 @@ namespace Test.ADAL.NET.Unit
                     mexDocument = XDocument.Load(stream);
                 }
 
-                Verify.IsNotNull(mexDocument);
+                Assert.IsNotNull(mexDocument);
                 WsTrustAddress wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.IntegratedAuth, null);
-                Verify.IsNotNull(wsTrustAddress);
-                Verify.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust13);
+                Assert.IsNotNull(wsTrustAddress);
+                Assert.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust13);
                 wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
-                Verify.IsNotNull(wsTrustAddress);
-                Verify.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust2005);
+                Assert.IsNotNull(wsTrustAddress);
+                Assert.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust2005);
             });
         }
         
@@ -75,26 +75,26 @@ namespace Test.ADAL.NET.Unit
                 }
                 catch (Exception ex)
                 {
-                    Verify.Fail("Not expected -- " + ex.Message);
+                    Assert.Fail("Not expected -- " + ex.Message);
                 }
             });
         }
 
         private static void VerifyUserRealmResponse(UserRealmDiscoveryResponse userRealmResponse, string expectedAccountType)
         {
-            Verify.AreEqual("1.0", userRealmResponse.Version);
-            Verify.AreEqual(userRealmResponse.AccountType, expectedAccountType);
+            Assert.AreEqual("1.0", userRealmResponse.Version);
+            Assert.AreEqual(userRealmResponse.AccountType, expectedAccountType);
             if (expectedAccountType == "Federated")
             {
-                Verify.IsNotNull(userRealmResponse.FederationActiveAuthUrl);
-                Verify.IsNotNull(userRealmResponse.FederationMetadataUrl);
-                Verify.AreEqual("WSTrust", userRealmResponse.FederationProtocol);
+                Assert.IsNotNull(userRealmResponse.FederationActiveAuthUrl);
+                Assert.IsNotNull(userRealmResponse.FederationMetadataUrl);
+                Assert.AreEqual("WSTrust", userRealmResponse.FederationProtocol);
             }
             else
             {
-                Verify.IsNull(userRealmResponse.FederationActiveAuthUrl);
-                Verify.IsNull(userRealmResponse.FederationMetadataUrl);
-                Verify.IsNull(userRealmResponse.FederationProtocol);
+                Assert.IsNull(userRealmResponse.FederationActiveAuthUrl);
+                Assert.IsNull(userRealmResponse.FederationMetadataUrl);
+                Assert.IsNull(userRealmResponse.FederationProtocol);
             }
         }
 

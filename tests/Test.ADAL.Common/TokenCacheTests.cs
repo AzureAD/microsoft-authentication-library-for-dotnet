@@ -238,13 +238,13 @@ namespace Test.ADAL.Common.Unit
 
             tokenCache.Clear();
             AddToDictionary(tokenCache, key, null);
-            Verify.AreEqual(tokenCache.tokenCacheDictionary[key], null);
+            Assert.AreEqual(tokenCache.tokenCacheDictionary[key], null);
             for (int len = 0; len < 3000; len++)
             {
                 var value = CreateCacheValue(null, "user1");
                 tokenCache.Clear();
                 AddToDictionary(tokenCache, key, value);
-                Verify.AreEqual(tokenCache.tokenCacheDictionary[key], value);
+                Assert.AreEqual(tokenCache.tokenCacheDictionary[key], value);
             }
         }
 
@@ -265,7 +265,7 @@ namespace Test.ADAL.Common.Unit
         
         private static void VerifyCacheItemCount(TokenCache cache, int expectedCount)
         {
-            Verify.AreEqual(cache.Count, expectedCount);
+            Assert.AreEqual(cache.Count, expectedCount);
         }
 
         private static void VerifyCacheItems(TokenCache cache, int expectedCount, TokenCacheKey firstKey)
@@ -276,16 +276,16 @@ namespace Test.ADAL.Common.Unit
         private static void VerifyCacheItems(TokenCache cache, int expectedCount, TokenCacheKey firstKey, TokenCacheKey secondKey)
         {
             var items = cache.ReadItems().ToList();
-            Verify.AreEqual(expectedCount, items.Count);
+            Assert.AreEqual(expectedCount, items.Count);
 
             if (firstKey != null)
             {
-                Verify.IsTrue(AreEqual(items[0], firstKey) || AreEqual(items[0], secondKey));
+                Assert.IsTrue(AreEqual(items[0], firstKey) || AreEqual(items[0], secondKey));
             }
 
             if (secondKey != null)
             {
-                Verify.IsTrue(AreEqual(items[1], firstKey) || AreEqual(items[1], secondKey));
+                Assert.IsTrue(AreEqual(items[1], firstKey) || AreEqual(items[1], secondKey));
             }
         }
 
@@ -318,22 +318,22 @@ namespace Test.ADAL.Common.Unit
 
         private static void VerifyAuthenticationResultExsAreEqual(AuthenticationResultEx resultEx1, AuthenticationResultEx resultEx2)
         {
-            Verify.IsTrue(AreAuthenticationResultExsEqual(resultEx1, resultEx2));
+            Assert.IsTrue(AreAuthenticationResultExsEqual(resultEx1, resultEx2));
         }
 
         private static void VerifyAuthenticationResultExsAreNotEqual(AuthenticationResultEx resultEx1, AuthenticationResultEx resultEx2)
         {
-            Verify.IsFalse(AreAuthenticationResultExsEqual(resultEx1, resultEx2));
+            Assert.IsFalse(AreAuthenticationResultExsEqual(resultEx1, resultEx2));
         }
 
         private static void VerifyAuthenticationResultsAreEqual(AuthenticationResult result1, AuthenticationResult result2)
         {
-            Verify.IsTrue(AreAuthenticationResultsEqual(result1, result2));
+            Assert.IsTrue(AreAuthenticationResultsEqual(result1, result2));
         }
 
         private static void VerifyAuthenticationResultsAreNotEqual(AuthenticationResult result1, AuthenticationResult result2)
         {
-            Verify.IsFalse(AreAuthenticationResultsEqual(result1, result2));
+            Assert.IsFalse(AreAuthenticationResultsEqual(result1, result2));
         }
 
         private static bool AreAuthenticationResultExsEqual(AuthenticationResultEx resultEx1, AuthenticationResultEx resultEx2)
