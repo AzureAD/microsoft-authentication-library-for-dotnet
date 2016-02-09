@@ -30,12 +30,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string TenantId = "tid";
         public const string UPN = "upn";
         public const string Email = "email";
-        public const string GivenName = "given_name";
-        public const string FamilyName = "family_name";
         public const string IdentityProvider = "idp";
         public const string Issuer = "iss";
         public const string PasswordExpiration = "pwd_exp";
         public const string PasswordChangeUrl = "pwd_url";
+        public const string Version = "ver";
+        public const string PreferredUsername = "preferred_username";
+        public const string Name = "name";
     }
 
     [DataContract]

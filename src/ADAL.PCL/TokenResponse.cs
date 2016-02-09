@@ -31,6 +31,7 @@ using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -49,12 +50,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string Error = "error";
         public const string ErrorDescription = "error_description";
         public const string ErrorCodes = "error_codes";
+        public const string CorrelationIdClaim = "correlation_id";
     }
 
     [DataContract]
     internal class TokenResponse
     {
-        private const string CorrelationIdClaim = "correlation_id";
 
         [DataMember(Name = TokenResponseClaim.TokenType, IsRequired = false)]
         public string TokenType { get; set; }
@@ -92,7 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = TokenResponseClaim.ErrorCodes, IsRequired = false)]
         public string[] ErrorCodes { get; set; }
 
-        [DataMember(Name = CorrelationIdClaim, IsRequired = false)]
+        [DataMember(Name = TokenResponseClaim.CorrelationIdClaim, IsRequired = false)]
         public string CorrelationId { get; set; }
 
         internal static TokenResponse CreateFromBrokerResponse(IDictionary<string, string> responseDictionary)
@@ -114,7 +115,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     IdTokenString = responseDictionary["id_token"],
                     TokenType = "Bearer",
                     CorrelationId = responseDictionary["correlation_id"],
-                    //TODO - Get scopes instead. Resource = responseDictionary["resource"],
+                    Scope = responseDictionary["scope"],
                     ExpiresOn = long.Parse(responseDictionary["expires_on"].Split('.')[0])
                 };
             }
@@ -130,40 +131,41 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     ErrorDescription = MsalErrorMessage.ServiceReturnedError
                 };
             }
-
-            Stream responseStream = webResponse.ResponseStream;
-
-            if (responseStream == null)
+            StringBuilder responseStreamString = new StringBuilder();
+            TokenResponse tokenResponse = null;
+            using (Stream responseStream = webResponse.ResponseStream)
             {
-                return new TokenResponse
+
+                if (responseStream == null)
                 {
-                    Error = MsalError.Unknown,
-                    ErrorDescription = MsalErrorMessage.Unknown
-                };
-            }
+                    return new TokenResponse
+                    {
+                        Error = MsalError.Unknown,
+                        ErrorDescription = MsalErrorMessage.Unknown
+                    };
+                }
 
-            TokenResponse tokenResponse;
 
-            try
-            {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(TokenResponse));
-                tokenResponse = ((TokenResponse)serializer.ReadObject(responseStream));
-
-                // Reset stream position to make it possible for application to read HttpRequestException body again
-                responseStream.Position = 0;
-            }
-            catch (SerializationException)
-            {
-                responseStream.Position = 0;
-                tokenResponse = new TokenResponse
+                try
                 {
-                    Error = (webResponse.StatusCode == HttpStatusCode.ServiceUnavailable) ?
-                        MsalError.ServiceUnavailable :
-                        MsalError.Unknown,
-                    ErrorDescription = ReadStreamContent(responseStream)
-                };
+                    responseStreamString.Append(ReadStreamContent(responseStream));
+                    using (MemoryStream ms = new MemoryStream(responseStreamString.ToByteArray()))
+                    {
+                        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(TokenResponse));
+                        tokenResponse = ((TokenResponse)serializer.ReadObject(ms));
+                    }
+                }
+                catch (SerializationException)
+                {
+                    tokenResponse = new TokenResponse
+                    {
+                        Error = (webResponse.StatusCode == HttpStatusCode.ServiceUnavailable)
+                            ? MsalError.ServiceUnavailable
+                            : MsalError.Unknown,
+                        ErrorDescription = responseStreamString.ToString()
+                    };
+                }
             }
-
             return tokenResponse;
         }
 
