@@ -47,7 +47,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return true;
         }
 
-        public bool CanInvokeBroker { get { return !WillSkipBroker() && mBrokerProxy.CanSwitchToBroker(); } }
+        //TODO - enable broker flows when authenticator apps support it
+        public bool CanInvokeBroker { get { return false && !WillSkipBroker() && mBrokerProxy.CanSwitchToBroker(); } }
 
 
         public async Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)

@@ -32,9 +32,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class DeviceAuthHelper : IDeviceAuthHelper
     {
+        //TODO - enable device auth when proxy adds support
         public bool CanHandleDeviceAuthChallenge
         {
-            get { return true; }
+            get { return false; }
         }
 
         public async Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)

@@ -35,10 +35,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         
         public IPlatformParameters PlatformParameters { get; set; }
 
+        //TODO - enable broker flows when authenticator apps support it
         public bool CanInvokeBroker { get
         {
             PlatformParameters pp = PlatformParameters as PlatformParameters;
-            return !pp.SkipBroker && UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://"));
+            return false && !pp.SkipBroker && UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://"));
         } }
 
         public async Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)

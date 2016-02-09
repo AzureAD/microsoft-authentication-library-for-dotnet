@@ -36,7 +36,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     class DeviceAuthHelper : IDeviceAuthHelper
     {
-        public bool CanHandleDeviceAuthChallenge { get { return true; } }
+        //TODO - enable device auth when proxy adds support
+        public bool CanHandleDeviceAuthChallenge { get { return false; } }
 
         public async Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
