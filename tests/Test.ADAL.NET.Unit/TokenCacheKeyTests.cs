@@ -13,13 +13,13 @@ namespace Test.ADAL.NET.Unit
         public void ConstructorInitCombinations()
         {
             //no policy, user properties
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId);
             this.ValidateTokenCacheKey(key, true);
 
             //with policy, user properties
-            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
@@ -32,12 +32,12 @@ namespace Test.ADAL.NET.Unit
             user.RootId = TestConstants.DefaultRootId;
 
             //no policy, user object
-            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType, user);
             this.ValidateTokenCacheKey(key, true);
 
             //with policy, user object
-            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType, user,
                 TestConstants.DefaultPolicy);
             this.ValidateTokenCacheKey(key, false);
@@ -47,7 +47,7 @@ namespace Test.ADAL.NET.Unit
         private void ValidateTokenCacheKey(TokenCacheKey key, bool policyMissing)
         {
             Assert.IsNotNull(key);
-            Assert.AreEqual(TestConstants.DefaultAuthorityCommon, key.Authority);
+            Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, key.Authority);
             Assert.AreEqual(TestConstants.DefaultScope, key.Scope);
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultTokenSubjectType, key.TokenSubjectType);
@@ -66,19 +66,19 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("TokenCacheKeyTests")]
         public void TestEquals()
         {
-            TokenCacheKey key1 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            TokenCacheKey key1 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
 
-            TokenCacheKey key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            TokenCacheKey key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
             Assert.IsTrue(key1.Equals(key2));
 
             //authority
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon + "more",
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant + "more",
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
@@ -91,20 +91,20 @@ namespace Test.ADAL.NET.Unit
             Assert.IsFalse(key1.Equals(key2));
 
             //null scope
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 null, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             //client id
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, null, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId + "more",
                 TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
@@ -113,55 +113,55 @@ namespace Test.ADAL.NET.Unit
 
 
             //token subject type
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TokenSubjectType.Client,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             //unique id
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 null, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             //displayable id
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, null, TestConstants.DefaultRootId, TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId + "more", TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             //root id
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, null, TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId + "more",
                 TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
             //policy
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, null);
             Assert.IsFalse(key1.Equals(key2));
 
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy + "more");
@@ -176,7 +176,7 @@ namespace Test.ADAL.NET.Unit
         public void TestScopeEquals()
         {
 
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
@@ -199,7 +199,7 @@ namespace Test.ADAL.NET.Unit
         public void TestScopeIntersects()
         {
             //null scope
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 null, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
@@ -209,7 +209,7 @@ namespace Test.ADAL.NET.Unit
             Assert.IsTrue(key.ScopeIntersects(otherScope));
 
             //put scope value
-            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
@@ -222,7 +222,7 @@ namespace Test.ADAL.NET.Unit
             Assert.IsTrue(key.ScopeIntersects(otherScope));
 
             //put values in scope for the key
-            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 otherScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
@@ -235,7 +235,7 @@ namespace Test.ADAL.NET.Unit
         public void TestScopeContains()
         {
             //null scope
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 null, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
@@ -246,7 +246,7 @@ namespace Test.ADAL.NET.Unit
             Assert.IsFalse(key.ScopeContains(new HashSet<string>()));
 
             //put scope value
-            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);

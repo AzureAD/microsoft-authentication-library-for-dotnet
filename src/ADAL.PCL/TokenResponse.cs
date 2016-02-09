@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string AccessToken = "access_token";
         public const string RefreshToken = "refresh_token";
         public const string Scope = "scope";
-        public const string FamilyOfClientId = "TO_BE_DECIDED";
+        public const string FamilyId = "fid";
         public const string IdToken = "id_token";
         public const string CreatedOn = "created_on";
         public const string ExpiresOn = "expires_on";
@@ -68,8 +68,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = TokenResponseClaim.Scope, IsRequired = false)]
         public string Scope { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.FamilyOfClientId, IsRequired = false)]
-        public string FamilyOfClientId { get; set; }
+        [DataMember(Name = TokenResponseClaim.FamilyId, IsRequired = false)]
+        public string FamilyId { get; set; }
 
         [DataMember(Name = TokenResponseClaim.IdToken, IsRequired = false)]
         public string IdTokenString { get; set; }
@@ -175,7 +175,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 DateTimeOffset expiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn);
                 var result = new AuthenticationResult(this.TokenType, this.AccessToken, expiresOn);
-                
+
+                result.FamilyId = FamilyId;
+
                 IdToken idToken = IdToken.Parse(this.IdTokenString);
                 if (idToken != null)
                 {

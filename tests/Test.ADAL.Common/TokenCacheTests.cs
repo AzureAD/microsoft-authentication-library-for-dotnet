@@ -30,16 +30,6 @@ namespace Test.ADAL.Common.Unit
     public class TokenCacheTests
     {
         public static long ValidExpiresIn = 28800;
-
-        private static string[] InvalidResource = new []{ "00000003-0000-0ff1-ce00-000000000001" };
-
-        private static string ValidClientId = "87002806-c87a-41cd-896b-84ca5690d29f";
-
-        private static string[] ValidResource = new[] { "00000003-0000-0ff1-ce00-000000000000" };
-
-        private static string ValidAccessToken =
-            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8wMDAwMDAwMS0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvIiwibmJmIjoxMzU4MjIwODkxLCJleHAiOjEzNTgyNDk2OTEsImFjciI6IjEiLCJwcm4iOiI2OWQyNDU0NC1jNDIwLTQ3MjEtYTRiZi0xMDZmMjM3OGQ5ZjYiLCJ0aWQiOiIwMDAwMDAwMS0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJpYXQiOiIxMzU4MjIwODkxIiwiYXBwaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDAiLCJhcHBpZGFjciI6IjAiLCJzY3AiOiJzYW1wbGUgc2NvcGVzIiwidiI6IjIifQ.9p6zqloui6PY31Wg6SJpgt2YS-pGWKjHd-0bw_LcuFo";
-
         // Passing a seed to make repro possible
         private static readonly Random Rand = new Random(42);
 
@@ -49,7 +39,7 @@ namespace Test.ADAL.Common.Unit
         public void LoadFromCacheExpiredToken()
         {
             TokenCache cache = new TokenCache();
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
@@ -58,12 +48,13 @@ namespace Test.ADAL.Common.Unit
             ex.RefreshToken = "someRT";
             cache.tokenCacheDictionary[key] = ex;
 
-            AuthenticationResultEx resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityCommon,
+            AuthenticationResultEx resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(resultEx);
             Assert.IsNotNull(resultEx.Result);
+            Assert.IsNull(resultEx.Result.AccessToken);
             Assert.AreEqual(resultEx.RefreshToken, "someRT");
 
         }
@@ -74,18 +65,18 @@ namespace Test.ADAL.Common.Unit
         {
             TokenCache cache = new TokenCache();
             loadCacheItems(cache);
-            HashSet<string> scope = new HashSet<string>(new[] { "scope1" });
+            HashSet<string> scope = new HashSet<string>(new[] { "r1/scope1" });
 
-            AuthenticationResultEx resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityCommon,
+            AuthenticationResultEx resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
                 scope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(resultEx);
             Assert.IsTrue(resultEx.Result.AccessToken.Contains(string.Format("Scope:{0},", TestConstants.DefaultScope.CreateSingleStringFromSet())));
 
-            scope.Add("unique-scope");
+            scope.Add("r1/unique-scope");
             //look for intersection. only RT will be returned for refresh_token grant flow.
-            resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityCommon,
+            resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
                 scope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy, null);
@@ -95,13 +86,55 @@ namespace Test.ADAL.Common.Unit
             Assert.AreEqual(resultEx.RefreshToken, "someRT");
         }
 
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void LoadFromCacheFamilyOfClientIdToken()
+        {
+            //this test will result only in a RT and no access token returned.
+            var tokenCache = new TokenCache();
+            loadCacheItems(tokenCache);
+
+            AuthenticationResultEx resultEx =
+                tokenCache.LoadFromCache(TestConstants.DefaultAuthorityGuestTenant + "non-existant",
+                    new HashSet<string>(new[] { "r1/scope1"}),
+                    TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType, null, null,
+                    TestConstants.DefaultRootId, TestConstants.DefaultPolicy, null);
+            Assert.IsNotNull(resultEx);
+            Assert.IsNotNull(resultEx.Result);
+            Assert.IsNull(resultEx.Result.AccessToken);
+            Assert.AreEqual(resultEx.Result.ExpiresOn, DateTimeOffset.MinValue);
+            Assert.AreEqual(resultEx.RefreshToken, "someRT");
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void LoadFromCacheCrossTenantToken()
+        {
+            //this test will result only in a RT and no access token returned.
+            var tokenCache = new TokenCache();
+            loadCacheItems(tokenCache);
+
+            AuthenticationResultEx resultEx =
+                tokenCache.LoadFromCache(TestConstants.DefaultAuthorityGuestTenant,
+                    new HashSet<string>(new[] { "r1/scope1", "random-scope" }),
+                    TestConstants.DefaultClientId+"more", TestConstants.DefaultTokenSubjectType, null, null,
+                    TestConstants.DefaultRootId, TestConstants.DefaultPolicy, null);
+            Assert.IsNotNull(resultEx);
+            Assert.IsNotNull(resultEx.Result);
+            Assert.IsNull(resultEx.Result.AccessToken);
+            Assert.AreEqual(resultEx.Result.ExpiresOn, DateTimeOffset.MinValue);
+            Assert.AreEqual(resultEx.RefreshToken, "someRT");
+        }
+
+
         [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void LoadSingleItemFromCacheMatchingScopeDifferentAuthorities()
         {
             TokenCache cache = new TokenCache();
             loadCacheItems(cache);
-            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityCommon,
+            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy, null);
@@ -109,7 +142,7 @@ namespace Test.ADAL.Common.Unit
             TokenCacheKey key = item.Value.Key;
             AuthenticationResultEx resultEx = item.Value.Value;
 
-            Assert.AreEqual(TestConstants.DefaultAuthorityCommon, key.Authority);
+            Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, key.Authority);
             Assert.AreEqual(TestConstants.DefaultScope, key.Scope);
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultTokenSubjectType, key.TokenSubjectType);
@@ -118,6 +151,65 @@ namespace Test.ADAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
 
+            Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
+        }
+
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void LoadSingleItemFromCacheFamilyOfClientIdTest()
+        {
+            TokenCache cache = new TokenCache();
+            loadCacheItems(cache);
+
+            //lookup is for guest tenant authority, but the RT will be returned for home tenant authority because it is participating in FoCI feature.
+            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item =
+                cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityGuestTenant,
+                    TestConstants.DefaultScope, TestConstants.DefaultClientId+"more", TestConstants.DefaultTokenSubjectType,
+                    TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                    TestConstants.DefaultPolicy, null);
+
+            Assert.IsNotNull(item);
+            TokenCacheKey key = item.Value.Key;
+            AuthenticationResultEx resultEx = item.Value.Value;
+
+            Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, key.Authority);
+            Assert.AreEqual(TestConstants.DefaultScope, key.Scope);
+            Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
+            Assert.AreEqual(TestConstants.DefaultTokenSubjectType, key.TokenSubjectType);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
+            Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
+
+        }
+
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void LoadSingleItemFromCacheNonExistantScopeDifferentAuthorities()
+        {
+            TokenCache cache = new TokenCache();
+            loadCacheItems(cache);
+            HashSet<string> scope = new HashSet<string>(new[] { "nonexistant-scope" });
+
+            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityHomeTenant,
+                scope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                null, null, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy, null);
+            Assert.IsNotNull(item);
+            TokenCacheKey key = item.Value.Key;
+            AuthenticationResultEx resultEx = item.Value.Value;
+
+            Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, key.Authority);
+            Assert.AreEqual(TestConstants.DefaultScope, key.Scope);
+            Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
+            Assert.AreEqual(TestConstants.DefaultTokenSubjectType, key.TokenSubjectType);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
         }
 
@@ -128,9 +220,9 @@ namespace Test.ADAL.Common.Unit
         {
             TokenCache cache = new TokenCache();
             loadCacheItems(cache);
-            HashSet<string> scope = new HashSet<string>(new[] {"scope1"});
+            HashSet<string> scope = new HashSet<string>(new[] {"r1/scope1"});
 
-            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityCommon,
+            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityHomeTenant,
                 scope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy, null);
@@ -138,7 +230,7 @@ namespace Test.ADAL.Common.Unit
             TokenCacheKey key = item.Value.Key;
             AuthenticationResultEx resultEx = item.Value.Value;
 
-            Assert.AreEqual(TestConstants.DefaultAuthorityCommon, key.Authority);
+            Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, key.Authority);
             Assert.AreEqual(TestConstants.DefaultScope, key.Scope);
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultTokenSubjectType, key.TokenSubjectType);
@@ -149,16 +241,17 @@ namespace Test.ADAL.Common.Unit
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
 
             scope.Add("unique-scope");
-            item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityCommon,
+            item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityHomeTenant,
                 scope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy, null);
+
             Assert.IsNotNull(item);
             key = item.Value.Key;
             resultEx = item.Value.Value;
 
-            Assert.AreEqual(TestConstants.DefaultAuthorityCommon, key.Authority);
-            Assert.AreEqual(TestConstants.DefaultScope, key.Scope);
+            Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, key.Authority);
+            Assert.AreEqual(TestConstants.DefaultScope, key.Scope); //default scope contains r1/scope1
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultTokenSubjectType, key.TokenSubjectType);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
@@ -169,7 +262,7 @@ namespace Test.ADAL.Common.Unit
 
 
             //invoke multiple tokens error
-            TokenCacheKey cacheKey = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            TokenCacheKey cacheKey = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId+ "more", TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
@@ -180,7 +273,7 @@ namespace Test.ADAL.Common.Unit
 
             try
             {
-                item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityCommon,
+                item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityHomeTenant,
                     TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                     TestConstants.DefaultUniqueId, null, TestConstants.DefaultRootId,
                     TestConstants.DefaultPolicy, null);
@@ -191,41 +284,58 @@ namespace Test.ADAL.Common.Unit
                 Assert.AreEqual("multiple_matching_tokens_detected", exception.ErrorCode);
             }
         }
-
-
-
-
+        
         private void loadCacheItems(TokenCache cache)
         {
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon,
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
+            ex.Result.User = new User { DisplayableId = TestConstants.DefaultDisplayableId, UniqueId = TestConstants.DefaultUniqueId, RootId = TestConstants.DefaultRootId };
+            ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
             cache.tokenCacheDictionary[key] = ex;
 
-            key = new TokenCacheKey(TestConstants.DefaultAuthorityCommon+"more",
-                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+            key = new TokenCacheKey(TestConstants.DefaultAuthorityGuestTenant,
+                TestConstants.ScopeForAnotherResource, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
             ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
+            ex.Result.User = new User{ DisplayableId = TestConstants.DefaultDisplayableId, UniqueId = TestConstants.DefaultUniqueId + "more", RootId = TestConstants.DefaultRootId };
             ex.RefreshToken = "someRT";
             cache.tokenCacheDictionary[key] = ex;
         }
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
-        public void CrossTenantLookupTest()
+        public void LoadSingleItemFromCacheCrossTenantLookupTest()
         {
             var tokenCache = new TokenCache();
-            var cacheDictionary = tokenCache.tokenCacheDictionary;
-            tokenCache.Clear();
+            loadCacheItems(tokenCache);
 
-            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts/", new HashSet<string>(new[]{ "resource1" }), "client1", TokenSubjectType.User, null, "user1", null);
-            AuthenticationResultEx value = CreateCacheValue(null, "user1");
+            //cross-tenant works by default. search cache using non-existant authority
+            //using root id. Code will find multiple results with the same root id. it can return any.
+            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item =
+                tokenCache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityGuestTenant + "non-existant",
+                    new HashSet<string>(new[] {"scope1", "random-scope"}),
+                    TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType, null, null,
+                    TestConstants.DefaultRootId, TestConstants.DefaultPolicy, null);
+            Assert.IsNotNull(item);
+            TokenCacheKey key = item.Value.Key;
+            AuthenticationResultEx resultEx = item.Value.Value;
+
+            Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, key.Authority);
+            Assert.AreEqual(TestConstants.DefaultScope, key.Scope);
+            Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
+            Assert.AreEqual(TestConstants.DefaultTokenSubjectType, key.TokenSubjectType);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
+            Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
 
         }
 
@@ -251,7 +361,7 @@ namespace Test.ADAL.Common.Unit
         internal AuthenticationResultEx CreateCacheValue(string uniqueId, string displayableId)
         {
             string refreshToken = string.Format("RefreshToken{0}", Rand.Next());
-            var result = new AuthenticationResult(null, ValidAccessToken, new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
+            var result = new AuthenticationResult(null, "some-access-token", new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
                 {
                     User = new User { UniqueId = uniqueId, DisplayableId = displayableId }
                 };

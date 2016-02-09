@@ -303,9 +303,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     resultEx.Result.AccessToken = null;
                     PlatformPlugin.Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
                 }
-                else if (!cacheKey.ScopeContains(scope))
+                else if (!cacheKey.ScopeContains(scope) || !authority.Equals(cacheKey.Authority) || !clientId.Equals(cacheKey.ClientId))
                 {
-                    //requested scope are not a subset.
+                    //requested scope are not a subset or authority does not match (cross-tenant RT) or client id is not same (FoCI).
                     PlatformPlugin.Logger.Verbose(callState,
                         string.Format("Refresh token for scope '{0}' will be used to acquire token for '{1}'",
                             cacheKey.Scope.CreateSingleStringFromSet(),
@@ -332,19 +332,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     PlatformPlugin.Logger.Information(callState,
                         "A matching item (access token or refresh token or both) was found in the cache");
-                }
-            }
-            else
-            {
-                PlatformPlugin.Logger.Information(callState, "No matching token was found in the cache. Looking for token of any client id");
-                kvp = this.LoadSingleItemFromCache(authority, scope,
-                null, subjectType, uniqueId, displayableId, rootId, policy, callState);
-                if (kvp.HasValue)
-                {
-                    cacheKey = kvp.Value.Key;
-                    resultEx = kvp.Value.Value;
-                    PlatformPlugin.Logger.Information(callState, string.Format("Found refresh token for cache key - {0}", cacheKey));
-                    resultEx = CreateResultExFromCacheResultEx(resultEx);
                 }
             }
 
@@ -456,20 +443,57 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     break;
                 case 0:
                     {
-                        // There are no resource specific tokens.  Choose any of the MRRT tokens if there are any.
-                        List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> mrrtItems =
-                            items.Where(p => p.Value.IsMultipleScopeRefreshToken).ToList();
+                        // There are no tokens matching all the scopes.  look for intersecting scopes.
+                        PlatformPlugin.Logger.Information(callState,
+                            "A Multi Scope Refresh Token for a different resource was found which can be used");
+                        scopeSpecificItems = items.Where(p => p.Key.ScopeIntersects(scope)).ToList();
 
-                        if (mrrtItems.Any())
+                        if (!scopeSpecificItems.Any())
                         {
-                            returnValue = mrrtItems.First();
+                            //Choose any of the MRRT tokens if there are any.
+                            scopeSpecificItems =
+                                items.Where(p => p.Value.IsMultipleScopeRefreshToken).ToList();
+
+                            if (scopeSpecificItems.Any())
+                            {
+                                returnValue = scopeSpecificItems.First();
+                                PlatformPlugin.Logger.Information(callState,
+                                    "A Multi Scope Refresh Token for a different scope was found which can be used");
+                            }
+                        }
+                        else
+                        {
+                            returnValue = scopeSpecificItems.First();
                             PlatformPlugin.Logger.Information(callState,
-                                "A Multi Scope Refresh accessToken for a different resource was found which can be used");
+                                "A Multi Scope Refresh Token for intersecting scope was found which can be used");
                         }
                     }
                     break;
                 default:
                     throw new MsalException(MsalError.MultipleTokensMatched);
+            }
+
+            // check for tokens issued to same client_id/user_id combination, but any tenant.
+            if (returnValue == null)
+            {
+                List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForAllTenants = this.QueryCache(null, clientId, subjectType, uniqueId, displayableId, rootId, policy);
+                if (itemsForAllTenants.Count > 0)
+                {
+                    returnValue = itemsForAllTenants.First();
+                }
+            }
+
+            // look for family of client id
+            if (returnValue == null)
+            {
+                // set authority and client id to null.
+                List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForFamily =
+                    this.QueryCache(null, null, subjectType, uniqueId, displayableId, rootId, policy)
+                        .Where(kvp => kvp.Value.Result != null && kvp.Value.Result.FamilyId != null).ToList();
+                if (itemsForFamily.Count > 0)
+                {
+                    returnValue = itemsForFamily.First();
+                }
             }
 
             return returnValue;

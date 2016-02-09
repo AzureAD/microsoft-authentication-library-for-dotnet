@@ -70,6 +70,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember]
         public string TenantId { get; private set; }
 
+
+        /// <summary>
+        /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is not returned by the service.
+        /// </summary>
+        [DataMember]
+        internal string FamilyId { get; set; }
+
+
         /// <summary>
         /// Gets user information including user Id. Some elements in User might be null if not returned by the service.
         /// </summary>
