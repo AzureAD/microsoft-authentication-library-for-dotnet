@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.TokenSubjectType = key.TokenSubjectType;
             this.UniqueId = key.UniqueId;
             this.DisplayableId = key.DisplayableId;
-            this.DisplayableId = key.RootId;
+            this.RootId = key.RootId;
             this.TenantId = result.TenantId;
             this.ExpiresOn = result.ExpiresOn;
             this.Token = result.AccessToken;

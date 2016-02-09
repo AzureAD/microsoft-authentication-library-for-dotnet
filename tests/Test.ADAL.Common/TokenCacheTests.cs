@@ -86,7 +86,6 @@ namespace Test.ADAL.Common.Unit
             Assert.AreEqual(resultEx.RefreshToken, "someRT");
         }
 
-
         [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void LoadFromCacheFamilyOfClientIdToken()
@@ -356,6 +355,202 @@ namespace Test.ADAL.Common.Unit
                 AddToDictionary(tokenCache, key, value);
                 Assert.AreEqual(tokenCache.tokenCacheDictionary[key], value);
             }
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void ReadItemsTest()
+        {
+            var tokenCache = new TokenCache();
+            loadCacheItems(tokenCache);
+            IEnumerable<TokenCacheItem> items = tokenCache.ReadItems();
+            Assert.AreEqual(2, items.Count());
+            Assert.AreEqual(TestConstants.DefaultUniqueId, items.Where(item => item.Authority.Equals(TestConstants.DefaultAuthorityHomeTenant)).First().UniqueId);
+            Assert.AreEqual(TestConstants.DefaultUniqueId + "more", items.Where(item => item.Authority.Equals(TestConstants.DefaultAuthorityGuestTenant)).First().UniqueId);
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void DeleteItemTest()
+        {
+            var tokenCache = new TokenCache();
+            loadCacheItems(tokenCache);
+            try
+            {
+                tokenCache.DeleteItem(null);
+                Assert.Fail("ArgumentNullException should have been thrown");
+            }
+            catch (ArgumentNullException)
+            {
+                
+            }
+            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? kvp =
+                tokenCache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityHomeTenant,
+                    TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                    TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                    TestConstants.DefaultPolicy, null);
+
+            TokenCacheItem item = new TokenCacheItem(kvp.Value.Key, kvp.Value.Value.Result);
+            tokenCache.DeleteItem(item);
+            Assert.AreEqual(1, tokenCache.Count);
+
+            IEnumerable<TokenCacheItem> items = tokenCache.ReadItems();
+            Assert.AreEqual(TestConstants.DefaultUniqueId + "more", items.Where(entry => entry.Authority.Equals(TestConstants.DefaultAuthorityGuestTenant)).First().UniqueId);
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void SerializationDeserializationTest()
+        {
+            var tokenCache1 = new TokenCache();
+            loadCacheItems(tokenCache1);
+            byte[] cacheBytes = tokenCache1.Serialize();
+            Assert.IsNotNull(cacheBytes);
+            Assert.IsTrue(cacheBytes.Length > 0);
+
+            var tokenCache2 = new TokenCache(cacheBytes);
+            Assert.AreEqual(tokenCache1.Count, tokenCache2.Count);
+            
+            foreach(TokenCacheKey key in tokenCache1.tokenCacheDictionary.Keys)
+            {
+                Assert.IsTrue(tokenCache2.tokenCacheDictionary.ContainsKey(key));
+                AuthenticationResultEx result1 = tokenCache1.tokenCacheDictionary[key];
+                AuthenticationResultEx result2 = tokenCache2.tokenCacheDictionary[key];
+
+                Assert.AreEqual(result1.RefreshToken, result2.RefreshToken);
+                Assert.AreEqual(result1.Exception, result2.Exception);
+                Assert.AreEqual(result1.IsMultipleScopeRefreshToken, result2.IsMultipleScopeRefreshToken);
+                Assert.AreEqual(result1.ScopeInResponse, result2.ScopeInResponse);
+                Assert.AreEqual(result1.Result.AccessToken, result2.Result.AccessToken);
+                Assert.AreEqual(result1.Result.FamilyId, result2.Result.FamilyId);
+                Assert.AreEqual(result1.Result.AccessTokenType, result2.Result.AccessTokenType);
+                Assert.AreEqual(result1.Result.IdToken, result2.Result.IdToken);
+                Assert.AreEqual(result1.Result.User.DisplayableId, result2.Result.User.DisplayableId);
+                Assert.AreEqual(result1.Result.User.UniqueId, result2.Result.User.UniqueId);
+                Assert.AreEqual(result1.Result.User.RootId, result2.Result.User.RootId);
+                Assert.AreEqual(result1.Result.User.PasswordChangeUrl, result2.Result.User.PasswordChangeUrl);
+                Assert.AreEqual(result1.Result.User.IdentityProvider, result2.Result.User.IdentityProvider);
+                Assert.IsTrue(AreDateTimeOffsetsEqual(result1.Result.ExpiresOn, result2.Result.ExpiresOn));
+            }
+        }
+
+
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void DeserializationNullAndEmptyBlobTest()
+        {
+            var tokenCache = new TokenCache(null);
+            Assert.IsNotNull(tokenCache);
+            Assert.IsNotNull(tokenCache.Count);
+
+            tokenCache = new TokenCache(new byte[] {});
+            Assert.IsNotNull(tokenCache);
+            Assert.IsNotNull(tokenCache.Count);
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void StoreToCacheIntersectingScopesTest()
+        {
+            var tokenCache = new TokenCache();
+            loadCacheItems(tokenCache);
+
+            //save result with intersecting scopes
+            var result = new AuthenticationResult("Bearer", "some-access-token", new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
+            {
+                User = new User { UniqueId = TestConstants.DefaultUniqueId, DisplayableId = TestConstants.DefaultDisplayableId }
+            };
+
+            AuthenticationResultEx resultEx = new AuthenticationResultEx
+            {
+                Result = result,
+                RefreshToken = "someRT"
+            };
+
+            tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityHomeTenant,
+                new HashSet<string>(new string[] {"r1/scope1", "r1/scope5"}), TestConstants.DefaultClientId,
+                TestConstants.DefaultTokenSubjectType, TestConstants.DefaultPolicy, null);
+
+            Assert.AreEqual(2, tokenCache.Count);
+            AuthenticationResultEx resultExOut = 
+                tokenCache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
+                new HashSet<string>(new string[] {"r1/scope5"}), TestConstants.DefaultClientId, 
+                TestConstants.DefaultTokenSubjectType, null, null, null, TestConstants.DefaultPolicy, null);
+
+            Assert.AreEqual(resultEx.RefreshToken, resultExOut.RefreshToken);
+            Assert.AreEqual(resultEx.Result.AccessToken, resultExOut.Result.AccessToken);
+            Assert.AreEqual(resultEx.Result.AccessTokenType, resultExOut.Result.AccessTokenType);
+            Assert.AreEqual(resultEx.Result.User.UniqueId, resultExOut.Result.User.UniqueId);
+            Assert.AreEqual(resultEx.Result.User.DisplayableId, resultExOut.Result.User.DisplayableId);
+            Assert.AreEqual(resultEx.Result.User.RootId, resultExOut.Result.User.RootId);
+        }
+
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void StoreToCacheClientCredentialTest()
+        {
+            var tokenCache = new TokenCache();
+            loadCacheItems(tokenCache);
+            
+            var result = new AuthenticationResult("Bearer", "some-access-token", new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
+            {
+                User = null
+            };
+
+            AuthenticationResultEx resultEx = new AuthenticationResultEx
+            {
+                Result = result,
+                RefreshToken = null
+            };
+
+            //scope should not intersect with existing entry because it is a different token subject type.
+            tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityHomeTenant,
+                new HashSet<string>(new string[] { "r1/scope1" }), TestConstants.DefaultClientId,
+                TokenSubjectType.Client, TestConstants.DefaultPolicy, null);
+
+            Assert.AreEqual(3, tokenCache.Count);
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void StoreToCacheUniqueScopesTest()
+        {
+            var tokenCache = new TokenCache();
+            tokenCache.AfterAccess = null;
+            tokenCache.BeforeAccess = null;
+            tokenCache.BeforeWrite = null;
+            loadCacheItems(tokenCache);
+
+            //save result with intersecting scopes
+            var result = new AuthenticationResult("Bearer", "some-access-token", new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
+            {
+                User = new User { UniqueId = TestConstants.DefaultUniqueId, DisplayableId = TestConstants.DefaultDisplayableId }
+            };
+
+            AuthenticationResultEx resultEx = new AuthenticationResultEx
+            {
+                Result = result,
+                RefreshToken = "someRT"
+            };
+
+            tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityHomeTenant,
+                new HashSet<string>(new string[] { "r1/scope5", "r1/scope7" }), TestConstants.DefaultClientId,
+                TestConstants.DefaultTokenSubjectType, TestConstants.DefaultPolicy, null);
+
+            Assert.AreEqual(3, tokenCache.Count);
+            AuthenticationResultEx resultExOut =
+                tokenCache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
+                new HashSet<string>(new string[] { "r1/scope5" }), TestConstants.DefaultClientId,
+                TestConstants.DefaultTokenSubjectType, null, null, null, TestConstants.DefaultPolicy, null);
+
+            Assert.AreEqual(resultEx.RefreshToken, resultExOut.RefreshToken);
+            Assert.AreEqual(resultEx.Result.AccessToken, resultExOut.Result.AccessToken);
+            Assert.AreEqual(resultEx.Result.AccessTokenType, resultExOut.Result.AccessTokenType);
+            Assert.AreEqual(resultEx.Result.User.UniqueId, resultExOut.Result.User.UniqueId);
+            Assert.AreEqual(resultEx.Result.User.DisplayableId, resultExOut.Result.User.DisplayableId);
+            Assert.AreEqual(resultEx.Result.User.RootId, resultExOut.Result.User.RootId);
         }
 
         internal AuthenticationResultEx CreateCacheValue(string uniqueId, string displayableId)

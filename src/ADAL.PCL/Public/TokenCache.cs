@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="state">State of the cache as a blob</param>
         public void Deserialize(byte[] state)
         {
-            if (state == null)
+            if (state == null || state.Length == 0)
             {
                 this.tokenCacheDictionary.Clear();
                 return;
