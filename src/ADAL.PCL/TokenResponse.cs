@@ -135,7 +135,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             TokenResponse tokenResponse = null;
             using (Stream responseStream = webResponse.ResponseStream)
             {
-
                 if (responseStream == null)
                 {
                     return new TokenResponse
@@ -144,7 +143,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         ErrorDescription = MsalErrorMessage.Unknown
                     };
                 }
-
 
                 try
                 {
@@ -166,6 +164,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     };
                 }
             }
+
             return tokenResponse;
         }
 
