@@ -64,11 +64,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(), MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
         }
 
-        protected AbstractClientApplication(string authority, string clientId, string redirectUri)
+        protected AbstractClientApplication(string authority, string clientId, string redirectUri, bool validateAuthority)
         {
             this.Authority = authority;
             this.ClientId = clientId;
             this.RedirectUri = redirectUri;
+            // If authorityType is not provided (via first constructor), we validate by default (except for ASG and Office tenants).
+            this.Authenticator = new Authenticator(authority, validateAuthority);
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string[] scope, ClientKey clientKey, string userId, IPlatformParameters parameters, string policy)

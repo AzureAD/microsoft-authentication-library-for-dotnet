@@ -66,11 +66,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (UseDefaultCredentials)
             {
-                return await GetResponseAsync(clientForUsingCredential.Value);
+                return await GetResponseAsync(clientForUsingCredential.Value).ConfigureAwait(false);
             }
             else
             {
-                return await GetResponseAsync(clientWithoutCredential.Value);
+                return await GetResponseAsync(clientWithoutCredential.Value).ConfigureAwait(false);
             }
         }
 

@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
         }
 
-        public PublicClientApplication(string authority):base(authority, DEFAULT_CLIENT_ID, DEFAULT_REDIRECT_URI)
+        public PublicClientApplication(string authority):base(authority, DEFAULT_CLIENT_ID, DEFAULT_REDIRECT_URI, true)
         {
         }
         
@@ -53,8 +53,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="authority"></param>
+        /// <param name="policy"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthAsync(string[] scope, string authority)
+        public async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthAsync(string[] scope, string authority, string policy)
         {
             return null;
         }

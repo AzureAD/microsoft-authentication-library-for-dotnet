@@ -39,14 +39,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public Authenticator(string authority, bool validateAuthority)
         {
             this.Authority = CanonicalizeUri(authority);
-
             this.AuthorityType = DetectAuthorityType(this.Authority);
-
-            if (this.AuthorityType != AuthorityType.AAD && validateAuthority)
-            {
-                throw new ArgumentException(MsalErrorMessage.UnsupportedAuthorityValidation, "validateAuthority");
-            }
-
             this.ValidateAuthority = validateAuthority;
         }
 
@@ -126,6 +119,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             string firstPath = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
             AuthorityType authorityType = IsAdfsAuthority(firstPath) ? AuthorityType.ADFS : AuthorityType.AAD;
+
+            if (authorityType == AuthorityType.ADFS)
+            {
+                throw new ArgumentException(MsalErrorMessage.AuthorityNotSupported, "authority");
+            }
 
             return authorityType;
         }

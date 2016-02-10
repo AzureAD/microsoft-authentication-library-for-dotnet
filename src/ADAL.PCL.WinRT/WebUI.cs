@@ -54,11 +54,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 if (ssoMode)
                 {
-                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri);
+                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri).AsTask().ConfigureAwait(false);
                 }
                 else
                 { 
-                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri, redirectUri);
+                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri, redirectUri).AsTask().ConfigureAwait(false);
                 }
             }
             catch (FileNotFoundException ex)

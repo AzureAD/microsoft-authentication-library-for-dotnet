@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     PersistedKeyProvider.OpenKeyPairFromCertificateAsync(certificate, HashAlgorithmNames.Sha256,
                         CryptographicPadding.RsaPkcs1V15);
 
-            IBuffer signed = await CryptographicEngine.SignAsync(keyPair, input);
+            IBuffer signed = await CryptographicEngine.SignAsync(keyPair, input).AsTask().ConfigureAwait(false);
 
             string signedJwt = string.Format("{0}.{1}", response.GetResponseToSign(),
                 Base64UrlEncoder.Encode(signed.ToArray()));
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
 
                     query.IssuerName = distinguishedIssuerName;
-                    certificates = await CertificateStores.FindAllAsync(query);
+                    certificates = await CertificateStores.FindAllAsync(query).AsTask().ConfigureAwait(false);
                     if (certificates.Count > 0)
                     {
                         break;
@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 errMessage = "Cert Thumbprint:" + challengeData["CertThumbprint"];
                 PlatformPlugin.Logger.Verbose(null, "Looking up certificate matching thumbprint:" + challengeData["CertThumbprint"]);
                 query.Thumbprint = HexStringToByteArray(challengeData["CertThumbprint"]);
-                certificates = await CertificateStores.FindAllAsync(query);
+                certificates = await CertificateStores.FindAllAsync(query).AsTask().ConfigureAwait(false);
             }
 
             if (certificates == null || certificates.Count == 0)
