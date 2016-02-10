@@ -93,8 +93,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 requestMessage.Headers.Add(OAuthHeader.CorrelationId, this.CallState.CorrelationId.ToString());
                 requestMessage.Headers.Add(OAuthHeader.RequestCorrelationIdInResponse, "true");
             }
+            
+            if(client.Timeout != TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds))
+            {
+                client.Timeout = TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds);
+            }
 
-            client.Timeout = TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds);
             HttpResponseMessage responseMessage;
 
             try

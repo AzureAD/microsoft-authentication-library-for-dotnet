@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Will be a default value. Can be overriden by the developer.
         /// </summary>
-        public string ClientId { get; set; }
+        public string ClientId { get; private set; }
 
         /// <summary>
         /// Redirect Uri configured in the portal. Will have a default value. Not required, if the developer is using the default client ID.

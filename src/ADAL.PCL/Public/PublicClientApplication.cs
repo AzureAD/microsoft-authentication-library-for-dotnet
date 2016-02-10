@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     public sealed class PublicClientApplication : AbstractClientApplication
     {
         private const string DEFAULT_CLIENT_ID = "default-client-id";
-        private const string DEFAULT_REDIRECT_URI = "default-redirect-uri";
+        private const string DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
 
         /// <summary>
         /// Default consutructor of the application. It is here to emphasise the lack of parameters.
@@ -23,7 +23,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public PublicClientApplication(string authority):base(authority, DEFAULT_CLIENT_ID, DEFAULT_REDIRECT_URI, true)
         {
         }
-        
+
+        public PublicClientApplication(string authority, string clientId) : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
+        {
+        }
+
         /// <summary>
         /// .NET specific property that allows configuration of platform specific properties. For example, in iOS/Android it would include the flag to enable/disable broker.
         /// </summary>
@@ -45,7 +49,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthAsync(string[] scope)
         {
-            return null;
+            return
+                await
+                    this.AcquireTokenUsingIntegratedAuthCommonAsync(this.Authenticator, scope, this.ClientId,
+                        new UserCredential(), null).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -57,7 +64,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthAsync(string[] scope, string authority, string policy)
         {
-            return null;
+            Authenticator localAuthenticator = new Authenticator(this.Authority, this.ValidateAuthority);
+            return
+                await
+                    this.AcquireTokenUsingIntegratedAuthCommonAsync(localAuthenticator, scope, this.ClientId,
+                        new UserCredential(), null).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -166,30 +177,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return null;
         }
-
-        //what about device code methods?
-        //TODO we should look at them later.
-
-
-
+        
         internal IWebUI CreateWebAuthenticationDialog(IPlatformParameters parameters)
         {
             return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parameters);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(string[] scope, string clientId, UserCredential userCredential, string policy)
+        private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(Authenticator authenticator, string[] scope, string clientId, UserCredential userCredential, string policy)
         {
-            var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, scope, clientId, userCredential, policy);
+            var handler = new AcquireTokenNonInteractiveHandler(authenticator, this.TokenCache, scope, clientId, userCredential, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string[] scope, string clientId, UserAssertion userAssertion, string policy)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string clientId, UserAssertion userAssertion, string policy)
         {
-            var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, scope, clientId, userAssertion, policy);
+            var handler = new AcquireTokenNonInteractiveHandler(authenticator, this.TokenCache, scope, clientId, userAssertion, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string[] scope, string[] additionalScope, string clientId, Uri redirectUri, string loginHint, string extraQueryParameters, string policy)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string[] additionalScope, string clientId, Uri redirectUri, string loginHint, string extraQueryParameters, string policy)
         {
             var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, scope, additionalScope, clientId, redirectUri, this.PlatformParameters, loginHint, extraQueryParameters, policy, this.CreateWebAuthenticationDialog(this.PlatformParameters));
             return await handler.RunAsync().ConfigureAwait(false);

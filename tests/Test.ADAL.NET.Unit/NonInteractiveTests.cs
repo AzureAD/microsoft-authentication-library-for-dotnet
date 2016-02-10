@@ -65,7 +65,7 @@ namespace Test.ADAL.NET.Unit
         {
             await Task.Factory.StartNew(() =>
             {
-                UserCredential cred = new UserCredential("user", "pass&<>\"'");
+                UserCredential cred = new UserCredential("user");
                 StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto",
                     new WsTrustAddress {Uri = new Uri("resource")}, cred);
                 try
