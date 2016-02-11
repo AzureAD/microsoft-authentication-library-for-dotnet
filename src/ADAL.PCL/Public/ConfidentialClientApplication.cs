@@ -36,13 +36,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope)
        {
            return null;
-        }
+       }
 
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string authority)
         {
             return null;
         }
-
+        
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId)
         {
             return null;
@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return null;
         }
 
-        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string[] scope, string authorizationCode)
+        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string[] scope, string authorizationCode, string policy)
         {
             return null;
         }
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return null;
         }
 
-        public async Task<Uri> GetAuthorizationRequestURL(string[] scope, string redirectUri, string userId, string extraQueryParameters, string[] additionalScope, string authority)
+        public async Task<Uri> GetAuthorizationRequestURL(string[] scope, string redirectUri, string userId, string extraQueryParameters, string[] additionalScope, string authority, string policy)
         {
             return null;
         }

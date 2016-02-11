@@ -32,8 +32,6 @@ namespace TestApp.PCL
         public MobileAppSts()
         {
             this.InvalidAuthority = "https://invalid_address.com/path";
-            this.InvalidClientId = "87002806-c87a-41cd-896b-84ca5690d29e";
-            this.InvalidResource = "00000003-0000-0ff1-ce00-000000000001";
             this.ValidateAuthority = true;
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
             this.ValidExpiresIn = 28800;
@@ -42,7 +40,7 @@ namespace TestApp.PCL
             string[] segments = this.ValidLoggedInFederatedUserName.Split(new[] { '\\' });
             this.ValidLoggedInFederatedUserId = string.Format("{0}@microsoft.com", (segments.Length == 2) ? segments[1] : segments[0]);
 
-            this.TenantName = "<REPLACE>";
+            this.TenantName = "Common";
             this.Authority = string.Format("https://login.windows.net/{0}", this.TenantName);
             this.TenantlessAuthority = "https://login.windows.net/Common";
             this.ValidClientId = "dd9caee2-38bd-484e-998c-7529bdef220f";
@@ -53,7 +51,7 @@ namespace TestApp.PCL
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
             this.ValidRedirectUriForConfidentialClient = new Uri("https://confidential.foobar.com");
             this.ValidPassword = "<REPLACE>";
-            this.ValidScope = new[] {"https://graph.windows.net"};
+            this.ValidScope = new[] {"https://graph.microsoft.com/user.read"};
 
         }
 
@@ -69,7 +67,7 @@ namespace TestApp.PCL
         {
             try
             {
-                app = new PublicClientApplication(sts.Authority);
+                app = new PublicClientApplication("https://login.windows.net/common", "7c7a2f70-caef-45c8-9a6c-091633501de4");
                 var result = await app.AcquireTokenSilentAsync(sts.ValidScope, sts.ValidUserName);
 
                 return result.AccessToken;
@@ -82,12 +80,12 @@ namespace TestApp.PCL
             }
         }
 
-        public async Task<string> GetTokenInteractiveAsync(IPlatformParameters parameters)
+        public async Task<string> GetTokenIntegratedAuthAsync()
         {
             try
             {
-                app = new AuthenticationContext(sts.Authority, true);
-                var result = await app.AcquireTokenAsync(sts.ValidScope, sts.ValidUserName, parameters);
+                app = new PublicClientApplication(sts.Authority, "7c7a2f70-caef-45c8-9a6c-091633501de4");
+                var result = await app.AcquireTokenWithIntegratedAuthAsync(sts.ValidScope);
                 return result.AccessToken;
             }
             catch (Exception ex)
@@ -102,10 +100,11 @@ namespace TestApp.PCL
         {
             try
             {
-                app = new AuthenticationContext(Sts.Authority, true);
+/*                app = new AuthenticationContext(Sts.Authority, true);
                 var result = await app.AcquireTokenAsync(Sts.ValidScope, Sts.ValidClientId, null, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
 
-                return result.AccessToken;
+                return result.AccessToken;*/
+                return null;
             }
             catch (Exception ex)
             {
@@ -117,10 +116,11 @@ namespace TestApp.PCL
         {
             try
             {
-                app = new AuthenticationContext(Sts.Authority, true);
+/*                app = new AuthenticationContext(Sts.Authority, true);
                 var result = await app.AcquireTokenAsync(Sts.ValidScope, Sts.ValidClientId, new UserCredential(Sts.ValidUserName, Sts.ValidPassword));
 
-                return result.AccessToken;
+                return result.AccessToken;*/
+                return null;
             }
             catch (Exception ex)
             {
@@ -132,10 +132,11 @@ namespace TestApp.PCL
         {
             try
             {
-                app = new AuthenticationContext(Sts.Authority, true);
+/*                app = new AuthenticationContext(Sts.Authority, true);
                 var result = await app.AcquireTokenAsync(Sts.ValidScope, new ClientCredential(Sts.ValidConfidentialClientId, Sts.ValidConfidentialClientSecret));
 
-                return result.AccessToken;
+                return result.AccessToken;*/
+                return null;
             }
             catch (Exception ex)
             {
