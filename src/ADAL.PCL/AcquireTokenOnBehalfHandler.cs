@@ -17,12 +17,16 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.ServiceModel;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class AcquireTokenOnBehalfHandler : AcquireTokenHandlerBase
     {
         private readonly UserAssertion userAssertion;
+        private readonly string assertionHash;
 
         public AcquireTokenOnBehalfHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserAssertion userAssertion)
             : base(authenticator, tokenCache, resource, clientKey, TokenSubjectType.UserPlusClient)
@@ -34,8 +38,46 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.userAssertion = userAssertion;
             this.DisplayableId = userAssertion.UserName;
+            this.assertionHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(userAssertion.Assertion);
 
             this.SupportADFS = true;
+        }
+
+        protected override AuthenticationResultEx ValidateResult(AuthenticationResultEx resultEx)
+        {
+            // cache lookup returned a token. no username provided in the assertion. 
+            // cannot deterministicly identify the user. fallback to compare hash. 
+            if (resultEx != null && string.IsNullOrEmpty(userAssertion.UserName))
+            {
+                //if cache result does not contain hash then return null
+                if (!string.IsNullOrEmpty(resultEx.UserAssertionHash))
+                {
+                    //if user assertion hash does not match then return null
+                    if (!resultEx.UserAssertionHash.Equals(assertionHash))
+                    {
+                        resultEx = null;
+                    }
+                }
+                else
+                {
+                    resultEx = null;
+                }
+            }
+
+            //return as is if it is null or provided userAssertion contains username
+            return resultEx;
+        }
+
+
+        protected override async Task<AuthenticationResultEx> SendTokenRequestAsync()
+        {
+            AuthenticationResultEx resultEx = await base.SendTokenRequestAsync();
+            if (resultEx != null)
+            {
+                resultEx.UserAssertionHash = this.assertionHash;
+            }
+
+            return resultEx;
         }
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)

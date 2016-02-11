@@ -31,7 +31,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private readonly TokenCache tokenCache;
         protected readonly IDictionary<string, string> brokerParameters;
 
-        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, TokenSubjectType subjectType)
+
+        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string resource,
+            ClientKey clientKey, TokenSubjectType subjectType)
         {
             this.Authenticator = authenticator;
             this.CallState = CreateCallState(this.Authenticator.CorrelationId);
@@ -102,6 +104,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     notifiedBeforeAccessCache = true;
 
                     resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.CallState);
+                    resultEx = this.ValidateResult(resultEx);
+
                     if (resultEx != null && resultEx.Result.AccessToken == null && resultEx.RefreshToken != null)
                     {
                         resultEx = await this.RefreshAccessTokenAsync(resultEx);
@@ -167,6 +171,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.NotifyAfterAccessCache();
                 }
             }
+        }
+
+
+        protected virtual AuthenticationResultEx ValidateResult(AuthenticationResultEx resultEx)
+        {
+            return resultEx;
         }
 
         protected virtual void UpdateBrokerParameters(IDictionary<string, string> parameters)
