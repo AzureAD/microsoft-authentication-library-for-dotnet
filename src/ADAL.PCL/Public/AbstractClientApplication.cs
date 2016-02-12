@@ -97,15 +97,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.Authenticator = new Authenticator(authority, validateAuthority);
         }
 
-        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string[] scope, ClientKey clientKey, string userId, IPlatformParameters parameters, string policy)
+        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator, string[] scope, ClientKey clientKey, string userId, IPlatformParameters parameters, string policy)
         {
-            var handler = new AcquireTokenSilentHandler(this.Authenticator, this.TokenCache, scope, clientKey, userId,  parameters, policy);
+            var handler = new AcquireTokenSilentHandler(authenticator, this.TokenCache, scope, clientKey, userId,  parameters, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string[] scope, ClientKey clientKey, User user, IPlatformParameters parameters, string policy)
+        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator, string[] scope, ClientKey clientKey, User user, IPlatformParameters parameters, string policy)
         {
-            var handler = new AcquireTokenSilentHandler(this.Authenticator, this.TokenCache, scope, clientKey, user, parameters, policy);
+            var handler = new AcquireTokenSilentHandler(authenticator, this.TokenCache, scope, clientKey, user, parameters, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

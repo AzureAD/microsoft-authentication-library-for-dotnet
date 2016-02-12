@@ -70,7 +70,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope)
         {
-            return null;
+            return await this.AcquireTokenSilentCommonAsync(this.Authenticator, scope, new ClientKey(this.ClientId), (User)null, this.PlatformParameters, null).ConfigureAwait(false);
+
         }
 
         /// <summary>
@@ -81,7 +82,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId)
         {
-            return null;
+            return await this.AcquireTokenSilentCommonAsync(this.Authenticator, scope, new ClientKey(this.ClientId), userId, this.PlatformParameters, null).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -90,9 +91,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="scope"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userId)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier)
         {
-            return null;
+            return await this.AcquireTokenSilentCommonAsync(this.Authenticator, scope, new ClientKey(this.ClientId), userIdentifier, this.PlatformParameters, null).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -102,10 +103,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="userId"></param>
         /// <param name="authority"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userId,
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier,
             string authority, string policy)
         {
-            return null;
+            Authenticator localAuthenticator = new Authenticator(this.Authority, this.ValidateAuthority);
+            return await this.AcquireTokenSilentCommonAsync(localAuthenticator, scope, new ClientKey(this.ClientId), userIdentifier, this.PlatformParameters, null).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -118,7 +120,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId,
             string authority, string policy)
         {
-            return null;
+            Authenticator localAuthenticator = new Authenticator(this.Authority, this.ValidateAuthority);
+            return await this.AcquireTokenSilentCommonAsync(localAuthenticator, scope, new ClientKey(this.ClientId), userId, this.PlatformParameters, null).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -167,6 +170,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string identifier,
             UiOptions options, string extraQueryParameters, string[] additionalScope, string authority)
         {
+            Authenticator localAuthenticator = new Authenticator(this.Authority, this.ValidateAuthority);
             return null;
         }
         
