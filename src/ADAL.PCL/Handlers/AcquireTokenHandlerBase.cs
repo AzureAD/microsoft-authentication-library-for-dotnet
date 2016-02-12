@@ -174,6 +174,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 await this.PostRunAsync(resultEx.Result).ConfigureAwait(false);
+
+                resultEx.Result.User.TokenCache = this.tokenCache;
                 return resultEx.Result;
             }
             catch (Exception ex)

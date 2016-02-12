@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.RootId = key.RootId;
             this.TenantId = result.TenantId;
             this.ExpiresOn = result.ExpiresOn;
-            this.Token = result.AccessToken;
+            this.AccessToken = result.AccessToken;
             this.User = result.User;
             this.Policy = key.Policy;
 
@@ -111,9 +111,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string RootId { get; internal set; }
 
         /// <summary>
-        ///     Gets the Access Token requested.
+        ///     Gets the Access AccessToken requested.
         /// </summary>
-        public string Token { get; internal set; }
+        public string AccessToken { get; internal set; }
 
         /// <summary>
         ///     Gets the entire Profile Info if returned by the service or null if no Id Token is returned.

@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="args">Arguments related to the cache item impacted</param>
         public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
 
-        private const int SchemaVersion = 4;
+        private const int SchemaVersion = 1;
         private const string Delimiter = ":::";
         // We do not want to return near expiry tokens, this is why we use this hard coded setting to refresh tokens which are close to expiration.
         private const int ExpirationMarginInMinutes = 5;
@@ -193,7 +193,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         ///     Reads a copy of the list of all items in the cache.
         /// </summary>
         /// <returns>The items in the cache</returns>
-        public virtual IEnumerable<TokenCacheItem> ReadItems()
+        internal IEnumerable<TokenCacheItem> ReadItems()
         {
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
             this.OnBeforeAccess(args);
@@ -210,7 +210,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         ///     Deletes an item from the cache.
         /// </summary>
         /// <param name="item">The item to delete from the cache</param>
-        public virtual void DeleteItem(TokenCacheItem item)
+        internal void DeleteItem(TokenCacheItem item)
         {
             if (item == null)
             {
@@ -226,6 +226,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 ClientId = item.ClientId,
                 UniqueId = item.UniqueId,
                 DisplayableId = item.DisplayableId,
+                RootId = item.RootId,
                 Policy = item.Policy
             };
 

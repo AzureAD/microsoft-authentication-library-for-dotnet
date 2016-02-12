@@ -33,14 +33,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public IPlatformParameters PlatformParameters { get; set; }
 
-        /// <summary>
-        /// Returns a User centric view over the cache that provides a list of all the signed in users.
-        /// </summary>
-        public IEnumerable<User> GetUsers(string identifier)
-        {
-            return null;
-        }
-
         //TODO look into adding user identifier when domain cannot be queried or privacy settings are against you
         /// <summary>
         /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
@@ -68,7 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return
                 await
                     this.AcquireTokenUsingIntegratedAuthCommonAsync(localAuthenticator, scope, this.ClientId,
-                        new UserCredential(), null).ConfigureAwait(false);
+                        new UserCredential(), policy).ConfigureAwait(false);
         }
 
         /// <summary>

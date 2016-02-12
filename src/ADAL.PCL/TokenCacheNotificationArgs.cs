@@ -63,5 +63,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Gets the policy.
         /// </summary>
         public string Policy { get; internal set; }
+
+        public string RootId { get; internal set; }
     }
 }

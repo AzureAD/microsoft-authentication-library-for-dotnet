@@ -1,5 +1,7 @@
 ﻿
 using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -56,6 +58,28 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             set { this.Authenticator.ValidateAuthority = value; }
+        }
+
+
+        /// <summary>
+        /// Returns a User centric view over the cache that provides a list of all the signed in users.
+        /// </summary>
+        public IEnumerable<User> GetUsers()
+        {
+            List <User> users = new List<User>();
+            if (this.TokenCache == null || this.TokenCache.Count == 0)
+            {
+                PlatformPlugin.Logger.Information(null, "AccessToken cache is null or empty");
+                return users;
+            }
+            IEnumerable<TokenCacheItem> allItems = this.TokenCache.ReadItems();
+            IEnumerable<string> uniqueIds = allItems.Select(item => item.UniqueId).Distinct();
+            foreach(string uniqueId in uniqueIds)
+            {
+                users.Add(allItems.Where(item => !string.IsNullOrEmpty(item.UniqueId) && item.UniqueId.Equals(uniqueId)).First().User);
+            }
+
+            return users;
         }
 
         static AbstractClientApplication()

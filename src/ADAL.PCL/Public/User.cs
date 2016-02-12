@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -36,14 +38,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     [DataContract]
     public sealed class User
     {
+        
         internal User()
-        {            
+        {
+            
         }
 
         internal User(User other)
         {
             this.UniqueId = other.UniqueId;
             this.DisplayableId = other.DisplayableId;
+            this.RootId = other.RootId;
             this.GivenName = other.GivenName;
             this.FamilyName = other.FamilyName;
             this.IdentityProvider = other.IdentityProvider;
@@ -93,8 +98,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember]
         public string IdentityProvider { get; internal set; }
 
-        
         [DataMember]
         internal string RootId { get; set; }
+
+
+        internal TokenCache TokenCache { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void SignOut()
+        {
+            if(this.TokenCache == null) { return; }
+
+            IEnumerable<TokenCacheItem> items = this.TokenCache.ReadItems().Where(item => item.RootId.Equals(this.RootId));
+            foreach(var item in items)
+            {
+                this.TokenCache.DeleteItem(item);
+            }
+        }
     }
 }

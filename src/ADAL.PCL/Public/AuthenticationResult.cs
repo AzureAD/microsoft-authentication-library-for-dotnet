@@ -35,9 +35,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Creates result returned from AcquireToken. Except in advanced scenarios related to token caching, you do not need to create any instance of AuthenticationResult.
         /// </summary>
-        /// <param name="accessTokenType">Type of the Access Token returned</param>
-        /// <param name="accessToken">The Access Token requested</param>
-        /// <param name="expiresOn">The point in time in which the Access Token returned in the AccessToken property ceases to be valid</param>
+        /// <param name="accessTokenType">Type of the Access AccessToken returned</param>
+        /// <param name="accessToken">The Access AccessToken requested</param>
+        /// <param name="expiresOn">The point in time in which the Access AccessToken returned in the AccessToken property ceases to be valid</param>
         internal AuthenticationResult(string accessTokenType, string accessToken, DateTimeOffset expiresOn)
         {
             this.AccessTokenType = accessTokenType;
@@ -46,19 +46,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Gets the type of the Access Token returned. 
+        /// Gets the type of the Access AccessToken returned. 
         /// </summary>
         [DataMember]
         public string AccessTokenType { get; private set; }
 
         /// <summary>
-        /// Gets the Access Token requested.
+        /// Gets the Access AccessToken requested.
         /// </summary>
         [DataMember]
         public string AccessToken { get; internal set; }
 
         /// <summary>
-        /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid.
+        /// Gets the point in time in which the Access AccessToken returned in the AccessToken property ceases to be valid.
         /// This value is calculated based on current UTC time measured locally and the value expiresIn received from the service.
         /// </summary>
         [DataMember]
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public User User { get; internal set; }
 
         /// <summary>
-        /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
+        /// Gets the entire Id AccessToken if returned by the service or null if no Id AccessToken is returned.
         /// </summary>
         [DataMember]
         public string IdToken { get; internal set; }
