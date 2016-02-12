@@ -91,5 +91,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         internal Exception Exception { get; set; }
+        
+        [DataMember]
+        public string UserAssertionHash { get; set; }
     }
 }
