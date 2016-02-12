@@ -35,9 +35,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private readonly string _extraQueryParameters;
         private readonly IWebUI _webUi;
         private readonly string _loginHint;
+        private readonly UiOptions _uiOptions;
 
         public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope,
-            string[] additionalScope, string clientId, Uri redirectUri, IPlatformParameters parameters, string loginHint, string extraQueryParameters, string policy, IWebUI webUI)
+            string[] additionalScope, string clientId, Uri redirectUri, IPlatformParameters parameters, string loginHint, UiOptions uiOptions, string extraQueryParameters, string policy, IWebUI webUI)
             : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, TokenSubjectType.User)
         {
             this._redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
@@ -66,6 +67,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this._extraQueryParameters = extraQueryParameters;
             this._webUi = webUI;
+            this._uiOptions = uiOptions;
             this.LoadFromCache = tokenCache != null;
             this.SupportADFS = true;
 

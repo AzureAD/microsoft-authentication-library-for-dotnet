@@ -112,6 +112,9 @@
     <Compile Include="..\ADAL.Common\AdalEventSource.cs">
       <Link>AdalEventSource.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\PublicClientApplicationExtensions.cs">
+      <Link>PublicClientApplicationExtensions.cs</Link>
+    </Compile>	
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
