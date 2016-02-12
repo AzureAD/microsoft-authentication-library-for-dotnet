@@ -436,7 +436,7 @@ namespace Test.ADAL.Common.Unit
 
             for (int i = 0; i < MaxItemCount; i++)
             {
-                keys[i] = GenerateRandomTokenCacheKey(MaxFieldSize);
+                keys[i] = GenerateRandomTokenCacheKey();
 
                 values[i] = CreateCacheValue(null, null);
                 AddToDictionary(tokenCache, keys[i], values[i]);
@@ -457,7 +457,17 @@ namespace Test.ADAL.Common.Unit
             tokenCache.Clear();
         }
 
-        internal static void TokenCacheValueSplitTest()
+        public static void TokenCacheBackCompatTest(byte[] oldcache)
+         {
+             TokenCache cache = new TokenCache(oldcache);
+             Verify.IsNotNull(cache);
+             foreach (var value in cache.tokenCacheDictionary.Values)
+             {
+                 Verify.IsNull(value.UserAssertionHash);
+             }
+         }
+
+internal static void TokenCacheValueSplitTest()
         {
             var tokenCache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts", "resourc1", "client1", TokenSubjectType.User, null, "user1");
@@ -486,14 +496,19 @@ namespace Test.ADAL.Common.Unit
                 tokenCache.Clear();
                 for (int count = 0; count < Rand.Next(1, MaxItemCount); count++)
                 {
-                    TokenCacheKey key = GenerateRandomTokenCacheKey(MaxFieldSize);
+                    TokenCacheKey key = GenerateRandomTokenCacheKey();
 
-                    AuthenticationResult result = GenerateRandomCacheValue(MaxFieldSize);
+                    AuthenticationResult result = GenerateRandomCacheValue(MaxFieldSize, key.UniqueId, key.DisplayableId);
                     AddToDictionary(tokenCache, key, result);
                 }
 
                 byte[] serializedCache = tokenCache.Serialize();
-                tokenCache.Deserialize(serializedCache);
+                TokenCache cache2  = new TokenCache(serializedCache);
+                               foreach (var key in tokenCache.tokenCacheDictionary.Keys)
+                                    {
+                    AuthenticationResult result2 = cache2.tokenCacheDictionary[key];
+                    VerifyAuthenticationResultsAreEqual(tokenCache.tokenCacheDictionary[key], result2);
+                                    }
             }
         }
 
@@ -587,6 +602,7 @@ namespace Test.ADAL.Common.Unit
             return (AreStringsEqual(result1.AccessToken, result2.AccessToken)
                     && AreStringsEqual(result1.AccessTokenType, result2.AccessTokenType)
                     && AreStringsEqual(result1.IdToken, result2.IdToken)
+                    && result1.UserAssertionHash == result2.UserAssertionHash
                     && result1.IsMultipleResourceRefreshToken == result2.IsMultipleResourceRefreshToken
                     && AreStringsEqual(result1.RefreshToken, result2.RefreshToken)
                     && AreStringsEqual(result1.TenantId, result2.TenantId)
@@ -627,17 +643,17 @@ namespace Test.ADAL.Common.Unit
             return result;
         }
 
-        private static TokenCacheKey GenerateRandomTokenCacheKey(int maxFieldSize)
+        private static TokenCacheKey GenerateRandomTokenCacheKey()
         {
-            return new TokenCacheKey(GenerateRandomString(maxFieldSize),
-                GenerateRandomString(maxFieldSize),
-                GenerateRandomString(maxFieldSize),
+            return new TokenCacheKey(Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(),
                 TokenSubjectType.User,
-                GenerateRandomString(maxFieldSize),
-                GenerateRandomString(maxFieldSize));
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString());
         }
 
-        public static AuthenticationResult GenerateRandomCacheValue(int maxFieldSize)
+        public static AuthenticationResult GenerateRandomCacheValue(int maxFieldSize, string uniqueId, string displayableId)
         {
             string refreshToken = GenerateRandomString(maxFieldSize);
             return new AuthenticationResult(
@@ -646,7 +662,7 @@ namespace Test.ADAL.Common.Unit
                 GenerateRandomString(maxFieldSize), 
                 new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)))
                 {
-                    UserInfo = new UserInfo { UniqueId = GenerateRandomString(maxFieldSize), DisplayableId = GenerateRandomString(maxFieldSize) }
+                    UserInfo = new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId }
                 };
         }
     }

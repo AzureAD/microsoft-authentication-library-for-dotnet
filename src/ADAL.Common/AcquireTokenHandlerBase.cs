@@ -93,7 +93,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    result = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.CallState);
+                    result = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Resource,
+                        this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId,
+                        this.CallState);
+                    result = this.ValidateResult(result);
+
                     if (result != null && result.AccessToken == null && result.RefreshToken != null)
                     {
                         result = await this.RefreshAccessTokenAsync(result);
@@ -137,6 +141,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.NotifyAfterAccessCache();
                 }
             }
+        }
+
+        protected virtual AuthenticationResult ValidateResult(AuthenticationResult result)
+        {
+            return result;
         }
 
         public static CallState CreateCallState(Guid correlationId, bool callSync)
