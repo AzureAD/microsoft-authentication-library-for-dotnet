@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 PlatformPlugin.Logger.Information(null, "AccessToken cache is null or empty");
                 return users;
             }
-            IEnumerable<TokenCacheItem> allItems = this.TokenCache.ReadItems();
+            IEnumerable<TokenCacheItem> allItems = this.TokenCache.ReadItems(this.ClientId);
             IEnumerable<string> uniqueIds = allItems.Select(item => item.UniqueId).Distinct();
             foreach(string uniqueId in uniqueIds)
             {

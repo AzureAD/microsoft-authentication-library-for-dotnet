@@ -193,13 +193,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         ///     Reads a copy of the list of all items in the cache.
         /// </summary>
         /// <returns>The items in the cache</returns>
-        internal IEnumerable<TokenCacheItem> ReadItems()
+        internal IEnumerable<TokenCacheItem> ReadItems(string clientId)
         {
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
             this.OnBeforeAccess(args);
 
             List<TokenCacheItem> items =
-                this.tokenCacheDictionary.Select(kvp => new TokenCacheItem(kvp.Key, kvp.Value.Result)).ToList();
+                this.tokenCacheDictionary.Where(kvp=>kvp.Key.ClientId.Equals(clientId)).Select(kvp => new TokenCacheItem(kvp.Key, kvp.Value.Result)).ToList();
 
             this.OnAfterAccess(args);
 
