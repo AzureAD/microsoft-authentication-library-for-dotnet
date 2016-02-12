@@ -147,5 +147,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this.UserInfo = new UserInfo(userInfo);
             }
         }
+
+        [DataMember]
+        internal String UserAssertionHash { get; set; }
     }
 }
