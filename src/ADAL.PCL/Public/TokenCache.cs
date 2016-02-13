@@ -358,9 +358,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             newResultEx.Result.UpdateTenantAndUser(resultEx.Result.TenantId, resultEx.Result.IdToken,
                 resultEx.Result.User);
 
-            newResultEx.Result.User.Authority = key.Authority;
-            newResultEx.Result.User.ClientId = key.ClientId;
-            newResultEx.Result.User.TokenCache = this;
+            if (newResultEx.Result.User != null)
+            {
+                newResultEx.Result.User.Authority = key.Authority;
+                newResultEx.Result.User.ClientId = key.ClientId;
+                newResultEx.Result.User.TokenCache = this;
+            }
 
             return newResultEx;
         }
