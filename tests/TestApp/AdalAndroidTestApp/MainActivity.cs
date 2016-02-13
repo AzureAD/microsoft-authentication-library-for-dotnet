@@ -54,7 +54,7 @@ namespace AdalAndroidTestApp
 
             sts.Authority = "https://login.microsoftonline.com/common";
             sts.ValidClientId = "b92e0ba5-f86e-4411-8e18-6b5f928d968a";
-            sts.ValidScope = "https://msdevex-my.sharepoint.com";
+            sts.ValidScope = new [] { "https://msdevex-my.sharepoint.com"};
             sts.ValidUserName = "mam@msdevex.onmicrosoft.com";
 
             EditText email = FindViewById<EditText>(Resource.Id.email);

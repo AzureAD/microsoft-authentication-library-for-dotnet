@@ -51,11 +51,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }            
         }
 
-        // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
-        // to get it from the STS response.
+        // This is needed for all flows now because we can get more scopes than requested.
         [DataMember]
-        internal string[] ScopeInResponse { get; set; }
-
+        public HashSet<string> ScopeInResponse { get; set; }
 
         /// <summary>
         /// Serializes the object to a JSON string

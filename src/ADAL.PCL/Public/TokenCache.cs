@@ -317,7 +317,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             cacheKey.Scope.CreateSingleStringFromSet(),
                             scope.CreateSingleStringFromSet()));
                     
-                    resultEx = CreateResultExFromCacheResultEx(resultEx);
+                    resultEx = CreateResultExFromCacheResultEx(cacheKey, resultEx);
                 }
                 else
                 {
@@ -326,6 +326,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
                 }
 
+                // client credential tokens do not have associated refresh tokens.
                 if (resultEx.Result.AccessToken == null && resultEx.RefreshToken == null)
                 {
                     this.tokenCacheDictionary.Remove(cacheKey);
@@ -345,7 +346,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
 
-        private AuthenticationResultEx CreateResultExFromCacheResultEx(AuthenticationResultEx resultEx)
+        private AuthenticationResultEx CreateResultExFromCacheResultEx(TokenCacheKey key, AuthenticationResultEx resultEx)
         {
             var newResultEx = new AuthenticationResultEx
             {
@@ -357,11 +358,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             newResultEx.Result.UpdateTenantAndUser(resultEx.Result.TenantId, resultEx.Result.IdToken,
                 resultEx.Result.User);
 
+            newResultEx.Result.User.Authority = key.Authority;
+            newResultEx.Result.User.ClientId = key.ClientId;
+            newResultEx.Result.User.TokenCache = this;
+
             return newResultEx;
         }
 
 
-        internal void StoreToCache(AuthenticationResultEx result, string authority, HashSet<string> scope, string clientId,
+        internal void StoreToCache(AuthenticationResultEx result, string authority, string clientId,
             TokenSubjectType subjectType, string policy, CallState callState)
         {
             PlatformPlugin.Logger.Verbose(callState, "Storing token in the cache...");
@@ -371,20 +376,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.OnBeforeWrite(new TokenCacheNotificationArgs
             {
-                Scope = scope,
+                Scope = result.ScopeInResponse,
                 ClientId = clientId,
                 UniqueId = uniqueId,
                 DisplayableId = displayableId,
                 Policy = policy
             });
 
-            TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, scope, clientId, subjectType,
+            TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, result.ScopeInResponse, clientId, subjectType,
                 result.Result.User, policy);
             // First identify all potential tokens.
             List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> items = this.QueryCache(authority, clientId,
                 subjectType, uniqueId, displayableId, rootId, policy);
             List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsToRemove =
-                items.Where(p => p.Key.ScopeIntersects(scope)).ToList();
+                items.Where(p => p.Key.ScopeIntersects(result.ScopeInResponse)).ToList();
 
             if (!itemsToRemove.Any())
             {

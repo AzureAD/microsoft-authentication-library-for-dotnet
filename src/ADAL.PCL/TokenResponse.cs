@@ -42,15 +42,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string AccessToken = "access_token";
         public const string RefreshToken = "refresh_token";
         public const string Scope = "scope";
-        public const string FamilyId = "fid";
+        public const string FamilyId = "foci";
         public const string IdToken = "id_token";
-        public const string CreatedOn = "created_on";
-        public const string ExpiresOn = "expires_on";
         public const string ExpiresIn = "expires_in";
         public const string Error = "error";
         public const string ErrorDescription = "error_description";
         public const string ErrorCodes = "error_codes";
-        public const string CorrelationIdClaim = "correlation_id";
+        public const string CorrelationId = "correlation_id";
     }
 
     [DataContract]
@@ -75,12 +73,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = TokenResponseClaim.IdToken, IsRequired = false)]
         public string IdTokenString { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.CreatedOn, IsRequired = false)]
-        public long CreatedOn { get; set; }
-
-        [DataMember(Name = TokenResponseClaim.ExpiresOn, IsRequired = false)]
-        public long ExpiresOn { get; set; }
-
         [DataMember(Name = TokenResponseClaim.ExpiresIn, IsRequired = false)]
         public long ExpiresIn { get; set; }
 
@@ -93,7 +85,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = TokenResponseClaim.ErrorCodes, IsRequired = false)]
         public string[] ErrorCodes { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.CorrelationIdClaim, IsRequired = false)]
+        [DataMember(Name = TokenResponseClaim.CorrelationId, IsRequired = false)]
         public string CorrelationId { get; set; }
 
         internal static TokenResponse CreateFromBrokerResponse(IDictionary<string, string> responseDictionary)
@@ -103,20 +95,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 return new TokenResponse
                 {
                     Error = responseDictionary[TokenResponseClaim.Error],
-                    ErrorDescription = responseDictionary[TokenResponseClaim.ErrorDescription]
+                    ErrorDescription = responseDictionary[TokenResponseClaim.ErrorDescription],
+                    CorrelationId = responseDictionary[TokenResponseClaim.CorrelationId]
                 };
             }
             else
             {
                 return new TokenResponse
                 {
-                    AccessToken = responseDictionary["access_token"],
-                    RefreshToken = responseDictionary["refresh_token"],
-                    IdTokenString = responseDictionary["id_token"],
-                    TokenType = "Bearer",
-                    CorrelationId = responseDictionary["correlation_id"],
-                    Scope = responseDictionary["scope"],
-                    ExpiresOn = long.Parse(responseDictionary["expires_on"].Split('.')[0])
+                    AccessToken = responseDictionary[TokenResponseClaim.AccessToken],
+                    RefreshToken = responseDictionary[TokenResponseClaim.RefreshToken],
+                    IdTokenString = responseDictionary[TokenResponseClaim.IdToken],
+                    TokenType = responseDictionary[TokenResponseClaim.TokenType],
+                    CorrelationId = responseDictionary[TokenResponseClaim.CorrelationId],
+                    Scope = responseDictionary[TokenResponseClaim.Scope],
                 };
             }
         }
@@ -170,7 +162,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public AuthenticationResultEx GetResult()
         {
-            AuthenticationResultEx resultEx;
+            AuthenticationResultEx resultEx = null;
 
             if (this.AccessToken != null)
             {
@@ -184,7 +176,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     string tenantId = idToken.TenantId;
                     string uniqueId = null;
-                    string displayableId = null;
 
                     if (!string.IsNullOrWhiteSpace(idToken.ObjectId))
                     {
@@ -194,41 +185,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     {
                         uniqueId = idToken.Subject;
                     }
-
-                    if (!string.IsNullOrWhiteSpace(idToken.UPN))
-                    {
-                        displayableId = idToken.UPN;
-                    }
-                    else if (!string.IsNullOrWhiteSpace(idToken.Email))
-                    {
-                        displayableId = idToken.Email;
-                    }
-
-                    string givenName = idToken.GivenName;
-                    string familyName = idToken.FamilyName;
-                    string identityProvider = idToken.IdentityProvider ?? idToken.Issuer;
-                    DateTimeOffset? passwordExpiresOffest = null;
-                    if (idToken.PasswordExpiration > 0)
-                    {
-                        passwordExpiresOffest = DateTime.UtcNow + TimeSpan.FromSeconds(idToken.PasswordExpiration);
-                    }
-
-                    Uri changePasswordUri = null;
-                    if (!string.IsNullOrEmpty(idToken.PasswordChangeUrl))
-                    {
-                        changePasswordUri = new Uri(idToken.PasswordChangeUrl);
-                    }
-
-                    result.UpdateTenantAndUser(tenantId, this.IdTokenString, new User { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider, PasswordExpiresOn = passwordExpiresOffest, PasswordChangeUrl = changePasswordUri });
+                    
+                    result.UpdateTenantAndUser(tenantId, this.IdTokenString,
+                        new User
+                        {
+                            UniqueId = uniqueId,
+                            DisplayableId = idToken.PreferredUsername,
+                            RootId = idToken.RootId,
+                            Name = idToken.Name,
+                            IdentityProvider = idToken.Issuer
+                        });
                 }
 
                 resultEx = new AuthenticationResultEx
                 {
                     Result = result,
                     RefreshToken = this.RefreshToken,
-                    // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
-                    // to get it from the STS response.
-                    ScopeInResponse = Scope.CreateArrayFromSingleString()
+                    // this is needed by all flows because we can get more scopes than actually requested
+                    ScopeInResponse = Scope.CreateSetFromSingleString()
                 };
             }
             else if (this.Error != null)

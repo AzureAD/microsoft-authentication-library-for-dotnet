@@ -465,11 +465,11 @@ namespace Test.ADAL.Common.Unit
             AuthenticationResultEx resultEx = new AuthenticationResultEx
             {
                 Result = result,
-                RefreshToken = "someRT"
+                RefreshToken = "someRT",
+                ScopeInResponse = new HashSet<string>(new string[] { "r1/scope1", "r1/scope5" })
             };
 
-            tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityHomeTenant,
-                new HashSet<string>(new string[] {"r1/scope1", "r1/scope5"}), TestConstants.DefaultClientId,
+            tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultClientId,
                 TestConstants.DefaultTokenSubjectType, TestConstants.DefaultPolicy, null);
 
             Assert.AreEqual(2, tokenCache.Count);
@@ -502,12 +502,12 @@ namespace Test.ADAL.Common.Unit
             AuthenticationResultEx resultEx = new AuthenticationResultEx
             {
                 Result = result,
-                RefreshToken = null
+                RefreshToken = null,
+                ScopeInResponse = new HashSet<string>(new string[] { "r1/scope1" })
             };
 
             //scope should not intersect with existing entry because it is a different token subject type.
-            tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityHomeTenant,
-                new HashSet<string>(new string[] { "r1/scope1" }), TestConstants.DefaultClientId,
+            tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultClientId,
                 TokenSubjectType.Client, TestConstants.DefaultPolicy, null);
 
             Assert.AreEqual(3, tokenCache.Count);
@@ -532,11 +532,11 @@ namespace Test.ADAL.Common.Unit
             AuthenticationResultEx resultEx = new AuthenticationResultEx
             {
                 Result = result,
-                RefreshToken = "someRT"
+                RefreshToken = "someRT",
+                ScopeInResponse = new HashSet<string>(new string[] { "r1/scope5", "r1/scope7" })
             };
 
-            tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityHomeTenant,
-                new HashSet<string>(new string[] { "r1/scope5", "r1/scope7" }), TestConstants.DefaultClientId,
+            tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultClientId,
                 TestConstants.DefaultTokenSubjectType, TestConstants.DefaultPolicy, null);
 
             Assert.AreEqual(3, tokenCache.Count);
@@ -657,7 +657,7 @@ namespace Test.ADAL.Common.Unit
                     && (result1.User == null || result2.User == null ||
                         (AreStringsEqual(result1.User.DisplayableId, result2.User.DisplayableId)
                         && AreStringsEqual(result1.User.FamilyName, result2.User.FamilyName)
-                        && AreStringsEqual(result1.User.GivenName, result2.User.GivenName)
+                        && AreStringsEqual(result1.User.Name, result2.User.Name)
                         && AreStringsEqual(result1.User.IdentityProvider, result2.User.IdentityProvider)
                         && result1.User.PasswordChangeUrl == result2.User.PasswordChangeUrl
                         && result1.User.PasswordExpiresOn == result2.User.PasswordExpiresOn

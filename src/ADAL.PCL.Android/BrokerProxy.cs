@@ -321,7 +321,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return new User
             {
                 UniqueId = userid,
-                GivenName = givenName,
+                Name = givenName,
                 FamilyName = familyName,
                 IdentityProvider = identityProvider,
                 DisplayableId = displayableId
@@ -648,7 +648,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     UniqueId = userInfoBundle
                     .GetString(BrokerConstants.AccountUserInfoUserId),
-                    GivenName = userInfoBundle
+                    Name = userInfoBundle
                                 .GetString(BrokerConstants.AccountUserInfoGivenName),
                     FamilyName = userInfoBundle
                                 .GetString(BrokerConstants.AccountUserInfoFamilyName),

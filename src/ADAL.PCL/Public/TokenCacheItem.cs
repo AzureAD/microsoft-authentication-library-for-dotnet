@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (result.User!= null)
             {
-                this.Name = result.User.GivenName;
+                this.Name = result.User.Name;
             }
         }
 

@@ -25,25 +25,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class IdTokenClaim
     {
+        public const string Issuer = "iss";
         public const string ObjectId = "oid";
         public const string Subject = "sub";
         public const string TenantId = "tid";
-        public const string UPN = "upn";
-        public const string Email = "email";
-        public const string GivenName = "given_name";
-        public const string FamilyName = "family_name";
-        public const string IdentityProvider = "idp";
-        public const string Issuer = "iss";
-        public const string PasswordExpiration = "pwd_exp";
-        public const string PasswordChangeUrl = "pwd_url";
         public const string Version = "ver";
         public const string PreferredUsername = "preferred_username";
         public const string Name = "name";
+        public const string RootId = "root_id";
     }
 
     [DataContract]
     internal class IdToken
     {
+        [DataMember(Name = IdTokenClaim.Issuer, IsRequired = false)]
+        public string Issuer { get; set; }
+
         [DataMember(Name = IdTokenClaim.ObjectId, IsRequired = false)]
         public string ObjectId { get; set; }
 
@@ -53,29 +50,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = IdTokenClaim.TenantId, IsRequired = false)]
         public string TenantId { get; set; }
 
-        [DataMember(Name = IdTokenClaim.UPN, IsRequired = false)]
-        public string UPN { get; set; }
+        [DataMember(Name = IdTokenClaim.Version, IsRequired = false)]
+        public string Version { get; set; }
 
-        [DataMember(Name = IdTokenClaim.GivenName, IsRequired = false)]
-        public string GivenName { get; set; }
+        [DataMember(Name = IdTokenClaim.PreferredUsername, IsRequired = false)]
+        public string PreferredUsername { get; set; }
 
-        [DataMember(Name = IdTokenClaim.FamilyName, IsRequired = false)]
-        public string FamilyName { get; set; }
+        [DataMember(Name = IdTokenClaim.Name, IsRequired = false)]
+        public string Name { get; set; }
 
-        [DataMember(Name = IdTokenClaim.Email, IsRequired = false)]
-        public string Email { get; set; }
-
-        [DataMember(Name = IdTokenClaim.PasswordExpiration, IsRequired = false)]
-        public long PasswordExpiration { get; set; }
-
-        [DataMember(Name = IdTokenClaim.PasswordChangeUrl, IsRequired = false)]
-        public string PasswordChangeUrl { get; set; }
-
-        [DataMember(Name = IdTokenClaim.IdentityProvider, IsRequired = false)]
-        public string IdentityProvider { get; set; }
-
-        [DataMember(Name = IdTokenClaim.Issuer, IsRequired = false)]
-        public string Issuer { get; set; }
+        [DataMember(Name = IdTokenClaim.RootId, IsRequired = false)]
+        public string RootId { get; set; }
 
         public static IdToken Parse(string idToken)
         {

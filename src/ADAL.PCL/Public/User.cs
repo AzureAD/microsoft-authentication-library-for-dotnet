@@ -49,11 +49,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.UniqueId = other.UniqueId;
             this.DisplayableId = other.DisplayableId;
             this.RootId = other.RootId;
-            this.GivenName = other.GivenName;
-            this.FamilyName = other.FamilyName;
-            this.IdentityProvider = other.IdentityProvider;
-            this.PasswordChangeUrl = other.PasswordChangeUrl;
-            this.PasswordExpiresOn = other.PasswordExpiresOn;
+            this.Name = other.Name;
             this.ClientId = other.ClientId;
             this.TokenCache = other.TokenCache;
         }
@@ -74,7 +70,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Gets given name of the user if provided by the service. If not, the value is null. 
         /// </summary>
         [DataMember]
-        public string GivenName { get; internal set; }
+        public string Name { get; internal set; }
 
         /// <summary>
         /// Gets family name of the user if provided by the service. If not, the value is null. 
@@ -106,7 +102,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal TokenCache TokenCache { get; set; }
 
-        internal string ClientId { get; set; }
+        public string ClientId { get; set; }
+
+        public string Authority { get; set; }
 
 
         /// <summary>

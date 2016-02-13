@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         resultEx = await this.RefreshAccessTokenAsync(resultEx).ConfigureAwait(false);
                         if (resultEx != null)
                         {
-                            this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.Policy, this.CallState);
+                            this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.TokenSubjectType, this.Policy, this.CallState);
                         }
                     }
                 }
@@ -169,7 +169,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             notifiedBeforeAccessCache = true;
                         }
 
-                        this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.Policy, this.CallState);
+                        this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.TokenSubjectType, this.Policy, this.CallState);
                     }
                 }
 
