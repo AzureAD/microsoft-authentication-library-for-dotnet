@@ -428,7 +428,6 @@ namespace Test.ADAL.Common.Unit
                 Assert.AreEqual(result1.Result.User.DisplayableId, result2.Result.User.DisplayableId);
                 Assert.AreEqual(result1.Result.User.UniqueId, result2.Result.User.UniqueId);
                 Assert.AreEqual(result1.Result.User.RootId, result2.Result.User.RootId);
-                Assert.AreEqual(result1.Result.User.PasswordChangeUrl, result2.Result.User.PasswordChangeUrl);
                 Assert.AreEqual(result1.Result.User.IdentityProvider, result2.Result.User.IdentityProvider);
                 Assert.IsTrue(AreDateTimeOffsetsEqual(result1.Result.ExpiresOn, result2.Result.ExpiresOn));
             }
@@ -656,11 +655,8 @@ namespace Test.ADAL.Common.Unit
                     && AreStringsEqual(result1.TenantId, result2.TenantId)
                     && (result1.User == null || result2.User == null ||
                         (AreStringsEqual(result1.User.DisplayableId, result2.User.DisplayableId)
-                        && AreStringsEqual(result1.User.FamilyName, result2.User.FamilyName)
                         && AreStringsEqual(result1.User.Name, result2.User.Name)
                         && AreStringsEqual(result1.User.IdentityProvider, result2.User.IdentityProvider)
-                        && result1.User.PasswordChangeUrl == result2.User.PasswordChangeUrl
-                        && result1.User.PasswordExpiresOn == result2.User.PasswordExpiresOn
                         && result1.User.UniqueId == result2.User.UniqueId)));
         }
 
