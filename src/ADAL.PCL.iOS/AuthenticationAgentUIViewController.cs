@@ -32,16 +32,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly string url;
         private readonly string callback;
-
+        private readonly IDictionary<string, string> additionalHeaders;
         private readonly ReturnCodeCallback callbackMethod;
 
         public delegate void ReturnCodeCallback(AuthorizationResult result);
 
-        public AuthenticationAgentUIViewController(string url, string callback, ReturnCodeCallback callbackMethod)
+        public AuthenticationAgentUIViewController(string url, string callback, IDictionary<string, string> additionalHeaders, ReturnCodeCallback callbackMethod)
         {
             this.url = url;
             this.callback = callback;
             this.callbackMethod = callbackMethod;
+            this.additionalHeaders = additionalHeaders;
             NSUrlProtocol.RegisterClass(new ObjCRuntime.Class(typeof(AdalCustomUrlProtocol)));
         }
 
@@ -111,7 +112,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.NavigationItem.LeftBarButtonItem = new UIBarButtonItem(UIBarButtonSystemItem.Cancel,
                 this.CancelAuthentication);
 
-            webView.LoadRequest(new NSUrlRequest(new NSUrl(this.url)));
+            NSUrlRequest startRequest = new NSUrlRequest(new NSUrl(this.url));
+            foreach (var key in this.additionalHeaders.Keys)
+            {
+                startRequest.Headers[new NSString(key)] = new NSString(additionalHeaders[key]);
+            }
+
+            webView.LoadRequest(startRequest);
 
             // if this is false, page will be 'zoomed in' to normal size
             //webView.ScalesPageToFit = true;

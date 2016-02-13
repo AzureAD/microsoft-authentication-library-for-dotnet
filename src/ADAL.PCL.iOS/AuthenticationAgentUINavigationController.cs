@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using CoreGraphics;
 
 using CoreFoundation;
@@ -53,7 +54,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod;
 
-        public AuthenticationAgentUINavigationController(string url, string callback, AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod)
+        public AuthenticationAgentUINavigationController(string url, string callback, IDictionary<string, string> additionalHeaders, AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod)
         {
             this.url = url;
             this.callback = callback;
