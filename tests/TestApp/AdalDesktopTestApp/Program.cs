@@ -33,7 +33,7 @@ namespace AdalDesktopTestApp
         {
             try
             {
-                AcquireTokenAsync().Wait();
+                GetTokenInteractiveAsync().Wait();
             }
             catch (AggregateException ae)
             {
@@ -50,6 +50,25 @@ namespace AdalDesktopTestApp
         {
             TokenBroker app = new TokenBroker();
             string token = await GetTokenIntegratedAuthAsync(app.Sts).ConfigureAwait(false);
+            Console.WriteLine(token);
+        }
+
+        public static async Task<string> GetTokenInteractiveAsync()
+        {
+            try
+            {
+                TokenBroker brkr = new TokenBroker();
+                PublicClientApplication app = new PublicClientApplication(brkr.Sts.Authority, "7c7a2f70-caef-45c8-9a6c-091633501de4");
+                app.PlatformParameters = new PlatformParameters();
+                var result = await app.AcquireTokenAsync(brkr.Sts.ValidScope);
+                return result.AccessToken;
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message + "\n" + ex.StackTrace;
+
+                return msg;
+            }
         }
 
         public static async Task<string> GetTokenIntegratedAuthAsync(Sts Sts)

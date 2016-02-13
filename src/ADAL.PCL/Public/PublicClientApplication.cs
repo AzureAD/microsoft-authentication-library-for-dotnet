@@ -26,6 +26,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public PublicClientApplication(string authority, string clientId) : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
         {
+            this.TokenCache = TokenCache.DefaultShared;
         }
 
         /// <summary>
@@ -131,7 +132,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope)
         {
-            return null;
+            return
+                await
+                    this.AcquireTokenCommonAsync(this.Authenticator, scope, null, this.ClientId,
+                        new Uri(this.RedirectUri), null, UiOptions.SelectAccount, null, null).ConfigureAwait(false);
         }
         
         /// <summary>

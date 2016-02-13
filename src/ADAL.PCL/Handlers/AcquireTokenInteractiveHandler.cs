@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this._extraQueryParameters = extraQueryParameters;
             this._webUi = webUI;
             this._uiOptions = uiOptions;
-            this.LoadFromCache = tokenCache != null;
+            this.LoadFromCache = false; //no cache lookup and refresh for interactive.
             this.SupportADFS = true;
 
             if (string.IsNullOrWhiteSpace(loginHint) && _uiOptions == UiOptions.UseCurrentUser)
@@ -95,17 +95,42 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected override async Task PreTokenRequest()
         {
+            IDictionary<string, string> headers = new Dictionary<string, string>();
             await base.PreTokenRequest().ConfigureAwait(false);
+            
+            bool notifiedBeforeAccessCache = false;
+            try
+            {
+                this.NotifyBeforeAccessCache();
+                notifiedBeforeAccessCache = true;
+
+                AuthenticationResultEx resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope,
+                    this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.RootId,
+                    this.Policy, this.CallState);
+                if (resultEx != null && string.IsNullOrWhiteSpace(resultEx.RefreshToken))
+                {
+                    headers["x-ms-sso-RefreshToken"] = resultEx.RefreshToken;
+                }
+            }
+            finally
+            {
+                if (notifiedBeforeAccessCache)
+                {
+                    this.NotifyAfterAccessCache();
+                }
+
+            }
 
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
-            await this.AcquireAuthorizationAsync().ConfigureAwait(false);
+            await this.AcquireAuthorizationAsync(headers).ConfigureAwait(false);
             this.VerifyAuthorizationResult();
+                
         }
 
-        internal async Task AcquireAuthorizationAsync()
+        internal async Task AcquireAuthorizationAsync(IDictionary<string, string> headers)
         {
             Uri authorizationUri = this.CreateAuthorizationUri();
-            this.authorizationResult = await this._webUi.AcquireAuthorizationAsync(authorizationUri, this._redirectUri, null, this.CallState).ConfigureAwait(false);
+            this.authorizationResult = await this._webUi.AcquireAuthorizationAsync(authorizationUri, this._redirectUri, headers, this.CallState).ConfigureAwait(false);
         }
 
         internal async Task<Uri> CreateAuthorizationUriAsync(Guid correlationId)
@@ -114,6 +139,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             await this.Authenticator.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
             return this.CreateAuthorizationUri();
         }
+
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.AuthorizationCode;
@@ -135,7 +161,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private DictionaryRequestParameters CreateAuthorizationRequest(string loginHint)
         {
-               var authorizationRequestParameters = new DictionaryRequestParameters(this.Scope, this.ClientKey);
+            HashSet<string> unionScope = this.GetDecoratedScope(new HashSet<string>(this.Scope.Union(this._additionalScope)));
+
+            var authorizationRequestParameters = new DictionaryRequestParameters(unionScope, this.ClientKey);
             authorizationRequestParameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
 
             authorizationRequestParameters[OAuthParameter.RedirectUri] = this._redirectUriRequestParameter;

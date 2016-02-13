@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal abstract class AcquireTokenHandlerBase
     {
         protected readonly static Task CompletedTask = Task.FromResult(false);
-        private readonly TokenCache tokenCache;
+        internal readonly TokenCache tokenCache;
         protected readonly IDictionary<string, string> brokerParameters;
 
         protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string policy, TokenSubjectType subjectType)
@@ -303,7 +303,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return tokenResponse.GetResult();
         }
 
-        private void NotifyBeforeAccessCache()
+        internal void NotifyBeforeAccessCache()
         {
             this.tokenCache.OnBeforeAccess(new TokenCacheNotificationArgs
             {
@@ -315,7 +315,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             });
         }
 
-        private void NotifyAfterAccessCache()
+        internal void NotifyAfterAccessCache()
         {
             this.tokenCache.OnAfterAccess(new TokenCacheNotificationArgs
             {
