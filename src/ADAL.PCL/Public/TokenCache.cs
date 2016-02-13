@@ -247,7 +247,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         ///     Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
         ///     impact all the instances of <see cref="AuthenticationContext" /> which share that cache.
         /// </summary>
-        internal void Clear(string clientId)
+        public void Clear(string clientId)
         {
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
             this.OnBeforeAccess(args);

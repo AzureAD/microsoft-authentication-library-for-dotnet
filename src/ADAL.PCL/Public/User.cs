@@ -54,6 +54,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.IdentityProvider = other.IdentityProvider;
             this.PasswordChangeUrl = other.PasswordChangeUrl;
             this.PasswordExpiresOn = other.PasswordExpiresOn;
+            this.ClientId = other.ClientId;
+            this.TokenCache = other.TokenCache;
         }
 
         /// <summary>
@@ -104,6 +106,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal TokenCache TokenCache { get; set; }
 
+        internal string ClientId { get; set; }
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -111,7 +116,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if(this.TokenCache == null) { return; }
 
-            IEnumerable<TokenCacheItem> items = this.TokenCache.ReadItems().Where(item => item.RootId.Equals(this.RootId));
+            IEnumerable<TokenCacheItem> items = this.TokenCache.ReadItems(this.ClientId).Where(item => item.RootId.Equals(this.RootId));
             foreach(var item in items)
             {
                 this.TokenCache.DeleteItem(item);

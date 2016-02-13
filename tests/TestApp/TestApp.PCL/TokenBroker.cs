@@ -61,14 +61,14 @@ namespace TestApp.PCL
     public class TokenBroker
     {
         private PublicClientApplication app;
-        Sts sts = new MobileAppSts();
+        public Sts Sts = new MobileAppSts();
 
         public async Task<string> GetTokenSilentAsync(IPlatformParameters parameters)
         {
             try
             {
                 app = new PublicClientApplication("https://login.windows.net/common", "7c7a2f70-caef-45c8-9a6c-091633501de4");
-                var result = await app.AcquireTokenSilentAsync(sts.ValidScope, sts.ValidUserName);
+                var result = await app.AcquireTokenSilentAsync(Sts.ValidScope, Sts.ValidUserName);
 
                 return result.AccessToken;
             }
@@ -80,21 +80,6 @@ namespace TestApp.PCL
             }
         }
 
-        public async Task<string> GetTokenIntegratedAuthAsync()
-        {
-            try
-            {
-                app = new PublicClientApplication(sts.Authority, "7c7a2f70-caef-45c8-9a6c-091633501de4");
-                var result = await app.AcquireTokenWithIntegratedAuthAsync(sts.ValidScope);
-                return result.AccessToken;
-            }
-            catch (Exception ex)
-            {
-                string msg = ex.Message +"\n"+ex.StackTrace;
-                
-                return msg;
-            }
-        }
 
         public async Task<string> GetTokenInteractiveWithMsAppAsync(IPlatformParameters parameters)
         {
@@ -146,7 +131,7 @@ namespace TestApp.PCL
 
         public void ClearTokenCache()
         {
-            TokenCache.DefaultShared.Clear();
+            TokenCache.DefaultShared.Clear("7c7a2f70-caef-45c8-9a6c-091633501de4");
         }
     }
 }

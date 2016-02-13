@@ -37,6 +37,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private readonly string _loginHint;
         private readonly UiOptions _uiOptions;
 
+
+        public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope,
+            string[] additionalScope, string clientId, Uri redirectUri, IPlatformParameters parameters, User user,
+            UiOptions uiOptions, string extraQueryParameters, string policy, IWebUI webUI):this(authenticator, tokenCache, scope, additionalScope, clientId, redirectUri, parameters, user.DisplayableId, uiOptions, extraQueryParameters, policy, webUI)
+        {
+            this.UniqueId = user.UniqueId;
+            this.RootId = user.RootId;
+        }
+
         public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope,
             string[] additionalScope, string clientId, Uri redirectUri, IPlatformParameters parameters, string loginHint, UiOptions uiOptions, string extraQueryParameters, string policy, IWebUI webUI)
             : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, TokenSubjectType.User)
@@ -60,7 +69,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             
 
             this._loginHint = loginHint;
-            if (!string.IsNullOrEmpty(extraQueryParameters) && extraQueryParameters[0] == '&')
+            if (!string.IsNullOrWhiteSpace(extraQueryParameters) && extraQueryParameters[0] == '&')
             {
                 extraQueryParameters = extraQueryParameters.Substring(1);
             }
@@ -70,6 +79,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this._uiOptions = uiOptions;
             this.LoadFromCache = tokenCache != null;
             this.SupportADFS = true;
+
+            if (string.IsNullOrWhiteSpace(loginHint) && _uiOptions == UiOptions.UseCurrentUser)
+            {
+                throw new ArgumentException(MsalErrorMessage.LoginHintNullForUiOption, "loginHint");
+            }
+            
 
             this.brokerParameters["force"] = "NO";
             this.brokerParameters["username"] = loginHint;
@@ -120,7 +135,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private DictionaryRequestParameters CreateAuthorizationRequest(string loginHint)
         {
-            var authorizationRequestParameters = new DictionaryRequestParameters(this.Scope, this.ClientKey);
+               var authorizationRequestParameters = new DictionaryRequestParameters(this.Scope, this.ClientKey);
             authorizationRequestParameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
 
             authorizationRequestParameters[OAuthParameter.RedirectUri] = this._redirectUriRequestParameter;
@@ -155,6 +170,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 authorizationRequestParameters.ExtraQueryParameter = _extraQueryParameters;
             }
+
+            AddUiOptionToRequestParameters(authorizationRequestParameters);
 
             return authorizationRequestParameters;
         }
@@ -192,6 +209,29 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return false;
+        }
+
+        private void AddUiOptionToRequestParameters(DictionaryRequestParameters authorizationRequestParameters)
+        {
+            switch (this._uiOptions)
+            {
+                case UiOptions.ForceConsent:
+                    authorizationRequestParameters[OAuthParameter.Prompt]= "consent";
+                    break;
+
+                case UiOptions.ForceLogin:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = "login";
+                    break;
+
+                case UiOptions.SelectAccount:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = "select_account";
+                    break;
+
+                case UiOptions.UseCurrentUser:
+                    authorizationRequestParameters[OAuthParameter.RestrictToHint] = "true";
+                    break;
+            }
+            
         }
     }
 }

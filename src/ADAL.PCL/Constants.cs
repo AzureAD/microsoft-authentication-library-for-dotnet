@@ -112,6 +112,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string ParsingWsTrustResponseFailed = "Parsing WS-Trust response failed";
         public const string PasswordRequiredForManagedUserError = "Password is required for managed user";
         public const string RedirectUriContainsFragment = "'redirectUri' must NOT include a fragment component";
+        public const string LoginHintNullForUiOption = "Null login hint is not allowed for UiOptions.UserCurrentUser";
         public const string ServiceReturnedError = "Service returned error. Check InnerException for more details";
         public const string BrokerReponseHashMismatch = "Unencrypted broker response hash did not match the expected hash";
 

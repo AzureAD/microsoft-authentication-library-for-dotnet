@@ -17,10 +17,11 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-
+using Test.ADAL.Common;
 using TestApp.PCL;
 
 namespace AdalDesktopTestApp
@@ -48,12 +49,23 @@ namespace AdalDesktopTestApp
         private static async Task AcquireTokenAsync()
         {
             TokenBroker app = new TokenBroker();
-            string token = await app.GetTokenIntegratedAuthAsync();
+            string token = await GetTokenIntegratedAuthAsync(app.Sts).ConfigureAwait(false);
         }
 
-        private static void ReadMail(string accessToken)
+        public static async Task<string> GetTokenIntegratedAuthAsync(Sts Sts)
         {
-            throw new NotImplementedException();
+            try
+            {
+                PublicClientApplication app = new PublicClientApplication(Sts.Authority, "7c7a2f70-caef-45c8-9a6c-091633501de4");
+                var result = await app.AcquireTokenWithIntegratedAuthAsync(Sts.ValidScope);
+                return result.AccessToken;
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message + "\n" + ex.StackTrace;
+
+                return msg;
+            }
         }
     }
 }

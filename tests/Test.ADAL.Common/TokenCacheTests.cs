@@ -345,13 +345,13 @@ namespace Test.ADAL.Common.Unit
             var tokenCache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts", new HashSet<string>(new[] { "resourc1" }), "client1", TokenSubjectType.User, null, "user1");
 
-            tokenCache.Clear();
+            tokenCache.Clear("client1");
             AddToDictionary(tokenCache, key, null);
             Assert.AreEqual(tokenCache.tokenCacheDictionary[key], null);
             for (int len = 0; len < 3000; len++)
             {
                 var value = CreateCacheValue(null, "user1");
-                tokenCache.Clear();
+                tokenCache.Clear("client1");
                 AddToDictionary(tokenCache, key, value);
                 Assert.AreEqual(tokenCache.tokenCacheDictionary[key], value);
             }
@@ -363,7 +363,7 @@ namespace Test.ADAL.Common.Unit
         {
             var tokenCache = new TokenCache();
             loadCacheItems(tokenCache);
-            IEnumerable<TokenCacheItem> items = tokenCache.ReadItems();
+            IEnumerable<TokenCacheItem> items = tokenCache.ReadItems(TestConstants.DefaultClientId);
             Assert.AreEqual(2, items.Count());
             Assert.AreEqual(TestConstants.DefaultUniqueId, items.Where(item => item.Authority.Equals(TestConstants.DefaultAuthorityHomeTenant)).First().UniqueId);
             Assert.AreEqual(TestConstants.DefaultUniqueId + "more", items.Where(item => item.Authority.Equals(TestConstants.DefaultAuthorityGuestTenant)).First().UniqueId);
@@ -394,7 +394,7 @@ namespace Test.ADAL.Common.Unit
             tokenCache.DeleteItem(item);
             Assert.AreEqual(1, tokenCache.Count);
 
-            IEnumerable<TokenCacheItem> items = tokenCache.ReadItems();
+            IEnumerable<TokenCacheItem> items = tokenCache.ReadItems(TestConstants.DefaultClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId + "more", items.Where(entry => entry.Authority.Equals(TestConstants.DefaultAuthorityGuestTenant)).First().UniqueId);
         }
 
@@ -580,7 +580,7 @@ namespace Test.ADAL.Common.Unit
 
         private static void VerifyCacheItems(TokenCache cache, int expectedCount, TokenCacheKey firstKey, TokenCacheKey secondKey)
         {
-            var items = cache.ReadItems().ToList();
+            var items = cache.ReadItems(TestConstants.DefaultClientId).ToList();
             Assert.AreEqual(expectedCount, items.Count);
 
             if (firstKey != null)
