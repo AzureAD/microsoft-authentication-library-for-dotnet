@@ -175,7 +175,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 await this.PostRunAsync(resultEx.Result).ConfigureAwait(false);
 
-                resultEx.Result.User.TokenCache = this.tokenCache;
                 return resultEx.Result;
             }
             catch (Exception ex)
@@ -211,6 +210,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected virtual Task PostRunAsync(AuthenticationResult result)
         {
             LogReturnedToken(result);
+
+            //add client id, token cache and authority to User object
+            if (result.User != null)
+            {
+                result.User.TokenCache = this.tokenCache;
+                result.User.ClientId = this.ClientKey.ClientId;
+                result.User.Authority = this.Authenticator.Authority;
+            }
 
             return CompletedTask;
         }

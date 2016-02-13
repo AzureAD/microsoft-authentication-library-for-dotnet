@@ -12,7 +12,6 @@ namespace Test.ADAL.NET.Unit
     public class TokenResponseTests
     {
 
-
         [TestMethod]
         [TestCategory("TokenResponseTests")]
         public void CreateErrorResponseTest()

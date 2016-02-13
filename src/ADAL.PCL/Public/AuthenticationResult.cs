@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
 
         /// <summary>
-        /// Gets user information including user Id. Some elements in User might be null if not returned by the service.
+        /// Gets otherUser information including otherUser Id. Some elements in User might be null if not returned by the service.
         /// </summary>
         [DataMember]
         public User User { get; internal set; }
@@ -99,13 +99,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return Oauth2AuthorizationHeader + this.AccessToken;
         }
 
-        internal void UpdateTenantAndUser(string tenantId, string idToken, User user)
+        internal void UpdateTenantAndUser(string tenantId, string idToken, User otherUser)
         {
             this.TenantId = tenantId;
             this.IdToken = idToken;
-            if (User != null)
+            if (otherUser != null)
             {
-                this.User = new User(user);
+                this.User = new User(otherUser);
             }
         }
     }
