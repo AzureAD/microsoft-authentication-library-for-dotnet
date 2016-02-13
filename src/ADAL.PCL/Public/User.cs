@@ -73,31 +73,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string Name { get; internal set; }
 
         /// <summary>
-        /// Gets family name of the user if provided by the service. If not, the value is null. 
-        /// </summary>
-        [DataMember]
-        public string FamilyName { get; internal set; }
-
-        /// <summary>
-        /// Gets the time when the password expires. Default value is 0.
-        /// </summary>
-        [DataMember]
-        public DateTimeOffset? PasswordExpiresOn { get; internal set; }
-
-        /// <summary>
-        /// Gets the url where the user can change the expiring password. The value can be null.
-        /// </summary>
-        [DataMember]
-        public Uri PasswordChangeUrl { get; internal set; }
-
-        /// <summary>
         /// Gets identity provider if returned by the service. If not, the value is null. 
         /// </summary>
         [DataMember]
         public string IdentityProvider { get; internal set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         [DataMember]
-        internal string RootId { get; set; }
+        public string RootId { get; set; }
 
 
         internal TokenCache TokenCache { get; set; }

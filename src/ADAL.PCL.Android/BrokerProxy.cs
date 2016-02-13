@@ -322,7 +322,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 UniqueId = userid,
                 Name = givenName,
-                FamilyName = familyName,
                 IdentityProvider = identityProvider,
                 DisplayableId = displayableId
             };
@@ -650,8 +649,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     .GetString(BrokerConstants.AccountUserInfoUserId),
                     Name = userInfoBundle
                                 .GetString(BrokerConstants.AccountUserInfoGivenName),
-                    FamilyName = userInfoBundle
-                                .GetString(BrokerConstants.AccountUserInfoFamilyName),
                     IdentityProvider = userInfoBundle
                                 .GetString(BrokerConstants.AccountUserInfoIdentityProvider),
                     DisplayableId = userInfoBundle
