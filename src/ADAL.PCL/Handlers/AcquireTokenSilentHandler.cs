@@ -32,20 +32,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             //TODO look up userIdentifier in the cache and get a user object
         }
 
-        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, User userId, IPlatformParameters parameters, string policy)
+        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, User user, IPlatformParameters parameters, string policy)
             : base(authenticator, tokenCache, scope, clientKey, policy, TokenSubjectType.User)
         {
-            if (userId == null)
+            if (user != null)
             {
-                throw new ArgumentNullException("userId", MsalErrorMessage.SpecifyAnyUser);
+                this.UniqueId = user.UniqueId;
+                this.DisplayableId = user.DisplayableId;
+                this.RootId = user.RootId;
+                this.brokerParameters["username"] = user.DisplayableId;
             }
 
-            this.UniqueId = userId.UniqueId;
-            this.DisplayableId = userId.DisplayableId;
             PlatformPlugin.BrokerHelper.PlatformParameters = parameters;    
             this.SupportADFS = false;
             
-            this.brokerParameters["username"] = userId.DisplayableId;
             this.brokerParameters["silent_broker_flow"] = null; //add key
         }
 

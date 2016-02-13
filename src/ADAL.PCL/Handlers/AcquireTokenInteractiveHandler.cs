@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this._webUi = webUI;
             this._uiOptions = uiOptions;
             this.LoadFromCache = false; //no cache lookup and refresh for interactive.
-            this.SupportADFS = true;
+            this.SupportADFS = false;
 
             if (string.IsNullOrWhiteSpace(loginHint) && _uiOptions == UiOptions.UseCurrentUser)
             {
