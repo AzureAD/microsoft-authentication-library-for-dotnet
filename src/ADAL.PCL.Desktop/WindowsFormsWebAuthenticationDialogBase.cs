@@ -208,7 +208,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         protected abstract void OnNavigationCanceled(int statusCode);
 
-        internal AuthorizationResult AuthenticateAAD(Uri requestUri, Uri callbackUri)
+        internal AuthorizationResult AuthenticateAAD(Uri requestUri, Uri callbackUri, string headers)
         {
             this.desiredCallbackUri = callbackUri;
             this.Result = null;
@@ -219,8 +219,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             this.webBrowser.Navigating += this.WebBrowserNavigatingHandler;
             this.webBrowser.Navigated += this.WebBrowserNavigatedHandler;
             this.webBrowser.NavigateError += this.WebBrowserNavigateErrorHandler;
-
-            this.webBrowser.Navigate(requestUri);
+            
+            this.webBrowser.Navigate(requestUri, null, null, headers);
             this.OnAuthenticate();
 
             return this.Result;

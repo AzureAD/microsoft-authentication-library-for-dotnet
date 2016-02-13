@@ -22,13 +22,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
     {
         private WindowsFormsWebAuthenticationDialog dialog;
 
-        protected override AuthorizationResult OnAuthenticate()
+        protected override AuthorizationResult OnAuthenticate(string headers)
         {
             AuthorizationResult result;
 
             using (this.dialog = new WindowsFormsWebAuthenticationDialog(this.OwnerWindow))
             {
-                result = this.dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri);
+                result = this.dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri, headers);
             }
 
             return result;

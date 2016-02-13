@@ -159,7 +159,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string identifier,
             UiOptions options, string extraQueryParameters)
         {
-            return null;
+            return
+                await
+                    this.AcquireTokenCommonAsync(this.Authenticator, scope, null, this.ClientId,
+                        new Uri(this.RedirectUri), identifier, options, extraQueryParameters, null).ConfigureAwait(false);
         }
 
         /// <summary>

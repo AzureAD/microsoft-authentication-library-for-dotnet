@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 AuthenticationResultEx resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope,
                     this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.RootId,
                     this.Policy, this.CallState);
-                if (resultEx != null && string.IsNullOrWhiteSpace(resultEx.RefreshToken))
+                if (resultEx != null && !string.IsNullOrWhiteSpace(resultEx.RefreshToken))
                 {
                     headers["x-ms-sso-RefreshToken"] = resultEx.RefreshToken;
                 }

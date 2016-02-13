@@ -41,6 +41,7 @@ namespace AdalDesktopTestApp
                 task = GetTokenSilentAsync(result.User);
                 Task.WaitAll(task);
                 result = task.Result;
+
                 Console.WriteLine(result.AccessToken);
             }
             catch (AggregateException ae)
@@ -64,10 +65,12 @@ namespace AdalDesktopTestApp
 
         public static async Task<AuthenticationResult> GetTokenSilentAsync(User user)
         {
+            TokenBroker brkr = new TokenBroker();
+            PublicClientApplication app =
+                new PublicClientApplication("https://login.microsoftonline.com/msdevex.onmicrosoft.com",
+                    "7c7a2f70-caef-45c8-9a6c-091633501de4");
             try
             {
-                TokenBroker brkr = new TokenBroker();
-                PublicClientApplication app = new PublicClientApplication("https://login.microsoftonline.com/msdevex.onmicrosoft.com", "7c7a2f70-caef-45c8-9a6c-091633501de4");
                 app.PlatformParameters = new PlatformParameters();
                 return await app.AcquireTokenSilentAsync(brkr.Sts.ValidScope);
             }
@@ -75,9 +78,9 @@ namespace AdalDesktopTestApp
             {
                 string msg = ex.Message + "\n" + ex.StackTrace;
                 Console.WriteLine(msg);
+                return await app.AcquireTokenAsync(brkr.Sts.ValidScope, user.DisplayableId, UiOptions.UseCurrentUser, null);
             }
-
-            return null;
+            
         }
 
         public static async Task<AuthenticationResult> GetTokenInteractiveAsync()

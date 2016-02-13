@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,14 +33,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         public Object OwnerWindow { get; set; }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionaHeaders, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders, CallState callState)
         {
             AuthorizationResult authorizationResult = null;
+            StringBuilder builder = new StringBuilder();
+
+            if (additionalHeaders != null)
+            {
+                foreach (var key in additionalHeaders.Keys)
+                {
+                    builder.AppendFormat(@"{0}: {1}\r\n", key, additionalHeaders[key]);
+                }
+            }
 
             var sendAuthorizeRequest = new Action(
                 delegate
                 {
-                    authorizationResult = this.Authenticate(authorizationUri, redirectUri);
+                    authorizationResult = this.Authenticate(authorizationUri, redirectUri, builder.ToString());
                 });
 
             // If the thread is MTA, it cannot create or communicate with WebBrowser which is a COM control.
@@ -76,13 +86,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             return await Task.Factory.StartNew(() => authorizationResult).ConfigureAwait(false);
         }
 
-        internal AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri)
+        internal AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri, string headers)
         {
             this.RequestUri = requestUri;
             this.CallbackUri = callbackUri;
 
             ThrowOnNetworkDown();
-            return this.OnAuthenticate();
+            return this.OnAuthenticate(headers);
         }
 
         private static void ThrowOnNetworkDown()
@@ -93,6 +103,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             }
         }
 
-        protected abstract AuthorizationResult OnAuthenticate();
+        protected abstract AuthorizationResult OnAuthenticate(string headers);
     }
 }
