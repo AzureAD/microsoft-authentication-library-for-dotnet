@@ -52,9 +52,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         .ConfigureAwait(false);
         }
 
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string authority)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId, string authority, string policy)
         {
-            return null;
+            Authenticator localAuthenticator = new Authenticator(authority, this.ValidateAuthority);
+            return
+                await
+                    this.AcquireTokenSilentCommonAsync(localAuthenticator, scope,
+                        new ClientKey(this.ClientId, this.ClientCredential, localAuthenticator), userId, null, policy)
+                        .ConfigureAwait(false);
         }
 
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(string[] scope, UserAssertion userAssertion)
@@ -103,15 +108,38 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             var handler = new AcquireTokenByAuthorizationCodeHandler(this.Authenticator, this.UserTokenCache, scope, clientKey, authorizationCode, redirectUri, policy);
             return await handler.RunAsync();
         }
-        
-        public async Task<Uri> GetAuthorizationRequestURL(string[] scope, string userId, string extraQueryParameters)
+
+        /// <summary>
+        /// Gets URL of the authorize endpoint including the query parameters.
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="loginHint"></param>
+        /// <param name="extraQueryParameters"></param>
+        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
+        public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string loginHint, string extraQueryParameters)
         {
-            return null;
+            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, null, scope, null, this.ClientId,
+                new Uri(this.RedirectUri), null, loginHint, UiOptions.SelectAccount, extraQueryParameters, null, null);
+            return await handler.CreateAuthorizationUriAsync(this.CorrelationId).ConfigureAwait(false);
         }
 
-        public async Task<Uri> GetAuthorizationRequestURL(string[] scope, string redirectUri, string userId, string extraQueryParameters, string[] additionalScope, string authority, string policy)
+        /// <summary>
+        /// Gets URL of the authorize endpoint including the query parameters.
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="redirectUri"></param>
+        /// <param name="loginHint"></param>
+        /// <param name="options"></param>
+        /// <param name="extraQueryParameters"></param>
+        /// <param name="additionalScope"></param>
+        /// <param name="authority"></param>
+        /// <param name="policy"></param>
+        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
+        public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string redirectUri, string loginHint, UiOptions options, string extraQueryParameters, string[] additionalScope, string authority, string policy)
         {
-            return null;
+            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, null, scope, additionalScope,
+                this.ClientId, new Uri(this.RedirectUri), null, loginHint, options, extraQueryParameters, policy, null);
+            return await handler.CreateAuthorizationUriAsync(this.CorrelationId).ConfigureAwait(false);
         }
 
         /// <summary>
