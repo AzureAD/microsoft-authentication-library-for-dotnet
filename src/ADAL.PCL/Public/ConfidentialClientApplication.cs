@@ -10,13 +10,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
        /// </summary>
        public ClientCredential ClientCredential { get; private set; }
 
+       public TokenCache AppTokenCache { get; set; }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="clientId"></param>
         /// <param name="redirectUri"></param>
         /// <param name="clientCredential"></param>
-       public ConfidentialClientApplication(string clientId, string redirectUri,
+        public ConfidentialClientApplication(string clientId, string redirectUri,
            ClientCredential clientCredential):this(DEFAULT_AUTHORTIY, clientId, redirectUri, clientCredential)
        {
        }
@@ -35,12 +37,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope)
        {
-            this.
+           return
+               await
+                   this.AcquireTokenForClientCommonAsync(scope,
+                       new ClientKey(this.ClientId, this.ClientCredential, this.Authenticator)).ConfigureAwait(false);
        }
 
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId)
         {
-            return null;
+            return
+                await
+                    this.AcquireTokenSilentCommonAsync(this.Authenticator, scope,
+                        new ClientKey(this.ClientId, this.ClientCredential, this.Authenticator), userId, null, null)
+                        .ConfigureAwait(false);
         }
 
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string authority)
@@ -79,28 +88,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(string[] scope, ClientKey clientKey)
         {
-            var handler = new AcquireTokenForClientHandler(this.Authenticator, this.TokenCache, scope, clientKey);
+            var handler = new AcquireTokenForClientHandler(this.Authenticator, this.AppTokenCache, scope, clientKey);
             return await handler.RunAsync();
         }
 
         private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(Authenticator authenticator, string[] scope, ClientKey clientKey, UserAssertion userAssertion, string policy)
         {
-            var handler = new AcquireTokenOnBehalfHandler(authenticator, this.TokenCache, scope, clientKey, userAssertion, policy);
+            var handler = new AcquireTokenOnBehalfHandler(authenticator, this.UserTokenCache, scope, clientKey, userAssertion, policy);
             return await handler.RunAsync();
         }
 
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode, string[] scope, Uri redirectUri, ClientKey clientKey, string policy)
         {
-            var handler = new AcquireTokenByAuthorizationCodeHandler(this.Authenticator, this.TokenCache, scope, clientKey, authorizationCode, redirectUri, policy);
+            var handler = new AcquireTokenByAuthorizationCodeHandler(this.Authenticator, this.UserTokenCache, scope, clientKey, authorizationCode, redirectUri, policy);
             return await handler.RunAsync();
         }
-
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string clientId, UserAssertion userAssertion, string policy)
-        {
-            var handler = new AcquireTokenNonInteractiveHandler(authenticator, this.TokenCache, scope, clientId, userAssertion, policy);
-            return await handler.RunAsync().ConfigureAwait(false);
-        }
-
+        
         public async Task<Uri> GetAuthorizationRequestURL(string[] scope, string userId, string extraQueryParameters)
         {
             return null;

@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public string RedirectUri { get; set; }
 
-        public TokenCache TokenCache { get; set; }
+        public TokenCache UserTokenCache { get; set; }
 
         /// <summary>
         /// Gets or sets correlation Id which would be sent to the service with the next request. 
@@ -67,12 +67,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public IEnumerable<User> GetUsers()
         {
             List <User> users = new List<User>();
-            if (this.TokenCache == null || this.TokenCache.Count == 0)
+            if (this.UserTokenCache == null || this.UserTokenCache.Count == 0)
             {
                 PlatformPlugin.Logger.Information(null, "AccessToken cache is null or empty");
                 return users;
             }
-            IEnumerable<TokenCacheItem> allItems = this.TokenCache.ReadItems(this.ClientId);
+            IEnumerable<TokenCacheItem> allItems = this.UserTokenCache.ReadItems(this.ClientId);
             IEnumerable<string> uniqueIds = allItems.Select(item => item.UniqueId).Distinct();
             foreach(string uniqueId in uniqueIds)
             {
@@ -99,13 +99,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator, string[] scope, ClientKey clientKey, string userId, IPlatformParameters parameters, string policy)
         {
-            var handler = new AcquireTokenSilentHandler(authenticator, this.TokenCache, scope, clientKey, userId,  parameters, policy);
+            var handler = new AcquireTokenSilentHandler(authenticator, this.UserTokenCache, scope, clientKey, userId,  parameters, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator, string[] scope, ClientKey clientKey, User user, IPlatformParameters parameters, string policy)
         {
-            var handler = new AcquireTokenSilentHandler(authenticator, this.TokenCache, scope, clientKey, user, parameters, policy);
+            var handler = new AcquireTokenSilentHandler(authenticator, this.UserTokenCache, scope, clientKey, user, parameters, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

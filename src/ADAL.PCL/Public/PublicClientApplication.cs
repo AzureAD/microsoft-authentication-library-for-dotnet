@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public PublicClientApplication(string authority, string clientId) : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
         {
-            this.TokenCache = TokenCache.DefaultShared;
+            this.UserTokenCache = TokenCache.DefaultShared;
         }
 
         /// <summary>
@@ -188,13 +188,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(Authenticator authenticator, string[] scope, string clientId, UserCredential userCredential, string policy)
         {
-            var handler = new AcquireTokenNonInteractiveHandler(authenticator, this.TokenCache, scope, clientId, userCredential, policy);
+            var handler = new AcquireTokenNonInteractiveHandler(authenticator, this.UserTokenCache, scope, clientId, userCredential, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string[] additionalScope, string clientId, Uri redirectUri, string loginHint, UiOptions uiOptions, string extraQueryParameters, string policy)
         {
-            var handler = new AcquireTokenInteractiveHandler(authenticator, this.TokenCache, scope, additionalScope, clientId, redirectUri, this.PlatformParameters, loginHint, uiOptions, extraQueryParameters, policy, this.CreateWebAuthenticationDialog(this.PlatformParameters));
+            var handler = new AcquireTokenInteractiveHandler(authenticator, this.UserTokenCache, scope, additionalScope, clientId, redirectUri, this.PlatformParameters, loginHint, uiOptions, extraQueryParameters, policy, this.CreateWebAuthenticationDialog(this.PlatformParameters));
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
