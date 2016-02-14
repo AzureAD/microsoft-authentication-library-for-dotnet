@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns></returns>
         internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope, string authority, string policy)
         {
-            Authenticator localAuthenticator = new Authenticator(this.Authority, this.ValidateAuthority);
+            Authenticator localAuthenticator = new Authenticator(authority, this.ValidateAuthority);
             return
                 await
                     this.AcquireTokenUsingIntegratedAuthCommonAsync(localAuthenticator, scope, this.ClientId,
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier,
             string authority, string policy)
         {
-            Authenticator localAuthenticator = new Authenticator(this.Authority, this.ValidateAuthority);
+            Authenticator localAuthenticator = new Authenticator(authority, this.ValidateAuthority);
             return await this.AcquireTokenSilentCommonAsync(localAuthenticator, scope, new ClientKey(this.ClientId), userIdentifier, this.PlatformParameters, null).ConfigureAwait(false);
         }
 
@@ -121,7 +121,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId,
             string authority, string policy)
         {
-            Authenticator localAuthenticator = new Authenticator(this.Authority, this.ValidateAuthority);
+            Authenticator localAuthenticator = new Authenticator(authority, this.ValidateAuthority);
             return await this.AcquireTokenSilentCommonAsync(localAuthenticator, scope, new ClientKey(this.ClientId), userId, this.PlatformParameters, null).ConfigureAwait(false);
         }
 
@@ -192,15 +192,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string clientId, UserAssertion userAssertion, string policy)
-        {
-            var handler = new AcquireTokenNonInteractiveHandler(authenticator, this.TokenCache, scope, clientId, userAssertion, policy);
-            return await handler.RunAsync().ConfigureAwait(false);
-        }
-
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string[] additionalScope, string clientId, Uri redirectUri, string loginHint, UiOptions uiOptions, string extraQueryParameters, string policy)
         {
-            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, scope, additionalScope, clientId, redirectUri, this.PlatformParameters, loginHint, uiOptions, extraQueryParameters, policy, this.CreateWebAuthenticationDialog(this.PlatformParameters));
+            var handler = new AcquireTokenInteractiveHandler(authenticator, this.TokenCache, scope, additionalScope, clientId, redirectUri, this.PlatformParameters, loginHint, uiOptions, extraQueryParameters, policy, this.CreateWebAuthenticationDialog(this.PlatformParameters));
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

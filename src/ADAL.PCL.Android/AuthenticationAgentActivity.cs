@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             webSettings.UserAgentString = 
                     userAgent + BrokerConstants.ClientTlsNotSupported;
             PlatformPlugin.Logger.Verbose(null, "UserAgent:" + webSettings.UserAgentString);
-
+            
             webSettings.JavaScriptEnabled = true;
 
             webSettings.LoadWithOverviewMode = true;
@@ -56,8 +56,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             webSettings.BuiltInZoomControls = true;
 
             this.client = new AdalWebViewClient(Intent.GetStringExtra("Callback"));
+            
             webView.SetWebViewClient(client);
-            webView.LoadUrl(url);
 
         }
 
@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     return true;
                 }
 
-                if (url.StartsWith(BrokerConstants.ClientTlsRedirect, StringComparison.CurrentCultureIgnoreCase))
+                if (url.StartsWith(BrokerConstants.PKeyAuthRedirect, StringComparison.CurrentCultureIgnoreCase))
                 {
                     Uri uri = new Uri(url);
                     string query = uri.Query;

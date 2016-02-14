@@ -8,7 +8,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
        /// <summary>
        /// 
        /// </summary>
-       public ClientCredential ClientCredential { get; set; }
+       public ClientCredential ClientCredential { get; private set; }
 
         /// <summary>
         /// 
@@ -35,33 +35,70 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope)
        {
-           return null;
+            this.
        }
 
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string authority)
-        {
-            return null;
-        }
-        
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId)
         {
             return null;
         }
 
-
-        public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(string[] scope, UserAssertion userAssertion)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string authority)
         {
             return null;
         }
 
-        public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(string[] scope, UserAssertion userAssertion, string authority)
+        public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(string[] scope, UserAssertion userAssertion)
         {
-            return null;
+            return
+                await
+                    this.AcquireTokenOnBehalfCommonAsync(this.Authenticator, scope,
+                        new ClientKey(this.ClientId, this.ClientCredential, this.Authenticator), userAssertion, null)
+                        .ConfigureAwait(false);
+        }
+    
+
+        public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(string[] scope, UserAssertion userAssertion, string authority, string policy)
+        {
+            Authenticator localAuthenticator = new Authenticator(authority, this.ValidateAuthority);
+            return
+                await
+                    this.AcquireTokenOnBehalfCommonAsync(localAuthenticator, scope,
+                        new ClientKey(this.ClientId, this.ClientCredential, localAuthenticator), userAssertion, policy)
+                        .ConfigureAwait(false);
         }
 
         public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string[] scope, string authorizationCode, string policy)
         {
-            return null;
+            return
+                await
+                    this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, scope, new Uri(this.RedirectUri),
+                        new ClientKey(this.ClientId, this.ClientCredential, this.Authenticator), policy).ConfigureAwait(false);
+        }
+
+
+        private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(string[] scope, ClientKey clientKey)
+        {
+            var handler = new AcquireTokenForClientHandler(this.Authenticator, this.TokenCache, scope, clientKey);
+            return await handler.RunAsync();
+        }
+
+        private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(Authenticator authenticator, string[] scope, ClientKey clientKey, UserAssertion userAssertion, string policy)
+        {
+            var handler = new AcquireTokenOnBehalfHandler(authenticator, this.TokenCache, scope, clientKey, userAssertion, policy);
+            return await handler.RunAsync();
+        }
+
+        private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode, string[] scope, Uri redirectUri, ClientKey clientKey, string policy)
+        {
+            var handler = new AcquireTokenByAuthorizationCodeHandler(this.Authenticator, this.TokenCache, scope, clientKey, authorizationCode, redirectUri, policy);
+            return await handler.RunAsync();
+        }
+
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string clientId, UserAssertion userAssertion, string policy)
+        {
+            var handler = new AcquireTokenNonInteractiveHandler(authenticator, this.TokenCache, scope, clientId, userAssertion, policy);
+            return await handler.RunAsync().ConfigureAwait(false);
         }
 
         public async Task<Uri> GetAuthorizationRequestURL(string[] scope, string userId, string extraQueryParameters)

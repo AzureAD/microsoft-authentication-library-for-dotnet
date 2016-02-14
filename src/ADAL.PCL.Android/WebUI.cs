@@ -17,18 +17,10 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
 using Android.Accounts;
-using Android.App;
-using Android.OS;
-using Java.Util.Concurrent;
-using Android.Content.PM;
-using Java.Security;
-using Java.IO;
-using Android.Util;
 using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -60,6 +52,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 var agentIntent = new Intent(this.parameters.CallerActivity, typeof(AuthenticationAgentActivity));
                 agentIntent.PutExtra("Url", authorizationUri.AbsoluteUri);
                 agentIntent.PutExtra("Callback", redirectUri.AbsoluteUri);
+                
                 this.parameters.CallerActivity.StartActivityForResult(agentIntent, 0);
             }
             catch (Exception ex)

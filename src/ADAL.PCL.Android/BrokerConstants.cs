@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public const string AzureAuthenticatorAppPackageName = "com.azure.authenticator";
 
-        public const string ClientTlsRedirect = "urn:http-auth:PKeyAuth";
+        public const string PKeyAuthRedirect = "urn:http-auth:PKeyAuth";
 
         public const string ChallangeTlsIncapable = "x-ms-PKeyAuth";
 

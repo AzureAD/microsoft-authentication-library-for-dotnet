@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private string url;
         private string callback;
-
+        private IDictionary<string, string> additionalHeaders;
         private AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod;
 
         public AuthenticationAgentUINavigationController(string url, string callback, IDictionary<string, string> additionalHeaders, AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod)
@@ -59,6 +59,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.url = url;
             this.callback = callback;
             this.callbackMethod = callbackMethod;
+            this.additionalHeaders = additionalHeaders;
         }
 
         public override void DidReceiveMemoryWarning()
@@ -74,7 +75,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             base.ViewDidLoad();
 
             // Perform any additional setup after loading the view
-            this.PushViewController(new AuthenticationAgentUIViewController(this.url, this.callback, this.callbackMethod), true);
+            this.PushViewController(new AuthenticationAgentUIViewController(this.url, this.callback, this.additionalHeaders, this.callbackMethod), true);
         }
     }
 }
