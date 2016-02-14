@@ -27,6 +27,8 @@ using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Certificates;
 using Windows.Security.Cryptography.Core;
 using Windows.Storage.Streams;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

@@ -24,6 +24,8 @@ using Android.Accounts;
 using Android.App;
 using Android.Content;
 using Java.IO;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

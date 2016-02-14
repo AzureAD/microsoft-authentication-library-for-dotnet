@@ -17,8 +17,9 @@
 //----------------------------------------------------------------------
 
 using System;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Handlers
 {
     internal class AcquireTokenOnBehalfHandler : AcquireTokenHandlerBase
     {

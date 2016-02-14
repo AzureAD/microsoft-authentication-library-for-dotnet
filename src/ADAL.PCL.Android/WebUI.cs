@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Android.Content;
 using Android.Accounts;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

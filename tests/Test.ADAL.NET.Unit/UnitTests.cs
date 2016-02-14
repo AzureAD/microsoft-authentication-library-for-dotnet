@@ -26,6 +26,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 

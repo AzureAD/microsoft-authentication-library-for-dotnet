@@ -27,6 +27,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

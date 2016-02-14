@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces
 {
     internal interface IHttpWebResponse : IDisposable
     {

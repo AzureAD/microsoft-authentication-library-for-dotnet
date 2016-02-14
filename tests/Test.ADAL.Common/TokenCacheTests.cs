@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.NET.Unit;
 
@@ -337,26 +338,7 @@ namespace Test.ADAL.Common.Unit
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
 
         }
-
-        [TestMethod]
-        [TestCategory("TokenCacheTests")]
-        public void TokenCacheValueSplitTest()
-        {
-            var tokenCache = new TokenCache();
-            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts", new HashSet<string>(new[] { "resourc1" }), "client1", TokenSubjectType.User, null, "user1");
-
-            tokenCache.Clear("client1");
-            AddToDictionary(tokenCache, key, null);
-            Assert.AreEqual(tokenCache.tokenCacheDictionary[key], null);
-            for (int len = 0; len < 3000; len++)
-            {
-                var value = CreateCacheValue(null, "user1");
-                tokenCache.Clear("client1");
-                AddToDictionary(tokenCache, key, value);
-                Assert.AreEqual(tokenCache.tokenCacheDictionary[key], value);
-            }
-        }
-
+        
         [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void ReadItemsTest()
@@ -367,6 +349,29 @@ namespace Test.ADAL.Common.Unit
             Assert.AreEqual(2, items.Count());
             Assert.AreEqual(TestConstants.DefaultUniqueId, items.Where(item => item.Authority.Equals(TestConstants.DefaultAuthorityHomeTenant)).First().UniqueId);
             Assert.AreEqual(TestConstants.DefaultUniqueId + "more", items.Where(item => item.Authority.Equals(TestConstants.DefaultAuthorityGuestTenant)).First().UniqueId);
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void ClearCacheTest()
+        {
+            var tokenCache = new TokenCache();
+            loadCacheItems(tokenCache);
+
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId+"more", TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            AuthenticationResultEx ex = new AuthenticationResultEx();
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
+            ex.Result.User = new User { DisplayableId = TestConstants.DefaultDisplayableId, UniqueId = TestConstants.DefaultUniqueId, RootId = TestConstants.DefaultRootId };
+            ex.Result.FamilyId = "1";
+            ex.RefreshToken = "someRT";
+            tokenCache.tokenCacheDictionary[key] = ex;
+
+            tokenCache.Clear(TestConstants.DefaultClientId);
+            Assert.AreEqual(1, tokenCache.Count);
+            Assert.AreEqual(key, tokenCache.tokenCacheDictionary.Keys.First());
         }
 
         [TestMethod]

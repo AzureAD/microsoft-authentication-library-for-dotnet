@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

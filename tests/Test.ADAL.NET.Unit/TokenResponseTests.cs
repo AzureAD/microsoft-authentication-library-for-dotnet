@@ -2,6 +2,8 @@
 using System.IO;
 using System.Runtime.Serialization;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;

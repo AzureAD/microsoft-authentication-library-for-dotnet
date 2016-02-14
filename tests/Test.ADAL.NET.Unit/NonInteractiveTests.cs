@@ -26,6 +26,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.Common;
 using System.Xml;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Test.ADAL.NET.Unit
 {

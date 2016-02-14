@@ -19,8 +19,9 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Handlers
 {
     internal class AcquireTokenNonInteractiveHandler : AcquireTokenHandlerBase
     {

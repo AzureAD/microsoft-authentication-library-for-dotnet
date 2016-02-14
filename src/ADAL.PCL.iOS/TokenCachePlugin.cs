@@ -19,6 +19,8 @@
 using Foundation;
 using Security;
 using System;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

@@ -18,7 +18,8 @@
 
 using System;
 using System.Diagnostics.Tracing;
-﻿
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class Logger : LoggerBase

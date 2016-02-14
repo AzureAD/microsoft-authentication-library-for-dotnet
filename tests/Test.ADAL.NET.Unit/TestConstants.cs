@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Test.ADAL.NET.Unit
 {

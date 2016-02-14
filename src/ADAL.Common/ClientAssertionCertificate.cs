@@ -19,6 +19,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

@@ -24,6 +24,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using CoreFoundation;
 using Foundation;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using UIKit;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory

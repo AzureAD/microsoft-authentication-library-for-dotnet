@@ -19,6 +19,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

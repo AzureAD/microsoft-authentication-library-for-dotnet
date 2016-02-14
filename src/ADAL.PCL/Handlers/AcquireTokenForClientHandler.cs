@@ -16,7 +16,9 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Handlers
 {
     internal class AcquireTokenForClientHandler : AcquireTokenHandlerBase
     {

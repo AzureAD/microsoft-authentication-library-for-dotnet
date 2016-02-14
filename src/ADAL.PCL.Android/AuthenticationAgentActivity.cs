@@ -22,6 +22,7 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Webkit;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

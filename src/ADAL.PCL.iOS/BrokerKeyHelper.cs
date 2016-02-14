@@ -20,6 +20,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using Foundation;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Security;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory

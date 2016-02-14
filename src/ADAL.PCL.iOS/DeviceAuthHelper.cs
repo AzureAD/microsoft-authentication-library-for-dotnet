@@ -25,6 +25,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Foundation;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
 using UIKit;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory

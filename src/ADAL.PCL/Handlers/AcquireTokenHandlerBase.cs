@@ -17,13 +17,13 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Handlers
 {
     internal abstract class AcquireTokenHandlerBase
     {
