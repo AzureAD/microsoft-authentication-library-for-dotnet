@@ -54,6 +54,7 @@
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>Internal\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Internal\HttpMessageHandlerFactory.cs" />
     <Compile Include="Internal\MsalError.cs" />
     <Compile Include="AbstractClientApplication.cs" />
     <Compile Include="Handlers\AcquireDeviceCodeHandler.cs" />
