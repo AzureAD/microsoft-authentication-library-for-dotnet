@@ -40,6 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         public const string CorrelationId = OAuthHeader.CorrelationId; // correlation id is not standard oauth2 parameter
         public const string Prompt = "prompt"; // prompt is not standard oauth2 parameter
         public const string RestrictToHint = "restrict_to_hint"; // restrict_to_hint is not standard oauth2 parameter
+        public const string Policy = "p";
     }
 
     internal class OAuthGrantType

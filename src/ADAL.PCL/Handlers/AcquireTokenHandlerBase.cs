@@ -304,7 +304,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Handlers
 
         private async Task<AuthenticationResultEx> SendHttpMessageAsync(IRequestParameters requestParameters)
         {
-            var client = new AdalHttpClient(this.Authenticator.TokenUri, this.CallState) { Client = { BodyParameters = requestParameters } };
+            string endpoint = this.Authenticator.TokenUri;
+            endpoint = AddPolicyParameter(endpoint);
+
+            var client = new AdalHttpClient(endpoint, this.CallState) { Client = { BodyParameters = requestParameters } };
             TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>(ClientMetricsEndpointType.Token).ConfigureAwait(false);
 
             return tokenResponse.GetResult();
@@ -354,6 +357,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Handlers
                 throw new MsalException(MsalError.InvalidAuthorityType,
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.InvalidAuthorityTypeTemplate, this.Authenticator.Authority));
             }
+        }
+
+        internal string AddPolicyParameter(string endpoint)
+        {
+            if (!string.IsNullOrWhiteSpace(this.Policy))
+            {
+                string delimiter = (endpoint.IndexOf('?') > 0) ? "&" : "?";
+                endpoint += string.Concat(delimiter, string.Format("p={0}", this.Policy));
+            }
+
+            return endpoint;
         }
     }
 }

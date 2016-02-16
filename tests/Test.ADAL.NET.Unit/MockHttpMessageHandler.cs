@@ -34,7 +34,12 @@ namespace Test.ADAL.NET.Unit
             {
                 Assert.IsNotNull(uri.Query);
                 IDictionary<string, string> inputQp = EncodingHelper.ParseKeyValueList(uri.Query, '&', true, null);
-
+                Assert.AreEqual(QueryParams.Count, inputQp.Count);
+                foreach (var key in QueryParams.Keys)
+                {
+                    Assert.IsTrue(inputQp.ContainsKey(key));
+                    Assert.AreEqual(QueryParams[key], inputQp[key]);
+                }
             }
             
         

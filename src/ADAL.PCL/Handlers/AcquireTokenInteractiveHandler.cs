@@ -167,6 +167,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Handlers
             var authorizationRequestParameters = new DictionaryRequestParameters(unionScope, this.ClientKey);
             authorizationRequestParameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
 
+            if (!string.IsNullOrWhiteSpace(this.Policy))
+            {
+                authorizationRequestParameters[OAuthParameter.Policy] = this.Policy;
+            }
+
             authorizationRequestParameters[OAuthParameter.RedirectUri] = this._redirectUriRequestParameter;
 
             if (!string.IsNullOrWhiteSpace(loginHint))

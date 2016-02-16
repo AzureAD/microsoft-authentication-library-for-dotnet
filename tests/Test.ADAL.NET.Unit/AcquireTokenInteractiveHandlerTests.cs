@@ -34,10 +34,14 @@ namespace Test.ADAL.NET.Unit
             cache.tokenCacheDictionary[key] = ex;
 
             IWebUI ui = Substitute.For<IWebUI>();
-            AuthorizationResult ar = new AuthorizationResult(AuthorizationStatus.Success, "some://uri?code=some-code");
+            AuthorizationResult ar = new AuthorizationResult(AuthorizationStatus.Success, "some-code");
             ui.AcquireAuthorizationAsync(Arg.Any<Uri>(), Arg.Any<Uri>(), Arg.Any<IDictionary<string,string>>(), Arg.Any<CallState>())
                 .Returns(ar);
-            
+
+            MockHttpMessageHandler mockHandler = new MockHttpMessageHandler();
+            mockHandler.Method = HttpMethod.Post;
+            HttpMessageHandlerFactory.MockHandler = mockHandler;
+
             AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, cache,
                 TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
                 TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
@@ -46,10 +50,6 @@ namespace Test.ADAL.NET.Unit
             task.Wait();
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
-
-            HttpMessageHandler mockHandler = Substitute.For<HttpMessageHandler>();
-            
-            HttpMessageHandlerFactory.MockHandler = mockHandler;
         }
     }
 }
