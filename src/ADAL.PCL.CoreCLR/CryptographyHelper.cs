@@ -17,9 +17,9 @@
 //----------------------------------------------------------------------
 
 using System;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
+using Microsoft.Identity.Client.Interfaces;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
     internal class CryptographyHelper : ICryptographyHelper
     {

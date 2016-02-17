@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Client.Internal
 {
     /// <summary>
     /// Contains parameters used by the ADAL call accessing the cache.

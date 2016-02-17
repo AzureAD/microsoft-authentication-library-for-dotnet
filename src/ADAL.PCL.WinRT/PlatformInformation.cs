@@ -25,9 +25,9 @@ using Windows.Networking.Connectivity;
 using Windows.Security.Authentication.Web;
 using Windows.Storage;
 using Windows.System.UserProfile;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
     internal class PlatformInformation : PlatformInformationBase
     {

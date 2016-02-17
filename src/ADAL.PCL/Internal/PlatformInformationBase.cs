@@ -20,7 +20,7 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Client.Internal
 {
     internal abstract class PlatformInformationBase
     {

@@ -16,14 +16,14 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Test.ADAL.Common;
+using Test.MSAL.Common;
 
 namespace TestApp.PCL
 {

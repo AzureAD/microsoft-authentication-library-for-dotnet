@@ -31,9 +31,9 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
+using Microsoft.Identity.Client.Interfaces;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Client.Internal
 {
     internal static class WsTrustRequest
     {

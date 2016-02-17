@@ -23,7 +23,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Client.Internal
 {
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]

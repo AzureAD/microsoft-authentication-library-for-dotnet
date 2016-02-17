@@ -17,10 +17,10 @@
 //----------------------------------------------------------------------
 
 using Foundation;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Identity.Client;
 using UIKit;
 
-namespace AdaliOSTestApp
+namespace MsaliOSTestApp
 {
     // The UIApplicationDelegate for the application. This class is responsible for launching the 
     // User Interface of the application, as well as listening (and optionally responding) to 

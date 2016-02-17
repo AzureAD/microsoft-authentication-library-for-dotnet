@@ -23,7 +23,7 @@ using System.Text;
 
 using UIKit;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Additional parameters used in acquiring user's authorization

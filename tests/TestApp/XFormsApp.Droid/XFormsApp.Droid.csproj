@@ -105,13 +105,13 @@
     <Content Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\ADAL.PCL.Android\ADAL.PCL.Android.csproj">
+    <ProjectReference Include="..\..\..\src\ADAL.PCL.Android\MSAL.PCL.Android.csproj">
       <Project>{0c5100d0-54f2-4075-b604-dde15da218d5}</Project>
-      <Name>ADAL.PCL.Android</Name>
+      <Name>MSAL.PCL.Android</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\ADAL.PCL\ADAL.PCL.csproj">
+    <ProjectReference Include="..\..\..\src\ADAL.PCL\MSAL.PCL.csproj">
       <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
-      <Name>ADAL.PCL</Name>
+      <Name>MSAL.PCL</Name>
     </ProjectReference>
     <ProjectReference Include="..\XFormsApp\XFormsApp.csproj">
       <Project>{856ea096-2283-49b6-b2cd-5c603551d150}</Project>

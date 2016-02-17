@@ -28,7 +28,7 @@
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Client.Internal
 {
     [DataContract]
     internal sealed class UserRealmDiscoveryResponse

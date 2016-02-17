@@ -31,12 +31,12 @@ using Android.Content.PM;
 using Android.Util;
 using Java.Security;
 using Java.Util.Concurrent;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.Identity.Client.Internal;
 using OperationCanceledException = Android.Accounts.OperationCanceledException;
 using Permission = Android.Content.PM.Permission;
 using Signature = Android.Content.PM.Signature;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
 
     class BrokerProxy

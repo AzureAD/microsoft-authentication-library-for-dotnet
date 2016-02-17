@@ -18,9 +18,9 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
+using Microsoft.Identity.Client.Interfaces;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
     class DeviceAuthHelper : IDeviceAuthHelper
     {

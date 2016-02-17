@@ -20,7 +20,7 @@ using System;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Client.Internal
 {
     internal class SilentWebUI : WebUI, IDisposable
     {

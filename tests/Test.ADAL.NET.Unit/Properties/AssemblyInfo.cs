@@ -22,11 +22,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Test.ADAL.NET.Unit")]
+[assembly: AssemblyTitle("Test.MSAL.NET.Unit")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Test.ADAL.NET.Unit")]
+[assembly: AssemblyProduct("Test.MSAL.NET.Unit")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -17,9 +17,9 @@
 //----------------------------------------------------------------------
 
 using System;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Handlers
+namespace Microsoft.Identity.Client.Handlers
 {
     class AcquireTokenByAuthorizationCodeHandler : AcquireTokenHandlerBase
     {
@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Handlers
         private readonly Uri redirectUri;
 
         public AcquireTokenByAuthorizationCodeHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string authorizationCode, Uri redirectUri, string policy)
-            : base(authenticator, tokenCache, scope, clientKey, policy, TokenSubjectType.User)
+            : base(authenticator, tokenCache, scope, clientKey, policy, Internal.TokenSubjectType.User)
         {
             if (string.IsNullOrWhiteSpace(authorizationCode))
             {

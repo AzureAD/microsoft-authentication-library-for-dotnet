@@ -22,11 +22,11 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.ADAL.Common;
+using Test.MSAL.Common;
 using System.Xml;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.Identity.Client.Internal;
 
 namespace Test.ADAL.NET.Unit
 {

@@ -19,7 +19,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Client.Internal
 {
     internal static class AdalIdParameter
     {

@@ -19,7 +19,7 @@
 using System;
 using Foundation;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
     public static class AuthenticationContinuationHelper
     {

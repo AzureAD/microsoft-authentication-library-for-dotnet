@@ -27,9 +27,9 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
+using Microsoft.Identity.Client.Interfaces;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
     internal class DeviceAuthHelper : IDeviceAuthHelper
     {

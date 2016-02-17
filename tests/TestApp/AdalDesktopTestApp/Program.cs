@@ -20,8 +20,8 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Test.ADAL.Common;
+using Microsoft.Identity.Client;
+using Test.MSAL.Common;
 using TestApp.PCL;
 
 namespace AdalDesktopTestApp

@@ -22,7 +22,7 @@ using System.Linq;
 
 using Foundation;
 using UIKit;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Identity.Client;
 using Xamarin.Forms;
 
 namespace XFormsApp.iOS

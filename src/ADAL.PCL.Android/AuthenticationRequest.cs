@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
     class AuthenticationRequest
     {

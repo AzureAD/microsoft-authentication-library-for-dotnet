@@ -22,9 +22,9 @@ using System.Threading.Tasks;
 using Android.Content;
 using Android.Accounts;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
     internal class WebUI : IWebUI
     {

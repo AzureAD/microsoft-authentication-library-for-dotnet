@@ -17,7 +17,7 @@
 //----------------------------------------------------------------------
 
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
     class BrokerConstants
     {

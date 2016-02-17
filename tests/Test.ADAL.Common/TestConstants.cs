@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Test.ADAL.Common
+namespace Test.MSAL.Common
 {
     public static class StringValue
     {

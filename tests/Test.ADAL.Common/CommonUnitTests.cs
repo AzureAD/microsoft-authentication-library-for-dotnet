@@ -18,12 +18,12 @@
 
 using System;
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.ADAL.Common
+namespace Test.MSAL.Common
 {
     public static class CommonUnitTests
     {

@@ -32,9 +32,9 @@ using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
+using Microsoft.Identity.Client.Interfaces;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Client.Internal
 {
     internal class TokenResponseClaim
     {

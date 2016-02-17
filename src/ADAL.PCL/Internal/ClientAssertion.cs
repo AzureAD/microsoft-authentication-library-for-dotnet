@@ -18,7 +18,7 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Client.Internal
 {
     /// <summary>
     /// Secret type containing an assertion of type "urn:ietf:params:oauth:token-type:jwt".

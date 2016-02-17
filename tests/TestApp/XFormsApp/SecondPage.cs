@@ -1,4 +1,4 @@
-﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
+﻿using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +41,7 @@ namespace XFormsApp
         async void browseButton_Clicked(object sender, EventArgs e)
         {
             this.result.Text = string.Empty;
-            string token = await tokenBroker.GetTokenInteractiveAsync(Paramters);
+            string token = null;//await tokenBroker.GetTokenInteractiveAsync(Paramters);
             this.result.Text = token;
         }
     }

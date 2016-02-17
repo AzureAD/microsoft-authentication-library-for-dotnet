@@ -19,7 +19,7 @@
 using System;
 using System.Reflection;
 
-[assembly: AssemblyProduct("Active Directory Authentication Library")]
+[assembly: AssemblyProduct("Microsoft Authentication Library")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCulture("")]

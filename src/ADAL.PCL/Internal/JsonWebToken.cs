@@ -20,7 +20,7 @@ using System;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Client.Internal
 {
     internal class JsonWebTokenConstants
     {

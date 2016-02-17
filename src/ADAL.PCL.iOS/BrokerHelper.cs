@@ -24,11 +24,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using CoreFoundation;
 using Foundation;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal;
 using UIKit;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
     internal class BrokerHelper : IBrokerHelper
     {

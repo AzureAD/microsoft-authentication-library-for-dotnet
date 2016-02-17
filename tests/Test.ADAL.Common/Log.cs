@@ -27,7 +27,7 @@
 
 using System.Diagnostics;
 
-namespace Test.ADAL.Common
+namespace Test.MSAL.Common
 {
     internal static class Log
     {

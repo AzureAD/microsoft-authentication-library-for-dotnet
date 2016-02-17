@@ -27,10 +27,10 @@ using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Certificates;
 using Windows.Security.Cryptography.Core;
 using Windows.Storage.Streams;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
     internal class DeviceAuthHelper : IDeviceAuthHelper
     {

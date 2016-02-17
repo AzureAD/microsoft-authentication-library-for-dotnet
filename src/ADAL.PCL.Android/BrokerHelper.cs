@@ -24,10 +24,10 @@ using Android.Accounts;
 using Android.App;
 using Android.Content;
 using Java.IO;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
     class BrokerHelper : IBrokerHelper
     {

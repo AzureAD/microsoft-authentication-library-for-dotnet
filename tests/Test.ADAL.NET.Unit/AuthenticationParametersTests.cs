@@ -17,9 +17,9 @@
 //----------------------------------------------------------------------
 
 using System;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.ADAL.Common;
+using Test.MSAL.Common;
 
 namespace Test.ADAL.NET.Unit
 {

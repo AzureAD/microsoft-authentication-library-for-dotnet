@@ -25,7 +25,7 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
+namespace Microsoft.Identity.Client.Native
 {
     /// <summary>
     ///     Interface for asymmetric algorithms implemented over the CNG layer of Windows to provide CNG

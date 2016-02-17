@@ -22,9 +22,7 @@ using Android.App;
 using Android.Content;
 using Android.Widget;
 using Android.OS;
-
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-
+using Microsoft.Identity.Client;
 using TestApp.PCL;
 
 namespace AdalAndroidTestApp
@@ -102,7 +100,7 @@ namespace AdalAndroidTestApp
             string value = null;
             try
             {
-                value = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this)).ConfigureAwait(false);
+                //value = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this)).ConfigureAwait(false);
             }
             catch (Java.Lang.Exception ex)
             {
@@ -120,7 +118,7 @@ namespace AdalAndroidTestApp
         {
             await Task.Factory.StartNew(() =>
             {
-                TokenCache.DefaultShared.Clear();
+                TokenCache.DefaultShared.Clear(sts.ValidClientId);
                 this.accessTokenTextView.Text = "Cache cleared";
             }).ConfigureAwait(false);
         }

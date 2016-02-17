@@ -19,7 +19,7 @@
 using System;
 using System.Globalization;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Client.Internal
 {
     /// <summary>
     /// The exception type thrown when an error occurs during token acquisition.

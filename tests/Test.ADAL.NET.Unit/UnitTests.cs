@@ -25,12 +25,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 
-using Test.ADAL.Common;
+using Test.MSAL.Common;
 
 namespace Test.ADAL.NET.Unit
 {

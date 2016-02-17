@@ -20,9 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Handlers
+namespace Microsoft.Identity.Client.Handlers
 {
     internal class AcquireTokenInteractiveHandler : AcquireTokenHandlerBase
     {
@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Handlers
 
         public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope,
             string[] additionalScope, string clientId, Uri redirectUri, IPlatformParameters parameters, string loginHint, UiOptions uiOptions, string extraQueryParameters, string policy, IWebUI webUI)
-            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, TokenSubjectType.User)
+            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, Internal.TokenSubjectType.User)
         {
             this._redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
 

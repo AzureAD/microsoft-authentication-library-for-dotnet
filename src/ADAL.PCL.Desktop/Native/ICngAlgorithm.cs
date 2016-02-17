@@ -19,7 +19,7 @@
 
 using System.Security.Cryptography;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
+namespace Microsoft.Identity.Client.Native
 {
     interface ICngAlgorithm
     {

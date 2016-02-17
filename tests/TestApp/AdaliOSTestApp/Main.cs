@@ -23,7 +23,7 @@ using System.Linq;
 using Foundation;
 using UIKit;
 
-namespace AdaliOSTestApp
+namespace MsaliOSTestApp
 {
     public class Application
     {

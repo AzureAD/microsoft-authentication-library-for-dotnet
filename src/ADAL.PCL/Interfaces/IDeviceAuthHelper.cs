@@ -19,7 +19,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces
+namespace Microsoft.Identity.Client.Interfaces
 {
     internal interface IDeviceAuthHelper
     {

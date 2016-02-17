@@ -28,7 +28,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Client.Internal
 {
     internal interface IRequestParameters
     {

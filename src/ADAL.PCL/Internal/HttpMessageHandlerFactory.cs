@@ -27,7 +27,7 @@
 
 using System.Net.Http;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Client.Internal
 {
 
     internal static class HttpMessageHandlerFactory

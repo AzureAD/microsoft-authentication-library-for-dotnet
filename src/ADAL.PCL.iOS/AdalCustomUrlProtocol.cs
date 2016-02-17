@@ -21,7 +21,7 @@ using System;
 using CoreFoundation;
 using Foundation;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Client
 {
     public class AdalCustomUrlProtocol : NSUrlProtocol
     {

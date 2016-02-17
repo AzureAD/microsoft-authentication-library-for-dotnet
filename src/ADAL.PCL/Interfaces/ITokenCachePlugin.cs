@@ -16,9 +16,9 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces
+namespace Microsoft.Identity.Client.Interfaces
 {
     internal interface ITokenCachePlugin
     {

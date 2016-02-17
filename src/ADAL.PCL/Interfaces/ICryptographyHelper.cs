@@ -16,7 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Interfaces
+namespace Microsoft.Identity.Client.Interfaces
 {
     internal interface ICryptographyHelper
     {

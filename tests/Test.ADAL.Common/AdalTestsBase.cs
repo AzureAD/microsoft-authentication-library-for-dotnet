@@ -28,7 +28,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Test.ADAL.Common
+namespace Test.MSAL.Common
 {
     public abstract class AdalTestsBase
     {

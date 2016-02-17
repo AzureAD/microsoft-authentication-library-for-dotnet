@@ -103,15 +103,15 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\ADAL.PCL.iOS\ADAL.PCL.iOS.csproj">
+    <ProjectReference Include="..\..\..\src\ADAL.PCL.iOS\MSAL.PCL.iOS.csproj">
       <Project>{2f80e14c-b186-4aee-92bc-0de3b6fdb107}</Project>
-      <Name>ADAL.PCL.iOS</Name>
+      <Name>MSAL.PCL.iOS</Name>
       <IsAppExtension>false</IsAppExtension>
       <IsWatchApp>false</IsWatchApp>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\ADAL.PCL\ADAL.PCL.csproj">
+    <ProjectReference Include="..\..\..\src\ADAL.PCL\MSAL.PCL.csproj">
       <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
-      <Name>ADAL.PCL</Name>
+      <Name>MSAL.PCL</Name>
     </ProjectReference>
     <ProjectReference Include="..\XFormsApp\XFormsApp.csproj">
       <Project>{856ea096-2283-49b6-b2cd-5c603551d150}</Project>
