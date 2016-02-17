@@ -27,11 +27,11 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Microsoft.Identity.Client;
 using XFormsApp.Droid;
 using XFormsApp;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 [assembly: ExportRenderer(typeof(SecondPage), typeof(SecondPageRenderer))]
 namespace XFormsApp.Droid

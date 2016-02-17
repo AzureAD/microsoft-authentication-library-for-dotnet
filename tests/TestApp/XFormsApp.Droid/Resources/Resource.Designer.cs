@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: global::Android.Runtime.ResourceDesignerAttribute("XFormsApp.Droid.Scope", IsApplication=true)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("XFormsApp.Droid.Resource", IsApplication=true)]
 
 namespace XFormsApp.Droid
 {
@@ -26,9 +26,9 @@ namespace XFormsApp.Droid
 		
 		public static void UpdateIdValues()
 		{
-			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Id.agentWebView = global::XFormsApp.Droid.Resource.Id.agentWebView;
-			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Layout.WebAuthenticationBroker = global::XFormsApp.Droid.Resource.Layout.WebAuthenticationBroker;
-			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.String.ApplicationName = global::XFormsApp.Droid.Resource.String.ApplicationName;
+			global::Microsoft.Identity.Client.Resource.Id.agentWebView = global::XFormsApp.Droid.Resource.Id.agentWebView;
+			global::Microsoft.Identity.Client.Resource.Layout.WebAuthenticationBroker = global::XFormsApp.Droid.Resource.Layout.WebAuthenticationBroker;
+			global::Microsoft.Identity.Client.Resource.String.ApplicationName = global::XFormsApp.Droid.Resource.String.ApplicationName;
 		}
 		
 		public partial class Attribute
