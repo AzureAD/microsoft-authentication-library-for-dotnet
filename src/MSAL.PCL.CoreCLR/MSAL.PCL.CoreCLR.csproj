@@ -52,13 +52,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\ADAL.Common\AdalEventSource.cs">
+    <Compile Include="..\MSAL.Common\AdalEventSource.cs">
       <Link>AdalEventSource.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
+    <Compile Include="..\MSAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\Logger.cs">
+    <Compile Include="..\MSAL.Common\Logger.cs">
       <Link>Logger.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.PCL\AdalOption.cs">
@@ -74,7 +74,7 @@
     <Compile Include="WebUIFactory.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ADAL.PCL\MSAL.PCL.csproj">
+    <ProjectReference Include="..\MSAL.PCL\MSAL.PCL.csproj">
       <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
       <Name>MSAL.PCL</Name>
     </ProjectReference>

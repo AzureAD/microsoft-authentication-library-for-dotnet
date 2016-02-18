@@ -79,7 +79,7 @@
     <AndroidResource Include="Resources\Values\Strings.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ADAL.PCL\MSAL.PCL.csproj">
+    <ProjectReference Include="..\MSAL.PCL\MSAL.PCL.csproj">
       <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
       <Name>MSAL.PCL</Name>
     </ProjectReference>

@@ -104,11 +104,11 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <ProjectReference Include="..\..\..\..\src\ADAL.PCL.WinRT\MSAL.PCL.WinRT.csproj">
+    <ProjectReference Include="..\..\..\..\src\MSAL.PCL.WinRT\MSAL.PCL.WinRT.csproj">
       <Project>{826d90f4-ca79-4788-918c-b66aa5cc6df0}</Project>
       <Name>MSAL.PCL.WinRT</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\src\ADAL.PCL\MSAL.PCL.csproj">
+    <ProjectReference Include="..\..\..\..\src\MSAL.PCL\MSAL.PCL.csproj">
       <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
       <Name>MSAL.PCL</Name>
     </ProjectReference>
