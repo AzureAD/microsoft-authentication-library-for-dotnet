@@ -30,7 +30,7 @@ using System.Collections.Generic;
 
 namespace Test.MSAL.Common
 {
-    public abstract class AdalTestsBase
+    public abstract class MsalTestsBase
     {
 
         protected Sts Sts { get; set; }

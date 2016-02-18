@@ -33,7 +33,7 @@ namespace Test.ADAL.NET.Unit
     [TestClass]
     [DeploymentItem("TestMex.xml")]
     [DeploymentItem("TestMex2005.xml")]
-    public class NonInteractiveTests : AdalTestsBase
+    public class NonInteractiveTests : MsalTestsBase
     {
 
         [TestMethod]

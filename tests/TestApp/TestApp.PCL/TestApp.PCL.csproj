@@ -34,7 +34,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\Test.ADAL.Common\Sts.cs">
+    <Compile Include="..\..\Test.MSAL.Common\Sts.cs">
       <Link>Sts.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />

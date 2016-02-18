@@ -75,22 +75,22 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="..\Test.ADAL.Common\AdalTestsBase.cs">
-      <Link>Common\AdalTestsBase.cs</Link>
+    <Compile Include="..\Test.MSAL.Common\MsalTestsBase.cs">
+      <Link>Common\MsalTestsBase.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.Common\CommonUnitTests.cs">
+    <Compile Include="..\Test.MSAL.Common\CommonUnitTests.cs">
       <Link>Common\CommonUnitTests.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.Common\Log.cs">
+    <Compile Include="..\Test.MSAL.Common\Log.cs">
       <Link>Common\Log.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.Common\Sts.cs">
+    <Compile Include="..\Test.MSAL.Common\Sts.cs">
       <Link>Common\Sts.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.Common\TestConstants.cs">
+    <Compile Include="..\Test.MSAL.Common\TestConstants.cs">
       <Link>Common\TestConstants.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.Common\TokenCacheTests.cs">
+    <Compile Include="..\Test.MSAL.Common\TokenCacheTests.cs">
       <Link>TokenCacheTests.cs</Link>
     </Compile>
     <Compile Include="AcquireTokenInteractiveHandlerTests.cs" />
@@ -133,11 +133,11 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Test.ADAL.Common\Certs\valid_cert.pfx">
+    <None Include="..\Test.MSAL.Common\Certs\valid_cert.pfx">
       <Link>Resources\valid_cert.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Test.ADAL.Common\Certs\valid_cert2.pfx">
+    <None Include="..\Test.MSAL.Common\Certs\valid_cert2.pfx">
       <Link>Resources\valid_cert2.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
