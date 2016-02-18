@@ -34,13 +34,16 @@ namespace Test.ADAL.NET.Unit
             cache.tokenCacheDictionary[key] = ex;
 
             IWebUI ui = Substitute.For<IWebUI>();
-            AuthorizationResult ar = new AuthorizationResult(AuthorizationStatus.Success, "some-code");
+            AuthorizationResult ar = new AuthorizationResult(AuthorizationStatus.Success, TestConstants.DefaultAuthorityHomeTenant+"?code=some-code");
             ui.AcquireAuthorizationAsync(Arg.Any<Uri>(), Arg.Any<Uri>(), Arg.Any<IDictionary<string,string>>(), Arg.Any<CallState>())
                 .Returns(ar);
 
             MockHttpMessageHandler mockHandler = new MockHttpMessageHandler();
             mockHandler.Method = HttpMethod.Post;
+            mockHandler.QueryParams = new Dictionary<string, string>() {{"p", "some-policy"}};
+            
             HttpMessageHandlerFactory.MockHandler = mockHandler;
+            
 
             AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, cache,
                 TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),

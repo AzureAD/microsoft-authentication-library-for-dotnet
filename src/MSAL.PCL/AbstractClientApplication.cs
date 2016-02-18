@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client
         protected const string DEFAULT_AUTHORTIY = "https://login.microsoftonline.com/common";
 
         /// <summary>
-        /// default false. TODO - Why would anyone build a single user, single tenant app. Consider removal.
+        /// default false.
         /// </summary>
         public string RestrictToSingleUser { get; set; }
 
@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Will be a default value. Can be overriden by the developer.
         /// </summary>
-        public string ClientId { get; private set; }
+        public string ClientId { get;  set; }
 
         /// <summary>
         /// Redirect Uri configured in the portal. Will have a default value. Not required, if the developer is using the default client ID.

@@ -112,11 +112,6 @@ namespace Test.ADAL.NET.Unit
         {
             return await Task.Factory.StartNew(() =>
             {
-                if (metadataUrl.EndsWith("xx"))
-                {
-                    throw new MsalException(MsalError.AccessingWsMetadataExchangeFailed);
-                }
-
                 using (Stream stream = new FileStream("TestMex.xml", FileMode.Open))
                 {
                     return XDocument.Load(stream);

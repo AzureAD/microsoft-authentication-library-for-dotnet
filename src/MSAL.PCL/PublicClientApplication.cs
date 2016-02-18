@@ -12,6 +12,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed class PublicClientApplication : AbstractClientApplication
     {
+        //TODO add default client id
         private const string DEFAULT_CLIENT_ID = "default-client-id";
         private const string DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
 
