@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client
         {
             if (Permission.Granted != Application.Context.PackageManager.CheckPermission(permission, Application.Context.PackageName))
             {
-                PlatformPlugin.Logger.Information(null, String.Format(AdalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission));
+                PlatformPlugin.Logger.Information(null, String.Format(MsalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission));
                 return false;
             }
 
@@ -557,7 +557,7 @@ namespace Microsoft.Identity.Client
                 PackageInfo info = Application.Context.PackageManager.GetPackageInfo(brokerPackageName, PackageInfoFlags.Signatures);
                 if (info == null || info.Signatures == null)
                 {
-                    PlatformPlugin.Logger.Information(null, AdalErrorMessageAndroidEx.FailedToGetBrokerAppSignature);
+                    PlatformPlugin.Logger.Information(null, MsalErrorMessageAndroidEx.FailedToGetBrokerAppSignature);
                     return false;
                 }
 
@@ -579,20 +579,20 @@ namespace Microsoft.Identity.Client
                     }
                 }
 
-                PlatformPlugin.Logger.Information(null, AdalErrorMessageAndroidEx.IncorrectBrokerAppSignate);
+                PlatformPlugin.Logger.Information(null, MsalErrorMessageAndroidEx.IncorrectBrokerAppSignate);
                 return false;
             }
             catch (PackageManager.NameNotFoundException ex)
             {
-                throw new MsalException(AdalErrorAndroidEx.MissingBrokerRelatedPackage, AdalErrorMessageAndroidEx.MissingBrokerRelatedPackage, ex);
+                throw new MsalException(MsalErrorAndroidEx.MissingBrokerRelatedPackage, MsalErrorMessageAndroidEx.MissingBrokerRelatedPackage, ex);
             }
             catch (NoSuchAlgorithmException ex)
             {
-                throw new MsalException(AdalErrorAndroidEx.MissingDigestShaAlgorithm, AdalErrorMessageAndroidEx.MissingDigestShaAlgorithm, ex);
+                throw new MsalException(MsalErrorAndroidEx.MissingDigestShaAlgorithm, MsalErrorMessageAndroidEx.MissingDigestShaAlgorithm, ex);
             }
             catch (Exception ex)
             {
-                throw new MsalException(AdalErrorAndroidEx.SignatureVerificationFailed, AdalErrorMessageAndroidEx.SignatureVerificationFailed, ex);
+                throw new MsalException(MsalErrorAndroidEx.SignatureVerificationFailed, MsalErrorMessageAndroidEx.SignatureVerificationFailed, ex);
             }
         }
 

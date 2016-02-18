@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Internal
         public static void InitializeByAssemblyDynamicLinking()
         {
             Assembly assembly = LoadPlatformSpecificAssembly();
-            const string Namespace = "Microsoft.IdentityModel.Clients.ActiveDirectory.";
+            const string Namespace = "Microsoft.Identity.Client.";
             InjectDependecies(
                 (IWebUIFactory)Activator.CreateInstance(assembly.GetType(Namespace + "WebUIFactory")),
                 (ITokenCachePlugin)Activator.CreateInstance(assembly.GetType(Namespace + "TokenCachePlugin")),
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal
         private static Assembly LoadPlatformSpecificAssembly()
         {
             // For security reasons, it is important to have PublicKeyToken mentioned referencing the assembly.
-            const string PlatformSpecificAssemblyNameTemplate = "Microsoft.IdentityModel.Clients.ActiveDirectory.Platform, Version={0}, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
+            const string PlatformSpecificAssemblyNameTemplate = "Microsoft.Identity.Client.Platform, Version={0}, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
 
             string platformSpecificAssemblyName = string.Format(PlatformSpecificAssemblyNameTemplate, MsalIdHelper.GetMsalVersion());
 

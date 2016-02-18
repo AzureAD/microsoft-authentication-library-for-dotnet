@@ -18,12 +18,12 @@
 
 namespace Microsoft.Identity.Client
 {
-    internal static class AdalErrorIOSEx
+    internal static class MsalErrorIOSEx
     {
         public const string BrokerApplicationRequired = "broker_application_required";
     }
 
-    internal static class AdalErrorMessageIOSEx
+    internal static class MsalErrorMessageIOSEx
     {
         public const string BrokerApplicationRequired = "Broker application must be installed to continue authentication";
     }

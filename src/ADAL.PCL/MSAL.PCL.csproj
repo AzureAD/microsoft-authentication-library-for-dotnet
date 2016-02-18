@@ -115,7 +115,7 @@
     <Compile Include="Internal\PlatformPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Internal\RequestParameters.cs" />
-    <Compile Include="Internal\AdalHttpClient.cs">
+    <Compile Include="Internal\MsalHttpClient.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TokenCache.cs" />

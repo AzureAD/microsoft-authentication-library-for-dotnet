@@ -458,14 +458,7 @@ namespace Microsoft.Identity.Client
                     break;
                 case 0:
                     {
-                        // There are no tokens matching all the scopes.  look for intersecting scopes.
-                        PlatformPlugin.Logger.Information(callState,
-                            "A Multi Scope Refresh Token for a different resource was found which can be used");
-                        scopeSpecificItems = items.Where(p => p.Key.ScopeIntersects(scope)).ToList();
-
-                        if (!scopeSpecificItems.Any())
-                        {
-                            //Choose any of the MRRT tokens if there are any.
+                        //Choose any of the MRRT tokens if there are any.
                             scopeSpecificItems =
                                 items.Where(p => p.Value.IsMultipleScopeRefreshToken).ToList();
 
@@ -475,13 +468,6 @@ namespace Microsoft.Identity.Client
                                 PlatformPlugin.Logger.Information(callState,
                                     "A Multi Scope Refresh Token for a different scope was found which can be used");
                             }
-                        }
-                        else
-                        {
-                            returnValue = scopeSpecificItems.First();
-                            PlatformPlugin.Logger.Information(callState,
-                                "A Multi Scope Refresh Token for intersecting scope was found which can be used");
-                        }
                     }
                     break;
                 default:

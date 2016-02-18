@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal
 
             try
             {
-                var client = new AdalHttpClient(instanceDiscoveryEndpoint, callState);
+                var client = new MsalHttpClient(instanceDiscoveryEndpoint, callState);
                 InstanceDiscoveryResponse discoveryResponse = await client.GetResponseAsync<InstanceDiscoveryResponse>(ClientMetricsEndpointType.InstanceDiscovery).ConfigureAwait(false);
 
                 if (discoveryResponse.TenantDiscoveryEndpoint == null)

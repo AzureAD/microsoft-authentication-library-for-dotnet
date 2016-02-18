@@ -25,7 +25,7 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-    public static class AdalInitializer
+    public static class MsalInitializer
     {
         public static void Initialize()
         {

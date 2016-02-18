@@ -49,8 +49,8 @@ namespace Microsoft.Identity.Client.Handlers
                 deviceCodeRequestParameters[OAuthParameter.CorrelationId] = this.callState.CorrelationId.ToString();
             }
             
-                IDictionary<string, string> adalIdParameters = MsalIdHelper.GetAdalIdParameters();
-                foreach (KeyValuePair<string, string> kvp in adalIdParameters)
+                IDictionary<string, string> msalIdParameters = MsalIdHelper.GetMsalIdParameters();
+                foreach (KeyValuePair<string, string> kvp in msalIdParameters)
                 {
                     deviceCodeRequestParameters[kvp.Key] = kvp.Value;
                 }
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Handlers
         {
             await this.authenticator.UpdateFromTemplateAsync(this.callState).ConfigureAwait(false);
             this.ValidateAuthorityType();
-            AdalHttpClient client = new AdalHttpClient(CreateDeviceCodeRequestUriString(), this.callState);
+            MsalHttpClient client = new MsalHttpClient(CreateDeviceCodeRequestUriString(), this.callState);
             DeviceCodeResponse response = await client.GetResponseAsync<DeviceCodeResponse>(ClientMetricsEndpointType.DeviceCode).ConfigureAwait(false);
 
             if (!string.IsNullOrEmpty(response.Error))

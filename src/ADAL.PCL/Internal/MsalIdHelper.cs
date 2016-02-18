@@ -21,7 +21,7 @@ using System.Reflection;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    internal static class AdalIdParameter
+    internal static class MsalIdParameter
     {
         /// <summary>
         /// ADAL Flavor: .NET or WinRT
@@ -55,29 +55,29 @@ namespace Microsoft.Identity.Client.Internal
     /// </summary>
     internal static class MsalIdHelper
     {
-        public static IDictionary<string, string> GetAdalIdParameters()
+        public static IDictionary<string, string> GetMsalIdParameters()
         {
             var parameters = new Dictionary<string, string>();
 
-            parameters[AdalIdParameter.Product] = PlatformPlugin.PlatformInformation.GetProductName();
-            parameters[AdalIdParameter.Version] = GetMsalVersion();
+            parameters[MsalIdParameter.Product] = PlatformPlugin.PlatformInformation.GetProductName();
+            parameters[MsalIdParameter.Version] = GetMsalVersion();
 
             var processorInofrmation = PlatformPlugin.PlatformInformation.GetProcessorArchitecture();
             if (processorInofrmation != null)
             {
-                parameters[AdalIdParameter.CpuPlatform] = processorInofrmation;
+                parameters[MsalIdParameter.CpuPlatform] = processorInofrmation;
             }
 
             var osInformation = PlatformPlugin.PlatformInformation.GetOperatingSystem();
             if (osInformation != null)
             {
-                parameters[AdalIdParameter.OS] = osInformation;
+                parameters[MsalIdParameter.OS] = osInformation;
             }
 
             var deviceInformation = PlatformPlugin.PlatformInformation.GetDeviceModel();
             if (deviceInformation != null)
             {
-                parameters[AdalIdParameter.DeviceModel] = deviceInformation;
+                parameters[MsalIdParameter.DeviceModel] = deviceInformation;
             }
 
             return parameters;

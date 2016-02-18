@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client
 
                 DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(keyPair["app_link"])));
 
-                    throw new MsalException(AdalErrorIOSEx.BrokerApplicationRequired, AdalErrorMessageIOSEx.BrokerApplicationRequired);
+                    throw new MsalException(MsalErrorIOSEx.BrokerApplicationRequired, MsalErrorMessageIOSEx.BrokerApplicationRequired);
             }
             else
             {

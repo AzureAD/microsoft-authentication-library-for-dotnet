@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Client.Handlers
             string endpoint = this.Authenticator.TokenUri;
             endpoint = AddPolicyParameter(endpoint);
 
-            var client = new AdalHttpClient(endpoint, this.CallState) { Client = { BodyParameters = requestParameters } };
+            var client = new MsalHttpClient(endpoint, this.CallState) { Client = { BodyParameters = requestParameters } };
             TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>(ClientMetricsEndpointType.Token).ConfigureAwait(false);
 
             return tokenResponse.GetResult();

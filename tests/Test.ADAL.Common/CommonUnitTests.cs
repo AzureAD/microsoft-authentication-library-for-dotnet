@@ -40,33 +40,33 @@ namespace Test.MSAL.Common
 
         public static void AdalIdTest()
         {
-            var adalParameters = MsalIdHelper.GetAdalIdParameters();
+            var adalParameters = MsalIdHelper.GetMsalIdParameters();
 
             Assert.AreEqual(4, adalParameters.Count);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.Product]);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.Version]);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
+            Assert.IsNotNull(adalParameters[MsalIdParameter.Product]);
+            Assert.IsNotNull(adalParameters[MsalIdParameter.Version]);
+            Assert.IsNotNull(adalParameters[MsalIdParameter.CpuPlatform]);
 #if TEST_ADAL_WINRT_UNIT
-            Assert.IsFalse(adalParameters.ContainsKey(AdalIdParameter.OS));
-            Assert.IsNotNull(adalParameters[AdalIdParameter.DeviceModel]);
+            Assert.IsFalse(adalParameters.ContainsKey(MsalIdParameter.OS));
+            Assert.IsNotNull(adalParameters[MsalIdParameter.DeviceModel]);
 #else
-            Assert.IsNotNull(adalParameters[AdalIdParameter.OS]);
-            Assert.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
+            Assert.IsNotNull(adalParameters[MsalIdParameter.OS]);
+            Assert.IsFalse(adalParameters.ContainsKey(MsalIdParameter.DeviceModel));
 #endif
 
             var parameters = new DictionaryRequestParameters(null, new ClientKey("client_id"));
-            adalParameters = MsalIdHelper.GetAdalIdParameters();
+            adalParameters = MsalIdHelper.GetMsalIdParameters();
 
             Assert.AreEqual(4, adalParameters.Count);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.Product]);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.Version]);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
+            Assert.IsNotNull(adalParameters[MsalIdParameter.Product]);
+            Assert.IsNotNull(adalParameters[MsalIdParameter.Version]);
+            Assert.IsNotNull(adalParameters[MsalIdParameter.CpuPlatform]);
 #if TEST_ADAL_WINRT_UNIT
-            Assert.IsFalse(adalParameters.ContainsKey(AdalIdParameter.OS));
-            Assert.IsNotNull(adalParameters[AdalIdParameter.DeviceModel]);
+            Assert.IsFalse(adalParameters.ContainsKey(MsalIdParameter.OS));
+            Assert.IsNotNull(adalParameters[MsalIdParameter.DeviceModel]);
 #else
-            Assert.IsNotNull(adalParameters[AdalIdParameter.OS]);
-            Assert.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
+            Assert.IsNotNull(adalParameters[MsalIdParameter.OS]);
+            Assert.IsFalse(adalParameters.ContainsKey(MsalIdParameter.DeviceModel));
 #endif
         }
     }

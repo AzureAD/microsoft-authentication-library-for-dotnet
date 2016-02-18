@@ -18,7 +18,7 @@
 
 namespace Microsoft.Identity.Client
 {
-    internal static class AdalErrorAndroidEx
+    internal static class MsalErrorAndroidEx
     {
         public const string MissingPackagePermission = "missing_package_permission";
         public const string CannotSwitchToBrokerFromThisApp = "cannot_switch_to_broker_from_this_app";
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client
         public const string BrokerApplicationRequired = "broker_application_required";
     }
 
-    internal static class AdalErrorMessageAndroidEx
+    internal static class MsalErrorMessageAndroidEx
     {
         public const string MissingPackagePermissionTemplate = "Permission {0} is missing from package manifest";
         public const string CannotSwitchToBrokerFromThisApp = "Cannot switch to broker from this app";

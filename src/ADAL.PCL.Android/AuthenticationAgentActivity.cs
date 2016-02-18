@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
     [CLSCompliant(false)]
     public class AuthenticationAgentActivity : Activity
     {
-        private AdalWebViewClient client;
+        private MsalWebViewClient client;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
             webSettings.UseWideViewPort = true;
             webSettings.BuiltInZoomControls = true;
 
-            this.client = new AdalWebViewClient(Intent.GetStringExtra("Callback"));
+            this.client = new MsalWebViewClient(Intent.GetStringExtra("Callback"));
             
             webView.SetWebViewClient(client);
 
@@ -84,11 +84,11 @@ namespace Microsoft.Identity.Client
             base.Finish();
         }
 
-        sealed class AdalWebViewClient : WebViewClient
+        sealed class MsalWebViewClient : WebViewClient
         {
             private readonly string callback;
 
-            public AdalWebViewClient(string callback)
+            public MsalWebViewClient(string callback)
             {
                 this.callback = callback;
             }

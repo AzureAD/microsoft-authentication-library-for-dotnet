@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client.Handlers
                 authorizationRequestParameters[OAuthParameter.CorrelationId] = this.CallState.CorrelationId.ToString();
             }
             
-                IDictionary<string, string> adalIdParameters = MsalIdHelper.GetAdalIdParameters();
+                IDictionary<string, string> adalIdParameters = MsalIdHelper.GetMsalIdParameters();
                 foreach (KeyValuePair<string, string> kvp in adalIdParameters)
                 {
                     authorizationRequestParameters[kvp.Key] = kvp.Value;

@@ -48,7 +48,7 @@ namespace MsaliOSTestApp
         {
             base.ViewDidLoad();
 
-            AdalInitializer.Initialize();
+            MsalInitializer.Initialize();
         }
 
         public override void ViewWillAppear(bool animated)

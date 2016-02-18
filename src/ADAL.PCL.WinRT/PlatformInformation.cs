@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client
         {
             if (!UserInformation.NameAccessAllowed)
             {
-                throw new MsalException(AdalErrorEx.CannotAccessUserInformation, AdalErrorMessageEx.CannotAccessUserInformation);
+                throw new MsalException(MsalErrorEx.CannotAccessUserInformation, MsalErrorMessageEx.CannotAccessUserInformation);
             }
 
             try
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
             }
             catch (UnauthorizedAccessException ex)
             {
-                throw new MsalException(AdalErrorEx.UnauthorizedUserInformationAccess, AdalErrorMessageEx.UnauthorizedUserInformationAccess, ex);
+                throw new MsalException(MsalErrorEx.UnauthorizedUserInformationAccess, MsalErrorMessageEx.UnauthorizedUserInformationAccess, ex);
             }
         }
 

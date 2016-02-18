@@ -33,14 +33,14 @@ using Microsoft.Identity.Client.Interfaces;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    class AdalHttpClient
+    class MsalHttpClient
     {
         private const string DeviceAuthHeaderName = "x-ms-PKeyAuth";
         private const string DeviceAuthHeaderValue = "1.0";
         private const string WwwAuthenticateHeader = "WWW-Authenticate";
         private const string PKeyAuthName = "PKeyAuth";
 
-        public AdalHttpClient(string uri, CallState callState)
+        public MsalHttpClient(string uri, CallState callState)
         {
             this.Client = new HttpClientWrapper(CheckForExtraQueryParameter(uri), callState);
             this.CallState = callState;
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal
                         this.Client.Headers[kvp.Key] = kvp.Value;
                     }
 
-                    IDictionary<string, string> adalIdHeaders = MsalIdHelper.GetAdalIdParameters();
+                    IDictionary<string, string> adalIdHeaders = MsalIdHelper.GetMsalIdParameters();
                     foreach (KeyValuePair<string, string> kvp in adalIdHeaders)
                     {
                         this.Client.Headers[kvp.Key] = kvp.Value;

@@ -26,29 +26,29 @@ namespace Microsoft.Identity.Client
     {
         static Logger()
         {
-            AdalEventSource = new AdalEventSource();
+            MsalEventSource = new MsalEventSource();
         }
 
-        internal static AdalEventSource AdalEventSource { get; private set; }
+        internal static MsalEventSource MsalEventSource { get; private set; }
 
         internal override void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Error(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), ex.ToString()));
+            MsalEventSource.Error(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), ex.ToString()));
         }
 
         internal override void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Verbose(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
+            MsalEventSource.Verbose(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
         }
 
         internal override void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Information(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
+            MsalEventSource.Information(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
         }
 
         internal override void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Warning(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
+            MsalEventSource.Warning(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
         }
 
         private static string GetCallerFilename(string callerFilePath)

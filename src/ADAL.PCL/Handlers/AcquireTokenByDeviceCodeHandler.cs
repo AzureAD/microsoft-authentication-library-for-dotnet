@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Handlers
                 }
                 catch (MsalServiceException exc)
                 {
-                    if (!exc.ErrorCode.Equals(AdalErrorEx.DeviceCodeAuthorizationPendingError))
+                    if (!exc.ErrorCode.Equals(MsalErrorEx.DeviceCodeAuthorizationPendingError))
                     {
                         throw;
                     }

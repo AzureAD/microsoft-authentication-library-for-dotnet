@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
             bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
             if (!ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
             {
-                throw new ArgumentException(AdalErrorMessageEx.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
+                throw new ArgumentException(MsalErrorMessageEx.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
             }
             
             WebAuthenticationResult webAuthenticationResult;

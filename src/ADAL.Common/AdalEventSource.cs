@@ -20,8 +20,8 @@ using System.Diagnostics.Tracing;
 
 namespace Microsoft.Identity.Client
 {
-    [EventSource(Name = "Microsoft.IdentityModel.Clients.ActiveDirectory")]
-    internal class AdalEventSource : EventSource
+    [EventSource(Name = "Microsoft.Identity.Client")]
+    internal class MsalEventSource : EventSource
     {
 
         [Event(1, Level = EventLevel.Verbose)]

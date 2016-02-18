@@ -30,7 +30,7 @@ using System.Xml.Linq;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    internal static class AdalErrorEx
+    internal static class MsalErrorEx
     {
         public const string UnauthorizedUserInformationAccess = "unauthorized_user_information_access";
         public const string CannotAccessUserInformation = "user_information_access_failed";
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string DeviceCodeAuthorizationPendingError = "authorization_pending";
     }
 
-    internal static class AdalErrorMessageEx
+    internal static class MsalErrorMessageEx
     {
         public const string CannotAccessUserInformation = "Cannot access user information. Check machine's Privacy settings or initialize UserCredential with userId";
         public const string RedirectUriUnsupportedWithPromptBehaviorNever = "PromptBehavior.Never is supported in SSO mode only (null or application's callback URI as redirectUri)";

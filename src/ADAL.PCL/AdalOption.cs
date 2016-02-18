@@ -20,13 +20,13 @@ using System.Diagnostics.Tracing;
 
 namespace Microsoft.Identity.Client
 {
-    public static class AdalOption
+    public static class MsalOption
     {
-        public static EventSource AdalEventSource
+        public static EventSource MsalEventSource
         {
             get
             {
-                return Logger.AdalEventSource;
+                return Logger.MsalEventSource;
             }
         }
     }

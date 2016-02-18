@@ -23,7 +23,7 @@ using Foundation;
 
 namespace Microsoft.Identity.Client
 {
-    public class AdalCustomUrlProtocol : NSUrlProtocol
+    public class MsalCustomUrlProtocol : NSUrlProtocol
     {
         private NSUrlConnection connection;
 
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
         }
 
         [Export("initWithRequest:cachedResponse:client:")]
-        public AdalCustomUrlProtocol(NSUrlRequest request, NSCachedUrlResponse cachedResponse,
+        public MsalCustomUrlProtocol(NSUrlRequest request, NSCachedUrlResponse cachedResponse,
             INSUrlProtocolClient client)
             : base(request, cachedResponse, client)
         {
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
 
             NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest) this.Request.MutableCopy();
             SetProperty(new NSString("YES"), "ADURLProtocol", mutableRequest);
-            this.connection = new NSUrlConnection(mutableRequest, new AdalCustomConnectionDelegate(this), true);
+            this.connection = new NSUrlConnection(mutableRequest, new MsalCustomConnectionDelegate(this), true);
         }
 
         public override void StopLoading()
@@ -68,11 +68,11 @@ namespace Microsoft.Identity.Client
             this.connection.Cancel();
         }
 
-        private class AdalCustomConnectionDelegate : NSUrlConnectionDataDelegate
+        private class MsalCustomConnectionDelegate : NSUrlConnectionDataDelegate
         {
-            private AdalCustomUrlProtocol handler;
+            private MsalCustomUrlProtocol handler;
 
-            public AdalCustomConnectionDelegate(AdalCustomUrlProtocol handler)
+            public MsalCustomConnectionDelegate(MsalCustomUrlProtocol handler)
             {
                 this.handler = handler;
             }

@@ -43,10 +43,10 @@ namespace Microsoft.Identity.Client
                 {
                     Generic = NSData.FromString(LocalSettingsContainerName),
                     Accessible = SecAccessible.Always,
-                    Service = "ADAL.PCL.iOS Service",
-                    Account = "ADAL.PCL.iOS cache",
-                    Label = "ADAL.PCL.iOS Label",
-                    Comment = "ADAL.PCL.iOS Cache",
+                    Service = "MSAL.PCL.iOS Service",
+                    Account = "MSAL.PCL.iOS cache",
+                    Label = "MSAL.PCL.iOS Label",
+                    Comment = "MSAL.PCL.iOS Cache",
                     Description = "Storage for cache"
                 };
 

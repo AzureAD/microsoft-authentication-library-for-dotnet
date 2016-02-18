@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
             this.callback = callback;
             this.callbackMethod = callbackMethod;
             this.additionalHeaders = additionalHeaders;
-            NSUrlProtocol.RegisterClass(new ObjCRuntime.Class(typeof(AdalCustomUrlProtocol)));
+            NSUrlProtocol.RegisterClass(new ObjCRuntime.Class(typeof(MsalCustomUrlProtocol)));
         }
 
         public override void ViewDidLoad()
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client
 
         public override void DismissViewController(bool animated, Action completionHandler)
         {
-            NSUrlProtocol.UnregisterClass(new ObjCRuntime.Class(typeof(AdalCustomUrlProtocol)));
+            NSUrlProtocol.UnregisterClass(new ObjCRuntime.Class(typeof(MsalCustomUrlProtocol)));
             base.DismissViewController(animated, completionHandler);
         }
     }
