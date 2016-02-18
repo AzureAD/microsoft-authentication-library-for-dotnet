@@ -101,12 +101,22 @@ namespace Microsoft.Identity.Client
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator, string[] scope, ClientKey clientKey, string userId, IPlatformParameters parameters, string policy)
         {
+            if (parameters == null)
+            {
+                parameters = PlatformPlugin.DefaultPlatformParameters;
+            }
+
             var handler = new AcquireTokenSilentHandler(authenticator, this.UserTokenCache, scope, clientKey, userId,  parameters, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator, string[] scope, ClientKey clientKey, User user, IPlatformParameters parameters, string policy)
         {
+            if (parameters == null)
+            {
+                parameters = PlatformPlugin.DefaultPlatformParameters;
+            }
+
             var handler = new AcquireTokenSilentHandler(authenticator, this.UserTokenCache, scope, clientKey, user, parameters, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }

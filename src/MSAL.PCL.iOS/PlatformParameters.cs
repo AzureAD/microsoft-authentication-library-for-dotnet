@@ -30,12 +30,12 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
-        private PlatformParameters()
+        public PlatformParameters()
         {
             SkipBroker = true;
         }
 
-        public PlatformParameters(UIViewController callerViewController)
+        public PlatformParameters(UIViewController callerViewController):this()
         {
             this.CallerViewController = callerViewController;
         }

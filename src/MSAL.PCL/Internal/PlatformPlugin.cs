@@ -51,6 +51,7 @@ namespace Microsoft.Identity.Client.Internal
         public static ICryptographyHelper CryptographyHelper { get; set; }
         public static IDeviceAuthHelper DeviceAuthHelper { get; set; }
         public static IBrokerHelper BrokerHelper { get; set; }
+        public static IPlatformParameters DefaultPlatformParameters { get; set; }
 
         public static void InitializeByAssemblyDynamicLinking()
         {
@@ -63,13 +64,14 @@ namespace Microsoft.Identity.Client.Internal
                 (PlatformInformationBase)Activator.CreateInstance(assembly.GetType(Namespace + "PlatformInformation")),
                 (ICryptographyHelper)Activator.CreateInstance(assembly.GetType(Namespace + "CryptographyHelper")),
                 (IDeviceAuthHelper)Activator.CreateInstance(assembly.GetType(Namespace + "DeviceAuthHelper")),
-                (IBrokerHelper)Activator.CreateInstance(assembly.GetType(Namespace + "BrokerHelper"))
+                (IBrokerHelper)Activator.CreateInstance(assembly.GetType(Namespace + "BrokerHelper")),
+                (IPlatformParameters)Activator.CreateInstance(assembly.GetType(Namespace + "PlatformParameters"))
             );
         }
 
         public static void InjectDependecies(IWebUIFactory webUIFactory, ITokenCachePlugin tokenCachePlugin, LoggerBase logger, 
             PlatformInformationBase platformInformation, ICryptographyHelper cryptographyHelper,
-            IDeviceAuthHelper deviceAuthHelper, IBrokerHelper brokerHelper)
+            IDeviceAuthHelper deviceAuthHelper, IBrokerHelper brokerHelper, IPlatformParameters platformParameters)
         {
             WebUIFactory = webUIFactory;
             TokenCachePlugin = tokenCachePlugin;
@@ -78,6 +80,7 @@ namespace Microsoft.Identity.Client.Internal
             CryptographyHelper = cryptographyHelper;
             DeviceAuthHelper = deviceAuthHelper;
             BrokerHelper = brokerHelper;
+            DefaultPlatformParameters = platformParameters;
         }
 
         private static Assembly LoadPlatformSpecificAssembly()

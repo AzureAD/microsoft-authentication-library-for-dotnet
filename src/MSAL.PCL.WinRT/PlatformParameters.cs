@@ -23,6 +23,10 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
+        public PlatformParameters()
+        {
+        }
+
         public PlatformParameters(bool useCorporateNetwork)
         {
             this.UseCorporateNetwork = useCorporateNetwork;

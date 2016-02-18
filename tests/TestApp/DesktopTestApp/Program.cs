@@ -67,11 +67,12 @@ namespace AdalDesktopTestApp
         {
             TokenBroker brkr = new TokenBroker();
             PublicClientApplication app =
-                new PublicClientApplication("https://login.microsoftonline.com/msdevex.onmicrosoft.com",
-                    "7c7a2f70-caef-45c8-9a6c-091633501de4");
+                new PublicClientApplication
+                {
+                    ClientId = "7c7a2f70-caef-45c8-9a6c-091633501de4"
+                };
             try
             {
-                app.PlatformParameters = new PlatformParameters();
                 return await app.AcquireTokenSilentAsync(brkr.Sts.ValidScope);
             }
             catch (Exception ex)
@@ -88,8 +89,11 @@ namespace AdalDesktopTestApp
             try
             {
                 TokenBroker brkr = new TokenBroker();
-                PublicClientApplication app = new PublicClientApplication(brkr.Sts.Authority, "7c7a2f70-caef-45c8-9a6c-091633501de4");
-                app.PlatformParameters = new PlatformParameters();
+                PublicClientApplication app =
+    new PublicClientApplication
+    {
+        ClientId = "7c7a2f70-caef-45c8-9a6c-091633501de4"
+    };
                 return await app.AcquireTokenAsync(brkr.Sts.ValidScope);
             }
             catch (Exception ex)

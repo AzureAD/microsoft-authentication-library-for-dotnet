@@ -25,12 +25,12 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
-        private PlatformParameters()
+        public PlatformParameters()
         {
             SkipBroker = true;
         }
 
-        public PlatformParameters(Activity callerActivity)
+        public PlatformParameters(Activity callerActivity):this()
         {
             this.CallerActivity = callerActivity;
         }

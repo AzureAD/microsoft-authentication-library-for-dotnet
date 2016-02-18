@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client
         {
         }
 
-        public PublicClientApplication(string authority):base(authority, DEFAULT_CLIENT_ID, DEFAULT_REDIRECT_URI, true)
+        public PublicClientApplication(string authority):this(authority, DEFAULT_CLIENT_ID)
         {
         }
 
@@ -197,6 +197,11 @@ namespace Microsoft.Identity.Client
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string[] additionalScope, string clientId, Uri redirectUri, string loginHint, UiOptions uiOptions, string extraQueryParameters, string policy)
         {
+            if (this.PlatformParameters == null)
+            {
+                this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
+            }
+
             var handler = new AcquireTokenInteractiveHandler(authenticator, this.UserTokenCache, scope, additionalScope, clientId, redirectUri, this.PlatformParameters, loginHint, uiOptions, extraQueryParameters, policy, this.CreateWebAuthenticationDialog(this.PlatformParameters));
             return await handler.RunAsync().ConfigureAwait(false);
         }

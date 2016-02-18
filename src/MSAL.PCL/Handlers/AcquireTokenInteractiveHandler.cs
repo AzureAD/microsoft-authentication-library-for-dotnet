@@ -98,30 +98,33 @@ namespace Microsoft.Identity.Client.Handlers
         {
             IDictionary<string, string> headers = new Dictionary<string, string>();
             await base.PreTokenRequest().ConfigureAwait(false);
-            
-            bool notifiedBeforeAccessCache = false;
-            try
-            {
-                this.NotifyBeforeAccessCache();
-                notifiedBeforeAccessCache = true;
 
-                AuthenticationResultEx resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope,
-                    this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.RootId,
-                    this.Policy, this.CallState);
-                if (resultEx != null && !string.IsNullOrWhiteSpace(resultEx.RefreshToken))
+            if (this.LoadFromCache)
+            {
+                bool notifiedBeforeAccessCache = false;
+                try
                 {
-                    headers["x-ms-sso-RefreshToken"] = resultEx.RefreshToken;
+                    this.NotifyBeforeAccessCache();
+                    notifiedBeforeAccessCache = true;
+
+                    AuthenticationResultEx resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority,
+                        this.Scope,
+                        this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.RootId,
+                        this.Policy, this.CallState);
+                    if (resultEx != null && !string.IsNullOrWhiteSpace(resultEx.RefreshToken))
+                    {
+                        headers["x-ms-sso-RefreshToken"] = resultEx.RefreshToken;
+                    }
+                }
+                finally
+                {
+                    if (notifiedBeforeAccessCache)
+                    {
+                        this.NotifyAfterAccessCache();
+                    }
+
                 }
             }
-            finally
-            {
-                if (notifiedBeforeAccessCache)
-                {
-                    this.NotifyAfterAccessCache();
-                }
-
-            }
-
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
             await this.AcquireAuthorizationAsync(headers).ConfigureAwait(false);
             this.VerifyAuthorizationResult();
