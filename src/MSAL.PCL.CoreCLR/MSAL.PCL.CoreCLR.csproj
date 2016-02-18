@@ -52,8 +52,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\MSAL.Common\AdalEventSource.cs">
-      <Link>AdalEventSource.cs</Link>
+    <Compile Include="..\MSAL.Common\MsalEventSource.cs">
+      <Link>MsalEventSource.cs</Link>
     </Compile>
     <Compile Include="..\MSAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
@@ -61,8 +61,8 @@
     <Compile Include="..\MSAL.Common\Logger.cs">
       <Link>Logger.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.PCL\AdalOption.cs">
-      <Link>AdalOption.cs</Link>
+    <Compile Include="..\MSAL.PCL\MsalOption.cs">
+      <Link>MsalOption.cs</Link>
     </Compile>
     <Compile Include="BrokerHelper.cs" />
     <Compile Include="DeviceAuthHelper.cs" />

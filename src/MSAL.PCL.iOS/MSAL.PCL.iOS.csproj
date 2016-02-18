@@ -36,7 +36,7 @@
     <DocumentationFile>bin\iPhone\Release\Microsoft.Identity.Client.Platform.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
+    <Compile Include="..\MSAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="MsalCustomUrlProtocol.cs" />
