@@ -262,8 +262,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (toRemoveKey != null)
             {
                 this.tokenCacheDictionary.Remove(toRemoveKey);
+                Logger.Information(null, "One item removed successfully");
             }
-
+            else
+            {
+                Logger.Information(null,"Item not Present in the Cache");
+            }
+            
             this.HasStateChanged = true;
             this.OnAfterAccess(args);
         }
@@ -281,7 +286,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
             this.OnBeforeAccess(args);
             this.OnBeforeWrite(args);
+            Logger.Information(null,String.Format("Clearing Cache :- {0} items to be removed",this.Count));
             this.tokenCacheDictionary.Clear();
+            Logger.Information(null, String.Format("Successfully Cleared Cache"));
             this.HasStateChanged = true;
             this.OnAfterAccess(args);
         }
