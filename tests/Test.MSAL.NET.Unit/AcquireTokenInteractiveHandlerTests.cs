@@ -41,7 +41,10 @@ namespace Test.ADAL.NET.Unit
             MockHttpMessageHandler mockHandler = new MockHttpMessageHandler();
             mockHandler.Method = HttpMethod.Post;
             mockHandler.QueryParams = new Dictionary<string, string>() {{"p", "some-policy"}};
-            
+            HttpResponseMessage responseMessageMock = Substitute.For<HttpResponseMessage>();
+            responseMessageMock.IsSuccessStatusCode.Returns(true);
+
+            mockHandler.ResponseMessage = responseMessageMock;
             HttpMessageHandlerFactory.MockHandler = mockHandler;
             
 
