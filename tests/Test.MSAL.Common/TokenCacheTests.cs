@@ -177,7 +177,7 @@ namespace Test.MSAL.Common.Unit
             loadCacheItems(tokenCache);
 
             AuthenticationResultEx resultEx =
-                tokenCache.LoadFromCache(TestConstants.DefaultAuthorityGuestTenant,
+                tokenCache.LoadFromCache(TestConstants.DefaultAuthorityGuestTenant+"more",
                     new HashSet<string>(new[] { "r1/scope1", "random-scope" }),
                     TestConstants.DefaultClientId+"more", TestConstants.DefaultTokenSubjectType, null, null,
                     TestConstants.DefaultRootId, TestConstants.DefaultPolicy, null);
@@ -187,6 +187,29 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(resultEx.Result.ExpiresOn, DateTimeOffset.MinValue);
             Assert.AreEqual(resultEx.RefreshToken, "someRT");
         }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void LoadFromCacheCrossTenantNullUserToken()
+        {
+            //this test will result only in a RT and no access token returned.
+            var tokenCache = new TokenCache();
+            loadCacheItems(tokenCache);
+            try
+            {
+                AuthenticationResultEx resultEx =
+                    tokenCache.LoadFromCache(TestConstants.DefaultAuthorityGuestTenant + "more",
+                        new HashSet<string>(new[] {"r1/scope1", "random-scope"}),
+                        TestConstants.DefaultClientId + "more", TestConstants.DefaultTokenSubjectType, null, null,
+                        null, TestConstants.DefaultPolicy, null);
+                Assert.Fail("multiple tokens should have been detected");
+            }
+            catch (MsalException exception)
+            {
+                Assert.AreEqual("multiple_matching_tokens_detected", exception.ErrorCode);
+            }
+        }
+
 
 
         [TestMethod]

@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Client
         ///     Reads a copy of the list of all items in the cache.
         /// </summary>
         /// <returns>The items in the cache</returns>
-        internal IEnumerable<TokenCacheItem> ReadItems(string clientId)
+        public IEnumerable<TokenCacheItem> ReadItems(string clientId)
         {
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
             this.OnBeforeAccess(args);
@@ -439,6 +439,13 @@ namespace Microsoft.Identity.Client
             HashSet<string> scope, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId, string rootId,
             string policy, CallState callState)
         {
+            bool noUserProvided = string.IsNullOrEmpty(displayableId) && string.IsNullOrEmpty(uniqueId) &&
+                                  string.IsNullOrEmpty(rootId);
+            if (noUserProvided)
+            {
+                PlatformPlugin.Logger.Information(null, "No user information provided.");    
+            }
+
             // First identify all potential tokens.
             List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> items = this.QueryCache(authority, clientId,
                 subjectType, uniqueId, displayableId, rootId, policy);
@@ -474,29 +481,34 @@ namespace Microsoft.Identity.Client
                     throw new MsalException(MsalError.MultipleTokensMatched);
             }
 
-            // check for tokens issued to same client_id/user_id combination, but any tenant.
-            if (returnValue == null)
+            if (!noUserProvided)
             {
-                List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForAllTenants = this.QueryCache(null, clientId, subjectType, uniqueId, displayableId, rootId, policy);
-                if (itemsForAllTenants.Count > 0)
+                // check for tokens issued to same client_id/user_id combination, but any tenant.
+                // cross tenant should not be used when there is no user provided, unless we are running in 
+                // RestrictToSingleUser mode.
+                if (returnValue == null)
                 {
-                    returnValue = itemsForAllTenants.First();
+                    List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForAllTenants = this.QueryCache(
+                        null, clientId, subjectType, uniqueId, displayableId, rootId, policy);
+                    if (itemsForAllTenants.Count > 0)
+                    {
+                        returnValue = itemsForAllTenants.First();
+                    }
+                }
+
+                // look for family of client id
+                if (returnValue == null)
+                {
+                    // set authority and client id to null.
+                    List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForFamily =
+                        this.QueryCache(null, null, subjectType, uniqueId, displayableId, rootId, policy)
+                            .Where(kvp => kvp.Value.Result != null && kvp.Value.Result.FamilyId != null).ToList();
+                    if (itemsForFamily.Count > 0)
+                    {
+                        returnValue = itemsForFamily.First();
+                    }
                 }
             }
-
-            // look for family of client id
-            if (returnValue == null)
-            {
-                // set authority and client id to null.
-                List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForFamily =
-                    this.QueryCache(null, null, subjectType, uniqueId, displayableId, rootId, policy)
-                        .Where(kvp => kvp.Value.Result != null && kvp.Value.Result.FamilyId != null).ToList();
-                if (itemsForFamily.Count > 0)
-                {
-                    returnValue = itemsForFamily.First();
-                }
-            }
-
             return returnValue;
         }
 

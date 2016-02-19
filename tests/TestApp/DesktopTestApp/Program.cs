@@ -94,6 +94,8 @@ namespace AdalDesktopTestApp
     {
         ClientId = "7c7a2f70-caef-45c8-9a6c-091633501de4"
     };
+                await app.AcquireTokenAsync(brkr.Sts.ValidScope);
+
                 return await app.AcquireTokenAsync(brkr.Sts.ValidScope);
             }
             catch (Exception ex)
