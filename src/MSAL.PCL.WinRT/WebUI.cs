@@ -42,13 +42,8 @@ namespace Microsoft.Identity.Client
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders, CallState callState)
         {
             bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
-            if (!ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
-            {
-                throw new ArgumentException(MsalErrorMessageEx.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
-            }
             
             WebAuthenticationResult webAuthenticationResult;
-
             WebAuthenticationOptions options = (this.useCorporateNetwork && (ssoMode || redirectUri.Scheme == Constant.MsAppScheme)) ? WebAuthenticationOptions.UseCorporateNetwork : WebAuthenticationOptions.None;
 
             try

@@ -95,6 +95,7 @@
     </Compile>
     <Compile Include="AcquireTokenInteractiveHandlerTests.cs" />
     <Compile Include="AuthenticationParametersTests.cs" />
+    <Compile Include="MockHelpers.cs" />
     <Compile Include="MockHttpMessageHandler.cs" />
     <Compile Include="NonInteractiveTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
