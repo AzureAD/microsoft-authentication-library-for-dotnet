@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Handlers
             this.userAssertion = userAssertion;
         }
 
-        protected override async Task PreRunAsync()
+        internal override async Task PreRunAsync()
         {
             await base.PreRunAsync().ConfigureAwait(false);
 
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Handlers
             }
         }
 
-        protected override async Task PreTokenRequest()
+        internal override async Task PreTokenRequest()
         {
             await base.PreTokenRequest().ConfigureAwait(false);
             if (this.PerformUserRealmDiscovery())

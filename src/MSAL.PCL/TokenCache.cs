@@ -303,7 +303,7 @@ namespace Microsoft.Identity.Client
                 resultEx = kvp.Value.Value;
                 bool tokenNearExpiry = (resultEx.Result.ExpiresOn <=
                                         DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
-
+                //TODO look for intersecting scopes first
                 if (tokenNearExpiry)
                 {
                     //TODO stop setting to null when service hardening requirements are clear

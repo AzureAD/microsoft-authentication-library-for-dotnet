@@ -222,13 +222,13 @@ namespace Microsoft.Identity.Client.Handlers
             return CompletedTask;
         }
 
-        protected virtual async Task PreRunAsync()
+        internal virtual async Task PreRunAsync()
         {
             await this.Authenticator.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
             this.ValidateAuthorityType();
         }
 
-        protected virtual Task PreTokenRequest()
+        internal virtual Task PreTokenRequest()
         {
             return CompletedTask;
         }
@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Client.Handlers
             return await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
         }
 
-        protected async Task<AuthenticationResultEx> SendTokenRequestByRefreshTokenAsync(string refreshToken)
+        internal async Task<AuthenticationResultEx> SendTokenRequestByRefreshTokenAsync(string refreshToken)
         {
             var requestParameters = new DictionaryRequestParameters(this.GetDecoratedScope(this.Scope), this.ClientKey);
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Client.Handlers
             return result;
         }
 
-        private async Task<AuthenticationResultEx> RefreshAccessTokenAsync(AuthenticationResultEx result)
+        internal async Task<AuthenticationResultEx> RefreshAccessTokenAsync(AuthenticationResultEx result)
         {
             AuthenticationResultEx newResultEx = null;
 
@@ -369,5 +369,46 @@ namespace Microsoft.Identity.Client.Handlers
 
             return endpoint;
         }
+
+        internal User MapIdentifierToUser(string identifier)
+        {
+            if (!string.IsNullOrEmpty(identifier))
+            {
+                if (identifier.Contains("@"))
+                {
+                    this.DisplayableId = identifier;
+                }
+                else
+                {
+                    this.UniqueId = identifier;
+                }
+            }
+
+            if (this.tokenCache != null)
+            {
+                bool notifiedBeforeAccessCache = false;
+                try
+                {
+                    this.NotifyBeforeAccessCache();
+                    notifiedBeforeAccessCache = true;
+
+                    AuthenticationResultEx resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority,
+                        this.Scope,
+                        this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.RootId,
+                        this.Policy, this.CallState);
+                }
+                finally
+                {
+                    if (notifiedBeforeAccessCache)
+                    {
+                        this.NotifyAfterAccessCache();
+                    }
+
+                }
+            }
+
+            return null;
+        }
+
     }
 }

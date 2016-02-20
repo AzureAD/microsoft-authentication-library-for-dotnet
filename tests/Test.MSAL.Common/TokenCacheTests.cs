@@ -195,12 +195,23 @@ namespace Test.MSAL.Common.Unit
             //this test will result only in a RT and no access token returned.
             var tokenCache = new TokenCache();
             loadCacheItems(tokenCache);
+
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType,
+                TestConstants.DefaultUniqueId+"more", TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            AuthenticationResultEx ex = new AuthenticationResultEx();
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
+            ex.Result.User = new User { DisplayableId = TestConstants.DefaultDisplayableId, UniqueId = TestConstants.DefaultUniqueId, RootId = TestConstants.DefaultRootId };
+            ex.Result.FamilyId = "1";
+            ex.RefreshToken = "someRT";
+            tokenCache.tokenCacheDictionary[key] = ex;
+
             try
             {
                 AuthenticationResultEx resultEx =
-                    tokenCache.LoadFromCache(TestConstants.DefaultAuthorityGuestTenant + "more",
-                        new HashSet<string>(new[] {"r1/scope1", "random-scope"}),
-                        TestConstants.DefaultClientId + "more", TestConstants.DefaultTokenSubjectType, null, null,
+                    tokenCache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultScope,
+                        TestConstants.DefaultClientId, TestConstants.DefaultTokenSubjectType, null, null,
                         null, TestConstants.DefaultPolicy, null);
                 Assert.Fail("multiple tokens should have been detected");
             }

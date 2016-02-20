@@ -66,22 +66,28 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the signed in users.
         /// </summary>
-        public IEnumerable<User> GetUsers()
+        public IEnumerable<User> Users
         {
-            List <User> users = new List<User>();
-            if (this.UserTokenCache == null || this.UserTokenCache.Count == 0)
+            get
             {
-                PlatformPlugin.Logger.Information(null, "AccessToken cache is null or empty");
+                List<User> users = new List<User>();
+                if (this.UserTokenCache == null || this.UserTokenCache.Count == 0)
+                {
+                    PlatformPlugin.Logger.Information(null, "AccessToken cache is null or empty");
+                    return users;
+                }
+                IEnumerable<TokenCacheItem> allItems = this.UserTokenCache.ReadItems(this.ClientId);
+                IEnumerable<string> uniqueIds = allItems.Select(item => item.UniqueId).Distinct();
+                foreach (string uniqueId in uniqueIds)
+                {
+                    users.Add(
+                        allItems.Where(item => !string.IsNullOrEmpty(item.UniqueId) && item.UniqueId.Equals(uniqueId))
+                            .First()
+                            .User);
+                }
+
                 return users;
             }
-            IEnumerable<TokenCacheItem> allItems = this.UserTokenCache.ReadItems(this.ClientId);
-            IEnumerable<string> uniqueIds = allItems.Select(item => item.UniqueId).Distinct();
-            foreach(string uniqueId in uniqueIds)
-            {
-                users.Add(allItems.Where(item => !string.IsNullOrEmpty(item.UniqueId) && item.UniqueId.Equals(uniqueId)).First().User);
-            }
-
-            return users;
         }
 
         static AbstractClientApplication()

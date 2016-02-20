@@ -140,23 +140,26 @@ namespace Microsoft.Identity.Client
                     this.AcquireTokenCommonAsync(this.Authenticator, scope, null, this.ClientId,
                         new Uri(this.RedirectUri), null, UiOptions.SelectAccount, null, null).ConfigureAwait(false);
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="scope"></param>
-        /// <param name="userId"></param>
+        /// <param name="identifier"></param>
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string identifier)
         {
-            return null;
+            return
+                await
+                    this.AcquireTokenCommonAsync(this.Authenticator, scope, null, this.ClientId,
+                        new Uri(this.RedirectUri), null, UiOptions.SelectAccount, null, null).ConfigureAwait(false);
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="scope"></param>
-        /// <param name="userId"></param>
+        /// <param name="identifier"></param>
         /// <param name="extraQueryParameters"></param>
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string identifier,
@@ -172,16 +175,21 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <param name="scope"></param>
-        /// <param name="userId"></param>
+        /// <param name="identifier"></param>
         /// <param name="extraQueryParameters"></param>
+        /// <param name="options"></param>
         /// <param name="additionalScope"></param>
         /// <param name="authority"></param>
+        /// <param name="policy"></param>
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string identifier,
-            UiOptions options, string extraQueryParameters, string[] additionalScope, string authority)
+            UiOptions options, string extraQueryParameters, string[] additionalScope, string authority, string policy)
         {
-            Authenticator localAuthenticator = new Authenticator(this.Authority, this.ValidateAuthority);
-            return null;
+            Authenticator localAuthenticator = new Authenticator(authority, this.ValidateAuthority);
+            return
+                await
+                    this.AcquireTokenCommonAsync(localAuthenticator, scope, additionalScope, this.ClientId,
+                        new Uri(this.RedirectUri), identifier, options, extraQueryParameters, policy).ConfigureAwait(false);
         }
         
         internal IWebUI CreateWebAuthenticationDialog(IPlatformParameters parameters)

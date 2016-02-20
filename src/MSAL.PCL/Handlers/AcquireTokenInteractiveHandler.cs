@@ -94,12 +94,12 @@ namespace Microsoft.Identity.Client.Handlers
             PlatformPlugin.BrokerHelper.PlatformParameters = _authorizationParameters;
         }
 
-        protected override async Task PreTokenRequest()
+        internal override async Task PreTokenRequest()
         {
             IDictionary<string, string> headers = new Dictionary<string, string>();
             await base.PreTokenRequest().ConfigureAwait(false);
 
-            if (this.LoadFromCache)
+            if (this.tokenCache!=null && (!string.IsNullOrEmpty(this._loginHint) || !string.IsNullOrEmpty(this.UniqueId)) && _uiOptions == UiOptions.UseCurrentUser)
             {
                 bool notifiedBeforeAccessCache = false;
                 try
