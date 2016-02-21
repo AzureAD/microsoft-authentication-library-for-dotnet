@@ -111,14 +111,6 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DefaultPolicy);
             Assert.IsFalse(key1.Equals(key2));
 
-
-            //token subject type
-            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
-                TestConstants.DefaultPolicy);
-            Assert.IsFalse(key1.Equals(key2));
-
             //unique id
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,

@@ -506,6 +506,7 @@ namespace Microsoft.Identity.Client
                     }
                 }
             }
+
             return returnValue;
         }
 

@@ -441,7 +441,23 @@ namespace Test.MSAL.Common.Unit
         public void LoadSingleItemFromCacheCrossTenantLookupTest()
         {
             var tokenCache = new TokenCache();
-            loadCacheItems(tokenCache);
+
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            AuthenticationResultEx ex = new AuthenticationResultEx();
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(),
+                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
+            ex.Result.User = new User
+            {
+                DisplayableId = TestConstants.DefaultDisplayableId,
+                UniqueId = TestConstants.DefaultUniqueId,
+                RootId = TestConstants.DefaultRootId
+            };
+            ex.Result.FamilyId = "1";
+            ex.RefreshToken = "someRT";
+            tokenCache.tokenCacheDictionary[key] = ex;
 
             User user = TestConstants.DefaultUser;
             user.DisplayableId = null;
@@ -454,7 +470,7 @@ namespace Test.MSAL.Common.Unit
                     new HashSet<string>(new[] {"scope1", "random-scope"}),
                     TestConstants.DefaultClientId, user, TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(item);
-            TokenCacheKey key = item.Value.Key;
+            key = item.Value.Key;
             AuthenticationResultEx resultEx = item.Value.Value;
 
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, key.Authority);
