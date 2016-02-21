@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
 
-namespace Test.ADAL.NET.Unit
+namespace Test.MSAL.NET.Unit
 {
     class TestConstants
     {
@@ -15,5 +14,12 @@ namespace Test.ADAL.NET.Unit
         public static readonly string DefaultDisplayableId = "displayable@id.com";
         public static readonly string DefaultRootId = "root_id";
         public static readonly string DefaultPolicy = "policy";
+
+        public static readonly User DefaultUser = new User
+        {
+            UniqueId = DefaultUniqueId,
+            DisplayableId = DefaultDisplayableId,
+            RootId = DefaultRootId
+        };
     }
 }

@@ -18,17 +18,16 @@
 
 using System;
 using System.IO;
-using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.MSAL.Common;
-using System.Xml;
-using Microsoft.Identity.Client.Internal;
 
-namespace Test.ADAL.NET.Unit
+namespace Test.MSAL.NET.Unit
 {
     [TestClass]
     [DeploymentItem("TestMex.xml")]

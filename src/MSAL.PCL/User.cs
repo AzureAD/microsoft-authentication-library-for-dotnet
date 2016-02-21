@@ -82,14 +82,19 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         [DataMember]
-        public string RootId { get; set; }
-
+        public string RootId { get; internal set; }
 
         internal TokenCache TokenCache { get; set; }
 
-        public string ClientId { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string ClientId { get; internal set; }
 
-        public string Authority { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Authority { get; internal set; }
 
 
         /// <summary>

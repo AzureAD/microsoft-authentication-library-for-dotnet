@@ -223,9 +223,7 @@ namespace Microsoft.Identity.Client
                 TokenCache = this,
                 Scope = item.Scope,
                 ClientId = item.ClientId,
-                UniqueId = item.UniqueId,
-                DisplayableId = item.DisplayableId,
-                RootId = item.RootId,
+                User = item.User,
                 Policy = item.Policy
             };
 
@@ -285,14 +283,14 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal virtual AuthenticationResultEx LoadFromCache(string authority, HashSet<string> scope, string clientId, string uniqueId, string displayableId, string rootId, string policy, CallState callState)
+        internal virtual AuthenticationResultEx LoadFromCache(string authority, HashSet<string> scope, string clientId, User user, string policy, CallState callState)
         {
             PlatformPlugin.Logger.Verbose(callState, "Looking up cache for a token...");
             AuthenticationResultEx resultEx = null;
 
             //get either a matching token or an MRRT supported RT
             KeyValuePair<TokenCacheKey, AuthenticationResultEx>? kvp = this.LoadSingleItemFromCache(authority, scope,
-                clientId, uniqueId, displayableId, rootId, policy, callState);
+                clientId, user, policy, callState);
             TokenCacheKey cacheKey = null;
             if (kvp.HasValue)
             {
@@ -371,24 +369,19 @@ namespace Microsoft.Identity.Client
             string policy, CallState callState)
         {
             PlatformPlugin.Logger.Verbose(callState, "Storing token in the cache...");
-            string uniqueId = (result.Result.User != null) ? result.Result.User.UniqueId : null;
-            string displayableId = (result.Result.User != null) ? result.Result.User.DisplayableId : null;
-            string rootId = (result.Result.User != null) ? result.Result.User.RootId : null;
 
             this.OnBeforeWrite(new TokenCacheNotificationArgs
             {
                 Scope = result.ScopeInResponse,
                 ClientId = clientId,
-                UniqueId = uniqueId,
-                DisplayableId = displayableId,
+                User = result.Result.User,
                 Policy = policy
             });
 
             TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, result.ScopeInResponse, clientId,
                 result.Result.User, policy);
             // First identify all potential tokens.
-            List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> items = this.QueryCache(authority, clientId,
-                uniqueId, displayableId, rootId, policy);
+            List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> items = this.QueryCache(authority, clientId, result.Result.User, policy);
             List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsToRemove =
                 items.Where(p => p.Key.ScopeIntersects(result.ScopeInResponse)).ToList();
 
@@ -432,14 +425,22 @@ namespace Microsoft.Identity.Client
         }
 
         internal KeyValuePair<TokenCacheKey, AuthenticationResultEx>? LoadSingleItemFromCache(string authority,
-            HashSet<string> scope, string clientId, string uniqueId, string displayableId, string rootId,
+            HashSet<string> scope, string clientId, User user,
             string policy, CallState callState)
         {
-            bool noUserProvided = string.IsNullOrEmpty(displayableId) && string.IsNullOrEmpty(uniqueId) &&
-                                  string.IsNullOrEmpty(rootId);
-            if (noUserProvided)
+            string uniqueId = null;
+            string displayableId = null;
+            string rootId = null;
+
+            if (user == null)
             {
-                PlatformPlugin.Logger.Information(null, "No user information provided.");    
+                PlatformPlugin.Logger.Information(null, "No user information provided.");
+            }
+            else
+            {
+                uniqueId = user.UniqueId;
+                displayableId = user.DisplayableId;
+                rootId = user.RootId;
             }
 
             // First identify all potential tokens.
@@ -477,7 +478,7 @@ namespace Microsoft.Identity.Client
                     throw new MsalException(MsalError.MultipleTokensMatched);
             }
 
-            if (!noUserProvided)
+            if (user != null)
             {
                 // check for tokens issued to same client_id/user_id combination, but any tenant.
                 // cross tenant should not be used when there is no user provided, unless we are running in 
@@ -485,7 +486,7 @@ namespace Microsoft.Identity.Client
                 if (returnValue == null)
                 {
                     List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForAllTenants = this.QueryCache(
-                        null, clientId, uniqueId, displayableId, rootId, policy);
+                        null, clientId, null, null, rootId, policy);
                     if (itemsForAllTenants.Count > 0)
                     {
                         returnValue = itemsForAllTenants.First();
@@ -497,7 +498,7 @@ namespace Microsoft.Identity.Client
                 {
                     // set authority and client id to null.
                     List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForFamily =
-                        this.QueryCache(null, null, uniqueId, displayableId, rootId, policy)
+                        this.QueryCache(null, null, null, null, rootId, policy)
                             .Where(kvp => kvp.Value.Result != null && kvp.Value.Result.FamilyId != null).ToList();
                     if (itemsForFamily.Count > 0)
                     {
@@ -506,6 +507,13 @@ namespace Microsoft.Identity.Client
                 }
             }
             return returnValue;
+        }
+
+        private List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> QueryCache(string authority, string clientId,
+            User user, string policy)
+        {
+            return this.QueryCache(
+                authority, clientId, user?.UniqueId, user?.DisplayableId, user?.RootId, policy);
         }
 
         /// <summary>

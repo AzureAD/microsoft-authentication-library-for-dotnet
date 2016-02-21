@@ -74,11 +74,11 @@ namespace Microsoft.Identity.Client.Handlers
                     PlatformPlugin.Logger.Verbose(this.CallState, string.Format("Logged in user with hash '{0}' detected", PlatformPlugin.CryptographyHelper.CreateSha256Hash(userCredential.UserName)));
                 }
 
-                this.DisplayableId = userCredential.UserName;
+                this.User = new User { DisplayableId = userCredential.UserName};
             }
             else if (this.userAssertion != null)
             {
-                this.DisplayableId = userAssertion.UserName;                
+                this.User = new User { DisplayableId = userAssertion.UserName };
             }
         }
 

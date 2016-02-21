@@ -18,7 +18,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client
 {
     internal partial class CustomWebBrowser
     {

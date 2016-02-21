@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Handlers
             }
 
             this.userAssertion = userAssertion;
-            this.DisplayableId = userAssertion.UserName;
+            this.User = new User { DisplayableId = userAssertion.UserName };
 
             this.SupportADFS = false;
         }

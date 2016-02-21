@@ -17,14 +17,12 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-
 using Microsoft.Identity.Client;
 using Test.MSAL.Common;
 using TestApp.PCL;
 
-namespace AdalDesktopTestApp
+namespace DesktopTestApp
 {
     class Program
     {

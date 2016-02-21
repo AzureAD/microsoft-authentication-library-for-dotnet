@@ -4,7 +4,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.ADAL.NET.Unit
+namespace Test.MSAL.NET.Unit
 {
     [TestClass]
     public class TokenCacheKeyTests

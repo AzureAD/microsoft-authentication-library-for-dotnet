@@ -22,8 +22,10 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client
 {
     internal abstract class WebUI : IWebUI
     {

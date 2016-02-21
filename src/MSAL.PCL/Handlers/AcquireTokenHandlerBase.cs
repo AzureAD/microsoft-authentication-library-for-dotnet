@@ -76,11 +76,7 @@ namespace Microsoft.Identity.Client.Handlers
 
         protected ClientKey ClientKey { get; private set; }
 
-        protected string UniqueId { get; set; }
-
-        protected string DisplayableId { get; set; }
-
-        protected string RootId { get; set; }
+        protected User User { get; set; }
 
         protected string Policy { get; set; }
 
@@ -118,7 +114,7 @@ namespace Microsoft.Identity.Client.Handlers
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.UniqueId, this.DisplayableId, this.RootId, this.Policy, this.CallState);
+                    resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.User, this.Policy, this.CallState);
                     if (resultEx != null && resultEx.Result.AccessToken == null && resultEx.RefreshToken != null)
                     {
                         resultEx = await this.RefreshAccessTokenAsync(resultEx).ConfigureAwait(false);
@@ -315,9 +311,7 @@ namespace Microsoft.Identity.Client.Handlers
             {
                 TokenCache = this.tokenCache,
                 Scope = this.Scope,
-                ClientId = this.ClientKey.ClientId,
-                UniqueId = this.UniqueId,
-                DisplayableId = this.DisplayableId
+                ClientId = this.ClientKey.ClientId
             });
         }
 
@@ -327,9 +321,7 @@ namespace Microsoft.Identity.Client.Handlers
             {
                 TokenCache = this.tokenCache,
                 Scope = this.Scope,
-                ClientId = this.ClientKey.ClientId,
-                UniqueId = this.UniqueId,
-                DisplayableId = this.DisplayableId
+                ClientId = this.ClientKey.ClientId
             });
         }
 
@@ -368,18 +360,22 @@ namespace Microsoft.Identity.Client.Handlers
 
         internal User MapIdentifierToUser(string identifier)
         {
+            string displayableId = null;
+            string uniqueId = null;
+
             if (!string.IsNullOrEmpty(identifier))
             {
                 if (identifier.Contains("@"))
                 {
-                    this.DisplayableId = identifier;
+                    displayableId = identifier;
                 }
                 else
                 {
-                    this.UniqueId = identifier;
+                    uniqueId = identifier;
                 }
             }
 
+            User user = new User();
             if (this.tokenCache != null)
             {
                 bool notifiedBeforeAccessCache = false;
@@ -390,7 +386,7 @@ namespace Microsoft.Identity.Client.Handlers
 
                     AuthenticationResultEx resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority,
                         this.Scope,
-                        this.ClientKey.ClientId, this.UniqueId, this.DisplayableId, this.RootId,
+                        this.ClientKey.ClientId, user,
                         this.Policy, this.CallState);
                 }
                 finally
@@ -403,7 +399,7 @@ namespace Microsoft.Identity.Client.Handlers
                 }
             }
 
-            return null;
+            return user;
         }
 
     }

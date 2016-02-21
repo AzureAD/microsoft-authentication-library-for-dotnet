@@ -20,8 +20,9 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// The browser dialog used for user authentication

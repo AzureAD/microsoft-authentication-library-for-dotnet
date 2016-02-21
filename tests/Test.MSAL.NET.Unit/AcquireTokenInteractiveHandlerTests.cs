@@ -1,20 +1,16 @@
-﻿
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Handlers;
+using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Test.MSAL.NET.Unit;
 
-namespace Test.ADAL.NET.Unit
+namespace Test.MSAL.NET.Unit
 {
     [TestClass]
     public class AcquireTokenInteractiveHandlerTests

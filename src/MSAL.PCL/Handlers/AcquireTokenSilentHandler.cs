@@ -37,9 +37,7 @@ namespace Microsoft.Identity.Client.Handlers
         {
             if (user != null)
             {
-                this.UniqueId = user.UniqueId;
-                this.DisplayableId = user.DisplayableId;
-                this.RootId = user.RootId;
+                this.User = user;
                 this.brokerParameters["username"] = user.DisplayableId;
             }
 

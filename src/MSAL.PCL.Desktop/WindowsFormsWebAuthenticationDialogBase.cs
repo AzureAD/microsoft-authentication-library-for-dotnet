@@ -22,8 +22,9 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client
 {
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]

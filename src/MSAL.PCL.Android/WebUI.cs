@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Android.Content;
 using Android.Accounts;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client

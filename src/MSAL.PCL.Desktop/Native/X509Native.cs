@@ -25,7 +25,7 @@ using System.Security;
 using System.Security.Cryptography;
 using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Native
 {
     internal static class X509Native
     {

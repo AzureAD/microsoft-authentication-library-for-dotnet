@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Handlers
@@ -43,8 +44,7 @@ namespace Microsoft.Identity.Client.Handlers
             string[] additionalScope, string clientId, Uri redirectUri, IPlatformParameters parameters, User user,
             UiOptions uiOptions, string extraQueryParameters, string policy, IWebUI webUI):this(authenticator, tokenCache, scope, additionalScope, clientId, redirectUri, parameters, user.DisplayableId, uiOptions, extraQueryParameters, policy, webUI)
         {
-            this.UniqueId = user.UniqueId;
-            this.RootId = user.RootId;
+            this.User = user;
         }
 
         public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope,
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.Handlers
             IDictionary<string, string> headers = new Dictionary<string, string>();
             await base.PreTokenRequest().ConfigureAwait(false);
 
-            if (this.tokenCache!=null && (!string.IsNullOrEmpty(this._loginHint) || !string.IsNullOrEmpty(this.UniqueId)) && _uiOptions == UiOptions.UseCurrentUser)
+            if (this.tokenCache!=null && this.User!=null  && _uiOptions == UiOptions.UseCurrentUser)
             {
                 bool notifiedBeforeAccessCache = false;
                 try
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client.Handlers
 
                     AuthenticationResultEx resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority,
                         this.Scope,
-                        this.ClientKey.ClientId, this.UniqueId, this.DisplayableId, this.RootId,
+                        this.ClientKey.ClientId, this.User,
                         this.Policy, this.CallState);
                     if (resultEx != null && !string.IsNullOrWhiteSpace(resultEx.RefreshToken))
                     {

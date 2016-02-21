@@ -16,23 +16,17 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+
 using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-
 using Test.MSAL.Common;
 
-namespace Test.ADAL.NET.Unit
+namespace Test.MSAL.NET.Unit
 {
     [TestClass]
     [DeploymentItem("valid_cert.pfx")]

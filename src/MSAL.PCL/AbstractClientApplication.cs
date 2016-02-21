@@ -126,10 +126,5 @@ namespace Microsoft.Identity.Client
             var handler = new AcquireTokenSilentHandler(authenticator, this.UserTokenCache, scope, clientKey, user, parameters, policy);
             return await handler.RunAsync().ConfigureAwait(false);
         }
-
-        private bool isUserIdDisplayable(string userId)
-        {
-            return false;
-        }
     }
 }

@@ -32,6 +32,7 @@ using Android.Content;
 using Android.OS;
 using Android.Webkit;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Resources;
 
 namespace Microsoft.Identity.Client
 {

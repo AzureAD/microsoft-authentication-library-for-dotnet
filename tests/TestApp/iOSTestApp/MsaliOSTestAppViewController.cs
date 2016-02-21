@@ -17,14 +17,11 @@
 //----------------------------------------------------------------------
 
 using System;
-using Foundation;
 using Microsoft.Identity.Client;
-
+using TestApp.PCL;
 using UIKit;
 
-using TestApp.PCL;
-
-namespace MsaliOSTestApp
+namespace AdaliOSSample
 {
     public partial class MsaliOSTestAppViewController : UIViewController
     {

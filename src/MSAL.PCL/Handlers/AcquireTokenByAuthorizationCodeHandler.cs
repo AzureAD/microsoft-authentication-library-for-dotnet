@@ -58,9 +58,7 @@ namespace Microsoft.Identity.Client.Handlers
         protected override void PostTokenRequest(AuthenticationResultEx resultEx)
         {
             base.PostTokenRequest(resultEx);
-            User userInfo = resultEx.Result.User;
-            this.UniqueId = (userInfo == null) ? null : userInfo.UniqueId;
-            this.DisplayableId = (userInfo == null) ? null : userInfo.DisplayableId;
+            this.User = resultEx.Result.User;
         }
     }
 }

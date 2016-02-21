@@ -18,7 +18,7 @@
 
 using System.ComponentModel;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client
 {
     public class WebBrowserNavigateErrorEventArgs : CancelEventArgs
     {

@@ -52,18 +52,12 @@ namespace Microsoft.Identity.Client.Internal
         /// <summary>
         /// Gets the user's unique Id.
         /// </summary>
-        public string UniqueId { get; internal set; }
-
-        /// <summary>
-        /// Gets the user's displayable Id.
-        /// </summary>
-        public string DisplayableId { get; internal set; }
+        public User User { get; set; }
 
         /// <summary>
         /// Gets the policy.
         /// </summary>
         public string Policy { get; internal set; }
-
-        public string RootId { get; internal set; }
+        
     }
 }

@@ -21,7 +21,7 @@ using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.MSAL.Common;
 
-namespace Test.ADAL.NET.Unit
+namespace Test.MSAL.NET.Unit
 {
     [TestClass]
     public class AuthenticationParametersTests

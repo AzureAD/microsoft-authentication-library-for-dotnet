@@ -4,12 +4,12 @@
 // actions declared in your storyboard file.
 // Manual changes to this file will not be maintained.
 //
-using Foundation;
-using System;
+
 using System.CodeDom.Compiler;
+using Foundation;
 using UIKit;
 
-namespace MsaliOSTestApp
+namespace AdaliOSSample
 {
 	[Register ("MsaliOSTestAppViewController")]
 	partial class MsaliOSTestAppViewController
