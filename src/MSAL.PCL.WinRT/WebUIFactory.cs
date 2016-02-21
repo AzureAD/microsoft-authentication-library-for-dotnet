@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Interfaces;
+
 namespace Microsoft.Identity.Client
 {
     internal class WebUIFactory : IWebUIFactory

@@ -16,9 +16,9 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Interfaces
 {
-    interface IWebUIFactory
+    internal interface IWebUIFactory
     {
         IWebUI CreateAuthenticationDialog(IPlatformParameters parameters);
     }
