@@ -37,36 +37,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public IPlatformParameters PlatformParameters { get; set; }
 
-        //TODO look into adding user identifier when domain cannot be queried or privacy settings are against you
-        /// <summary>
-        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <returns></returns>
-        internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope)
-        {
-            return
-                await
-                    this.AcquireTokenUsingIntegratedAuthCommonAsync(this.Authenticator, scope, this.ClientId,
-                        new UserCredential(), null).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="authority"></param>
-        /// <param name="policy"></param>
-        /// <returns></returns>
-        internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope, string authority, string policy)
-        {
-            Authenticator localAuthenticator = new Authenticator(authority, this.ValidateAuthority);
-            return
-                await
-                    this.AcquireTokenUsingIntegratedAuthCommonAsync(localAuthenticator, scope, this.ClientId,
-                        new UserCredential(), policy).ConfigureAwait(false);
-        }
-
         /// <summary>
         /// 
         /// </summary>
@@ -138,7 +108,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     this.AcquireTokenCommonAsync(this.Authenticator, scope, null, this.ClientId,
-                        new Uri(this.RedirectUri), null, UiOptions.SelectAccount, null, null).ConfigureAwait(false);
+                        new Uri(this.RedirectUri), (string)null, UiOptions.SelectAccount, null, null).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -152,7 +122,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     this.AcquireTokenCommonAsync(this.Authenticator, scope, null, this.ClientId,
-                        new Uri(this.RedirectUri), null, UiOptions.SelectAccount, null, null).ConfigureAwait(false);
+                        new Uri(this.RedirectUri), identifier, UiOptions.SelectAccount, null, null).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -177,6 +147,22 @@ namespace Microsoft.Identity.Client
         /// <param name="scope"></param>
         /// <param name="identifier"></param>
         /// <param name="extraQueryParameters"></param>
+        /// <returns></returns>
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User user,
+            UiOptions options, string extraQueryParameters)
+        {
+            return
+                await
+                    this.AcquireTokenCommonAsync(this.Authenticator, scope, null, this.ClientId,
+                        new Uri(this.RedirectUri), user, options, extraQueryParameters, null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="identifier"></param>
+        /// <param name="extraQueryParameters"></param>
         /// <param name="options"></param>
         /// <param name="additionalScope"></param>
         /// <param name="authority"></param>
@@ -191,6 +177,27 @@ namespace Microsoft.Identity.Client
                     this.AcquireTokenCommonAsync(localAuthenticator, scope, additionalScope, this.ClientId,
                         new Uri(this.RedirectUri), identifier, options, extraQueryParameters, policy).ConfigureAwait(false);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="identifier"></param>
+        /// <param name="extraQueryParameters"></param>
+        /// <param name="options"></param>
+        /// <param name="additionalScope"></param>
+        /// <param name="authority"></param>
+        /// <param name="policy"></param>
+        /// <returns></returns>
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User user,
+            UiOptions options, string extraQueryParameters, string[] additionalScope, string authority, string policy)
+        {
+            Authenticator localAuthenticator = new Authenticator(authority, this.ValidateAuthority);
+            return
+                await
+                    this.AcquireTokenCommonAsync(localAuthenticator, scope, additionalScope, this.ClientId,
+                        new Uri(this.RedirectUri), user, options, extraQueryParameters, policy).ConfigureAwait(false);
+        }
         
         internal IWebUI CreateWebAuthenticationDialog(IPlatformParameters parameters)
         {
@@ -203,6 +210,20 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
+
+        /// <summary>
+        /// interactive call using login_hint
+        /// </summary>
+        /// <param name="authenticator"></param>
+        /// <param name="scope"></param>
+        /// <param name="additionalScope"></param>
+        /// <param name="clientId"></param>
+        /// <param name="redirectUri"></param>
+        /// <param name="loginHint"></param>
+        /// <param name="uiOptions"></param>
+        /// <param name="extraQueryParameters"></param>
+        /// <param name="policy"></param>
+        /// <returns></returns>
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string[] additionalScope, string clientId, Uri redirectUri, string loginHint, UiOptions uiOptions, string extraQueryParameters, string policy)
         {
             if (this.PlatformParameters == null)
@@ -214,6 +235,59 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// interactive call using User object.
+        /// </summary>
+        /// <param name="authenticator"></param>
+        /// <param name="scope"></param>
+        /// <param name="additionalScope"></param>
+        /// <param name="clientId"></param>
+        /// <param name="redirectUri"></param>
+        /// <param name="loginHint"></param>
+        /// <param name="uiOptions"></param>
+        /// <param name="extraQueryParameters"></param>
+        /// <param name="policy"></param>
+        /// <returns></returns>
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string[] additionalScope, string clientId, Uri redirectUri, User user, UiOptions uiOptions, string extraQueryParameters, string policy)
+        {
+            if (this.PlatformParameters == null)
+            {
+                this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
+            }
+
+            var handler = new AcquireTokenInteractiveHandler(authenticator, this.UserTokenCache, scope, additionalScope, clientId, redirectUri, this.PlatformParameters, user, uiOptions, extraQueryParameters, policy, this.CreateWebAuthenticationDialog(this.PlatformParameters));
+            return await handler.RunAsync().ConfigureAwait(false);
+        }
+
+        //TODO look into adding user identifier when domain cannot be queried or privacy settings are against you
+        /// <summary>
+        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <returns></returns>
+        internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope)
+        {
+            return
+                await
+                    this.AcquireTokenUsingIntegratedAuthCommonAsync(this.Authenticator, scope, this.ClientId,
+                        new UserCredential(), null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="authority"></param>
+        /// <param name="policy"></param>
+        /// <returns></returns>
+        internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope, string authority, string policy)
+        {
+            Authenticator localAuthenticator = new Authenticator(authority, this.ValidateAuthority);
+            return
+                await
+                    this.AcquireTokenUsingIntegratedAuthCommonAsync(localAuthenticator, scope, this.ClientId,
+                        new UserCredential(), policy).ConfigureAwait(false);
+        }
 
     }
 }
