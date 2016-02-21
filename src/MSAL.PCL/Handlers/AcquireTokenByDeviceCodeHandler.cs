@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Handlers
         private DeviceCodeResult deviceCodeResult = null;
 
         public AcquireTokenByDeviceCodeHandler(Authenticator authenticator, TokenCache tokenCache, DeviceCodeResult deviceCodeResult)
-            : base(authenticator, tokenCache, deviceCodeResult.Scope, new ClientKey(deviceCodeResult.ClientId), null, TokenSubjectType.User)
+            : base(authenticator, tokenCache, deviceCodeResult.Scope, new ClientKey(deviceCodeResult.ClientId), null)
         {
             if (deviceCodeResult == null)
             {

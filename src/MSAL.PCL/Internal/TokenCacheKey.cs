@@ -32,46 +32,30 @@ using System.Linq;
 namespace Microsoft.Identity.Client.Internal
 {
     /// <summary>
-    /// Determines what type of subject the token was issued for.
-    /// </summary>
-    internal enum TokenSubjectType
-    {
-        /// <summary>
-        /// User
-        /// </summary>
-        User,
-        /// <summary>
-        /// Client
-        /// </summary>
-        Client
-    };
-
-    /// <summary>
     /// <see cref="TokenCacheKey"/> can be used with Linq to access items from the TokenCache dictionary.
     /// </summary>
     internal sealed class TokenCacheKey
     {
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, User user, string policy)
-            : this(authority, scope, clientId, tokenSubjectType, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.RootId : null, policy)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, User user, string policy)
+            : this(authority, scope, clientId, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.RootId : null, policy)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, User user)
-            : this(authority, scope, clientId, tokenSubjectType, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.RootId : null, null)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, User user)
+            : this(authority, scope, clientId, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.RootId : null, null)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId, string rootId)
-            : this(authority, scope, clientId, tokenSubjectType, uniqueId, displayableId, rootId, null)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId, string displayableId, string rootId)
+            : this(authority, scope, clientId, uniqueId, displayableId, rootId, null)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId, string rootId, string policy)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId, string displayableId, string rootId, string policy)
         {
             this.Authority = authority;
             this.Scope = scope;
             this.ClientId = clientId;
-            this.TokenSubjectType = tokenSubjectType;
             this.UniqueId = uniqueId;
             this.DisplayableId = displayableId;
             this.RootId = rootId;
@@ -92,8 +76,6 @@ namespace Microsoft.Identity.Client.Internal
 
         public string Policy { get; private set; }
 
-        public TokenSubjectType TokenSubjectType { get; private set; }
-
         /// <summary>
         /// 
         /// </summary>
@@ -102,9 +84,9 @@ namespace Microsoft.Identity.Client.Internal
         {
             return
                 string.Format(
-                    "Authority:{0}, Scope:{1}, ClientId:{2}, UniqueId:{3}, DisplayableId:{4}, RootId:{5}, Policy:{6}, TokenSubjectType:{7}",
+                    "Authority:{0}, Scope:{1}, ClientId:{2}, UniqueId:{3}, DisplayableId:{4}, RootId:{5}, Policy:{6}",
                     this.Authority, MsalStringHelper.CreateSingleStringFromArray(this.Scope.ToArray()), this.ClientId,
-                    this.UniqueId, this.DisplayableId, this.RootId, this.Policy, this.TokenSubjectType);
+                    this.UniqueId, this.DisplayableId, this.RootId, this.Policy);
         }
 
         /// <summary>
@@ -130,15 +112,14 @@ namespace Microsoft.Identity.Client.Internal
         public bool Equals(TokenCacheKey other)
         {
             return ReferenceEquals(this, other) ||
-               (other != null
-               && (other.Authority == this.Authority)
-               && this.ScopeEquals(other.Scope)
-               && this.Equals(this.ClientId, other.ClientId)
-               && this.Equals(other.UniqueId, this.UniqueId)
-               && this.Equals(this.DisplayableId, other.DisplayableId)
-               && this.Equals(this.RootId, other.RootId)
-               && this.Equals(this.Policy, other.Policy)
-               && (other.TokenSubjectType == this.TokenSubjectType));
+                   (other != null
+                    && (other.Authority == this.Authority)
+                    && this.ScopeEquals(other.Scope)
+                    && this.Equals(this.ClientId, other.ClientId)
+                    && this.Equals(other.UniqueId, this.UniqueId)
+                    && this.Equals(this.DisplayableId, other.DisplayableId)
+                    && this.Equals(this.RootId, other.RootId)
+                    && this.Equals(this.Policy, other.Policy));
         }
 
         /// <summary>
@@ -156,8 +137,7 @@ namespace Microsoft.Identity.Client.Internal
                 + this.UniqueId + Delimiter
                 + this.RootId + Delimiter
                 + ((this.DisplayableId != null) ? this.DisplayableId.ToLower() : null) + Delimiter
-                + ((this.Policy != null) ? this.Policy.ToLower() : null) + Delimiter
-                + (int)this.TokenSubjectType).GetHashCode();
+                + ((this.Policy != null) ? this.Policy.ToLower() : null)).GetHashCode();
         }
 
         internal bool ScopeContains(HashSet<string> otherScope)

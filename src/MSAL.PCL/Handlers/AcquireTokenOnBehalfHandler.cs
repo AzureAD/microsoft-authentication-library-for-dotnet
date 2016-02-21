@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Handlers
         private readonly UserAssertion userAssertion;
 
         public AcquireTokenOnBehalfHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, UserAssertion userAssertion, string policy)
-            : base(authenticator, tokenCache, scope, clientKey, policy, TokenSubjectType.User)
+            : base(authenticator, tokenCache, scope, clientKey, policy)
         {
             if (userAssertion == null)
             {

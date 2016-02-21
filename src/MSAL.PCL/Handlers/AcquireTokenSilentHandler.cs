@@ -27,13 +27,13 @@ namespace Microsoft.Identity.Client.Handlers
 
 
         public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string userIdentifer, IPlatformParameters parameters, string policy) 
-            : base(authenticator, tokenCache, scope, clientKey, policy, TokenSubjectType.User)
+            : base(authenticator, tokenCache, scope, clientKey, policy)
         {
             //TODO look up userIdentifier in the cache and get a user object
         }
 
         public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, User user, IPlatformParameters parameters, string policy)
-            : base(authenticator, tokenCache, scope, clientKey, policy, TokenSubjectType.User)
+            : base(authenticator, tokenCache, scope, clientKey, policy)
         {
             if (user != null)
             {

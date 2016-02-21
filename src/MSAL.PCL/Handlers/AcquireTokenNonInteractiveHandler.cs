@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Handlers
         private UserAssertion userAssertion;
         
         public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserCredential userCredential, string policy)
-            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, TokenSubjectType.User)
+            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy)
         {
             if (userCredential == null)
             {
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Handlers
         }
 
         public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserAssertion userAssertion, string policy)
-            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, TokenSubjectType.User)
+            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy)
         {
             if (userAssertion == null)
             {

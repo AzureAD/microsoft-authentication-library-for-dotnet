@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Client
             this.Authority = key.Authority;
             this.Scope = key.Scope;
             this.ClientId = key.ClientId;
-            this.TokenSubjectType = key.TokenSubjectType;
             this.UniqueId = key.UniqueId;
             this.DisplayableId = key.DisplayableId;
             this.RootId = key.RootId;
@@ -121,13 +120,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public User User { get; internal set; }
 
-        internal TokenSubjectType TokenSubjectType { get; set; }
-
         internal bool Match(TokenCacheKey key)
         {
-            return key!=null && (key.Authority == this.Authority && key.ScopeEquals(this.Scope) && key.Equals(key.ClientId, this.ClientId)
-                    && key.TokenSubjectType == this.TokenSubjectType && key.UniqueId == this.UniqueId &&
-                    key.Equals(key.DisplayableId, this.DisplayableId) && key.Equals(key.RootId, this.RootId) && key.Equals(key.Policy, this.Policy));
+            return key != null &&
+                   (key.Authority == this.Authority && key.ScopeEquals(this.Scope) &&
+                    key.Equals(key.ClientId, this.ClientId)
+                    && key.UniqueId == this.UniqueId &&
+                    key.Equals(key.DisplayableId, this.DisplayableId) && key.Equals(key.RootId, this.RootId) &&
+                    key.Equals(key.Policy, this.Policy));
         }
     }
 }

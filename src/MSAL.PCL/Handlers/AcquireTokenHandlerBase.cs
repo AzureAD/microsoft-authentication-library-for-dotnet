@@ -31,15 +31,14 @@ namespace Microsoft.Identity.Client.Handlers
         internal readonly TokenCache tokenCache;
         protected readonly IDictionary<string, string> brokerParameters;
 
-        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string policy, TokenSubjectType subjectType)
+        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string policy)
         {
             this.Authenticator = authenticator;
             this.CallState = CreateCallState(this.Authenticator.CorrelationId);
             PlatformPlugin.Logger.Information(this.CallState,
-                string.Format("=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}\n\tAuthentication Target: {4}\n\t",
+                string.Format("=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
                 authenticator.Authority, scope.CreateSingleStringFromArray(), clientKey.ClientId,
-                (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(" ({0} items)", tokenCache.Count) : "null",
-                subjectType));
+                (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(" ({0} items)", tokenCache.Count) : "null"));
 
             this.tokenCache = tokenCache;
 
@@ -52,7 +51,6 @@ namespace Microsoft.Identity.Client.Handlers
             ValidateScopeInput(this.Scope);
 
             this.ClientKey = clientKey;
-            this.TokenSubjectType = subjectType;
             this.Policy = policy;
 
             this.LoadFromCache = (tokenCache != null);
@@ -77,8 +75,6 @@ namespace Microsoft.Identity.Client.Handlers
         protected HashSet<string> Scope { get; set; }
 
         protected ClientKey ClientKey { get; private set; }
-
-        protected TokenSubjectType TokenSubjectType { get; private set; }
 
         protected string UniqueId { get; set; }
 
@@ -122,13 +118,13 @@ namespace Microsoft.Identity.Client.Handlers
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.RootId, this.Policy, this.CallState);
+                    resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.UniqueId, this.DisplayableId, this.RootId, this.Policy, this.CallState);
                     if (resultEx != null && resultEx.Result.AccessToken == null && resultEx.RefreshToken != null)
                     {
                         resultEx = await this.RefreshAccessTokenAsync(resultEx).ConfigureAwait(false);
                         if (resultEx != null)
                         {
-                            this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.TokenSubjectType, this.Policy, this.CallState);
+                            this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.Policy, this.CallState);
                         }
                     }
                 }
@@ -169,7 +165,7 @@ namespace Microsoft.Identity.Client.Handlers
                             notifiedBeforeAccessCache = true;
                         }
 
-                        this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.TokenSubjectType, this.Policy, this.CallState);
+                        this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.Policy, this.CallState);
                     }
                 }
 
@@ -394,7 +390,7 @@ namespace Microsoft.Identity.Client.Handlers
 
                     AuthenticationResultEx resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority,
                         this.Scope,
-                        this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.RootId,
+                        this.ClientKey.ClientId, this.UniqueId, this.DisplayableId, this.RootId,
                         this.Policy, this.CallState);
                 }
                 finally

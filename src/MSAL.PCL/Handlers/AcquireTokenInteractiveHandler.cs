@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Handlers
 
         public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope,
             string[] additionalScope, string clientId, Uri redirectUri, IPlatformParameters parameters, string loginHint, UiOptions uiOptions, string extraQueryParameters, string policy, IWebUI webUI)
-            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, Internal.TokenSubjectType.User)
+            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy)
         {
             this._redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
 
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client.Handlers
 
                     AuthenticationResultEx resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority,
                         this.Scope,
-                        this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.RootId,
+                        this.ClientKey.ClientId, this.UniqueId, this.DisplayableId, this.RootId,
                         this.Policy, this.CallState);
                     if (resultEx != null && !string.IsNullOrWhiteSpace(resultEx.RefreshToken))
                     {
