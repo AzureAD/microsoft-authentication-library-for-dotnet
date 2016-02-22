@@ -16,11 +16,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using UIKit;
 
 namespace Microsoft.Identity.Client
@@ -32,24 +27,17 @@ namespace Microsoft.Identity.Client
     {
         public PlatformParameters()
         {
-            SkipBroker = true;
         }
 
         public PlatformParameters(UIViewController callerViewController):this()
         {
             this.CallerViewController = callerViewController;
         }
-
-        public PlatformParameters(UIViewController callerViewController, bool skipBroker):this(callerViewController)
-        {
-            SkipBroker = skipBroker;
-        }
-
+        
         /// <summary>
         /// Caller UIViewController
         /// </summary>
         public UIViewController CallerViewController { get; private set; } 
-
-        public bool SkipBroker { get; set; }
+        
     }
 }

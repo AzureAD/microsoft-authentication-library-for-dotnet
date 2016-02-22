@@ -53,7 +53,6 @@
     <Compile Include="AuthenticationRequest.cs" />
     <Compile Include="BrokerConstants.cs" />
     <Compile Include="BrokerHelper.cs" />
-    <Compile Include="BrokerProxy.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="DeviceAuthHelper.cs" />
     <Compile Include="PlatformParameters.cs" />
@@ -63,7 +62,6 @@
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AuthenticationAgentActivity.cs" />
-    <Compile Include="AuthenticationAgentContinuationHelper.cs" />
     <Compile Include="TokenCachePlugin.cs" />
     <Compile Include="WebUI.cs" />
     <Compile Include="WebUIFactory.cs" />

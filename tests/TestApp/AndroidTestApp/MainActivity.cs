@@ -58,13 +58,7 @@ namespace AndroidTestApp
             EditText email = FindViewById<EditText>(Resource.Id.email);
             email.Text = sts.ValidUserName;
         }
-
-        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
-        {
-            base.OnActivityResult(requestCode, resultCode, data);
-            AuthenticationAgentContinuationHelper.SetAuthenticationAgentContinuationEventArgs(requestCode, resultCode, data);
-        }
-
+        
         private async void acquireTokenSilentButton_Click(object sender, EventArgs e)
         {
             this.accessTokenTextView.Text = string.Empty;

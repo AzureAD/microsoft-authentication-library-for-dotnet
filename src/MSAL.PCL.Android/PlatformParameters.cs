@@ -27,20 +27,12 @@ namespace Microsoft.Identity.Client
     {
         public PlatformParameters()
         {
-            SkipBroker = true;
         }
 
         public PlatformParameters(Activity callerActivity):this()
         {
             this.CallerActivity = callerActivity;
         }
-
-        public PlatformParameters(Activity callerActivity, bool skipBroker) : this(callerActivity)
-        {
-            SkipBroker = skipBroker;
-        }
-
-        public bool SkipBroker { get; set; }
 
         /// <summary>
         /// Caller Android Activity
