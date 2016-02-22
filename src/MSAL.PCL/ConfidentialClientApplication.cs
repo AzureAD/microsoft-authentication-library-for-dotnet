@@ -101,13 +101,13 @@ namespace Microsoft.Identity.Client
 
         private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(Authenticator authenticator, string[] scope, ClientKey clientKey, UserAssertion userAssertion, string policy)
         {
-            var handler = new AcquireTokenOnBehalfHandler(authenticator, this.UserTokenCache, scope, clientKey, userAssertion, policy);
+            var handler = new AcquireTokenOnBehalfHandler(authenticator, this.UserTokenCache, scope, clientKey, userAssertion, policy, this.RestrictToSingleUser);
             return await handler.RunAsync();
         }
 
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode, string[] scope, Uri redirectUri, ClientKey clientKey, string policy)
         {
-            var handler = new AcquireTokenByAuthorizationCodeHandler(this.Authenticator, this.UserTokenCache, scope, clientKey, authorizationCode, redirectUri, policy);
+            var handler = new AcquireTokenByAuthorizationCodeHandler(this.Authenticator, this.UserTokenCache, scope, clientKey, authorizationCode, redirectUri, policy, this.RestrictToSingleUser);
             return await handler.RunAsync();
         }
 
@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Client
         public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string loginHint, string extraQueryParameters)
         {
             var handler = new AcquireTokenInteractiveHandler(this.Authenticator, null, scope, null, this.ClientId,
-                new Uri(this.RedirectUri), null, loginHint, UiOptions.SelectAccount, extraQueryParameters, null, null);
+                new Uri(this.RedirectUri), null, loginHint, UiOptions.SelectAccount, extraQueryParameters, null, null, this.RestrictToSingleUser);
             return await handler.CreateAuthorizationUriAsync(this.CorrelationId).ConfigureAwait(false);
         }
 
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client
         public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string redirectUri, string loginHint, UiOptions options, string extraQueryParameters, string[] additionalScope, string authority, string policy)
         {
             var handler = new AcquireTokenInteractiveHandler(this.Authenticator, null, scope, additionalScope,
-                this.ClientId, new Uri(this.RedirectUri), null, loginHint, options, extraQueryParameters, policy, null);
+                this.ClientId, new Uri(this.RedirectUri), null, loginHint, options, extraQueryParameters, policy, null, this.RestrictToSingleUser);
             return await handler.CreateAuthorizationUriAsync(this.CorrelationId).ConfigureAwait(false);
         }
 

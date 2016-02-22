@@ -6,6 +6,6 @@ namespace Microsoft.Identity.Client
         SelectAccount,
         ForceLogin,
         ForceConsent,
-        UseCurrentUser
+        ActAsCurrentUser
     }
 }

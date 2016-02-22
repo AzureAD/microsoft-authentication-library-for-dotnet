@@ -16,7 +16,7 @@ namespace Test.MSAL.NET.Unit
 
         internal IDictionary<string, string> HeadersToValidate { get; set; }
 
-        public Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders, CallState callState)
         {
             if (HeadersToValidate!=null)
             {
@@ -29,7 +29,7 @@ namespace Test.MSAL.NET.Unit
                 }
             }
 
-            return new Task<AuthorizationResult>(()=>this.MockResult);
+            return await Task.Factory.StartNew(() => this.MockResult).ConfigureAwait(false);
         }
     }
 }

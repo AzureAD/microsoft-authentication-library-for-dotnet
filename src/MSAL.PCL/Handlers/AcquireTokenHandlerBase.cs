@@ -29,9 +29,10 @@ namespace Microsoft.Identity.Client.Handlers
     {
         protected readonly static Task CompletedTask = Task.FromResult(false);
         internal readonly TokenCache tokenCache;
+        protected readonly bool restrictToSingleUser;
         protected readonly IDictionary<string, string> brokerParameters;
 
-        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string policy)
+        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string policy, bool restrictToSingleUser)
         {
             this.Authenticator = authenticator;
             this.CallState = CreateCallState(this.Authenticator.CorrelationId);
@@ -63,7 +64,7 @@ namespace Microsoft.Identity.Client.Handlers
             brokerParameters["client_id"] = clientKey.ClientId;
             brokerParameters["correlation_id"] = this.CallState.CorrelationId.ToString();
             brokerParameters["client_version"] = MsalIdHelper.GetMsalVersion();
-
+            this.restrictToSingleUser = restrictToSingleUser;
         }
 
         internal CallState CallState { get; set; }

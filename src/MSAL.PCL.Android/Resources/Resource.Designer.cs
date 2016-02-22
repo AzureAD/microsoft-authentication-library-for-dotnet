@@ -11,7 +11,7 @@
 
 [assembly: global::Android.Runtime.ResourceDesignerAttribute("Microsoft.Identity.Client.Resource", IsApplication=false)]
 
-namespace Microsoft.Identity.Client.Resources
+namespace Microsoft.Identity.Client
 {
 	
 	

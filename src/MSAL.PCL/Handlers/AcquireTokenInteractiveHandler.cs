@@ -42,14 +42,14 @@ namespace Microsoft.Identity.Client.Handlers
 
         public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope,
             string[] additionalScope, string clientId, Uri redirectUri, IPlatformParameters parameters, User user,
-            UiOptions uiOptions, string extraQueryParameters, string policy, IWebUI webUI):this(authenticator, tokenCache, scope, additionalScope, clientId, redirectUri, parameters, user.DisplayableId, uiOptions, extraQueryParameters, policy, webUI)
+            UiOptions uiOptions, string extraQueryParameters, string policy, IWebUI webUI, bool restrictToSingleUser) :this(authenticator, tokenCache, scope, additionalScope, clientId, redirectUri, parameters, user?.DisplayableId, uiOptions, extraQueryParameters, policy, webUI, restrictToSingleUser)
         {
             this.User = user;
         }
 
         public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope,
-            string[] additionalScope, string clientId, Uri redirectUri, IPlatformParameters parameters, string loginHint, UiOptions uiOptions, string extraQueryParameters, string policy, IWebUI webUI)
-            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy)
+            string[] additionalScope, string clientId, Uri redirectUri, IPlatformParameters parameters, string loginHint, UiOptions uiOptions, string extraQueryParameters, string policy, IWebUI webUI, bool restrictToSingleUser)
+            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, restrictToSingleUser)
         {
             this._redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
 
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Handlers
             this.LoadFromCache = false; //no cache lookup and refresh for interactive.
             this.SupportADFS = false;
 
-            if (string.IsNullOrWhiteSpace(loginHint) && _uiOptions == UiOptions.UseCurrentUser)
+            if (string.IsNullOrWhiteSpace(loginHint) && _uiOptions == UiOptions.ActAsCurrentUser)
             {
                 throw new ArgumentException(MsalErrorMessage.LoginHintNullForUiOption, "loginHint");
             }
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.Handlers
             IDictionary<string, string> headers = new Dictionary<string, string>();
             await base.PreTokenRequest().ConfigureAwait(false);
 
-            if (this.tokenCache!=null && this.User!=null  && _uiOptions == UiOptions.UseCurrentUser)
+            if (this.tokenCache!=null && this.User!=null  && _uiOptions == UiOptions.ActAsCurrentUser)
             {
                 bool notifiedBeforeAccessCache = false;
                 try
@@ -125,6 +125,7 @@ namespace Microsoft.Identity.Client.Handlers
 
                 }
             }
+            
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
             await this.AcquireAuthorizationAsync(headers).ConfigureAwait(false);
             this.VerifyAuthorizationResult();
@@ -264,7 +265,7 @@ namespace Microsoft.Identity.Client.Handlers
                     authorizationRequestParameters[OAuthParameter.Prompt] = "select_account";
                     break;
 
-                case UiOptions.UseCurrentUser:
+                case UiOptions.ActAsCurrentUser:
                     authorizationRequestParameters[OAuthParameter.RestrictToHint] = "true";
                     break;
             }

@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// default false.
         /// </summary>
-        public string RestrictToSingleUser { get; set; }
+        public bool RestrictToSingleUser { get; set; }
 
         public string Authority { get; private set; }
 
@@ -81,8 +81,8 @@ namespace Microsoft.Identity.Client
                 foreach (string uniqueId in uniqueIds)
                 {
                     users.Add(
-                        allItems.Where(item => !string.IsNullOrEmpty(item.UniqueId) && item.UniqueId.Equals(uniqueId))
-                            .First()
+                        allItems
+                            .First(item => !string.IsNullOrEmpty(item.UniqueId) && item.UniqueId.Equals(uniqueId))
                             .User);
                 }
 
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client
                 parameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var handler = new AcquireTokenSilentHandler(authenticator, this.UserTokenCache, scope, clientKey, userId,  parameters, policy);
+            var handler = new AcquireTokenSilentHandler(authenticator, this.UserTokenCache, scope, clientKey, userId,  parameters, policy, this.RestrictToSingleUser);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client
                 parameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var handler = new AcquireTokenSilentHandler(authenticator, this.UserTokenCache, scope, clientKey, user, parameters, policy);
+            var handler = new AcquireTokenSilentHandler(authenticator, this.UserTokenCache, scope, clientKey, user, parameters, policy, this.RestrictToSingleUser);
             return await handler.RunAsync().ConfigureAwait(false);
         }
     }

@@ -26,11 +26,10 @@ namespace Microsoft.Identity.Client.Handlers
     internal class AcquireTokenNonInteractiveHandler : AcquireTokenHandlerBase
     {
         private readonly UserCredential userCredential;
-
         private UserAssertion userAssertion;
         
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserCredential userCredential, string policy)
-            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy)
+        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserCredential userCredential, string policy, bool restrictToSingleUser)
+            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, restrictToSingleUser)
         {
             if (userCredential == null)
             {

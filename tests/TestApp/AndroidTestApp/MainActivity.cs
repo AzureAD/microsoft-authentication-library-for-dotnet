@@ -18,7 +18,7 @@
 
 using System;
 using System.Threading.Tasks;
-using AdalAndroidTestApp.Resources;
+using AndroidTestApp.Resources;
 using Android.App;
 using Android.Content;
 using Android.Widget;
@@ -26,9 +26,9 @@ using Android.OS;
 using Microsoft.Identity.Client;
 using TestApp.PCL;
 
-namespace AdalAndroidTestApp
+namespace AndroidTestApp
 {
-    [Activity(Label = "AdalAndroidTestApp", MainLauncher = true, Icon = "@drawable/icon")]
+    [Activity(Label = "AndroidTestApp", MainLauncher = true, Icon = "@drawable/icon")]
     public class MainActivity : Activity
     {
         private TextView accessTokenTextView;

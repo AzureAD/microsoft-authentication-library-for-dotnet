@@ -96,11 +96,50 @@ namespace Test.MSAL.NET.Unit
             MockWebUI webUi = new MockWebUI();
             webUi.HeadersToValidate = new Dictionary<string, string>();
             webUi.HeadersToValidate["x-ms-sso-RefreshToken"] = "someRT";
+            webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
+                TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
 
             AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, cache,
                 TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
                 TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
-                TestConstants.DefaultDisplayableId, UiOptions.UseCurrentUser, "extra=qp", "some-policy", webUi);
+                ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", TestConstants.DefaultPolicy, webUi);
+            handler.PreRunAsync().Wait();
+            handler.PreTokenRequest().Wait();
+        }
+
+        [TestMethod]
+        [TestCategory("AcquireTokenInteractiveHandlerTests")]
+        public void ActAsCurrentUserNoSsoHeaderForLoginHintOnlyTest()
+        {
+            //this test validates that no SSO header is added when developer passes only login hint and UiOption.ActAsCurrentUser
+
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false);
+            TokenCache cache = new TokenCache();
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            AuthenticationResultEx ex = new AuthenticationResultEx();
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(),
+                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)));
+            ex.Result.User = new User
+            {
+                DisplayableId = TestConstants.DefaultDisplayableId,
+                UniqueId = TestConstants.DefaultUniqueId,
+                RootId = TestConstants.DefaultRootId
+            };
+            ex.Result.FamilyId = "1";
+            ex.RefreshToken = "someRT";
+            cache.tokenCacheDictionary[key] = ex;
+
+            MockWebUI webUi = new MockWebUI();
+            webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
+                TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
+
+            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, cache,
+                TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
+                TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
+                ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", TestConstants.DefaultPolicy, webUi);
             handler.PreRunAsync().Wait();
             handler.PreTokenRequest().Wait();
         }

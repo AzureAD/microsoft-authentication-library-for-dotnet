@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Handlers
     internal class AcquireTokenForClientHandler : AcquireTokenHandlerBase
     {
         public AcquireTokenForClientHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey)
-            : base(authenticator, tokenCache, scope, clientKey, null)
+            : base(authenticator, tokenCache, scope, clientKey, null, false)
         {
             this.SupportADFS = false;
         }

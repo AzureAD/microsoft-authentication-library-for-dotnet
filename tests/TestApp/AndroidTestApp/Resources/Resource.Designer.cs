@@ -11,7 +11,7 @@
 
 [assembly: global::Android.Runtime.ResourceDesignerAttribute("AdalAndroidTestApp.Resource", IsApplication=true)]
 
-namespace AdalAndroidTestApp.Resources
+namespace AdalAndroidTestApp
 {
 	
 	
@@ -26,9 +26,9 @@ namespace AdalAndroidTestApp.Resources
 		
 		public static void UpdateIdValues()
 		{
-			global::Microsoft.Identity.Client.Resources.Resource.Id.agentWebView = global::AdalAndroidTestApp.Resources.Resource.Id.agentWebView;
-			global::Microsoft.Identity.Client.Resources.Resource.Layout.WebAuthenticationBroker = global::AdalAndroidTestApp.Resources.Resource.Layout.WebAuthenticationBroker;
-			global::Microsoft.Identity.Client.Resources.Resource.String.ApplicationName = global::AdalAndroidTestApp.Resources.Resource.String.ApplicationName;
+			global::Microsoft.Identity.Client.Resource.Id.agentWebView = global::AdalAndroidTestApp.Resource.Id.agentWebView;
+			global::Microsoft.Identity.Client.Resource.Layout.WebAuthenticationBroker = global::AdalAndroidTestApp.Resource.Layout.WebAuthenticationBroker;
+			global::Microsoft.Identity.Client.Resource.String.ApplicationName = global::AdalAndroidTestApp.Resource.String.ApplicationName;
 		}
 		
 		public partial class Attribute

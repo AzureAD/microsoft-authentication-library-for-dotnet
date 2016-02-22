@@ -58,9 +58,7 @@
     <Compile Include="Internal\HttpMessageHandlerFactory.cs" />
     <Compile Include="Internal\MsalError.cs" />
     <Compile Include="AbstractClientApplication.cs" />
-    <Compile Include="Handlers\AcquireDeviceCodeHandler.cs" />
     <Compile Include="Handlers\AcquireTokenByAuthorizationCodeHandler.cs" />
-    <Compile Include="Handlers\AcquireTokenByDeviceCodeHandler.cs" />
     <Compile Include="Handlers\AcquireTokenForClientHandler.cs" />
     <Compile Include="Handlers\AcquireTokenHandlerBase.cs" />
     <Compile Include="Handlers\AcquireTokenInteractiveHandler.cs" />

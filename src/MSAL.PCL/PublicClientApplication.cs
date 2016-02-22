@@ -205,9 +205,39 @@ namespace Microsoft.Identity.Client
             return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parameters);
         }
 
+        //TODO look into adding user identifier when domain cannot be queried or privacy settings are against you
+        /// <summary>
+        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <returns></returns>
+        internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope)
+        {
+            return
+                await
+                    this.AcquireTokenUsingIntegratedAuthCommonAsync(this.Authenticator, scope, this.ClientId,
+                        new UserCredential(), null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="authority"></param>
+        /// <param name="policy"></param>
+        /// <returns></returns>
+        internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope, string authority, string policy)
+        {
+            Authenticator localAuthenticator = new Authenticator(authority, this.ValidateAuthority);
+            return
+                await
+                    this.AcquireTokenUsingIntegratedAuthCommonAsync(localAuthenticator, scope, this.ClientId,
+                        new UserCredential(), policy).ConfigureAwait(false);
+        }
+
         private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(Authenticator authenticator, string[] scope, string clientId, UserCredential userCredential, string policy)
         {
-            var handler = new AcquireTokenNonInteractiveHandler(authenticator, this.UserTokenCache, scope, clientId, userCredential, policy);
+            var handler = new AcquireTokenNonInteractiveHandler(authenticator, this.UserTokenCache, scope, clientId, userCredential, policy, this.RestrictToSingleUser);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
@@ -259,36 +289,5 @@ namespace Microsoft.Identity.Client
             var handler = new AcquireTokenInteractiveHandler(authenticator, this.UserTokenCache, scope, additionalScope, clientId, redirectUri, this.PlatformParameters, user, uiOptions, extraQueryParameters, policy, this.CreateWebAuthenticationDialog(this.PlatformParameters));
             return await handler.RunAsync().ConfigureAwait(false);
         }
-
-        //TODO look into adding user identifier when domain cannot be queried or privacy settings are against you
-        /// <summary>
-        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <returns></returns>
-        internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope)
-        {
-            return
-                await
-                    this.AcquireTokenUsingIntegratedAuthCommonAsync(this.Authenticator, scope, this.ClientId,
-                        new UserCredential(), null).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="authority"></param>
-        /// <param name="policy"></param>
-        /// <returns></returns>
-        internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope, string authority, string policy)
-        {
-            Authenticator localAuthenticator = new Authenticator(authority, this.ValidateAuthority);
-            return
-                await
-                    this.AcquireTokenUsingIntegratedAuthCommonAsync(localAuthenticator, scope, this.ClientId,
-                        new UserCredential(), policy).ConfigureAwait(false);
-        }
-
     }
 }
