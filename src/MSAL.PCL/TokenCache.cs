@@ -394,8 +394,8 @@ namespace Microsoft.Identity.Client
         {
             PlatformPlugin.Logger.Verbose(callState, "Storing token in the cache...");
 
-            if (restrictToSingleUser && result.Result.User != null && !string.IsNullOrEmpty(result.Result.User.UniqueId) &&
-                this.GetUniqueIdsFromCache(clientId).Contains(result.Result.User.UniqueId))
+            if (restrictToSingleUser && (result.Result.User == null || string.IsNullOrEmpty(result.Result.User.UniqueId) ||
+                !this.GetUniqueIdsFromCache(clientId).Contains(result.Result.User.UniqueId)))
             {
                 throw new MsalException(
                     "Cannot add more than 1 user with a different unique id when RestrictToSingleUser is set to TRUE.");

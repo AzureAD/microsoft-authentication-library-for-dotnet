@@ -71,6 +71,12 @@ namespace Microsoft.Identity.Client.Handlers
                 throw new ArgumentException(
                     "Cache cannot have entries for more than 1 unique id when RestrictToSingleUser is set to TRUE.");
             }
+
+            //pull any user from the cache as they will all have the same uniqueId
+            if (this.tokenCache != null && restrictToSingleUser)
+            {
+                this.User = this.tokenCache.ReadItems(this.ClientKey.ClientId).First().User;
+            }
         }
 
         internal CallState CallState { get; set; }
