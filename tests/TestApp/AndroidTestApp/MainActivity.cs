@@ -18,7 +18,6 @@
 
 using System;
 using System.Threading.Tasks;
-using AndroidTestApp.Resources;
 using Android.App;
 using Android.Content;
 using Android.Widget;

@@ -9,9 +9,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: global::Android.Runtime.ResourceDesignerAttribute("AdalAndroidTestApp.Resource", IsApplication=true)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("AndroidTestApp.Resource", IsApplication=true)]
 
-namespace AdalAndroidTestApp
+namespace AndroidTestApp
 {
 	
 	
@@ -26,9 +26,9 @@ namespace AdalAndroidTestApp
 		
 		public static void UpdateIdValues()
 		{
-			global::Microsoft.Identity.Client.Resource.Id.agentWebView = global::AdalAndroidTestApp.Resource.Id.agentWebView;
-			global::Microsoft.Identity.Client.Resource.Layout.WebAuthenticationBroker = global::AdalAndroidTestApp.Resource.Layout.WebAuthenticationBroker;
-			global::Microsoft.Identity.Client.Resource.String.ApplicationName = global::AdalAndroidTestApp.Resource.String.ApplicationName;
+			global::Microsoft.Identity.Client.Resource.Id.agentWebView = global::AndroidTestApp.Resource.Id.agentWebView;
+			global::Microsoft.Identity.Client.Resource.Layout.WebAuthenticationBroker = global::AndroidTestApp.Resource.Layout.WebAuthenticationBroker;
+			global::Microsoft.Identity.Client.Resource.String.ApplicationName = global::AndroidTestApp.Resource.String.ApplicationName;
 		}
 		
 		public partial class Attribute
