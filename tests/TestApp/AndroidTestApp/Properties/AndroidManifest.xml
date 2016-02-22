@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="AdalAndroidTestApp.AdalAndroidTestApp" android:versionCode="1" android:versionName="1.0" android:installLocation="auto">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="AndroidTestApp.AndroidTestApp" android:versionCode="1" android:versionName="1.0" android:installLocation="auto">
 	<uses-sdk android:maxSdkVersion="12" />
-	<application android:label="AdalAndroidTestApp" android:icon="@drawable/Icon"></application>
+	<application android:label="AndroidTestApp" android:icon="@drawable/Icon"></application>
 	<uses-permission android:name="android.permission.GET_ACCOUNTS" />
 	<uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
 	<uses-permission android:name="android.permission.USE_CREDENTIALS" />

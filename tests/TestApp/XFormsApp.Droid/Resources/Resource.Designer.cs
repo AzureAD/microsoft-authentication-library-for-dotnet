@@ -11,7 +11,7 @@
 
 [assembly: global::Android.Runtime.ResourceDesignerAttribute("XFormsApp.Droid.Resource", IsApplication=true)]
 
-namespace XFormsApp.Droid.Resources
+namespace XFormsApp.Droid
 {
 	
 	
@@ -26,9 +26,9 @@ namespace XFormsApp.Droid.Resources
 		
 		public static void UpdateIdValues()
 		{
-			global::Microsoft.Identity.Client.Resources.Resource.Id.agentWebView = global::XFormsApp.Droid.Resources.Resource.Id.agentWebView;
-			global::Microsoft.Identity.Client.Resources.Resource.Layout.WebAuthenticationBroker = global::XFormsApp.Droid.Resources.Resource.Layout.WebAuthenticationBroker;
-			global::Microsoft.Identity.Client.Resources.Resource.String.ApplicationName = global::XFormsApp.Droid.Resources.Resource.String.ApplicationName;
+			global::Microsoft.Identity.Client.Resource.Id.agentWebView = global::XFormsApp.Droid.Resource.Id.agentWebView;
+			global::Microsoft.Identity.Client.Resource.Layout.WebAuthenticationBroker = global::XFormsApp.Droid.Resource.Layout.WebAuthenticationBroker;
+			global::Microsoft.Identity.Client.Resource.String.ApplicationName = global::XFormsApp.Droid.Resource.String.ApplicationName;
 		}
 		
 		public partial class Attribute
