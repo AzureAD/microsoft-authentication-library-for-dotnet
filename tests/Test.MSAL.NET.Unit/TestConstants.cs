@@ -14,6 +14,7 @@ namespace Test.MSAL.NET.Unit
         public static readonly string DefaultDisplayableId = "displayable@id.com";
         public static readonly string DefaultRootId = "root_id";
         public static readonly string DefaultPolicy = "policy";
+        public static readonly bool DefaultRestrictToSingleUser = false;
 
         public static readonly User DefaultUser = new User
         {

@@ -21,6 +21,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
@@ -260,6 +261,28 @@ namespace Microsoft.Identity.Client
             this.OnAfterAccess(args);
         }
 
+        internal IEnumerable<string> GetUniqueIdsFromCache(string clientId)
+        {
+            IEnumerable<TokenCacheItem> allItems = this.ReadItems(clientId);
+            return allItems.Select(item => item.UniqueId).Distinct();
+        }
+
+        internal IEnumerable<User> GetUsers(string clientId)
+        {
+            List<User> users = new List<User>();
+            IEnumerable<string> uniqueIds = this.GetUniqueIdsFromCache(clientId);
+            foreach (string uniqueId in uniqueIds)
+            {
+                users.Add(
+                    this.ReadItems(clientId)
+                        .First(item => !string.IsNullOrEmpty(item.UniqueId) && item.UniqueId.Equals(uniqueId))
+                        .User);
+            }
+
+            return users;
+        }
+
+
         internal void OnAfterAccess(TokenCacheNotificationArgs args)
         {
             if (AfterAccess != null)
@@ -367,9 +390,16 @@ namespace Microsoft.Identity.Client
 
 
         internal void StoreToCache(AuthenticationResultEx result, string authority, string clientId,
-            string policy, CallState callState)
+            string policy, bool restrictToSingleUser, CallState callState)
         {
             PlatformPlugin.Logger.Verbose(callState, "Storing token in the cache...");
+
+            if (restrictToSingleUser && result.Result.User != null && !string.IsNullOrEmpty(result.Result.User.UniqueId) &&
+                this.GetUniqueIdsFromCache(clientId).Contains(result.Result.User.UniqueId))
+            {
+                throw new MsalException(
+                    "Cannot add more than 1 user with a different unique id when RestrictToSingleUser is set to TRUE.");
+            }
 
             this.OnBeforeWrite(new TokenCacheNotificationArgs
             {

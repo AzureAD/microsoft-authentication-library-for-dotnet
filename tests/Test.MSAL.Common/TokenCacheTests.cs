@@ -631,7 +631,7 @@ namespace Test.MSAL.Common.Unit
             };
 
             tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultClientId,
-                TestConstants.DefaultPolicy, null);
+                TestConstants.DefaultPolicy, TestConstants.DefaultRestrictToSingleUser, null);
 
             Assert.AreEqual(2, tokenCache.Count);
             AuthenticationResultEx resultExOut =
@@ -699,7 +699,7 @@ namespace Test.MSAL.Common.Unit
             };
 
             tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultClientId,
-                TestConstants.DefaultPolicy, null);
+                TestConstants.DefaultPolicy, TestConstants.DefaultRestrictToSingleUser, null);
 
             Assert.AreEqual(3, tokenCache.Count);
             AuthenticationResultEx resultExOut =

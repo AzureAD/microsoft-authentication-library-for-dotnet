@@ -262,7 +262,7 @@ namespace Microsoft.Identity.Client
                 this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var handler = new AcquireTokenInteractiveHandler(authenticator, this.UserTokenCache, scope, additionalScope, clientId, redirectUri, this.PlatformParameters, loginHint, uiOptions, extraQueryParameters, policy, this.CreateWebAuthenticationDialog(this.PlatformParameters));
+            var handler = new AcquireTokenInteractiveHandler(authenticator, this.UserTokenCache, scope, additionalScope, clientId, redirectUri, this.PlatformParameters, loginHint, uiOptions, extraQueryParameters, policy, this.CreateWebAuthenticationDialog(this.PlatformParameters), this.RestrictToSingleUser);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Client
                 this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var handler = new AcquireTokenInteractiveHandler(authenticator, this.UserTokenCache, scope, additionalScope, clientId, redirectUri, this.PlatformParameters, user, uiOptions, extraQueryParameters, policy, this.CreateWebAuthenticationDialog(this.PlatformParameters));
+            var handler = new AcquireTokenInteractiveHandler(authenticator, this.UserTokenCache, scope, additionalScope, clientId, redirectUri, this.PlatformParameters, user, uiOptions, extraQueryParameters, policy, this.CreateWebAuthenticationDialog(this.PlatformParameters), this.RestrictToSingleUser);
             return await handler.RunAsync().ConfigureAwait(false);
         }
     }

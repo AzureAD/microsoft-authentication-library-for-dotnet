@@ -39,8 +39,8 @@ namespace Microsoft.Identity.Client.Handlers
             this.userCredential = userCredential;
         }
 
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserAssertion userAssertion, string policy)
-            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy)
+        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserAssertion userAssertion, string policy, bool restrictToSingleUser)
+            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, restrictToSingleUser)
         {
             if (userAssertion == null)
             {

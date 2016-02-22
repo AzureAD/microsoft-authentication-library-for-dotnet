@@ -65,6 +65,12 @@ namespace Microsoft.Identity.Client.Handlers
             brokerParameters["correlation_id"] = this.CallState.CorrelationId.ToString();
             brokerParameters["client_version"] = MsalIdHelper.GetMsalVersion();
             this.restrictToSingleUser = restrictToSingleUser;
+            
+            if (this.tokenCache != null && (restrictToSingleUser && this.tokenCache.GetUniqueIdsFromCache(this.ClientKey.ClientId).Count() > 1))
+            {
+                throw new ArgumentException(
+                    "Cache cannot have entries for more than 1 unique id when RestrictToSingleUser is set to TRUE.");
+            }
         }
 
         internal CallState CallState { get; set; }
@@ -121,7 +127,7 @@ namespace Microsoft.Identity.Client.Handlers
                         resultEx = await this.RefreshAccessTokenAsync(resultEx).ConfigureAwait(false);
                         if (resultEx != null)
                         {
-                            this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.Policy, this.CallState);
+                            this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.Policy, this.restrictToSingleUser, this.CallState);
                         }
                     }
                 }
@@ -162,7 +168,7 @@ namespace Microsoft.Identity.Client.Handlers
                             notifiedBeforeAccessCache = true;
                         }
 
-                        this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.Policy, this.CallState);
+                        this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.Policy, this.restrictToSingleUser, this.CallState);
                     }
                 }
 

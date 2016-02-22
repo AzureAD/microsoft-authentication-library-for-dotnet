@@ -70,23 +70,13 @@ namespace Microsoft.Identity.Client
         {
             get
             {
-                List<User> users = new List<User>();
                 if (this.UserTokenCache == null || this.UserTokenCache.Count == 0)
                 {
                     PlatformPlugin.Logger.Information(null, "AccessToken cache is null or empty");
-                    return users;
-                }
-                IEnumerable<TokenCacheItem> allItems = this.UserTokenCache.ReadItems(this.ClientId);
-                IEnumerable<string> uniqueIds = allItems.Select(item => item.UniqueId).Distinct();
-                foreach (string uniqueId in uniqueIds)
-                {
-                    users.Add(
-                        allItems
-                            .First(item => !string.IsNullOrEmpty(item.UniqueId) && item.UniqueId.Equals(uniqueId))
-                            .User);
+                    return new List<User>();
                 }
 
-                return users;
+                return this.UserTokenCache.GetUsers(this.ClientId);
             }
         }
 

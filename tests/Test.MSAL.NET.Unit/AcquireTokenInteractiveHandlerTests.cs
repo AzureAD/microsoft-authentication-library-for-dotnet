@@ -55,7 +55,7 @@ namespace Test.MSAL.NET.Unit
             AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, cache,
                 TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
                 TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
-                TestConstants.DefaultDisplayableId, UiOptions.SelectAccount, "extra=qp", "some-policy", ui);
+                TestConstants.DefaultDisplayableId, UiOptions.SelectAccount, "extra=qp", "some-policy", ui, TestConstants.DefaultRestrictToSingleUser);
             Task<AuthenticationResult> task = handler.RunAsync();
             task.Wait();
             AuthenticationResult result = task.Result;
@@ -102,7 +102,7 @@ namespace Test.MSAL.NET.Unit
             AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, cache,
                 TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
                 TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
-                ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", TestConstants.DefaultPolicy, webUi);
+                ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", TestConstants.DefaultPolicy, webUi, TestConstants.DefaultRestrictToSingleUser);
             handler.PreRunAsync().Wait();
             handler.PreTokenRequest().Wait();
         }
@@ -139,7 +139,7 @@ namespace Test.MSAL.NET.Unit
             AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, cache,
                 TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
                 TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
-                ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", TestConstants.DefaultPolicy, webUi);
+                ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", TestConstants.DefaultPolicy, webUi, TestConstants.DefaultRestrictToSingleUser);
             handler.PreRunAsync().Wait();
             handler.PreTokenRequest().Wait();
         }
