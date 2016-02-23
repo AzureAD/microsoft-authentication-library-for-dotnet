@@ -65,12 +65,12 @@
     <Compile Include="Handlers\AcquireTokenOnBehalfHandler.cs" />
     <Compile Include="Handlers\AcquireTokenSilentHandler.cs" />
     <Compile Include="IClientAssertionCertificate.cs" />
-    <Compile Include="Internal\MsalException.cs" />
+    <Compile Include="MsalException.cs" />
     <Compile Include="Internal\MsalStringHelper.cs" />
     <Compile Include="Internal\MsalIdHelper.cs" />
-    <Compile Include="Internal\MsalServiceException.cs" />
-    <Compile Include="Internal\MsalSilentTokenAcquisitionException.cs" />
-    <Compile Include="Internal\MsalUserMismatchException.cs" />
+    <Compile Include="MsalServiceException.cs" />
+    <Compile Include="MsalSilentTokenAcquisitionException.cs" />
+    <Compile Include="MsalUserMismatchException.cs" />
     <Compile Include="AuthenticationParameters.cs" />
     <Compile Include="AuthenticationResult.cs" />
     <Compile Include="Internal\Authenticator.cs" />

@@ -16,7 +16,9 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.Internal
+using Microsoft.Identity.Client.Internal;
+
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// The exception type thrown when a token cannot be acquired silently.

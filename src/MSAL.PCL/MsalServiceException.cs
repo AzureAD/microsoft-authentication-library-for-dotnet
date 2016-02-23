@@ -20,8 +20,9 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// The exception type thrown when user returned by service does not match user in the request.

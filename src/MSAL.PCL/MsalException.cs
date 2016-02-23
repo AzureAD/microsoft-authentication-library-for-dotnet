@@ -18,8 +18,9 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// The exception type thrown when an error occurs during token acquisition.

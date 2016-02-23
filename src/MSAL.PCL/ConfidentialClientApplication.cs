@@ -42,8 +42,8 @@ namespace Microsoft.Identity.Client
        {
            return
                await
-                   this.AcquireTokenForClientCommonAsync(scope,
-                       new ClientKey(this.ClientId, this.ClientCredential, this.Authenticator)).ConfigureAwait(false);
+                   this.AcquireTokenSilentCommonAsync(this.Authenticator, scope,
+                       new ClientKey(this.ClientId, this.ClientCredential, this.Authenticator), (User) null, null, null).ConfigureAwait(false);
        }
 
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId)
