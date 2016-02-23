@@ -86,7 +86,6 @@
     <Compile Include="ConfidentialClientApplication.cs" />
     <Compile Include="Internal\Constants.cs" />
     <Compile Include="Internal\DeviceAuthJWTResponse.cs" />
-    <Compile Include="Internal\DeviceCodeResponse.cs" />
     <Compile Include="Internal\HttpClientWrapper.cs" />
     <Compile Include="Internal\HttpRequestWrapperException.cs" />
     <Compile Include="Internal\MsalHttpWebResponse.cs" />
