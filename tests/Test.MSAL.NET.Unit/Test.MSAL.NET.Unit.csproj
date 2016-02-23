@@ -94,6 +94,7 @@
       <Link>TokenCacheTests.cs</Link>
     </Compile>
     <Compile Include="AcquireTokenInteractiveHandlerTests.cs" />
+    <Compile Include="AcquireTokenSilentHandlerTests.cs" />
     <Compile Include="AuthenticationParametersTests.cs" />
     <Compile Include="MockHelpers.cs" />
     <Compile Include="MockHttpMessageHandler.cs" />

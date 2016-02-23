@@ -131,7 +131,7 @@ namespace TestApp.PCL
 
         public void ClearTokenCache()
         {
-            TokenCache.DefaultShared.Clear("7c7a2f70-caef-45c8-9a6c-091633501de4");
+            TokenCache.DefaultSharedUserTokenCache.Clear("7c7a2f70-caef-45c8-9a6c-091633501de4");
         }
     }
 }

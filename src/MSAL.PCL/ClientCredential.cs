@@ -18,7 +18,7 @@
 
 using System;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client
 {
     public enum ClientCredentialType
     {

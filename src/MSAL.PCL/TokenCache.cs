@@ -47,7 +47,14 @@ namespace Microsoft.Identity.Client
 
         static TokenCache()
         {
-            DefaultShared = new TokenCache
+            DefaultSharedUserTokenCache = new TokenCache
+            {
+                BeforeAccess = PlatformPlugin.TokenCachePlugin.BeforeAccess,
+                AfterAccess = PlatformPlugin.TokenCachePlugin.AfterAccess
+            };
+
+
+            DefaultSharedAppTokenCache = new TokenCache
             {
                 BeforeAccess = PlatformPlugin.TokenCachePlugin.BeforeAccess,
                 AfterAccess = PlatformPlugin.TokenCachePlugin.AfterAccess
@@ -72,10 +79,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     Static token cache shared by all instances of AuthenticationContext which do not explicitly pass a cache instance
+        ///     Static user token cache shared by all instances of application which do not explicitly pass a cache instance
         ///     during construction.
         /// </summary>
-        public static TokenCache DefaultShared { get; private set; }
+        public static TokenCache DefaultSharedUserTokenCache { get; private set; }
+
+
+        /// <summary>
+        ///     Static client token cache shared by all instances of ConfidentialClientApplication which do not explicitly pass a cache instance
+        ///     during construction.
+        /// </summary>
+        public static TokenCache DefaultSharedAppTokenCache { get; private set; }
 
         /// <summary>
         ///     Notification method called before any library method accesses the cache.
@@ -246,7 +260,7 @@ namespace Microsoft.Identity.Client
         ///     Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
         ///     impact all the instances of <see cref="AuthenticationContext" /> which share that cache.
         /// </summary>
-        public void Clear(string clientId)
+        public virtual void Clear(string clientId)
         {
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
             this.OnBeforeAccess(args);

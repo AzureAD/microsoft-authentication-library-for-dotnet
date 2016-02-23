@@ -54,7 +54,6 @@
     <Compile Include="..\MSAL.Common\CommonAssemblyInfo.cs">
       <Link>Internal\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="DeviceCodeResult.cs" />
     <Compile Include="Internal\HttpMessageHandlerFactory.cs" />
     <Compile Include="Internal\MsalError.cs" />
     <Compile Include="AbstractClientApplication.cs" />
@@ -80,8 +79,8 @@
     <Compile Include="Internal\AuthorizationResult.cs" />
     <Compile Include="Internal\Base64UrlEncoder.cs" />
     <Compile Include="Internal\CallState.cs" />
-    <Compile Include="Internal\ClientAssertion.cs" />
-    <Compile Include="Internal\ClientCredential.cs" />
+    <Compile Include="ClientAssertion.cs" />
+    <Compile Include="ClientCredential.cs" />
     <Compile Include="Internal\ClientKey.cs" />
     <Compile Include="Internal\ClientMetrics.cs" />
     <Compile Include="ConfidentialClientApplication.cs" />
@@ -119,7 +118,7 @@
     <Compile Include="TokenCache.cs" />
     <Compile Include="TokenCacheItem.cs" />
     <Compile Include="Internal\TokenCacheKey.cs" />
-    <Compile Include="Internal\TokenCacheNotificationArgs.cs" />
+    <Compile Include="TokenCacheNotificationArgs.cs" />
     <Compile Include="UIOptions.cs" />
     <Compile Include="UserAssertion.cs" />
     <Compile Include="UserCredential.cs" />

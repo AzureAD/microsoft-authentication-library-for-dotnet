@@ -112,7 +112,7 @@ namespace AndroidTestApp
         {
             await Task.Factory.StartNew(() =>
             {
-                TokenCache.DefaultShared.Clear(sts.ValidClientId);
+                TokenCache.DefaultSharedUserTokenCache.Clear(sts.ValidClientId);
                 this.accessTokenTextView.Text = "Cache cleared";
             }).ConfigureAwait(false);
         }

@@ -35,6 +35,7 @@ namespace Microsoft.Identity.Client
        public ConfidentialClientApplication(string authority, string clientId, string redirectUri, ClientCredential clientCredential):base(authority, clientId, redirectUri, true)
         {
             this.ClientCredential = clientCredential;
+            this.AppTokenCache = TokenCache.DefaultSharedAppTokenCache;
         }
 
        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope)
@@ -82,6 +83,15 @@ namespace Microsoft.Identity.Client
                     this.AcquireTokenOnBehalfCommonAsync(localAuthenticator, scope,
                         new ClientKey(this.ClientId, this.ClientCredential, localAuthenticator), userAssertion, policy)
                         .ConfigureAwait(false);
+        }
+
+
+        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string[] scope, string authorizationCode)
+        {
+            return
+                await
+                    this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, scope, new Uri(this.RedirectUri),
+                        new ClientKey(this.ClientId, this.ClientCredential, this.Authenticator), null).ConfigureAwait(false);
         }
 
         public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string[] scope, string authorizationCode, string policy)

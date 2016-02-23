@@ -193,7 +193,9 @@ namespace Microsoft.Identity.Client.Handlers
                 {
                     authorizationRequestParameters[kvp.Key] = kvp.Value;
                 }
-        
+
+            AddUiOptionToRequestParameters(authorizationRequestParameters);
+
             if (!string.IsNullOrWhiteSpace(_extraQueryParameters))
             {
                 // Checks for _extraQueryParameters duplicating standard parameters
@@ -209,8 +211,6 @@ namespace Microsoft.Identity.Client.Handlers
                 authorizationRequestParameters.ExtraQueryParameter = _extraQueryParameters;
             }
 
-            AddUiOptionToRequestParameters(authorizationRequestParameters);
-
             return authorizationRequestParameters;
         }
 
@@ -225,28 +225,6 @@ namespace Microsoft.Identity.Client.Handlers
             {
                 throw new MsalServiceException(this.authorizationResult.Error, this.authorizationResult.ErrorDescription);
             }
-        }
-
-
-        protected override void UpdateBrokerParameters(IDictionary<string, string> parameters)
-        {
-            Uri uri = new Uri(this.authorizationResult.Code);
-            string query = EncodingHelper.UrlDecode(uri.Query);
-            Dictionary<string, string> kvps = EncodingHelper.ParseKeyValueList(query, '&', false, this.CallState);
-            parameters["username"] = kvps["username"];
-        }
-
-        protected override bool BrokerInvocationRequired()
-        {
-            if (this.authorizationResult != null
-                && !string.IsNullOrEmpty(this.authorizationResult.Code)
-                && this.authorizationResult.Code.StartsWith("msauth://"))
-            {
-                this.brokerParameters["broker_install_url"] = this.authorizationResult.Code;
-                return true;
-            }
-
-            return false;
         }
 
         private void AddUiOptionToRequestParameters(DictionaryRequestParameters authorizationRequestParameters)

@@ -64,7 +64,7 @@ namespace Test.MSAL.Common.Unit
         public void LoadFromCacheIntersectingScopeDifferentAuthorities()
         {
             TokenCache cache = new TokenCache();
-            loadCacheItems(cache);
+            LoadCacheItems(cache);
             HashSet<string> scope = new HashSet<string>(new[] {"r1/scope1"});
 
             AuthenticationResultEx resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
@@ -94,7 +94,7 @@ namespace Test.MSAL.Common.Unit
         {
             //this test will result only in a RT and no access token returned.
             var tokenCache = new TokenCache();
-            loadCacheItems(tokenCache);
+            LoadCacheItems(tokenCache);
 
             User user = TestConstants.DefaultUser;
             user.DisplayableId = null;
@@ -116,7 +116,7 @@ namespace Test.MSAL.Common.Unit
         public void LoadFromCacheNullUserMultipleEntries()
         {
             var tokenCache = new TokenCache();
-            loadCacheItems(tokenCache);
+            LoadCacheItems(tokenCache);
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
                 TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
@@ -184,7 +184,7 @@ namespace Test.MSAL.Common.Unit
         {
             //this test will result only in a RT and no access token returned.
             var tokenCache = new TokenCache();
-            loadCacheItems(tokenCache);
+            LoadCacheItems(tokenCache);
 
             User user = TestConstants.DefaultUser;
             user.DisplayableId = null;
@@ -207,7 +207,7 @@ namespace Test.MSAL.Common.Unit
         {
             //this test will result only in a RT and no access token returned.
             var tokenCache = new TokenCache();
-            loadCacheItems(tokenCache);
+            LoadCacheItems(tokenCache);
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
@@ -245,7 +245,7 @@ namespace Test.MSAL.Common.Unit
         public void LoadSingleItemFromCacheMatchingScopeDifferentAuthorities()
         {
             TokenCache cache = new TokenCache();
-            loadCacheItems(cache);
+            LoadCacheItems(cache);
             KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item =
                 cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityHomeTenant,
                     TestConstants.DefaultScope, TestConstants.DefaultClientId,
@@ -272,7 +272,7 @@ namespace Test.MSAL.Common.Unit
         public void LoadSingleItemFromCacheFamilyOfClientIdTest()
         {
             TokenCache cache = new TokenCache();
-            loadCacheItems(cache);
+            LoadCacheItems(cache);
 
             //lookup is for guest tenant authority, but the RT will be returned for home tenant authority because it is participating in FoCI feature.
             KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item =
@@ -301,7 +301,7 @@ namespace Test.MSAL.Common.Unit
         public void LoadSingleItemFromCacheNonExistantScopeDifferentAuthorities()
         {
             TokenCache cache = new TokenCache();
-            loadCacheItems(cache);
+            LoadCacheItems(cache);
             HashSet<string> scope = new HashSet<string>(new[] {"nonexistant-scope"});
 
             User user = TestConstants.DefaultUser;
@@ -332,7 +332,7 @@ namespace Test.MSAL.Common.Unit
         public void LoadSingleItemFromCacheIntersectingScopeDifferentAuthorities()
         {
             TokenCache cache = new TokenCache();
-            loadCacheItems(cache);
+            LoadCacheItems(cache);
             HashSet<string> scope = new HashSet<string>(new[] {"r1/scope1"});
 
             KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item =
@@ -400,7 +400,7 @@ namespace Test.MSAL.Common.Unit
             }
         }
 
-        private void loadCacheItems(TokenCache cache)
+        public static void LoadCacheItems(TokenCache cache)
         {
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
@@ -488,7 +488,7 @@ namespace Test.MSAL.Common.Unit
         public void ReadItemsTest()
         {
             var tokenCache = new TokenCache();
-            loadCacheItems(tokenCache);
+            LoadCacheItems(tokenCache);
             IEnumerable<TokenCacheItem> items = tokenCache.ReadItems(TestConstants.DefaultClientId);
             Assert.AreEqual(2, items.Count());
             Assert.AreEqual(TestConstants.DefaultUniqueId,
@@ -502,7 +502,7 @@ namespace Test.MSAL.Common.Unit
         public void ClearCacheTest()
         {
             var tokenCache = new TokenCache();
-            loadCacheItems(tokenCache);
+            LoadCacheItems(tokenCache);
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId + "more",
@@ -531,7 +531,7 @@ namespace Test.MSAL.Common.Unit
         public void DeleteItemTest()
         {
             var tokenCache = new TokenCache();
-            loadCacheItems(tokenCache);
+            LoadCacheItems(tokenCache);
             try
             {
                 tokenCache.DeleteItem(null);
@@ -560,7 +560,7 @@ namespace Test.MSAL.Common.Unit
         public void SerializationDeserializationTest()
         {
             var tokenCache1 = new TokenCache();
-            loadCacheItems(tokenCache1);
+            LoadCacheItems(tokenCache1);
             byte[] cacheBytes = tokenCache1.Serialize();
             Assert.IsNotNull(cacheBytes);
             Assert.IsTrue(cacheBytes.Length > 0);
@@ -609,7 +609,7 @@ namespace Test.MSAL.Common.Unit
         public void StoreToCacheIntersectingScopesTest()
         {
             var tokenCache = new TokenCache();
-            loadCacheItems(tokenCache);
+            LoadCacheItems(tokenCache);
 
             //save result with intersecting scopes
             var result = new AuthenticationResult("Bearer", "some-access-token",
@@ -653,7 +653,7 @@ namespace Test.MSAL.Common.Unit
         public void StoreToCacheClientCredentialTest()
         {
             var tokenCache = new TokenCache();
-            loadCacheItems(tokenCache);
+            LoadCacheItems(tokenCache);
 
             var result = new AuthenticationResult("Bearer", "some-access-token",
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
@@ -677,7 +677,7 @@ namespace Test.MSAL.Common.Unit
             tokenCache.AfterAccess = null;
             tokenCache.BeforeAccess = null;
             tokenCache.BeforeWrite = null;
-            loadCacheItems(tokenCache);
+            LoadCacheItems(tokenCache);
 
             //save result with intersecting scopes
             var result = new AuthenticationResult("Bearer", "some-access-token",
