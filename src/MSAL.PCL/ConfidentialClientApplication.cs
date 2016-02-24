@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client
         /// <param name="redirectUri"></param>
         /// <param name="clientCredential"></param>
         public ConfidentialClientApplication(string clientId, string redirectUri,
-           ClientCredential clientCredential):this(DEFAULT_AUTHORTIY, clientId, redirectUri, clientCredential)
+           ClientCredential clientCredential):this(DefaultAuthority, clientId, redirectUri, clientCredential)
        {
        }
     
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
             this.AppTokenCache = TokenCache.DefaultSharedAppTokenCache;
         }
 
-       public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope)
+       public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope)
         {
             Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
             return
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
                        new ClientKey(this.ClientId, this.ClientCredential, authenticator), (User) null, null, null).ConfigureAwait(false);
        }
 
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId)
         {
             Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
             return
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
                         .ConfigureAwait(false);
         }
 
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId, string authority, string policy)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId, string authority, string policy)
         {
             Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
             return
@@ -107,6 +107,15 @@ namespace Microsoft.Identity.Client
                         new ClientKey(this.ClientId, this.ClientCredential, authenticator), policy).ConfigureAwait(false);
         }
 
+
+       public async Task<AuthenticationResult> AcquireTokenForClient(string[] scope)
+        {
+            Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
+           return
+               await
+                   this.AcquireTokenForClientCommonAsync(scope,
+                       new ClientKey(this.ClientId, this.ClientCredential, authenticator)).ConfigureAwait(false);
+        }
 
         private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(string[] scope, ClientKey clientKey)
         {
@@ -176,5 +185,5 @@ namespace Microsoft.Identity.Client
         {
             return null;
         }
-    }
+   }
 }

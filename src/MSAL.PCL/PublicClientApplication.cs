@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Default consutructor of the application. It is here to emphasise the lack of parameters.
         /// </summary>
-        public PublicClientApplication():this(DEFAULT_AUTHORTIY)
+        public PublicClientApplication():this(DefaultAuthority)
         {
         }
 

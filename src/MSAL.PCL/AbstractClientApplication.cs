@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client
 {
     public abstract class AbstractClientApplication
     {
-        protected const string DEFAULT_AUTHORTIY = "https://login.microsoftonline.com/common";
+        protected const string DefaultAuthority = "https://login.microsoftonline.com/common";
 
         /// <summary>
         /// default false.
@@ -95,5 +95,6 @@ namespace Microsoft.Identity.Client
             var handler = new AcquireTokenSilentHandler(authenticator, this.UserTokenCache, scope, clientKey, user, parameters, policy, this.RestrictToSingleUser);
             return await handler.RunAsync().ConfigureAwait(false);
         }
+
     }
 }
