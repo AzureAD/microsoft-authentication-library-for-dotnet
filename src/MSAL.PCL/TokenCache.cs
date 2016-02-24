@@ -336,14 +336,13 @@ namespace Microsoft.Identity.Client
                 resultEx = kvp.Value.Value;
                 bool tokenNearExpiry = (resultEx.Result.ExpiresOn <=
                                         DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
-                //TODO look for intersecting scopes first
                 if (tokenNearExpiry)
                 {
                     //TODO stop setting to null when service hardening requirements are clear
                     resultEx.Result.AccessToken = null;
                     PlatformPlugin.Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
                 }
-                else if (!cacheKey.ScopeContains(scope) || !authority.Equals(cacheKey.Authority) || !clientId.Equals(cacheKey.ClientId))
+                else if (!cacheKey.ScopeContains(scope) || (!IsAuthorityCommon(authority) && !authority.Equals(cacheKey.Authority)) || !clientId.Equals(cacheKey.ClientId))
                 {
                     //requested scope are not a subset or authority does not match (cross-tenant RT) or client id is not same (FoCI).
                     PlatformPlugin.Logger.Verbose(callState,
@@ -408,6 +407,7 @@ namespace Microsoft.Identity.Client
         {
             PlatformPlugin.Logger.Verbose(callState, "Storing token in the cache...");
 
+            //single user mode cannot allow more than 1 unique id in the cache including null
             if (restrictToSingleUser && (result.Result.User == null || string.IsNullOrEmpty(result.Result.User.UniqueId) ||
                 !this.GetUniqueIdsFromCache(clientId).Contains(result.Result.User.UniqueId)))
             {
@@ -480,6 +480,13 @@ namespace Microsoft.Identity.Client
             if (user == null)
             {
                 PlatformPlugin.Logger.Information(null, "No user information provided.");
+                // if authority is common and there are multiple unique ids in the cache
+                // then throw MultipleTokensMatched because code cannot guess which user
+                // is requested by the developer.
+                if (IsAuthorityCommon(authority) && this.GetUniqueIdsFromCache(clientId).Count() > 1)
+                {
+                    throw new MsalException(MsalError.MultipleTokensMatched);
+                }
             }
             else
             {
@@ -488,6 +495,11 @@ namespace Microsoft.Identity.Client
                 rootId = user.RootId;
             }
 
+            if (IsAuthorityCommon(authority))
+            {
+                authority = null; //ignore authority
+            }
+            
             // First identify all potential tokens.
             List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> items = this.QueryCache(authority, clientId,
                 uniqueId, displayableId, rootId, policy);
@@ -506,18 +518,28 @@ namespace Microsoft.Identity.Client
                     returnValue = scopeSpecificItems.First();
                     break;
                 case 0:
+                {
+                        //look for intersecting scope first
+                    scopeSpecificItems =
+                        items.Where(p => p.Key.ScopeIntersects(scope)).ToList();
+                    if (!scopeSpecificItems.Any())
                     {
                         //Choose any of the MRRT tokens if there are any.
-                            scopeSpecificItems =
-                                items.Where(p => p.Value.IsMultipleScopeRefreshToken).ToList();
+                        scopeSpecificItems =
+                            items.Where(p => p.Value.IsMultipleScopeRefreshToken).ToList();
 
-                            if (scopeSpecificItems.Any())
-                            {
-                                returnValue = scopeSpecificItems.First();
-                                PlatformPlugin.Logger.Information(callState,
-                                    "A Multi Scope Refresh Token for a different scope was found which can be used");
-                            }
+                        if (scopeSpecificItems.Any())
+                        {
+                            returnValue = scopeSpecificItems.First();
+                            PlatformPlugin.Logger.Information(callState,
+                                "A Multi Scope Refresh Token for a different scope was found which can be used");
+                        }
                     }
+                    else
+                        {
+                            returnValue = scopeSpecificItems.First(); //return intersecting scopes
+                        }
+                }
                     break;
                 default:
                     throw new MsalException(MsalError.MultipleTokensMatched);
@@ -553,6 +575,12 @@ namespace Microsoft.Identity.Client
             }
 
             return returnValue;
+        }
+
+
+        private bool IsAuthorityCommon(string authority)
+        {
+            return authority.ToLower().EndsWith("/common/");
         }
 
         private List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> QueryCache(string authority, string clientId,

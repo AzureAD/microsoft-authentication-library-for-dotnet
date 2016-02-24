@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
         private const string DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
 
         /// <summary>
-        /// Default consutructor of the application. It is here to emphasise the lack of parameters.
+        /// Default consutructor of the application.
         /// </summary>
         public PublicClientApplication():this(DefaultAuthority)
         {

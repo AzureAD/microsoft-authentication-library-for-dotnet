@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Handlers
         
         protected bool StoreToCache { get; set; }
 
-        protected HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
+        protected virtual HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
         {
             HashSet<string> set = new HashSet<string>(inputScope.ToArray());
             set.UnionWith(OAuthValue.ReservedScopes.CreateSetFromArray());

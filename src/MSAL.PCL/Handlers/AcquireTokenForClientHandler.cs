@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Handlers
@@ -26,6 +27,11 @@ namespace Microsoft.Identity.Client.Handlers
             : base(authenticator, tokenCache, scope, clientKey, null, false)
         {
             this.SupportADFS = false;
+        }
+
+        protected override HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
+        {
+            return inputScope;
         }
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
