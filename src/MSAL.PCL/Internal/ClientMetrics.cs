@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public void BeginClientMetricsRecord(CallState callState)
         {
-            if (callState != null && callState.AuthorityType == AuthorityType.AAD)
+            if (callState != null)
             {
                 metricsTimer = Stopwatch.StartNew();
             }
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal
         public Dictionary<string, string> GetPreviousRequestRecord(CallState callState)
         {
             Dictionary<string, string> parameters;
-            if (callState != null && callState.AuthorityType == AuthorityType.AAD)
+            if (callState != null)
             {
                 parameters = GetClientMetricsParameters();
             }
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public void EndClientMetricsRecord(string endpoint, CallState callState)
         {
-            if (callState != null && callState.AuthorityType == AuthorityType.AAD && metricsTimer != null)
+            if (callState != null && metricsTimer != null)
             {
                 metricsTimer.Stop();
                 lastResponseTime = metricsTimer.ElapsedMilliseconds;

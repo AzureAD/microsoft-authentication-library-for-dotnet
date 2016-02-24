@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal
                 throw new ArgumentNullException("clientCredential");
             }
 
-            this.Authenticator = Authenticator;
+            this.Authenticator = authenticator;
             this.Credential = clientCredential;
             this.HasCredential = true;
         }

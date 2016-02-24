@@ -28,7 +28,5 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         public Guid CorrelationId { get; set; }
-
-        public AuthorityType AuthorityType { get; internal set; }
     }
 }

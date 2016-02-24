@@ -22,12 +22,6 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    internal enum AuthorityType
-    {
-        AAD,
-        ADFS
-    }
-
     internal class Authenticator
     {
         private const string TenantlessTenantName = "Common";
@@ -39,13 +33,10 @@ namespace Microsoft.Identity.Client.Internal
         public Authenticator(string authority, bool validateAuthority)
         {
             this.Authority = CanonicalizeUri(authority);
-            this.AuthorityType = DetectAuthorityType(this.Authority);
             this.ValidateAuthority = validateAuthority;
         }
 
         public string Authority { get; private set; }
-
-        public AuthorityType AuthorityType { get; private set; }
 
         public bool ValidateAuthority { get; set; }
 
@@ -89,43 +80,7 @@ namespace Microsoft.Identity.Client.Internal
             if (this.IsTenantless && !string.IsNullOrWhiteSpace(tenantId))
             {
                 this.ReplaceTenantlessTenant(tenantId);
-                this.updatedFromTemplate = false;
             }
-        }
-
-        internal static AuthorityType DetectAuthorityType(string authority)
-        {
-            if (string.IsNullOrWhiteSpace(authority))
-            {
-                throw new ArgumentNullException("authority");
-            }
-
-            if (!Uri.IsWellFormedUriString(authority, UriKind.Absolute))
-            {
-                throw new ArgumentException(MsalErrorMessage.AuthorityInvalidUriFormat, "authority");
-            }
-
-            var authorityUri = new Uri(authority);
-            if (authorityUri.Scheme != "https")
-            {
-                throw new ArgumentException(MsalErrorMessage.AuthorityUriInsecure, "authority");
-            }
-
-            string path = authorityUri.AbsolutePath.Substring(1);
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, "authority");
-            }
-
-            string firstPath = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-            AuthorityType authorityType = IsAdfsAuthority(firstPath) ? AuthorityType.ADFS : AuthorityType.AAD;
-
-            if (authorityType == AuthorityType.ADFS)
-            {
-                throw new ArgumentException(MsalErrorMessage.AuthorityNotSupported, "authority");
-            }
-
-            return authorityType;
         }
 
         private static string CanonicalizeUri(string uri)

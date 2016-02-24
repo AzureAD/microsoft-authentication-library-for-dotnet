@@ -230,7 +230,6 @@ namespace Microsoft.Identity.Client.Handlers
         internal virtual async Task PreRunAsync()
         {
             await this.Authenticator.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
-            this.ValidateAuthorityType();
         }
 
         internal virtual Task PreTokenRequest()
@@ -348,15 +347,6 @@ namespace Microsoft.Identity.Client.Handlers
                     accessTokenHash,
                     result.ExpiresOn,                    
                     result.User != null ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.User.UniqueId) : "null"));
-            }
-        }
-
-        private void ValidateAuthorityType()
-        {
-            if (!this.SupportADFS && this.Authenticator.AuthorityType == AuthorityType.ADFS)
-            {
-                throw new MsalException(MsalError.InvalidAuthorityType,
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.InvalidAuthorityTypeTemplate, this.Authenticator.Authority));
             }
         }
 

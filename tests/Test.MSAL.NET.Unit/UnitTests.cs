@@ -79,17 +79,6 @@ namespace Test.MSAL.NET.Unit
         }
 
         [TestMethod]
-        [Description("Test for authority type detection")]
-        [TestCategory("AdalDotNetUnit")]
-        public void AuthorityTypeDetectionTest()
-        {
-            Assert.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://login.windows.net/tenant/dummy/"));
-            Assert.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://accounts-int.somethingelse.w/dummy/"));
-            Assert.AreEqual(AuthorityType.ADFS, Authenticator.DetectAuthorityType("https://abc.com/adfs/dummy/"));
-        }
-
-
-        [TestMethod]
         [Description("Test for AuthenticationParameters.CreateFromResponseAuthenticateHeader")]
         [TestCategory("AdalDotNetUnit")]
         public void AuthenticationParametersTest()
