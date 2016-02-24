@@ -30,10 +30,11 @@ namespace Microsoft.Identity.Client.Internal
 
         private bool updatedFromTemplate; 
 
-        public Authenticator(string authority, bool validateAuthority)
+        public Authenticator(string authority, bool validateAuthority, Guid correlationId)
         {
             this.Authority = CanonicalizeUri(authority);
             this.ValidateAuthority = validateAuthority;
+            this.CorrelationId = correlationId;
         }
 
         public string Authority { get; private set; }
@@ -91,11 +92,6 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             return uri;
-        }
-
-        private static bool IsAdfsAuthority(string firstPath)
-        {
-            return string.Compare(firstPath, "adfs", StringComparison.OrdinalIgnoreCase) == 0;
         }
 
         private void ReplaceTenantlessTenant(string tenantId)

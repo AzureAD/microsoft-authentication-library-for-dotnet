@@ -10,7 +10,6 @@ namespace Microsoft.Identity.Client
 {
     public abstract class AbstractClientApplication
     {
-        internal Authenticator Authenticator;
         protected const string DEFAULT_AUTHORTIY = "https://login.microsoftonline.com/common";
 
         /// <summary>
@@ -36,31 +35,12 @@ namespace Microsoft.Identity.Client
         /// Gets or sets correlation Id which would be sent to the service with the next request. 
         /// Correlation Id is to be used for diagnostics purposes. 
         /// </summary>
-        public Guid CorrelationId
-        {
-            get
-            {
-                return this.Authenticator.CorrelationId;
-            }
-
-            set
-            {
-                this.Authenticator.CorrelationId = value;
-            }
-        }
+        public Guid CorrelationId { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether address validation is ON or OFF.
         /// </summary>
-        public bool ValidateAuthority
-        {
-            get
-            {
-                return this.Authenticator.ValidateAuthority;
-            }
-
-            set { this.Authenticator.ValidateAuthority = value; }
-        }
+        public bool ValidateAuthority { get; set; }
 
 
         /// <summary>
@@ -91,8 +71,7 @@ namespace Microsoft.Identity.Client
             this.Authority = authority;
             this.ClientId = clientId;
             this.RedirectUri = redirectUri;
-            // If authorityType is not provided (via first constructor), we validate by default (except for ASG and Office tenants).
-            this.Authenticator = new Authenticator(authority, validateAuthority);
+            this.ValidateAuthority = validateAuthority;
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator, string[] scope, ClientKey clientKey, string userId, IPlatformParameters parameters, string policy)

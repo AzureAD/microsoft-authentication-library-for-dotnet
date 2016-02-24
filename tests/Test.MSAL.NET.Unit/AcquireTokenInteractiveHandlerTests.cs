@@ -20,7 +20,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void NoCacheLookup()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
             TokenCache cache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
@@ -76,7 +76,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void SsoRrefreshTokenInHeaderTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
             TokenCache cache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
@@ -115,7 +115,7 @@ namespace Test.MSAL.NET.Unit
         public void ActAsCurrentUserNoSsoHeaderForLoginHintOnlyTest()
         {
             //this test validates that no SSO header is added when developer passes only login hint and UiOption.ActAsCurrentUser
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
             TokenCache cache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
@@ -152,7 +152,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void RedirectUriContainsFragmentErrorTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
             try
             {
                 AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, null,
@@ -172,7 +172,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void CacheWithMultipleUsersAndRestrictToSingleUserTrueTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
             TokenCache cache = new TokenCache();
             TokenCacheTests.LoadCacheItems(cache);
 
@@ -198,7 +198,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void VerifyAuthorizationResultTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
 
             MockWebUI webUi = new MockWebUI();
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
@@ -250,7 +250,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void NullLoginHintForActAsCurrentUserTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
             try
             {
                 AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, null,
@@ -270,7 +270,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void NullUserForActAsCurrentUserTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
             try
             {
                 AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, null,
@@ -290,7 +290,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void DuplicateQueryParameterErrorTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
             AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, null,
                 TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
                 TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
