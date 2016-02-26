@@ -43,29 +43,29 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.SupportADFS = true;
         }
 
-        protected override AuthenticationResultEx ValidateResult(AuthenticationResultEx resultEx)
+        protected override void ValidateResult()
         {
             // cache lookup returned a token. no username provided in the assertion. 
             // cannot deterministicly identify the user. fallback to compare hash. 
-            if (resultEx != null && string.IsNullOrEmpty(userAssertion.UserName))
+            if (this.ResultEx != null && string.IsNullOrEmpty(userAssertion.UserName))
             {
                 //if cache result does not contain hash then return null
-                if (!string.IsNullOrEmpty(resultEx.UserAssertionHash))
+                if (!string.IsNullOrEmpty(this.ResultEx.UserAssertionHash))
                 {
                     //if user assertion hash does not match then return null
-                    if (!resultEx.UserAssertionHash.Equals(assertionHash))
+                    if (!this.ResultEx.UserAssertionHash.Equals(assertionHash))
                     {
-                        resultEx = null;
+                        this.ResultEx = null;
                     }
                 }
                 else
                 {
-                    resultEx = null;
+                    this.ResultEx = null;
                 }
             }
 
             //return as is if it is null or provided userAssertion contains username
-            return resultEx;
+           
         }
 
 
