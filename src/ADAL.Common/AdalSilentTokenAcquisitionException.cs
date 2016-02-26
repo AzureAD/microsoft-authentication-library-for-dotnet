@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
 #if ADAL_NET
@@ -36,6 +38,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public AdalSilentTokenAcquisitionException()
             : base(AdalError.FailedToAcquireTokenSilently, AdalErrorMessage.FailedToAcquireTokenSilently)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the exception class.
+        /// </summary>
+        /// <param name="exception">inner exception</param>
+        public AdalSilentTokenAcquisitionException(Exception exception) : base(AdalError.FailedToAcquireTokenSilently, AdalErrorMessage.FailedToRefreshToken, exception)
         {
         }
 

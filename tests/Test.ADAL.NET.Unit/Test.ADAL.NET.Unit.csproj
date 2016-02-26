@@ -104,6 +104,7 @@
     <Compile Include="..\Test.ADAL.Common\Verify.cs">
       <Link>Common\Verify.cs</Link>
     </Compile>
+    <Compile Include="AcquireTokenSilentTests.cs" />
     <Compile Include="AuthenticationParametersTests.cs" />
     <Compile Include="NonInteractiveTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

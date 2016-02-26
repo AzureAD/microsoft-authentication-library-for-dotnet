@@ -28,6 +28,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected const string NullResource = "null_resource_as_optional";
         protected readonly static Task CompletedTask = Task.FromResult(false);
         private readonly TokenCache tokenCache;
+        protected Exception RefreshException;
 
         protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, TokenSubjectType subjectType, bool callSync)
         {
@@ -40,7 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 subjectType));
 
             this.tokenCache = tokenCache;
-
+            this.RefreshException = null;
             if (string.IsNullOrWhiteSpace(resource))
             {
                 var ex = new ArgumentNullException("resource");
@@ -215,6 +216,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 catch (AdalException ex)
                 {
+                    Logger.Error(this.CallState, ex);
                     AdalServiceException serviceException = ex as AdalServiceException;
                     if (serviceException != null && serviceException.ErrorCode == "invalid_request")
                     {
@@ -225,6 +227,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             (WebException)serviceException.InnerException);
                     }
 
+                    this.RefreshException = ex;
                     newResult = null;
                 }
             }
