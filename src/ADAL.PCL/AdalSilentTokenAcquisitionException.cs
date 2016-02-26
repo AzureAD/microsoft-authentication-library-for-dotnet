@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
@@ -28,6 +30,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public AdalSilentTokenAcquisitionException()
             : base(AdalError.FailedToAcquireTokenSilently, AdalErrorMessage.FailedToAcquireTokenSilently)
+        {
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="innerException"></param>
+        public AdalSilentTokenAcquisitionException(Exception innerException)
+            : base(AdalError.FailedToAcquireTokenSilently, AdalErrorMessage.FailedToRefreshToken, innerException)
         {
         }
     }
