@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -71,7 +72,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static string GetAdalVersion()
         {
-            return typeof(AdalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
+            string fullVersion = typeof(AdalIdHelper).GetTypeInfo().Assembly.FullName;
+            Regex regex = new Regex(@"Version=[\d]+.[\d]+.[\d]+.[\d]+");
+            Match match = regex.Match(fullVersion);
+            if (match.Success)
+            {
+                string[] version = match.Groups[0].Value.Split(new[] { '=' }, StringSplitOptions.None);
+                return version[1];
+            }
+
+            return null;
         }
 
         public static string GetAssemblyFileVersion()
