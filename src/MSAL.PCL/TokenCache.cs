@@ -336,13 +336,7 @@ namespace Microsoft.Identity.Client
                 resultEx = kvp.Value.Value;
                 bool tokenNearExpiry = (resultEx.Result.ExpiresOn <=
                                         DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
-                if (tokenNearExpiry)
-                {
-                    //TODO stop setting to null when service hardening requirements are clear
-                    resultEx.Result.AccessToken = null;
-                    PlatformPlugin.Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
-                }
-                else if (!cacheKey.ScopeContains(scope) || (!IsAuthorityCommon(authority) && !authority.Equals(cacheKey.Authority)) || !clientId.Equals(cacheKey.ClientId))
+                if (!cacheKey.ScopeContains(scope) || (!IsAuthorityCommon(authority) && !authority.Equals(cacheKey.Authority)) || !clientId.Equals(cacheKey.ClientId))
                 {
                     //requested scope are not a subset or authority does not match (cross-tenant RT) or client id is not same (FoCI).
                     PlatformPlugin.Logger.Verbose(callState,
@@ -351,6 +345,11 @@ namespace Microsoft.Identity.Client
                             scope.CreateSingleStringFromSet()));
                     
                     resultEx = CreateResultExFromCacheResultEx(cacheKey, resultEx);
+                }
+                else if(tokenNearExpiry)
+                {
+                    resultEx.Result.AccessToken = null;
+                    PlatformPlugin.Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
                 }
                 else
                 {

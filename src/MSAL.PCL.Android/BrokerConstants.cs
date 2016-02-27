@@ -136,8 +136,7 @@ namespace Microsoft.Identity.Client
          * Signature info for Intune Company portal app that installs authenticator
          * component.
          */
-        //TODO - revert to original signature
-        public const string Signature = "IcB5PxIyvbLkbFVtBI/itkW/ejk=";//"1L4Z9FJCgn5c0VLhyAxC5O9LdlE=";
+        public const string Signature = "1L4Z9FJCgn5c0VLhyAxC5O9LdlE=";
         
         /**
          * Signature info for Azure authenticator app that installs authenticator

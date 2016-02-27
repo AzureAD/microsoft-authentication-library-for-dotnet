@@ -44,6 +44,11 @@ namespace Microsoft.Identity.Client
 
 
         /// <summary>
+        /// .NET specific property that allows configuration of platform specific properties. For example, in iOS/Android it would include the flag to enable/disable broker.
+        /// </summary>
+        public IPlatformParameters PlatformParameters { get; set; }
+
+        /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the signed in users.
         /// </summary>
         public IEnumerable<User> Users
@@ -74,27 +79,107 @@ namespace Microsoft.Identity.Client
             this.ValidateAuthority = validateAuthority;
         }
 
-        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator, string[] scope, ClientKey clientKey, string userId, IPlatformParameters parameters, string policy)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <returns></returns>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope)
+        {
+            Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
+            return await this.AcquireTokenSilentCommonAsync(authenticator, scope, (string)null, this.PlatformParameters, null).ConfigureAwait(false);
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId)
+        {
+            Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
+            return await this.AcquireTokenSilentCommonAsync(authenticator, scope, userId, this.PlatformParameters, null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="userIdentifier"></param>
+        /// <returns></returns>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier)
+        {
+            Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
+            return await this.AcquireTokenSilentCommonAsync(authenticator, scope, userIdentifier, this.PlatformParameters, null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="userIdentifier"></param>
+        /// <param name="authority"></param>
+        /// <param name="policy"></param>
+        /// <returns></returns>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier,
+            string authority, string policy)
+        {
+            Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
+            return await this.AcquireTokenSilentCommonAsync(authenticator, scope, userIdentifier, this.PlatformParameters, policy).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="userId"></param>
+        /// <param name="authority"></param>
+        /// <param name="policy"></param>
+        /// <returns></returns>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId,
+            string authority, string policy)
+        {
+            Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
+            return await this.AcquireTokenSilentCommonAsync(authenticator, scope, userId, this.PlatformParameters, policy).ConfigureAwait(false);
+        }
+
+
+
+        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator, string[] scope, string userId, IPlatformParameters parameters, string policy)
         {
             if (parameters == null)
             {
                 parameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var handler = new AcquireTokenSilentHandler(authenticator, this.UserTokenCache, scope, clientKey, userId,  parameters, policy, this.RestrictToSingleUser);
+            var handler = new AcquireTokenSilentHandler(this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), userId,  parameters);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator, string[] scope, ClientKey clientKey, User user, IPlatformParameters parameters, string policy)
+        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator, string[] scope, User user, IPlatformParameters parameters, string policy)
         {
             if (parameters == null)
             {
                 parameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var handler = new AcquireTokenSilentHandler(authenticator, this.UserTokenCache, scope, clientKey, user, parameters, policy, this.RestrictToSingleUser);
+            var handler = new AcquireTokenSilentHandler(this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), user, parameters);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
+        internal virtual HandlerData GetHandlerData(Authenticator authenticator, string[] scope, string policy, TokenCache cache)
+        {
+            return new HandlerData
+            {
+                Authenticator = authenticator,
+                Scope = scope,
+                Policy = policy,
+                RestrictToSingleUser = this.RestrictToSingleUser,
+                TokenCache = cache
+            };
+        }
     }
 }

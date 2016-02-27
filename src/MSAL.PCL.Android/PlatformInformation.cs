@@ -30,13 +30,11 @@ namespace Microsoft.Identity.Client
 
         public override string GetEnvironmentVariable(string variable)
         {
-            // TODO: Update
             return null;
         }
 
         public override Task<string> GetUserPrincipalNameAsync()
         {
-            // TODO: Update
             return null;
         }
 

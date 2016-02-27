@@ -53,11 +53,20 @@ namespace Test.MSAL.NET.Unit
             mockHandler.ResponseMessage = MockHelpers.CreatePositiveTokenResponseMessage();
             HttpMessageHandlerFactory.MockHandler = mockHandler;
 
-            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, cache,
-                TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
-                TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
-                TestConstants.DefaultDisplayableId, UiOptions.SelectAccount, "extra=qp", "some-policy", ui,
-                TestConstants.DefaultRestrictToSingleUser);
+            HandlerData data = new HandlerData()
+            {
+                Authenticator = authenticator,
+                ClientKey = new ClientKey(TestConstants.DefaultClientId),
+                Policy = "some-policy",
+                RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
+                Scope = TestConstants.DefaultScope.ToArray(),
+                TokenCache = cache
+            };
+
+            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+                TestConstants.ScopeForAnotherResource.ToArray(),
+                new Uri("some://uri"), new PlatformParameters(), TestConstants.DefaultDisplayableId,
+                UiOptions.SelectAccount, "extra=qp", ui);
             Task<AuthenticationResult> task = handler.RunAsync();
             task.Wait();
             AuthenticationResult result = task.Result;
@@ -101,11 +110,20 @@ namespace Test.MSAL.NET.Unit
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
 
-            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, cache,
-                TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
-                TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
-                ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", TestConstants.DefaultPolicy, webUi,
-                TestConstants.DefaultRestrictToSingleUser);
+            HandlerData data = new HandlerData()
+            {
+                Authenticator = authenticator,
+                ClientKey = new ClientKey(TestConstants.DefaultClientId),
+                Policy = TestConstants.DefaultPolicy,
+                RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
+                Scope = TestConstants.DefaultScope.ToArray(),
+                TokenCache = cache
+            };
+            
+            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+                TestConstants.ScopeForAnotherResource.ToArray(),
+                new Uri("some://uri"), new PlatformParameters(),
+                ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", webUi);
             handler.PreRunAsync().Wait();
             handler.PreTokenRequest().Wait();
         }
@@ -138,11 +156,20 @@ namespace Test.MSAL.NET.Unit
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
 
-            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, cache,
-                TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
-                TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
-                ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", TestConstants.DefaultPolicy, webUi,
-                TestConstants.DefaultRestrictToSingleUser);
+            HandlerData data = new HandlerData()
+            {
+                Authenticator = authenticator,
+                ClientKey = new ClientKey(TestConstants.DefaultClientId),
+                Policy = TestConstants.DefaultPolicy,
+                RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
+                Scope = TestConstants.DefaultScope.ToArray(),
+                TokenCache = cache
+            };
+
+            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+                TestConstants.ScopeForAnotherResource.ToArray(),
+                new Uri("some://uri"), new PlatformParameters(),
+                ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", webUi);
             handler.PreRunAsync().Wait();
             handler.PreTokenRequest().Wait();
         }
@@ -155,11 +182,21 @@ namespace Test.MSAL.NET.Unit
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
             try
             {
-                AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, null,
-                    TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
-                    TestConstants.DefaultClientId, new Uri("some://uri#fragment=not-so-good"), new PlatformParameters(),
-                    (string) null, UiOptions.ForceLogin, "extra=qp", TestConstants.DefaultPolicy, new MockWebUI(),
-                    TestConstants.DefaultRestrictToSingleUser);
+
+                HandlerData data = new HandlerData()
+                {
+                    Authenticator = authenticator,
+                    ClientKey = new ClientKey(TestConstants.DefaultClientId),
+                    Policy = TestConstants.DefaultPolicy,
+                    RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
+                    Scope = TestConstants.DefaultScope.ToArray(),
+                    TokenCache = null
+                };
+
+                AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data, TestConstants.ScopeForAnotherResource.ToArray(),
+                    new Uri("some://uri#fragment=not-so-good"), new PlatformParameters(),
+                    (string) null, UiOptions.ForceLogin, "extra=qp", new MockWebUI()
+                    );
                 Assert.Fail("ArgumentException should be thrown here");
             }
             catch (ArgumentException ae)
@@ -178,12 +215,22 @@ namespace Test.MSAL.NET.Unit
 
             try
             {
-                AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, cache,
-                    TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
-                    TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
+
+                HandlerData data = new HandlerData()
+                {
+                    Authenticator = authenticator,
+                    ClientKey = new ClientKey(TestConstants.DefaultClientId),
+                    Policy = TestConstants.DefaultPolicy,
+                    RestrictToSingleUser = true,
+                    Scope = TestConstants.DefaultScope.ToArray(),
+                    TokenCache = cache
+                };
+
+                AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+                    TestConstants.ScopeForAnotherResource.ToArray(),
+                    new Uri("some://uri"), new PlatformParameters(),
                     new User {UniqueId = TestConstants.DefaultUniqueId}, UiOptions.ForceLogin, "extra=qp",
-                    TestConstants.DefaultPolicy, new MockWebUI(),
-                    true);
+                    new MockWebUI());
                 Assert.Fail("ArgumentException should be thrown here");
             }
             catch (ArgumentException ae)
@@ -204,11 +251,19 @@ namespace Test.MSAL.NET.Unit
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
                 TestConstants.DefaultAuthorityHomeTenant + "?error="+OAuthError.LoginRequired);
 
-            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, null,
-                TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
-                TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
-                (string)null, UiOptions.ForceLogin, "extra=qp", TestConstants.DefaultPolicy, webUi,
-                TestConstants.DefaultRestrictToSingleUser);
+            HandlerData data = new HandlerData()
+            {
+                Authenticator = authenticator,
+                ClientKey = new ClientKey(TestConstants.DefaultClientId),
+                Policy = TestConstants.DefaultPolicy,
+                RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
+                Scope = TestConstants.DefaultScope.ToArray(),
+                TokenCache = null
+            };
+
+            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+                TestConstants.ScopeForAnotherResource.ToArray(), new Uri("some://uri"), new PlatformParameters(),
+                (string) null, UiOptions.ForceLogin, "extra=qp", webUi);
             handler.PreRunAsync().Wait();
             try
             {
@@ -226,11 +281,9 @@ namespace Test.MSAL.NET.Unit
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
                 TestConstants.DefaultAuthorityHomeTenant + "?error=invalid_request&error_description=some error description");
 
-            handler = new AcquireTokenInteractiveHandler(authenticator, null,
-                TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
-                TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
-                (string)null, UiOptions.ForceLogin, "extra=qp", TestConstants.DefaultPolicy, webUi,
-                TestConstants.DefaultRestrictToSingleUser);
+            handler = new AcquireTokenInteractiveHandler(data,
+                TestConstants.ScopeForAnotherResource.ToArray(), new Uri("some://uri"), new PlatformParameters(),
+                (string)null, UiOptions.ForceLogin, "extra=qp", webUi);
             handler.PreRunAsync().Wait();
 
             try
@@ -253,11 +306,21 @@ namespace Test.MSAL.NET.Unit
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
             try
             {
-                AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, null,
-                    TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
-                    TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
-                    (string)null, UiOptions.ActAsCurrentUser, "extra=qp", TestConstants.DefaultPolicy, new MockWebUI(),
-                    TestConstants.DefaultRestrictToSingleUser);
+
+                HandlerData data = new HandlerData()
+                {
+                    Authenticator = authenticator,
+                    ClientKey = new ClientKey(TestConstants.DefaultClientId),
+                    Policy = TestConstants.DefaultPolicy,
+                    RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
+                    Scope = TestConstants.DefaultScope.ToArray(),
+                    TokenCache = null
+                };
+
+                AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+                    TestConstants.ScopeForAnotherResource.ToArray(),
+                    new Uri("some://uri"), new PlatformParameters(),
+                    (string) null, UiOptions.ActAsCurrentUser, "extra=qp", new MockWebUI());
                 Assert.Fail("ArgumentException should be thrown here");
             }
             catch (ArgumentException ae)
@@ -273,11 +336,19 @@ namespace Test.MSAL.NET.Unit
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
             try
             {
-                AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, null,
-                    TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
-                    TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
-                    (User)null, UiOptions.ActAsCurrentUser, "extra=qp", TestConstants.DefaultPolicy, new MockWebUI(),
-                    TestConstants.DefaultRestrictToSingleUser);
+                HandlerData data = new HandlerData()
+                {
+                    Authenticator = authenticator,
+                    ClientKey = new ClientKey(TestConstants.DefaultClientId),
+                    Policy = TestConstants.DefaultPolicy,
+                    RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
+                    Scope = TestConstants.DefaultScope.ToArray(),
+                    TokenCache = null
+                };
+
+                AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+                    TestConstants.ScopeForAnotherResource.ToArray(), new Uri("some://uri"), new PlatformParameters(),
+                    (User) null, UiOptions.ActAsCurrentUser, "extra=qp", new MockWebUI());
                 Assert.Fail("ArgumentException should be thrown here");
             }
             catch (ArgumentException ae)
@@ -291,11 +362,21 @@ namespace Test.MSAL.NET.Unit
         public void DuplicateQueryParameterErrorTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
-            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(authenticator, null,
-                TestConstants.DefaultScope.ToArray(), TestConstants.ScopeForAnotherResource.ToArray(),
-                TestConstants.DefaultClientId, new Uri("some://uri"), new PlatformParameters(),
-                (User)null, UiOptions.ForceLogin, "extra=qp&prompt=login", TestConstants.DefaultPolicy, new MockWebUI(),
-                TestConstants.DefaultRestrictToSingleUser);
+
+            HandlerData data = new HandlerData()
+            {
+                Authenticator = authenticator,
+                ClientKey = new ClientKey(TestConstants.DefaultClientId),
+                Policy = TestConstants.DefaultPolicy,
+                RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
+                Scope = TestConstants.DefaultScope.ToArray(),
+                TokenCache = null
+            };
+
+            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+                TestConstants.ScopeForAnotherResource.ToArray(),
+                new Uri("some://uri"), new PlatformParameters(),
+                (User) null, UiOptions.ForceLogin, "extra=qp&prompt=login", new MockWebUI());
             handler.PreRunAsync().Wait();
 
             try

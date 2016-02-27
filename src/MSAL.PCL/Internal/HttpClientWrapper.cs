@@ -157,7 +157,6 @@ namespace Microsoft.Identity.Client.Internal
                 catch (HttpRequestException ex)
                 {
                     webResponse.ResponseStream.Position = 0;
-                    //TODO remove stream.position and fix MSALServiceException
                     //throw new MsalServiceException(webResponse, ex);
                 }
             }

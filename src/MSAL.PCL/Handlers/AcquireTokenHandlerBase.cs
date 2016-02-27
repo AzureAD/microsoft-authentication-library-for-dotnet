@@ -32,39 +32,40 @@ namespace Microsoft.Identity.Client.Handlers
         protected readonly bool restrictToSingleUser;
         protected readonly IDictionary<string, string> brokerParameters;
 
-        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string policy, bool restrictToSingleUser)
+        protected AcquireTokenHandlerBase(HandlerData handlerData)
         {
-            this.Authenticator = authenticator;
+            this.Authenticator = handlerData.Authenticator;
             this.CallState = CreateCallState(this.Authenticator.CorrelationId);
+
             PlatformPlugin.Logger.Information(this.CallState,
                 string.Format("=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
-                authenticator.Authority, scope.CreateSingleStringFromArray(), clientKey.ClientId,
+                Authenticator.Authority, handlerData.Scope.CreateSingleStringFromArray(), handlerData.ClientKey.ClientId,
                 (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(" ({0} items)", tokenCache.Count) : "null"));
 
-            this.tokenCache = tokenCache;
+            this.tokenCache = handlerData.TokenCache;
 
-            if (MsalStringHelper.IsNullOrEmpty(scope))
+            if (MsalStringHelper.IsNullOrEmpty(handlerData.Scope))
             {
                 throw new ArgumentNullException("scope");
             }
             
-            this.Scope = scope.CreateSetFromArray();
+            this.Scope = handlerData.Scope.CreateSetFromArray();
             ValidateScopeInput(this.Scope);
 
-            this.ClientKey = clientKey;
-            this.Policy = policy;
+            this.ClientKey = handlerData.ClientKey;
+            this.Policy = handlerData.Policy;
 
             this.LoadFromCache = (tokenCache != null);
             this.StoreToCache = (tokenCache != null);
             this.SupportADFS = false;
 
             this.brokerParameters = new Dictionary<string, string>();
-            brokerParameters["authority"] = authenticator.Authority;
+            brokerParameters["authority"] = this.Authenticator.Authority;
             brokerParameters["scope"] = this.Scope.CreateSingleStringFromSet();
-            brokerParameters["client_id"] = clientKey.ClientId;
+            brokerParameters["client_id"] = this.ClientKey.ClientId;
             brokerParameters["correlation_id"] = this.CallState.CorrelationId.ToString();
             brokerParameters["client_version"] = MsalIdHelper.GetMsalVersion();
-            this.restrictToSingleUser = restrictToSingleUser;
+            this.restrictToSingleUser = handlerData.RestrictToSingleUser;
             
             if (this.tokenCache != null && (restrictToSingleUser && this.tokenCache.GetUniqueIdsFromCache(this.ClientKey.ClientId).Count() > 1))
             {

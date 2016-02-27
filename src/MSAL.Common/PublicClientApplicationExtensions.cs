@@ -24,8 +24,7 @@ namespace Microsoft.Identity.Client
 {
     public static class PublicClientApplicationExtensions
     {
-
-        //TODO look into adding user identifier when domain cannot be queried or privacy settings are against you
+        
         /// <summary>
         /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
         /// </summary>

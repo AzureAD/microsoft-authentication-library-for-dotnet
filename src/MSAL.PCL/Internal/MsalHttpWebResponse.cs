@@ -49,7 +49,6 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (disposing)
             {
-                // TODO: Address the missing Dispose method issue.
                 if (this.ResponseStream != null)
                 {
                     this.ResponseStream.Dispose();

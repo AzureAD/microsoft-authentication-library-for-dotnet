@@ -27,8 +27,8 @@ namespace Microsoft.Identity.Client.Handlers
 
         private readonly Uri redirectUri;
 
-        public AcquireTokenByAuthorizationCodeHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string authorizationCode, Uri redirectUri, string policy, bool restrictToSingleUser)
-            : base(authenticator, tokenCache, scope, clientKey, policy, restrictToSingleUser)
+        public AcquireTokenByAuthorizationCodeHandler(HandlerData handlerData, string authorizationCode, Uri redirectUri)
+            : base(handlerData)
         {
             if (string.IsNullOrWhiteSpace(authorizationCode))
             {

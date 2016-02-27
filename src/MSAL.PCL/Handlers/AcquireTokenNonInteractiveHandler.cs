@@ -28,8 +28,8 @@ namespace Microsoft.Identity.Client.Handlers
         private readonly UserCredential userCredential;
         private UserAssertion userAssertion;
         
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserCredential userCredential, string policy, bool restrictToSingleUser)
-            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, restrictToSingleUser)
+        public AcquireTokenNonInteractiveHandler(HandlerData handlerData, UserCredential userCredential)
+            : base(handlerData)
         {
             if (userCredential == null)
             {
@@ -39,8 +39,8 @@ namespace Microsoft.Identity.Client.Handlers
             this.userCredential = userCredential;
         }
 
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, string clientId, UserAssertion userAssertion, string policy, bool restrictToSingleUser)
-            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, restrictToSingleUser)
+        public AcquireTokenNonInteractiveHandler(HandlerData handlerData, UserAssertion userAssertion)
+            : base(handlerData)
         {
             if (userAssertion == null)
             {

@@ -26,14 +26,14 @@ namespace Microsoft.Identity.Client.Handlers
         private IPlatformParameters parameters;
 
 
-        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, string userIdentifer, IPlatformParameters parameters, string policy, bool restrictToSingleUser) 
-            : base(authenticator, tokenCache, scope, clientKey, policy, restrictToSingleUser)
+        public AcquireTokenSilentHandler(HandlerData handlerData, string userIdentifer, IPlatformParameters parameters) 
+            : base(handlerData)
         {
-            //TODO look up userIdentifier in the cache and get a user object
+            //todo implement useridentifier
         }
 
-        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope, ClientKey clientKey, User user, IPlatformParameters parameters, string policy, bool restrictToSingleUser)
-            : base(authenticator, tokenCache, scope, clientKey, policy, restrictToSingleUser)
+        public AcquireTokenSilentHandler(HandlerData handlerData, User user, IPlatformParameters parameters)
+            : base(handlerData)
         {
             if (user != null)
             {

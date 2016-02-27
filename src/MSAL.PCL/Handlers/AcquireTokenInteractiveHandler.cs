@@ -40,16 +40,16 @@ namespace Microsoft.Identity.Client.Handlers
         private readonly UiOptions _uiOptions;
 
 
-        public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope,
-            string[] additionalScope, string clientId, Uri redirectUri, IPlatformParameters parameters, User user,
-            UiOptions uiOptions, string extraQueryParameters, string policy, IWebUI webUI, bool restrictToSingleUser) :this(authenticator, tokenCache, scope, additionalScope, clientId, redirectUri, parameters, user?.DisplayableId, uiOptions, extraQueryParameters, policy, webUI, restrictToSingleUser)
+        public AcquireTokenInteractiveHandler(HandlerData handlerData,
+            string[] additionalScope, Uri redirectUri, IPlatformParameters parameters, User user,
+            UiOptions uiOptions, string extraQueryParameters, IWebUI webUI) :this(handlerData, additionalScope, redirectUri, parameters, user?.DisplayableId, uiOptions, extraQueryParameters, webUI)
         {
             this.User = user;
         }
 
-        public AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string[] scope,
-            string[] additionalScope, string clientId, Uri redirectUri, IPlatformParameters parameters, string loginHint, UiOptions uiOptions, string extraQueryParameters, string policy, IWebUI webUI, bool restrictToSingleUser)
-            : base(authenticator, tokenCache, scope, new ClientKey(clientId), policy, restrictToSingleUser)
+        public AcquireTokenInteractiveHandler(HandlerData handlerData,
+            string[] additionalScope, Uri redirectUri, IPlatformParameters parameters, string loginHint, UiOptions uiOptions, string extraQueryParameters, IWebUI webUI)
+            : base(handlerData)
         {
             this._redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
 

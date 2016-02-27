@@ -38,13 +38,11 @@ namespace Microsoft.Identity.Client
 
         public override string GetEnvironmentVariable(string variable)
         {
-            // TODO: Update
             return null;
         }
 
         public override Task<string> GetUserPrincipalNameAsync()
         {
-            // TODO: Update
             return null;
         }
 
@@ -65,7 +63,6 @@ namespace Microsoft.Identity.Client
 
         public override string GetAssemblyFileVersionAttribute()
         {
-            // TODO: Check if assembly file version can be read in iOS assembly as well or not. For now, we use assembly version instead.
             return typeof(MsalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
         }
     }
