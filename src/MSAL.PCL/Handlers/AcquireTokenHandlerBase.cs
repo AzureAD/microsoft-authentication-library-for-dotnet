@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Handlers
         protected readonly static Task CompletedTask = Task.FromResult(false);
         internal readonly TokenCache tokenCache;
         protected readonly bool restrictToSingleUser;
-        protected readonly IDictionary<string, string> brokerParameters;
+
 
         protected AcquireTokenHandlerBase(HandlerData handlerData)
         {
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Handlers
 
             PlatformPlugin.Logger.Information(this.CallState,
                 string.Format("=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
-                Authenticator.Authority, handlerData.Scope.CreateSingleStringFromArray(), handlerData.ClientKey.ClientId,
+                Authenticator.Authority, handlerData.Scope.AsSingleString(), handlerData.ClientKey.ClientId,
                 (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(" ({0} items)", tokenCache.Count) : "null"));
 
             this.tokenCache = handlerData.TokenCache;
@@ -58,25 +58,12 @@ namespace Microsoft.Identity.Client.Handlers
             this.LoadFromCache = (tokenCache != null);
             this.StoreToCache = (tokenCache != null);
             this.SupportADFS = false;
-
-            this.brokerParameters = new Dictionary<string, string>();
-            brokerParameters["authority"] = this.Authenticator.Authority;
-            brokerParameters["scope"] = this.Scope.CreateSingleStringFromSet();
-            brokerParameters["client_id"] = this.ClientKey.ClientId;
-            brokerParameters["correlation_id"] = this.CallState.CorrelationId.ToString();
-            brokerParameters["client_version"] = MsalIdHelper.GetMsalVersion();
             this.restrictToSingleUser = handlerData.RestrictToSingleUser;
             
             if (this.tokenCache != null && (restrictToSingleUser && this.tokenCache.GetUniqueIdsFromCache(this.ClientKey.ClientId).Count() > 1))
             {
                 throw new ArgumentException(
                     "Cache cannot have entries for more than 1 unique id when RestrictToSingleUser is set to TRUE.");
-            }
-
-            //pull any user from the cache as they will all have the same uniqueId
-            if (this.tokenCache != null && restrictToSingleUser)
-            {
-                this.User = this.tokenCache.ReadItems(this.ClientKey.ClientId).First().User;
             }
         }
 
@@ -110,7 +97,7 @@ namespace Microsoft.Identity.Client.Handlers
             //check if scope or additional scope contains client ID.
             if (scopesToValidate.Intersect(OAuthValue.ReservedScopes.CreateSetFromArray()).Any())
             {
-                throw new ArgumentException(string.Format("API does not accept '{0}' value as user-provided scopes", OAuthValue.ReservedScopes.CreateSingleStringFromArray()));
+                throw new ArgumentException(string.Format("API does not accept '{0}' value as user-provided scopes", OAuthValue.ReservedScopes.AsSingleString()));
             }
         }
 
@@ -141,32 +128,10 @@ namespace Microsoft.Identity.Client.Handlers
 
                 if (resultEx == null)
                 {
-                    if (PlatformPlugin.BrokerHelper.CanInvokeBroker)
-                    {
-                        resultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        await this.PreTokenRequest().ConfigureAwait(false);
-                        
-                        // check if broker app installation is required for authentication.
-                        if (this.BrokerInvocationRequired())
-                        {
-                            resultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            resultEx = await this.SendTokenRequestAsync().ConfigureAwait(false);
-                        }
-                    }
-
-                    //broker token acquisition failed
-                    if (resultEx != null && resultEx.Exception != null)
-                    {
-                        throw resultEx.Exception;
-                    }
-
+                    await this.PreTokenRequest().ConfigureAwait(false);    
+                    resultEx = await this.SendTokenRequestAsync().ConfigureAwait(false);
                     this.PostTokenRequest(resultEx);
+
                     if (this.StoreToCache)
                     {
                         if (!notifiedBeforeAccessCache)
@@ -196,12 +161,7 @@ namespace Microsoft.Identity.Client.Handlers
                 }
             }
         }
-
-        protected virtual void UpdateBrokerParameters(IDictionary<string, string> parameters)
-        {
-            
-        }
-
+        
         protected virtual bool BrokerInvocationRequired()
         {
             return false;
@@ -231,6 +191,12 @@ namespace Microsoft.Identity.Client.Handlers
         internal virtual async Task PreRunAsync()
         {
             await this.Authenticator.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
+
+            //pull any user from the cache as they will all have the same uniqueId
+            if (this.User == null && this.tokenCache != null && restrictToSingleUser)
+            {
+                this.User = this.tokenCache.ReadItems(this.ClientKey.ClientId).First().User;
+            }
         }
 
         internal virtual Task PreTokenRequest()
@@ -263,7 +229,7 @@ namespace Microsoft.Identity.Client.Handlers
             if (result.RefreshToken == null)
             {
                 result.RefreshToken = refreshToken;
-                PlatformPlugin.Logger.Verbose(this.CallState, "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+                PlatformPlugin.Logger.Information(this.CallState, "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
             }
 
             return result;
@@ -323,7 +289,7 @@ namespace Microsoft.Identity.Client.Handlers
             this.tokenCache.OnBeforeAccess(new TokenCacheNotificationArgs
             {
                 TokenCache = this.tokenCache,
-                Scope = this.Scope,
+                Scope = this.Scope.ToArray(),
                 ClientId = this.ClientKey.ClientId
             });
         }
@@ -333,7 +299,7 @@ namespace Microsoft.Identity.Client.Handlers
             this.tokenCache.OnAfterAccess(new TokenCacheNotificationArgs
             {
                 TokenCache = this.tokenCache,
-                Scope = this.Scope,
+                Scope = this.Scope.ToArray(),
                 ClientId = this.ClientKey.ClientId
             });
         }
@@ -362,7 +328,7 @@ namespace Microsoft.Identity.Client.Handlers
             return endpoint;
         }
 
-        internal User MapIdentifierToUser(string identifier)
+        internal void MapIdentifierToUser(string identifier)
         {
             string displayableId = null;
             string uniqueId = null;
@@ -379,12 +345,18 @@ namespace Microsoft.Identity.Client.Handlers
                 }
             }
 
-            User user = new User();
             if (this.tokenCache != null)
             {
                 bool notifiedBeforeAccessCache = false;
                 try
                 {
+
+                    User user = new User()
+                    {
+                        UniqueId = uniqueId,
+                        DisplayableId = displayableId
+                    };
+
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
@@ -392,6 +364,10 @@ namespace Microsoft.Identity.Client.Handlers
                         this.Scope,
                         this.ClientKey.ClientId, user,
                         this.Policy, this.CallState);
+                    if (resultEx != null)
+                    {
+                        this.User = resultEx.Result.User;
+                    }
                 }
                 finally
                 {
@@ -402,8 +378,6 @@ namespace Microsoft.Identity.Client.Handlers
 
                 }
             }
-
-            return user;
         }
 
     }

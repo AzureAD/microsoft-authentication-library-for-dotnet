@@ -69,7 +69,10 @@ namespace Test.MSAL.Common.Unit
                 TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
-            ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow));
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow))
+            {
+                ScopeSet = TestConstants.DefaultScope
+            };
             ex.RefreshToken = "someRT";
             cache.tokenCacheDictionary[key] = ex;
 
@@ -93,7 +96,10 @@ namespace Test.MSAL.Common.Unit
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
-            ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow));
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow))
+            {
+                ScopeSet = TestConstants.DefaultScope
+            };
             ex.RefreshToken = "someRT";
             ex.Result.FamilyId = "1";
             cache.tokenCacheDictionary[key] = ex;
@@ -123,7 +129,7 @@ namespace Test.MSAL.Common.Unit
             Assert.IsNotNull(resultEx);
             Assert.IsTrue(
                 resultEx.Result.AccessToken.Contains(string.Format("Scope:{0},",
-                    TestConstants.DefaultScope.CreateSingleStringFromSet())));
+                    TestConstants.DefaultScope.AsSingleString())));
 
             scope.Add("r1/unique-scope");
             //look for intersection. only RT will be returned for refresh_token grant flow.
@@ -523,6 +529,8 @@ namespace Test.MSAL.Common.Unit
                 UniqueId = TestConstants.DefaultUniqueId,
                 RootId = TestConstants.DefaultRootId
             };
+            ex.Result.ScopeSet = TestConstants.DefaultScope;
+
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
             cache.tokenCacheDictionary[key] = ex;
@@ -540,6 +548,7 @@ namespace Test.MSAL.Common.Unit
                 UniqueId = TestConstants.DefaultUniqueId + "more",
                 RootId = TestConstants.DefaultRootId
             };
+            ex.Result.ScopeSet = TestConstants.ScopeForAnotherResource;
             ex.RefreshToken = "someRT";
             cache.tokenCacheDictionary[key] = ex;
         }
@@ -685,7 +694,7 @@ namespace Test.MSAL.Common.Unit
                 Assert.AreEqual(result1.RefreshToken, result2.RefreshToken);
                 Assert.AreEqual(result1.Exception, result2.Exception);
                 Assert.AreEqual(result1.IsMultipleScopeRefreshToken, result2.IsMultipleScopeRefreshToken);
-                Assert.AreEqual(result1.ScopeInResponse, result2.ScopeInResponse);
+                Assert.AreEqual(result1.Result.ScopeSet, result2.Result.ScopeSet);
                 Assert.AreEqual(result1.Result.AccessToken, result2.Result.AccessToken);
                 Assert.AreEqual(result1.Result.FamilyId, result2.Result.FamilyId);
                 Assert.AreEqual(result1.Result.AccessTokenType, result2.Result.AccessTokenType);
@@ -728,14 +737,14 @@ namespace Test.MSAL.Common.Unit
                     {
                         UniqueId = TestConstants.DefaultUniqueId,
                         DisplayableId = TestConstants.DefaultDisplayableId
-                    }
+                    },
+                    ScopeSet = new HashSet<string>(new string[] { "r1/scope1", "r1/scope5" })
             };
 
             AuthenticationResultEx resultEx = new AuthenticationResultEx
             {
                 Result = result,
-                RefreshToken = "someRT",
-                ScopeInResponse = new HashSet<string>(new string[] {"r1/scope1", "r1/scope5"})
+                RefreshToken = "someRT"
             };
 
             tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultClientId,
@@ -766,15 +775,68 @@ namespace Test.MSAL.Common.Unit
             var result = new AuthenticationResult("Bearer", "some-access-token",
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
             {
-                User = null
+                User = null,
+                ScopeSet = new HashSet<string>(new string[] { "r1/scope1" })
             };
 
             AuthenticationResultEx resultEx = new AuthenticationResultEx
             {
                 Result = result,
-                RefreshToken = null,
-                ScopeInResponse = new HashSet<string>(new string[] {"r1/scope1"})
+                RefreshToken = null
             };
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void StoreToCacheNewUserRestrictToSingleUserTrueTest()
+        {
+            var tokenCache = new TokenCache();
+
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            AuthenticationResultEx ex = new AuthenticationResultEx();
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(),
+                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
+            ex.Result.User = new User
+            {
+                DisplayableId = TestConstants.DefaultDisplayableId,
+                UniqueId = TestConstants.DefaultUniqueId,
+                RootId = TestConstants.DefaultRootId
+            };
+            ex.Result.FamilyId = "1";
+            ex.RefreshToken = "someRT";
+            tokenCache.tokenCacheDictionary[key] = ex;
+            
+            var result = new AuthenticationResult("Bearer", "some-access-token",
+                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
+            {
+                User =
+                    new User
+                    {
+                        UniqueId = TestConstants.DefaultUniqueId+"more",
+                        DisplayableId = TestConstants.DefaultDisplayableId
+                    },
+                ScopeSet = new HashSet<string>(new string[] { "r1/scope5", "r1/scope7" })
+            };
+
+            AuthenticationResultEx resultEx = new AuthenticationResultEx
+            {
+                Result = result,
+                RefreshToken = "someRT"
+            };
+            try
+            {
+                tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityGuestTenant, TestConstants.DefaultClientId,
+                    TestConstants.DefaultPolicy, true, null);
+                Assert.Fail("MsalException should be thrown here");
+            }
+            catch (MsalException me)
+            {
+                Assert.AreEqual(MsalError.InvalidCacheOperation, me.ErrorCode);
+                Assert.AreEqual("Cannot add more than 1 user with a different unique id when RestrictToSingleUser is set to TRUE.", me.Message);
+            }
         }
 
         [TestMethod]
@@ -796,14 +858,14 @@ namespace Test.MSAL.Common.Unit
                     {
                         UniqueId = TestConstants.DefaultUniqueId,
                         DisplayableId = TestConstants.DefaultDisplayableId
-                    }
+                    },
+                ScopeSet = new HashSet<string>(new string[] { "r1/scope5", "r1/scope7" })
             };
 
             AuthenticationResultEx resultEx = new AuthenticationResultEx
             {
                 Result = result,
-                RefreshToken = "someRT",
-                ScopeInResponse = new HashSet<string>(new string[] {"r1/scope5", "r1/scope7"})
+                RefreshToken = "someRT"
             };
 
             tokenCache.StoreToCache(resultEx, TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultClientId,

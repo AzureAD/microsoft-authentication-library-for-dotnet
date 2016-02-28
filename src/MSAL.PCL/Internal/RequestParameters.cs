@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (scope!=null && scope.Count>0)
             {
-                this[OAuthParameter.Scope] = scope.CreateSingleStringFromSet();
+                this[OAuthParameter.Scope] = scope.AsSingleString();
             }
 
             clientKey.AddToParameters(this);

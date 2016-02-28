@@ -173,12 +173,13 @@ namespace Microsoft.Identity.Client.Internal
                         });
                 }
 
+                result.ScopeSet = Scope.AsSet();
                 resultEx = new AuthenticationResultEx
                 {
                     Result = result,
                     RefreshToken = this.RefreshToken,
                     // this is needed by all flows because we can get more scopes than actually requested
-                    ScopeInResponse = Scope.CreateSetFromSingleString()
+                    //ScopeInResponse = Scope.AsSet()
                 };
             }
             else if (this.Error != null)

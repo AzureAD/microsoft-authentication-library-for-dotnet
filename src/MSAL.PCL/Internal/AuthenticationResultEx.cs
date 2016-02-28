@@ -49,10 +49,6 @@ namespace Microsoft.Identity.Client.Internal
             }            
         }
 
-        // This is needed for all flows now because we can get more scopes than requested.
-        [DataMember]
-        public HashSet<string> ScopeInResponse { get; set; }
-
         /// <summary>
         /// Serializes the object to a JSON string
         /// </summary>

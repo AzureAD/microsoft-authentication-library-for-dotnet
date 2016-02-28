@@ -17,10 +17,12 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -89,6 +91,18 @@ namespace Microsoft.Identity.Client
         /// </summary>
         [DataMember]
         public string IdToken { get; internal set; }
+
+        /// <summary>
+        /// Gets the scope values returned from the service.
+        /// </summary>
+        public string[] Scope { get { return ScopeSet.AsArray(); } }
+
+
+        /// <summary>
+        /// Gets the scope values returned from the service.
+        /// </summary>
+        [DataMember]
+        internal HashSet<string >ScopeSet { get; set; }
 
         /// <summary>
         /// Creates authorization header from authentication result.

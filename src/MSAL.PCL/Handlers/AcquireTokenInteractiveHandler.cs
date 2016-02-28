@@ -86,11 +86,6 @@ namespace Microsoft.Identity.Client.Handlers
                 throw new ArgumentException(MsalErrorMessage.LoginHintNullForUiOption, "loginHint");
             }
             
-
-            this.brokerParameters["force"] = "NO";
-            this.brokerParameters["username"] = loginHint;
-            this.brokerParameters["redirect_uri"] = redirectUri.AbsoluteUri;
-            this.brokerParameters["extra_qp"] = extraQueryParameters;
             PlatformPlugin.BrokerHelper.PlatformParameters = _authorizationParameters;
         }
 

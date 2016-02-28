@@ -27,9 +27,9 @@ namespace Microsoft.Identity.Client.Handlers
 
 
         public AcquireTokenSilentHandler(HandlerData handlerData, string userIdentifer, IPlatformParameters parameters) 
-            : base(handlerData)
+            : this(handlerData, (User)null, parameters)
         {
-            //todo implement useridentifier
+            this.MapIdentifierToUser(userIdentifer);
         }
 
         public AcquireTokenSilentHandler(HandlerData handlerData, User user, IPlatformParameters parameters)
@@ -38,13 +38,10 @@ namespace Microsoft.Identity.Client.Handlers
             if (user != null)
             {
                 this.User = user;
-                this.brokerParameters["username"] = user.DisplayableId;
             }
 
             PlatformPlugin.BrokerHelper.PlatformParameters = parameters;    
             this.SupportADFS = false;
-            
-            this.brokerParameters["silent_broker_flow"] = null; //add key
         }
 
         protected override Task<AuthenticationResultEx> SendTokenRequestAsync()

@@ -93,6 +93,11 @@ namespace Microsoft.Identity.Client.Internal
         public const string MultipleTokensMatched = "multiple_matching_tokens_detected";
 
         /// <summary>
+        /// Invalid cache operation was attempted.
+        /// </summary>
+        public const string InvalidCacheOperation = "invalid_cache_operation";
+
+        /// <summary>
         /// Invalid authority type.
         /// </summary>
         public const string InvalidAuthorityType = "invalid_authority_type";

@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client
                 foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> kvp in this.tokenCacheDictionary)
                 {
                     writer.Write(string.Format("{1}{0}{2}{0}{3}{0}{4}", Delimiter, kvp.Key.Authority,
-                        kvp.Key.Scope.CreateSingleStringFromSet(), kvp.Key.ClientId, kvp.Key.Policy));
+                        kvp.Key.Scope.AsSingleString(), kvp.Key.ClientId, kvp.Key.Policy));
                     writer.Write(kvp.Value.Serialize());
                 }
 
@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Client
                     AuthenticationResultEx resultEx = AuthenticationResultEx.Deserialize(reader.ReadString());
 
                     TokenCacheKey key = new TokenCacheKey(kvpElements[0],
-                        kvpElements[1].CreateSetFromSingleString(), kvpElements[2], resultEx.Result.User, kvpElements[3]);
+                        kvpElements[1].AsSet(), kvpElements[2], resultEx.Result.User, kvpElements[3]);
 
                     this.tokenCacheDictionary.Add(key, resultEx);
                 }
@@ -236,7 +236,7 @@ namespace Microsoft.Identity.Client
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
             {
                 TokenCache = this,
-                Scope = item.Scope,
+                Scope = item.Scope.AsArray(),
                 ClientId = item.ClientId,
                 User = item.User,
                 Policy = item.Policy
@@ -340,8 +340,8 @@ namespace Microsoft.Identity.Client
                     //requested scope are not a subset or authority does not match (cross-tenant RT) or client id is not same (FoCI).
                     PlatformPlugin.Logger.Verbose(callState,
                         string.Format("Refresh token for scope '{0}' will be used to acquire token for '{1}'",
-                            cacheKey.Scope.CreateSingleStringFromSet(),
-                            scope.CreateSingleStringFromSet()));
+                            cacheKey.Scope.AsSingleString(),
+                            scope.AsSingleString()));
                     
                     resultEx = CreateResultExFromCacheResultEx(cacheKey, resultEx);
                 }
@@ -381,9 +381,11 @@ namespace Microsoft.Identity.Client
         {
             var newResultEx = new AuthenticationResultEx
             {
-                Result = new AuthenticationResult(null, null, DateTimeOffset.MinValue),
+                Result = new AuthenticationResult(null, null, DateTimeOffset.MinValue)
+                {
+                    ScopeSet = new HashSet<string>(resultEx.Result.ScopeSet.ToArray())
+                },
                 RefreshToken = resultEx.RefreshToken,
-                ScopeInResponse = resultEx.ScopeInResponse
             };
 
             newResultEx.Result.UpdateTenantAndUser(resultEx.Result.TenantId, resultEx.Result.IdToken,
@@ -400,37 +402,37 @@ namespace Microsoft.Identity.Client
         }
 
 
-        internal void StoreToCache(AuthenticationResultEx result, string authority, string clientId,
+        internal void StoreToCache(AuthenticationResultEx resultEx, string authority, string clientId,
             string policy, bool restrictToSingleUser, CallState callState)
         {
             PlatformPlugin.Logger.Verbose(callState, "Storing token in the cache...");
 
             //single user mode cannot allow more than 1 unique id in the cache including null
-            if (restrictToSingleUser && (result.Result.User == null || string.IsNullOrEmpty(result.Result.User.UniqueId) ||
-                !this.GetUniqueIdsFromCache(clientId).Contains(result.Result.User.UniqueId)))
+            if (restrictToSingleUser && (resultEx.Result.User == null || string.IsNullOrEmpty(resultEx.Result.User.UniqueId) ||
+                !this.GetUniqueIdsFromCache(clientId).Contains(resultEx.Result.User.UniqueId)))
             {
-                throw new MsalException(
+                throw new MsalException(MsalError.InvalidCacheOperation,
                     "Cannot add more than 1 user with a different unique id when RestrictToSingleUser is set to TRUE.");
             }
 
             this.OnBeforeWrite(new TokenCacheNotificationArgs
             {
-                Scope = result.ScopeInResponse,
+                Scope = resultEx.Result.Scope,
                 ClientId = clientId,
-                User = result.Result.User,
+                User = resultEx.Result.User,
                 Policy = policy
             });
 
-            TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, result.ScopeInResponse, clientId,
-                result.Result.User, policy);
+            TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resultEx.Result.ScopeSet, clientId,
+                resultEx.Result.User, policy);
             // First identify all potential tokens.
-            List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> items = this.QueryCache(authority, clientId, result.Result.User, policy);
+            List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> items = this.QueryCache(authority, clientId, resultEx.Result.User, policy);
             List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsToRemove =
-                items.Where(p => p.Key.ScopeIntersects(result.ScopeInResponse)).ToList();
+                items.Where(p => p.Key.ScopeIntersects(resultEx.Result.ScopeSet)).ToList();
 
             if (!itemsToRemove.Any())
             {
-                this.tokenCacheDictionary[tokenCacheKey] = result;
+                this.tokenCacheDictionary[tokenCacheKey] = resultEx;
                 PlatformPlugin.Logger.Verbose(callState, "An item was stored in the cache");
             }
             else
@@ -442,11 +444,11 @@ namespace Microsoft.Identity.Client
                     this.tokenCacheDictionary.Remove(itemToRemove);
                 }
 
-                this.tokenCacheDictionary[tokenCacheKey] = result;
+                this.tokenCacheDictionary[tokenCacheKey] = resultEx;
                 PlatformPlugin.Logger.Verbose(callState, "An item was updated in the cache");
             }
 
-            this.UpdateCachedRefreshTokens(result, authority, clientId, policy);
+            this.UpdateCachedRefreshTokens(resultEx, authority, clientId, policy);
             this.HasStateChanged = true;
         }
 

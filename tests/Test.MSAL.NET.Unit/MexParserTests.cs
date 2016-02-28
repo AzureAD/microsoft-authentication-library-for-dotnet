@@ -42,12 +42,14 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("MexParserTests")]
         public void FetchWsTrustAddressFromMexTest()
         {
+            using (Stream stream = new FileStream("TestMex2005.xml", FileMode.Open))
+            {
             HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
             {
                 Method =  HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StreamContent(new FileStream("TestMex2005.xml", FileMode.Open))
+                    Content = new StreamContent(stream)
                 }
             };
 
@@ -58,6 +60,8 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(address);
             Assert.AreEqual("https://sts.usystech.net/adfs/services/trust/2005/windowstransport", address.Uri.AbsoluteUri);
             Assert.AreEqual(WsTrustVersion.WsTrust2005, address.Version);
+
+            }
         }
 
         [TestMethod]

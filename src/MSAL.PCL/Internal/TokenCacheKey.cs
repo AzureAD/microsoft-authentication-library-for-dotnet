@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Internal
             return
                 string.Format(
                     "Authority:{0}, Scope:{1}, ClientId:{2}, UniqueId:{3}, DisplayableId:{4}, RootId:{5}, Policy:{6}",
-                    this.Authority, MsalStringHelper.CreateSingleStringFromArray(this.Scope.ToArray()), this.ClientId,
+                    this.Authority, MsalStringHelper.AsSingleString(this.Scope.ToArray()), this.ClientId,
                     this.UniqueId, this.DisplayableId, this.RootId, this.Policy);
         }
 
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             const string Delimiter = ":::";
             return (this.Authority + Delimiter
-                + MsalStringHelper.CreateSingleStringFromSet(this.Scope) + Delimiter
+                + MsalStringHelper.AsSingleString(this.Scope) + Delimiter
                 + this.ClientId.ToLower() + Delimiter
                 + this.UniqueId + Delimiter
                 + this.RootId + Delimiter

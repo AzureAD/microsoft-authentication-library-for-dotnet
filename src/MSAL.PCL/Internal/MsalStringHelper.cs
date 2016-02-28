@@ -25,13 +25,22 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal static class MsalStringHelper
     {
-
-        internal static string CreateSingleStringFromSet(this HashSet<string> setOfStrings)
+        internal static string[] AsArray(this HashSet<string> setOfStrings)
         {
-            return CreateSingleStringFromArray(setOfStrings.ToArray());
+            if (setOfStrings == null)
+            {
+                return null;
+            }
+
+            return setOfStrings.ToArray();
         }
 
-        internal static string CreateSingleStringFromArray(this string[] arrayOfStrings)
+        internal static string AsSingleString(this HashSet<string> setOfStrings)
+        {
+            return AsSingleString(setOfStrings.ToArray());
+        }
+
+        internal static string AsSingleString(this string[] arrayOfStrings)
         {
 
             if (IsNullOrEmpty(arrayOfStrings))
@@ -51,12 +60,12 @@ namespace Microsoft.Identity.Client.Internal
             return sb.ToString();
         }
         
-        internal static HashSet<string> CreateSetFromSingleString(this string singleString)
+        internal static HashSet<string> AsSet(this string singleString)
         {
             return new HashSet<string>(singleString.Split(new[] { " " }, StringSplitOptions.None));
         }
 
-        internal static string[] CreateArrayFromSingleString(this string singleString)
+        internal static string[] AsArray(this string singleString)
         {
             if (string.IsNullOrWhiteSpace(singleString))
             {

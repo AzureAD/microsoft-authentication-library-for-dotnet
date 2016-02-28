@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the Scope.
         /// </summary>
-        public HashSet<string> Scope { get; internal set; }
+        public string[] Scope { get; internal set; }
 
         /// <summary>
         /// Gets the user's unique Id.

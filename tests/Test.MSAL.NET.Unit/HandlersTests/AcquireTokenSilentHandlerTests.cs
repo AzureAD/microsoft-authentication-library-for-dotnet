@@ -7,7 +7,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
     {
         [TestMethod]
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
-        public void ConstructorTests()
+        public void ConstructorCommonAuthorityEmptyCacheTests()
         {
             
         }
