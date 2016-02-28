@@ -43,7 +43,6 @@ namespace Microsoft.Identity.Client
         private const int ExpirationMarginInMinutes = 5;
         internal readonly IDictionary<TokenCacheKey, AuthenticationResultEx> tokenCacheDictionary;
         private volatile bool hasStateChanged;
-        private bool _restrictToSingleUser;
 
         static TokenCache()
         {

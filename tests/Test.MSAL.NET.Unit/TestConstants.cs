@@ -9,6 +9,7 @@ namespace Test.MSAL.NET.Unit
         public static readonly HashSet<string> ScopeForAnotherResource = new HashSet<string>(new[] { "r2/scope1", "r2/scope2" });
         public static readonly string DefaultAuthorityHomeTenant = "https://login.microsoftonline.com/home/";
         public static readonly string DefaultAuthorityGuestTenant = "https://login.microsoftonline.com/guest/";
+        public static readonly string DefaultAuthorityCommonTenant = "https://login.microsoftonline.com/common/";
         public static readonly string DefaultClientId = "client_id";
         public static readonly string DefaultUniqueId = "unique_id";
         public static readonly string DefaultDisplayableId = "displayable@id.com";

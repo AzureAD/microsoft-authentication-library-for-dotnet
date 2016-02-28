@@ -58,6 +58,55 @@ namespace Test.MSAL.Common.Unit
             Assert.IsNull(resultEx.Result.AccessToken);
             Assert.AreEqual(resultEx.RefreshToken, "someRT");
         }
+        
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void LoadFromCacheExpiredTokenFromCrossTenant()
+        {
+            TokenCache cache = new TokenCache();
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityGuestTenant,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId,
+                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            AuthenticationResultEx ex = new AuthenticationResultEx();
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow));
+            ex.RefreshToken = "someRT";
+            cache.tokenCacheDictionary[key] = ex;
+
+            AuthenticationResultEx resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId,
+                TestConstants.DefaultUser,
+                TestConstants.DefaultPolicy, null);
+            Assert.IsNotNull(resultEx);
+            Assert.IsNotNull(resultEx.Result);
+            Assert.IsNull(resultEx.Result.AccessToken);
+            Assert.AreEqual(resultEx.RefreshToken, "someRT");
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void LoadFromCacheExpiredTokenFromFoci()
+        {
+            TokenCache cache = new TokenCache();
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId+"more",
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            AuthenticationResultEx ex = new AuthenticationResultEx();
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow));
+            ex.RefreshToken = "someRT";
+            ex.Result.FamilyId = "1";
+            cache.tokenCacheDictionary[key] = ex;
+
+            AuthenticationResultEx resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId,
+                TestConstants.DefaultUser,
+                TestConstants.DefaultPolicy, null);
+            Assert.IsNotNull(resultEx);
+            Assert.IsNotNull(resultEx.Result);
+            Assert.IsNull(resultEx.Result.AccessToken);
+            Assert.AreEqual(resultEx.RefreshToken, "someRT");
+        }
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
@@ -239,6 +288,65 @@ namespace Test.MSAL.Common.Unit
             }
         }
 
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void LoadSingleItemFromCacheNullUserMultipleUniqueIdsInCacheTest()
+        {
+            TokenCache cache = new TokenCache();
+            LoadCacheItems(cache);
+            try
+            {
+                cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityCommonTenant,
+                    TestConstants.DefaultScope, TestConstants.DefaultClientId,
+                    null,
+                    TestConstants.DefaultPolicy, null);
+                Assert.Fail("multiple tokens should have been detected");
+            }
+            catch (MsalException exception)
+            {
+                Assert.AreEqual("multiple_matching_tokens_detected", exception.ErrorCode);
+            }
+        }
+
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void LoadSingleItemFromCacheNullUserSingleUniqueIdInCacheTest()
+        {
+            TokenCache cache = new TokenCache();
+
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                TestConstants.DefaultScope, TestConstants.DefaultClientId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultPolicy);
+            AuthenticationResultEx ex = new AuthenticationResultEx();
+            ex.Result = new AuthenticationResult("Bearer", key.ToString(),
+                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
+            ex.Result.User = new User
+            {
+                DisplayableId = TestConstants.DefaultDisplayableId,
+                UniqueId = TestConstants.DefaultUniqueId,
+                RootId = TestConstants.DefaultRootId
+            };
+            ex.Result.FamilyId = "1";
+            ex.RefreshToken = "someRT";
+            cache.tokenCacheDictionary[key] = ex;
+
+            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item =
+                cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityCommonTenant,
+                    TestConstants.DefaultScope, TestConstants.DefaultClientId,
+                    null,
+                    TestConstants.DefaultPolicy, null);
+            Assert.IsNotNull(item);
+
+            Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, key.Authority);
+            Assert.AreEqual(TestConstants.DefaultScope, key.Scope);
+            Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
+        }
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
