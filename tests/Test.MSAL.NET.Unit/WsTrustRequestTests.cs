@@ -32,12 +32,12 @@ namespace Test.MSAL.NET.Unit
     [TestClass]
     [DeploymentItem("TestMex.xml")]
     [DeploymentItem("TestMex2005.xml")]
-    public class NonInteractiveTests : MsalTestsBase
+    public class WsTrustRequestTests
     {
 
         [TestMethod]
         [Description("WS-Trust Address Extraction Test")]
-        [TestCategory("AdalDotNet")]
+        [TestCategory("WsTrustRequestTests")]
         public async Task WsTrust2005AddressExtractionTest()
         {
             await Task.Factory.StartNew(() => {
@@ -59,7 +59,7 @@ namespace Test.MSAL.NET.Unit
         
         [TestMethod]
         [Description("WS-Trust Request Xml Format Test")]
-        [TestCategory("AdalDotNet")]
+        [TestCategory("WsTrustRequestTests")]
         public async Task WsTrustRequestXmlFormatTest()
         {
             await Task.Factory.StartNew(() =>
