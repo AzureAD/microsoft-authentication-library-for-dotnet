@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client
     {
         public override string GetProductName()
         {
-            return "PCL.Android";
+            return "MSAL.Android";
         }
 
         public override string GetEnvironmentVariable(string variable)

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Unit
+namespace Test.MSAL.NET.Unit.Mocks
 {
     internal class MockHttpMessageHandler : HttpMessageHandler
     {
@@ -25,7 +25,7 @@ namespace Test.MSAL.NET.Unit
             Uri uri = request.RequestUri;
             if (!string.IsNullOrEmpty(Url))
             {
-                Assert.AreEqual(Url, uri.Authority);
+                Assert.AreEqual(Url, uri.AbsoluteUri.Split(new [] { '?'})[0]);
             }
 
             if (QueryParams != null)

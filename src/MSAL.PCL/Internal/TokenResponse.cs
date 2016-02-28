@@ -89,31 +89,6 @@ namespace Microsoft.Identity.Client.Internal
         [DataMember(Name = TokenResponseClaim.CorrelationId, IsRequired = false)]
         public string CorrelationId { get; set; }
 
-        internal static TokenResponse CreateFromBrokerResponse(IDictionary<string, string> responseDictionary)
-        {
-            if (responseDictionary.ContainsKey(TokenResponseClaim.ErrorDescription))
-            {
-                return new TokenResponse
-                {
-                    Error = responseDictionary[TokenResponseClaim.Error],
-                    ErrorDescription = responseDictionary[TokenResponseClaim.ErrorDescription],
-                    CorrelationId = responseDictionary[TokenResponseClaim.CorrelationId]
-                };
-            }
-            else
-            {
-                return new TokenResponse
-                {
-                    AccessToken = responseDictionary[TokenResponseClaim.AccessToken],
-                    RefreshToken = responseDictionary[TokenResponseClaim.RefreshToken],
-                    IdTokenString = responseDictionary[TokenResponseClaim.IdToken],
-                    TokenType = responseDictionary[TokenResponseClaim.TokenType],
-                    CorrelationId = responseDictionary[TokenResponseClaim.CorrelationId],
-                    Scope = responseDictionary[TokenResponseClaim.Scope],
-                };
-            }
-        }
-
         public static TokenResponse CreateFromErrorResponse(IHttpWebResponse webResponse)
         {
             if (webResponse == null)

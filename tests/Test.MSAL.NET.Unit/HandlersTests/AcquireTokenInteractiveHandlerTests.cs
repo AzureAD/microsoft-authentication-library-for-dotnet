@@ -10,8 +10,9 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Test.MSAL.Common.Unit;
+using Test.MSAL.NET.Unit.Mocks;
 
-namespace Test.MSAL.NET.Unit
+namespace Test.MSAL.NET.Unit.HandlersTests
 {
     [TestClass]
     public class AcquireTokenInteractiveHandlerTests

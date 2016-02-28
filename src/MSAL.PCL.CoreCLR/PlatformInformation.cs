@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client
     {
         public override string GetProductName()
         {
-            return "PCL.CoreCLR";
+            return "MSAL.CoreCLR";
         }
 
         public override async Task<string> GetUserPrincipalNameAsync()

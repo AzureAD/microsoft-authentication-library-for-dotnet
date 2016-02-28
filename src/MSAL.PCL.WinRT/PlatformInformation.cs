@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client
     {
         public override string GetProductName()
         {
-            return "PCL.WinRT";
+            return "MSAL.WinRT";
         }
 
         public override string GetEnvironmentVariable(string variable)

@@ -155,10 +155,5 @@ namespace Microsoft.Identity.Client.Internal
             escapeStr = escapeStr.Replace(">", "&gt;");
             return escapeStr;
         }
-
-        private static string BuildTimeString(DateTime utcTime)
-        {
-            return utcTime.ToString("yyyy-MM-ddTHH:mm:ss.068Z", CultureInfo.InvariantCulture);
-        }
     }
 }

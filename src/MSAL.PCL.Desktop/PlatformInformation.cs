@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
     {
         public override string GetProductName()
         {
-            return "PCL.Desktop";
+            return "MSAL.Desktop";
         }
 
         public override async Task<string> GetUserPrincipalNameAsync()

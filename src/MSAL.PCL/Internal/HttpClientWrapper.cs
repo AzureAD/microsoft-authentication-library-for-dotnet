@@ -75,9 +75,15 @@ namespace Microsoft.Identity.Client.Internal
             set { this.timeoutInMilliSeconds = value; }
         }
 
-
         public async Task<IHttpWebResponse> GetResponseAsync()
         {
+            if (HttpMessageHandlerFactory.MockHandler != null)
+            {
+                //mock object is set for testing. reinitialize the htttp client
+                clientForUsingCredential = new HttpClient(HttpMessageHandlerFactory.MockHandler);
+                clientWithoutCredential = new HttpClient(HttpMessageHandlerFactory.MockHandler);
+            }
+
             if (UseDefaultCredentials)
             {
                 return await GetResponseAsync(clientForUsingCredential).ConfigureAwait(false);

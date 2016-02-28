@@ -57,7 +57,6 @@ namespace Test.MSAL.NET.Unit
             });
         }
         
-
         [TestMethod]
         [Description("WS-Trust Request Xml Format Test")]
         [TestCategory("AdalDotNet")]
@@ -76,44 +75,6 @@ namespace Test.MSAL.NET.Unit
                 catch (Exception ex)
                 {
                     Assert.Fail("Not expected -- " + ex.Message);
-                }
-            });
-        }
-
-        private static void VerifyUserRealmResponse(UserRealmDiscoveryResponse userRealmResponse, string expectedAccountType)
-        {
-            Assert.AreEqual("1.0", userRealmResponse.Version);
-            Assert.AreEqual(userRealmResponse.AccountType, expectedAccountType);
-            if (expectedAccountType == "Federated")
-            {
-                Assert.IsNotNull(userRealmResponse.FederationActiveAuthUrl);
-                Assert.IsNotNull(userRealmResponse.FederationMetadataUrl);
-                Assert.AreEqual("WSTrust", userRealmResponse.FederationProtocol);
-            }
-            else
-            {
-                Assert.IsNull(userRealmResponse.FederationActiveAuthUrl);
-                Assert.IsNull(userRealmResponse.FederationMetadataUrl);
-                Assert.IsNull(userRealmResponse.FederationProtocol);
-            }
-        }
-
-        private static XDocument ConvertStringToXDocument(string mexDocumentContent)
-        {
-            byte[] serializedMexDocumentContent = Encoding.UTF8.GetBytes(mexDocumentContent);
-            using (MemoryStream stream = new MemoryStream(serializedMexDocumentContent))
-            {
-                return XDocument.Load(stream);
-            }
-        }
-
-        private async static Task<XDocument> FecthMexAsync(string metadataUrl)
-        {
-            return await Task.Factory.StartNew(() =>
-            {
-                using (Stream stream = new FileStream("TestMex.xml", FileMode.Open))
-                {
-                    return XDocument.Load(stream);
                 }
             });
         }

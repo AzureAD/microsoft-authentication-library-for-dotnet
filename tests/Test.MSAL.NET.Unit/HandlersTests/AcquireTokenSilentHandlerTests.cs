@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Unit
+namespace Test.MSAL.NET.Unit.HandlersTests
 {
     [TestClass]
     public class AcquireTokenSilentHandlerTests

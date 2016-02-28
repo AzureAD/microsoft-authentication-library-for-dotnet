@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client
     {
         public override string GetProductName()
         {
-            return "PCL.iOS";
+            return "MSAL.iOS";
         }
 
         public override string GetEnvironmentVariable(string variable)

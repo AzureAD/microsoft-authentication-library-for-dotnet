@@ -166,29 +166,6 @@ namespace Test.MSAL.NET.Unit
         {
             CommonUnitTests.AdalIdTest();
         }
-
-        [TestMethod]
-        [TestCategory("AdalDotNetUnit")]
-        [Description("Test to verify CryptographyHelper.SignWithCertificate")]
-        public void SignWithCertificateTest()
-        {
-            string message = "This is a test message";
-            string[] certs = { "valid_cert.pfx", "valid_cert2.pfx" };
-            for (int i = 0; i < 2; i++)
-            {
-                X509Certificate2 x509Certificate = new X509Certificate2(certs[i], "password", X509KeyStorageFlags.Exportable);
-
-                IClientAssertionCertificate cryptoHelper = new ClientAssertionCertificate("client_id", x509Certificate);
-                byte[] signature = cryptoHelper.Sign(message);
-                Assert.IsNotNull(signature);
-
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-
-                signature = cryptoHelper.Sign(message);
-                Assert.IsNotNull(signature);
-            }
-        }
         
         
         private static void RunAuthenticationParametersPositive(string authenticateHeader, string expectedAuthority, string excepectedResource)

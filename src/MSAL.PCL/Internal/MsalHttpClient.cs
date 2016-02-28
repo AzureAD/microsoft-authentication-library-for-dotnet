@@ -88,8 +88,6 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (HttpRequestWrapperException ex)
             {
-                if (!this.isDeviceAuthChallenge(endpointType, ex.WebResponse, respondToDeviceAuthChallenge))
-                {
                     MsalServiceException serviceEx;
                     if (ex.WebResponse != null)
                     {
@@ -106,60 +104,13 @@ namespace Microsoft.Identity.Client.Internal
                     clientMetrics.SetLastError(serviceEx.ServiceErrorCodes);
                     PlatformPlugin.Logger.Error(CallState, serviceEx);
                     throw serviceEx;
-                }
-                else
-                {
-                    response = ex.WebResponse;
-                }
             }
             finally
             {
                 clientMetrics.EndClientMetricsRecord(endpointType, this.CallState);
             }
 
-            //check for pkeyauth challenge
-            if (this.isDeviceAuthChallenge(endpointType, response, respondToDeviceAuthChallenge))
-            {
-                return await HandleDeviceAuthChallenge<T>(endpointType, response).ConfigureAwait(false);
-            }
-
             return typedResponse;
-        }
-
-        private bool isDeviceAuthChallenge(string endpointType, IHttpWebResponse response, bool respondToDeviceAuthChallenge)
-        {
-            return PlatformPlugin.DeviceAuthHelper.CanHandleDeviceAuthChallenge &&
-                   respondToDeviceAuthChallenge &&
-                   (response.Headers.ContainsKey(WwwAuthenticateHeader) &&
-                    response.Headers[WwwAuthenticateHeader].StartsWith(PKeyAuthName)) &&
-                   endpointType.Equals(ClientMetricsEndpointType.Token);
-        }
-
-        private IDictionary<string, string> ParseChallengeData(IHttpWebResponse response)
-        {
-            IDictionary<string, string> data = new Dictionary<string, string>();
-            string wwwAuthenticate = response.Headers[WwwAuthenticateHeader];
-            wwwAuthenticate = wwwAuthenticate.Substring(PKeyAuthName.Length + 1);
-            wwwAuthenticate = wwwAuthenticate.Replace("\"", "");
-            string[] headerPairs = wwwAuthenticate.Split(',');
-            foreach (string pair in headerPairs)
-            {
-                string[] keyValue = pair.Split('=');
-                data.Add(keyValue[0].Trim(),keyValue[1].Trim());
-            }
-
-            return data;
-        }
-
-        private async Task<T> HandleDeviceAuthChallenge<T>(string endpointType, IHttpWebResponse response)
-        {
-            IDictionary<string, string> responseDictionary = this.ParseChallengeData(response);
-            string responseHeader = await PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(responseDictionary).ConfigureAwait(false);
-            IRequestParameters rp = this.Client.BodyParameters;
-            this.Client = new HttpClientWrapper(CheckForExtraQueryParameter(responseDictionary["SubmitUrl"]), this.CallState);
-            this.Client.BodyParameters = rp;
-            this.Client.Headers["Authorization"] = responseHeader;
-            return await this.GetResponseAsync<T>(endpointType, false).ConfigureAwait(false);
         }
 
         private static T DeserializeResponse<T>(Stream responseStream)
