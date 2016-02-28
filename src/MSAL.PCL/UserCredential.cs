@@ -29,8 +29,7 @@ namespace Microsoft.Identity.Client
 {
     internal enum UserAuthType
     {
-        IntegratedAuth,
-        UsernamePassword
+        IntegratedAuth
     }
 
     // Disabled Non-Interactive Feature

@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Client.Internal
                     XElement auth = element.Elements(XmlNamespace.Http + "NegotiateAuthentication").FirstOrDefault();
                     if (auth != null)
                     {
-                        AddPolicy(policies, policy, UserAuthType.IntegratedAuth, securityPolicy.Equals(XmlNamespace.Sp2005));
+                        AddPolicy(policies, policy, UserAuthType.IntegratedAuth);
                     }
 
                     auth = element.Elements(securityPolicy + "SignedEncryptedSupportingTokens").FirstOrDefault();
@@ -170,12 +170,6 @@ namespace Microsoft.Identity.Client.Internal
                     if (wspPolicy2 == null)
                     {
                         continue;
-                    }
-
-                    XElement wssUsernameToken10 = wspPolicy2.Elements(securityPolicy + "WssUsernameToken10").FirstOrDefault();
-                    if (wssUsernameToken10 != null)
-                    {
-                        AddPolicy(policies, policy, UserAuthType.UsernamePassword, securityPolicy.Equals(XmlNamespace.Sp2005));
                     }
                 }
             }
@@ -222,6 +216,13 @@ namespace Microsoft.Identity.Client.Internal
                     {
                         continue;
                     }
+
+                    bool isWsTrust2005 =
+                        string.Compare(XmlNamespace.Issue2005.ToString(), soapAction.Value,
+                            StringComparison.OrdinalIgnoreCase) == 0;
+                    policies[policyUri.Value].Version = isWsTrust2005
+                        ? WsTrustVersion.WsTrust2005
+                        : WsTrustVersion.WsTrust13;
 
                     XElement soapBinding = binding.Elements(XmlNamespace.Soap12 + "binding").FirstOrDefault();
                     if (soapBinding == null)
@@ -273,7 +274,7 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        private static void AddPolicy(IDictionary<string, MexPolicy> policies, XElement policy, UserAuthType policyAuthType, bool isWsTrust2005)
+        private static void AddPolicy(IDictionary<string, MexPolicy> policies, XElement policy, UserAuthType policyAuthType)
         {
             XElement binding = policy.Descendants(XmlNamespace.Sp + "TransportBinding").FirstOrDefault()
                           ?? policy.Descendants(XmlNamespace.Sp2005 + "TransportBinding").FirstOrDefault();
@@ -281,16 +282,9 @@ namespace Microsoft.Identity.Client.Internal
             if (binding != null)
             {
                 XAttribute id = policy.Attribute(XmlNamespace.Wsu + "Id");
-                WsTrustVersion version = WsTrustVersion.WsTrust13;
-
-                if (isWsTrust2005)
-                {
-                    version = WsTrustVersion.WsTrust2005;
-                }
-
                 if (id != null)
                 {
-                    policies.Add("#" + id.Value, new MexPolicy { Id = id.Value, AuthType = policyAuthType, Version = version });
+                    policies.Add("#" + id.Value, new MexPolicy { Id = id.Value, AuthType = policyAuthType });
                 }
             }
         }
