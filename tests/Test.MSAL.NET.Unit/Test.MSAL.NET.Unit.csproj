@@ -99,7 +99,7 @@
     <Compile Include="Mocks\MockHelpers.cs" />
     <Compile Include="Mocks\MockHttpMessageHandler.cs" />
     <Compile Include="Mocks\MockWebUI.cs" />
-    <Compile Include="NonInteractiveTests.cs" />
+    <Compile Include="WsTrustRequestTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestConstants.cs" />
     <Compile Include="TokenCacheKeyTests.cs" />
