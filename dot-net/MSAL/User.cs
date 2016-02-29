@@ -14,6 +14,7 @@ namespace MSAL
         /// TODO - 1) Deleting tokens for username+authority combo does not work as there a RT in cache that can be used to get cross tenant token silently.
         /// TODO - 2) Deleting ALL tokens for a given UPN would be wrong because userA in tenantX is not same as tenantY.
         /// TODO - We should consider putting signOut in application context because a user signs out of an application.
+        /// TODO - Will calling sign out mutate the User object and clear all data from it? 
         /// </summary>
         public void SignOut()
         {

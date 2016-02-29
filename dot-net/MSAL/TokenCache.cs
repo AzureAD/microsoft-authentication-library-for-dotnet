@@ -133,30 +133,6 @@ namespace MSAL
         public void Deserialize(byte[] state)
         {
         }
-
-        internal void OnAfterAccess(TokenCacheNotificationArgs args)
-        {
-            if (AfterAccess != null)
-            {
-                AfterAccess(args);
-            }
-        }
-
-        internal void OnBeforeAccess(TokenCacheNotificationArgs args)
-        {
-            if (BeforeAccess != null)
-            {
-                BeforeAccess(args);
-            }
-        }
-
-        internal void OnBeforeWrite(TokenCacheNotificationArgs args)
-        {
-            if (BeforeWrite != null)
-            {
-                BeforeWrite(args);
-            }
-        }
     }
 
 }
