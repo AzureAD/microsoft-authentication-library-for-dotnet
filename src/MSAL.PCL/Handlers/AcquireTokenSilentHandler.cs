@@ -30,6 +30,8 @@ namespace Microsoft.Identity.Client.Handlers
             : this(handlerData, (User)null, parameters)
         {
             this.MapIdentifierToUser(userIdentifer);
+            PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
+            this.SupportADFS = false;
         }
 
         public AcquireTokenSilentHandler(HandlerData handlerData, User user, IPlatformParameters parameters)
