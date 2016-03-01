@@ -96,10 +96,12 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (FileNotFoundException ex)
             {
+                PlatformPlugin.Logger.Error(null, ex);
                 throw new MsalException(MsalError.AssemblyNotFound, string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.AssemblyNotFoundTemplate, platformSpecificAssemblyName), ex);
             }
             catch (Exception ex) // FileLoadException is missing from PCL
             {
+                PlatformPlugin.Logger.Error(null, ex);
                 throw new MsalException(MsalError.AssemblyLoadFailed, string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.AssemblyLoadFailedTemplate, platformSpecificAssemblyName), ex);
             }
         }

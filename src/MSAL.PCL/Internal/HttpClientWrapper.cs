@@ -147,6 +147,7 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (TaskCanceledException ex)
             {
+                PlatformPlugin.Logger.Error(this.CallState, ex);
                 throw new MsalException(MsalError.HttpRequestCancelled, ex);
             }
 
@@ -162,6 +163,7 @@ namespace Microsoft.Identity.Client.Internal
                 }
                 catch (HttpRequestException ex)
                 {
+                    PlatformPlugin.Logger.Error(this.CallState, ex);
                     webResponse.ResponseStream.Position = 0;
                     //throw new MsalServiceException(webResponse, ex);
                 }

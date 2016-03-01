@@ -60,10 +60,12 @@ namespace Microsoft.Identity.Client
             }
             catch (FileNotFoundException ex)
             {
+                PlatformPlugin.Logger.Error(callState, ex);
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
             catch (Exception ex)
             {
+                PlatformPlugin.Logger.Error(callState, ex);
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
 

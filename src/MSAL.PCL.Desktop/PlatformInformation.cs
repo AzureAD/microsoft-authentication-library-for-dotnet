@@ -108,8 +108,9 @@ namespace Microsoft.Identity.Client
                 returnValue = result == NativeMethods.ErrorSuccess &&
                               status == NativeMethods.NetJoinStatus.NetSetupDomainName;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                PlatformPlugin.Logger.Error(null, ex);
                 // ignore the exception as the result is already set to false;
             }
 
@@ -148,8 +149,9 @@ namespace Microsoft.Identity.Client
                             return "Unknown";
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
+                    PlatformPlugin.Logger.Error(null, ex);
                     return "Unknown";
                 }
             }

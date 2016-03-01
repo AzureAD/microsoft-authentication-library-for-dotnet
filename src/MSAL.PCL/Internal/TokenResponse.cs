@@ -121,8 +121,9 @@ namespace Microsoft.Identity.Client.Internal
                         tokenResponse = ((TokenResponse)serializer.ReadObject(ms));
                     }
                 }
-                catch (SerializationException)
+                catch (SerializationException ex)
                 {
+                    PlatformPlugin.Logger.Error(null, ex);
                     tokenResponse = new TokenResponse
                     {
                         Error = (webResponse.StatusCode == HttpStatusCode.ServiceUnavailable)
