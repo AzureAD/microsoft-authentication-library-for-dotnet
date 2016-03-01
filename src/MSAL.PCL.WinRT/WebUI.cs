@@ -58,11 +58,7 @@ namespace Microsoft.Identity.Client
                     webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri, redirectUri).AsTask().ConfigureAwait(false);
                 }
             }
-            catch (FileNotFoundException ex)
-            {
-                PlatformPlugin.Logger.Error(callState, ex);
-                throw new MsalException(MsalError.AuthenticationUiFailed, ex);
-            }
+
             catch (Exception ex)
             {
                 PlatformPlugin.Logger.Error(callState, ex);
