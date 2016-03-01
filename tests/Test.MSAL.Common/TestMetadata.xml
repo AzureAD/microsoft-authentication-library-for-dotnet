@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Rows>
+  <Sts>
+    <StsType>AAD</StsType>
+  </Sts>
+  <Sts>
+    <StsType>ADFS</StsType>
+  </Sts>
+
+  <AAD>
+    <StsType>AAD</StsType>
+  </AAD>
+
+  <ADFS>
+    <StsType>ADFS</StsType>
+  </ADFS>  
+  
+  <MockSts>
+    <StsType>AAD</StsType>
+    <Mock>true</Mock>
+  </MockSts>
+  <MockSts>
+    <StsType>ADFS</StsType>
+    <Mock>true</Mock>
+  </MockSts>
+
+  <MockAAD>
+    <StsType>AAD</StsType>
+    <Mock>true</Mock>
+  </MockAAD>
+
+  <MockADFS>
+    <StsType>ADFS</StsType>
+    <Mock>true</Mock>
+  </MockADFS>  
+
+  <AADFederatedWithADFS3>
+    <StsType>AADFederatedWithADFS3</StsType>
+  </AADFederatedWithADFS3>
+  
+  <ResourceOwnerCredentials>
+    <StsType>AdfsPasswordGrant</StsType>
+    <CallSync>false</CallSync>
+  </ResourceOwnerCredentials>
+  
+  <ResourceOwnerCredentials>
+    <StsType>AadPasswordGrant</StsType>
+    <CallSync>false</CallSync>
+  </ResourceOwnerCredentials>
+</Rows>
