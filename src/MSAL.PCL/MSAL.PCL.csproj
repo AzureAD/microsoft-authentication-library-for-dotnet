@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{94569420-69B5-4031-A975-F5791E3F2F17}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.Identity.Client</RootNamespace>
+    <AssemblyName>Microsoft.Identity.Client</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkProfile>Profile7</TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Microsoft.Identity.Client.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>true</DelaySign>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- A reference to the entire .NET Framework is automatically included -->
+    <None Include="..\..\build\35MSSharedLib1024.snk">
+      <Link>35MSSharedLib1024.snk</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\MSAL.Common\CommonAssemblyInfo.cs">
+      <Link>Internal\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Internal\HandlerData.cs" />
+    <Compile Include="Internal\HttpMessageHandlerFactory.cs" />
+    <Compile Include="Internal\MsalError.cs" />
+    <Compile Include="AbstractClientApplication.cs" />
+    <Compile Include="Handlers\AcquireTokenByAuthorizationCodeHandler.cs" />
+    <Compile Include="Handlers\AcquireTokenForClientHandler.cs" />
+    <Compile Include="Handlers\AcquireTokenHandlerBase.cs" />
+    <Compile Include="Handlers\AcquireTokenInteractiveHandler.cs" />
+    <Compile Include="Handlers\AcquireTokenNonInteractiveHandler.cs" />
+    <Compile Include="Handlers\AcquireTokenOnBehalfHandler.cs" />
+    <Compile Include="Handlers\AcquireTokenSilentHandler.cs" />
+    <Compile Include="IClientAssertionCertificate.cs" />
+    <Compile Include="MsalException.cs" />
+    <Compile Include="Internal\MsalStringHelper.cs" />
+    <Compile Include="Internal\MsalIdHelper.cs" />
+    <Compile Include="MsalServiceException.cs" />
+    <Compile Include="MsalSilentTokenAcquisitionException.cs" />
+    <Compile Include="MsalUserMismatchException.cs" />
+    <Compile Include="AuthenticationParameters.cs" />
+    <Compile Include="AuthenticationResult.cs" />
+    <Compile Include="Internal\Authenticator.cs" />
+    <Compile Include="Internal\AuthenticatorTemplate.cs" />
+    <Compile Include="Internal\AuthenticatorTemplateList.cs" />
+    <Compile Include="Internal\AuthorizationResult.cs" />
+    <Compile Include="Internal\Base64UrlEncoder.cs" />
+    <Compile Include="Internal\CallState.cs" />
+    <Compile Include="ClientAssertion.cs" />
+    <Compile Include="ClientCredential.cs" />
+    <Compile Include="Internal\ClientKey.cs" />
+    <Compile Include="Internal\ClientMetrics.cs" />
+    <Compile Include="ConfidentialClientApplication.cs" />
+    <Compile Include="Internal\Constants.cs" />
+    <Compile Include="Internal\HttpClientWrapper.cs" />
+    <Compile Include="Internal\HttpRequestWrapperException.cs" />
+    <Compile Include="Internal\MsalHttpWebResponse.cs" />
+    <Compile Include="Interfaces\IBrokerHelper.cs" />
+    <Compile Include="Interfaces\IDeviceAuthHelper.cs" />
+    <Compile Include="IPlatformParameters.cs" />
+    <Compile Include="Interfaces\ICryptographyHelper.cs" />
+    <Compile Include="Internal\IdToken.cs" />
+    <Compile Include="Interfaces\IHttpWebResponse.cs" />
+    <Compile Include="Interfaces\ITokenCachePlugin.cs" />
+    <Compile Include="Internal\JsonHelper.cs" />
+    <Compile Include="Internal\JsonWebToken.cs" />
+    <Compile Include="Internal\LoggerBase.cs" />
+    <Compile Include="Internal\MexParser.cs" />
+    <Compile Include="Internal\AuthenticationResultEx.cs" />
+    <Compile Include="PublicClientApplication.cs" />
+    <Compile Include="Internal\TokenResponse.cs" />
+    <Compile Include="Internal\OAuthConstants.cs" />
+    <Compile Include="Internal\PlatformInformationBase.cs" />
+    <Compile Include="Interfaces\IWebUI.cs" />
+    <Compile Include="Internal\EncodingHelper.cs" />
+    <Compile Include="Interfaces\IWebUIFactory.cs" />
+    <Compile Include="Internal\PlatformPlugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Internal\RequestParameters.cs" />
+    <Compile Include="Internal\MsalHttpClient.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TokenCache.cs" />
+    <Compile Include="TokenCacheItem.cs" />
+    <Compile Include="Internal\TokenCacheKey.cs" />
+    <Compile Include="TokenCacheNotificationArgs.cs" />
+    <Compile Include="UIOptions.cs" />
+    <Compile Include="UserAssertion.cs" />
+    <Compile Include="UserCredential.cs" />
+    <Compile Include="User.cs" />
+    <Compile Include="Internal\UserRealmDiscoveryResponse.cs" />
+    <Compile Include="Internal\WsTrustRequest.cs" />
+    <Compile Include="Internal\WsTrustResponse.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

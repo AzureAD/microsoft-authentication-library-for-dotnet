@@ -34,6 +34,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
     <None Include="project.json" />
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
@@ -47,15 +48,9 @@
     <Compile Include="TokenCache.cs" />
     <Compile Include="TokenCacheItem.cs" />
     <Compile Include="TokenCacheNotificationArgs.cs" />
+    <Compile Include="UIOptions.cs" />
     <Compile Include="User.cs" />
     <Compile Include="UserAssertion.cs" />
-    <Compile Include="UserIdentifier.cs" />
-    <Compile Include="UserInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System">
-      <HintPath>..\..\..\..\windows\Microsoft.NET\Framework\v4.0.30319\System.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
