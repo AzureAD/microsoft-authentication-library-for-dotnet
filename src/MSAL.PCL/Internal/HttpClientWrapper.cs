@@ -162,8 +162,7 @@ namespace Microsoft.Identity.Client.Internal
                 }
                 catch (HttpRequestException ex)
                 {
-                    webResponse.ResponseStream.Position = 0;
-                    //throw new MsalServiceException(webResponse, ex);
+                    throw new MsalServiceException(ex.Message, ex);
                 }
             }
 
