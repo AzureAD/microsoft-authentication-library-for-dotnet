@@ -84,5 +84,8 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         internal Exception Exception { get; set; }
+
+        [DataMember]
+        public string UserAssertionHash { get; set; }
     }
 }
