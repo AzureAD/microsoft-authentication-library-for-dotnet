@@ -154,16 +154,10 @@ namespace Microsoft.Identity.Client.Internal
 
             if (!responseMessage.IsSuccessStatusCode)
             {
-                try
-                {
-                    throw new HttpRequestException(
-                        string.Format("Response status code does not indicate success: {0} ({1}).",
-                            (int) webResponse.StatusCode, webResponse.StatusCode));
-                }
-                catch (HttpRequestException ex)
-                {
-                    throw new MsalServiceException(ex.Message, ex);
-                }
+                throw new HttpRequestWrapperException(null, new HttpRequestException(
+                    string.Format("Response status code does not indicate success: {0} ({1}).",
+                        (int)webResponse.StatusCode, webResponse.StatusCode)));
+
             }
 
             if (addCorrelationId)
