@@ -66,6 +66,7 @@ namespace Microsoft.Identity.Client
                     }
                     catch (AggregateException ae)
                     {
+                        PlatformPlugin.Logger.Error(callState, ae.InnerException);
                         // Any exception thrown as a result of running task will cause AggregateException to be thrown with 
                         // actual exception as inner.
                         Exception innerException = ae.InnerExceptions[0];

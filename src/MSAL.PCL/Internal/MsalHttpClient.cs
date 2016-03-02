@@ -88,7 +88,8 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (HttpRequestWrapperException ex)
             {
-                    MsalServiceException serviceEx;
+                PlatformPlugin.Logger.Error(this.CallState, ex);
+                MsalServiceException serviceEx;
                     if (ex.WebResponse != null)
                     {
                         TokenResponse tokenResponse = TokenResponse.CreateFromErrorResponse(ex.WebResponse);

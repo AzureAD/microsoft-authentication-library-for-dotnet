@@ -147,6 +147,7 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (TaskCanceledException ex)
             {
+                PlatformPlugin.Logger.Error(this.CallState, ex);
                 throw new MsalException(MsalError.HttpRequestCancelled, ex);
             }
 
@@ -157,7 +158,6 @@ namespace Microsoft.Identity.Client.Internal
                 throw new HttpRequestWrapperException(null, new HttpRequestException(
                     string.Format("Response status code does not indicate success: {0} ({1}).",
                         (int)webResponse.StatusCode, webResponse.StatusCode)));
-
             }
 
             if (addCorrelationId)

@@ -50,6 +50,7 @@ namespace Microsoft.Identity.Client
         internal MsalServiceException(string errorCode, Exception innerException)
             : this(errorCode, GetErrorMessage(errorCode), null, innerException)
         {
+           
         }
 
         /// <summary>
