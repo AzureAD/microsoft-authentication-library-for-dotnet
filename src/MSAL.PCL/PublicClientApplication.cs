@@ -13,17 +13,18 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed class PublicClientApplication : AbstractClientApplication
     {
-        private const string DEFAULT_CLIENT_ID = "default-client-id";
         private const string DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
 
+/*
         /// <summary>
         /// Default consutructor of the application.
         /// </summary>
         public PublicClientApplication():this(DefaultAuthority)
         {
         }
+*/
 
-        public PublicClientApplication(string authority):this(authority, DEFAULT_CLIENT_ID)
+        public PublicClientApplication(string clientId) :this(DefaultAuthority, clientId)
         {
         }
 

@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client
 {
     public abstract class AbstractClientApplication
     {
-        protected const string DefaultAuthority = "https://login.microsoftonline.com/common";
+        protected const string DefaultAuthority = "https://login.microsoftonline.com/common/";
 
         /// <summary>
         /// default false.
@@ -20,12 +20,12 @@ namespace Microsoft.Identity.Client
         public string Authority { get; private set; }
 
         /// <summary>
-        /// Will be a default value. Can be overriden by the developer.
+        /// Will be a default value. Can be overriden by the developer. Once set, application will bind to the client Id.
         /// </summary>
         public string ClientId { get;  set; }
 
         /// <summary>
-        /// Redirect Uri configured in the portal. Will have a default value. Not required, if the developer is using the default client ID.
+        /// Redirect Uri configured in the portal. Will have a default value. Not required, if the developer is using the default client Id.
         /// </summary>
         public string RedirectUri { get; set; }
 
@@ -96,12 +96,12 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <param name="scope"></param>
-        /// <param name="userId"></param>
+        /// <param name="user"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user)
         {
             Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
-            return await this.AcquireTokenSilentCommonAsync(authenticator, scope, userId, this.PlatformParameters, null).ConfigureAwait(false);
+            return await this.AcquireTokenSilentCommonAsync(authenticator, scope, user, this.PlatformParameters, null).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -135,27 +135,27 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <param name="scope"></param>
-        /// <param name="userId"></param>
+        /// <param name="user"></param>
         /// <param name="authority"></param>
         /// <param name="policy"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User userId,
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user,
             string authority, string policy)
         {
             Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
-            return await this.AcquireTokenSilentCommonAsync(authenticator, scope, userId, this.PlatformParameters, policy).ConfigureAwait(false);
+            return await this.AcquireTokenSilentCommonAsync(authenticator, scope, user, this.PlatformParameters, policy).ConfigureAwait(false);
         }
 
 
 
-        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator, string[] scope, string userId, IPlatformParameters parameters, string policy)
+        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator, string[] scope, string userIdentifier, IPlatformParameters parameters, string policy)
         {
             if (parameters == null)
             {
                 parameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var handler = new AcquireTokenSilentHandler(this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), userId,  parameters);
+            var handler = new AcquireTokenSilentHandler(this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), userIdentifier,  parameters);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
