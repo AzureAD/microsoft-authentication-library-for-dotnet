@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Unit
+namespace Test.MSAL.NET.Unit.Mocks
 {
     internal class MockWebUI : IWebUI 
     {

@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Handlers
         public AcquireTokenSilentHandler(HandlerData handlerData, string userIdentifer, IPlatformParameters parameters) 
             : this(handlerData, (User)null, parameters)
         {
-            this.MapIdentifierToUser(userIdentifer);
+            this.User = this.MapIdentifierToUser(userIdentifer);
             PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
             this.SupportADFS = false;
         }
