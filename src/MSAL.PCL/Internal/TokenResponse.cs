@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client.Internal
                 }
                 catch (SerializationException ex)
                 {
-                    PlatformPlugin.Logger.Error(null, ex);
+                    PlatformPlugin.Logger.Warning(null, ex.Message);
                     tokenResponse = new TokenResponse
                     {
                         Error = (webResponse.StatusCode == HttpStatusCode.ServiceUnavailable)

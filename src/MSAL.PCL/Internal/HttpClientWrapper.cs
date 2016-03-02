@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client.Internal
                 catch (HttpRequestException ex)
                 {
                     PlatformPlugin.Logger.Error(this.CallState, ex);
-                    throw new MsalServiceException(ex.Message,ex.InnerException);
+                    throw new MsalServiceException(ex.Message,ex);
                 }
             }
 

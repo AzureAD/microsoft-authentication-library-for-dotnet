@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                PlatformPlugin.Logger.Error(null, ex);
+                PlatformPlugin.Logger.Warning(null, ex.Message);
                 // ignore the exception as the result is already set to false;
             }
 
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client
                 }
                 catch(Exception ex)
                 {
-                    PlatformPlugin.Logger.Error(null, ex);
+                    PlatformPlugin.Logger.Warning(null, ex.Message);
                     return "Unknown";
                 }
             }

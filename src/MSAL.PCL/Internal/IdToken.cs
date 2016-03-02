@@ -83,12 +83,12 @@ namespace Microsoft.Identity.Client.Internal
                     }
                     catch (SerializationException ex)
                     {
-                        PlatformPlugin.Logger.Error(null, ex);
+                        PlatformPlugin.Logger.Warning(null, ex.Message);
                         // We silently ignore the id token if exception occurs.   
                     }
                     catch (ArgumentException ex)
                     {
-                        PlatformPlugin.Logger.Error(null, ex);
+                        PlatformPlugin.Logger.Warning(null, ex.Message);
                         // Again, we silently ignore the id token if exception occurs.   
                     }
                 }

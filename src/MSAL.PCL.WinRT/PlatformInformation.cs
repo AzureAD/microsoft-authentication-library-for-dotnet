@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client
             }
             catch (UnauthorizedAccessException ae)
             {
-                PlatformPlugin.Logger.Error(callState, ae);
+                PlatformPlugin.Logger.Warning(callState, ae.Message);
                 PlatformPlugin.Logger.Information(callState, "Cannot try Windows Integrated Auth due to lack of Enterprise capability.");
                 // This mostly means Enterprise capability is missing, so WIA cannot be used and
                 // we return true to add form auth parameter in the caller.
@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client
                 }
                 catch(Exception ex)
                 {
-                    PlatformPlugin.Logger.Error(null, ex);
+                    PlatformPlugin.Logger.Warning(null, ex.Message);
                     return "Unknown";
                 }
             }
