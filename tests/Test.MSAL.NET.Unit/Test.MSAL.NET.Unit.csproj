@@ -104,6 +104,7 @@
     <Compile Include="TestConstants.cs" />
     <Compile Include="TokenCacheKeyTests.cs" />
     <Compile Include="TokenResponseTests.cs" />
+    <Compile Include="PublicClientApplicationTests.cs" />
     <Compile Include="UserRealDiscoveryResponseTests.cs" />
     <Compile Include="UnitTests.cs" />
   </ItemGroup>
