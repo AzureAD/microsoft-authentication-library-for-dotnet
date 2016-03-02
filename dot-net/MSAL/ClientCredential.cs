@@ -21,15 +21,11 @@ namespace MSAL
             
         }
 
+        internal Object Certificate { get; set; }
+
         internal IDictionary<string, string> ToParameters()
         {
             return null;
         }
-
-        public static ClientCredential(byte[] certificate, string password)
-        {
-            return null;
-        }
-
     }
 }
