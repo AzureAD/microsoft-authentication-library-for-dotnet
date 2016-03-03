@@ -694,7 +694,12 @@ namespace Test.MSAL.Common.Unit
                 Assert.AreEqual(result1.RefreshToken, result2.RefreshToken);
                 Assert.AreEqual(result1.Exception, result2.Exception);
                 Assert.AreEqual(result1.IsMultipleScopeRefreshToken, result2.IsMultipleScopeRefreshToken);
-                Assert.AreEqual(result1.Result.ScopeSet, result2.Result.ScopeSet);
+                Assert.AreEqual(result1.Result.ScopeSet.Count, result2.Result.ScopeSet.Count);
+                foreach (var result1Scope in result1.Result.ScopeSet)
+                {
+                    Assert.IsTrue(result2.Result.ScopeSet.Contains(result1Scope));
+                }
+
                 Assert.AreEqual(result1.Result.AccessToken, result2.Result.AccessToken);
                 Assert.AreEqual(result1.Result.FamilyId, result2.Result.FamilyId);
                 Assert.AreEqual(result1.Result.AccessTokenType, result2.Result.AccessTokenType);

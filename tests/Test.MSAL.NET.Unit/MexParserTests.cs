@@ -54,8 +54,6 @@ namespace Test.MSAL.NET.Unit
             };
 
             Task<WsTrustAddress> task = MexParser.FetchWsTrustAddressFromMexAsync("https://someUrl", UserAuthType.IntegratedAuth, null);
-
-            task.Wait();
             WsTrustAddress address = task.Result;
             Assert.IsNotNull(address);
             Assert.AreEqual("https://sts.usystech.net/adfs/services/trust/2005/windowstransport", address.Uri.AbsoluteUri);
@@ -90,7 +88,7 @@ namespace Test.MSAL.NET.Unit
             {
                 Task<WsTrustAddress> task = MexParser.FetchWsTrustAddressFromMexAsync("https://someUrl",
                     UserAuthType.IntegratedAuth, null);
-                task.Wait();
+                var wsTrustAddress = task.Result;
             }
             catch (AggregateException ae)
             {
