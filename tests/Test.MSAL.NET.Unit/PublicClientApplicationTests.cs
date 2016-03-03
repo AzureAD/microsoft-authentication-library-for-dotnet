@@ -39,8 +39,7 @@ namespace Test.MSAL.NET.Unit
             IEnumerable<User> users = app.Users;
             Assert.IsNotNull(users);
             Assert.IsFalse(users.Any());
-
-            TokenCacheTests.LoadCacheItems(app.UserTokenCache);
+            app.UserTokenCache = TokenCacheTests.CreateCacheWithItems();
             users = app.Users;
             Assert.IsNotNull(users);
             Assert.AreEqual(2, users.Count());
@@ -75,8 +74,8 @@ namespace Test.MSAL.NET.Unit
         public void AcquireTokenTest()
         {
             PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
-            TokenCacheTests.LoadCacheItems(app.UserTokenCache);
-            
+            app.UserTokenCache = TokenCacheTests.CreateCacheWithItems();
+
             //ask for scopes that already exist in the cache. Interactive call will ignore the cache lookup.
             Task<AuthenticationResult> task = app.AcquireTokenAsync(TestConstants.DefaultScope.ToArray());
             task.Wait();
