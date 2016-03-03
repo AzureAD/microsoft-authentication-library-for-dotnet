@@ -51,14 +51,14 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <param name="scope"></param>
-        /// <param name="identifier"></param>
+        /// <param name="loginHint"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string identifier)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string loginHint)
         {
             Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
             return
                 await
-                    this.AcquireTokenCommonAsync(authenticator, scope, null, new Uri(this.RedirectUri), identifier,
+                    this.AcquireTokenCommonAsync(authenticator, scope, null, new Uri(this.RedirectUri), loginHint,
                         UiOptions.SelectAccount, null, null).ConfigureAwait(false);
         }
 
@@ -66,16 +66,16 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <param name="scope"></param>
-        /// <param name="identifier"></param>
+        /// <param name="loginHint"></param>
         /// <param name="extraQueryParameters"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string identifier,
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string loginHint,
             UiOptions options, string extraQueryParameters)
         {
             Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
             return
                 await
-                    this.AcquireTokenCommonAsync(authenticator, scope, null, new Uri(this.RedirectUri), identifier,
+                    this.AcquireTokenCommonAsync(authenticator, scope, null, new Uri(this.RedirectUri), loginHint,
                         options, extraQueryParameters, null).ConfigureAwait(false);
         }
 
@@ -83,7 +83,8 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <param name="scope"></param>
-        /// <param name="identifier"></param>
+        /// <param name="user"></param>
+        /// <param name="options"></param>
         /// <param name="extraQueryParameters"></param>
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User user,
@@ -100,30 +101,30 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <param name="scope"></param>
-        /// <param name="identifier"></param>
+        /// <param name="loginHint"></param>
         /// <param name="extraQueryParameters"></param>
         /// <param name="options"></param>
         /// <param name="additionalScope"></param>
         /// <param name="authority"></param>
         /// <param name="policy"></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string identifier,
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string loginHint,
             UiOptions options, string extraQueryParameters, string[] additionalScope, string authority, string policy)
         {
             Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
             return
                 await
                     this.AcquireTokenCommonAsync(authenticator, scope, additionalScope, new Uri(this.RedirectUri),
-                        identifier, options, extraQueryParameters, policy).ConfigureAwait(false);
+                        loginHint, options, extraQueryParameters, policy).ConfigureAwait(false);
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="scope"></param>
-        /// <param name="identifier"></param>
-        /// <param name="extraQueryParameters"></param>
+        /// <param name="user"></param>
         /// <param name="options"></param>
+        /// <param name="extraQueryParameters"></param>
         /// <param name="additionalScope"></param>
         /// <param name="authority"></param>
         /// <param name="policy"></param>
@@ -158,7 +159,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
+        /// .NET specific method for intergrated auth.
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="authority"></param>
@@ -179,20 +180,7 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-
-        /// <summary>
-        /// interactive call using login_hint
-        /// </summary>
-        /// <param name="authenticator"></param>
-        /// <param name="scope"></param>
-        /// <param name="additionalScope"></param>
-        /// <param name="clientId"></param>
-        /// <param name="redirectUri"></param>
-        /// <param name="loginHint"></param>
-        /// <param name="uiOptions"></param>
-        /// <param name="extraQueryParameters"></param>
-        /// <param name="policy"></param>
-        /// <returns></returns>
+        
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string[] additionalScope, Uri redirectUri, string loginHint, UiOptions uiOptions, string extraQueryParameters, string policy)
         {
             if (this.PlatformParameters == null)
@@ -208,19 +196,7 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// interactive call using User object.
-        /// </summary>
-        /// <param name="authenticator"></param>
-        /// <param name="scope"></param>
-        /// <param name="additionalScope"></param>
-        /// <param name="clientId"></param>
-        /// <param name="redirectUri"></param>
-        /// <param name="loginHint"></param>
-        /// <param name="uiOptions"></param>
-        /// <param name="extraQueryParameters"></param>
-        /// <param name="policy"></param>
-        /// <returns></returns>
+
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string[] additionalScope, Uri redirectUri, User user, UiOptions uiOptions, string extraQueryParameters, string policy)
         {
             if (this.PlatformParameters == null)
