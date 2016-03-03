@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             return
                 string.Format(
-                    "Authority:{0}, Scope:{1}, ClientId:{2}, UniqueId:{3}, DisplayableId:{4}, RootId:{5}, Policy:{6}",
+                    "Authority:{0}, Scope:{1}, ClientId:{2}, UniqueId:{3}, DisplayableId:{4}, HomeObjectId:{5}, Policy:{6}",
                     this.Authority, MsalStringHelper.AsSingleString(this.Scope.ToArray()), this.ClientId,
                     this.UniqueId, this.DisplayableId, this.RootId, this.Policy);
         }

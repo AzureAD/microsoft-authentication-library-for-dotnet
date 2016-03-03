@@ -102,8 +102,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
                 Guid.NewGuid());
-            TokenCache cache = new TokenCache();
-            TokenCacheTests.LoadCacheItems(cache);
+            TokenCache cache = TokenCacheTests.CreateCacheWithItems();
             HandlerData data = new HandlerData()
             {
                 Authenticator = authenticator,
@@ -127,8 +126,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
                 Guid.NewGuid());
-            TokenCache cache = new TokenCache();
-            TokenCacheTests.LoadCacheItems(cache);
+            TokenCache cache = TokenCacheTests.CreateCacheWithItems();
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.DefaultClientId,
@@ -173,8 +171,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
                 Guid.NewGuid());
-            TokenCache cache = new TokenCache();
-            TokenCacheTests.LoadCacheItems(cache);
+            TokenCache cache = TokenCacheTests.CreateCacheWithItems();
 
             HandlerData data = new HandlerData()
             {
