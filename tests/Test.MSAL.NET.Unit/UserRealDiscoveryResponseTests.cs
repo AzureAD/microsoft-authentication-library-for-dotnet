@@ -21,7 +21,7 @@ namespace Test.MSAL.NET.Unit
             {
                 task = UserRealmDiscoveryResponse.CreateByDiscoveryAsync(null,
                     "some@user.com", null);
-                task.Wait();
+                var userRealmDiscoveryResponse = task.Result;
                 Assert.Fail("UriFormatException should be thrown here.");
             }
             catch (AggregateException ae)
@@ -48,7 +48,6 @@ namespace Test.MSAL.NET.Unit
             HttpMessageHandlerFactory.MockHandler = mockHandler;
             Task<UserRealmDiscoveryResponse> task =  UserRealmDiscoveryResponse.CreateByDiscoveryAsync("https://someurl.com/",
                     "someone@microsoft.com", null);
-                task.Wait();
             UserRealmDiscoveryResponse discoveryResponse = task.Result;
             Assert.IsNotNull(discoveryResponse);
             Assert.AreEqual("Federated", discoveryResponse.AccountType);
@@ -76,7 +75,6 @@ namespace Test.MSAL.NET.Unit
             HttpMessageHandlerFactory.MockHandler = mockHandler;
             Task<UserRealmDiscoveryResponse> task = UserRealmDiscoveryResponse.CreateByDiscoveryAsync("https://someurl.com/",
                 "someone@live.com", null);
-            task.Wait();
             UserRealmDiscoveryResponse discoveryResponse = task.Result;
             Assert.IsNotNull(discoveryResponse);
             Assert.AreEqual("Federated", discoveryResponse.AccountType);
@@ -105,7 +103,6 @@ namespace Test.MSAL.NET.Unit
             HttpMessageHandlerFactory.MockHandler = mockHandler;
             Task<UserRealmDiscoveryResponse> task = UserRealmDiscoveryResponse.CreateByDiscoveryAsync("https://someurl.com/",
                 "someone@managed.onmicrosoft.com", null);
-            task.Wait();
             UserRealmDiscoveryResponse discoveryResponse = task.Result;
             Assert.IsNotNull(discoveryResponse);
             Assert.AreEqual("Managed", discoveryResponse.AccountType);

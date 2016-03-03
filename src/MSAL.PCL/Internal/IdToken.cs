@@ -81,12 +81,14 @@ namespace Microsoft.Identity.Client.Internal
                             idTokenBody = (IdToken)serializer.ReadObject(stream);
                         }
                     }
-                    catch (SerializationException)
+                    catch (SerializationException ex)
                     {
+                        PlatformPlugin.Logger.Warning(null, ex.Message);
                         // We silently ignore the id token if exception occurs.   
                     }
-                    catch (ArgumentException)
+                    catch (ArgumentException ex)
                     {
+                        PlatformPlugin.Logger.Warning(null, ex.Message);
                         // Again, we silently ignore the id token if exception occurs.   
                     }
                 }

@@ -25,6 +25,7 @@ using Windows.Security.Cryptography.Core;
 using Windows.Security.Cryptography.DataProtection;
 using Windows.Storage.Streams;
 using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -102,6 +103,7 @@ namespace Microsoft.Identity.Client
             }
             catch (AggregateException ae)
             {
+                PlatformPlugin.Logger.Error(null, ae.InnerException);
                 // Any exception thrown as a result of running task will cause AggregateException to be thrown with 
                 // actual exception as inner.
                 throw ae.InnerExceptions[0];

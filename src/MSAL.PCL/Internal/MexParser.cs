@@ -73,10 +73,12 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (WebException ex)
             {
+                PlatformPlugin.Logger.Error(callState, ex);
                 throw new MsalServiceException(MsalError.AccessingWsMetadataExchangeFailed, ex);
             }
             catch (XmlException ex)
             {
+                PlatformPlugin.Logger.Error(callState, ex);
                 throw new MsalException(MsalError.ParsingWsMetadataExchangeFailed, ex);
             }
 
@@ -114,6 +116,7 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (XmlException ex)
             {
+                PlatformPlugin.Logger.Error(callState, ex);
                 throw new MsalException(MsalError.ParsingWsMetadataExchangeFailed, ex);
             }
 

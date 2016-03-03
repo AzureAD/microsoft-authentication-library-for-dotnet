@@ -328,7 +328,7 @@ namespace Microsoft.Identity.Client.Handlers
             return endpoint;
         }
 
-        internal void MapIdentifierToUser(string identifier)
+        internal User MapIdentifierToUser(string identifier)
         {
             string displayableId = null;
             string uniqueId = null;
@@ -366,7 +366,7 @@ namespace Microsoft.Identity.Client.Handlers
                         this.Policy, this.CallState);
                     if (resultEx != null)
                     {
-                        this.User = resultEx.Result.User;
+                        return resultEx.Result.User;
                     }
                 }
                 finally
@@ -378,6 +378,8 @@ namespace Microsoft.Identity.Client.Handlers
 
                 }
             }
+
+            return null;
         }
 
     }
