@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string Version = "ver";
         public const string PreferredUsername = "preferred_username";
         public const string Name = "name";
-        public const string RootId = "root_id";
+        public const string HomeObjectId = "home_oid";
     }
 
     [DataContract]
@@ -59,8 +59,8 @@ namespace Microsoft.Identity.Client.Internal
         [DataMember(Name = IdTokenClaim.Name, IsRequired = false)]
         public string Name { get; set; }
 
-        [DataMember(Name = IdTokenClaim.RootId, IsRequired = false)]
-        public string RootId { get; set; }
+        [DataMember(Name = IdTokenClaim.HomeObjectId, IsRequired = false)]
+        public string HomeObjectId { get; set; }
 
         public static IdToken Parse(string idToken)
         {
