@@ -195,7 +195,6 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             AcquireTokenSilentHandler handler = new AcquireTokenSilentHandler(data, (string)null,
                 new PlatformParameters());
             Task<AuthenticationResult> task = handler.RunAsync();
-            task.Wait();
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
@@ -232,7 +231,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
                 AcquireTokenSilentHandler handler = new AcquireTokenSilentHandler(data, (string) null,
                     new PlatformParameters());
                 Task<AuthenticationResult> task = handler.RunAsync();
-                task.Wait();
+                var authenticationResult = task.Result;
                 Assert.Fail("MsalSilentTokenAcquisitionException should be thrown here");
             }
             catch (AggregateException ae)
