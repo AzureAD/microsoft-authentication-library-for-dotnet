@@ -113,22 +113,51 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray().AsSingleString(), result.Scope.AsSingleString());
         }
 
-        /*        [TestMethod]
-                [TestCategory("PublicClientApplicationTests")]
-                public void AcquireTokenMoreScopesTest()
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void AcquireTokenSilentServiceErrorTest()
+        {
+            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+            app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
+
+            MockHttpMessageHandler mockHandler = new MockHttpMessageHandler();
+            mockHandler.Method = HttpMethod.Post;
+            mockHandler.ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage();
+            HttpMessageHandlerFactory.MockHandler = mockHandler;
+                try
                 {
-                    PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
-                    app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
-                    string[] scope = TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray();
-
-                    MockWebUI webUi
-
-
-                    //ask for scopes that already exist in the cache. Interactive call will ignore the cache lookup.
-                    Task<AuthenticationResult> task = app.AcquireTokenAsync(scope, TestConstants.DefaultDisplayableId);
-                    task.Wait();
+                    Task<AuthenticationResult> task =app.AcquireTokenSilentAsync(TestConstants.ScopeForAnotherResource.ToArray(), TestConstants.DefaultUniqueId);
                     AuthenticationResult result = task.Result;
-                    Assert.IsNotNull(result);
-                }*/
-    }
+                    Assert.Fail("AdalSilentTokenAcquisitionException was expected");
+                }
+                catch (AggregateException ex)
+                {
+                    Assert.IsNotNull(ex.InnerException);
+
+                    Assert.IsTrue(ex.InnerException is MsalSilentTokenAcquisitionException);
+                    var msalExc = (MsalSilentTokenAcquisitionException) ex.InnerException;
+                    Assert.AreEqual(MsalError.FailedToAcquireTokenSilently, msalExc.ErrorCode);
+                    Assert.IsNotNull(msalExc.InnerException, "MsalSilentTokenAcquisitionException inner exception is null");
+                    Assert.AreEqual(((MsalException)msalExc.InnerException).ErrorCode, "invalid_grant");
+                }
+            }
+
+
+            /*        [TestMethod]
+                    [TestCategory("PublicClientApplicationTests")]
+                    public void AcquireTokenMoreScopesTest()
+                    {
+                        PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+                        app.UserTokenCache = TokenCacheTests.CreateCacheWithItems();
+                        string[] scope = TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray();
+
+                        MockWebUI webUi
+
+                        //ask for scopes that already exist in the cache. Interactive call will ignore the cache lookup.
+                        Task<AuthenticationResult> task = app.AcquireTokenAsync(scope, TestConstants.DefaultDisplayableId);
+                        task.Wait();
+                        AuthenticationResult result = task.Result;
+                        Assert.IsNotNull(result);
+                    }*/
+        }
 }
