@@ -100,6 +100,7 @@
     <Compile Include="Mocks\MockHttpMessageHandler.cs" />
     <Compile Include="Mocks\MockWebUI.cs" />
     <Compile Include="MexParserTests.cs" />
+    <Compile Include="Mocks\TokenCacheHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestConstants.cs" />
     <Compile Include="TokenCacheKeyTests.cs" />

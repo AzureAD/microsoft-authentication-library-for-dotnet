@@ -46,19 +46,19 @@ namespace Microsoft.Identity.Client.Internal
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId, string displayableId, string rootId)
-            : this(authority, scope, clientId, uniqueId, displayableId, rootId, null)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId, string displayableId, string homeObjectId)
+            : this(authority, scope, clientId, uniqueId, displayableId, homeObjectId, null)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId, string displayableId, string rootId, string policy)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId, string displayableId, string homeObjectId, string policy)
         {
             this.Authority = authority;
             this.Scope = scope;
             this.ClientId = clientId;
             this.UniqueId = uniqueId;
             this.DisplayableId = displayableId;
-            this.RootId = rootId;
+            this.HomeObjectId = homeObjectId;
             this.Policy = policy;
         }
 
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public string DisplayableId { get; private set; }
 
-        public string RootId { get; private set; }
+        public string HomeObjectId { get; private set; }
 
         public string Policy { get; private set; }
 
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.Internal
                 string.Format(
                     "Authority:{0}, Scope:{1}, ClientId:{2}, UniqueId:{3}, DisplayableId:{4}, HomeObjectId:{5}, Policy:{6}",
                     this.Authority, MsalStringHelper.AsSingleString(this.Scope.ToArray()), this.ClientId,
-                    this.UniqueId, this.DisplayableId, this.RootId, this.Policy);
+                    this.UniqueId, this.DisplayableId, this.HomeObjectId, this.Policy);
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.Internal
                     && this.Equals(this.ClientId, other.ClientId)
                     && this.Equals(other.UniqueId, this.UniqueId)
                     && this.Equals(this.DisplayableId, other.DisplayableId)
-                    && this.Equals(this.RootId, other.RootId)
+                    && this.Equals(this.HomeObjectId, other.HomeObjectId)
                     && this.Equals(this.Policy, other.Policy));
         }
 
@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.Internal
                 + MsalStringHelper.AsSingleString(this.Scope) + Delimiter
                 + this.ClientId.ToLower() + Delimiter
                 + this.UniqueId + Delimiter
-                + this.RootId + Delimiter
+                + this.HomeObjectId + Delimiter
                 + ((this.DisplayableId != null) ? this.DisplayableId.ToLower() : null) + Delimiter
                 + ((this.Policy != null) ? this.Policy.ToLower() : null)).GetHashCode();
         }

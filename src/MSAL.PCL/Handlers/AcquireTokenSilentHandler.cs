@@ -26,15 +26,15 @@ namespace Microsoft.Identity.Client.Handlers
         private IPlatformParameters parameters;
 
 
-        public AcquireTokenSilentHandler(HandlerData handlerData, string userIdentifer, IPlatformParameters parameters) 
-            : this(handlerData, (User)null, parameters)
+        public AcquireTokenSilentHandler(HandlerData handlerData, string userIdentifer, IPlatformParameters parameters, bool forceRefresh) 
+            : this(handlerData, (User)null, parameters, forceRefresh)
         {
             this.User = this.MapIdentifierToUser(userIdentifer);
             PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
             this.SupportADFS = false;
         }
 
-        public AcquireTokenSilentHandler(HandlerData handlerData, User user, IPlatformParameters parameters)
+        public AcquireTokenSilentHandler(HandlerData handlerData, User user, IPlatformParameters parameters, bool forceRefresh)
             : base(handlerData)
         {
             if (user != null)
@@ -44,6 +44,7 @@ namespace Microsoft.Identity.Client.Handlers
 
             PlatformPlugin.BrokerHelper.PlatformParameters = parameters;    
             this.SupportADFS = false;
+            this.ForceRefresh = forceRefresh;
         }
 
         protected override Task<AuthenticationResultEx> SendTokenRequestAsync()

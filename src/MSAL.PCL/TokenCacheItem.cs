@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client
             this.ClientId = key.ClientId;
             this.UniqueId = key.UniqueId;
             this.DisplayableId = key.DisplayableId;
-            this.RootId = key.RootId;
+            this.HomeObjectId = key.HomeObjectId;
             this.TenantId = result.TenantId;
             this.ExpiresOn = result.ExpiresOn;
             this.AccessToken = result.AccessToken;
@@ -104,11 +104,8 @@ namespace Microsoft.Identity.Client
         ///     Gets the user's displayable Id.
         /// </summary>
         public string DisplayableId { get; internal set; }
-
-        /// <summary>
-        ///     Gets the user's displayable Id.
-        /// </summary>
-        public string RootId { get; internal set; }
+        
+        internal string HomeObjectId { get; set; }
 
         /// <summary>
         ///     Gets the Access AccessToken requested.
@@ -126,7 +123,7 @@ namespace Microsoft.Identity.Client
                    (key.Authority == this.Authority && key.ScopeEquals(this.Scope) &&
                     key.Equals(key.ClientId, this.ClientId)
                     && key.UniqueId == this.UniqueId &&
-                    key.Equals(key.DisplayableId, this.DisplayableId) && key.Equals(key.RootId, this.RootId) &&
+                    key.Equals(key.DisplayableId, this.DisplayableId) && key.Equals(key.HomeObjectId, this.HomeObjectId) &&
                     key.Equals(key.Policy, this.Policy));
         }
     }
