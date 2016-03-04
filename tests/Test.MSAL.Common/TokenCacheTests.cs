@@ -24,6 +24,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.MSAL.NET.Unit;
+using Test.MSAL.NET.Unit.Mocks;
 
 namespace Test.MSAL.Common.Unit
 {
@@ -42,7 +43,7 @@ namespace Test.MSAL.Common.Unit
             TokenCache cache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow));
@@ -66,7 +67,7 @@ namespace Test.MSAL.Common.Unit
             TokenCache cache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityGuestTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow))
@@ -93,7 +94,7 @@ namespace Test.MSAL.Common.Unit
             TokenCache cache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId+"more",
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(), new DateTimeOffset(DateTime.UtcNow))
@@ -118,8 +119,7 @@ namespace Test.MSAL.Common.Unit
         [TestCategory("TokenCacheTests")]
         public void LoadFromCacheIntersectingScopeDifferentAuthorities()
         {
-            TokenCache cache = new TokenCache();
-            LoadCacheItems(cache);
+            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
             HashSet<string> scope = new HashSet<string>(new[] {"r1/scope1"});
 
             AuthenticationResultEx resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
@@ -148,15 +148,14 @@ namespace Test.MSAL.Common.Unit
         public void LoadFromCacheFamilyOfClientIdToken()
         {
             //this test will result only in a RT and no access token returned.
-            var tokenCache = new TokenCache();
-            LoadCacheItems(tokenCache);
+            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
 
             User user = TestConstants.DefaultUser;
             user.DisplayableId = null;
             user.UniqueId = null;
 
             AuthenticationResultEx resultEx =
-                tokenCache.LoadFromCache(TestConstants.DefaultAuthorityGuestTenant + "non-existant",
+                cache.LoadFromCache(TestConstants.DefaultAuthorityGuestTenant + "non-existant",
                     new HashSet<string>(new[] {"r1/scope1"}),
                     TestConstants.DefaultClientId, user, TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(resultEx);
@@ -170,11 +169,10 @@ namespace Test.MSAL.Common.Unit
         [TestCategory("TokenCacheTests")]
         public void LoadFromCacheNullUserMultipleEntries()
         {
-            var tokenCache = new TokenCache();
-            LoadCacheItems(tokenCache);
+            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
@@ -183,14 +181,14 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultRootId
+                RootId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
-            tokenCache.tokenCacheDictionary[key] = ex;
+            cache.tokenCacheDictionary[key] = ex;
             try
             {
-                AuthenticationResultEx resultEx = tokenCache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
+                AuthenticationResultEx resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
                     TestConstants.DefaultScope,
                     TestConstants.DefaultClientId, null,
                     TestConstants.DefaultPolicy, null);
@@ -209,7 +207,7 @@ namespace Test.MSAL.Common.Unit
             var tokenCache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
@@ -218,7 +216,7 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultRootId
+                RootId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -238,8 +236,7 @@ namespace Test.MSAL.Common.Unit
         public void LoadFromCacheCrossTenantToken()
         {
             //this test will result only in a RT and no access token returned.
-            var tokenCache = new TokenCache();
-            LoadCacheItems(tokenCache);
+            TokenCache tokenCache = TokenCacheHelper.CreateCacheWithItems();
 
             User user = TestConstants.DefaultUser;
             user.DisplayableId = null;
@@ -261,12 +258,11 @@ namespace Test.MSAL.Common.Unit
         public void LoadFromCacheCrossTenantNullUserToken()
         {
             //this test will result only in a RT and no access token returned.
-            var tokenCache = new TokenCache();
-            LoadCacheItems(tokenCache);
+            TokenCache tokenCache = TokenCacheHelper.CreateCacheWithItems();
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
@@ -275,7 +271,7 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultRootId
+                RootId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -298,11 +294,10 @@ namespace Test.MSAL.Common.Unit
         [TestCategory("TokenCacheTests")]
         public void LoadSingleItemFromCacheNullUserMultipleUniqueIdsInCacheTest()
         {
-            TokenCache cache = new TokenCache();
-            LoadCacheItems(cache);
+            TokenCache tokenCache = TokenCacheHelper.CreateCacheWithItems();
             try
             {
-                cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityCommonTenant,
+                tokenCache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityCommonTenant,
                     TestConstants.DefaultScope, TestConstants.DefaultClientId,
                     null,
                     TestConstants.DefaultPolicy, null);
@@ -323,7 +318,7 @@ namespace Test.MSAL.Common.Unit
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
@@ -332,7 +327,7 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultRootId
+                RootId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -350,7 +345,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
         }
 
@@ -358,8 +353,7 @@ namespace Test.MSAL.Common.Unit
         [TestCategory("TokenCacheTests")]
         public void LoadSingleItemFromCacheMatchingScopeDifferentAuthorities()
         {
-            TokenCache cache = new TokenCache();
-            LoadCacheItems(cache);
+            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
             KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item =
                 cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityHomeTenant,
                     TestConstants.DefaultScope, TestConstants.DefaultClientId,
@@ -374,7 +368,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
 
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
@@ -385,8 +379,7 @@ namespace Test.MSAL.Common.Unit
         [TestCategory("TokenCacheTests")]
         public void LoadSingleItemFromCacheFamilyOfClientIdTest()
         {
-            TokenCache cache = new TokenCache();
-            LoadCacheItems(cache);
+            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
 
             //lookup is for guest tenant authority, but the RT will be returned for home tenant authority because it is participating in FoCI feature.
             KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item =
@@ -404,7 +397,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
         }
@@ -414,8 +407,7 @@ namespace Test.MSAL.Common.Unit
         [TestCategory("TokenCacheTests")]
         public void LoadSingleItemFromCacheNonExistantScopeDifferentAuthorities()
         {
-            TokenCache cache = new TokenCache();
-            LoadCacheItems(cache);
+            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
             HashSet<string> scope = new HashSet<string>(new[] {"nonexistant-scope"});
 
             User user = TestConstants.DefaultUser;
@@ -435,7 +427,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
         }
@@ -445,8 +437,7 @@ namespace Test.MSAL.Common.Unit
         [TestCategory("TokenCacheTests")]
         public void LoadSingleItemFromCacheIntersectingScopeDifferentAuthorities()
         {
-            TokenCache cache = new TokenCache();
-            LoadCacheItems(cache);
+            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
             HashSet<string> scope = new HashSet<string>(new[] {"r1/scope1"});
 
             KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item =
@@ -463,7 +454,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
 
@@ -482,7 +473,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
 
@@ -490,7 +481,7 @@ namespace Test.MSAL.Common.Unit
             //invoke multiple tokens error
             TokenCacheKey cacheKey = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId + "more", TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId + "more", TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
@@ -514,45 +505,6 @@ namespace Test.MSAL.Common.Unit
             }
         }
 
-        public static void LoadCacheItems(TokenCache cache)
-        {
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
-                TestConstants.DefaultPolicy);
-            AuthenticationResultEx ex = new AuthenticationResultEx();
-            ex.Result = new AuthenticationResult("Bearer", key.ToString(),
-                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
-            ex.Result.User = new User
-            {
-                DisplayableId = TestConstants.DefaultDisplayableId,
-                UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultRootId
-            };
-            ex.Result.ScopeSet = TestConstants.DefaultScope;
-
-            ex.Result.FamilyId = "1";
-            ex.RefreshToken = "someRT";
-            cache.tokenCacheDictionary[key] = ex;
-
-            key = new TokenCacheKey(TestConstants.DefaultAuthorityGuestTenant,
-                TestConstants.ScopeForAnotherResource, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
-                TestConstants.DefaultPolicy);
-            ex = new AuthenticationResultEx();
-            ex.Result = new AuthenticationResult("Bearer", key.ToString(),
-                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
-            ex.Result.User = new User
-            {
-                DisplayableId = TestConstants.DefaultDisplayableId,
-                UniqueId = TestConstants.DefaultUniqueId + "more",
-                RootId = TestConstants.DefaultRootId
-            };
-            ex.Result.ScopeSet = TestConstants.ScopeForAnotherResource;
-            ex.RefreshToken = "someRT";
-            cache.tokenCacheDictionary[key] = ex;
-        }
-
         [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void LoadSingleItemFromCacheCrossTenantLookupTest()
@@ -561,7 +513,7 @@ namespace Test.MSAL.Common.Unit
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
@@ -570,7 +522,7 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultRootId
+                RootId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -595,7 +547,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultRootId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
         }
@@ -604,9 +556,8 @@ namespace Test.MSAL.Common.Unit
         [TestCategory("TokenCacheTests")]
         public void ReadItemsTest()
         {
-            var tokenCache = new TokenCache();
-            LoadCacheItems(tokenCache);
-            IEnumerable<TokenCacheItem> items = tokenCache.ReadItems(TestConstants.DefaultClientId);
+            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
+            IEnumerable<TokenCacheItem> items = cache.ReadItems(TestConstants.DefaultClientId);
             Assert.AreEqual(2, items.Count());
             Assert.AreEqual(TestConstants.DefaultUniqueId,
                 items.Where(item => item.Authority.Equals(TestConstants.DefaultAuthorityHomeTenant)).First().UniqueId);
@@ -618,12 +569,11 @@ namespace Test.MSAL.Common.Unit
         [TestCategory("TokenCacheTests")]
         public void ClearCacheTest()
         {
-            var tokenCache = new TokenCache();
-            LoadCacheItems(tokenCache);
+            TokenCache tokenCache = TokenCacheHelper.CreateCacheWithItems();
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId + "more",
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
@@ -632,7 +582,7 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultRootId
+                RootId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -647,8 +597,7 @@ namespace Test.MSAL.Common.Unit
         [TestCategory("TokenCacheTests")]
         public void DeleteItemTest()
         {
-            var tokenCache = new TokenCache();
-            LoadCacheItems(tokenCache);
+            TokenCache tokenCache = TokenCacheHelper.CreateCacheWithItems();
             try
             {
                 tokenCache.DeleteItem(null);
@@ -676,8 +625,7 @@ namespace Test.MSAL.Common.Unit
         [TestCategory("TokenCacheTests")]
         public void SerializationDeserializationTest()
         {
-            var tokenCache1 = new TokenCache();
-            LoadCacheItems(tokenCache1);
+            TokenCache tokenCache1 = TokenCacheHelper.CreateCacheWithItems();
             byte[] cacheBytes = tokenCache1.Serialize();
             Assert.IsNotNull(cacheBytes);
             Assert.IsTrue(cacheBytes.Length > 0);
@@ -694,7 +642,12 @@ namespace Test.MSAL.Common.Unit
                 Assert.AreEqual(result1.RefreshToken, result2.RefreshToken);
                 Assert.AreEqual(result1.Exception, result2.Exception);
                 Assert.AreEqual(result1.IsMultipleScopeRefreshToken, result2.IsMultipleScopeRefreshToken);
-                Assert.AreEqual(result1.Result.ScopeSet, result2.Result.ScopeSet);
+                Assert.AreEqual(result1.Result.ScopeSet.Count, result2.Result.ScopeSet.Count);
+                foreach (var result1Scope in result1.Result.ScopeSet)
+                {
+                    Assert.IsTrue(result2.Result.ScopeSet.Contains(result1Scope));
+                }
+
                 Assert.AreEqual(result1.Result.AccessToken, result2.Result.AccessToken);
                 Assert.AreEqual(result1.Result.FamilyId, result2.Result.FamilyId);
                 Assert.AreEqual(result1.Result.AccessTokenType, result2.Result.AccessTokenType);
@@ -725,8 +678,7 @@ namespace Test.MSAL.Common.Unit
         [TestCategory("TokenCacheTests")]
         public void StoreToCacheIntersectingScopesTest()
         {
-            var tokenCache = new TokenCache();
-            LoadCacheItems(tokenCache);
+            TokenCache tokenCache = TokenCacheHelper.CreateCacheWithItems();
 
             //save result with intersecting scopes
             var result = new AuthenticationResult("Bearer", "some-access-token",
@@ -769,8 +721,7 @@ namespace Test.MSAL.Common.Unit
         [TestCategory("TokenCacheTests")]
         public void StoreToCacheClientCredentialTest()
         {
-            var tokenCache = new TokenCache();
-            LoadCacheItems(tokenCache);
+            TokenCache tokenCache = TokenCacheHelper.CreateCacheWithItems();
 
             var result = new AuthenticationResult("Bearer", "some-access-token",
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
@@ -794,7 +745,7 @@ namespace Test.MSAL.Common.Unit
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
@@ -803,7 +754,7 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultRootId
+                RootId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -847,7 +798,7 @@ namespace Test.MSAL.Common.Unit
             tokenCache.AfterAccess = null;
             tokenCache.BeforeAccess = null;
             tokenCache.BeforeWrite = null;
-            LoadCacheItems(tokenCache);
+            tokenCache = TokenCacheHelper.CreateCacheWithItems();
 
             //save result with intersecting scopes
             var result = new AuthenticationResult("Bearer", "some-access-token",

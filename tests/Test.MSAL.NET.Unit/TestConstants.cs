@@ -13,7 +13,7 @@ namespace Test.MSAL.NET.Unit
         public static readonly string DefaultClientId = "client_id";
         public static readonly string DefaultUniqueId = "unique_id";
         public static readonly string DefaultDisplayableId = "displayable@id.com";
-        public static readonly string DefaultRootId = "root_id";
+        public static readonly string DefaultHomeObjectId = "home_oid";
         public static readonly string DefaultPolicy = "policy";
         public static readonly bool DefaultRestrictToSingleUser = false;
 
@@ -21,7 +21,7 @@ namespace Test.MSAL.NET.Unit
         {
             UniqueId = DefaultUniqueId,
             DisplayableId = DefaultDisplayableId,
-            RootId = DefaultRootId
+            RootId = DefaultHomeObjectId
         };
     }
 }

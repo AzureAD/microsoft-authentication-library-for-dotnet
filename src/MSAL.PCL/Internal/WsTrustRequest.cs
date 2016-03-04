@@ -87,6 +87,7 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (WebException ex)
             {
+                PlatformPlugin.Logger.Error(callState, ex);
                 string errorMessage;
 
                 try

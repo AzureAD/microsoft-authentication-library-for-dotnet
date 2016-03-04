@@ -69,6 +69,7 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (XmlException ex)
             {
+                PlatformPlugin.Logger.Error(callState, ex);
                 throw new MsalException(MsalError.ParsingWsTrustResponseFailed, ex);
             }
 
@@ -83,6 +84,7 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (XmlException ex)
             {
+                PlatformPlugin.Logger.Error(null, ex);
                 throw new MsalException(MsalError.ParsingWsTrustResponseFailed, ex);
             }
         }
@@ -137,6 +139,7 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (XmlException ex)
             {
+                PlatformPlugin.Logger.Error(null, ex);
                 throw new MsalException(MsalError.ParsingWsTrustResponseFailed, ex);
             }
 

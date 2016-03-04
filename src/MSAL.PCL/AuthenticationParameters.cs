@@ -128,6 +128,7 @@ namespace Microsoft.Identity.Client
             }
             catch (HttpRequestWrapperException ex)
             {
+                PlatformPlugin.Logger.Error(null, ex);
                 IHttpWebResponse response = ex.WebResponse;
                 if (response == null)
                 {
@@ -137,6 +138,7 @@ namespace Microsoft.Identity.Client
                 }
 
                 authParams = CreateFromUnauthorizedResponseCommon(response);
+                
             }
 
             return authParams;

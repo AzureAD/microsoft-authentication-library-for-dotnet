@@ -89,6 +89,7 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (MsalServiceException ex)
             {
+                PlatformPlugin.Logger.Error(callState, ex);
                 throw new MsalException((ex.ErrorCode == "invalid_instance") ? MsalError.AuthorityNotInValidList : MsalError.AuthorityValidationFailed, ex);
             }
         }

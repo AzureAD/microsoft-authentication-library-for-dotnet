@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
@@ -30,6 +31,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public MsalSilentTokenAcquisitionException()
             : base(MsalError.FailedToAcquireTokenSilently, MsalErrorMessage.FailedToAcquireTokenSilently)
+        {
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="innerException"></param>
+        public MsalSilentTokenAcquisitionException(Exception innerException)
+            : base(MsalError.FailedToAcquireTokenSilently, MsalErrorMessage.FailedToRefreshToken, innerException)
         {
         }
     }

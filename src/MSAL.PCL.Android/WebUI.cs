@@ -59,6 +59,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
+                PlatformPlugin.Logger.Error(callState, ex);
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
 

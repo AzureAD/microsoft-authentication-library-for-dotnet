@@ -125,6 +125,7 @@ namespace Microsoft.Identity.Client
                     }
                     catch (Exception e)
                     {
+                        PlatformPlugin.Logger.Error(null, e);
                         // Catch all exceptions to transfer them to the original calling thread.
                         this.uiException = e;
                     }

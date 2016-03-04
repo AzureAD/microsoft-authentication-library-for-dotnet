@@ -28,9 +28,10 @@ namespace Test.MSAL.NET.Unit.Mocks
                 Assert.AreEqual(Url, uri.AbsoluteUri.Split(new [] { '?'})[0]);
             }
 
+            //match QP passed in for validation. 
             if (QueryParams != null)
             {
-                Assert.IsNotNull(uri.Query);
+                Assert.IsFalse(string.IsNullOrEmpty(uri.Query));
                 IDictionary<string, string> inputQp = EncodingHelper.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
                 foreach (var key in QueryParams.Keys)
                 {

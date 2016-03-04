@@ -121,8 +121,9 @@ namespace Microsoft.Identity.Client.Internal
                         tokenResponse = ((TokenResponse)serializer.ReadObject(ms));
                     }
                 }
-                catch (SerializationException)
+                catch (SerializationException ex)
                 {
+                    PlatformPlugin.Logger.Warning(null, ex.Message);
                     tokenResponse = new TokenResponse
                     {
                         Error = (webResponse.StatusCode == HttpStatusCode.ServiceUnavailable)
@@ -167,7 +168,7 @@ namespace Microsoft.Identity.Client.Internal
                         {
                             UniqueId = uniqueId,
                             DisplayableId = idToken.PreferredUsername,
-                            RootId = idToken.RootId,
+                            RootId = idToken.HomeObjectId,
                             Name = idToken.Name,
                             IdentityProvider = idToken.Issuer
                         });
