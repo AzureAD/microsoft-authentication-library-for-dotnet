@@ -7,20 +7,38 @@ using System.Threading.Tasks;
 namespace MSAL
 {
    public class ConfidentialClientApplication
-    {
-
+   {
+       private const string DEFAULT_AUTHORTIY = "https://login.microsoftonline.com/common";
         /// <summary>
-        /// default false
+        /// default false. TODO - Why would anyone build a single user, single tenant app. Consider removal.
         /// </summary>
         public string RestrictToSingleUser { get; set; }
 
-        public string DefaultAuthority { get; set; }
+        public string Authority { get; private set; }
+
+        /// <summary>
+        /// Will be a default value. Can be overriden by the developer.
+        /// </summary>
+        public string ClientId { get; private set; }
+
+        /// <summary>
+        /// Redirect Uri configured in the portal. Will have a default value. Not required, if the developer is using the default client ID.
+        /// </summary>
+        public string RedirectUri { get; private set; }
 
         public TokenCache TokenCache { get; set; }
-
-        public ConfidentialClientApplication(string clientId, string redirectUri, ClientCredential clientCredential)
+        
+       public ConfidentialClientApplication(string clientId, string redirectUri,
+           ClientCredential clientCredential):this(DEFAULT_AUTHORTIY, clientId, redirectUri, clientCredential)
        {
            
+       }
+
+       public ConfidentialClientApplication(string authority, string clientId, string redirectUri, ClientCredential clientCredential)
+       {
+           this.Authority = authority;
+           this.ClientId = clientId;
+           this.RedirectUri = redirectUri;
        }
 
        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope)
@@ -33,7 +51,7 @@ namespace MSAL
             return null;
         }
 
-        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, UserIdentifier userId)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User userId)
         {
             return null;
         }
@@ -54,12 +72,12 @@ namespace MSAL
             return null;
         }
 
-        public Uri GetAuthorizationRequestURL(string[] scope, UserIdentifier userId, string extraQueryParameters)
+        public Uri GetAuthorizationRequestURL(string[] scope, string userId, string extraQueryParameters)
         {
             return null;
         }
 
-        public Uri GetAuthorizationRequestURL(string[] scope, string redirectUri, UserIdentifier userId, string extraQueryParameters, string[] additionalScope, string authority)
+        public Uri GetAuthorizationRequestURL(string[] scope, string redirectUri, string userId, string extraQueryParameters, string[] additionalScope, string authority)
         {
             return null;
         }
