@@ -15,6 +15,7 @@ namespace Test.MSAL.NET.Unit
         public static readonly string DefaultDisplayableId = "displayable@id.com";
         public static readonly string DefaultHomeObjectId = "home_oid";
         public static readonly string DefaultPolicy = "policy";
+        public static readonly string DefaultRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public static readonly bool DefaultRestrictToSingleUser = false;
 
         public static readonly User DefaultUser = new User

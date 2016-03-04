@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal
         // (64K) This is an arbitrary large value for the token length. We can adjust it as needed.
         private const int MaxTokenLength = 65536;   
 
-        private readonly JWTPayload payload;
+        public readonly JWTPayload Payload;
 
         public JsonWebToken(string clientId, string audience)
         {
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal
 
             DateTime validTo = validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds);
 
-            this.payload = new JWTPayload
+            this.Payload = new JWTPayload
                            {
                                Audience = audience,
                                Issuer = clientId,
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal
             return JsonHelper.EncodeToJson(header);
         }
 
-        private static long ConvertToTimeT(DateTime time)
+        internal static long ConvertToTimeT(DateTime time)
         {
             var startTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
             TimeSpan diff = time - startTime;
@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Client.Internal
             string encodedHeader = EncodeSegment(jsonHeader);
 
             // Payload segment
-            string jsonPayload = JsonHelper.EncodeToJson(this.payload);
+            string jsonPayload = JsonHelper.EncodeToJson(this.Payload);
 
             string encodedPayload = EncodeSegment(jsonPayload);
 

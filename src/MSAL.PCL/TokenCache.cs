@@ -39,8 +39,6 @@ namespace Microsoft.Identity.Client
 
         private const int SchemaVersion = 1;
         private const string Delimiter = ":::";
-        // We do not want to return near expiry tokens, this is why we use this hard coded setting to refresh tokens which are close to expiration.
-        private const int ExpirationMarginInMinutes = 5;
         internal readonly IDictionary<TokenCacheKey, AuthenticationResultEx> tokenCacheDictionary;
         private volatile bool hasStateChanged;
 
@@ -334,7 +332,7 @@ namespace Microsoft.Identity.Client
                 cacheKey = kvp.Value.Key;
                 resultEx = kvp.Value.Value;
                 bool tokenNearExpiry = (resultEx.Result.ExpiresOn <=
-                                        DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
+                                        DateTime.UtcNow + TimeSpan.FromMinutes(Constant.ExpirationMarginInMinutes));
                 if (!cacheKey.ScopeContains(scope) || (!IsAuthorityCommon(authority) && !authority.Equals(cacheKey.Authority)) || !clientId.Equals(cacheKey.ClientId))
                 {
                     //requested scope are not a subset or authority does not match (cross-tenant RT) or client id is not same (FoCI).
