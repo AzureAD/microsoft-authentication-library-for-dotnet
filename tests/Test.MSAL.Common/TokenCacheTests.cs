@@ -345,7 +345,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
         }
 
@@ -368,7 +368,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
 
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
@@ -397,7 +397,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
         }
@@ -427,7 +427,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
         }
@@ -454,7 +454,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
 
@@ -473,7 +473,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
 
@@ -547,7 +547,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
             Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
         }

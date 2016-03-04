@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client
         {
             if(this.TokenCache == null) { return; }
 
-            IEnumerable<TokenCacheItem> items = this.TokenCache.ReadItems(this.ClientId).Where(item => item.RootId.Equals(this.RootId));
+            IEnumerable<TokenCacheItem> items = this.TokenCache.ReadItems(this.ClientId).Where(item => item.HomeObjectId.Equals(this.RootId));
             foreach(var item in items)
             {
                 this.TokenCache.DeleteItem(item);

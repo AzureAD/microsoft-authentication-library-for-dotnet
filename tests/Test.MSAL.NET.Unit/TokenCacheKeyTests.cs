@@ -53,7 +53,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.DefaultClientId, key.ClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, key.UniqueId);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.RootId);
+            Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(policyMissing, key.Policy == null);
 
             if (!policyMissing)
