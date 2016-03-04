@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client.Internal
 
             if (!responseMessage.IsSuccessStatusCode)
             {
-                throw new HttpRequestWrapperException(null, new HttpRequestException(
+                throw new HttpRequestWrapperException(webResponse, new HttpRequestException(
                     string.Format("Response status code does not indicate success: {0} ({1}).",
                         (int)webResponse.StatusCode, webResponse.StatusCode)));
             }
