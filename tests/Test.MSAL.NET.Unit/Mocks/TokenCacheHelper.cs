@@ -14,7 +14,7 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public static TokenCache CreateCacheWithItems()
         {
-        TokenCache cache = new TokenCache();
+            TokenCache cache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
@@ -58,7 +58,7 @@ namespace Test.MSAL.NET.Unit.Mocks
         {
             foreach (var value in cache.tokenCacheDictionary.Values)
             {
-                value.Result.ExpiresOn =  DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc);
+                value.Result.ExpiresOn = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc);
             }
         }
     }
