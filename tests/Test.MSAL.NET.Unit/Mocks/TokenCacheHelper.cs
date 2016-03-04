@@ -17,7 +17,7 @@ namespace Test.MSAL.NET.Unit.Mocks
             TokenCache cache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
@@ -26,7 +26,7 @@ namespace Test.MSAL.NET.Unit.Mocks
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultRootId
+                RootId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.ScopeSet = TestConstants.DefaultScope;
 
@@ -36,7 +36,7 @@ namespace Test.MSAL.NET.Unit.Mocks
 
             key = new TokenCacheKey(TestConstants.DefaultAuthorityGuestTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
@@ -45,7 +45,7 @@ namespace Test.MSAL.NET.Unit.Mocks
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId + "more",
-                RootId = TestConstants.DefaultRootId
+                RootId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.ScopeSet = TestConstants.ScopeForAnotherResource;
             ex.RefreshToken = "someRT";

@@ -50,7 +50,7 @@ namespace Test.MSAL.NET.Unit
             // another cache entry for same unique id. user count should still remain 2.
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
@@ -59,7 +59,7 @@ namespace Test.MSAL.NET.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultRootId
+                RootId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.ScopeSet = TestConstants.DefaultScope;
 
@@ -102,7 +102,7 @@ namespace Test.MSAL.NET.Unit
             HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreatePositiveTokenResponseMessage(TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray())
+                ResponseMessage = MockHelpers.CreatePositiveTokenResponseMessage(TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId, TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray())
             };
 
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.DefaultScope.ToArray(), TestConstants.DefaultUniqueId, app.Authority, null, true);

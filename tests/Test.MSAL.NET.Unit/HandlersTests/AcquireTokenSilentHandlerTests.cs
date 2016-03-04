@@ -130,7 +130,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
@@ -139,7 +139,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultRootId
+                RootId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.ScopeSet = TestConstants.DefaultScope;
 
