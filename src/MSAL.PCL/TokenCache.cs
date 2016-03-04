@@ -603,7 +603,7 @@ namespace Microsoft.Identity.Client
                     && (string.IsNullOrWhiteSpace(clientId) || p.Key.Equals(p.Key.ClientId, clientId))
                     && (string.IsNullOrWhiteSpace(uniqueId) || p.Key.Equals(p.Key.UniqueId, uniqueId))
                     && (string.IsNullOrWhiteSpace(displayableId) || p.Key.Equals(p.Key.DisplayableId, displayableId))
-                    && (string.IsNullOrWhiteSpace(rootId) || p.Key.Equals(p.Key.RootId, rootId))
+                    && (string.IsNullOrWhiteSpace(rootId) || p.Key.Equals(p.Key.HomeObjectId, rootId))
                     && (string.IsNullOrWhiteSpace(policy) || p.Key.Equals(p.Key.Policy, policy))).ToList();
         }
     }

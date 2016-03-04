@@ -82,7 +82,9 @@ namespace Microsoft.Identity.Client.Handlers
         protected string Policy { get; set; }
 
         protected bool LoadFromCache { get; set; }
-        
+
+        protected bool ForceRefresh { get; set; }
+
         protected bool StoreToCache { get; set; }
 
         protected virtual HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
@@ -116,7 +118,7 @@ namespace Microsoft.Identity.Client.Handlers
                     notifiedBeforeAccessCache = true;
 
                     resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.User, this.Policy, this.CallState);
-                    if (resultEx != null && resultEx.Result.AccessToken == null && resultEx.RefreshToken != null)
+                    if (resultEx != null && (resultEx.Result.AccessToken == null || this.ForceRefresh) && resultEx.RefreshToken != null)
                     {
                         resultEx = await this.RefreshAccessTokenAsync(resultEx).ConfigureAwait(false);
                         if (resultEx != null)
