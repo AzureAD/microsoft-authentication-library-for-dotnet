@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client
         /// <param name="redirectUri"></param>
         /// <param name="clientCredential"></param>
         public ConfidentialClientApplication(string clientId, string redirectUri,
-           ClientCredential clientCredential):this(DefaultAuthority, clientId, redirectUri, clientCredential)
+           ClientCredential clientCredential, TokenCache userTokenCache):this(DefaultAuthority, clientId, redirectUri, clientCredential, userTokenCache)
        {
        }
     
@@ -32,9 +32,10 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId"></param>
         /// <param name="redirectUri"></param>
         /// <param name="clientCredential"></param>
-       public ConfidentialClientApplication(string authority, string clientId, string redirectUri, ClientCredential clientCredential):base(authority, clientId, redirectUri, true)
+       public ConfidentialClientApplication(string authority, string clientId, string redirectUri, ClientCredential clientCredential, TokenCache userTokenCache) :base(authority, clientId, redirectUri, true)
         {
             this.ClientCredential = clientCredential;
+            this.UserTokenCache = userTokenCache;
             this.AppTokenCache = TokenCache.DefaultSharedAppTokenCache;
         }
 

@@ -186,7 +186,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreatePositiveTokenResponseMessage()
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
             };
 
             AcquireTokenSilentHandler handler = new AcquireTokenSilentHandler(data, (string)null,
@@ -220,7 +220,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreatePositiveTokenResponseMessage()
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
             };
 
             try

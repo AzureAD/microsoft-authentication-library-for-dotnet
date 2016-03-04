@@ -264,6 +264,7 @@ namespace Microsoft.Identity.Client.Handlers
                         // If Id token is not returned by token endpoint when refresh token is redeemed, we should copy tenant and user information from the cached token.
                         newResultEx.Result.UpdateTenantAndUser(result.Result.TenantId, result.Result.IdToken, result.Result.User);
                     }
+
                 }
                 catch (MsalException ex)
                 {
@@ -292,7 +293,15 @@ namespace Microsoft.Identity.Client.Handlers
             var client = new MsalHttpClient(endpoint, this.CallState) { Client = { BodyParameters = requestParameters } };
             TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>(ClientMetricsEndpointType.Token).ConfigureAwait(false);
 
-            return tokenResponse.GetResult();
+            AuthenticationResultEx resultEx = tokenResponse.GetResultEx();
+            
+            if (resultEx.Result.ScopeSet == null || resultEx.Result.ScopeSet.Count == 0)
+            {
+                resultEx.Result.ScopeSet = this.Scope;
+                PlatformPlugin.Logger.Information(this.CallState, "Scope was missing from the token response, so using developer provided scopes in the result");
+            }
+
+            return resultEx;
         }
 
         internal void NotifyBeforeAccessCache()
