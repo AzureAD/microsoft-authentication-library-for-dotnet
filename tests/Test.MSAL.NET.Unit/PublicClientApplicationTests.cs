@@ -42,7 +42,7 @@ namespace Test.MSAL.NET.Unit
             IEnumerable<User> users = app.Users;
             Assert.IsNotNull(users);
             Assert.IsFalse(users.Any());
-            app.UserTokenCache = TokenCacheTests.CreateCacheWithItems();
+            app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
             users = app.Users;
             Assert.IsNotNull(users);
             Assert.AreEqual(2, users.Count());
@@ -77,11 +77,11 @@ namespace Test.MSAL.NET.Unit
         public void AcquireTokenSilentCacheOnlyLookupTest()
         {
             PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
-            app.UserTokenCache = TokenCacheTests.CreateCacheWithItems();
+            app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
             HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreatePositiveTokenResponseMessage(TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray())
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.Forbidden) //fail the request if it goes to http client due to any error
             };
 
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.DefaultScope.ToArray());
@@ -92,23 +92,43 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.DefaultScope.AsSingleString(), result.Scope.AsSingleString());
         }
 
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void AcquireTokenSilentForceRefreshTest()
+        {
+            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+            app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
 
-            /*        [TestMethod]
-                    [TestCategory("PublicClientApplicationTests")]
-                    public void AcquireTokenMoreScopesTest()
-                    {
-                        PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
-                        app.UserTokenCache = TokenCacheTests.CreateCacheWithItems();
-                        string[] scope = TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray();
+            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreatePositiveTokenResponseMessage(TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultRootId, TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray())
+            };
 
-                        MockWebUI webUi
-
-
-                        //ask for scopes that already exist in the cache. Interactive call will ignore the cache lookup.
-                        Task<AuthenticationResult> task = app.AcquireTokenAsync(scope, TestConstants.DefaultDisplayableId);
-                        task.Wait();
-                        AuthenticationResult result = task.Result;
-                        Assert.IsNotNull(result);
-                    }*/
+            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.DefaultScope.ToArray(), TestConstants.DefaultUniqueId, app.Authority, null, true);
+            AuthenticationResult result = task.Result;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, result.User.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, result.User.UniqueId);
+            Assert.AreEqual(TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray().AsSingleString(), result.Scope.AsSingleString());
         }
+
+        /*        [TestMethod]
+                [TestCategory("PublicClientApplicationTests")]
+                public void AcquireTokenMoreScopesTest()
+                {
+                    PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+                    app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
+                    string[] scope = TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray();
+
+                    MockWebUI webUi
+
+
+                    //ask for scopes that already exist in the cache. Interactive call will ignore the cache lookup.
+                    Task<AuthenticationResult> task = app.AcquireTokenAsync(scope, TestConstants.DefaultDisplayableId);
+                    task.Wait();
+                    AuthenticationResult result = task.Result;
+                    Assert.IsNotNull(result);
+                }*/
+    }
 }

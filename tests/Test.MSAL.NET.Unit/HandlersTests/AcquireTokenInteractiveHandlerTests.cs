@@ -211,7 +211,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
         public void CacheWithMultipleUsersAndRestrictToSingleUserTrueTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
-            TokenCache cache = TokenCacheTests.CreateCacheWithItems();
+            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
 
             try
             {
