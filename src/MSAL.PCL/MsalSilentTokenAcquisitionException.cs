@@ -33,7 +33,10 @@ namespace Microsoft.Identity.Client
             : base(MsalError.FailedToAcquireTokenSilently, MsalErrorMessage.FailedToAcquireTokenSilently)
         {
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="innerException"></param>
         public MsalSilentTokenAcquisitionException(Exception innerException)
             : base(MsalError.FailedToAcquireTokenSilently, MsalErrorMessage.FailedToRefreshToken, innerException)
         {
