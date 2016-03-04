@@ -81,6 +81,8 @@ namespace Microsoft.Identity.Client.Handlers
 
         protected string Policy { get; set; }
 
+        protected AuthenticationResultEx ResultEx { get; set; }
+
         protected bool LoadFromCache { get; set; }
         
         protected bool StoreToCache { get; set; }
@@ -109,29 +111,35 @@ namespace Microsoft.Identity.Client.Handlers
             {
                 await this.PreRunAsync().ConfigureAwait(false);
 
-                AuthenticationResultEx resultEx = null;
                 if (this.LoadFromCache)
                 {
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.User, this.Policy, this.CallState);
-                    if (resultEx != null && resultEx.Result.AccessToken == null && resultEx.RefreshToken != null)
+                    ResultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.User, this.Policy, this.CallState);
+                    if (ResultEx != null && ResultEx.Result.AccessToken == null && ResultEx.RefreshToken != null)
                     {
-                        resultEx = await this.RefreshAccessTokenAsync(resultEx).ConfigureAwait(false);
-                        if (resultEx != null)
+                        ResultEx = await this.RefreshAccessTokenAsync(ResultEx).ConfigureAwait(false);
+                        if (ResultEx != null && ResultEx.Exception == null)
                         {
-                            this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.Policy, this.restrictToSingleUser, this.CallState);
+                            this.tokenCache.StoreToCache(ResultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.Policy, this.restrictToSingleUser, this.CallState);
                         }
                     }
                 }
 
-                if (resultEx == null)
+                if (ResultEx == null || ResultEx.Exception!=null)
                 {
                     await this.PreTokenRequest().ConfigureAwait(false);    
-                    resultEx = await this.SendTokenRequestAsync().ConfigureAwait(false);
-                    this.PostTokenRequest(resultEx);
+                    ResultEx = await this.SendTokenRequestAsync().ConfigureAwait(false);
 
+                    if (ResultEx.Exception != null)
+                    {
+                        throw ResultEx.Exception;
+                    }
+
+                    this.PostTokenRequest(ResultEx);
+
+                    
                     if (this.StoreToCache)
                     {
                         if (!notifiedBeforeAccessCache)
@@ -140,13 +148,13 @@ namespace Microsoft.Identity.Client.Handlers
                             notifiedBeforeAccessCache = true;
                         }
 
-                        this.tokenCache.StoreToCache(resultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.Policy, this.restrictToSingleUser, this.CallState);
+                        this.tokenCache.StoreToCache(ResultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.Policy, this.restrictToSingleUser, this.CallState);
                     }
                 }
 
-                await this.PostRunAsync(resultEx.Result).ConfigureAwait(false);
+                await this.PostRunAsync(ResultEx.Result).ConfigureAwait(false);
 
-                return resultEx.Result;
+                return ResultEx.Result;
             }
             catch (Exception ex)
             {
@@ -266,7 +274,7 @@ namespace Microsoft.Identity.Client.Handlers
                             serviceException.InnerException);
                     }
 
-                    newResultEx = null;
+                    newResultEx = new AuthenticationResultEx { Exception = ex };
                 }
             }
 

@@ -48,8 +48,13 @@ namespace Microsoft.Identity.Client.Handlers
 
         protected override Task<AuthenticationResultEx> SendTokenRequestAsync()
         {
-            PlatformPlugin.Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
-            throw new MsalSilentTokenAcquisitionException();
+            if (ResultEx == null)
+            {
+                PlatformPlugin.Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
+                throw new MsalSilentTokenAcquisitionException();
+            }
+
+            throw new MsalSilentTokenAcquisitionException(ResultEx.Exception);
         }
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
