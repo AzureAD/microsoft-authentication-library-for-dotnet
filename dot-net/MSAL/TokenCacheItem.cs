@@ -27,40 +27,15 @@ namespace MSAL
         public DateTimeOffset ExpiresOn { get; internal set; }
 
         /// <summary>
-        /// Gets the FamilyName.
+        /// Gets the Scope.
         /// </summary>
-        public string FamilyName { get; internal set; }
-
-        /// <summary>
-        /// Gets the GivenName.
-        /// </summary>
-        public string GivenName { get; internal set; }
-
-        /// <summary>
-        /// Gets the IdentityProviderName.
-        /// </summary>
-        public string IdentityProvider { get; internal set; }
-
-        /// <summary>
-        /// Gets the Resource.
-        /// </summary>
-        public string Resource { get; internal set; }
+        public string[] Scope { get; internal set; }
 
         /// <summary>
         /// Gets the TenantId.
         /// </summary>
         public string TenantId { get; internal set; }
-
-        /// <summary>
-        /// Gets the user's unique Id.
-        /// </summary>
-        public string UniqueId { get; internal set; }
-
-        /// <summary>
-        /// Gets the user's displayable Id.
-        /// </summary>
-        public string DisplayableId { get; internal set; }
-
+        
         /// <summary>
         /// Gets the Access Token requested.
         /// </summary>
@@ -70,5 +45,8 @@ namespace MSAL
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
         public string IdToken { get; internal set; }
+
+        public User User { get; internal set; }
+
     }
 }

@@ -12,15 +12,29 @@ namespace ConsoleApplication
         static void Main(string[] args)
         {
             PublicClientApplication app = new PublicClientApplication();
-
             AuthenticationResult result = null;
+
+            //externally available
+            string identifier = args[0];
+            IEnumerable<User> adalUsers = app.GetUsers(identifier);
+
             try
             {
-                result = app.AcquireTokenSilentAsync(new[] {""}).Result;
+                if (adalUsers.Any())
+                {
+                    result = app.AcquireTokenSilentAsync(new[] {""}, adalUsers.First()).Result;
+                }
             }
             catch (Exception exc)
             {
-                result = app.AcquireTokenAsync(new[] {""}).Result;
+                //log error
+            }
+            finally
+            {
+                if (result == null)
+                {
+                    result = app.AcquireTokenAsync(new[] {""}).Result;
+                }
             }
         }
     }
