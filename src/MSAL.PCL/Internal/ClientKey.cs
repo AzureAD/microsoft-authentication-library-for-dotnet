@@ -76,14 +76,30 @@ namespace Microsoft.Identity.Client.Internal
 
             if (this.Credential != null)
             {
-                if (this.Credential.ClientCredentialType == ClientCredentialType.ClientSecret)
+                if (!string.IsNullOrEmpty(this.Credential.Secret))
                 {
                     parameters[OAuthParameter.ClientSecret] = this.Credential.Secret;
                 }
                 else
                 {
                     JsonWebToken jwtToken = new JsonWebToken(this.ClientId, this.Authenticator.SelfSignedJwtAudience);
-                    ClientAssertion clientAssertion = jwtToken.Sign(this.Credential.Certificate);
+                    ClientAssertion clientAssertion = this.Credential.ClientAssertion;
+
+                    if (this.Credential.ValidTo != 0)
+                    {
+
+                        bool assertionNearExpiry = (this.Credential.ValidTo <=
+                                                    JsonWebToken.ConvertToTimeT(DateTime.UtcNow +
+                                                                                TimeSpan.FromMinutes(
+                                                                                    Constant.ExpirationMarginInMinutes)));
+                        if (assertionNearExpiry)
+                        {
+                            clientAssertion = jwtToken.Sign(this.Credential.Certificate);
+                            this.Credential.ValidTo = jwtToken.Payload.ValidTo;
+                            this.Credential.ClientAssertion = clientAssertion;
+                        }
+                    }
+
                     parameters[OAuthParameter.ClientAssertionType] = clientAssertion.AssertionType;
                     parameters[OAuthParameter.ClientAssertion] = clientAssertion.Assertion;
                 }

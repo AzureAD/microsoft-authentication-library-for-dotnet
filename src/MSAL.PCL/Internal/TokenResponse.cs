@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.Internal
             return tokenResponse;
         }
 
-        public AuthenticationResultEx GetResult()
+        public AuthenticationResultEx GetResultEx()
         {
             AuthenticationResultEx resultEx = null;
 
@@ -178,9 +178,7 @@ namespace Microsoft.Identity.Client.Internal
                 resultEx = new AuthenticationResultEx
                 {
                     Result = result,
-                    RefreshToken = this.RefreshToken,
-                    // this is needed by all flows because we can get more scopes than actually requested
-                    //ScopeInResponse = Scope.AsSet()
+                    RefreshToken = this.RefreshToken
                 };
             }
             else if (this.Error != null)

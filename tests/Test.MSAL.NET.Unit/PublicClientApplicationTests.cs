@@ -102,7 +102,7 @@ namespace Test.MSAL.NET.Unit
             HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreatePositiveTokenResponseMessage(TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId, TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray())
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId, TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray())
             };
 
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.DefaultScope.ToArray(), TestConstants.DefaultUniqueId, app.Authority, null, true);

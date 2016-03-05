@@ -35,11 +35,6 @@ namespace Microsoft.Identity.Client.Internal
 {
     class MsalHttpClient
     {
-        private const string DeviceAuthHeaderName = "x-ms-PKeyAuth";
-        private const string DeviceAuthHeaderValue = "1.0";
-        private const string WwwAuthenticateHeader = "WWW-Authenticate";
-        private const string PKeyAuthName = "PKeyAuth";
-
         public MsalHttpClient(string uri, CallState callState)
         {
             this.Client = new HttpClientWrapper(CheckForExtraQueryParameter(uri), callState);
@@ -58,7 +53,6 @@ namespace Microsoft.Identity.Client.Internal
         private async Task<T> GetResponseAsync<T>(string endpointType, bool respondToDeviceAuthChallenge)
         {
             T typedResponse = default(T);
-            IHttpWebResponse response;
             ClientMetrics clientMetrics = new ClientMetrics();
 
             try
@@ -76,10 +70,8 @@ namespace Microsoft.Identity.Client.Internal
                     {
                         this.Client.Headers[kvp.Key] = kvp.Value;
                     }
-                
 
-                //add pkeyauth header
-                this.Client.Headers[DeviceAuthHeaderName] = DeviceAuthHeaderValue;
+                IHttpWebResponse response;
                 using (response = await this.Client.GetResponseAsync().ConfigureAwait(false))
                 {
                     typedResponse = DeserializeResponse<T>(response.ResponseStream);

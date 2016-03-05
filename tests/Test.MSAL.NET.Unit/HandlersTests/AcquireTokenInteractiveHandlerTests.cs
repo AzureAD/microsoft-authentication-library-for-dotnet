@@ -51,7 +51,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             mockHandler.Method = HttpMethod.Post;
             mockHandler.QueryParams = new Dictionary<string, string>() {{"p", "some-policy"}};
 
-            mockHandler.ResponseMessage = MockHelpers.CreatePositiveTokenResponseMessage();
+            mockHandler.ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage();
             HttpMessageHandlerFactory.MockHandler = mockHandler;
 
             HandlerData data = new HandlerData()

@@ -62,6 +62,11 @@ namespace Microsoft.Identity.Client.Internal
         
         internal static HashSet<string> AsSet(this string singleString)
         {
+            if (string.IsNullOrEmpty(singleString))
+            {
+                return new HashSet<string>();    
+            }
+
             return new HashSet<string>(singleString.Split(new[] { " " }, StringSplitOptions.None));
         }
 

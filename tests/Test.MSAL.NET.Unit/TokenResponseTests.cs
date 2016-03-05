@@ -76,7 +76,7 @@ namespace Test.MSAL.NET.Unit
             response.Scope = "scope1 scope2";
             response.TokenType = "Bearer";
 
-            AuthenticationResultEx resultEx = response.GetResult();
+            AuthenticationResultEx resultEx = response.GetResultEx();
             Assert.IsNotNull(resultEx);
             Assert.AreEqual("access-token", resultEx.Result.AccessToken);
             Assert.AreEqual("scope1 scope2", resultEx.Result.ScopeSet.AsSingleString());

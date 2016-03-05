@@ -20,12 +20,6 @@ using System;
 
 namespace Microsoft.Identity.Client
 {
-    public enum ClientCredentialType
-    {
-        ClientSecret, //client_secret
-        ClientAssertion, //urn:ietf:params:oauth:client-assertion-type:jwt-bearer
-    }
-
     /// <summary>
     /// Secret including client id and secret.
     /// </summary>
@@ -39,14 +33,13 @@ namespace Microsoft.Identity.Client
         public ClientCredential(IClientAssertionCertificate certificate)
         {
             this.Certificate = certificate;
-            this.ClientCredentialType = ClientCredentialType.ClientAssertion;
         }
 
         /// <summary>
         /// Constructor to create Secret with client id and secret
         /// </summary>
         /// <param name="secret">Secret of the client requesting the token.</param>
-        public ClientCredential(string secret, ClientCredentialType clientCredentialType)
+        public ClientCredential(string secret)
         {
 
             if (string.IsNullOrWhiteSpace(secret))
@@ -55,14 +48,14 @@ namespace Microsoft.Identity.Client
             }
             
             this.Secret = secret;
-            this.ClientCredentialType = clientCredentialType;
         }
 
         internal string Secret { get; private set; }
 
-        internal ClientCredentialType ClientCredentialType { get; private set; }
-
         internal IClientAssertionCertificate Certificate { get; private set; }
 
+        internal  ClientAssertion ClientAssertion { get; set; }
+
+        internal long ValidTo { get; set; }
     }
 }
