@@ -34,7 +34,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultHomeObjectId
+                HomeObjectId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -99,7 +99,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultHomeObjectId
+                HomeObjectId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -147,7 +147,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultHomeObjectId
+                HomeObjectId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";

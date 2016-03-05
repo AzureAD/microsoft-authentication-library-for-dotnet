@@ -11,7 +11,7 @@ namespace Test.MSAL.NET.Unit.Mocks
     internal class TokenCacheHelper
     {
         public static long ValidExpiresIn = 28800;
-
+        
         public static TokenCache CreateCacheWithItems()
         {
             TokenCache cache = new TokenCache();
@@ -26,7 +26,7 @@ namespace Test.MSAL.NET.Unit.Mocks
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultHomeObjectId
+                HomeObjectId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.ScopeSet = TestConstants.DefaultScope;
 
@@ -45,7 +45,7 @@ namespace Test.MSAL.NET.Unit.Mocks
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId + "more",
-                RootId = TestConstants.DefaultHomeObjectId
+                HomeObjectId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.ScopeSet = TestConstants.ScopeForAnotherResource;
             ex.RefreshToken = "someRT";

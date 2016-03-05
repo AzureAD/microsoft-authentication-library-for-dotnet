@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
         {
             this.UniqueId = other.UniqueId;
             this.DisplayableId = other.DisplayableId;
-            this.RootId = other.RootId;
+            this.HomeObjectId = other.HomeObjectId;
             this.Name = other.Name;
             this.ClientId = other.ClientId;
             this.TokenCache = other.TokenCache;
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         [DataMember]
-        public string RootId { get; internal set; }
+        public string HomeObjectId { get; internal set; }
 
         internal TokenCache TokenCache { get; set; }
 
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client
         {
             if(this.TokenCache == null) { return; }
 
-            IEnumerable<TokenCacheItem> items = this.TokenCache.ReadItems(this.ClientId).Where(item => item.HomeObjectId.Equals(this.RootId));
+            IEnumerable<TokenCacheItem> items = this.TokenCache.ReadItems(this.ClientId).Where(item => item.HomeObjectId.Equals(this.HomeObjectId));
             foreach(var item in items)
             {
                 this.TokenCache.DeleteItem(item);
