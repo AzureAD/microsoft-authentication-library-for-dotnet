@@ -25,6 +25,22 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal static class MsalStringHelper
     {
+        internal static HashSet<string> ToLower(this HashSet<string> setOfStrings)
+        {
+            if (setOfStrings == null)
+            {
+                return null;
+            }
+
+            HashSet<string> set = new HashSet<string>();
+            foreach (var item in setOfStrings)
+            {
+                set.Add(item.ToLower());
+            }
+
+            return set;
+        }
+
         internal static string[] AsArray(this HashSet<string> setOfStrings)
         {
             if (setOfStrings == null)

@@ -77,6 +77,26 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DefaultPolicy);
             Assert.IsTrue(key1.Equals(key2));
 
+            //scope
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                TestConstants.ScopeForAnotherResource, TestConstants.DefaultClientId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
+                TestConstants.DefaultPolicy);
+            Assert.IsFalse(key1.Equals(key2));
+
+            //different case scope
+            HashSet<string> uppercaseScope = new HashSet<string>();
+            foreach (var item in TestConstants.DefaultScope)
+            {
+                uppercaseScope.Add(item.ToUpper());
+            }
+
+            key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                uppercaseScope, TestConstants.DefaultClientId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
+                TestConstants.DefaultPolicy);
+            Assert.IsTrue(key1.Equals(key2));
+
             //authority
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant + "more",
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,

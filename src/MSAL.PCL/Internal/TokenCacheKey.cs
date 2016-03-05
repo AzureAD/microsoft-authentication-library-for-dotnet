@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -37,21 +38,27 @@ namespace Microsoft.Identity.Client.Internal
     internal sealed class TokenCacheKey
     {
         internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, User user, string policy)
-            : this(authority, scope, clientId, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null, policy)
+            : this(
+                authority, scope, clientId, (user != null) ? user.UniqueId : null,
+                (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null, policy)
         {
         }
 
         internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, User user)
-            : this(authority, scope, clientId, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null, null)
+            : this(
+                authority, scope, clientId, (user != null) ? user.UniqueId : null,
+                (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null, null)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId, string displayableId, string homeObjectId)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId,
+            string displayableId, string homeObjectId)
             : this(authority, scope, clientId, uniqueId, displayableId, homeObjectId, null)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId, string displayableId, string homeObjectId, string policy)
+        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId,
+            string displayableId, string homeObjectId, string policy)
         {
             this.Authority = authority;
             this.Scope = scope;
@@ -116,9 +123,9 @@ namespace Microsoft.Identity.Client.Internal
                     && (other.Authority == this.Authority)
                     && this.ScopeEquals(other.Scope)
                     && this.Equals(this.ClientId, other.ClientId)
-                    && this.Equals(other.UniqueId, this.UniqueId)
+                    && (other.UniqueId == this.UniqueId)
                     && this.Equals(this.DisplayableId, other.DisplayableId)
-                    && this.Equals(this.HomeObjectId, other.HomeObjectId)
+                    && (this.HomeObjectId == other.HomeObjectId)
                     && this.Equals(this.Policy, other.Policy));
         }
 
@@ -132,12 +139,12 @@ namespace Microsoft.Identity.Client.Internal
         {
             const string Delimiter = ":::";
             return (this.Authority + Delimiter
-                + MsalStringHelper.AsSingleString(this.Scope) + Delimiter
-                + this.ClientId.ToLower() + Delimiter
-                + this.UniqueId + Delimiter
-                + this.HomeObjectId + Delimiter
-                + ((this.DisplayableId != null) ? this.DisplayableId.ToLower() : null) + Delimiter
-                + ((this.Policy != null) ? this.Policy.ToLower() : null)).GetHashCode();
+                    + MsalStringHelper.AsSingleString(this.Scope) + Delimiter
+                    + this.ClientId.ToLower() + Delimiter
+                    + this.UniqueId + Delimiter
+                    + this.HomeObjectId + Delimiter
+                    + ((this.DisplayableId != null) ? this.DisplayableId.ToLower() : null) + Delimiter
+                    + ((this.Policy != null) ? this.Policy.ToLower() : null)).GetHashCode();
         }
 
         internal bool ScopeContains(HashSet<string> otherScope)
@@ -152,9 +159,10 @@ namespace Microsoft.Identity.Client.Internal
                 return true;
             }
 
+
             foreach (string otherString in otherScope)
             {
-                if (!this.Scope.Contains(otherString))
+                if (!this.Scope.ToLower().Contains(otherString.ToLower()))
                 {
                     return false;
                 }
@@ -177,7 +185,7 @@ namespace Microsoft.Identity.Client.Internal
 
             if (Scope.Count == otherScope.Count)
             {
-                return this.Scope.Intersect(otherScope).Count() == this.Scope.Count;
+                return this.Scope.ToLower().Intersect(otherScope.ToLower()).Count() == this.Scope.Count;
             }
 
             return false;
@@ -195,9 +203,9 @@ namespace Microsoft.Identity.Client.Internal
                 return this.Scope == null;
             }
 
-            return this.Scope.Intersect(otherScope).ToArray().Length > 0;
+            return this.Scope.ToLower().Intersect(otherScope.ToLower()).ToArray().Length > 0;
         }
-        
+
         internal bool Equals(string string1, string string2)
         {
             return (string.Compare(string2, string1, StringComparison.OrdinalIgnoreCase) == 0);
