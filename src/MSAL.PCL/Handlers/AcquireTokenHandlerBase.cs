@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client.Handlers
                     notifiedBeforeAccessCache = true;
 
                     ResultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.User, this.Policy, this.CallState);
-                    if (ResultEx != null && ResultEx.Result.AccessToken == null && ResultEx.RefreshToken != null)
+                    if (ResultEx != null && (ResultEx.Result.AccessToken == null || ForceRefresh) && ResultEx.RefreshToken != null)
 
                     {
                         ResultEx = await this.RefreshAccessTokenAsync(ResultEx).ConfigureAwait(false);
