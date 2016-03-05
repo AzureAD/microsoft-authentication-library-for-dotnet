@@ -82,10 +82,9 @@ namespace Microsoft.Identity.Client.Internal
                 }
                 else
                 {
-                    JsonWebToken jwtToken = new JsonWebToken(this.ClientId, this.Authenticator.SelfSignedJwtAudience);
                     ClientAssertion clientAssertion = this.Credential.ClientAssertion;
 
-                    if (this.Credential.ValidTo != 0)
+                    if (clientAssertion == null || this.Credential.ValidTo != 0)
                     {
 
                         bool assertionNearExpiry = (this.Credential.ValidTo <=
@@ -94,6 +93,7 @@ namespace Microsoft.Identity.Client.Internal
                                                                                     Constant.ExpirationMarginInMinutes)));
                         if (assertionNearExpiry)
                         {
+                            JsonWebToken jwtToken = new JsonWebToken(this.ClientId, this.Authenticator.SelfSignedJwtAudience);
                             clientAssertion = jwtToken.Sign(this.Credential.Certificate);
                             this.Credential.ValidTo = jwtToken.Payload.ValidTo;
                             this.Credential.ClientAssertion = clientAssertion;

@@ -78,6 +78,11 @@ namespace Test.MSAL.NET.Unit
         {
             PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
             app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
+            app.UserTokenCache.tokenCacheDictionary.Remove(new TokenCacheKey(TestConstants.DefaultAuthorityGuestTenant,
+                TestConstants.ScopeForAnotherResource, TestConstants.DefaultClientId,
+                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId,
+                TestConstants.DefaultHomeObjectId,
+                TestConstants.DefaultPolicy));
             HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,

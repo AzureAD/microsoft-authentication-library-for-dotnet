@@ -6,10 +6,12 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.MSAL.NET.Unit.Mocks;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Test.MSAL.NET.Unit
 {
     [TestClass]
+    [DeploymentItem(@"Resources\valid_cert.pfx")]
     public class ConfidentialClientApplicationTests
     {
         private const string AssertionType = "urn:ietf:params:oauth:grant-type:jwt-bearer";
@@ -42,7 +44,7 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
-        public void ConfidentialClientTest()
+        public void ConfidentialClientUsingSecretTest()
         {
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
                 TestConstants.DefaultRedirectUri, new ClientCredential("secret"), new TokenCache());
@@ -70,6 +72,60 @@ namespace Test.MSAL.NET.Unit
             {
                 Assert.IsNull(value.RefreshToken);
             }
+        }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public void ConfidentialClientUsingCertificateTest()
+        {
+            ClientCredential cc = new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid_cert.pfx", "password")));
+            ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
+                TestConstants.DefaultRedirectUri, cc, new TokenCache());
+            app.AppTokenCache = new TokenCache();
+            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
+            };
+
+            Task<AuthenticationResult> task = app.AcquireTokenForClient(TestConstants.DefaultScope.ToArray(),
+                TestConstants.DefaultPolicy);
+            AuthenticationResult result = task.Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull("header.payload.signature", result.AccessToken);
+            Assert.AreEqual(TestConstants.DefaultScope.AsSingleString(), result.ScopeSet.AsSingleString());
+
+            //make sure user token cache is empty
+            Assert.AreEqual(0, app.UserTokenCache.Count);
+
+            //check app token cache count to be 1
+            Assert.AreEqual(1, app.AppTokenCache.Count);
+            //make sure refresh token is null
+            foreach (var value in app.AppTokenCache.tokenCacheDictionary.Values)
+            {
+                Assert.IsNull(value.RefreshToken);
+            }
+
+            //assert client credential
+            Assert.IsNotNull(cc.ClientAssertion);
+            Assert.AreNotEqual(0, cc.ValidTo);
+
+            //save client assertion.
+            string cachedAssertion = cc.ClientAssertion.Assertion;
+            long cacheValidTo = cc.ValidTo;
+
+            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
+            };
+
+            task = app.AcquireTokenForClient(TestConstants.ScopeForAnotherResource.ToArray(),
+                TestConstants.DefaultPolicy);
+            result = task.Result;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(cacheValidTo, cc.ValidTo);
+            Assert.AreEqual(cachedAssertion, cc.ClientAssertion.Assertion);
         }
 
         [TestMethod]

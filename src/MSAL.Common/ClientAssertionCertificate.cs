@@ -28,20 +28,12 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed class ClientAssertionCertificate : IClientAssertionCertificate
     {
-        private string clientId = null;
-
         /// <summary>
-        /// Constructor to create credential with client Id and certificate.
+        /// Constructor to create credential using certificate.
         /// </summary>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="certificate">The certificate used as credential.</param>
-        public ClientAssertionCertificate(string clientId, X509Certificate2 certificate)
+        public ClientAssertionCertificate(X509Certificate2 certificate)
         {
-            if (string.IsNullOrWhiteSpace(clientId))
-            {
-                throw new ArgumentNullException("clientId");
-            }
-
             if (certificate == null)
             {
                 throw new ArgumentNullException("certificate");
@@ -52,16 +44,9 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentOutOfRangeException("certificate",
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate, MinKeySizeInBits));
             }
-
-            this.clientId = clientId;
+            
             this.Certificate = certificate;
         }
-
-
-        /// <summary>
-        /// Gets the identifier of the client requesting the token.
-        /// </summary>
-        public string ClientId { get { return clientId; } }
 
         /// <summary>
         /// Gets minimum X509 certificate key size in bits
