@@ -49,6 +49,9 @@ namespace Microsoft.Identity.Client.Internal
             }            
         }
 
+        [DataMember]
+        public string UserAssertionHash { get; set; }
+
         /// <summary>
         /// Serializes the object to a JSON string
         /// </summary>

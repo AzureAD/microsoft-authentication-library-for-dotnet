@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client.Internal
                         {
                             UniqueId = uniqueId,
                             DisplayableId = idToken.PreferredUsername,
-                            RootId = idToken.HomeObjectId,
+                            HomeObjectId = idToken.HomeObjectId,
                             Name = idToken.Name,
                             IdentityProvider = idToken.Issuer
                         });

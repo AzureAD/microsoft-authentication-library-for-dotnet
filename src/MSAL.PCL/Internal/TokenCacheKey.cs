@@ -37,12 +37,12 @@ namespace Microsoft.Identity.Client.Internal
     internal sealed class TokenCacheKey
     {
         internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, User user, string policy)
-            : this(authority, scope, clientId, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.RootId : null, policy)
+            : this(authority, scope, clientId, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null, policy)
         {
         }
 
         internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, User user)
-            : this(authority, scope, clientId, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.RootId : null, null)
+            : this(authority, scope, clientId, (user != null) ? user.UniqueId : null, (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null, null)
         {
         }
 

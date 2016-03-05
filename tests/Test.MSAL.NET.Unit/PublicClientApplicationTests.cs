@@ -59,7 +59,7 @@ namespace Test.MSAL.NET.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultHomeObjectId
+                HomeObjectId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.ScopeSet = TestConstants.DefaultScope;
 

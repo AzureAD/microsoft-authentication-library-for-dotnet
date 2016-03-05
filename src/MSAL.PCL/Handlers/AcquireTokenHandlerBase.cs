@@ -118,7 +118,9 @@ namespace Microsoft.Identity.Client.Handlers
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    ResultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope, this.ClientKey.ClientId, this.User, this.Policy, this.CallState);
+                    ResultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope,
+                        this.ClientKey.ClientId, this.User, this.Policy, this.CallState);
+                    this.ValidateResult();
                     if (ResultEx != null && (ResultEx.Result.AccessToken == null || ForceRefresh) && ResultEx.RefreshToken != null)
 
                     {
@@ -172,7 +174,12 @@ namespace Microsoft.Identity.Client.Handlers
                 }
             }
         }
-        
+
+        protected virtual void ValidateResult()
+        {
+
+        }
+
         protected virtual bool BrokerInvocationRequired()
         {
             return false;

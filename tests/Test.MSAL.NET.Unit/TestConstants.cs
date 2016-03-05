@@ -22,7 +22,7 @@ namespace Test.MSAL.NET.Unit
         {
             UniqueId = DefaultUniqueId,
             DisplayableId = DefaultDisplayableId,
-            RootId = DefaultHomeObjectId
+            HomeObjectId = DefaultHomeObjectId
         };
     }
 }

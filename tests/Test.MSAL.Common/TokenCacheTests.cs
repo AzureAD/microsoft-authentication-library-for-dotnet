@@ -181,7 +181,7 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultHomeObjectId
+                HomeObjectId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -216,7 +216,7 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultHomeObjectId
+                HomeObjectId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -271,7 +271,7 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultHomeObjectId
+                HomeObjectId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -327,7 +327,7 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultHomeObjectId
+                HomeObjectId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -522,7 +522,7 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultHomeObjectId
+                HomeObjectId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -582,7 +582,7 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultHomeObjectId
+                HomeObjectId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -654,7 +654,7 @@ namespace Test.MSAL.Common.Unit
                 Assert.AreEqual(result1.Result.IdToken, result2.Result.IdToken);
                 Assert.AreEqual(result1.Result.User.DisplayableId, result2.Result.User.DisplayableId);
                 Assert.AreEqual(result1.Result.User.UniqueId, result2.Result.User.UniqueId);
-                Assert.AreEqual(result1.Result.User.RootId, result2.Result.User.RootId);
+                Assert.AreEqual(result1.Result.User.HomeObjectId, result2.Result.User.HomeObjectId);
                 Assert.AreEqual(result1.Result.User.IdentityProvider, result2.Result.User.IdentityProvider);
                 Assert.IsTrue(AreDateTimeOffsetsEqual(result1.Result.ExpiresOn, result2.Result.ExpiresOn));
             }
@@ -713,7 +713,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(resultEx.Result.AccessTokenType, resultExOut.Result.AccessTokenType);
             Assert.AreEqual(resultEx.Result.User.UniqueId, resultExOut.Result.User.UniqueId);
             Assert.AreEqual(resultEx.Result.User.DisplayableId, resultExOut.Result.User.DisplayableId);
-            Assert.AreEqual(resultEx.Result.User.RootId, resultExOut.Result.User.RootId);
+            Assert.AreEqual(resultEx.Result.User.HomeObjectId, resultExOut.Result.User.HomeObjectId);
         }
 
 
@@ -754,7 +754,7 @@ namespace Test.MSAL.Common.Unit
             {
                 DisplayableId = TestConstants.DefaultDisplayableId,
                 UniqueId = TestConstants.DefaultUniqueId,
-                RootId = TestConstants.DefaultHomeObjectId
+                HomeObjectId = TestConstants.DefaultHomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -833,7 +833,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(resultEx.Result.AccessTokenType, resultExOut.Result.AccessTokenType);
             Assert.AreEqual(resultEx.Result.User.UniqueId, resultExOut.Result.User.UniqueId);
             Assert.AreEqual(resultEx.Result.User.DisplayableId, resultExOut.Result.User.DisplayableId);
-            Assert.AreEqual(resultEx.Result.User.RootId, resultExOut.Result.User.RootId);
+            Assert.AreEqual(resultEx.Result.User.HomeObjectId, resultExOut.Result.User.HomeObjectId);
         }
 
         internal AuthenticationResultEx CreateCacheValue(string uniqueId, string displayableId)

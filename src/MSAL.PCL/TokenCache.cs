@@ -456,7 +456,7 @@ namespace Microsoft.Identity.Client
             {
                 List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> mrrtItems =
                     this.QueryCache(authority, clientId, result.Result.User.UniqueId,
-                        result.Result.User.DisplayableId, result.Result.User.RootId, policy)
+                        result.Result.User.DisplayableId, result.Result.User.HomeObjectId, policy)
                         .Where(p => p.Value.IsMultipleScopeRefreshToken)
                         .ToList();
 
@@ -475,7 +475,14 @@ namespace Microsoft.Identity.Client
             string displayableId = null;
             string rootId = null;
 
-            if (user == null)
+            if (user != null)
+            {
+                uniqueId = user.UniqueId;
+                displayableId = user.DisplayableId;
+                rootId = user.HomeObjectId;
+            }
+
+            if (uniqueId == null && displayableId == null && rootId == null)
             {
                 PlatformPlugin.Logger.Information(null, "No user information provided.");
                 // if authority is common and there are multiple unique ids in the cache
@@ -485,12 +492,6 @@ namespace Microsoft.Identity.Client
                 {
                     throw new MsalException(MsalError.MultipleTokensMatched);
                 }
-            }
-            else
-            {
-                uniqueId = user.UniqueId;
-                displayableId = user.DisplayableId;
-                rootId = user.RootId;
             }
 
             if (IsAuthorityCommon(authority))
@@ -585,7 +586,7 @@ namespace Microsoft.Identity.Client
             User user, string policy)
         {
             return this.QueryCache(
-                authority, clientId, user?.UniqueId, user?.DisplayableId, user?.RootId, policy);
+                authority, clientId, user?.UniqueId, user?.DisplayableId, user?.HomeObjectId, policy);
         }
 
         /// <summary>

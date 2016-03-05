@@ -30,7 +30,7 @@ namespace Test.MSAL.NET.Unit
             User user = new User();
             user.DisplayableId = TestConstants.DefaultDisplayableId;
             user.UniqueId = TestConstants.DefaultUniqueId;
-            user.RootId = TestConstants.DefaultHomeObjectId;
+            user.HomeObjectId = TestConstants.DefaultHomeObjectId;
 
             //no policy, user object
             key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
