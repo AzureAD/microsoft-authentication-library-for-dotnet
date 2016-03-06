@@ -278,15 +278,21 @@ namespace Microsoft.Identity.Client
             return allItems.Select(item => item.UniqueId).Distinct();
         }
 
+        internal IEnumerable<string> GetHomeObjectIdsFromCache(string clientId)
+        {
+            IEnumerable<TokenCacheItem> allItems = this.ReadItems(clientId);
+            return allItems.Select(item => item.HomeObjectId).Distinct();
+        }
+
         internal IEnumerable<User> GetUsers(string clientId)
         {
             List<User> users = new List<User>();
-            IEnumerable<string> uniqueIds = this.GetUniqueIdsFromCache(clientId);
-            foreach (string uniqueId in uniqueIds)
+            IEnumerable<string> homeOids = this.GetHomeObjectIdsFromCache(clientId);
+            foreach (string homeOid in homeOids)
             {
                 users.Add(
                     this.ReadItems(clientId)
-                        .First(item => !string.IsNullOrEmpty(item.UniqueId) && item.UniqueId.Equals(uniqueId))
+                        .First(item => !string.IsNullOrEmpty(item.HomeObjectId) && item.HomeObjectId.Equals(homeOid))
                         .User);
             }
 

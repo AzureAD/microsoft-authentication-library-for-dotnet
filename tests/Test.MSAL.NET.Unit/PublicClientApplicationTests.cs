@@ -45,12 +45,12 @@ namespace Test.MSAL.NET.Unit
             app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
             users = app.Users;
             Assert.IsNotNull(users);
-            Assert.AreEqual(2, users.Count());
+            Assert.AreEqual(1, users.Count());
 
-            // another cache entry for same unique id. user count should still remain 2.
+            // another cache entry for different home object id. user count should be 2.
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId+"more",
                 TestConstants.DefaultPolicy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
