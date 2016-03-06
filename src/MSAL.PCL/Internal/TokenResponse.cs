@@ -162,7 +162,12 @@ namespace Microsoft.Identity.Client.Internal
                     {
                         uniqueId = idToken.Subject;
                     }
-                    
+
+                    if (string.IsNullOrWhiteSpace(idToken.HomeObjectId))
+                    {
+                        idToken.HomeObjectId = uniqueId;
+                    }
+
                     result.UpdateTenantAndUser(tenantId, this.IdTokenString,
                         new User
                         {

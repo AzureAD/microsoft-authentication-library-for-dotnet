@@ -77,12 +77,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         [DataMember]
         public string IdentityProvider { get; internal set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
+        
         [DataMember]
-        public string HomeObjectId { get; internal set; }
+        internal string HomeObjectId { get; set; }
+
 
         internal TokenCache TokenCache { get; set; }
 
