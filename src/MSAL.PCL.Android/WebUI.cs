@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Android.Content;
 using Android.Accounts;
 using System.Collections.Generic;
+using System.Text;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 
@@ -54,7 +55,8 @@ namespace Microsoft.Identity.Client
                 var agentIntent = new Intent(this.parameters.CallerActivity, typeof(AuthenticationAgentActivity));
                 agentIntent.PutExtra("Url", authorizationUri.AbsoluteUri);
                 agentIntent.PutExtra("Callback", redirectUri.AbsoluteUri);
-                
+                AuthenticationAgentActivity.AdditionalHeaders = additionalHeaders;
+
                 this.parameters.CallerActivity.StartActivityForResult(agentIntent, 0);
             }
             catch (Exception ex)
