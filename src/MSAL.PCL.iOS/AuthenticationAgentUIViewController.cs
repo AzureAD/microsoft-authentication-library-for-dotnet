@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
 
         public delegate void ReturnCodeCallback(AuthorizationResult result);
 
-        public AuthenticationAgentUIViewController(string url, string callback, IDictionary<string, string> additionalHeaders, ReturnCodeCallback callbackMethod)
+        public AuthenticationAgentUIViewController(string url, string callback, ReturnCodeCallback callbackMethod)
         {
             this.url = url;
             this.callback = callback;
@@ -114,11 +114,6 @@ namespace Microsoft.Identity.Client
                 this.CancelAuthentication);
 
             NSUrlRequest startRequest = new NSUrlRequest(new NSUrl(this.url));
-            foreach (var key in this.additionalHeaders.Keys)
-            {
-                startRequest.Headers[new NSString(key)] = new NSString(additionalHeaders[key]);
-            }
-
             webView.LoadRequest(startRequest);
 
             // if this is false, page will be 'zoomed in' to normal size

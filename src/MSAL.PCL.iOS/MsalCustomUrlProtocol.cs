@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client
         {
             if (request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
             {
-                return GetProperty("ADURLProtocol", request) == null;
+                return GetProperty("MsalCustomUrlProtocol", request) == null;
             }
 
             return false;
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
             }
 
             NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest) this.Request.MutableCopy();
-            SetProperty(new NSString("YES"), "ADURLProtocol", mutableRequest);
+            SetProperty(new NSString("YES"), "MsalCustomUrlProtocol", mutableRequest);
             this.connection = new NSUrlConnection(mutableRequest, new MsalCustomConnectionDelegate(this), true);
         }
 
@@ -97,23 +97,7 @@ namespace Microsoft.Identity.Client
                 NSUrlResponse response)
             {
                 NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest) request.MutableCopy();
-                if (response != null)
-                {
-                    RemoveProperty("ADURLProtocol", mutableRequest);
-                    handler.Client.Redirected(handler, mutableRequest, response);
-                    connection.Cancel();
-                    if (!request.Headers.ContainsKey(new NSString("x-ms-PkeyAuth")))
-                    {
-                        mutableRequest[BrokerConstants.ChallengeHeaderKey] = BrokerConstants.ChallengeHeaderValue;
-                    }
-                    return mutableRequest;
-                }
-
-                if (!request.Headers.ContainsKey(new NSString(BrokerConstants.ChallengeHeaderKey)))
-                {
-                    mutableRequest[BrokerConstants.ChallengeHeaderKey] = BrokerConstants.ChallengeHeaderValue;
-                }
-
+                CustomHeaderHandler.ApplyHeadersTo(mutableRequest);
                 return mutableRequest;
             }
 

@@ -75,7 +75,8 @@ namespace Microsoft.Identity.Client
             base.ViewDidLoad();
 
             // Perform any additional setup after loading the view
-            this.PushViewController(new AuthenticationAgentUIViewController(this.url, this.callback, this.additionalHeaders, this.callbackMethod), true);
+            CustomHeaderHandler.AdditionalHeaders = this.additionalHeaders;
+            this.PushViewController(new AuthenticationAgentUIViewController(this.url, this.callback, this.callbackMethod), true);
         }
     }
 }
