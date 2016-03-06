@@ -23,12 +23,12 @@ using Foundation;
 
 namespace Microsoft.Identity.Client
 {
-    public class MsalCustomUrlProtocol : NSUrlProtocol
+    internal class MsalCustomUrlProtocol : NSUrlProtocol
     {
         private NSUrlConnection connection;
 
         [Export("canInitWithRequest:")]
-        public static bool canInitWithRequest(NSUrlRequest request)
+        public new static bool CanInitWithRequest(NSUrlRequest request)
         {
             if (request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
             {
@@ -70,27 +70,27 @@ namespace Microsoft.Identity.Client
 
         private class MsalCustomConnectionDelegate : NSUrlConnectionDataDelegate
         {
-            private MsalCustomUrlProtocol handler;
+            private readonly MsalCustomUrlProtocol _handler;
 
             public MsalCustomConnectionDelegate(MsalCustomUrlProtocol handler)
             {
-                this.handler = handler;
+                this._handler = handler;
             }
 
             public override void ReceivedData(NSUrlConnection connection, NSData data)
             {
-                handler.Client.DataLoaded(handler, data);
+                _handler.Client.DataLoaded(_handler, data);
             }
 
             public override void FailedWithError(NSUrlConnection connection, NSError error)
             {
-                handler.Client.FailedWithError(handler, error);
+                _handler.Client.FailedWithError(_handler, error);
                 connection.Cancel();
             }
 
             public override void ReceivedResponse(NSUrlConnection connection, NSUrlResponse response)
             {
-                handler.Client.ReceivedResponse(handler, response, NSUrlCacheStoragePolicy.NotAllowed);
+                _handler.Client.ReceivedResponse(_handler, response, NSUrlCacheStoragePolicy.NotAllowed);
             }
 
             public override NSUrlRequest WillSendRequest(NSUrlConnection connection, NSUrlRequest request,
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client
 
             public override void FinishedLoading(NSUrlConnection connection)
             {
-                handler.Client.FinishedLoading(handler);
+                _handler.Client.FinishedLoading(_handler);
                 connection.Cancel();
             }
         }

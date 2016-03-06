@@ -45,7 +45,7 @@ namespace AdaliOSSample
         {
             base.ViewDidLoad();
 
-            MsalInitializer.Initialize();
+            //MsalInitializer.Initialize();
         }
 
         public override void ViewWillAppear(bool animated)
@@ -98,12 +98,12 @@ namespace AdaliOSSample
                 ReportLabel.Text = string.Empty;
                 TokenBroker tokenBroker = new TokenBroker();
                 sts.Authority = "https://login.microsoftonline.com/common";
-                sts.ValidClientId = "b92e0ba5-f86e-4411-8e18-6b5f928d968a";
-                sts.ValidScope = new [] { "https://msdevex-my.sharepoint.com"};
-                sts.ValidUserName = "user@msdevex.onmicrosoft.com";
-                sts.ValidNonExistingRedirectUri = new Uri("adaliosapp://com.your-company.adaliostestapp");
+                sts.ValidClientId = "CLIENT_ID";
+                sts.ValidScope = new[] { "SCOPE1" };
+                sts.ValidUserName = "USER_ID";
+                sts.ValidNonExistingRedirectUri = new Uri("APP-SCHEME//BUNDLE-ID");
                 tokenBroker.Sts = sts;
-                string token = null;// await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this, false));
+                string token = null;// await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
                 ReportLabel.Text = token;
             }
             catch (Exception ex)
