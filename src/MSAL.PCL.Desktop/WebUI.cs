@@ -42,9 +42,18 @@ namespace Microsoft.Identity.Client
 
             if (additionalHeaders != null)
             {
+                bool isFirst = true;
                 foreach (var key in additionalHeaders.Keys)
                 {
-                    builder.AppendFormat(@"{0}: {1}\r\n", key, additionalHeaders[key]);
+                    if (isFirst)
+                    {
+                        builder.AppendFormat("{0}: {1}", key, additionalHeaders[key]);
+                        isFirst = false;
+                    }
+                    else
+                    {
+                        builder.AppendFormat("\r\n{0}: {1}", key, additionalHeaders[key]);
+                    }
                 }
             }
 
