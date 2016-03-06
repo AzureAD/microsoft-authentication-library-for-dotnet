@@ -333,7 +333,7 @@ namespace Microsoft.Identity.Client
                 resultEx = kvp.Value.Value;
                 bool tokenNearExpiry = (resultEx.Result.ExpiresOn <=
                                         DateTime.UtcNow + TimeSpan.FromMinutes(Constant.ExpirationMarginInMinutes));
-                if (!cacheKey.ScopeContains(scope) || (!IsAuthorityCommon(authority) && !authority.Equals(cacheKey.Authority)) || !clientId.Equals(cacheKey.ClientId))
+                if (!cacheKey.ScopeContains(scope) || (!Authenticator.IsTenantLess(authority) && !authority.Equals(cacheKey.Authority)) || !clientId.Equals(cacheKey.ClientId))
                 {
                     //requested scope are not a subset or authority does not match (cross-tenant RT) or client id is not same (FoCI).
                     PlatformPlugin.Logger.Verbose(callState,
@@ -488,13 +488,13 @@ namespace Microsoft.Identity.Client
                 // if authority is common and there are multiple unique ids in the cache
                 // then throw MultipleTokensMatched because code cannot guess which user
                 // is requested by the developer.
-                if (IsAuthorityCommon(authority) && this.GetUniqueIdsFromCache(clientId).Count() > 1)
+                if (Authenticator.IsTenantLess(authority) && this.GetUniqueIdsFromCache(clientId).Count() > 1)
                 {
                     throw new MsalException(MsalError.MultipleTokensMatched);
                 }
             }
 
-            if (IsAuthorityCommon(authority))
+            if (Authenticator.IsTenantLess(authority))
             {
                 authority = null; //ignore authority
             }
@@ -574,12 +574,6 @@ namespace Microsoft.Identity.Client
             }
 
             return returnValue;
-        }
-
-
-        private bool IsAuthorityCommon(string authority)
-        {
-            return authority.ToLower().EndsWith("/common/");
         }
 
         private List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> QueryCache(string authority, string clientId,

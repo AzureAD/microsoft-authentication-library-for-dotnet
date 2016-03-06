@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -24,7 +25,7 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal class Authenticator
     {
-        private const string TenantlessTenantName = "Common";
+        private static readonly string[] TenantlessTenantName = {"Common", "Organizations", "Consumers"};
 
         private static readonly AuthenticatorTemplateList AuthenticatorTemplateList = new AuthenticatorTemplateList();
 
@@ -70,10 +71,18 @@ namespace Microsoft.Identity.Client.Internal
                 this.DeviceCodeUri = matchingTemplate.DeviceCodeEndpoint.Replace("{tenant}", tenant);
                 this.TokenUri = matchingTemplate.TokenEndpoint.Replace("{tenant}", tenant);
                 this.UserRealmUri = CanonicalizeUri(matchingTemplate.UserRealmEndpoint);
-                this.IsTenantless = (string.Compare(tenant, TenantlessTenantName, StringComparison.OrdinalIgnoreCase) == 0);
+                this.IsTenantless = IsTenantLess(this.Authority);
                 this.SelfSignedJwtAudience = matchingTemplate.Issuer.Replace("{tenant}", tenant);
                 this.updatedFromTemplate = true;
             }
+        }
+
+        public static bool IsTenantLess(string authority)
+        {
+            var authorityUri = new Uri(authority);
+            string path = authorityUri.AbsolutePath.Substring(1);
+            string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
+            return TenantlessTenantName.Any(name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         public void UpdateTenantId(string tenantId)
@@ -96,8 +105,11 @@ namespace Microsoft.Identity.Client.Internal
 
         private void ReplaceTenantlessTenant(string tenantId)
         {
-            var regex = new Regex(Regex.Escape(TenantlessTenantName), RegexOptions.IgnoreCase);
-            this.Authority = regex.Replace(this.Authority, tenantId, 1);
+            foreach (var name in TenantlessTenantName)
+            {
+                var regex = new Regex(Regex.Escape(name), RegexOptions.IgnoreCase);
+                this.Authority = regex.Replace(this.Authority, tenantId, 1);
+            }
         }
     }
 }
