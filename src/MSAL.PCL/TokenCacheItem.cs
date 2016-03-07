@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client
                    (key.Authority == this.Authority && key.ScopeEquals(this.Scope) &&
                     key.Equals(key.ClientId, this.ClientId)
                     && key.UniqueId == this.UniqueId &&
-                    key.Equals(key.DisplayableId, this.DisplayableId) && key.Equals(key.HomeObjectId, this.HomeObjectId) &&
+                    key.Equals(key.DisplayableId, this.DisplayableId) && (key.HomeObjectId == this.HomeObjectId) &&
                     key.Equals(key.Policy, this.Policy));
         }
     }

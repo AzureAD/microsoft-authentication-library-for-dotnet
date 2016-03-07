@@ -39,6 +39,7 @@ namespace Microsoft.Identity.Client
     [CLSCompliant(false)]
     public class AuthenticationAgentActivity : Activity
     {
+        public static IDictionary<string, string> AdditionalHeaders;
         private MsalWebViewClient client;
 
         protected override void OnCreate(Bundle bundle)
@@ -68,6 +69,7 @@ namespace Microsoft.Identity.Client
             this.client = new MsalWebViewClient(Intent.GetStringExtra("Callback"));
             
             webView.SetWebViewClient(client);
+            webView.LoadUrl(url, AdditionalHeaders);
 
         }
 
@@ -81,6 +83,8 @@ namespace Microsoft.Identity.Client
             {
                 this.SetResult(Result.Canceled, new Intent("Return"));
             }
+
+            AdditionalHeaders = null;
             base.Finish();
         }
 

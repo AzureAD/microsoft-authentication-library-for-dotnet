@@ -19,7 +19,7 @@
 
 namespace Microsoft.Identity.Client
 {
-    class BrokerConstants
+    internal class BrokerConstants
     {
         public const string ChallengeResponseHeader = "Authorization";
 

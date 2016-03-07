@@ -148,12 +148,17 @@ namespace Microsoft.Identity.Client
         /// <param name="scope">Identifier of the target scope that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
+        /// <param name="user">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string clientId, Uri redirectUri, User userId, string extraQueryParameters)
+        public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string clientId, Uri redirectUri, string loginHint, string extraQueryParameters)
         {
-            return null;
+            Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
+            var handler =
+                new AcquireTokenInteractiveHandler(
+                    this.GetHandlerData(authenticator, scope, null, this.UserTokenCache), null,
+                    new Uri(this.RedirectUri), null, loginHint, UiOptions.SelectAccount, extraQueryParameters, null);
+            return await handler.CreateAuthorizationUriAsync(this.CorrelationId).ConfigureAwait(false);
         }
         
         internal override HandlerData GetHandlerData(Authenticator authenticator, string[] scope, string policy,

@@ -23,16 +23,16 @@ using Foundation;
 
 namespace Microsoft.Identity.Client
 {
-    public class MsalCustomUrlProtocol : NSUrlProtocol
+    internal class MsalCustomUrlProtocol : NSUrlProtocol
     {
         private NSUrlConnection connection;
 
         [Export("canInitWithRequest:")]
-        public static bool canInitWithRequest(NSUrlRequest request)
+        public new static bool CanInitWithRequest(NSUrlRequest request)
         {
             if (request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
             {
-                return GetProperty("ADURLProtocol", request) == null;
+                return GetProperty("MsalCustomUrlProtocol", request) == null;
             }
 
             return false;
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
             }
 
             NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest) this.Request.MutableCopy();
-            SetProperty(new NSString("YES"), "ADURLProtocol", mutableRequest);
+            SetProperty(new NSString("YES"), "MsalCustomUrlProtocol", mutableRequest);
             this.connection = new NSUrlConnection(mutableRequest, new MsalCustomConnectionDelegate(this), true);
         }
 
@@ -70,56 +70,40 @@ namespace Microsoft.Identity.Client
 
         private class MsalCustomConnectionDelegate : NSUrlConnectionDataDelegate
         {
-            private MsalCustomUrlProtocol handler;
+            private readonly MsalCustomUrlProtocol _handler;
 
             public MsalCustomConnectionDelegate(MsalCustomUrlProtocol handler)
             {
-                this.handler = handler;
+                this._handler = handler;
             }
 
             public override void ReceivedData(NSUrlConnection connection, NSData data)
             {
-                handler.Client.DataLoaded(handler, data);
+                _handler.Client.DataLoaded(_handler, data);
             }
 
             public override void FailedWithError(NSUrlConnection connection, NSError error)
             {
-                handler.Client.FailedWithError(handler, error);
+                _handler.Client.FailedWithError(_handler, error);
                 connection.Cancel();
             }
 
             public override void ReceivedResponse(NSUrlConnection connection, NSUrlResponse response)
             {
-                handler.Client.ReceivedResponse(handler, response, NSUrlCacheStoragePolicy.NotAllowed);
+                _handler.Client.ReceivedResponse(_handler, response, NSUrlCacheStoragePolicy.NotAllowed);
             }
 
             public override NSUrlRequest WillSendRequest(NSUrlConnection connection, NSUrlRequest request,
                 NSUrlResponse response)
             {
                 NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest) request.MutableCopy();
-                if (response != null)
-                {
-                    RemoveProperty("ADURLProtocol", mutableRequest);
-                    handler.Client.Redirected(handler, mutableRequest, response);
-                    connection.Cancel();
-                    if (!request.Headers.ContainsKey(new NSString("x-ms-PkeyAuth")))
-                    {
-                        mutableRequest[BrokerConstants.ChallengeHeaderKey] = BrokerConstants.ChallengeHeaderValue;
-                    }
-                    return mutableRequest;
-                }
-
-                if (!request.Headers.ContainsKey(new NSString(BrokerConstants.ChallengeHeaderKey)))
-                {
-                    mutableRequest[BrokerConstants.ChallengeHeaderKey] = BrokerConstants.ChallengeHeaderValue;
-                }
-
+                CustomHeaderHandler.ApplyHeadersTo(mutableRequest);
                 return mutableRequest;
             }
 
             public override void FinishedLoading(NSUrlConnection connection)
             {
-                handler.Client.FinishedLoading(handler);
+                _handler.Client.FinishedLoading(_handler);
                 connection.Cancel();
             }
         }

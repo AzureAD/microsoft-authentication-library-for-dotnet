@@ -92,6 +92,8 @@ namespace Microsoft.Identity.Client.Handlers
         internal override async Task PreTokenRequest()
         {
             IDictionary<string, string> headers = new Dictionary<string, string>();
+            headers["x-ms-sso-Ignore-SSO"] = "1";
+
             await base.PreTokenRequest().ConfigureAwait(false);
 
             if (this.tokenCache!=null && this.User!=null  && _uiOptions == UiOptions.ActAsCurrentUser)

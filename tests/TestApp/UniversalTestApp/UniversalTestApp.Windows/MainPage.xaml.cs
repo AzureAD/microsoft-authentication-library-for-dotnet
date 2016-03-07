@@ -40,7 +40,7 @@ namespace UniversalTestApp
         private async void Button_Click_1(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
-            string token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
+            string token = null;//await tokenBroker.GetTokenWithUsernamePasswordAsync();
             this.AccessToken.Text = token;
         }
 

@@ -67,7 +67,7 @@ namespace TestApp.PCL
         {
             try
             {
-                app = new PublicClientApplication("https://login.windows.net/common", "7c7a2f70-caef-45c8-9a6c-091633501de4");
+                app = new PublicClientApplication("https://login.windows.net/common", "CLIENT_ID");
                 var result = await app.AcquireTokenSilentAsync(Sts.ValidScope, Sts.ValidUserName);
 
                 return result.AccessToken;
@@ -96,22 +96,7 @@ namespace TestApp.PCL
                 return ex.Message;
             }
         }
-
-        public async Task<string> GetTokenWithUsernamePasswordAsync()
-        {
-            try
-            {
-/*                app = new AuthenticationContext(Sts.Authority, true);
-                var result = await app.AcquireTokenAsync(Sts.ValidScope, Sts.ValidClientId, new UserCredential(Sts.ValidUserName, Sts.ValidPassword));
-
-                return result.AccessToken;*/
-                return null;
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
-        }
+        
 
         public async Task<string> GetTokenWithClientCredentialAsync()
         {
@@ -131,7 +116,7 @@ namespace TestApp.PCL
 
         public void ClearTokenCache()
         {
-            TokenCache.DefaultSharedUserTokenCache.Clear("7c7a2f70-caef-45c8-9a6c-091633501de4");
+            TokenCache.DefaultSharedUserTokenCache.Clear("CLIENT_ID");
         }
     }
 }

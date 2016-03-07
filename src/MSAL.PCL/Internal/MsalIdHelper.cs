@@ -16,8 +16,10 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -85,7 +87,16 @@ namespace Microsoft.Identity.Client.Internal
 
         public static string GetMsalVersion()
         {
-            return typeof(MsalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
+            string fullVersion = typeof(MsalIdHelper).GetTypeInfo().Assembly.FullName;
+            Regex regex = new Regex(@"Version=[\d]+.[\d+]+.[\d]+.[\d]+");
+            Match match = regex.Match(fullVersion);
+            if (match.Success)
+            {
+                string[] version = match.Groups[0].Value.Split(new[] { '=' }, StringSplitOptions.None);
+                return version[1];
+            }
+
+            return null;
         }
 
         public static string GetAssemblyFileVersion()
