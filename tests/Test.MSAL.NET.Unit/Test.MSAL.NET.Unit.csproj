@@ -107,6 +107,7 @@
     <Compile Include="TokenResponseTests.cs" />
     <Compile Include="PublicClientApplicationTests.cs" />
     <Compile Include="ConfidentialClientApplicationTests.cs" />
+    <Compile Include="LoggerCallbackTests.cs" />
     <Compile Include="UserRealDiscoveryResponseTests.cs" />
     <Compile Include="UnitTests.cs" />
   </ItemGroup>
