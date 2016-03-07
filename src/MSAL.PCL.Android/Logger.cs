@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using Android.Util;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
@@ -25,18 +26,30 @@ namespace Microsoft.Identity.Client
     {
         internal override void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
+            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), ex.ToString());
+            Log.Error(null, log);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, log);
         }
 
         internal override void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
+            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
+            Log.Verbose(null, log);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Verbose, log);
         }
 
         internal override void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
+            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
+            Log.Info(null, log);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Information, log);
         }
 
         internal override void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
+            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
+            Log.Warn(null, log);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Warning, log);
         }
     }
 }

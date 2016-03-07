@@ -17,7 +17,6 @@
 //----------------------------------------------------------------------
 
 using System;
-using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
@@ -33,33 +32,30 @@ namespace Microsoft.Identity.Client
 
         internal override void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            MsalEventSource.Error(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), ex.ToString()));
+            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), ex.ToString());
+            MsalEventSource.Error(log);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, log);
         }
 
         internal override void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            MsalEventSource.Verbose(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
+            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
+            MsalEventSource.Verbose(log);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Verbose, log);
         }
 
         internal override void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            MsalEventSource.Information(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
+            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
+            MsalEventSource.Information(log);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Information, log);
         }
 
         internal override void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            MsalEventSource.Warning(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
-        }
-
-        private static string GetCallerFilename(string callerFilePath)
-        {
-            return callerFilePath.Substring(callerFilePath.LastIndexOf("\\", StringComparison.Ordinal) + 1);
-        }
-
-        internal static string PrepareLogMessage(CallState callState, string classOrComponent, string message)
-        {
-            string correlationId = (callState != null) ? callState.CorrelationId.ToString() : string.Empty;
-            return string.Format(CultureInfo.CurrentCulture, "{0}: {1} - {2}: {3}", DateTime.UtcNow, correlationId, classOrComponent, message);
+            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
+            MsalEventSource.Warning(log);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Warning, log);
         }
     }
 }

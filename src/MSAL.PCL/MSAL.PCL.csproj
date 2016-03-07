@@ -66,6 +66,7 @@
     <Compile Include="Handlers\AcquireTokenOnBehalfHandler.cs" />
     <Compile Include="Handlers\AcquireTokenSilentHandler.cs" />
     <Compile Include="IClientAssertionCertificate.cs" />
+    <Compile Include="LoggerCallbackHandler.cs" />
     <Compile Include="MsalException.cs" />
     <Compile Include="Internal\MsalStringHelper.cs" />
     <Compile Include="Internal\MsalIdHelper.cs" />
