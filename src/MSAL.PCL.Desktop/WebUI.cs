@@ -45,15 +45,13 @@ namespace Microsoft.Identity.Client
                 bool isFirst = true;
                 foreach (var key in additionalHeaders.Keys)
                 {
-                    if (isFirst)
+                    if (!isFirst)
                     {
-                        builder.AppendFormat("{0}: {1}", key, additionalHeaders[key]);
-                        isFirst = false;
+                        builder.Append("\r\n");
                     }
-                    else
-                    {
-                        builder.AppendFormat("\r\n{0}: {1}", key, additionalHeaders[key]);
-                    }
+
+                    builder.AppendFormat("{0}: {1}", key, additionalHeaders[key]);
+                    isFirst = false;
                 }
             }
 
