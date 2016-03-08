@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string Thumbprint
         {
             // Thumbprint should be url encoded
-            get { return Base64UrlEncoder.Encode(this.Certificate.Thumbprint); }
+            get { return Base64UrlEncoder.Encode(this.Certificate.GetCertHash()); }
         }
     }
 }
