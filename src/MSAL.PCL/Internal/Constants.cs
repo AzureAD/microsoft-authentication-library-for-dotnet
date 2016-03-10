@@ -66,6 +66,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string AssemblyLoadFailedTemplate =
             "Loading an assembly required for the platform failed. Make sure assembly for the correct platform '{0}' exists";
 
+        public const string NonHttpsRedirectNotSupported = "Non-HTTPS url redirect is not supported in webview";
         public const string AuthenticationUiFailed = "The browser based authentication dialog failed to complete";
         public const string AuthorityInvalidUriFormat = "'authority' should be in Uri format";
         public const string AuthorityNotSupported = "'authority' is not supported";

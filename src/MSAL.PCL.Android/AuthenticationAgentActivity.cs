@@ -111,7 +111,8 @@ namespace Microsoft.Identity.Client
             }
 
             public override bool ShouldOverrideUrlLoading(WebView view, string url)
-            { 
+            {
+                Uri uri = new Uri(url);
                 if (url.StartsWith(BrokerConstants.BrowserExtPrefix))
                 {
                     PlatformPlugin.Logger.Verbose(null, "It is browser launch request");
@@ -131,7 +132,6 @@ namespace Microsoft.Identity.Client
 
                 if (url.StartsWith(BrokerConstants.PKeyAuthRedirect, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    Uri uri = new Uri(url);
                     string query = uri.Query;
                     if (query.StartsWith("?"))
                     {
@@ -152,12 +152,24 @@ namespace Microsoft.Identity.Client
                     return true;
                 }
 
+
+                if (!uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+                {
+                    AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
+                    result.Error = MsalError.NonHttpsRedirectNotSupported;
+                    result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
+                    callbackMethod(result);
+                    this.DismissViewController(true, null);
+                    return false;
+                }
+
+
                 return false;
             }
 
             private void OpenLinkInBrowser(string url, Activity activity)
             {
-                String link = url
+                string link = url
                         .Replace(BrokerConstants.BrowserExtPrefix, "https://");
                 Intent intent = new Intent(Intent.ActionView, Android.Net.Uri.Parse(link));
                 activity.StartActivity(intent);

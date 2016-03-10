@@ -47,6 +47,12 @@ namespace Microsoft.Identity.Client.Internal
         /// </summary>
         public const string AuthenticationFailed = "authentication_failed";
 
+
+        /// <summary>
+        /// Invalid credential type.
+        /// </summary>
+        public const string NonHttpsRedirectNotSupported= "non_https_redirect_failed";
+
         /// <summary>
         /// Authentication canceled.
         /// </summary>

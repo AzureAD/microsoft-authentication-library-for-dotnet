@@ -179,17 +179,30 @@ namespace Microsoft.Identity.Client
 
         private bool CheckForClosingUrl(Uri url)
         {
+            bool readyToClose = false;
+
             if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) && url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath))
             {
                 this.Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
-                this.StopWebBrowser();
-
-                // in this handler object could be already disposed, so it should be the last method
-                this.OnClosingUrl();
-                return true;
+                readyToClose = true;
             }
 
-            return false;
+            if (!url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+            {
+                this.Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
+                this.Result.Error = MsalError.NonHttpsRedirectNotSupported;
+                this.Result.ErrorDescription= MsalErrorMessage.NonHttpsRedirectNotSupported;
+                readyToClose = true;
+            }
+
+            if (readyToClose)
+            {
+                this.StopWebBrowser();
+                // in this handler object could be already disposed, so it should be the last method
+                this.OnClosingUrl();
+            }
+
+            return readyToClose;
         }
 
         private void StopWebBrowser()

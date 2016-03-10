@@ -34,9 +34,8 @@ namespace Microsoft.Identity.Client.Internal
     [DataContract]
     internal class AuthorizationResult
     {
-        internal AuthorizationResult(AuthorizationStatus status, string returnedUriInput)
+        internal AuthorizationResult(AuthorizationStatus status, string returnedUriInput):this(status)
         {
-            this.Status = status;
 
             if (this.Status == AuthorizationStatus.UserCancel)
             {
@@ -54,16 +53,22 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
+
+        internal AuthorizationResult(AuthorizationStatus status)
+        {
+            this.Status = status;
+        }
+
         public AuthorizationStatus Status { get; private set; }
 
         [DataMember]
         public string Code { get; private set; }
 
         [DataMember]
-        public string Error { get; private set; }
+        public string Error { get; set; }
 
         [DataMember]
-        public string ErrorDescription { get; private set; }
+        public string ErrorDescription { get; set; }
 
         public void ParseAuthorizeResponse(string webAuthenticationResult)
         {
