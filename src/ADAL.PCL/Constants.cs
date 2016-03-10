@@ -54,6 +54,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string Unknown = "unknown_error";
 
         /// <summary>
+        /// Non https redirect failed
+        /// </summary>
+        public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
+        /// <summary>
         /// Invalid argument.
         /// </summary>
         public const string InvalidArgument = "invalid_argument";
@@ -300,6 +304,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string AuthorityInvalidUriFormat = "'authority' should be in Uri format";
         public const string AuthorityNotInValidList = "'authority' is not in the list of valid addresses";
         public const string AuthorityValidationFailed = "Authority validation failed";
+        public const string NonHttpsRedirectNotSupported = "Non-HTTPS url redirect is not supported in webview";
         public const string AuthorityUriInsecure = "'authority' should use the 'https' scheme";
 
         public const string AuthorityUriInvalidPath =
