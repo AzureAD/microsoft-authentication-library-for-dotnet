@@ -194,7 +194,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             Task<AuthenticationResult> task = handler.RunAsync();
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
-            Assert.AreEqual("some-access-token", result.AccessToken);
+            Assert.AreEqual("some-access-token", result.Token);
             Assert.AreEqual("some-scope1 some-scope2", result.Scope.AsSingleString());
         }
 

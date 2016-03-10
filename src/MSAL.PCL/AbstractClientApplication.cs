@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
             {
                 if (this.UserTokenCache == null || this.UserTokenCache.Count == 0)
                 {
-                    PlatformPlugin.Logger.Information(null, "AccessToken cache is null or empty");
+                    PlatformPlugin.Logger.Information(null, "Token cache is null or empty");
                     return new List<User>();
                 }
 

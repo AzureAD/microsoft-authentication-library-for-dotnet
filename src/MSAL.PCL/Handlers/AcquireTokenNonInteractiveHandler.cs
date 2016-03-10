@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.Handlers
                     PlatformPlugin.Logger.Information(this.CallState, string.Format("WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustAddress.Uri, userRealmResponse.FederationMetadataUrl));
 
                     WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, this.userCredential, this.CallState).ConfigureAwait(false);
-                    PlatformPlugin.Logger.Information(this.CallState, string.Format("AccessToken of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType));
+                    PlatformPlugin.Logger.Information(this.CallState, string.Format("Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType));
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
                     this.userAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer, this.userCredential.UserName);

@@ -59,7 +59,7 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DefaultPolicy);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
-            Assert.IsNotNull("header.payload.signature", result.AccessToken);
+            Assert.IsNotNull("header.payload.signature", result.Token);
             Assert.AreEqual(TestConstants.DefaultScope.AsSingleString(), result.ScopeSet.AsSingleString());
 
             //make sure user token cache is empty
@@ -92,7 +92,7 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DefaultPolicy);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
-            Assert.IsNotNull("header.payload.signature", result.AccessToken);
+            Assert.IsNotNull("header.payload.signature", result.Token);
             Assert.AreEqual(TestConstants.DefaultScope.AsSingleString(), result.ScopeSet.AsSingleString());
 
             //make sure user token cache is empty

@@ -18,10 +18,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using System.Text;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
@@ -37,30 +34,30 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Creates result returned from AcquireToken. Except in advanced scenarios related to token caching, you do not need to create any instance of AuthenticationResult.
         /// </summary>
-        /// <param name="accessTokenType">Type of the Access AccessToken returned</param>
-        /// <param name="accessToken">The Access AccessToken requested</param>
-        /// <param name="expiresOn">The point in time in which the Access AccessToken returned in the AccessToken property ceases to be valid</param>
-        internal AuthenticationResult(string accessTokenType, string accessToken, DateTimeOffset expiresOn)
+        /// <param name="tokenType">Type of the Token returned</param>
+        /// <param name="token">The Token requested</param>
+        /// <param name="expiresOn">The point in time in which the Access Token returned in the Token property ceases to be valid</param>
+        internal AuthenticationResult(string tokenType, string token, DateTimeOffset expiresOn)
         {
-            this.AccessTokenType = accessTokenType;
-            this.AccessToken = accessToken;
+            this.TokenType = tokenType;
+            this.Token = token;
             this.ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
         }
 
         /// <summary>
-        /// Gets the type of the Access AccessToken returned. 
+        /// Gets the type of the Token returned. 
         /// </summary>
         [DataMember]
-        public string AccessTokenType { get; private set; }
+        public string TokenType { get; private set; }
 
         /// <summary>
-        /// Gets the Access AccessToken requested.
+        /// Gets the Access Token requested.
         /// </summary>
         [DataMember]
-        public string AccessToken { get; internal set; }
+        public string Token { get; internal set; }
 
         /// <summary>
-        /// Gets the point in time in which the Access AccessToken returned in the AccessToken property ceases to be valid.
+        /// Gets the point in time in which the Access Token returned in the Token property ceases to be valid.
         /// This value is calculated based on current UTC time measured locally and the value expiresIn received from the service.
         /// </summary>
         [DataMember]
@@ -74,7 +71,7 @@ namespace Microsoft.Identity.Client
 
 
         /// <summary>
-        /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is not returned by the service.
+        /// Gets an identifier for the family the token was acquired from. This property will be null if tenant information is not returned by the service.
         /// </summary>
         [DataMember]
         internal string FamilyId { get; set; }
@@ -87,7 +84,7 @@ namespace Microsoft.Identity.Client
         public User User { get; internal set; }
 
         /// <summary>
-        /// Gets the entire Id AccessToken if returned by the service or null if no Id AccessToken is returned.
+        /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
         [DataMember]
         public string IdToken { get; internal set; }
@@ -110,7 +107,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Created authorization header</returns>
         public string CreateAuthorizationHeader()
         {
-            return Oauth2AuthorizationHeader + this.AccessToken;
+            return Oauth2AuthorizationHeader + this.Token;
         }
 
         internal void UpdateTenantAndUser(string tenantId, string idToken, User otherUser)

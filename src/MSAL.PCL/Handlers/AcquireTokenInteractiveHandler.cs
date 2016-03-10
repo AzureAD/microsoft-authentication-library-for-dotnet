@@ -65,6 +65,7 @@ namespace Microsoft.Identity.Client.Handlers
             }
 
             ValidateScopeInput(this._additionalScope);
+
             this._authorizationParameters = parameters;
             this._redirectUriRequestParameter = PlatformPlugin.PlatformInformation.GetRedirectUriAsString(this._redirectUri, this.CallState);
             

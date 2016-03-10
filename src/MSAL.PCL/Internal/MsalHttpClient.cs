@@ -47,11 +47,6 @@ namespace Microsoft.Identity.Client.Internal
 
         public async Task<T> GetResponseAsync<T>(string endpointType)
         {
-            return await this.GetResponseAsync<T>(endpointType, true).ConfigureAwait(false);
-        }
-
-        private async Task<T> GetResponseAsync<T>(string endpointType, bool respondToDeviceAuthChallenge)
-        {
             T typedResponse = default(T);
             ClientMetrics clientMetrics = new ClientMetrics();
 
