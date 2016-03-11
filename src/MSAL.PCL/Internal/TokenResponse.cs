@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
@@ -46,6 +45,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string FamilyId = "foci";
         public const string IdToken = "id_token";
         public const string ExpiresIn = "expires_in";
+        public const string IdTokenExpiresIn = "id_token_expires_in";
         public const string Error = "error";
         public const string ErrorDescription = "error_description";
         public const string ErrorCodes = "error_codes";
@@ -72,10 +72,13 @@ namespace Microsoft.Identity.Client.Internal
         public string FamilyId { get; set; }
 
         [DataMember(Name = TokenResponseClaim.IdToken, IsRequired = false)]
-        public string IdTokenString { get; set; }
+        public string IdToken { get; set; }
 
         [DataMember(Name = TokenResponseClaim.ExpiresIn, IsRequired = false)]
         public long ExpiresIn { get; set; }
+
+        [DataMember(Name = TokenResponseClaim.IdTokenExpiresIn, IsRequired = false)]
+        public long IdTokenExpiresIn { get; set; }
 
         [DataMember(Name = TokenResponseClaim.Error, IsRequired = false)]
         public string Error { get; set; }
@@ -140,15 +143,25 @@ namespace Microsoft.Identity.Client.Internal
         public AuthenticationResultEx GetResultEx()
         {
             AuthenticationResultEx resultEx = null;
-
-            if (this.AccessToken != null)
+            
+            if (!string.IsNullOrEmpty(this.AccessToken) || !string.IsNullOrEmpty(this.IdToken))
             {
-                DateTimeOffset expiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn);
-                var result = new AuthenticationResult(this.TokenType, this.AccessToken, expiresOn);
+                DateTimeOffset accessTokenExpiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn);
+                DateTimeOffset idTokenExpiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(this.IdTokenExpiresIn);
+
+                AuthenticationResult result = null;
+                if (!string.IsNullOrEmpty(this.AccessToken))
+                {
+                    result = new AuthenticationResult(this.TokenType, this.AccessToken, accessTokenExpiresOn);
+                }
+                else
+                {
+                    result = new AuthenticationResult(this.TokenType, this.IdToken, idTokenExpiresOn);
+                }
+                
 
                 result.FamilyId = FamilyId;
-
-                IdToken idToken = IdToken.Parse(this.IdTokenString);
+                IdToken idToken = Internal.IdToken.Parse(this.IdToken);
                 if (idToken != null)
                 {
                     string tenantId = idToken.TenantId;
@@ -168,7 +181,7 @@ namespace Microsoft.Identity.Client.Internal
                         idToken.HomeObjectId = uniqueId;
                     }
 
-                    result.UpdateTenantAndUser(tenantId, this.IdTokenString,
+                    result.UpdateTenantAndUser(tenantId, this.IdToken,
                         new User
                         {
                             UniqueId = uniqueId,

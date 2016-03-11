@@ -73,7 +73,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(2, cache.Count);
-            Assert.AreEqual(result.AccessToken, "some-access-token");
+            Assert.AreEqual(result.Token, "some-access-token");
 
             //both cache entry authorities are TestConstants.DefaultAuthorityHomeTenant
             foreach (var item in cache.ReadItems(TestConstants.DefaultClientId))

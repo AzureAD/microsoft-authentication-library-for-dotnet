@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
             this.HomeObjectId = key.HomeObjectId;
             this.TenantId = result.TenantId;
             this.ExpiresOn = result.ExpiresOn;
-            this.AccessToken = result.AccessToken;
+            this.Token = result.Token;
             this.User = result.User;
             this.Policy = key.Policy;
 
@@ -108,9 +108,9 @@ namespace Microsoft.Identity.Client
         internal string HomeObjectId { get; set; }
 
         /// <summary>
-        ///     Gets the Access AccessToken requested.
+        ///     Gets the Access Token requested.
         /// </summary>
-        public string AccessToken { get; internal set; }
+        public string Token { get; internal set; }
 
         /// <summary>
         ///     Gets the entire Profile Info if returned by the service or null if no Id Token is returned.

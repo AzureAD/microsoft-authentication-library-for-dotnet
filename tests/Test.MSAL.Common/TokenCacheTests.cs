@@ -56,7 +56,7 @@ namespace Test.MSAL.Common.Unit
                 TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(resultEx);
             Assert.IsNotNull(resultEx.Result);
-            Assert.IsNull(resultEx.Result.AccessToken);
+            Assert.IsNull(resultEx.Result.Token);
             Assert.AreEqual(resultEx.RefreshToken, "someRT");
         }
         
@@ -83,7 +83,7 @@ namespace Test.MSAL.Common.Unit
                 TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(resultEx);
             Assert.IsNotNull(resultEx.Result);
-            Assert.IsNull(resultEx.Result.AccessToken);
+            Assert.IsNull(resultEx.Result.Token);
             Assert.AreEqual(resultEx.RefreshToken, "someRT");
         }
 
@@ -111,7 +111,7 @@ namespace Test.MSAL.Common.Unit
                 TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(resultEx);
             Assert.IsNotNull(resultEx.Result);
-            Assert.IsNull(resultEx.Result.AccessToken);
+            Assert.IsNull(resultEx.Result.Token);
             Assert.AreEqual(resultEx.RefreshToken, "someRT");
         }
 
@@ -128,7 +128,7 @@ namespace Test.MSAL.Common.Unit
                 TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(resultEx);
             Assert.IsTrue(
-                resultEx.Result.AccessToken.Contains(string.Format("Scope:{0},",
+                resultEx.Result.Token.Contains(string.Format("Scope:{0},",
                     TestConstants.DefaultScope.AsSingleString())));
 
             scope.Add("r1/unique-scope");
@@ -160,7 +160,7 @@ namespace Test.MSAL.Common.Unit
                     TestConstants.DefaultClientId, user, TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(resultEx);
             Assert.IsNotNull(resultEx.Result);
-            Assert.IsNull(resultEx.Result.AccessToken);
+            Assert.IsNull(resultEx.Result.Token);
             Assert.AreEqual(resultEx.Result.ExpiresOn, DateTimeOffset.MinValue);
             Assert.AreEqual(resultEx.RefreshToken, "someRT");
         }
@@ -228,7 +228,7 @@ namespace Test.MSAL.Common.Unit
                 TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(resultEx);
             Assert.IsNotNull(resultEx.Result);
-            Assert.IsNotNull(resultEx.Result.AccessToken);
+            Assert.IsNotNull(resultEx.Result.Token);
         }
 
         [TestMethod]
@@ -248,7 +248,7 @@ namespace Test.MSAL.Common.Unit
                     TestConstants.DefaultClientId + "more", user, TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(resultEx);
             Assert.IsNotNull(resultEx.Result);
-            Assert.IsNull(resultEx.Result.AccessToken);
+            Assert.IsNull(resultEx.Result.Token);
             Assert.AreEqual(resultEx.Result.ExpiresOn, DateTimeOffset.MinValue);
             Assert.AreEqual(resultEx.RefreshToken, "someRT");
         }
@@ -371,7 +371,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
 
-            Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
+            Assert.AreEqual(key.ToString(), resultEx.Result.Token);
         }
 
 
@@ -399,7 +399,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
             Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
-            Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
+            Assert.AreEqual(key.ToString(), resultEx.Result.Token);
         }
 
 
@@ -429,7 +429,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
             Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
-            Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
+            Assert.AreEqual(key.ToString(), resultEx.Result.Token);
         }
 
 
@@ -456,7 +456,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
             Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
-            Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
+            Assert.AreEqual(key.ToString(), resultEx.Result.Token);
 
             scope.Add("unique-scope");
             item = cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityHomeTenant,
@@ -475,7 +475,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
             Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
-            Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
+            Assert.AreEqual(key.ToString(), resultEx.Result.Token);
 
 
             //invoke multiple tokens error
@@ -549,7 +549,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(TestConstants.DefaultDisplayableId, key.DisplayableId);
             Assert.AreEqual(TestConstants.DefaultHomeObjectId, key.HomeObjectId);
             Assert.AreEqual(TestConstants.DefaultPolicy, key.Policy);
-            Assert.AreEqual(key.ToString(), resultEx.Result.AccessToken);
+            Assert.AreEqual(key.ToString(), resultEx.Result.Token);
         }
 
         [TestMethod]
@@ -648,9 +648,9 @@ namespace Test.MSAL.Common.Unit
                     Assert.IsTrue(result2.Result.ScopeSet.Contains(result1Scope));
                 }
 
-                Assert.AreEqual(result1.Result.AccessToken, result2.Result.AccessToken);
+                Assert.AreEqual(result1.Result.Token, result2.Result.Token);
                 Assert.AreEqual(result1.Result.FamilyId, result2.Result.FamilyId);
-                Assert.AreEqual(result1.Result.AccessTokenType, result2.Result.AccessTokenType);
+                Assert.AreEqual(result1.Result.TokenType, result2.Result.TokenType);
                 Assert.AreEqual(result1.Result.IdToken, result2.Result.IdToken);
                 Assert.AreEqual(result1.Result.User.DisplayableId, result2.Result.User.DisplayableId);
                 Assert.AreEqual(result1.Result.User.UniqueId, result2.Result.User.UniqueId);
@@ -709,8 +709,8 @@ namespace Test.MSAL.Common.Unit
                     null, TestConstants.DefaultPolicy, null);
 
             Assert.AreEqual(resultEx.RefreshToken, resultExOut.RefreshToken);
-            Assert.AreEqual(resultEx.Result.AccessToken, resultExOut.Result.AccessToken);
-            Assert.AreEqual(resultEx.Result.AccessTokenType, resultExOut.Result.AccessTokenType);
+            Assert.AreEqual(resultEx.Result.Token, resultExOut.Result.Token);
+            Assert.AreEqual(resultEx.Result.TokenType, resultExOut.Result.TokenType);
             Assert.AreEqual(resultEx.Result.User.UniqueId, resultExOut.Result.User.UniqueId);
             Assert.AreEqual(resultEx.Result.User.DisplayableId, resultExOut.Result.User.DisplayableId);
             Assert.AreEqual(resultEx.Result.User.HomeObjectId, resultExOut.Result.User.HomeObjectId);
@@ -829,8 +829,8 @@ namespace Test.MSAL.Common.Unit
                     null, TestConstants.DefaultPolicy, null);
 
             Assert.AreEqual(resultEx.RefreshToken, resultExOut.RefreshToken);
-            Assert.AreEqual(resultEx.Result.AccessToken, resultExOut.Result.AccessToken);
-            Assert.AreEqual(resultEx.Result.AccessTokenType, resultExOut.Result.AccessTokenType);
+            Assert.AreEqual(resultEx.Result.Token, resultExOut.Result.Token);
+            Assert.AreEqual(resultEx.Result.TokenType, resultExOut.Result.TokenType);
             Assert.AreEqual(resultEx.Result.User.UniqueId, resultExOut.Result.User.UniqueId);
             Assert.AreEqual(resultEx.Result.User.DisplayableId, resultExOut.Result.User.DisplayableId);
             Assert.AreEqual(resultEx.Result.User.HomeObjectId, resultExOut.Result.User.HomeObjectId);
@@ -940,8 +940,8 @@ namespace Test.MSAL.Common.Unit
 
         private static bool AreAuthenticationResultsEqual(AuthenticationResult result1, AuthenticationResult result2)
         {
-            return (AreStringsEqual(result1.AccessToken, result2.AccessToken)
-                    && AreStringsEqual(result1.AccessTokenType, result2.AccessTokenType)
+            return (AreStringsEqual(result1.Token, result2.Token)
+                    && AreStringsEqual(result1.TokenType, result2.TokenType)
                     && AreStringsEqual(result1.IdToken, result2.IdToken)
                     && AreStringsEqual(result1.TenantId, result2.TenantId)
                     && (result1.User == null || result2.User == null ||

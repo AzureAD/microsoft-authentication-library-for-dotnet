@@ -49,7 +49,7 @@ namespace TestApp.PCL
             this.ValidUserName = @"<REPLACE>";
             this.ValidDefaultRedirectUri = new Uri("https://login.live.com/");
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
-            this.ValidRedirectUriForConfidentialClient = new Uri("https://confidential.foobar.com");
+            this.ValidRedirectUriForConfidentialClient = new Uri("https://confidential.foo-bar.com");
             this.ValidPassword = "<REPLACE>";
             this.ValidScope = new[] {"https://graph.microsoft.com/user.read"};
 
@@ -70,7 +70,7 @@ namespace TestApp.PCL
                 app = new PublicClientApplication("https://login.windows.net/common", "CLIENT_ID");
                 var result = await app.AcquireTokenSilentAsync(Sts.ValidScope, Sts.ValidUserName);
 
-                return result.AccessToken;
+                return result.Token;
             }
             catch (Exception ex)
             {
@@ -88,7 +88,7 @@ namespace TestApp.PCL
 /*                app = new AuthenticationContext(Sts.Authority, true);
                 var result = await app.AcquireTokenAsync(Sts.ValidScope, Sts.ValidClientId, null, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
 
-                return result.AccessToken;*/
+                return result.Token;*/
                 return null;
             }
             catch (Exception ex)
@@ -105,7 +105,7 @@ namespace TestApp.PCL
 /*                app = new AuthenticationContext(Sts.Authority, true);
                 var result = await app.AcquireTokenAsync(Sts.ValidScope, new ClientCredential(Sts.ValidConfidentialClientId, Sts.ValidConfidentialClientSecret));
 
-                return result.AccessToken;*/
+                return result.Token;*/
                 return null;
             }
             catch (Exception ex)

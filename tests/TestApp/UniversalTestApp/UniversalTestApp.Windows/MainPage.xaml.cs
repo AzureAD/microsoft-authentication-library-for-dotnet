@@ -34,7 +34,7 @@ namespace UniversalTestApp
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
-            //this.AccessToken.Text = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(false));
+            //this.Token.Text = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(false));
         }
 
         private async void Button_Click_1(object sender, RoutedEventArgs e)

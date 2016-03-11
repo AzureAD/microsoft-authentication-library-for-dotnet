@@ -351,7 +351,7 @@ namespace Microsoft.Identity.Client
                 }
                 else if(tokenNearExpiry)
                 {
-                    resultEx.Result.AccessToken = null;
+                    resultEx.Result.Token = null;
                     PlatformPlugin.Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
                 }
                 else
@@ -362,7 +362,7 @@ namespace Microsoft.Identity.Client
                 }
 
                 // client credential tokens do not have associated refresh tokens.
-                if (resultEx.Result.AccessToken == null && resultEx.RefreshToken == null)
+                if (resultEx.Result.Token == null && resultEx.RefreshToken == null)
                 {
                     this.tokenCacheDictionary.Remove(cacheKey);
                     PlatformPlugin.Logger.Information(callState, "An old item was removed from the cache");

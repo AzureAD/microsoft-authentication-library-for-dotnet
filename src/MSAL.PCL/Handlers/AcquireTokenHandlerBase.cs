@@ -43,6 +43,9 @@ namespace Microsoft.Identity.Client.Handlers
                 (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(" ({0} items)", tokenCache.Count) : "null"));
 
             this.tokenCache = handlerData.TokenCache;
+            this.ClientKey = handlerData.ClientKey;
+            this.Policy = handlerData.Policy;
+            this.restrictToSingleUser = handlerData.RestrictToSingleUser;
 
             if (MsalStringHelper.IsNullOrEmpty(handlerData.Scope))
             {
@@ -52,13 +55,10 @@ namespace Microsoft.Identity.Client.Handlers
             this.Scope = handlerData.Scope.CreateSetFromArray();
             ValidateScopeInput(this.Scope);
 
-            this.ClientKey = handlerData.ClientKey;
-            this.Policy = handlerData.Policy;
 
             this.LoadFromCache = (tokenCache != null);
             this.StoreToCache = (tokenCache != null);
             this.SupportADFS = false;
-            this.restrictToSingleUser = handlerData.RestrictToSingleUser;
             
             if (this.tokenCache != null && (restrictToSingleUser && this.tokenCache.GetUniqueIdsFromCache(this.ClientKey.ClientId).Count() > 1))
             {
@@ -93,6 +93,7 @@ namespace Microsoft.Identity.Client.Handlers
         {
             HashSet<string> set = new HashSet<string>(inputScope.ToArray());
             set.UnionWith(OAuthValue.ReservedScopes.CreateSetFromArray());
+            set.Remove(this.ClientKey.ClientId);
             return set;
         }
 
@@ -102,6 +103,14 @@ namespace Microsoft.Identity.Client.Handlers
             if (scopesToValidate.Intersect(OAuthValue.ReservedScopes.CreateSetFromArray()).Any())
             {
                 throw new ArgumentException(string.Format("API does not accept '{0}' value as user-provided scopes", OAuthValue.ReservedScopes.AsSingleString()));
+            }
+
+            if (scopesToValidate.Contains(this.ClientKey.ClientId))
+            {
+                if (scopesToValidate.Count > 1)
+                {
+                    throw new ArgumentException("Client Id can only be provided as a single scope");
+                }
             }
         }
 
@@ -121,7 +130,7 @@ namespace Microsoft.Identity.Client.Handlers
                     ResultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope,
                         this.ClientKey.ClientId, this.User, this.Policy, this.CallState);
                     this.ValidateResult();
-                    if (ResultEx != null && (ResultEx.Result.AccessToken == null || ForceRefresh) && ResultEx.RefreshToken != null)
+                    if (ResultEx != null && (ResultEx.Result.Token == null || ForceRefresh) && ResultEx.RefreshToken != null)
 
                     {
                         ResultEx = await this.RefreshAccessTokenAsync(ResultEx).ConfigureAwait(false);
@@ -333,9 +342,9 @@ namespace Microsoft.Identity.Client.Handlers
 
         private void LogReturnedToken(AuthenticationResult result)
         {
-            if (result.AccessToken != null)
+            if (result.Token != null)
             {
-                string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.AccessToken);
+                string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.Token);
 
                 PlatformPlugin.Logger.Information(this.CallState, string.Format("=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tExpiration Time: {1}\n\tUser Hash: {2}\n\t",
                     accessTokenHash,

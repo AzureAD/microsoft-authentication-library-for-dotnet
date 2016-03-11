@@ -5,9 +5,10 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.MSAL.Common.Unit;
+using NSubstitute;
 using Test.MSAL.NET.Unit.Mocks;
 
 namespace Test.MSAL.NET.Unit
@@ -71,6 +72,61 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(users);
             Assert.AreEqual(2, users.Count());
         }
+
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void AcquireTokenIdTokenOnlyResponseTest()
+        {
+            MockWebUI webUi = new MockWebUI();
+            webUi.HeadersToValidate = new Dictionary<string, string>();
+            webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
+                TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
+
+            IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
+            mockFactory.CreateAuthenticationDialog(Arg.Any<IPlatformParameters>()).Returns(webUi);
+            PlatformPlugin.WebUIFactory = mockFactory;
+            
+            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessIdTokenResponseMessage()
+            };
+
+            // this is a flow where we pass client id as a scope
+            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+            Task<AuthenticationResult> task = app.AcquireTokenAsync(new string[] {TestConstants.DefaultClientId});
+            AuthenticationResult result = task.Result;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.Token, result.IdToken);
+            Assert.AreEqual(1, app.UserTokenCache.Count);
+            foreach (var item in app.UserTokenCache.ReadItems(TestConstants.DefaultClientId))
+            {
+                Assert.AreEqual(1, item.Scope.Count);
+                Assert.AreEqual(TestConstants.DefaultClientId, item.Scope.AsSingleString());
+            }
+
+            //call AcquireTokenSilent to make sure we get same token back and no call goes over network
+            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
+            };
+            task = app.AcquireTokenSilentAsync(new string[] { TestConstants.DefaultClientId });
+
+            AuthenticationResult result1 = task.Result;
+            Assert.IsNotNull(result1);
+            Assert.AreEqual(result1.Token, result1.IdToken);
+            Assert.AreEqual(result.Token, result1.Token);
+            Assert.AreEqual(result.IdToken, result1.IdToken);
+            Assert.AreEqual(1, app.UserTokenCache.Count);
+            foreach (var item in app.UserTokenCache.ReadItems(TestConstants.DefaultClientId))
+            {
+                Assert.AreEqual(1, item.Scope.Count);
+                Assert.AreEqual(TestConstants.DefaultClientId, item.Scope.AsSingleString());
+            }
+        }
+
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
