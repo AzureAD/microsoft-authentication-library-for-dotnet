@@ -52,7 +52,7 @@ namespace TestApp.PCL
             this.ValidUserName = @"<REPLACE>";
             this.ValidDefaultRedirectUri = new Uri("https://login.live.com/");
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
-            this.ValidRedirectUriForConfidentialClient = new Uri("https://confidential.foobar.com");
+            this.ValidRedirectUriForConfidentialClient = new Uri("https://confidential.foo-bar.com");
             this.ValidPassword = "<REPLACE>";
             this.ValidResource = "https://graph.windows.net";
 
