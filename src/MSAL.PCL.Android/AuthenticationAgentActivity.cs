@@ -155,12 +155,11 @@ namespace Microsoft.Identity.Client
 
                 if (!uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
                 {
-                    AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
-                    result.Error = MsalError.NonHttpsRedirectNotSupported;
-                    result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
-                    callbackMethod(result);
-                    this.DismissViewController(true, null);
-                    return false;
+                    UriBuilder errorUri = new UriBuilder(callback);
+                    errorUri.Query = string.Format("error={0}&error_description={1}",
+                        MsalError.NonHttpsRedirectNotSupported, MsalErrorMessage.NonHttpsRedirectNotSupported);
+                    this.Finish(view, errorUri.ToString());
+                    return true;
                 }
 
 
