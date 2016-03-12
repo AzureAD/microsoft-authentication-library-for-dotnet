@@ -57,6 +57,16 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result);
         }
 
+        public static async Task NonHttpsURLNegativeTest(Sts sts)
+        {
+            AuthenticationContextProxy.SetCredentials(sts.ValidUserName, sts.ValidPassword);
+            var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
+
+            // Obtain a token interactively.
+            AuthenticationResultProxy result =await  context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, UserIdentifier.AnyUser);
+            VerifyErrorDescriptionContains(result.ErrorDescription, "Non-HTTPS url redirect is not supported in webview");
+        }
+
         public static async Task AcquireTokenPositiveWithoutRedirectUriOrUserIdTestAsync(Sts sts)
         {
             AuthenticationContextProxy.SetCredentials(sts.ValidUserName, sts.ValidPassword);
