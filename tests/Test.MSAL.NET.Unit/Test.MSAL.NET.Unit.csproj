@@ -75,24 +75,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="..\Test.MSAL.Common\MsalTestsBase.cs">
-      <Link>Common\MsalTestsBase.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.MSAL.Common\CommonUnitTests.cs">
-      <Link>Common\CommonUnitTests.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.MSAL.Common\Log.cs">
-      <Link>Common\Log.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.MSAL.Common\Sts.cs">
-      <Link>Common\Sts.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.MSAL.Common\TestConstants.cs">
-      <Link>Common\TestConstants.cs</Link>
-    </Compile>
-    <Compile Include="..\Test.MSAL.Common\TokenCacheTests.cs">
-      <Link>TokenCacheTests.cs</Link>
-    </Compile>
+    <Compile Include="TokenCacheTests.cs" />
     <Compile Include="HandlersTests\AcquireTokenInteractiveHandlerTests.cs" />
     <Compile Include="HandlersTests\AcquireTokenSilentHandlerTests.cs" />
     <Compile Include="AuthenticationParametersTests.cs" />
@@ -109,7 +92,6 @@
     <Compile Include="ConfidentialClientApplicationTests.cs" />
     <Compile Include="LoggerCallbackTests.cs" />
     <Compile Include="UserRealDiscoveryResponseTests.cs" />
-    <Compile Include="UnitTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\MSAL.PCL.Desktop\MSAL.PCL.Desktop.csproj">
@@ -141,11 +123,11 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Test.MSAL.Common\Certs\valid_cert.pfx">
+    <None Include="Resources\Certs\valid_cert.pfx">
       <Link>Resources\valid_cert.pfx</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="..\Test.MSAL.Common\Certs\valid_cert2.pfx">
+    <None Include="Resources\Certs\valid_cert2.pfx">
       <Link>Resources\valid_cert2.pfx</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
