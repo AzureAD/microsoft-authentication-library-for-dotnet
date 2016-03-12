@@ -99,6 +99,18 @@ namespace Microsoft.Identity.Client
                     return false;
                 }
 
+
+                if (!request.Url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+                {
+                    AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
+                    result.Error = MsalError.NonHttpsRedirectNotSupported;
+                    result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
+                    callbackMethod(result);
+                    this.DismissViewController(true, null);
+                    return false;
+                }
+
+
                 return true;
             };
 
