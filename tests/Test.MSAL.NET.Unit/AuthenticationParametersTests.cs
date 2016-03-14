@@ -31,8 +31,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public void AuthenticationParametersTest()
         {
-            Sts sts = new Sts();
-            string authority = sts.Authority + "/oauth2/authorize";
+            string authority = "https://login.windows.net/common/oauth2/authorize";
             const string Resource = "test_resource";
 
             AuthenticationParameters authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(@"Bearer authorization_uri=""{0}"",resource_id=""{1}""", authority, Resource));
