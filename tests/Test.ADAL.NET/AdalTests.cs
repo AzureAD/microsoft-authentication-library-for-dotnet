@@ -78,7 +78,7 @@ namespace Test.ADAL.Common
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority, TokenCacheType.Null);
 
             string authorizationCode = await context.AcquireAccessCodeAsync(sts.ValidResource, sts.ValidConfidentialClientId, sts.ValidRedirectUriForConfidentialClient, sts.ValidUserId);
-            var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, ExportX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword), sts.ConfidentialClientCertificatePassword);
+            var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, CreateX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             RecorderJwtId.JwtIdIndex = 1;
             AuthenticationResultProxy result = await context.AcquireTokenByAuthorizationCodeAsync(authorizationCode, sts.ValidRedirectUriForConfidentialClient, certificate, sts.ValidResource);
             VerifySuccessResult(sts, result);
@@ -139,7 +139,7 @@ namespace Test.ADAL.Common
 
             AuthenticationResultProxy result = null;
 
-            var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, ExportX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword), sts.ConfidentialClientCertificatePassword);
+            var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, CreateX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             RecorderJwtId.JwtIdIndex = 2;
             result = await context.AcquireTokenAsync(sts.ValidResource, certificate);
             Verify.IsNotNullOrEmptyString(result.AccessToken);
@@ -150,12 +150,12 @@ namespace Test.ADAL.Common
             result = await context.AcquireTokenAsync(sts.ValidResource, (ClientAssertionCertificate)null);
             VerifyErrorResult(result, Sts.InvalidArgumentError, "clientCertificate");
 
-            var invalidCertificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, ExportX509Certificate(sts.InvalidConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword), sts.InvalidConfidentialClientCertificatePassword);
+            var invalidCertificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, CreateX509Certificate(sts.InvalidConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             RecorderJwtId.JwtIdIndex = 3;
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCertificate);
             VerifyErrorResult(result, Sts.InvalidClientError, null, 0, "50012");
 
-            invalidCertificate = new ClientAssertionCertificate(sts.InvalidClientId, ExportX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword), sts.ConfidentialClientCertificatePassword);
+            invalidCertificate = new ClientAssertionCertificate(sts.InvalidClientId, CreateX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             RecorderJwtId.JwtIdIndex = 4;
             result = await context.AcquireTokenAsync(sts.ValidResource, invalidCertificate);
             VerifyErrorResult(result, Sts.UnauthorizedClient, null, 400, "70001");
@@ -340,7 +340,7 @@ namespace Test.ADAL.Common
             AuthenticationResultProxy result = await context.AcquireTokenAsync(sts.ValidConfidentialClientId, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, result);
 
-            var clientCertificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, ExportX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword), sts.ConfidentialClientCertificatePassword);
+            var clientCertificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, CreateX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             RecorderJwtId.JwtIdIndex = 5;
             AuthenticationResultProxy result2 = await context.AcquireTokenAsync(null, clientCertificate, result.AccessToken);
             VerifyErrorResult(result2, Sts.InvalidArgumentError, "resource");
@@ -373,7 +373,7 @@ namespace Test.ADAL.Common
             result2 = await context.AcquireTokenAsync(sts.ValidResource, clientCertificate, result.AccessToken + "x");
             VerifyErrorResult(result2, "invalid_grant", "invalid signature");
 
-            var invalidClientCredential = new ClientAssertionCertificate(sts.ValidConfidentialClientId.Replace('1', '2'), ExportX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword), sts.ConfidentialClientCertificatePassword);
+            var invalidClientCredential = new ClientAssertionCertificate(sts.ValidConfidentialClientId.Replace('1', '2'), CreateX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             RecorderJwtId.JwtIdIndex = 7;
             result2 = await context.AcquireTokenAsync(sts.ValidResource, invalidClientCredential, result.AccessToken);
             VerifyErrorResult(result2, Sts.UnauthorizedClient, "not found");
@@ -440,7 +440,7 @@ namespace Test.ADAL.Common
             const int ParallelCount = 20;
             AuthenticationResultProxy[] result = new AuthenticationResultProxy[ParallelCount];
 
-            var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, ExportX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword), sts.ConfidentialClientCertificatePassword);
+            var certificate = new ClientAssertionCertificate(sts.ValidConfidentialClientId, CreateX509Certificate(sts.ConfidentialClientCertificateName, sts.ConfidentialClientCertificatePassword));
             RecorderJwtId.JwtIdIndex = 8;
 
             Parallel.For(0, ParallelCount, async (i) =>
@@ -770,14 +770,13 @@ namespace Test.ADAL.Common
                 audience += @"/";
             }
 
-            ClientAssertion assertion = AdalFriend.CreateJwt(ExportX509Certificate(certificateName, certificatePassword), certificatePassword, clientId, audience);
+            ClientAssertion assertion = AdalFriend.CreateJwt(CreateX509Certificate(certificateName, certificatePassword), certificatePassword, clientId, audience);
             return new ClientAssertion(clientId, assertion.Assertion);
         }
 
-        private static byte[] ExportX509Certificate(string filename, string password)
+        private static X509Certificate2 CreateX509Certificate(string filename, string password)
         {
-            var x509Certificate = new X509Certificate2(filename, password, X509KeyStorageFlags.Exportable);
-            return x509Certificate.Export(X509ContentType.Pkcs12, password);           
+            return new X509Certificate2(filename, password);
         }
     }
 }

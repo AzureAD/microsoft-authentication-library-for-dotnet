@@ -17,21 +17,24 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Globalization;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
     /// Containing certificate used to create client assertion.
     /// </summary>
-    public sealed class ClientAssertionCertificate
+    public sealed class ClientAssertionCertificate : IClientAssertionCertificate
     {
+        private string clientId = null;
+
         /// <summary>
         /// Constructor to create credential with client Id and certificate.
         /// </summary>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="certificate">The certificate used as credential.</param>
-        /// <param name="password">The certificate password</param>
-        public ClientAssertionCertificate(string clientId, byte[] certificate, string password)
+        public ClientAssertionCertificate(string clientId, X509Certificate2 certificate)
         {
             if (string.IsNullOrWhiteSpace(clientId))
             {
@@ -43,15 +46,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentNullException("certificate");
             }
 
-            if (string.IsNullOrWhiteSpace(password))
+            if (certificate.PublicKey.Key.KeySize < MinKeySizeInBits)
             {
-                throw new ArgumentNullException("password");
+                throw new ArgumentOutOfRangeException("certificate",
+                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.CertificateKeySizeTooSmallTemplate, MinKeySizeInBits));
             }
 
-            this.ClientId = clientId;
+            this.clientId = clientId;
             this.Certificate = certificate;
-            this.Password = password;
         }
+
+
+        /// <summary>
+        /// Gets the identifier of the client requesting the token.
+        /// </summary>
+        public string ClientId { get { return clientId; } }
 
         /// <summary>
         /// Gets minimum X509 certificate key size in bits
@@ -62,20 +71,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Gets the identifier of the client requesting the token.
-        /// </summary>
-        public string ClientId { get; private set; }
-
-        /// <summary>
         /// Gets the certificate used as credential.
         /// </summary>
-        public byte[] Certificate { get; private set; }
+        public X509Certificate2 Certificate { get; private set; }
 
-        public string Password { get; private set; }
-
-        internal byte[] Sign(string message)
+        public byte[] Sign(string message)
         {
-            return PlatformPlugin.CryptographyHelper.SignWithCertificate(message, this.Certificate, this.Password);
+            CryptographyHelper helper = new CryptographyHelper();
+            return helper.SignWithCertificate(message, this.Certificate);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Thumbprint
+        {
+            // Thumbprint should be url encoded
+            get { return Base64UrlEncoder.Encode(this.Certificate.GetCertHash()); }
         }
     }
 }

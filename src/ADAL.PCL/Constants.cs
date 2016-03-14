@@ -54,6 +54,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string Unknown = "unknown_error";
 
         /// <summary>
+        /// Non https redirect failed
+        /// </summary>
+        public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
+        /// <summary>
         /// Invalid argument.
         /// </summary>
         public const string InvalidArgument = "invalid_argument";
@@ -300,6 +304,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string AuthorityInvalidUriFormat = "'authority' should be in Uri format";
         public const string AuthorityNotInValidList = "'authority' is not in the list of valid addresses";
         public const string AuthorityValidationFailed = "Authority validation failed";
+        public const string NonHttpsRedirectNotSupported = "Non-HTTPS url redirect is not supported in webview";
         public const string AuthorityUriInsecure = "'authority' should use the 'https' scheme";
 
         public const string AuthorityUriInvalidPath =
@@ -314,7 +319,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             "No identity provider email address suffix matches the provided address";
 
         public const string EncodedTokenTooLong = "Encoded token size is beyond the upper limit";
-        public const string FailedToAcquireTokenSilently = "Failed to acquire token silently. Call method AcquireToken";
+        public const string FailedToAcquireTokenSilently = "Failed to acquire token silently as no token was found in the cache. Call method AcquireToken";
         public const string FailedToRefreshToken = "Failed to refresh token";
         public const string FederatedServiceReturnedErrorTemplate = "Federated service at {0} returned error: {1}";
         public const string IdentityProtocolLoginUrlNull = "The LoginUrl property in identityProvider cannot be null";

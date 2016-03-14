@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly JWTPayload payload;
 
-        public JsonWebToken(ClientAssertionCertificate certificate, string audience)
+        public JsonWebToken(IClientAssertionCertificate certificate, string audience)
         {
             DateTime validFrom = PlatformPlugin.HttpClientFactory.GetJsonWebTokenValidFrom();
 
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                            };
         }
 
-        public ClientAssertion Sign(ClientAssertionCertificate credential)
+        public ClientAssertion Sign(IClientAssertionCertificate credential)
         {
             // Base64Url encoded header and claims
             string token = this.Encode(credential);     
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return Base64UrlEncoder.Encode(segment);
         }
 
-        private static string EncodeHeaderToJson(ClientAssertionCertificate credential)
+        private static string EncodeHeaderToJson(IClientAssertionCertificate credential)
         {
             JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(credential);
             return JsonHelper.EncodeToJson(header);
@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return (long)(diff.TotalSeconds);
         }
 
-        private string Encode(ClientAssertionCertificate credential)
+        private string Encode(IClientAssertionCertificate credential)
         {
             // Header segment
             string jsonHeader = EncodeHeaderToJson(credential);
@@ -133,9 +133,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataContract]
         internal class JWTHeader
         {
-            protected ClientAssertionCertificate Credential { get; private set; }
+            protected IClientAssertionCertificate Credential { get; private set; }
 
-            public JWTHeader(ClientAssertionCertificate credential)
+            public JWTHeader(IClientAssertionCertificate credential)
             {
                 this.Credential = credential;
             }
@@ -195,7 +195,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataContract]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
-            public JWTHeaderWithCertificate(ClientAssertionCertificate credential)
+            public JWTHeaderWithCertificate(IClientAssertionCertificate credential)
                 : base(credential)
             {
             }
@@ -206,7 +206,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 get
                 {
                     // Thumbprint should be url encoded
-                    return PlatformPlugin.CryptographyHelper.GetX509CertificateThumbprint(this.Credential);
+                    return this.Credential.Thumbprint;
                 }
 
                 set

@@ -36,17 +36,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        public byte[] SignWithCertificate(string message, byte[] rawData, string password)
+        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
-            X509Certificate2 x509Certificate = new X509Certificate2(rawData, password);
-
-            if (x509Certificate.PublicKey.Key.KeySize < ClientAssertionCertificate.MinKeySizeInBits)
+            if (certificate.PublicKey.Key.KeySize < ClientAssertionCertificate.MinKeySizeInBits)
             {
                 throw new ArgumentOutOfRangeException("rawData",
                     string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.CertificateKeySizeTooSmallTemplate, ClientAssertionCertificate.MinKeySizeInBits));
             }
 
-            X509AsymmetricSecurityKey x509Key = new X509AsymmetricSecurityKey(x509Certificate);
+            X509AsymmetricSecurityKey x509Key = new X509AsymmetricSecurityKey(certificate);
             RSACryptoServiceProvider rsa = x509Key.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, true) as RSACryptoServiceProvider;
 
             RSACryptoServiceProvider newRsa = null;
@@ -65,14 +63,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     newRsa.Dispose();
                 }
             }
-        }
-
-        public string GetX509CertificateThumbprint(ClientAssertionCertificate credential)
-        {
-            X509Certificate2 x509Certificate = new X509Certificate2(credential.Certificate, credential.Password);
-
-            // Thumbprint should be url encoded
-            return Base64UrlEncoder.Encode(x509Certificate.GetCertHash());            
         }
 
         // Copied from ACS code

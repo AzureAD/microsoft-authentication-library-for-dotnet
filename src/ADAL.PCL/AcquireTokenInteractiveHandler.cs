@@ -73,8 +73,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.SupportADFS = true;
 
             this.brokerParameters["force"] = "NO";
-            this.brokerParameters["username"] = userId.Id;
+            if (userId != UserIdentifier.AnyUser)
+            {
+                this.brokerParameters["username"] = userId.Id;
+            }
+            else
+            {
+                this.brokerParameters["username"] = string.Empty;
+            }
             this.brokerParameters["username_type"] = userId.Type.ToString();
+
             this.brokerParameters["redirect_uri"] = redirectUri.AbsoluteUri;
             this.brokerParameters["extra_qp"] = extraQueryParameters;
             PlatformPlugin.BrokerHelper.PlatformParameters = authorizationParameters;

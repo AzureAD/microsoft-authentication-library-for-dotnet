@@ -18,8 +18,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.Common.Unit
@@ -427,7 +429,7 @@ namespace Test.ADAL.Common.Unit
 
             for (int i = 0; i < MaxItemCount; i++)
             {
-                keys[i] = GenerateRandomTokenCacheKey(MaxFieldSize);
+                keys[i] = GenerateRandomTokenCacheKey();
 
                 values[i] = CreateCacheValue(null, null);
                 AddToDictionary(tokenCache, keys[i], values[i]);
@@ -477,9 +479,8 @@ namespace Test.ADAL.Common.Unit
                 tokenCache.Clear();
                 for (int count = 0; count < Rand.Next(1, MaxItemCount); count++)
                 {
-                    TokenCacheKey key = GenerateRandomTokenCacheKey(MaxFieldSize);
-
-                    AuthenticationResultEx result = GenerateRandomCacheValue(MaxFieldSize);
+                    TokenCacheKey key = GenerateRandomTokenCacheKey();
+                    AuthenticationResultEx result = GenerateRandomCacheValue(MaxFieldSize, key.UniqueId, key.DisplayableId);
                     AddToDictionary(tokenCache, key, result);
                 }
 
@@ -493,6 +494,13 @@ namespace Test.ADAL.Common.Unit
                     double diff = Math.Abs((item.ExpiresOn - item2.ExpiresOn).TotalSeconds);
                     Verify.IsLessThanOrEqual(diff, 1.0);
                 }
+
+                foreach (var key in tokenCache.tokenCacheDictionary.Keys)
+                {
+                    AuthenticationResultEx result2 = tokenCache2.tokenCacheDictionary[key];
+                    VerifyAuthenticationResultExsAreEqual(tokenCache.tokenCacheDictionary[key], result2);
+                }
+
             }
         }
 
@@ -599,8 +607,9 @@ namespace Test.ADAL.Common.Unit
         private static bool AreAuthenticationResultExsEqual(AuthenticationResultEx resultEx1, AuthenticationResultEx resultEx2)
         {
             return AreAuthenticationResultsEqual(resultEx1.Result, resultEx2.Result) &&
-                resultEx1.RefreshToken == resultEx2.RefreshToken &&
-                resultEx1.IsMultipleResourceRefreshToken == resultEx2.IsMultipleResourceRefreshToken;
+                   resultEx1.RefreshToken == resultEx2.RefreshToken &&
+                   resultEx1.IsMultipleResourceRefreshToken == resultEx2.IsMultipleResourceRefreshToken &&
+                   resultEx1.UserAssertionHash == resultEx2.UserAssertionHash;
         }
 
         private static bool AreAuthenticationResultsEqual(AuthenticationResult result1, AuthenticationResult result2)
@@ -644,17 +653,17 @@ namespace Test.ADAL.Common.Unit
 
             return result;
         }
-        private static TokenCacheKey GenerateRandomTokenCacheKey(int maxFieldSize)
+        private static TokenCacheKey GenerateRandomTokenCacheKey()
         {
-            return new TokenCacheKey(GenerateRandomString(maxFieldSize),
-                GenerateRandomString(maxFieldSize),
-                GenerateRandomString(maxFieldSize),
+            return new TokenCacheKey(Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(),
                 TokenSubjectType.User,
-                GenerateRandomString(maxFieldSize),
-                GenerateRandomString(maxFieldSize));
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString());
         }
 
-        public static AuthenticationResultEx GenerateRandomCacheValue(int maxFieldSize)
+        public static AuthenticationResultEx GenerateRandomCacheValue(int maxFieldSize, string uniqueId, string displayableId)
         {
             return new AuthenticationResultEx
             {
@@ -663,10 +672,21 @@ namespace Test.ADAL.Common.Unit
                     GenerateRandomString(maxFieldSize),
                     new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)))
                 {
-                    UserInfo = new UserInfo { UniqueId = GenerateRandomString(maxFieldSize), DisplayableId = GenerateRandomString(maxFieldSize) }
+                    UserInfo = new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId }
                 },
-                RefreshToken = GenerateRandomString(maxFieldSize)
+                RefreshToken = GenerateRandomString(maxFieldSize),
+                UserAssertionHash = Guid.NewGuid().ToString()
             };
+        }
+
+        public static void TokenCacheBackCompatTest(byte[] oldcache)
+        {
+            TokenCache cache = new TokenCache(oldcache);
+            Verify.IsNotNull(cache);
+            foreach (var value in cache.tokenCacheDictionary.Values)
+            {
+                Verify.IsNull(value.UserAssertionHash);
+            }
         }
     }
 }

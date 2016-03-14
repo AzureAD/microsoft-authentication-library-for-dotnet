@@ -105,6 +105,7 @@
     <Compile Include="..\Test.ADAL.Common\Verify.cs">
       <Link>Common\Verify.cs</Link>
     </Compile>
+    <Compile Include="AcquireTokenSilentTests.cs" />
     <Compile Include="AuthenticationParametersTests.cs" />
     <Compile Include="NonInteractiveTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -141,6 +142,9 @@
       <Link>TestMetadata.xml</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
+    </Content>
+    <Content Include="oldcache.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="TestMex.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

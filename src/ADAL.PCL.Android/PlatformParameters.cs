@@ -25,18 +25,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
-        private PlatformParameters()
+        public PlatformParameters(Activity callerActivity):this(callerActivity, true)
         {
-            SkipBroker = true;
         }
 
-        public PlatformParameters(Activity callerActivity)
+        public PlatformParameters(Activity callerActivity, bool skipBroker)
         {
             this.CallerActivity = callerActivity;
-        }
-
-        public PlatformParameters(Activity callerActivity, bool skipBroker) : this(callerActivity)
-        {
             SkipBroker = skipBroker;
         }
 

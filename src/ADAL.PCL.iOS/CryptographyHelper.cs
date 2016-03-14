@@ -32,15 +32,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
             }
         }
-
-        public byte[] SignWithCertificate(string message, byte[] rawData, string password)
-        {
-            throw new NotImplementedException();            
-        }
-
-        public string GetX509CertificateThumbprint(ClientAssertionCertificate credential)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

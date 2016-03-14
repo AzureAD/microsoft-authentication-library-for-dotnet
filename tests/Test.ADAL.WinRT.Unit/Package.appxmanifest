@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest">
-  <Identity Name="5a240727-0a1a-4fda-8875-9261c8c2a35b" Publisher="CN=afshins" Version="1.0.0.0" />
+  <Identity Name="5a240727-0a1a-4fda-8875-9261c8c2a35b" Publisher="CN=kpanwar" Version="1.0.0.0" />
   <Properties>
     <DisplayName>Test.ADAL.WinRT.Unit</DisplayName>
     <PublisherDisplayName>AdalDev</PublisherDisplayName>

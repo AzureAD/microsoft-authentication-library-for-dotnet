@@ -16,27 +16,17 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Globalization;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class CryptographyHelper : ICryptographyHelper
+    public interface IClientAssertionCertificate
     {
-        private RSA _rsa;
-        private HashAlgorithmName _hashAlgorithm = HashAlgorithmName.SHA256;
-        private ECDsa _ecdsaCng;
+        byte[] Sign(string message);
 
-        public string CreateSha256Hash(string input)
-        {
-            using (SHA256 sha = SHA256.Create())
-            {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
-            }
-        }
+        /// <summary>
+        /// Gets the identifier of the client requesting the token.
+        /// </summary>
+        string ClientId { get; }
+
+        string Thumbprint { get; }
     }
 }

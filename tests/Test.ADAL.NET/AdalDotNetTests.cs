@@ -78,6 +78,15 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
+        [Description("Negative Test for non https redirect")]
+        [TestCategory("AdalDotNet")]
+        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "Sts", DataAccessMethod.Sequential)]
+        public async Task NonHttpsRedirectTest()
+        {
+            await AdalTests.NonHttpsURLNegativeTest(Sts);
+        }
+
+        [TestMethod]
         [Description("Positive Test for AcquireToken")]
         [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockSts", DataAccessMethod.Sequential)]

@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -24,6 +25,7 @@ using Test.ADAL.Common.Unit;
 namespace Test.ADAL.NET.Unit
 {
     [TestClass]
+    [DeploymentItem("oldcache.txt")]
     public class TokenCacheUnitTests
     {
         [TestMethod]
@@ -73,5 +75,15 @@ namespace Test.ADAL.NET.Unit
         {
             TokenCacheTests.TokenCacheSerializationTest();
         }
+
+
+        [TestMethod]
+        [Description("Test for Token Cache backwasrd compatiblity where new attribute is added in AuthenticationResultEx")]
+        [TestCategory("AdalDotNetUnit")]
+        public void TokenCacheBackCompatTest()
+        {
+                TokenCacheTests.TokenCacheBackCompatTest(File.ReadAllBytes("oldcache.txt"));
+        }
+        
     }
 }
