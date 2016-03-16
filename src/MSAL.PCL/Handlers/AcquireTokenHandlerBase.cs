@@ -94,6 +94,13 @@ namespace Microsoft.Identity.Client.Handlers
             HashSet<string> set = new HashSet<string>(inputScope.ToArray());
             set.UnionWith(OAuthValue.ReservedScopes.CreateSetFromArray());
             set.Remove(this.ClientKey.ClientId);
+
+            if (!string.IsNullOrEmpty(this.Policy))
+            {
+                set.Remove("email");
+                set.Remove("profile");
+            }
+
             return set;
         }
 
