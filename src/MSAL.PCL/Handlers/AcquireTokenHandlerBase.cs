@@ -95,6 +95,7 @@ namespace Microsoft.Identity.Client.Handlers
             set.UnionWith(OAuthValue.ReservedScopes.CreateSetFromArray());
             set.Remove(this.ClientKey.ClientId);
 
+            //special case b2c scenarios to not send email and profile as scopes for BUILD 
             if (!string.IsNullOrEmpty(this.Policy))
             {
                 set.Remove("email");
