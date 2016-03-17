@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 canClose = true;
             }
             
-            if (!url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+            if (!canClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
             {
                 this.Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
                 this.Result.Error = AdalError.NonHttpsRedirectNotSupported;
