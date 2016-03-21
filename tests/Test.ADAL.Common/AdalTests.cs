@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -200,7 +201,7 @@ namespace Test.ADAL.Common
             if (sts.Type != StsType.ADFS)
             {
                 Uri uri = new Uri(sts.Authority);
-                context = new AuthenticationContextProxy(string.Format("{0}://{1}/non_existing_tenant", uri.Scheme, uri.Authority));
+                context = new AuthenticationContextProxy(string.Format(CultureInfo.CurrentCulture, " {0}://{1}/non_existing_tenant", uri.Scheme, uri.Authority));
                 result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
                 VerifyErrorResult(result, Sts.AuthenticationCanceledError, null);
             }
@@ -627,7 +628,7 @@ namespace Test.ADAL.Common
             Log.Comment("Verifying success result...");
             if (result.Status != AuthenticationStatusProxy.Success)
             {
-                Log.Comment(string.Format("Unexpected '{0}' error from service: {1}", result.Error, result.ErrorDescription));
+                Log.Comment(string.Format(CultureInfo.CurrentCulture, " Unexpected '{0}' error from service: {1}", result.Error, result.ErrorDescription));
             }
 
             Verify.AreEqual(AuthenticationStatusProxy.Success, result.Status, "AuthenticationResult.Status");
@@ -672,7 +673,7 @@ namespace Test.ADAL.Common
 
         public static void VerifyErrorResult(AuthenticationResultProxy result, string error, string errorDescriptionKeyword, int statusCode = 0, string serviceErrorCode = null)
         {
-            Log.Comment(string.Format("Verifying error result '{0}':'{1}'...", result.Error, result.ErrorDescription));
+            Log.Comment(string.Format(CultureInfo.CurrentCulture, " Verifying error result '{0}':'{1}'...", result.Error, result.ErrorDescription));
             Verify.AreNotEqual(AuthenticationStatusProxy.Success, result.Status);
             Verify.IsNullOrEmptyString(result.AccessToken);
             Verify.IsNotNullOrEmptyString(result.Error);
@@ -706,14 +707,14 @@ namespace Test.ADAL.Common
             List<AuthenticationResultProxy> results = await AcquireTokenPositiveWithCacheAsync(sts, context);
 
             Verify.AreEqual(results[0].AccessToken, results[1].AccessToken, "AuthenticationResult.AccessToken");
-            Log.Comment(string.Format("First ExpiresOn: {0}", results[0].ExpiresOn));
-            Log.Comment(string.Format("Second ExpiresOn: {0}", results[1].ExpiresOn));
+            Log.Comment(string.Format(CultureInfo.CurrentCulture, " First ExpiresOn: {0}", results[0].ExpiresOn));
+            Log.Comment(string.Format(CultureInfo.CurrentCulture, " Second ExpiresOn: {0}", results[1].ExpiresOn));
             return results;
         }
 
         private static void VerifyErrorDescriptionContains(string errorDescription, string keyword)
         {
-            Log.Comment(string.Format("Verifying error description '{0}'...", errorDescription));
+            Log.Comment(string.Format(CultureInfo.CurrentCulture, " Verifying error description '{0}'...", errorDescription));
             Verify.IsGreaterThanOrEqual(errorDescription.IndexOf(keyword, StringComparison.OrdinalIgnoreCase), 0);
         }
 

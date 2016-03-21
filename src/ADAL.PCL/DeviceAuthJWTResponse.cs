@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -79,7 +80,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public string GetResponseToSign()
         {
-            return String.Format("{0}.{1}", 
+            return String.Format(CultureInfo.CurrentCulture, "{0}.{1}", 
                 Base64UrlEncoder.Encode(JsonHelper.EncodeToJson(header).ToByteArray()), 
                 Base64UrlEncoder.Encode(JsonHelper.EncodeToJson(payload).ToByteArray()));
         }

@@ -18,6 +18,7 @@
 
 using System;
 using System.Drawing;
+using System.Globalization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -96,7 +97,7 @@ namespace Test.ADAL.NET.WindowsForms
 
         private async Task RunTestSyncOrAsync(TestMethod testMethod, TestMethodAsync testMethodAsync, StsType stsType)
         {
-            this.AppendText(string.Format("{0}: ", (testMethod != NullTestMethod) ? testMethod.Method.Name : testMethodAsync.Method.Name));
+            this.AppendText(string.Format(CultureInfo.CurrentCulture, " {0}: ", (testMethod != NullTestMethod) ? testMethod.Method.Name : testMethodAsync.Method.Name));
             try
             {
                 Sts sts = StsFactory.CreateSts(stsType);
@@ -120,7 +121,7 @@ namespace Test.ADAL.NET.WindowsForms
             }
             catch (Exception ex)
             {
-                this.AppendText(string.Format("FAILED with exception '{0}'!\n", ex), Color.Red);
+                this.AppendText(string.Format(CultureInfo.CurrentCulture, " FAILED with exception '{0}'!\n", ex), Color.Red);
             }
         }
 

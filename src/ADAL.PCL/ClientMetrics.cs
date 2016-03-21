@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -105,7 +106,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
 
                     parameters[ClientMetricsHeaderLastRequest] = pendingClientMetrics.lastCorrelationId.ToString();
-                    parameters[ClientMetricsHeaderLastResponseTime] = pendingClientMetrics.lastResponseTime.ToString();
+                    parameters[ClientMetricsHeaderLastResponseTime] = pendingClientMetrics.lastResponseTime.ToString(CultureInfo.CurrentCulture);
                     parameters[ClientMetricsHeaderLastEndpoint] = pendingClientMetrics.lastEndpoint;
 
                     pendingClientMetrics = null;

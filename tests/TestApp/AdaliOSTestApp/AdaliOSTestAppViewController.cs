@@ -47,8 +47,6 @@ namespace AdaliOSTestApp
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-
-            AdalInitializer.Initialize();
         }
 
         public override void ViewWillAppear(bool animated)
@@ -81,10 +79,10 @@ namespace AdaliOSTestApp
                 TokenBroker tokenBroker = new TokenBroker();
 
                 sts.Authority = "https://login.microsoftonline.com/common";
-                sts.ValidClientId = "b92e0ba5-f86e-4411-8e18-6b5f928d968a";
-                sts.ValidResource = "https://msdevex-my.sharepoint.com";
-                sts.ValidUserName = "user@msdevex.onmicrosoft.com";
-                sts.ValidNonExistingRedirectUri = new Uri("adaliosapp://com.your-company.adaliostestapp");
+                sts.ValidClientId = "<CLIENT_ID>";
+                sts.ValidResource = "<RESOURCE>";
+                sts.ValidUserName = "<USER>";
+                sts.ValidNonExistingRedirectUri = new Uri("REDIRECT_URI");
                 tokenBroker.Sts = sts;
                 string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this, false));
                 ReportLabel.Text = token;
@@ -102,10 +100,10 @@ namespace AdaliOSTestApp
                 ReportLabel.Text = string.Empty;
                 TokenBroker tokenBroker = new TokenBroker();
                 sts.Authority = "https://login.microsoftonline.com/common";
-                sts.ValidClientId = "b92e0ba5-f86e-4411-8e18-6b5f928d968a";
-                sts.ValidResource = "https://msdevex-my.sharepoint.com";
-                sts.ValidUserName = "user@msdevex.onmicrosoft.com";
-                sts.ValidNonExistingRedirectUri = new Uri("adaliosapp://com.your-company.adaliostestapp");
+                sts.ValidClientId = "<CLIENT_ID>";
+                sts.ValidResource = "<RESOURCE>";
+                sts.ValidUserName = "<USER>";
+                sts.ValidNonExistingRedirectUri = new Uri("REDIRECT_URI");
                 tokenBroker.Sts = sts;
                 string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this, false));
                 ReportLabel.Text = token;

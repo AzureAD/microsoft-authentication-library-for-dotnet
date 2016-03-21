@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -65,7 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     if (deviceCodeRequestParameters.ContainsKey(kvp.Key))
                     {
-                        throw new AdalException(AdalError.DuplicateQueryParameter, string.Format(AdalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
+                        throw new AdalException(AdalError.DuplicateQueryParameter, string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
                     }
                 }
 
@@ -95,7 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (this.authenticator.AuthorityType == AuthorityType.ADFS)
             {
                 throw new AdalException(AdalError.InvalidAuthorityType,
-                    string.Format(AdalErrorMessage.InvalidAuthorityTypeTemplate, this.authenticator.Authority));
+                    string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.InvalidAuthorityTypeTemplate, this.authenticator.Authority));
             }
         }
 

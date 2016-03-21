@@ -34,9 +34,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class WebUI : IWebUI
     {
-
-        private IAccountManagerFuture accountManagerFeature;
-
         private static SemaphoreSlim returnedUriReady;
         private static AuthorizationResult authorizationResult;
         private readonly PlatformParameters parameters;

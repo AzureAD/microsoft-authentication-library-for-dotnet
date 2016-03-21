@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Security.Authentication.Web;
@@ -95,7 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     result = new AuthorizationResult(AuthorizationStatus.Success, webAuthenticationResult.ResponseData);
                     break;
                 case WebAuthenticationStatus.ErrorHttp:
-                    result = new AuthorizationResult(AuthorizationStatus.ErrorHttp, webAuthenticationResult.ResponseErrorDetail.ToString());
+                    result = new AuthorizationResult(AuthorizationStatus.ErrorHttp, webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.CurrentCulture));
                     break;
                 case WebAuthenticationStatus.UserCancel:
                     result = new AuthorizationResult(AuthorizationStatus.UserCancel, null);

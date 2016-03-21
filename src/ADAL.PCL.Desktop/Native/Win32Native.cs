@@ -103,7 +103,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
         ///     message table.
         /// </summary>
         [SecurityCritical]
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Safe to expose")]
         internal static string FormatMessageFromLibrary(int message, string library)
         {

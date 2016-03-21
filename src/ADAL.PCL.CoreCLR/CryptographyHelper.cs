@@ -16,27 +16,14 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-using System.Globalization;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class CryptographyHelper : ICryptographyHelper
     {
-        private RSA _rsa;
-        private HashAlgorithmName _hashAlgorithm = HashAlgorithmName.SHA256;
-        private ECDsa _ecdsaCng;
 
         public string CreateSha256Hash(string input)
         {
-            using (SHA256 sha = SHA256.Create())
-            {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
-            }
+            return null;
         }
     }
 }

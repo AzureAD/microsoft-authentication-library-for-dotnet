@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -113,7 +114,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     try
                     {
-                        throw new HttpRequestException(string.Format("Response status code does not indicate success: {0} ({1}).", (int)webResponse.StatusCode, webResponse.StatusCode));
+                        throw new HttpRequestException(string.Format(CultureInfo.CurrentCulture, " Response status code does not indicate success: {0} ({1}).", (int)webResponse.StatusCode, webResponse.StatusCode));
                     }
                     catch (HttpRequestException ex)
                     {
@@ -156,13 +157,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Guid correlationIdInResponse;
                     if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
                     {
-                        PlatformPlugin.Logger.Warning(CallState, string.Format("Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
+                        PlatformPlugin.Logger.Warning(CallState, string.Format(CultureInfo.CurrentCulture, "Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
                     }
                     else if (correlationIdInResponse != this.CallState.CorrelationId)
                     {
                         PlatformPlugin.Logger.Warning(
                             this.CallState,
-                            string.Format("Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, CallState.CorrelationId));
+                            string.Format(CultureInfo.CurrentCulture, "Returned correlation id '{0}' does not match the sent correlation id '{1}'", correlationIdHeader, CallState.CorrelationId));
                     }
 
                     break;

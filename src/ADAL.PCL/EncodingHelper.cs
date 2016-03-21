@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -64,7 +65,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             StringBuilder builder = new StringBuilder();
             foreach (var key in input.Keys)
             {
-                builder.AppendFormat("{0}={1}&", key, UrlEncode(input[key]));
+                builder.AppendFormat(CultureInfo.CurrentCulture, "{0}={1}&", key, UrlEncode(input[key]));
             }
 
             builder.Remove(builder.Length - 1, 1);
@@ -103,7 +104,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     if (response.ContainsKey(key) && callState != null)
                     {
-                        PlatformPlugin.Logger.Warning(callState, string.Format("Key/value pair list contains redundant key '{0}'.", key));
+                        PlatformPlugin.Logger.Warning(callState, string.Format(CultureInfo.CurrentCulture, "Key/value pair list contains redundant key '{0}'.", key));
                     }
 
                     response[key] = value;
@@ -273,7 +274,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private static void AddKeyValueString(StringBuilder messageBuilder, string key, char[] value)
         {
             string delimiter = (messageBuilder.Length == 0) ? string.Empty : "&";
-            messageBuilder.AppendFormat("{0}{1}=", delimiter, key);
+            messageBuilder.AppendFormat(CultureInfo.CurrentCulture, "{0}{1}=", delimiter, key);
             messageBuilder.Append(value);
         }
 

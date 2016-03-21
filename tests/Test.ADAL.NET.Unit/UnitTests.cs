@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
@@ -64,7 +65,7 @@ namespace Test.ADAL.NET.Unit
             const string ClientId = "client_id";
             const string AdditionalParameter = "additional_parameter";
             const string AdditionalParameter2 = "additional_parameter2";
-            string expectedString = string.Format("client_id=client_id&{0}={1}&{2}={3}", AdditionalParameter, EncodingHelper.UrlEncode(ComplexString), AdditionalParameter2, EncodingHelper.UrlEncode(ComplexString2));
+            string expectedString = string.Format(CultureInfo.CurrentCulture, " client_id=client_id&{0}={1}&{2}={3}", AdditionalParameter, EncodingHelper.UrlEncode(ComplexString), AdditionalParameter2, EncodingHelper.UrlEncode(ComplexString2));
 
             var param = new DictionaryRequestParameters(null, new ClientKey(ClientId));
             param[AdditionalParameter] = ComplexString;

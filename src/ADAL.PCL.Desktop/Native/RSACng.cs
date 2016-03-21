@@ -117,7 +117,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
         /// <exception cref="ArgumentException">if <paramref name="key" /> is not an RSA key</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="key" /> is null</exception>
         [SecurityCritical]
-        [SecuritySafeCritical]
         public RSACng(CngKey key)
         {
             if (key == null)
@@ -185,8 +184,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
         public CngKey Key
         {
             [SecurityCritical]
-            [SecuritySafeCritical]
-            [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
             [SecurityPermission(SecurityAction.Assert, UnmanagedCode = true)]
             get
             {
@@ -255,7 +252,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
         public CngProvider Provider
         {
             [SecurityCritical]
-            [SecuritySafeCritical]
             get
             { return Key.Provider; }
         }
@@ -363,15 +359,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
         /// </summary>
         private HashAlgorithm CreateSignatureHashObject()
         {
-            if (m_signatureHashAlgorithm == CngAlgorithm.MD5)
-            {
-                return new MD5Cng();
-            }
-            else if (m_signatureHashAlgorithm == CngAlgorithm.Sha1)
-            {
-                return new SHA1Cng();
-            }
-            else if (m_signatureHashAlgorithm == CngAlgorithm.Sha256)
+            if (m_signatureHashAlgorithm == CngAlgorithm.Sha256)
             {
                 return new SHA256Cng();
             }
@@ -481,7 +469,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
         ///      This method will demand KeyContainerPermission if the key being used is not ephemeral.
         /// </permission>
         [SecurityCritical]
-        [SecuritySafeCritical]
         public byte[] SignHash(byte[] hash, CngAlgorithm hashAlgorithm)
         {
             if (hash == null)

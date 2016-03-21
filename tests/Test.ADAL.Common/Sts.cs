@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.Common
@@ -54,7 +55,7 @@ namespace Test.ADAL.Common
                     sts = new AadPasswordGrantSts();
                     break;
                 default:
-                    throw new ArgumentException(string.Format("Unsupported STS type '{0}'", stsType));
+                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, " Unsupported STS type '{0}'", stsType));
             }
 
             return sts;
@@ -235,10 +236,10 @@ namespace Test.ADAL.Common
             this.ValidNonExistingRedirectUri = new Uri("http://foo-bar.com");
             this.ValidLoggedInFederatedUserName = "dummy\\dummy";
             string[] segments = this.ValidLoggedInFederatedUserName.Split(new[] { '\\' });
-            this.ValidLoggedInFederatedUserId = string.Format("{0}@microsoft.com", (segments.Length == 2) ? segments[1] : segments[0]);
+            this.ValidLoggedInFederatedUserId = string.Format(CultureInfo.CurrentCulture, " {0}@microsoft.com", (segments.Length == 2) ? segments[1] : segments[0]);
 
             this.TenantName = "aadadfs.onmicrosoft.com";
-            this.Authority = string.Format("https://login.windows.net/{0}/", this.TenantName);
+            this.Authority = string.Format(CultureInfo.CurrentCulture, " https://login.windows.net/{0}/", this.TenantName);
             this.TenantlessAuthority = "https://login.windows.net/Common";
             this.Type = StsType.AAD;
             this.ValidClientId = "4b8d1b32-ee16-4b30-9b5d-e374c43deb31";

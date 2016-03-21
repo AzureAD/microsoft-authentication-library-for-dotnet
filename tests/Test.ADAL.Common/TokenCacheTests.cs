@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -54,16 +55,16 @@ namespace Test.ADAL.Common.Unit
             Log.Comment("====== Creating a set of keys and values for the test...");
             TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts", ValidResource, ValidClientId, TokenSubjectType.User, null, DisplayableId);
             var value = CreateCacheValue(key.UniqueId, key.DisplayableId);
-            Log.Comment(string.Format("Cache Key (with User): {0}", key));
-            Log.Comment(string.Format("Cache Value 1: {0}", value));
+            Log.Comment(string.Format(CultureInfo.CurrentCulture, " Cache Key (with User): {0}", key));
+            Log.Comment(string.Format(CultureInfo.CurrentCulture, " Cache Value 1: {0}", value));
             TokenCacheKey key2 = new TokenCacheKey("https://localhost/MockSts", InvalidResource, ValidClientId, TokenSubjectType.User, null, DisplayableId);
             var value2 = CreateCacheValue(null, DisplayableId);
-            Log.Comment(string.Format("Cache Key (with User): {0}", key));
-            Log.Comment(string.Format("Cache Value 2: {0}", value2));
+            Log.Comment(string.Format(CultureInfo.CurrentCulture, " Cache Key (with User): {0}", key));
+            Log.Comment(string.Format(CultureInfo.CurrentCulture, " Cache Value 2: {0}", value2));
             TokenCacheKey userlessKey = new TokenCacheKey("https://localhost/MockSts", ValidResource, ValidClientId, TokenSubjectType.User, null, null);
             var userlessValue = CreateCacheValue(null, null);
-            Log.Comment(string.Format("Cache Key (withoutUser): {0}", userlessKey));
-            Log.Comment(string.Format("Cache Value 3: {0}", userlessValue));
+            Log.Comment(string.Format(CultureInfo.CurrentCulture, " Cache Key (withoutUser): {0}", userlessKey));
+            Log.Comment(string.Format(CultureInfo.CurrentCulture, " Cache Value 3: {0}", userlessValue));
 
             TokenCacheKey incorrectUserKey = new TokenCacheKey("https://localhost/MockSts", InvalidResource, ValidClientId, TokenSubjectType.User, null, "testuser2@microsoft.com");
 
@@ -506,7 +507,7 @@ namespace Test.ADAL.Common.Unit
 
         public static AuthenticationResultEx CreateCacheValue(string uniqueId, string displayableId)
         {
-            string refreshToken = string.Format("RefreshToken{0}", Rand.Next());
+            string refreshToken = string.Format(CultureInfo.CurrentCulture, " RefreshToken{0}", Rand.Next());
             var result = new AuthenticationResult(null, ValidAccessToken, new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
                 {
                     UserInfo = new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId }
