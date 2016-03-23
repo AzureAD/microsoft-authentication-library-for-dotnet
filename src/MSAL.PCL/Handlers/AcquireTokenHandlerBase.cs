@@ -334,7 +334,9 @@ namespace Microsoft.Identity.Client.Handlers
             {
                 TokenCache = this.tokenCache,
                 Scope = this.Scope.ToArray(),
-                ClientId = this.ClientKey.ClientId
+                ClientId = this.ClientKey.ClientId,
+                User = this.User,
+                Policy = this.Policy
             });
         }
 
@@ -344,7 +346,9 @@ namespace Microsoft.Identity.Client.Handlers
             {
                 TokenCache = this.tokenCache,
                 Scope = this.Scope.ToArray(),
-                ClientId = this.ClientKey.ClientId
+                ClientId = this.ClientKey.ClientId,
+                User = this.User,
+                Policy = this.Policy
             });
         }
 
