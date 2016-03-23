@@ -16,12 +16,11 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
-using System;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class CryptographyHelper : ICryptographyHelper
     {
+
         public string CreateSha256Hash(string input)
         {
             return null;

@@ -42,7 +42,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
         CngKey Key
         {
             [SecurityCritical]
-            [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
             get;
         }
     }

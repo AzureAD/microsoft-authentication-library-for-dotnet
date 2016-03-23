@@ -16,6 +16,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -124,7 +125,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return PlatformPlugin.DeviceAuthHelper.CanHandleDeviceAuthChallenge &&
                    respondToDeviceAuthChallenge &&
                    (response.Headers.ContainsKey(WwwAuthenticateHeader) &&
-                    response.Headers[WwwAuthenticateHeader].StartsWith(PKeyAuthName)) &&
+                    response.Headers[WwwAuthenticateHeader].StartsWith(PKeyAuthName, StringComparison.CurrentCulture)) &&
                    endpointType.Equals(ClientMetricsEndpointType.Token);
         }
 

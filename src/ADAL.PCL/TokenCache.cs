@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -134,11 +135,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 BinaryWriter writer = new BinaryWriter(stream);
                 writer.Write(SchemaVersion);
-                PlatformPlugin.Logger.Information(null, string.Format("Serializing token cache with {0} items.", this.tokenCacheDictionary.Count));
+                PlatformPlugin.Logger.Information(null, string.Format(CultureInfo.CurrentCulture, "Serializing token cache with {0} items.", this.tokenCacheDictionary.Count));
                 writer.Write(this.tokenCacheDictionary.Count);
                 foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> kvp in this.tokenCacheDictionary)
                 {
-                    writer.Write(string.Format("{1}{0}{2}{0}{3}{0}{4}", Delimiter, kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId, (int)kvp.Key.TokenSubjectType));
+                    writer.Write(string.Format(CultureInfo.CurrentCulture, "{1}{0}{2}{0}{3}{0}{4}", Delimiter, kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId, (int)kvp.Key.TokenSubjectType));
                     writer.Write(kvp.Value.Serialize());
                 }
 
@@ -184,12 +185,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     string[] kvpElements = keyString.Split(new[] { Delimiter }, StringSplitOptions.None);
                     AuthenticationResultEx resultEx = AuthenticationResultEx.Deserialize(reader.ReadString());
-                    TokenCacheKey key = new TokenCacheKey(kvpElements[0], kvpElements[1], kvpElements[2], (TokenSubjectType)int.Parse(kvpElements[3]), resultEx.Result.UserInfo);
+                    TokenCacheKey key = new TokenCacheKey(kvpElements[0], kvpElements[1], kvpElements[2], (TokenSubjectType)int.Parse(kvpElements[3], CultureInfo.CurrentCulture), resultEx.Result.UserInfo);
 
                     this.tokenCacheDictionary.Add(key, resultEx);
                 }
 
-                PlatformPlugin.Logger.Information(null, string.Format("Deserialized {0} items to token cache.", count));
+                PlatformPlugin.Logger.Information(null, string.Format(CultureInfo.CurrentCulture, "Deserialized {0} items to token cache.", count));
             }
         }
 
@@ -256,9 +257,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
             this.OnBeforeAccess(args);
             this.OnBeforeWrite(args);
-            PlatformPlugin.Logger.Information(null, String.Format("Clearing Cache :- {0} items to be removed", this.Count));
+            PlatformPlugin.Logger.Information(null, String.Format(CultureInfo.CurrentCulture, "Clearing Cache :- {0} items to be removed", this.Count));
             this.tokenCacheDictionary.Clear();
-            PlatformPlugin.Logger.Information(null, String.Format("Successfully Cleared Cache"));
+            PlatformPlugin.Logger.Information(null, "Successfully Cleared Cache");
             this.HasStateChanged = true;
             this.OnAfterAccess(args);
         }
@@ -309,7 +310,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 else if (!cacheKey.ResourceEquals(resource))
                 {
                     PlatformPlugin.Logger.Verbose(callState, 
-                        string.Format("Multi resource refresh token for resource '{0}' will be used to acquire token for '{1}'", cacheKey.Resource, resource));
+                        string.Format(CultureInfo.CurrentCulture, "Multi resource refresh token for resource '{0}' will be used to acquire token for '{1}'", cacheKey.Resource, resource));
                     var newResultEx = new AuthenticationResultEx
                     {
                         Result = new AuthenticationResult(null, null, DateTimeOffset.MinValue),                            
@@ -322,7 +323,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 else
                 {
-                    PlatformPlugin.Logger.Verbose(callState, string.Format("{0} minutes left until token in cache expires", (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
+                    PlatformPlugin.Logger.Verbose(callState, string.Format(CultureInfo.CurrentCulture, "{0} minutes left until token in cache expires", (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
                 }                
 
                 if (resultEx.Result.AccessToken == null && resultEx.RefreshToken == null)

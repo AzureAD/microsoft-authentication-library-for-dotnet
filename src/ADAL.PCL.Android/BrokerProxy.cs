@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Android.Accounts;
@@ -377,7 +378,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string signatureDigest = this.GetCurrentSignatureForPackage(packageName);
             if (!String.IsNullOrEmpty(signatureDigest))
             {
-                return String.Format("{0}://{1}/{2}", RedirectUriScheme, EncodingHelper.UrlEncode(packageName), EncodingHelper.UrlEncode(signatureDigest));
+                return string.Format(CultureInfo.CurrentCulture, " {0}://{1}/{2}", RedirectUriScheme, EncodingHelper.UrlEncode(packageName), EncodingHelper.UrlEncode(signatureDigest));
             }
 
             return String.Empty;

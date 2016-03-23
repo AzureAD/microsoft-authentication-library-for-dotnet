@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -54,7 +55,7 @@ namespace Test.ADAL.WinRT.Unit
                         string[] segments = value.Substring(1)
                             .Split(new[] {Delimiter}, StringSplitOptions.RemoveEmptyEntries);
                         return new AuthorizationResult(AuthorizationStatus.Success,
-                            string.Format("https://dummy?error={0}&error_description={1}", segments[0], segments[1]));
+                            string.Format(CultureInfo.CurrentCulture, " https://dummy?error={0}&error_description={1}", segments[0], segments[1]));
                     }
                 }
 

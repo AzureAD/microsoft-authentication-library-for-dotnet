@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -68,9 +69,9 @@ namespace Test.ADAL.NET.Friend
                 const string DummyUri = "https://temp_uri";
                 switch (result.Status)
                 {
-                    case AuthorizationStatus.Success: value = string.Format("{0}?code={1}", DummyUri, result.Code); break;
+                    case AuthorizationStatus.Success: value = string.Format(CultureInfo.CurrentCulture, " {0}?code={1}", DummyUri, result.Code); break;
                     case AuthorizationStatus.UserCancel: value = string.Empty; break;
-                    case AuthorizationStatus.ProtocolError: value = string.Format("{0}?error={1}&error_description={2}", DummyUri, result.Error, result.ErrorDescription); break;
+                    case AuthorizationStatus.ProtocolError: value = string.Format(CultureInfo.CurrentCulture, " {0}?error={1}&error_description={2}", DummyUri, result.Error, result.ErrorDescription); break;
                     default: value = string.Empty; break;
                 }
 
@@ -87,7 +88,7 @@ namespace Test.ADAL.NET.Friend
                 }
                 else
                 {
-                    value = 'A' + string.Format("{0}{1}{2}{3}{4}", ex.ErrorCode, Delimiter, ex.Message, Delimiter, 
+                    value = 'A' + string.Format(CultureInfo.CurrentCulture, " {0}{1}{2}{3}{4}", ex.ErrorCode, Delimiter, ex.Message, Delimiter, 
                         (serviceException != null) ? serviceException.StatusCode : 0);
                 }
                 

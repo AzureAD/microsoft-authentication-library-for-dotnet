@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.IO;
 using System.Runtime.ConstrainedExecution;
@@ -34,43 +35,52 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    class DeviceAuthHelper : IDeviceAuthHelper
+    internal class DeviceAuthHelper : IDeviceAuthHelper
     {
-        public bool CanHandleDeviceAuthChallenge { get { return true; } }
+        public bool CanHandleDeviceAuthChallenge
+        {
+            get { return true; }
+        }
 
         public async Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
 
             X509Certificate2 certificate = FindCertificate(challengeData);
-                DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"], challengeData["nonce"], Convert.ToBase64String(certificate.GetRawCertData()));
-                CngKey key = GetCngPrivateKey(certificate);
-                byte[] sig = null;
-                             using (RSACng rsa = new RSACng(key))
-                             {
-                                 rsa.SignatureHashAlgorithm = CngAlgorithm.Sha256;
-                    sig = rsa.SignData(response.GetResponseToSign().ToByteArray());
-                             }
-                
-                string signedJwt = string.Format("{0}.{1}", response.GetResponseToSign(),
-                    Base64UrlEncoder.Encode(sig));
-                string authToken = string.Format("AuthToken=\"{0}\"", signedJwt);
-                Task<string> resultTask = Task.Factory.StartNew(() =>
-                {
-                    return string.Format(authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
-                });
+            DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
+                challengeData["nonce"], Convert.ToBase64String(certificate.GetRawCertData()));
+            CngKey key = GetCngPrivateKey(certificate);
+            byte[] sig = null;
+            using (RSACng rsa = new RSACng(key))
+            {
+                rsa.SignatureHashAlgorithm = CngAlgorithm.Sha256;
+                sig = rsa.SignData(response.GetResponseToSign().ToByteArray());
+            }
 
-                return await resultTask;
+            string signedJwt = string.Format(CultureInfo.CurrentCulture, " {0}.{1}", response.GetResponseToSign(),
+                Base64UrlEncoder.Encode(sig));
+            string authToken = string.Format(CultureInfo.CurrentCulture, " AuthToken=\"{0}\"", signedJwt);
+            Task<string> resultTask =
+                Task.Factory.StartNew(
+                    () =>
+                    {
+                        return string.Format(authHeaderTemplate, authToken, challengeData["Context"],
+                            challengeData["Version"]);
+                    });
+
+            return await resultTask;
         }
 
-        public bool CanUseBroker { get { return false; } }
+        public bool CanUseBroker
+        {
+            get { return false; }
+        }
 
         private X509Certificate2 FindCertificate(IDictionary<string, string> challengeData)
         {
             var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
             try
             {
-
                 store.Open(OpenFlags.ReadOnly);
                 var certCollection = store.Certificates;
                 X509Certificate2Collection signingCert = null;
@@ -99,7 +109,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (signingCert == null || signingCert.Count == 0)
                     {
                         throw new AdalException(AdalError.DeviceCertificateNotFound,
-                            string.Format(AdalErrorMessage.DeviceCertificateNotFoundTemplate, "Cert Authorities:" + challengeData["CertAuthorities"]));
+                            string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.DeviceCertificateNotFoundTemplate,
+                                "Cert Authorities:" + challengeData["CertAuthorities"]));
                     }
                 }
                 else
@@ -109,7 +120,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (signingCert.Count == 0)
                     {
                         throw new AdalException(AdalError.DeviceCertificateNotFound,
-                            string.Format(AdalErrorMessage.DeviceCertificateNotFoundTemplate, "Cert thumbprint:" + challengeData["CertThumbprint"]));
+                            string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.DeviceCertificateNotFoundTemplate,
+                                "Cert thumbprint:" + challengeData["CertThumbprint"]));
                     }
                 }
 
@@ -141,17 +153,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <permission cref="SecurityPermission">The caller of this method must have SecurityPermission/UnmanagedCode.</permission>
         [SecurityCritical]
-        [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Safe use of LinkDemand methods")]
+        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
+            Justification = "Safe use of LinkDemand methods")]
         public static CngKey GetCngPrivateKey(X509Certificate2 certificate)
         {
-/*
-            if (!certificate.HasPrivateKey || !certificate.HasCngKey())
-            {
-                return null;
-            }
-*/
-
             using (SafeCertContextHandle certContext = GetCertificateContext(certificate))
             using (SafeNCryptKeyHandle privateKeyHandle = X509Native.AcquireCngPrivateKey(certContext))
             {
@@ -172,8 +177,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         ///     The immediate caller must have SecurityPermission/UnmanagedCode to use this method
         /// </permission>
         [SecurityCritical]
-        [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
-        [SuppressMessage("Microsoft.Reliability", "CA2004:RemoveCallsToGCKeepAlive", Justification = "This method is used to create the safe handle, and KeepAlive is needed to prevent racing the GC while doing so")]
+        [SuppressMessage("Microsoft.Reliability", "CA2004:RemoveCallsToGCKeepAlive",
+            Justification =
+                "This method is used to create the safe handle, and KeepAlive is needed to prevent racing the GC while doing so"
+            )]
         public static SafeCertContextHandle GetCertificateContext(X509Certificate certificate)
         {
             SafeCertContextHandle certContext = X509Native.DuplicateCertContext(certificate.Handle);
@@ -185,11 +192,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return certContext;
         }
-
     }
 
 
-    [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
+    [SecurityCritical]
     public sealed class SafeCertContextHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         private SafeCertContextHandle()
@@ -199,7 +205,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         [DllImport("crypt32.dll")]
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "SafeHandle release method")]
+        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass",
+            Justification = "SafeHandle release method")]
         [SuppressUnmanagedCodeSecurity]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool CertFreeCertificateContext(IntPtr pCertContext);
@@ -209,5 +216,4 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return CertFreeCertificateContext(handle);
         }
     }
-
 }

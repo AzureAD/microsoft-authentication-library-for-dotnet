@@ -16,6 +16,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------
 
+using System.Globalization;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     using System;
@@ -110,7 +112,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>A string representation of the current exception.</returns>
         public override string ToString()
         {
-            return base.ToString() + string.Format("\n\tStatusCode: {0}", this.StatusCode);
+            return base.ToString() + string.Format(CultureInfo.CurrentCulture, "\n\tStatusCode: {0}", this.StatusCode);
         }
 
     }

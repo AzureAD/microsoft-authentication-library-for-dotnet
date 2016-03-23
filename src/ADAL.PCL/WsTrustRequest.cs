@@ -139,7 +139,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 requestType = "http://schemas.xmlsoap.org/ws/2005/02/trust/Issue";
             }
 
-            messageBuilder.AppendFormat(WsTrustEnvelopeTemplate,
+            messageBuilder.AppendFormat(CultureInfo.CurrentCulture, WsTrustEnvelopeTemplate,
                 schemaLocation, soapAction,
                                 guid, wsTrustAddress.Uri, securityHeaderBuilder,
                                 rstTrustNamespace, appliesTo, keyType,
@@ -168,7 +168,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 StringBuilder messageCredentialsBuilder = new StringBuilder(MaxExpectedMessageSize);
                 string guid = Guid.NewGuid().ToString();
-                messageCredentialsBuilder.AppendFormat(
+                messageCredentialsBuilder.AppendFormat(CultureInfo.CurrentCulture,
                     "<o:UsernameToken u:Id='uuid-{0}'><o:Username>{1}</o:Username><o:Password>", guid,
                     credential.UserName);
                 char[] passwordChars = null;
@@ -184,7 +184,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     passwordChars.SecureClear();
                 }
 
-                messageCredentialsBuilder.AppendFormat("</o:Password></o:UsernameToken>");
+                messageCredentialsBuilder.AppendFormat(CultureInfo.CurrentCulture, "</o:Password></o:UsernameToken>");
 
                 //
                 // Timestamp the message
@@ -196,7 +196,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 DateTime expiryTime = currentTime.AddMinutes(10);
                 string expiryTimeString = BuildTimeString(expiryTime);
 
-                securityHeaderBuilder.AppendFormat(
+                securityHeaderBuilder.AppendFormat(CultureInfo.CurrentCulture,
                     "<o:Security s:mustUnderstand='1' xmlns:o='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd'><u:Timestamp u:Id='_0'><u:Created>{0}</u:Created><u:Expires>{1}</u:Expires></u:Timestamp>{2}</o:Security>",
                     currentTimeString,
                     expiryTimeString,

@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     this.Code = response[TokenResponseClaim.Code];
                 }
-                else if (webAuthenticationResult.StartsWith("msauth://"))
+                else if (webAuthenticationResult.StartsWith("msauth://", StringComparison.CurrentCultureIgnoreCase))
                 {
                     this.Code = webAuthenticationResult;
                 }

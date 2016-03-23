@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
@@ -103,7 +104,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     TokenType = "Bearer",
                     CorrelationId = responseDictionary["correlation_id"],
                     Resource = responseDictionary["resource"],
-                    ExpiresOn = long.Parse(responseDictionary["expires_on"].Split('.')[0])
+                    ExpiresOn = long.Parse(responseDictionary["expires_on"].Split('.')[0], CultureInfo.CurrentCulture)
                 };
             }
         }

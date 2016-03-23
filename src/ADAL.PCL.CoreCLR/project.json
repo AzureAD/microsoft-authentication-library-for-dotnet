@@ -1,9 +1,13 @@
-{
+﻿{
   "supports": {
     "dnxcore50.app": {}
   },
-  "dependencies": {},
+  "dependencies": {
+    "Microsoft.NETCore": "5.0.0",
+    "Microsoft.NETCore.Portable.Compatibility": "1.0.0"
+  },
   "frameworks": {
-    ".NETPortable,Version=v4.5,Profile=Profile75": {}
+    "dotnet": {
+    }
   }
 }

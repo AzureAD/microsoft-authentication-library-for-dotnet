@@ -20,6 +20,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -126,7 +127,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             // check if the url scheme is of type browser-install://
             // this means we need to launch external browser
-            if (e.Url.Scheme.Equals("browser", StringComparison.InvariantCultureIgnoreCase))
+            if (e.Url.Scheme.Equals("browser", StringComparison.CurrentCultureIgnoreCase))
             {
                 Process.Start(e.Url.AbsoluteUri.Replace("browser://", "https://"));
                 e.Cancel = true;
@@ -134,7 +135,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             if (!e.Cancel)
             {
-                PlatformPlugin.Logger.Verbose(null, string.Format("Navigating to '{0}'.", EncodingHelper.UrlDecode(e.Url.ToString())));
+                PlatformPlugin.Logger.Verbose(null, string.Format(CultureInfo.CurrentCulture, " Navigating to '{0}'.", EncodingHelper.UrlDecode(e.Url.ToString())));
             }
         }
 
@@ -142,7 +143,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             if (!this.CheckForClosingUrl(e.Url))
             {
-                PlatformPlugin.Logger.Verbose(null, string.Format("Navigated to '{0}'.", EncodingHelper.UrlDecode(e.Url.ToString())));
+                PlatformPlugin.Logger.Verbose(null, string.Format(CultureInfo.CurrentCulture, " Navigated to '{0}'.", EncodingHelper.UrlDecode(e.Url.ToString())));
             }
         }
 
@@ -210,9 +211,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             {
                 if (this.webBrowser.IsBusy)
                 {
-                    PlatformPlugin.Logger.Verbose(null, string.Format("WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}", this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created, this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
+                    PlatformPlugin.Logger.Verbose(null, string.Format(CultureInfo.CurrentCulture, " WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}", this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created, this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
                     this.webBrowser.Stop();
-                    PlatformPlugin.Logger.Verbose(null, string.Format("WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}", this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created, this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
+                    PlatformPlugin.Logger.Verbose(null, string.Format(CultureInfo.CurrentCulture, " WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}", this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created, this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
                 }
             }
         }
@@ -320,12 +321,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             {
                 return new AdalServiceException(
                     AdalError.AuthenticationUiFailed,
-                    string.Format("The browser based authentication dialog failed to complete. Reason: {0}", NavigateErrorStatus.Messages[statusCode])) { StatusCode = statusCode };
+                    string.Format(CultureInfo.CurrentCulture, " The browser based authentication dialog failed to complete. Reason: {0}", NavigateErrorStatus.Messages[statusCode])) { StatusCode = statusCode };
             }
 
             return new AdalServiceException(
                 AdalError.AuthenticationUiFailed,
-                string.Format("The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}", statusCode)) { StatusCode = statusCode };
+                string.Format(CultureInfo.CurrentCulture, " The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}", statusCode)) { StatusCode = statusCode };
         }
 
         protected static class DpiHelper

@@ -19,6 +19,7 @@
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -40,10 +41,10 @@ namespace TestApp.PCL
             this.ValidNonExistingRedirectUri = new Uri("urn:ietf:wg:oauth:2.0:oob");
             this.ValidLoggedInFederatedUserName = "dummy\\dummy";
             string[] segments = this.ValidLoggedInFederatedUserName.Split(new[] { '\\' });
-            this.ValidLoggedInFederatedUserId = string.Format("{0}@microsoft.com", (segments.Length == 2) ? segments[1] : segments[0]);
+            this.ValidLoggedInFederatedUserId = string.Format(CultureInfo.CurrentCulture, " {0}@microsoft.com", (segments.Length == 2) ? segments[1] : segments[0]);
 
             this.TenantName = "<REPLACE>";
-            this.Authority = string.Format("https://login.windows.net/{0}", this.TenantName);
+            this.Authority = string.Format(CultureInfo.CurrentCulture, " https://login.windows.net/{0}", this.TenantName);
             this.TenantlessAuthority = "https://login.windows.net/Common";
             this.Type = StsType.AAD;
             this.ValidClientId = "dd9caee2-38bd-484e-998c-7529bdef220f";

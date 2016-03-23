@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -52,9 +53,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             IBuffer signed = await CryptographicEngine.SignAsync(keyPair, input);
 
-            string signedJwt = string.Format("{0}.{1}", response.GetResponseToSign(),
+            string signedJwt = string.Format(CultureInfo.CurrentCulture, " {0}.{1}", response.GetResponseToSign(),
                 Base64UrlEncoder.Encode(signed.ToArray()));
-            string authToken = string.Format("AuthToken=\"{0}\"", signedJwt);
+            string authToken = string.Format(CultureInfo.CurrentCulture, " AuthToken=\"{0}\"", signedJwt);
             return string.Format(authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
         }
 

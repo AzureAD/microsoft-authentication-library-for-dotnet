@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -193,7 +194,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     if (authorizationRequestParameters.ContainsKey(kvp.Key))
                     {
-                        throw new AdalException(AdalError.DuplicateQueryParameter, string.Format(AdalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
+                        throw new AdalException(AdalError.DuplicateQueryParameter, string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
                     }
                 }
 
@@ -229,7 +230,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (this.authorizationResult != null
                 && !string.IsNullOrEmpty(this.authorizationResult.Code)
-                && this.authorizationResult.Code.StartsWith("msauth://"))
+                && this.authorizationResult.Code.StartsWith("msauth://", StringComparison.CurrentCultureIgnoreCase))
             {
                 this.brokerParameters["broker_install_url"] = this.authorizationResult.Code;
                 return true;

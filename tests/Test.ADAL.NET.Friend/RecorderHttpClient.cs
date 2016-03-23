@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
@@ -117,7 +118,7 @@ namespace Test.ADAL.NET.Friend
             string key = string.Empty;
             foreach (var kvp in this.keyElements)
             {
-                key += string.Format("{0}={1},", kvp.Key, kvp.Value);
+                key += string.Format(CultureInfo.CurrentCulture, " {0}={1},", kvp.Key, kvp.Value);
             }
 
             if (IOMap.ContainsKey(key))
