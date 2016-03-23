@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client
                 }
 
 
-                if (!request.Url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+                if (!request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
                 {
                     AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
                     result.Error = MsalError.NonHttpsRedirectNotSupported;
