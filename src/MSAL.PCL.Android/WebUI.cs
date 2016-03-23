@@ -41,6 +41,11 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
+
+            if (this.parameters.CallerActivity == null)
+            {
+                throw new ArgumentException("CallerActivity should be set in PlatformParameters", "CallerActivity");
+            }
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders, CallState callState)

@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Client
                 readyToClose = true;
             }
 
-            if (!readyToClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+            if (!readyToClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) && !url.AbsoluteUri.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase))
             {
                 this.Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
                 this.Result.Error = MsalError.NonHttpsRedirectNotSupported;
