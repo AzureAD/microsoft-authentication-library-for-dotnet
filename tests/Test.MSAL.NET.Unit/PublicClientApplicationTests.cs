@@ -47,6 +47,11 @@ namespace Test.MSAL.NET.Unit
             users = app.Users;
             Assert.IsNotNull(users);
             Assert.AreEqual(1, users.Count());
+            foreach (var user in users)
+            {
+                Assert.AreEqual(TestConstants.DefaultClientId, user.ClientId);
+                Assert.IsNotNull(user.TokenCache);
+            }
 
             // another cache entry for different home object id. user count should be 2.
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
@@ -71,8 +76,28 @@ namespace Test.MSAL.NET.Unit
             users = app.Users;
             Assert.IsNotNull(users);
             Assert.AreEqual(2, users.Count());
+            foreach (var user in users)
+            {
+                Assert.AreEqual(TestConstants.DefaultClientId, user.ClientId);
+                Assert.IsNotNull(user.TokenCache);
+            }
         }
 
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void GetUsersAndSignThemOutTest()
+        {
+            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+            app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
+
+            foreach (var user in app.Users)
+            {
+                user.SignOut();
+            }
+            
+            Assert.AreEqual(0, app.UserTokenCache.Count);
+        }
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
@@ -112,6 +137,7 @@ namespace Test.MSAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
             };
+
             task = app.AcquireTokenSilentAsync(new string[] { TestConstants.DefaultClientId });
 
             AuthenticationResult result1 = task.Result;
