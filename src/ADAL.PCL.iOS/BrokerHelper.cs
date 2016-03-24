@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 string expectedHash = responseDictionary["hash"];
                 string encryptedResponse = responseDictionary["response"];
-                string decryptedResponse = BrokerKeyHelper.DecryptBrokerResponse(encryptedResponse, responseDictionary.ContainsKey("msg_protocol_ver"));
+                string decryptedResponse = BrokerKeyHelper.DecryptBrokerResponse(encryptedResponse);
                 string responseActualHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(decryptedResponse);
                 byte[] rawHash = Convert.FromBase64String(responseActualHash);
                 string hash  = BitConverter.ToString(rawHash);
