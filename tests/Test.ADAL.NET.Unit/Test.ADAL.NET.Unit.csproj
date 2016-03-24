@@ -107,6 +107,7 @@
     </Compile>
     <Compile Include="AcquireTokenSilentTests.cs" />
     <Compile Include="AuthenticationParametersTests.cs" />
+    <Compile Include="LoggerCallbackTests.cs" />
     <Compile Include="NonInteractiveTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TokenCacheUnitTests.cs" />

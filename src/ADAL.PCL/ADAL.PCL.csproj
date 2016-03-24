@@ -91,6 +91,7 @@
     <Compile Include="HttpClientFactory.cs" />
     <Compile Include="HttpRequestWrapperException.cs" />
     <Compile Include="HttpWebResponseWrapper.cs" />
+    <Compile Include="IAdalLogCallback.cs" />
     <Compile Include="IBrokerHelper.cs" />
     <Compile Include="IClientAssertionCertificate.cs" />
     <Compile Include="IDeviceAuthHelper.cs" />

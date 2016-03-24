@@ -32,22 +32,30 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal override void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Error(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), ex.ToString()));
+            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), ex.ToString());
+            AdalEventSource.Error(log);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, log);
         }
 
         internal override void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Verbose(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
+            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
+            AdalEventSource.Verbose(log);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Verbose, log);
         }
 
         internal override void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Information(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
+            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
+            AdalEventSource.Information(log);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Information, log);
         }
 
         internal override void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
-            AdalEventSource.Warning(PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message));
+            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
+            AdalEventSource.Warning(log);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Warning, log);
         }
 
         private static string GetCallerFilename(string callerFilePath)
