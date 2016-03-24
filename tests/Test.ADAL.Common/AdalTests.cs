@@ -424,6 +424,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result);
         }
 
+#if TEST_ADAL_NET
         public static async Task AcquireTokenNonInteractivePositiveTestAsync(Sts sts)
         {
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
@@ -441,6 +442,7 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result2);
             VerifyExpiresOnAreEqual(result, result2);
         }
+#endif
 
         public static async Task InnerExceptionAccessTestAsync(Sts sts)
         {
@@ -531,7 +533,8 @@ namespace Test.ADAL.Common
             VerifySuccessResultAndTokenContent(sts, result2);
             Verify.AreEqual(sts.ValidUserName2, result2.UserInfo.DisplayableId);
         }
-        
+
+#if TEST_ADAL_NET
         public static async Task ResourceOwnerCredentialsTestAsync(Sts sts)
         {
             var context = new AuthenticationContextProxy(sts.Authority, sts.ValidateAuthority);
@@ -562,7 +565,8 @@ namespace Test.ADAL.Common
             VerifySuccessResult(sts, result2);
             Verify.IsTrue(AreDateTimeOffsetsEqual(result.ExpiresOn, result2.ExpiresOn));
         }
-        
+#endif
+                
         public static void VerifyExpiresOnAreEqual(AuthenticationResultProxy result, AuthenticationResultProxy result2)
         {
             bool equal = AreDateTimeOffsetsEqual(result.ExpiresOn, result2.ExpiresOn);

@@ -20,7 +20,7 @@ using System;
 using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-
+using Test.ADAL.Common;
 using TestApp.PCL;
 
 namespace AdalDesktopTestApp
@@ -47,9 +47,14 @@ namespace AdalDesktopTestApp
 
         private static async Task AcquireTokenAsync()
         {
-            TokenBroker tokenBroker = new TokenBroker();
-             string token = await tokenBroker.GetTokenWithUsernamePasswordAsync();
+            Sts sts = new MobileAppSts();
+            AuthenticationContext context = new AuthenticationContext(sts.Authority, true);
+            var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, new UserCredential(sts.ValidUserName, sts.ValidPassword));
+
+            string token = result.AccessToken;
             Console.WriteLine(token + "\n");
+
+            TokenBroker tokenBroker = new TokenBroker();
             token = await tokenBroker.GetTokenWithClientCredentialAsync();
             Console.WriteLine(token);
         }
