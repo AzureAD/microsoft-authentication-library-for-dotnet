@@ -75,18 +75,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return brokerKey;
         }
         
-        internal static String DecryptBrokerResponse(String encryptedBrokerResponse, bool useKey)
+        internal static String DecryptBrokerResponse(String encryptedBrokerResponse)
         {
             byte[] outputBytes = Base64UrlEncoder.DecodeBytes(encryptedBrokerResponse);
             string plaintext = string.Empty;
             
             using (MemoryStream memoryStream = new MemoryStream(outputBytes))
             {
-                byte[] key = new byte[256];
-                if (useKey)
-                {
-                    key = GetRawBrokerKey();
-                }
+                byte[] key = GetRawBrokerKey();
 
                 AesManaged algo = GetCryptoAlgorithm(key);
                 using (CryptoStream cryptoStream = new CryptoStream(memoryStream, algo.CreateDecryptor(), CryptoStreamMode.Read))
