@@ -196,7 +196,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             // if redirect_uri is not hit and scheme of the url is not whitelisted and url is not about:blank
             // and url scheme is not https then fail to load.
             if (!canClose && !whiteListedSchemes.Contains(url.Scheme.ToLower(CultureInfo.CurrentCulture)) &&
-                url.AbsoluteUri.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase)
+                !url.AbsoluteUri.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase)
                 && !url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
             {
                 this.Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
