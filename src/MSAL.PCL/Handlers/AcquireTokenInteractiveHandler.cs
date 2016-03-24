@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Handlers
         private readonly string _extraQueryParameters;
         private readonly IWebUI _webUi;
         private readonly string _loginHint;
-        private readonly UiOptions _uiOptions;
+        private readonly UiOptions? _uiOptions;
 
 
         public AcquireTokenInteractiveHandler(HandlerData handlerData,
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Handlers
         }
 
         public AcquireTokenInteractiveHandler(HandlerData handlerData,
-            string[] additionalScope, Uri redirectUri, IPlatformParameters parameters, string loginHint, UiOptions uiOptions, string extraQueryParameters, IWebUI webUI)
+            string[] additionalScope, Uri redirectUri, IPlatformParameters parameters, string loginHint, UiOptions? uiOptions, string extraQueryParameters, IWebUI webUI)
             : base(handlerData)
         {
             this._redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
