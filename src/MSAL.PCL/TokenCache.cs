@@ -308,10 +308,10 @@ namespace Microsoft.Identity.Client
                 IEnumerable<string> homeOids = this.GetHomeObjectIdsFromCache(clientId);
                 foreach (string homeOid in homeOids)
                 {
-                    users.Add(
-                        this.ReadItemsFromCache(clientId)
-                            .First(item => !string.IsNullOrEmpty(item.HomeObjectId) && item.HomeObjectId.Equals(homeOid))
-                            .User);
+                    User localUser = this.ReadItems(clientId).First(item => !string.IsNullOrEmpty(item.HomeObjectId) && item.HomeObjectId.Equals(homeOid)).User;
+                    localUser.ClientId = clientId;
+                    localUser.TokenCache = this;
+                    users.Add(localUser);
                 }
 
                 this.HasStateChanged = true;
