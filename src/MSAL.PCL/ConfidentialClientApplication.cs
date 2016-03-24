@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client
             data.ClientKey = new ClientKey(this.ClientId);
             var handler =
                 new AcquireTokenInteractiveHandler(data, null,
-                    new Uri(this.RedirectUri), null, loginHint, UiOptions.SelectAccount, extraQueryParameters, null);
+                    new Uri(this.RedirectUri), null, loginHint, null, extraQueryParameters, null);
             return await handler.CreateAuthorizationUriAsync(this.CorrelationId).ConfigureAwait(false);
         }
 
@@ -126,20 +126,21 @@ namespace Microsoft.Identity.Client
         /// Gets URL of the authorize endpoint including the query parameters.
         /// </summary>
         /// <param name="scope"></param>
+        /// <param name="redirectUri"></param>
         /// <param name="loginHint"></param>
         /// <param name="extraQueryParameters"></param>
         /// <param name="additionalScope"></param>
         /// <param name="authority"></param>
         /// <param name="policy"></param>
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string loginHint, string extraQueryParameters, string[] additionalScope, string authority, string policy)
+        public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string redirectUri, string loginHint, string extraQueryParameters, string[] additionalScope, string authority, string policy)
         {
             Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
             HandlerData data = this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache);
             data.ClientKey = new ClientKey(this.ClientId);
             var handler =
                 new AcquireTokenInteractiveHandler(data, additionalScope,
-                    new Uri(this.RedirectUri), null, loginHint, null, extraQueryParameters, null);
+                    new Uri(redirectUri), null, loginHint, null, extraQueryParameters, null);
             return await handler.CreateAuthorizationUriAsync(this.CorrelationId).ConfigureAwait(false);
         }
         
