@@ -17,6 +17,7 @@
 //----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -43,6 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         private Keys key = Keys.None;
 
+        private readonly HashSet<string> whiteListedSchemes = new HashSet<string>();
         internal AuthorizationResult Result { get; set; }
 
         protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow)
@@ -75,15 +77,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             }
             else
             {
-                throw new AdalException(AdalError.InvalidOwnerWindowType, 
+                throw new AdalException(AdalError.InvalidOwnerWindowType,
                     "Invalid owner window type. Expected types are IWin32Window or IntPtr (for window handle).");
             }
 
             this.webBrowser = new CustomWebBrowser();
             this.webBrowser.PreviewKeyDown += webBrowser_PreviewKeyDown;
             this.InitializeComponent();
+
+            whiteListedSchemes.Add("browser");
         }
-        
+
         private void webBrowser_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
             if (e.KeyCode == Keys.Back)
@@ -97,10 +101,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         /// </summary>
         public WebBrowser WebBrowser
         {
-            get
-            {
-                return this.webBrowser;
-            }
+            get { return this.webBrowser; }
         }
 
         protected virtual void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
@@ -125,9 +126,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             // if redirect URI is URN, then we prohibit navigation, to prevent random browser popup.
             e.Cancel = this.CheckForClosingUrl(e.Url);
 
-            // check if the url scheme is of type browser-install://
+            // check if the url scheme is of type browser://
             // this means we need to launch external browser
-            if (e.Url.Scheme.Equals("browser", StringComparison.CurrentCultureIgnoreCase))
+            if (!e.Cancel && e.Url.Scheme.Equals("browser", StringComparison.CurrentCultureIgnoreCase))
             {
                 Process.Start(e.Url.AbsoluteUri.Replace("browser://", "https://"));
                 e.Cancel = true;
@@ -135,7 +136,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             if (!e.Cancel)
             {
-                PlatformPlugin.Logger.Verbose(null, string.Format(CultureInfo.CurrentCulture, " Navigating to '{0}'.", EncodingHelper.UrlDecode(e.Url.ToString())));
+                PlatformPlugin.Logger.Verbose(null,
+                    string.Format(CultureInfo.CurrentCulture, " Navigating to '{0}'.",
+                        EncodingHelper.UrlDecode(e.Url.ToString())));
             }
         }
 
@@ -143,7 +146,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             if (!this.CheckForClosingUrl(e.Url))
             {
-                PlatformPlugin.Logger.Verbose(null, string.Format(CultureInfo.CurrentCulture, " Navigated to '{0}'.", EncodingHelper.UrlDecode(e.Url.ToString())));
+                PlatformPlugin.Logger.Verbose(null,
+                    string.Format(CultureInfo.CurrentCulture, " Navigated to '{0}'.",
+                        EncodingHelper.UrlDecode(e.Url.ToString())));
             }
         }
 
@@ -181,13 +186,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             // Make change here
             bool canClose = false;
-            if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) && url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath))
+            if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.CurrentCultureIgnoreCase) &&
+                url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath, StringComparison.CurrentCulture))
             {
                 this.Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
                 canClose = true;
             }
-            
-            if (!canClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+
+            // if redirect_uri is not hit and scheme of the url is not whitelisted and url is not about:blank
+            // and url scheme is not https then fail to load.
+            if (!canClose && !whiteListedSchemes.Contains(url.Scheme.ToLower(CultureInfo.CurrentCulture)) &&
+                !url.AbsoluteUri.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase)
+                && !url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
             {
                 this.Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
                 this.Result.Error = AdalError.NonHttpsRedirectNotSupported;
@@ -211,9 +221,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             {
                 if (this.webBrowser.IsBusy)
                 {
-                    PlatformPlugin.Logger.Verbose(null, string.Format(CultureInfo.CurrentCulture, " WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}", this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created, this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
+                    PlatformPlugin.Logger.Verbose(null,
+                        string.Format(CultureInfo.CurrentCulture,
+                            " WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
+                            this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
+                            this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
                     this.webBrowser.Stop();
-                    PlatformPlugin.Logger.Verbose(null, string.Format(CultureInfo.CurrentCulture, " WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}", this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created, this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
+                    PlatformPlugin.Logger.Verbose(null,
+                        string.Format(CultureInfo.CurrentCulture,
+                            " WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
+                            this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
+                            this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
                 }
             }
         }
@@ -241,11 +259,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         }
 
         protected virtual void OnAuthenticate()
-        { }
+        {
+        }
 
         private void InitializeComponent()
         {
-            Screen screen = (this.ownerWindow != null) ? Screen.FromHandle(this.ownerWindow.Handle) : Screen.PrimaryScreen;
+            Screen screen = (this.ownerWindow != null)
+                ? Screen.FromHandle(this.ownerWindow.Handle)
+                : Screen.PrimaryScreen;
 
             // Window height is set to 70% of the screen height.
             int uiHeight = (int)(Math.Max(screen.WorkingArea.Height, 160) * 70.0 / DpiHelper.ZoomPercent);
@@ -286,7 +307,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             this.Name = "BrowserAuthenticationWindow";
 
             // Move the window to the center of the parent window only if owner window is set.
-            this.StartPosition = (this.ownerWindow != null) ? FormStartPosition.CenterParent : FormStartPosition.CenterScreen;
+            this.StartPosition = (this.ownerWindow != null)
+                ? FormStartPosition.CenterParent
+                : FormStartPosition.CenterScreen;
             this.Text = string.Empty;
             this.ShowIcon = false;
             this.MaximizeBox = false;
@@ -299,7 +322,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             this.webBrowserPanel.ResumeLayout(false);
             this.ResumeLayout(false);
         }
-        
+
         private sealed class WindowsFormsWin32Window : IWin32Window
         {
             public IntPtr Handle { get; set; }
@@ -321,12 +344,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             {
                 return new AdalServiceException(
                     AdalError.AuthenticationUiFailed,
-                    string.Format(CultureInfo.CurrentCulture, " The browser based authentication dialog failed to complete. Reason: {0}", NavigateErrorStatus.Messages[statusCode])) { StatusCode = statusCode };
+                    string.Format(CultureInfo.CurrentCulture,
+                        " The browser based authentication dialog failed to complete. Reason: {0}",
+                        NavigateErrorStatus.Messages[statusCode]))
+                { StatusCode = statusCode };
             }
 
             return new AdalServiceException(
                 AdalError.AuthenticationUiFailed,
-                string.Format(CultureInfo.CurrentCulture, " The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}", statusCode)) { StatusCode = statusCode };
+                string.Format(CultureInfo.CurrentCulture,
+                    " The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}",
+                    statusCode))
+            { StatusCode = statusCode };
         }
 
         protected static class DpiHelper
@@ -366,7 +395,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         internal static class NativeMethods
         {
-            internal enum SessionOp 
+            internal enum SessionOp
             {
                 SESSION_QUERY = 0,
                 SESSION_INCREMENT,
@@ -374,7 +403,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             };
 
             [DllImport("IEFRAME.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
-            internal static extern int SetQueryNetSessionCount(SessionOp sessionOp);        
+            internal static extern int SetQueryNetSessionCount(SessionOp sessionOp);
         }
     }
 }
