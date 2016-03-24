@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace Test.MSAL.NET.Unit
         public void ConstructorsTest()
         {
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
-                TestConstants.DefaultRedirectUri, new ClientCredential("secret"), new TokenCache());
+                TestConstants.DefaultRedirectUri, new ClientCredential(TestConstants.DefaultClientSecret), new TokenCache());
             Assert.IsNotNull(app);
             Assert.IsNotNull(app.UserTokenCache);
             Assert.IsNotNull(app.AppTokenCache);
@@ -47,7 +48,7 @@ namespace Test.MSAL.NET.Unit
         public void ConfidentialClientUsingSecretTest()
         {
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
-                TestConstants.DefaultRedirectUri, new ClientCredential("secret"), new TokenCache());
+                TestConstants.DefaultRedirectUri, new ClientCredential(TestConstants.DefaultClientSecret), new TokenCache());
             app.AppTokenCache = new TokenCache();
             HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
             {
@@ -141,7 +142,7 @@ namespace Test.MSAL.NET.Unit
                 new CryptographyHelper().CreateSha256Hash(someAssertion + "-but-not-in-cache");
 
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
-                TestConstants.DefaultRedirectUri, new ClientCredential("secret"), new TokenCache());
+                TestConstants.DefaultRedirectUri, new ClientCredential(TestConstants.DefaultClientSecret), new TokenCache());
             app.UserTokenCache = cache;
 
             string[] scope = {"mail.read"};
@@ -180,7 +181,7 @@ namespace Test.MSAL.NET.Unit
                 new CryptographyHelper().CreateSha256Hash(someAssertion);
 
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
-                TestConstants.DefaultRedirectUri, new ClientCredential("secret"), new TokenCache());
+                TestConstants.DefaultRedirectUri, new ClientCredential(TestConstants.DefaultClientSecret), new TokenCache());
             app.UserTokenCache = cache;
 
             //this is a fail safe. No call should go on network
@@ -215,7 +216,7 @@ namespace Test.MSAL.NET.Unit
                 new CryptographyHelper().CreateSha256Hash(someAssertion);
 
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
-                TestConstants.DefaultRedirectUri, new ClientCredential("secret"), new TokenCache());
+                TestConstants.DefaultRedirectUri, new ClientCredential(TestConstants.DefaultClientSecret), new TokenCache());
             app.UserTokenCache = cache;
 
             //this is a fail safe. No call should go on network
@@ -235,6 +236,106 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(key.DisplayableId, result.User.DisplayableId);
             Assert.AreEqual("nC2j5wL7iN83cU5DJsDXnt11TdEObirkKTVKari51Ps=",
                 cache.tokenCacheDictionary[key].UserAssertionHash);
+        }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public void GetAuthorizationRequestUrlNoRedirectUriTest()
+        {
+            ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
+                TestConstants.DefaultRedirectUri, new ClientCredential(TestConstants.DefaultClientSecret), new TokenCache());
+            Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.DefaultScope.AsArray(), TestConstants.DefaultDisplayableId, null);
+            Uri uri = task.Result;
+            Assert.IsNotNull(uri);
+            Dictionary<string, string> qp = EncodingHelper.ParseKeyValueList(uri.Query.Substring(1),'&', true, null);
+            Assert.IsNotNull(qp);
+            Assert.AreEqual(9, qp.Count);
+            Assert.AreEqual("r1/scope1 r1/scope2 openid email profile offline_access", qp["scope"]);
+            Assert.AreEqual(TestConstants.DefaultClientId, qp["client_id"]);
+            Assert.AreEqual("code", qp["response_type"]);
+            Assert.AreEqual(TestConstants.DefaultRedirectUri, qp["redirect_uri"]);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, qp["login_hint"]);
+            Assert.AreEqual("MSAL.Desktop", qp["x-client-sku"]);
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
+
+
+            app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
+                TestConstants.DefaultRedirectUri, new ClientCredential(TestConstants.DefaultClientSecret), new TokenCache());
+            task = app.GetAuthorizationRequestUrlAsync(TestConstants.DefaultScope.AsArray(), TestConstants.DefaultDisplayableId, "extra=qp&prompt=none");
+            uri = task.Result;
+            Assert.IsNotNull(uri);
+            Assert.IsTrue(uri.AbsoluteUri.StartsWith(app.Authority, StringComparison.CurrentCulture));
+            qp = EncodingHelper.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+            Assert.IsNotNull(qp);
+            Assert.AreEqual(11, qp.Count);
+            Assert.AreEqual("r1/scope1 r1/scope2 openid email profile offline_access", qp["scope"]);
+            Assert.AreEqual(TestConstants.DefaultClientId, qp["client_id"]);
+            Assert.AreEqual("code", qp["response_type"]);
+            Assert.AreEqual(TestConstants.DefaultRedirectUri, qp["redirect_uri"]);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, qp["login_hint"]);
+            Assert.AreEqual("MSAL.Desktop", qp["x-client-sku"]);
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
+            Assert.AreEqual("qp", qp["extra"]);
+            Assert.AreEqual("none", qp["prompt"]);
+        }
+
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public void GetAuthorizationRequestUrlDuplicateParamsTest()
+        {
+
+            ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
+                TestConstants.DefaultRedirectUri, new ClientCredential(TestConstants.DefaultClientSecret), new TokenCache());
+            try
+            {
+                Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.DefaultScope.AsArray(),
+                    TestConstants.DefaultDisplayableId, "login_hint=some@value.com");
+                Uri uri = task.Result;
+                Assert.Fail("MSALException should be thrown here");
+            }
+            catch (Exception exc)
+            {
+                Assert.IsTrue(exc.InnerException is MsalException);
+                Assert.AreEqual("duplicate_query_parameter", ((MsalException)exc.InnerException).ErrorCode);
+                Assert.AreEqual("Duplicate query parameter 'login_hint' in extraQueryParameters", ((MsalException)exc.InnerException).Message);
+
+            }
+        }
+
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public void GetAuthorizationRequestUrlCustomRedirectUriTest()
+        {
+            ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
+                TestConstants.DefaultRedirectUri, new ClientCredential(TestConstants.DefaultClientSecret), new TokenCache());
+            Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.DefaultScope.AsArray(),
+                "custom://redirect-uri", TestConstants.DefaultDisplayableId, "extra=qp&prompt=none",
+                TestConstants.ScopeForAnotherResource.AsArray(), TestConstants.DefaultAuthorityGuestTenant,
+                TestConstants.DefaultPolicy);
+            Uri uri = task.Result;
+            Assert.IsNotNull(uri);
+            Assert.IsTrue(uri.AbsoluteUri.StartsWith(TestConstants.DefaultAuthorityGuestTenant, StringComparison.CurrentCulture));
+            Dictionary<string, string> qp = EncodingHelper.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+            Assert.IsNotNull(qp);
+            Assert.AreEqual(12, qp.Count);
+            Assert.AreEqual("r1/scope1 r1/scope2 r2/scope1 r2/scope2 openid offline_access", qp["scope"]);
+            Assert.AreEqual(TestConstants.DefaultClientId, qp["client_id"]);
+            Assert.AreEqual("code", qp["response_type"]);
+            Assert.AreEqual("custom://redirect-uri", qp["redirect_uri"]);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, qp["login_hint"]);
+            Assert.AreEqual("MSAL.Desktop", qp["x-client-sku"]);
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
+            Assert.AreEqual("qp", qp["extra"]);
+            Assert.AreEqual("none", qp["prompt"]);
+            Assert.AreEqual(TestConstants.DefaultPolicy, qp["p"]);
         }
     }
 }

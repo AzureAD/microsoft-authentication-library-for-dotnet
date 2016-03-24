@@ -17,6 +17,7 @@ namespace Test.MSAL.NET.Unit
         public static readonly string DefaultPolicy = "policy";
         public static readonly string DefaultRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public static readonly bool DefaultRestrictToSingleUser = false;
+        public static readonly string DefaultClientSecret = "client_secret";
 
         public static readonly User DefaultUser = new User
         {

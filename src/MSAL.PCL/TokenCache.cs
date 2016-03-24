@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         ///     Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
-        ///     impact all the instances of <see cref="AuthenticationContext" /> which share that cache.
+        ///     impact all the instances of <see cref="PublicClientApplication" /> which share that cache.
         /// </summary>
         public virtual void Clear(string clientId)
         {
