@@ -119,21 +119,6 @@ namespace TestApp.PCL
             }
         }
 
-        public async Task<string> GetTokenWithUsernamePasswordAsync()
-        {
-            try
-            {
-                context = new AuthenticationContext(Sts.Authority, true);
-                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, new UserCredential(Sts.ValidUserName, Sts.ValidPassword));
-
-                return result.AccessToken;
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
-        }
-
         public async Task<string> GetTokenWithClientCredentialAsync()
         {
             try

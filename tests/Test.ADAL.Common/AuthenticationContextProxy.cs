@@ -46,6 +46,7 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenAsync(resource, credential));
         }
 
+#if TEST_ADAL_NET
         public async Task<AuthenticationResultProxy> AcquireTokenAsync(string resource, string clientId, UserCredentialProxy credential)
         {
             return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientId,
@@ -53,7 +54,7 @@ namespace Test.ADAL.Common
                 new UserCredential(credential.UserId) :
                 new UserCredential(credential.UserId, credential.Password)));
         }
-
+#endif
         public async Task<AuthenticationResultProxy> AcquireTokenSilentAsync(string resource, string clientId)
         {
             return await RunTaskAsync(this.context.AcquireTokenSilentAsync(resource, clientId));

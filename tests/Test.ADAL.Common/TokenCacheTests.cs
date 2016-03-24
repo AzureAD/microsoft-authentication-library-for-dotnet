@@ -147,7 +147,7 @@ namespace Test.ADAL.Common.Unit
             RemoveFromDictionary(cache, key);
             VerifyCacheItemCount(cache, 0);
         }
-
+#if TEST_ADAL_NET
         public static async Task TokenCacheKeyTestAsync(IPlatformParameters parameters)
         {
             CheckPublicGetSets();
@@ -238,7 +238,7 @@ namespace Test.ADAL.Common.Unit
             VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
 
         }
-
+#endif
 
         internal static void TokenCacheCrossTenantOperationsTest()
         {

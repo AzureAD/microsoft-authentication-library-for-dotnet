@@ -58,6 +58,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+	<Compile Include="..\ADAL.Common\AuthenticationContextIntegratedAuthExtensions.cs">
+      <Link>AuthenticationContextIntegratedAuthExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\ADAL.Common\AdalEventSource.cs">
       <Link>AdalEventSource.cs</Link>
     </Compile>

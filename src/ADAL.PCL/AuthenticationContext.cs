@@ -180,19 +180,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Acquires security token from the authority.
         /// </summary>
-        /// <remarks>This feature is supported only for Azure Active Directory and Active Directory Federation Services (ADFS) on Windows 10.</remarks>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="userCredential">The user credential to use for token acquisition.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, UserCredential userCredential)
-        {
-            return await this.AcquireTokenCommonAsync(resource, clientId, userCredential);
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority.
-        /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userAssertion">The assertion to use for token acquisition.</param>
@@ -505,7 +492,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parameters);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserCredential userCredential)
+        internal async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserCredential userCredential)
         {
             var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, userCredential);
             return await handler.RunAsync();
