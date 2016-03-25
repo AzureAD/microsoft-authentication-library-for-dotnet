@@ -82,52 +82,53 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             }
         }
 
-/*        [TestMethod]
-        [TestCategory("AcquireTokenInteractiveHandlerTests")]
-        public void SsoRrefreshTokenInHeaderTest()
-        {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
-            TokenCache cache = new TokenCache();
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
-                TestConstants.DefaultPolicy);
-            AuthenticationResultEx ex = new AuthenticationResultEx();
-            ex.Result = new AuthenticationResult("Bearer", key.ToString(),
-                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)));
-            ex.Result.User = new User
-            {
-                DisplayableId = TestConstants.DefaultDisplayableId,
-                UniqueId = TestConstants.DefaultUniqueId,
-                HomeObjectId = TestConstants.DefaultHomeObjectId
-            };
-            ex.Result.FamilyId = "1";
-            ex.RefreshToken = "someRT";
-            cache.tokenCacheDictionary[key] = ex;
+        //TODO commented code should be uncommented as per https://github.com/AzureAD/MSAL-Prototype/issues/66
+        /*        [TestMethod]
+                [TestCategory("AcquireTokenInteractiveHandlerTests")]
+                public void SsoRrefreshTokenInHeaderTest()
+                {
+                    Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
+                    TokenCache cache = new TokenCache();
+                    TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                        TestConstants.DefaultScope, TestConstants.DefaultClientId,
+                        TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
+                        TestConstants.DefaultPolicy);
+                    AuthenticationResultEx ex = new AuthenticationResultEx();
+                    ex.Result = new AuthenticationResult("Bearer", key.ToString(),
+                        new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)));
+                    ex.Result.User = new User
+                    {
+                        DisplayableId = TestConstants.DefaultDisplayableId,
+                        UniqueId = TestConstants.DefaultUniqueId,
+                        HomeObjectId = TestConstants.DefaultHomeObjectId
+                    };
+                    ex.Result.FamilyId = "1";
+                    ex.RefreshToken = "someRT";
+                    cache.tokenCacheDictionary[key] = ex;
 
-            MockWebUI webUi = new MockWebUI();
-            webUi.HeadersToValidate = new Dictionary<string, string>();
-            webUi.HeadersToValidate["x-ms-sso-RefreshToken"] = "someRT";
-            webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
-                TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
+                    MockWebUI webUi = new MockWebUI();
+                    webUi.HeadersToValidate = new Dictionary<string, string>();
+                    webUi.HeadersToValidate["x-ms-sso-RefreshToken"] = "someRT";
+                    webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
+                        TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
 
-            HandlerData data = new HandlerData()
-            {
-                Authenticator = authenticator,
-                ClientKey = new ClientKey(TestConstants.DefaultClientId),
-                Policy = TestConstants.DefaultPolicy,
-                RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = TestConstants.DefaultScope.ToArray(),
-                TokenCache = cache
-            };
-            
-            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
-                TestConstants.ScopeForAnotherResource.ToArray(),
-                new Uri("some://uri"), new PlatformParameters(),
-                ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", webUi);
-            handler.PreRunAsync().Wait();
-            handler.PreTokenRequest().Wait();
-        }*/
+                    HandlerData data = new HandlerData()
+                    {
+                        Authenticator = authenticator,
+                        ClientKey = new ClientKey(TestConstants.DefaultClientId),
+                        Policy = TestConstants.DefaultPolicy,
+                        RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
+                        Scope = TestConstants.DefaultScope.ToArray(),
+                        TokenCache = cache
+                    };
+
+                    AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+                        TestConstants.ScopeForAnotherResource.ToArray(),
+                        new Uri("some://uri"), new PlatformParameters(),
+                        ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", webUi);
+                    handler.PreRunAsync().Wait();
+                    handler.PreTokenRequest().Wait();
+                }*/
 
         [TestMethod]
         [TestCategory("AcquireTokenInteractiveHandlerTests")]

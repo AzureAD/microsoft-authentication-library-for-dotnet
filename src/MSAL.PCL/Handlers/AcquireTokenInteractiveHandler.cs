@@ -92,6 +92,7 @@ namespace Microsoft.Identity.Client.Handlers
 
         internal override async Task PreTokenRequest()
         {
+            //TODO commented code should be uncommented as per https://github.com/AzureAD/MSAL-Prototype/issues/66
             IDictionary<string, string> headers = new Dictionary<string, string>();
             //headers["x-ms-sso-Ignore-SSO"] = "1";
 
