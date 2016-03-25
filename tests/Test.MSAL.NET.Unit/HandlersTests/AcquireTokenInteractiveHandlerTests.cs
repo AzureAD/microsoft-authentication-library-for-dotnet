@@ -82,7 +82,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             }
         }
 
-        [TestMethod]
+/*        [TestMethod]
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void SsoRrefreshTokenInHeaderTest()
         {
@@ -127,7 +127,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
                 ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", webUi);
             handler.PreRunAsync().Wait();
             handler.PreTokenRequest().Wait();
-        }
+        }*/
 
         [TestMethod]
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
