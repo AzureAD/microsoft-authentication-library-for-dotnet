@@ -93,11 +93,11 @@ namespace Microsoft.Identity.Client.Handlers
         internal override async Task PreTokenRequest()
         {
             IDictionary<string, string> headers = new Dictionary<string, string>();
-            headers["x-ms-sso-Ignore-SSO"] = "1";
+            //headers["x-ms-sso-Ignore-SSO"] = "1";
 
             await base.PreTokenRequest().ConfigureAwait(false);
 
-            if (this.tokenCache!=null && this.User!=null  && _uiOptions == UiOptions.ActAsCurrentUser)
+/*            if (this.tokenCache!=null && this.User!=null  && _uiOptions == UiOptions.ActAsCurrentUser)
             {
                 bool notifiedBeforeAccessCache = false;
                 try
@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.Handlers
                     }
 
                 }
-            }
+            }*/
             
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
             await this.AcquireAuthorizationAsync(headers).ConfigureAwait(false);
