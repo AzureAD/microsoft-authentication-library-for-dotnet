@@ -84,6 +84,12 @@ namespace Test.ADAL.NET.Unit
         {
                 TokenCacheTests.TokenCacheBackCompatTest(File.ReadAllBytes("oldcache.txt"));
         }
-        
+        [TestMethod]
+        [Description("Positive Test for Parallel stores on cache")]
+        [TestCategory("AdalDotNet.Unit")]
+        public void ParallelStoreTest()
+        {
+            TokenCacheTests.ParallelStorePositiveTest(File.ReadAllBytes("oldcache.txt"));
+        }
     }
 }

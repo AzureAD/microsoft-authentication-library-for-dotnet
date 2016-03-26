@@ -689,5 +689,32 @@ namespace Test.ADAL.Common.Unit
                 Verify.IsNull(value.UserAssertionHash);
             }
         }
+        public static void ParallelStorePositiveTest(byte[] oldcache)
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                TokenCache cache = new TokenCache(oldcache);
+                cache.BeforeAccess = DoBefore;
+                cache.AfterAccess = DoAfter;
+                Task readTask = Task.Run(() => cache.ReadItems());
+                Task writeTask = Task.Run(() => cache.Clear());
+                readTask.Wait();
+                writeTask.Wait();
+            }
+        }
+
+        private static int _count = 0;
+
+        private static void DoBefore(TokenCacheNotificationArgs args)
+        {
+            _count++;
+        }
+
+        private static void DoAfter(TokenCacheNotificationArgs args)
+        {
+            Verify.AreEqual(1, _count);
+            _count--;
+        }
+
     }
 }
