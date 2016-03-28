@@ -97,7 +97,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             public override bool ShouldOverrideUrlLoading(WebView view, string url)
-            { 
+            {
+                Uri uri = new Uri(url);
                 if (url.StartsWith(BrokerConstants.BrowserExtPrefix))
                 {
                     PlatformPlugin.Logger.Verbose(null, "It is browser launch request");
@@ -117,7 +118,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (url.StartsWith(BrokerConstants.ClientTlsRedirect, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    Uri uri = new Uri(url);
                     string query = uri.Query;
                     if (query.StartsWith("?"))
                     {
@@ -137,6 +137,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.Finish(view, url);
                     return true;
                 }
+
+
+                if (!url.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) && !uri.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    UriBuilder errorUri = new UriBuilder(callback);
+                    errorUri.Query = string.Format("error={0}&error_description={1}",
+                        AdalError.NonHttpsRedirectNotSupported, AdalErrorMessage.NonHttpsRedirectNotSupported);
+                    this.Finish(view, errorUri.ToString());
+                    return true;
+                }
+
 
                 return false;
             }

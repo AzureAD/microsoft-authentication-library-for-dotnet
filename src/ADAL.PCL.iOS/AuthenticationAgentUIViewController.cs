@@ -96,6 +96,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     wView.LoadRequest(newRequest);
                     return false;
                 }
+                
+                if (!request.Url.AbsoluteString.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) && !request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
+                    result.Error = AdalError.NonHttpsRedirectNotSupported;
+                    result.ErrorDescription = AdalErrorMessage.NonHttpsRedirectNotSupported;
+                    callbackMethod(result);
+                    this.DismissViewController(true, null);
+                    return false;
+                }
 
                 return true;
             };
