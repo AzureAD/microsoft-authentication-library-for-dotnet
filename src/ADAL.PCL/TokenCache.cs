@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private volatile bool hasStateChanged;
 
-        public Object cacheLock = new Object();
+        private Object cacheLock = new Object();
 
         static TokenCache()
         {

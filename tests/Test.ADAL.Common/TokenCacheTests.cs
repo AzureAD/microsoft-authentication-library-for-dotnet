@@ -691,8 +691,6 @@ namespace Test.ADAL.Common.Unit
         }
         public static void ParallelStorePositiveTest(byte[] oldcache)
         {
-            for (int i = 0; i < 100; i++)
-            {
                 TokenCache cache = new TokenCache(oldcache);
                 cache.BeforeAccess = DoBefore;
                 cache.AfterAccess = DoAfter;
@@ -700,7 +698,6 @@ namespace Test.ADAL.Common.Unit
                 Task writeTask = Task.Run(() => cache.Clear());
                 readTask.Wait();
                 writeTask.Wait();
-            }
         }
 
         private static int _count = 0;
