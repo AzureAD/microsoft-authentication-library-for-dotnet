@@ -7,7 +7,7 @@
         <!--class Prefix:identifier View Controller-->
         <scene sceneID="ufC-wZ-h7g">
             <objects>
-                <viewController id="vXZ-lx-hvc" customClass="AdaliOSTestAppViewController" sceneMemberID="viewController">
+                <viewController id="vXZ-lx-hvc" customClass="MsaliOSTestAppViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="3"/>
                         <viewControllerLayoutGuide type="bottom" id="4"/>

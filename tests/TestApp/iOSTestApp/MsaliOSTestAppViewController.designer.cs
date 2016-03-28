@@ -9,7 +9,7 @@ using System.CodeDom.Compiler;
 using Foundation;
 using UIKit;
 
-namespace AdaliOSSample
+namespace MsaliOSSample
 {
 	[Register ("MsaliOSTestAppViewController")]
 	partial class MsaliOSTestAppViewController

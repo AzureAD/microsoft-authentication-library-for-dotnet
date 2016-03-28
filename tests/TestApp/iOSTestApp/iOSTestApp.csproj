@@ -8,9 +8,9 @@
     <ProjectGuid>{2B675E51-98A2-4B44-8A37-A0661ABB931F}</ProjectGuid>
     <ProjectTypeGuids>{FEACFBD2-3405-455C-9665-78FE426C6842};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Exe</OutputType>
-    <RootNamespace>AdaliOSSample</RootNamespace>
+    <RootNamespace>MsaliOSSample</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <AssemblyName>AdaliOSSample</AssemblyName>
+    <AssemblyName>MsaliOSSample</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
@@ -110,7 +110,9 @@
       <DependentUpon>MsaliOSTestAppViewController.cs</DependentUpon>
     </Compile>
     <Compile Include="MsaliOSTestAppViewController.cs" />
-    <InterfaceDefinition Include="MainStoryboard.storyboard" />
+    <InterfaceDefinition Include="MainStoryboard.storyboard">
+      <SubType>Designer</SubType>
+    </InterfaceDefinition>
     <BundleResource Include="Resources\Default-568h%402x.png" />
   </ItemGroup>
   <ItemGroup>

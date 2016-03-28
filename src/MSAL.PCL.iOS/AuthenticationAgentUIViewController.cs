@@ -29,21 +29,19 @@ namespace Microsoft.Identity.Client
     [Foundation.Register("AuthenticationAgentUIViewController")]
     internal class AuthenticationAgentUIViewController : UIViewController
     {
-        private UIWebView webView;
+        private UIWebView _webView;
 
-        private readonly string url;
-        private readonly string callback;
-        private readonly IDictionary<string, string> additionalHeaders;
+        private readonly string _url;
+        private readonly string _callback;
         private readonly ReturnCodeCallback callbackMethod;
 
         public delegate void ReturnCodeCallback(AuthorizationResult result);
 
         public AuthenticationAgentUIViewController(string url, string callback, ReturnCodeCallback callbackMethod)
         {
-            this.url = url;
-            this.callback = callback;
+            this._url = url;
+            this._callback = callback;
             this.callbackMethod = callbackMethod;
-            this.additionalHeaders = additionalHeaders;
             NSUrlProtocol.RegisterClass(new ObjCRuntime.Class(typeof(MsalCustomUrlProtocol)));
         }
 
@@ -53,8 +51,8 @@ namespace Microsoft.Identity.Client
 
             View.BackgroundColor = UIColor.White;
 
-            webView = new UIWebView((CGRect) View.Bounds);
-            webView.ShouldStartLoad = (wView, request, navType) =>
+            _webView = new UIWebView((CGRect) View.Bounds);
+            _webView.ShouldStartLoad = (wView, request, navType) =>
             {
                 if (request == null)
                 {
@@ -73,7 +71,7 @@ namespace Microsoft.Identity.Client
                     return false;
                 }
 
-                if (requestUrlString.ToLower().StartsWith(callback.ToLower()) || requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix))
+                if (requestUrlString.ToLower().StartsWith(_callback.ToLower()) || requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix))
                 {
                     callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, request.Url.ToString()));
                     this.DismissViewController(true, null);
@@ -98,9 +96,8 @@ namespace Microsoft.Identity.Client
                     wView.LoadRequest(newRequest);
                     return false;
                 }
-
-
-                if (!request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
+                
+                if (!request.Url.AbsoluteString.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) && !request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
                 {
                     AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
                     result.Error = MsalError.NonHttpsRedirectNotSupported;
@@ -114,19 +111,19 @@ namespace Microsoft.Identity.Client
                 return true;
             };
 
-            webView.LoadFinished += delegate
+            _webView.LoadFinished += delegate
             {
                 // If the title is too long, iOS automatically truncates it and adds ...
-                this.Title = webView.EvaluateJavascript(@"document.title") ?? "Sign in";
+                this.Title = _webView.EvaluateJavascript(@"document.title") ?? "Sign in";
             };
 
-            View.AddSubview(webView);
+            View.AddSubview(_webView);
 
             this.NavigationItem.LeftBarButtonItem = new UIBarButtonItem(UIBarButtonSystemItem.Cancel,
                 this.CancelAuthentication);
 
-            NSUrlRequest startRequest = new NSUrlRequest(new NSUrl(this.url));
-            webView.LoadRequest(startRequest);
+            NSUrlRequest startRequest = new NSUrlRequest(new NSUrl(this._url));
+            _webView.LoadRequest(startRequest);
 
             // if this is false, page will be 'zoomed in' to normal size
             //webView.ScalesPageToFit = true;

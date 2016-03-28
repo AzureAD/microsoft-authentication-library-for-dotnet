@@ -21,7 +21,7 @@ using Microsoft.Identity.Client;
 using TestApp.PCL;
 using UIKit;
 
-namespace AdaliOSSample
+namespace MsaliOSSample
 {
     public partial class MsaliOSTestAppViewController : UIViewController
     {
@@ -87,7 +87,6 @@ namespace AdaliOSSample
             }
             catch (Exception ex)
             {
-                throw ex;
             }
         }
 

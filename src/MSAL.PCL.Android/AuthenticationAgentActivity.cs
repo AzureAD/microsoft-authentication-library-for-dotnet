@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client
                 }
 
 
-                if (!uri.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
+                if (!url.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) && !uri.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
                 {
                     UriBuilder errorUri = new UriBuilder(callback);
                     errorUri.Query = string.Format("error={0}&error_description={1}",
