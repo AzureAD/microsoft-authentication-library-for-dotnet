@@ -106,12 +106,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             get
             {
-                return this.hasStateChanged;
+                lock (cacheLock)
+                {
+                    return this.hasStateChanged;
+                }
             }
 
             set
             {
-                this.hasStateChanged = value;
+                lock (cacheLock)
+                {
+                    this.hasStateChanged = value;
+                }
             }
         }
 
@@ -294,25 +300,34 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal void OnAfterAccess(TokenCacheNotificationArgs args)
         {
-            if (AfterAccess != null)
+            lock (cacheLock)
             {
-                AfterAccess(args);
+                if (AfterAccess != null)
+                {
+                    AfterAccess(args);
+                }
             }
         }
 
         internal void OnBeforeAccess(TokenCacheNotificationArgs args)
         {
-            if (BeforeAccess != null)
+            lock (cacheLock)
             {
-                BeforeAccess(args);
+                if (BeforeAccess != null)
+                {
+                    BeforeAccess(args);
+                }
             }
         }
 
         internal void OnBeforeWrite(TokenCacheNotificationArgs args)
         {
-            if (BeforeWrite != null)
+            lock (cacheLock)
             {
-                BeforeWrite(args);
+                if (BeforeWrite != null)
+                {
+                    BeforeWrite(args);
+                }
             }
         }
 
