@@ -74,19 +74,21 @@ namespace MsaliOSSample
         {
             try
             {
+
                 ReportLabel.Text = string.Empty;
                 TokenBroker tokenBroker = new TokenBroker();
-
                 sts.Authority = "https://login.microsoftonline.com/common";
                 sts.ValidClientId = "CLIENT_ID";
-                sts.ValidScope = new[] {"SCOPE1"};
+                sts.ValidScope = new[] { "SCOPE1" };
                 sts.ValidUserName = "USER_ID";
                 sts.ValidNonExistingRedirectUri = new Uri("APP-SCHEME//BUNDLE-ID");
-                string token = null;// await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this, false));
+                tokenBroker.Sts = sts;
+                string token = null;// await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this));
                 ReportLabel.Text = token;
             }
             catch (Exception ex)
             {
+                ReportLabel.Text = ex.Message;
             }
         }
 
