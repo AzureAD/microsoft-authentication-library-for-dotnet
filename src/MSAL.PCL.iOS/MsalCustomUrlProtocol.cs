@@ -98,6 +98,13 @@ namespace Microsoft.Identity.Client
             {
                 NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest) request.MutableCopy();
                 CustomHeaderHandler.ApplyHeadersTo(mutableRequest);
+
+                if (response != null)
+                {
+                    RemoveProperty("MsalCustomUrlProtocol", mutableRequest);
+                    _handler.Client.Redirected(_handler, mutableRequest, response);
+                }
+
                 return mutableRequest;
             }
 
