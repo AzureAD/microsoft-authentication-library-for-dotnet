@@ -68,11 +68,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XFormsApp.Droid", "tests\Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XFormsApp.iOS", "tests\TestApp\XFormsApp.iOS\XFormsApp.iOS.csproj", "{FDED3627-94FD-4886-A540-3AC05380095B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4E6B0EFA-B4FD-4817-98C0-36575E346721}"
-	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XFormsApp", "tests\TestApp\XFormsApp\XFormsApp.csproj", "{856EA096-2283-49B6-B2CD-5C603551D150}"
 EndProject
 Global
