@@ -27,7 +27,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public AuthenticatorTemplateList()
         {
-            string[] trustedHostList = { "login.windows.net", "login.chinacloudapi.cn", "login.cloudgovapi.us", "login.microsoftonline.com" };
+            string[] trustedHostList = 
+                {
+                    "login.windows.net",            // Microsoft Azure Worldwide - Used in validation scenarios where host is not this list 
+                    "login.chinacloudapi.cn",       // Microsoft Azure China
+                    "login-us.microsoftonline.com", // Microsoft Azure US Government
+                    "login.microsoftonline.com"     // Microsoft Azure Worldwide
+                };
 
             string customAuthorityHost = PlatformPlugin.PlatformInformation.GetEnvironmentVariable("customTrustedHost");
             if (string.IsNullOrWhiteSpace(customAuthorityHost))
