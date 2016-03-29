@@ -46,7 +46,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         // We do not want to return near expiry tokens, this is why we use this hard coded setting to refresh tokens which are close to expiration.
         private const int ExpirationMarginInMinutes = 5;
 
-        private volatile bool hasStateChanged; 
+        private volatile bool hasStateChanged;
+
+        private Object cacheLock = new Object();
 
         static TokenCache()
         {
@@ -104,12 +106,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             get
             {
-                return this.hasStateChanged;
+                lock (cacheLock)
+                {
+                    return this.hasStateChanged;
+                }
             }
 
             set
             {
-                this.hasStateChanged = value;
+                lock (cacheLock)
+                {
+                    this.hasStateChanged = value;
+                }
             }
         }
 
@@ -120,7 +128,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             get
             {
-                return this.tokenCacheDictionary.Count;
+                lock (cacheLock)
+                {
+                    return this.tokenCacheDictionary.Count;
+                } 
             }
         }
 
@@ -131,22 +142,28 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>Current state of the cache as a blob</returns>
         public byte[] Serialize()
         {
-            using (Stream stream = new MemoryStream())
+            lock (cacheLock)
             {
-                BinaryWriter writer = new BinaryWriter(stream);
-                writer.Write(SchemaVersion);
-                PlatformPlugin.Logger.Information(null, string.Format(CultureInfo.CurrentCulture, "Serializing token cache with {0} items.", this.tokenCacheDictionary.Count));
-                writer.Write(this.tokenCacheDictionary.Count);
-                foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> kvp in this.tokenCacheDictionary)
+                using (Stream stream = new MemoryStream())
                 {
-                    writer.Write(string.Format(CultureInfo.CurrentCulture, "{1}{0}{2}{0}{3}{0}{4}", Delimiter, kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId, (int)kvp.Key.TokenSubjectType));
-                    writer.Write(kvp.Value.Serialize());
-                }
+                    BinaryWriter writer = new BinaryWriter(stream);
+                    writer.Write(SchemaVersion);
+                    PlatformPlugin.Logger.Information(null,
+                        string.Format(CultureInfo.CurrentCulture, "Serializing token cache with {0} items.",
+                            this.tokenCacheDictionary.Count));
+                    writer.Write(this.tokenCacheDictionary.Count);
+                    foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> kvp in this.tokenCacheDictionary)
+                    {
+                        writer.Write(string.Format(CultureInfo.CurrentCulture, "{1}{0}{2}{0}{3}{0}{4}", Delimiter,
+                            kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId, (int) kvp.Key.TokenSubjectType));
+                        writer.Write(kvp.Value.Serialize());
+                    }
 
-                int length = (int)stream.Position;
-                stream.Position = 0;
-                BinaryReader reader = new BinaryReader(stream);
-                return reader.ReadBytes(length);
+                    int length = (int) stream.Position;
+                    stream.Position = 0;
+                    BinaryReader reader = new BinaryReader(stream);
+                    return reader.ReadBytes(length);
+                }
             }
         }
 
@@ -156,41 +173,47 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="state">State of the cache as a blob</param>
         public void Deserialize(byte[] state)
         {
-            if (state == null)
+            lock (cacheLock)
             {
-                this.tokenCacheDictionary.Clear();
-                return;
-            }
-
-            using (Stream stream = new MemoryStream())
-            {
-                BinaryWriter writer = new BinaryWriter(stream);
-                writer.Write(state);
-                writer.Flush();
-                stream.Position = 0;
-
-                BinaryReader reader = new BinaryReader(stream);
-                int schemaVersion = reader.ReadInt32();
-                if (schemaVersion != SchemaVersion)
+                if (state == null)
                 {
-                    PlatformPlugin.Logger.Warning(null, "The version of the persistent state of the cache does not match the current schema, so skipping deserialization.");
+                    this.tokenCacheDictionary.Clear();
                     return;
                 }
 
-                this.tokenCacheDictionary.Clear();
-                int count = reader.ReadInt32();
-                for (int n = 0; n < count; n++)
+                using (Stream stream = new MemoryStream())
                 {
-                    string keyString = reader.ReadString();
+                    BinaryWriter writer = new BinaryWriter(stream);
+                    writer.Write(state);
+                    writer.Flush();
+                    stream.Position = 0;
 
-                    string[] kvpElements = keyString.Split(new[] { Delimiter }, StringSplitOptions.None);
-                    AuthenticationResultEx resultEx = AuthenticationResultEx.Deserialize(reader.ReadString());
-                    TokenCacheKey key = new TokenCacheKey(kvpElements[0], kvpElements[1], kvpElements[2], (TokenSubjectType)int.Parse(kvpElements[3], CultureInfo.CurrentCulture), resultEx.Result.UserInfo);
+                    BinaryReader reader = new BinaryReader(stream);
+                    int schemaVersion = reader.ReadInt32();
+                    if (schemaVersion != SchemaVersion)
+                    {
+                        PlatformPlugin.Logger.Warning(null,"The version of the persistent state of the cache does not match the current schema, so skipping deserialization.");
+                        return;
+                    }
 
-                    this.tokenCacheDictionary.Add(key, resultEx);
+                    this.tokenCacheDictionary.Clear();
+                    int count = reader.ReadInt32();
+                    for (int n = 0; n < count; n++)
+                    {
+                        string keyString = reader.ReadString();
+
+                        string[] kvpElements = keyString.Split(new[] {Delimiter}, StringSplitOptions.None);
+                        AuthenticationResultEx resultEx = AuthenticationResultEx.Deserialize(reader.ReadString());
+                        TokenCacheKey key = new TokenCacheKey(kvpElements[0], kvpElements[1], kvpElements[2],
+                            (TokenSubjectType) int.Parse(kvpElements[3], CultureInfo.CurrentCulture),
+                            resultEx.Result.UserInfo);
+
+                        this.tokenCacheDictionary.Add(key, resultEx);
+                    }
+
+                    PlatformPlugin.Logger.Information(null,
+                        string.Format(CultureInfo.CurrentCulture, "Deserialized {0} items to token cache.", count));
                 }
-
-                PlatformPlugin.Logger.Information(null, string.Format(CultureInfo.CurrentCulture, "Deserialized {0} items to token cache.", count));
             }
         }
 
@@ -200,14 +223,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>The items in the cache</returns>
         public virtual IEnumerable<TokenCacheItem> ReadItems()
         {
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
-            this.OnBeforeAccess(args);
+            lock (cacheLock)
+            {
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs {TokenCache = this};
+                this.OnBeforeAccess(args);
 
-            List<TokenCacheItem> items = this.tokenCacheDictionary.Select(kvp => new TokenCacheItem(kvp.Key, kvp.Value.Result)).ToList();
+                List<TokenCacheItem> items =
+                    this.tokenCacheDictionary.Select(kvp => new TokenCacheItem(kvp.Key, kvp.Value.Result)).ToList();
 
-            this.OnAfterAccess(args);
+                this.OnAfterAccess(args);
 
-            return items;
+                return items;
+            }
         }
 
         /// <summary>
@@ -216,12 +243,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="item">The item to delete from the cache</param>
         public virtual void DeleteItem(TokenCacheItem item)
         {
-            if (item == null)
+            lock (cacheLock)
             {
-                throw new ArgumentNullException("item");
-            }
+                if (item == null)
+                {
+                    throw new ArgumentNullException("item");
+                }
 
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,
                     Resource = item.Resource,
@@ -230,22 +259,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     DisplayableId = item.DisplayableId
                 };
 
-            this.OnBeforeAccess(args);
-            this.OnBeforeWrite(args);
+                this.OnBeforeAccess(args);
+                this.OnBeforeWrite(args);
 
-            TokenCacheKey toRemoveKey = this.tokenCacheDictionary.Keys.FirstOrDefault(item.Match);
-            if (toRemoveKey != null)
-            {
-                this.tokenCacheDictionary.Remove(toRemoveKey);
-                PlatformPlugin.Logger.Information(null, "One item removed successfully");
-            }
-            else
-            {
-                PlatformPlugin.Logger.Information(null, "Item not Present in the Cache");
-            }
+                TokenCacheKey toRemoveKey = this.tokenCacheDictionary.Keys.FirstOrDefault(item.Match);
+                if (toRemoveKey != null)
+                {
+                    this.tokenCacheDictionary.Remove(toRemoveKey);
+                    PlatformPlugin.Logger.Information(null, "One item removed successfully");
+                }
+                else
+                {
+                    PlatformPlugin.Logger.Information(null, "Item not Present in the Cache");
+                }
 
-            this.HasStateChanged = true;
-            this.OnAfterAccess(args);
+                this.HasStateChanged = true;
+                this.OnAfterAccess(args);
+            }
         }
 
         /// <summary>
@@ -254,192 +284,235 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public virtual void Clear()
         {
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
-            this.OnBeforeAccess(args);
-            this.OnBeforeWrite(args);
-            PlatformPlugin.Logger.Information(null, String.Format(CultureInfo.CurrentCulture, "Clearing Cache :- {0} items to be removed", this.Count));
-            this.tokenCacheDictionary.Clear();
-            PlatformPlugin.Logger.Information(null, "Successfully Cleared Cache");
-            this.HasStateChanged = true;
-            this.OnAfterAccess(args);
+            lock (cacheLock)
+            {
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs {TokenCache = this};
+                this.OnBeforeAccess(args);
+                this.OnBeforeWrite(args);
+                PlatformPlugin.Logger.Information(null,
+                    String.Format(CultureInfo.CurrentCulture, "Clearing Cache :- {0} items to be removed", this.Count));
+                this.tokenCacheDictionary.Clear();
+                PlatformPlugin.Logger.Information(null, "Successfully Cleared Cache");
+                this.HasStateChanged = true;
+                this.OnAfterAccess(args);
+            }
         }
 
         internal void OnAfterAccess(TokenCacheNotificationArgs args)
         {
-            if (AfterAccess != null)
+            lock (cacheLock)
             {
-                AfterAccess(args);
+                if (AfterAccess != null)
+                {
+                    AfterAccess(args);
+                }
             }
         }
 
         internal void OnBeforeAccess(TokenCacheNotificationArgs args)
         {
-            if (BeforeAccess != null)
+            lock (cacheLock)
             {
-                BeforeAccess(args);
+                if (BeforeAccess != null)
+                {
+                    BeforeAccess(args);
+                }
             }
         }
 
         internal void OnBeforeWrite(TokenCacheNotificationArgs args)
         {
-            if (BeforeWrite != null)
+            lock (cacheLock)
             {
-                BeforeWrite(args);
+                if (BeforeWrite != null)
+                {
+                    BeforeWrite(args);
+                }
             }
         }
 
         internal AuthenticationResultEx LoadFromCache(string authority, string resource, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId, CallState callState)
         {
-            PlatformPlugin.Logger.Verbose(callState, "Looking up cache for a token...");
-
-            AuthenticationResultEx resultEx = null;
-
-            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? kvp = this.LoadSingleItemFromCache(authority, resource, clientId, subjectType, uniqueId, displayableId, callState);
-
-            if (kvp.HasValue)
+            lock (cacheLock)
             {
-                TokenCacheKey cacheKey = kvp.Value.Key;
-                resultEx = kvp.Value.Value;
-                bool tokenNearExpiry = (resultEx.Result.ExpiresOn <= DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
+                PlatformPlugin.Logger.Verbose(callState, "Looking up cache for a token...");
 
-                if (tokenNearExpiry)
+                AuthenticationResultEx resultEx = null;
+
+                KeyValuePair<TokenCacheKey, AuthenticationResultEx>? kvp = this.LoadSingleItemFromCache(authority,
+                    resource, clientId, subjectType, uniqueId, displayableId, callState);
+
+                if (kvp.HasValue)
                 {
-                    resultEx.Result.AccessToken = null;
-                    PlatformPlugin.Logger.Verbose(callState, "An expired or near expiry token was found in the cache");
-                }
-                else if (!cacheKey.ResourceEquals(resource))
-                {
-                    PlatformPlugin.Logger.Verbose(callState, 
-                        string.Format(CultureInfo.CurrentCulture, "Multi resource refresh token for resource '{0}' will be used to acquire token for '{1}'", cacheKey.Resource, resource));
-                    var newResultEx = new AuthenticationResultEx
+                    TokenCacheKey cacheKey = kvp.Value.Key;
+                    resultEx = kvp.Value.Value;
+                    bool tokenNearExpiry = (resultEx.Result.ExpiresOn <=
+                                            DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
+
+                    if (tokenNearExpiry)
                     {
-                        Result = new AuthenticationResult(null, null, DateTimeOffset.MinValue),                            
-                        RefreshToken = resultEx.RefreshToken,
-                        ResourceInResponse = resultEx.ResourceInResponse
-                    };
+                        resultEx.Result.AccessToken = null;
+                        PlatformPlugin.Logger.Verbose(callState,
+                            "An expired or near expiry token was found in the cache");
+                    }
+                    else if (!cacheKey.ResourceEquals(resource))
+                    {
+                        PlatformPlugin.Logger.Verbose(callState,
+                            string.Format(CultureInfo.CurrentCulture,
+                                "Multi resource refresh token for resource '{0}' will be used to acquire token for '{1}'",
+                                cacheKey.Resource, resource));
+                        var newResultEx = new AuthenticationResultEx
+                        {
+                            Result = new AuthenticationResult(null, null, DateTimeOffset.MinValue),
+                            RefreshToken = resultEx.RefreshToken,
+                            ResourceInResponse = resultEx.ResourceInResponse
+                        };
 
-                    newResultEx.Result.UpdateTenantAndUserInfo(resultEx.Result.TenantId, resultEx.Result.IdToken, resultEx.Result.UserInfo);
-                    resultEx = newResultEx;
+                        newResultEx.Result.UpdateTenantAndUserInfo(resultEx.Result.TenantId, resultEx.Result.IdToken,
+                            resultEx.Result.UserInfo);
+                        resultEx = newResultEx;
+                    }
+                    else
+                    {
+                        PlatformPlugin.Logger.Verbose(callState,
+                            string.Format(CultureInfo.CurrentCulture, "{0} minutes left until token in cache expires",
+                                (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
+                    }
+
+                    if (resultEx.Result.AccessToken == null && resultEx.RefreshToken == null)
+                    {
+                        this.tokenCacheDictionary.Remove(cacheKey);
+                        PlatformPlugin.Logger.Information(callState, "An old item was removed from the cache");
+                        this.HasStateChanged = true;
+                        resultEx = null;
+                    }
+
+                    if (resultEx != null)
+                    {
+                        PlatformPlugin.Logger.Information(callState,
+                            "A matching item (access token or refresh token or both) was found in the cache");
+                    }
                 }
                 else
                 {
-                    PlatformPlugin.Logger.Verbose(callState, string.Format(CultureInfo.CurrentCulture, "{0} minutes left until token in cache expires", (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
-                }                
-
-                if (resultEx.Result.AccessToken == null && resultEx.RefreshToken == null)
-                {
-                    this.tokenCacheDictionary.Remove(cacheKey);
-                    PlatformPlugin.Logger.Information(callState, "An old item was removed from the cache");
-                    this.HasStateChanged = true;
-                    resultEx = null;
+                    PlatformPlugin.Logger.Information(callState, "No matching token was found in the cache");
                 }
 
-                if (resultEx != null)
-                {
-                    PlatformPlugin.Logger.Information(callState, "A matching item (access token or refresh token or both) was found in the cache");
-                }
+                return resultEx;
             }
-            else
-            {
-                PlatformPlugin.Logger.Information(callState, "No matching token was found in the cache");
-            }
-
-            return resultEx;
         }
 
         internal void StoreToCache(AuthenticationResultEx result, string authority, string resource, string clientId, TokenSubjectType subjectType, CallState callState)
         {
-            PlatformPlugin.Logger.Verbose(callState, "Storing token in the cache...");
-
-            string uniqueId = (result.Result.UserInfo != null) ? result.Result.UserInfo.UniqueId : null;
-            string displayableId = (result.Result.UserInfo != null) ? result.Result.UserInfo.DisplayableId : null;
-
-            this.OnBeforeWrite(new TokenCacheNotificationArgs
+            lock (cacheLock)
             {
-                Resource = resource,
-                ClientId = clientId,
-                UniqueId = uniqueId,
-                DisplayableId = displayableId
-            });
+                PlatformPlugin.Logger.Verbose(callState, "Storing token in the cache...");
 
-            TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, subjectType, result.Result.UserInfo);
-            this.tokenCacheDictionary[tokenCacheKey] = result;
-            PlatformPlugin.Logger.Verbose(callState, "An item was stored in the cache");
-            this.UpdateCachedMrrtRefreshTokens(result, clientId, subjectType);
+                string uniqueId = (result.Result.UserInfo != null) ? result.Result.UserInfo.UniqueId : null;
+                string displayableId = (result.Result.UserInfo != null) ? result.Result.UserInfo.DisplayableId : null;
 
-            this.HasStateChanged = true;
+                this.OnBeforeWrite(new TokenCacheNotificationArgs
+                {
+                    Resource = resource,
+                    ClientId = clientId,
+                    UniqueId = uniqueId,
+                    DisplayableId = displayableId
+                });
+
+                TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, subjectType,
+                    result.Result.UserInfo);
+                this.tokenCacheDictionary[tokenCacheKey] = result;
+                PlatformPlugin.Logger.Verbose(callState, "An item was stored in the cache");
+                this.UpdateCachedMrrtRefreshTokens(result, clientId, subjectType);
+
+                this.HasStateChanged = true;
+            }
         }
 
         private void UpdateCachedMrrtRefreshTokens(AuthenticationResultEx result, string clientId, TokenSubjectType subjectType)
         {
-            if (result.Result.UserInfo != null && result.IsMultipleResourceRefreshToken)
+            lock (cacheLock)
             {
-                //pass null for authority to update the token for all the tenants
-                List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> mrrtItems =
-                    this.QueryCache(null, clientId, subjectType, result.Result.UserInfo.UniqueId, result.Result.UserInfo.DisplayableId).Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
-
-                foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> mrrtItem in mrrtItems)
+                if (result.Result.UserInfo != null && result.IsMultipleResourceRefreshToken)
                 {
-                    mrrtItem.Value.RefreshToken = result.RefreshToken;
+                    //pass null for authority to update the token for all the tenants
+                    List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> mrrtItems =
+                        this.QueryCache(null, clientId, subjectType, result.Result.UserInfo.UniqueId,
+                            result.Result.UserInfo.DisplayableId)
+                            .Where(p => p.Value.IsMultipleResourceRefreshToken)
+                            .ToList();
+
+                    foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> mrrtItem in mrrtItems)
+                    {
+                        mrrtItem.Value.RefreshToken = result.RefreshToken;
+                    }
                 }
             }
         }
 
         private KeyValuePair<TokenCacheKey, AuthenticationResultEx>? LoadSingleItemFromCache(string authority, string resource, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId, CallState callState)
         {
-            // First identify all potential tokens.
-            List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> items = this.QueryCache(authority, clientId, subjectType, uniqueId, displayableId);
-
-            List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> resourceSpecificItems =
-                items.Where(p => p.Key.ResourceEquals(resource)).ToList();
-
-            int resourceValuesCount = resourceSpecificItems.Count();
-            KeyValuePair<TokenCacheKey, AuthenticationResultEx>? returnValue = null;
-            switch (resourceValuesCount)
+            lock (cacheLock)
             {
-                case 1:
-                    PlatformPlugin.Logger.Information(callState, "An item matching the requested resource was found in the cache");
-                    returnValue = resourceSpecificItems.First();
-                    break;
-                case 0:
-                {
-                    // There are no resource specific tokens.  Choose any of the MRRT tokens if there are any.
-                    List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> mrrtItems =
-                        items.Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
+                // First identify all potential tokens.
+                List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> items = this.QueryCache(authority, clientId,
+                    subjectType, uniqueId, displayableId);
 
-                    if (mrrtItems.Any())
+                List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> resourceSpecificItems =
+                    items.Where(p => p.Key.ResourceEquals(resource)).ToList();
+
+                int resourceValuesCount = resourceSpecificItems.Count();
+                KeyValuePair<TokenCacheKey, AuthenticationResultEx>? returnValue = null;
+                switch (resourceValuesCount)
+                {
+                    case 1:
+                        PlatformPlugin.Logger.Information(callState,
+                            "An item matching the requested resource was found in the cache");
+                        returnValue = resourceSpecificItems.First();
+                        break;
+                    case 0:
                     {
-                        returnValue = mrrtItems.First();
-                        PlatformPlugin.Logger.Information(callState, "A Multi Resource Refresh Token for a different resource was found which can be used");
+                        // There are no resource specific tokens.  Choose any of the MRRT tokens if there are any.
+                        List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> mrrtItems =
+                            items.Where(p => p.Value.IsMultipleResourceRefreshToken).ToList();
+
+                        if (mrrtItems.Any())
+                        {
+                            returnValue = mrrtItems.First();
+                            PlatformPlugin.Logger.Information(callState,
+                                "A Multi Resource Refresh Token for a different resource was found which can be used");
+                        }
+                    }
+                        break;
+                    default:
+                        throw new AdalException(AdalError.MultipleTokensMatched);
+                }
+
+                // check for tokens issued to same client_id/user_id combination, but any tenant.
+                if (returnValue == null)
+                {
+                    List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForAllTenants = this.QueryCache(
+                        null, clientId, subjectType, uniqueId, displayableId);
+                    if (itemsForAllTenants.Count != 0)
+                    {
+                        returnValue = itemsForAllTenants.First();
+                    }
+
+                    // check if the token was issued by AAD
+                    if (returnValue != null &&
+                        Authenticator.DetectAuthorityType(returnValue.Value.Key.Authority) != AuthorityType.ADFS)
+                    {
+                        //remove access token to redeem refresh token against a different tenant.
+                        returnValue.Value.Value.Result.AccessToken = null;
+                    }
+                    else
+                    {
+                        returnValue = null;
                     }
                 }
-                    break;
-                default:
-                    throw new AdalException(AdalError.MultipleTokensMatched);
+
+                return returnValue;
             }
-
-            // check for tokens issued to same client_id/user_id combination, but any tenant.
-            if (returnValue == null)
-            {
-                List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForAllTenants = this.QueryCache(null, clientId, subjectType, uniqueId, displayableId);
-                if (itemsForAllTenants.Count != 0)
-                {
-                    returnValue = itemsForAllTenants.First();
-                }
-
-                // check if the token was issued by AAD
-                if (returnValue != null && Authenticator.DetectAuthorityType(returnValue.Value.Key.Authority) != AuthorityType.ADFS)
-                {
-                    //remove access token to redeem refresh token against a different tenant.
-                    returnValue.Value.Value.Result.AccessToken = null;
-                }
-                else
-                {
-                    returnValue = null;
-                }
-            }
-
-            return returnValue;
         }
 
         /// <summary>
@@ -447,15 +520,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// authority value that this AuthorizationContext was created with.  In every case passing
         /// null results in a wildcard evaluation.
         /// </summary>
-        private List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> QueryCache(string authority, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId)
+        private List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> QueryCache(string authority, string clientId,
+            TokenSubjectType subjectType, string uniqueId, string displayableId)
         {
-            return this.tokenCacheDictionary.Where(
+            lock (cacheLock)
+            {
+                return this.tokenCacheDictionary.Where(
                     p =>
                         (string.IsNullOrWhiteSpace(authority) || p.Key.Authority == authority)
                         && (string.IsNullOrWhiteSpace(clientId) || p.Key.ClientIdEquals(clientId))
                         && (string.IsNullOrWhiteSpace(uniqueId) || p.Key.UniqueId == uniqueId)
                         && (string.IsNullOrWhiteSpace(displayableId) || p.Key.DisplayableIdEquals(displayableId))
                         && p.Key.TokenSubjectType == subjectType).ToList();
+            }
         }
     }
 }
