@@ -23,12 +23,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         IntegratedAuth,
         UsernamePassword
     }
-
-    // Disabled Non-Interactive Feature
+    
     /// <summary>
     /// Credential used for integrated authentication on domain-joined machines.
     /// </summary>
-    public sealed class UserCredential
+    public class UserCredential
     {
         /// <summary>
         /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
@@ -43,22 +42,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Constructor to create credential with client id and secret
         /// </summary>
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        public UserCredential(string userName)
+        public UserCredential(string userName):this(userName, UserAuthType.IntegratedAuth)
         {
-            this.UserName = userName;
-            this.UserAuthType = UserAuthType.IntegratedAuth;
         }
 
-        /// <summary>
-        /// Constructor to create credential with client id and secret
-        /// </summary>
-        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        /// <param name="password">User password.</param>
-        public UserCredential(string userName, string password)
+        internal UserCredential(string userName, UserAuthType userAuthType)
         {
             this.UserName = userName;
-            this.Password = password;
-            this.UserAuthType = UserAuthType.UsernamePassword;
+            this.UserAuthType = userAuthType;
         }
 
         /// <summary>
@@ -68,22 +59,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal UserAuthType UserAuthType { get; private set; }
 
-        internal string Password { get; private set; }
-
-        internal char[] PasswordToCharArray()
+        internal virtual void ApplyTo(DictionaryRequestParameters requestParameters)
         {
-            return (this.Password != null) ? this.Password.ToCharArray() : null;
         }
 
-        internal char[] EscapedPasswordToCharArray()
+        internal virtual char[] PasswordToCharArray()
         {
-            string password = this.Password;
-            password = password.Replace("&", "&amp;");
-            password = password.Replace("\"", "&quot;");
-            password = password.Replace("'", "&apos;");
-            password = password.Replace("<", "&lt;");
-            password = password.Replace(">", "&gt;");
-            return (password != null) ? password.ToCharArray() : null;
+            return null;
         }
     }
 }

@@ -52,7 +52,7 @@ namespace Test.ADAL.Common
             return await RunTaskAsync(this.context.AcquireTokenAsync(resource, clientId,
                 (credential.Password == null) ?
                 new UserCredential(credential.UserId) :
-                new UserCredential(credential.UserId, credential.Password)));
+                new UserPasswordCredential(credential.UserId, credential.Password)));
         }
 #endif
         public async Task<AuthenticationResultProxy> AcquireTokenSilentAsync(string resource, string clientId)
