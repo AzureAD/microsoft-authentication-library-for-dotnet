@@ -1,4 +1,5 @@
 #pragma warning disable 1591
+//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
