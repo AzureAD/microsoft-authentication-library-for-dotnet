@@ -24,7 +24,7 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-//
+
 using Foundation;
 using System;
 using System.CodeDom.Compiler;
