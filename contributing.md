@@ -107,6 +107,11 @@ Bug fixes and features should come with tests.  Add your tests in the
 test directory. This varies by repository but often follows the same convention of /src/test.  Look at other tests to see how they should be
 structured (license boilerplate, common includes, etc.).
 
+Before you can run tests you will need to enable Skip Verification for on your machine.  Open the 'Developer Command Prompt for VS2015' as an administrator and run the following command:
+
+```
+sn -Vr *,31bf3856ad364e35
+```
 
 Make sure that all tests pass.
 
