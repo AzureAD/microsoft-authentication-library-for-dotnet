@@ -58,7 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-	<Compile Include="..\ADAL.Common\AuthenticationContextIntegratedAuthExtensions.cs">
+    <Compile Include="..\ADAL.Common\AuthenticationContextIntegratedAuthExtensions.cs">
       <Link>AuthenticationContextIntegratedAuthExtensions.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.Common\AdalEventSource.cs">
@@ -104,6 +104,7 @@
     </Compile>
     <Compile Include="StaTaskScheduler.cs" />
     <Compile Include="TokenCachePlugin.cs" />
+    <Compile Include="UserPasswordCredential.cs" />
     <Compile Include="WebBrowserInterfaces.cs" />
     <Compile Include="WebBrowserNavigateErrorEventArgs.cs" />
     <Compile Include="WebUI.cs" />

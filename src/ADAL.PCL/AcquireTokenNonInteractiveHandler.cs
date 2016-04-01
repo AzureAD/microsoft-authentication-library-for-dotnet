@@ -145,9 +145,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
-                requestParameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
-                requestParameters[OAuthParameter.Username] = this.userCredential.UserName;
-                requestParameters[OAuthParameter.Password] = this.userCredential.Password;
+                this.userCredential.ApplyTo(requestParameters);
             }
 
             // To request id_token in response

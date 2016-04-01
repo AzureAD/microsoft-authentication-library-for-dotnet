@@ -191,7 +191,7 @@ namespace Test.ADAL.NET.Unit
             WsTrustAddress wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
             Verify.IsNotNull(wsTrustAddress);
 
-            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, new UserCredential(federatedSts.ValidUserName, federatedSts.ValidPassword), null);
+            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, new UserPasswordCredential(federatedSts.ValidUserName, federatedSts.ValidPassword), null);
             Verify.IsNotNull(wstResponse.Token);
             Verify.IsTrue(wstResponse.TokenType.Contains("SAML"));
 
@@ -201,7 +201,7 @@ namespace Test.ADAL.NET.Unit
             try
             {
                 await WsTrustRequest.SendRequestAsync(new WsTrustAddress { Uri = new Uri(wsTrustAddress.Uri.AbsoluteUri + "x") },
-                    new UserCredential(federatedSts.ValidUserName, federatedSts.ValidPassword), null);
+                    new UserPasswordCredential(federatedSts.ValidUserName, federatedSts.ValidPassword), null);
             }
             catch (AdalException ex)
             {
@@ -211,7 +211,7 @@ namespace Test.ADAL.NET.Unit
 
             try
             {
-                await WsTrustRequest.SendRequestAsync(new WsTrustAddress { Uri = new Uri(wsTrustAddress.Uri.AbsoluteUri) }, new UserCredential(federatedSts.ValidUserName, "InvalidPassword"), null);
+                await WsTrustRequest.SendRequestAsync(new WsTrustAddress { Uri = new Uri(wsTrustAddress.Uri.AbsoluteUri) }, new UserPasswordCredential(federatedSts.ValidUserName, "InvalidPassword"), null);
             }
             catch (AdalException ex)
             {
@@ -248,7 +248,7 @@ namespace Test.ADAL.NET.Unit
         {
             await Task.Factory.StartNew(() =>
             {
-                UserCredential cred = new UserCredential("user", "pass&<>\"'");
+                UserCredential cred = new UserPasswordCredential("user", "pass&<>\"'");
                 StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto",
                     new WsTrustAddress {Uri = new Uri("some://resource")}, cred);
                 try

@@ -58,7 +58,7 @@ namespace AdalDesktopTestApp
         {
             Sts sts = new MobileAppSts();
             AuthenticationContext context = new AuthenticationContext(sts.Authority, true);
-            var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, new UserCredential(sts.ValidUserName, sts.ValidPassword));
+            var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, new UserPasswordCredential(sts.ValidUserName, sts.ValidPassword));
 
             string token = result.AccessToken;
             Console.WriteLine(token + "\n");

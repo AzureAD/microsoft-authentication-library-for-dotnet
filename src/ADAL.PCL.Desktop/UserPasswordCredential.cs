@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -27,54 +27,45 @@
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal enum UserAuthType
-    {
-        IntegratedAuth,
-        UsernamePassword
-    }
-    
     /// <summary>
-    /// Credential used for integrated authentication on domain-joined machines.
+    /// Credential used for username/password authentication.
     /// </summary>
-    public class UserCredential
+    public sealed class UserPasswordCredential : UserCredential
     {
-        /// <summary>
-        /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
-        /// and it can only be used in domain joined scenarios.
-        /// </summary>
-        public UserCredential()
-        {
-            this.UserAuthType = UserAuthType.IntegratedAuth;
-        }
 
         /// <summary>
         /// Constructor to create credential with client id and secret
         /// </summary>
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        public UserCredential(string userName):this(userName, UserAuthType.IntegratedAuth)
+        /// <param name="password">User password.</param>
+        public UserPasswordCredential(string userName, string password):base(userName, UserAuthType.UsernamePassword)
         {
+            this.Password = password;
         }
 
-        internal UserCredential(string userName, UserAuthType userAuthType)
+        internal string Password { get; private set; }
+
+        internal override char[] PasswordToCharArray()
         {
-            this.UserName = userName;
-            this.UserAuthType = userAuthType;
+            return (this.Password != null) ? this.Password.ToCharArray() : null;
         }
 
-        /// <summary>
-        /// Gets identifier of the user.
-        /// </summary>
-        public string UserName { get; internal set; }
-
-        internal UserAuthType UserAuthType { get; private set; }
-
-        internal virtual void ApplyTo(DictionaryRequestParameters requestParameters)
+        internal char[] EscapedPasswordToCharArray()
         {
+            string password = this.Password;
+            password = password.Replace("&", "&amp;");
+            password = password.Replace("\"", "&quot;");
+            password = password.Replace("'", "&apos;");
+            password = password.Replace("<", "&lt;");
+            password = password.Replace(">", "&gt;");
+            return (password != null) ? password.ToCharArray() : null;
         }
 
-        internal virtual char[] PasswordToCharArray()
+        internal override void ApplyTo(DictionaryRequestParameters requestParameters)
         {
-            return null;
+            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
+            requestParameters[OAuthParameter.Username] = this.UserName;
+            requestParameters[OAuthParameter.Password] = this.Password;
         }
     }
 }
