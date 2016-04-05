@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             SkipBroker = true;
         }
 
-        public PlatformParameters(UIViewController callerViewController)
+        public PlatformParameters(UIViewController callerViewController):this()
         {
             this.CallerViewController = callerViewController;
         }

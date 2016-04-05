@@ -168,13 +168,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public AuthenticationResultEx GetResult()
         {
+            return this.GetResult(DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn));
+        }
+
+        public AuthenticationResultEx GetResult(DateTimeOffset expiresOn)
+        {
             AuthenticationResultEx resultEx;
 
             if (this.AccessToken != null)
             {
-                DateTimeOffset expiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn);
                 var result = new AuthenticationResult(this.TokenType, this.AccessToken, expiresOn);
-                
+
                 IdToken idToken = IdToken.Parse(this.IdTokenString);
                 if (idToken != null)
                 {
@@ -224,7 +228,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     RefreshToken = this.RefreshToken,
                     // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
                     // to get it from the STS response.
-                    ResourceInResponse = this.Resource                    
+                    ResourceInResponse = this.Resource
                 };
             }
             else if (this.Error != null)
@@ -238,6 +242,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return resultEx;
         }
+
 
         private static string ReadStreamContent(Stream stream)
         {

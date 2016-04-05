@@ -1,37 +1,45 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-  <dict>
-    <key>CFBundleDisplayName</key>
-    <string>AdaliOSTestApp</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.your-company.AdaliOSTestApp</string>
-    <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
-    <key>CFBundleVersion</key>
-    <string>1.0</string>
-    <key>UISupportedInterfaceOrientations</key>
-    <array>
-      <string>UIInterfaceOrientationPortrait</string>
-      <string>UIInterfaceOrientationLandscapeLeft</string>
-      <string>UIInterfaceOrientationLandscapeRight</string>
-    </array>
-    <key>UIMainStoryboardFile</key>
-    <string>MainStoryboard</string>
-    <key>MinimumOSVersion</key>
-    <string>7.0</string>
-    	<key>CFBundleURLTypes</key>
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>AdaliOSTestApp</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.your-company.adaliostestapp</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIMainStoryboardFile</key>
+	<string>MainStoryboard</string>
+	<key>MinimumOSVersion</key>
+	<string>9.0</string>
+  <key>LSApplicationQueriesSchemes</key>
+  <array>
+    <string>msauth</string>
+  </array>
+	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.your-company.AdaliOSTestApp</string>
+			<string>com.your-company.adaliostestapp</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>AdaliOSApp</string>
+				<string>adaliosapp</string>
 			</array>
 		</dict>
 	</array>
-  </dict>
+	<key>UIDeviceFamily</key>
+	<array>
+		<integer>1</integer>
+	</array>
+</dict>
 </plist>
