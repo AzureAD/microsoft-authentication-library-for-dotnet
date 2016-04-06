@@ -94,9 +94,10 @@ namespace TestApp.PCL
         {
             try
             {
-                var result = await app.AcquireTokenAsync(Sts.ValidScope, Sts.ValidClientId, null, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
+/* app = new AuthenticationContext(Sts.Authority, true);
+                                var result = await app.AcquireTokenAsync(Sts.ValidScope, Sts.ValidClientId, null, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
 
-                return result.Token;*/
+                                return result.Token;*/
                 return null;
             }
             catch (Exception ex)
@@ -110,9 +111,10 @@ namespace TestApp.PCL
         {
             try
             {
-                var result = await app.AcquireTokenAsync(Sts.ValidScope, new ClientCredential(Sts.ValidConfidentialClientId, Sts.ValidConfidentialClientSecret));
+/* app = new AuthenticationContext(Sts.Authority, true);
+                                var result = await app.AcquireTokenAsync(Sts.ValidScope, new ClientCredential(Sts.ValidConfidentialClientId, Sts.ValidConfidentialClientSecret));
 
-                return result.Token;*/
+                                return result.Token;*/
                 return null;
             }
             catch (Exception ex)

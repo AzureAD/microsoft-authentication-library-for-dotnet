@@ -33,6 +33,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+// Moving the code to the library's main namespace
+
 namespace Microsoft.Identity.Client
 {
     // This IDisposable class doe not need to implement Dispose method in standard way, because it is sealed. 
