@@ -46,6 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     break;
 
                 case BrokerResponseCode.ResponseReceived:
+                case BrokerResponseCode.BrowserCodeError:
                 case BrokerResponseCode.UserCancelled:
                     BrokerHelper.SetBrokerResult(data, (int)resultCode);
                     break;

@@ -302,6 +302,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 
                 return new AuthenticationResultEx
                 {
+                    Result = result,
                     RefreshToken = null,
                     ResourceInResponse = null,
                 };
@@ -387,7 +388,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string signatureDigest = this.GetCurrentSignatureForPackage(packageName);
             if (!String.IsNullOrEmpty(signatureDigest))
             {
-                return string.Format(CultureInfo.CurrentCulture, " {0}://{1}/{2}", RedirectUriScheme, EncodingHelper.UrlEncode(packageName), EncodingHelper.UrlEncode(signatureDigest));
+                return string.Format(CultureInfo.CurrentCulture, "{0}://{1}/{2}", RedirectUriScheme, packageName.ToLower(), signatureDigest);
             }
 
             return String.Empty;
@@ -430,8 +431,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             brokerOptions.PutInt("json", 1);
             brokerOptions.PutString(BrokerConstants.AccountResource,
                     request.Resource);
-            string s = GetRedirectUriForBroker();
-            brokerOptions.PutString(BrokerConstants.AccountRedirect, s);
+            string computedRedirectUri = GetRedirectUriForBroker();
+            
+            if (!string.IsNullOrEmpty(request.RedirectUri) && !string.Equals(computedRedirectUri, request.RedirectUri))
+            {
+                throw new ArgumentException("redirect uri for broker invocation should be set to" + computedRedirectUri);
+            }
+
+            brokerOptions.PutString(BrokerConstants.AccountRedirect, request.RedirectUri);
             brokerOptions.PutString(BrokerConstants.AccountClientIdKey,
                     request.ClientId);
             brokerOptions.PutString(BrokerConstants.AdalVersionKey,

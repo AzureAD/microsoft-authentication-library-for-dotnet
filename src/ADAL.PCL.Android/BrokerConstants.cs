@@ -130,6 +130,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public const string ChallangeResponseVersion = "Version";
 
+        public const string ResponseErrorCode = "com.microsoft.aad.adal:BrowserErrorCode";
+        public const string ResponseErrorMessage = "com.microsoft.aad.adal:BrowserErrorMessage";
+
+
         /**
          * Certificate authorities are passed with delimiter.
          */

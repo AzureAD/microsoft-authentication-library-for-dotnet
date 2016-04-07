@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public bool CanInvokeBroker { get
         {
             PlatformParameters pp = PlatformParameters as PlatformParameters;
-            return !pp.SkipBroker && UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://"));
+            return pp.UseBroker && UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://"));
         } }
 
         public async Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
