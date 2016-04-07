@@ -45,18 +45,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public IPlatformParameters PlatformParameters { get; set; }
 
-        private bool WillSkipBroker()
+        private bool WillUseBroker()
         {
             PlatformParameters pp = PlatformParameters as PlatformParameters;
             if (pp != null)
             {
-                return pp.SkipBroker;
+                return pp.UseBroker;
             }
 
-            return true;
+            return false;
         }
 
-        public bool CanInvokeBroker { get { return !WillSkipBroker() && mBrokerProxy.CanSwitchToBroker(); } }
+        public bool CanInvokeBroker { get { return WillUseBroker() && mBrokerProxy.CanSwitchToBroker(); } }
 
 
         public async Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
@@ -169,7 +169,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
-                throw new AdalException(AdalErrorAndroidEx.NoBrokerAccountFound, "Add requested account as a Workplace account via Settings->Accounts or set SkipBroker=false.");
+                throw new AdalException(AdalErrorAndroidEx.NoBrokerAccountFound, "Add requested account as a Workplace account via Settings->Accounts or set UseBroker=true.");
             }
         }
         

@@ -34,17 +34,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
-        public PlatformParameters(Activity callerActivity):this(callerActivity, true)
+        public PlatformParameters(Activity callerActivity):this(callerActivity, false)
         {
         }
 
-        public PlatformParameters(Activity callerActivity, bool skipBroker)
+        public PlatformParameters(Activity callerActivity, bool useBroker)
         {
             this.CallerActivity = callerActivity;
-            SkipBroker = skipBroker;
+            UseBroker = useBroker;
         }
 
-        public bool SkipBroker { get; set; }
+        public bool UseBroker { get; set; }
 
         /// <summary>
         /// Caller Android Activity
