@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     PlatformPlugin.Logger.Verbose(null, "User is not specified for background token request");
                 }
 
-                if (resultEx != null && resultEx.Result!=null && !string.IsNullOrEmpty(resultEx.Result.AccessToken))
+                if (resultEx != null && resultEx.Result != null && !string.IsNullOrEmpty(resultEx.Result.AccessToken))
                 {
                     PlatformPlugin.Logger.Verbose(null, "Token is returned from background call ");
                     readyForResponse.Release();
@@ -177,15 +177,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (resultCode != BrokerResponseCode.ResponseReceived)
             {
-                resultEx = new AuthenticationResultEx
-                {
-                    Exception = new AdalException(AdalError.AuthenticationCanceled, AdalErrorMessage.AuthenticationCanceled)
-                };
+                    resultEx = new AuthenticationResultEx
+                    {
+                        Exception =
+                            new AdalException(data.GetStringExtra(BrokerConstants.ResponseErrorCode),
+                                data.GetStringExtra(BrokerConstants.ResponseErrorMessage))
+                    };
             }
             else
             {
-                string accessToken = data.GetStringExtra("account.access.token");
-                DateTimeOffset expiresOn = BrokerProxy.ConvertFromTimeT(data.GetLongExtra("account.expiredate", 0));
+                string accessToken = data.GetStringExtra(BrokerConstants.AccountAccessToken);
+                DateTimeOffset expiresOn = BrokerProxy.ConvertFromTimeT(data.GetLongExtra(BrokerConstants.AccountExpireDate, 0));
                 UserInfo userInfo = BrokerProxy.GetUserInfoFromBrokerResult(data.Extras);
                 resultEx = new AuthenticationResultEx
                 {
@@ -195,6 +197,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
                 };
             }
+
             readyForResponse.Release();
         }
     }

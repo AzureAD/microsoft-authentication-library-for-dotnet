@@ -44,11 +44,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             SkipBroker = true;
         }
 
+        /// <summary>
+        /// Additional parameters used in acquiring user's authorization
+        /// </summary>
+        /// <param name="callerViewController">UIViewController instance</param>
         public PlatformParameters(UIViewController callerViewController):this()
         {
             this.CallerViewController = callerViewController;
         }
 
+        /// <summary>
+        /// Additional parameters used in acquiring user's authorization
+        /// </summary>
+        /// <param name="callerViewController">UIViewController instance</param>
+        /// <param name="skipBroker">skips calling to broker if broker is present. true, by default</param>
         public PlatformParameters(UIViewController callerViewController, bool skipBroker):this(callerViewController)
         {
             SkipBroker = skipBroker;
@@ -57,8 +66,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Caller UIViewController
         /// </summary>
-        public UIViewController CallerViewController { get; private set; } 
+        public UIViewController CallerViewController { get; private set; }
 
+        /// <summary>
+        /// Skips calling to broker if broker is present. true, by default
+        /// </summary>
         public bool SkipBroker { get; set; }
     }
 }
