@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client
         }
         }
 
-        public async Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
+        public Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {
             throw new NotImplementedException();
         }

@@ -65,7 +65,7 @@ namespace XFormsApp
 
         public IPlatformParameters Paramters { get; set; }
 
-        async void browseButton_Clicked(object sender, EventArgs e)
+        void browseButton_Clicked(object sender, EventArgs e)
         {
             this.result.Text = string.Empty;
             string token = null;//await tokenBroker.GetTokenInteractiveAsync(Paramters);

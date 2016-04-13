@@ -93,7 +93,7 @@ namespace AndroidTestApp
 
         }
 
-        private async void acquireTokenInteractiveButton_Click(object sender, EventArgs e)
+        private void acquireTokenInteractiveButton_Click(object sender, EventArgs e)
         {
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
