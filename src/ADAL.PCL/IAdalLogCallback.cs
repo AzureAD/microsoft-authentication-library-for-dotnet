@@ -35,9 +35,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public enum LogLevel
     {
+        /// <summary>
+        /// Information log level
+        /// </summary>
         Information,
+        /// <summary>
+        /// Verbose log level
+        /// </summary>
         Verbose,
+        /// <summary>
+        /// Warning log level
+        /// </summary>
         Warning,
+        /// <summary>
+        /// Error log level
+        /// </summary>
         Error
     }
 
@@ -46,6 +58,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public interface IAdalLogCallback
     {
+        /// <summary>
+        /// Callback method to implement for custom logging
+        /// </summary>
+        /// <param name="level">Log level</param>
+        /// <param name="message">message to be logged</param>
         void Log(LogLevel level, string message);
     }
 

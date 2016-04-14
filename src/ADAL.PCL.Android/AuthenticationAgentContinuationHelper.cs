@@ -30,8 +30,17 @@ using Android.Content;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    /// <summary>
+    /// Static class that consumes the response from the Authentication flow and continues token acquisition. This class should be called in OnActivityResult() of the activity doing authentication.
+    /// </summary>
     public static class AuthenticationAgentContinuationHelper
     {
+        /// <summary>
+        /// Sets authentication response from the webview or broker for token acquisition continuation.
+        /// </summary>
+        /// <param name="requestCode">Request response code</param>
+        /// <param name="resultCode">Result code from authentication</param>
+        /// <param name="data">Response data from authentication</param>
         public static void SetAuthenticationAgentContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
             AuthorizationResult authorizationResult = null;

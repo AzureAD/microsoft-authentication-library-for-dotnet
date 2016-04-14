@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return base.ToString() + string.Format(CultureInfo.CurrentCulture, "\n\tErrorCode: {0}", this.ErrorCode);
         }
 
-        protected static string GetErrorMessage(string errorCode)
+        internal static string GetErrorMessage(string errorCode)
         {
             string message;
             switch (errorCode)

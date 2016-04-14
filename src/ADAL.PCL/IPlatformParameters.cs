@@ -27,6 +27,9 @@
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    /// <summary>
+    /// Empty interface implemented in each supported platform.
+    /// </summary>
     public interface IPlatformParameters
     {
     }

@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
     ///     Algorithm classes exposed by NCrypt
     /// </summary>
     [Flags]
-    public enum NCryptAlgorithmOperations
+    internal enum NCryptAlgorithmOperations
     {
         None = 0x00000000,
         Cipher = 0x00000001,                        // NCRYPT_CIPHER_OPERATION

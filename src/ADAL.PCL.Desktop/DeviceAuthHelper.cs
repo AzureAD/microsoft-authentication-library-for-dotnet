@@ -205,7 +205,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
 
     [SecurityCritical]
-    public sealed class SafeCertContextHandle : SafeHandleZeroOrMinusOneIsInvalid
+    internal sealed class SafeCertContextHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         private SafeCertContextHandle()
             : base(true)

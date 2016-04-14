@@ -32,7 +32,7 @@ using Foundation;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public class AdalCustomUrlProtocol : NSUrlProtocol
+    internal class AdalCustomUrlProtocol : NSUrlProtocol
     {
         private NSUrlConnection connection;
 

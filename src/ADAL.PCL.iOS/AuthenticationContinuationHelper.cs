@@ -30,14 +30,25 @@ using Foundation;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    /// <summary>
+    /// Static class that consumes the response from the Authentication flow and continues token acquisition. This class should be called in ApplicationDelegate whenever app loads/reloads.
+    /// </summary>
     public static class AuthenticationContinuationHelper
     {
-
+        /// <summary>
+        /// Returns if the response is from the broker app
+        /// </summary>
+        /// <param name="sourceApplication">application bundle id</param>
+        /// <returns></returns>
         public static bool IsBrokerResponse(string sourceApplication)
         {
             return sourceApplication != null && sourceApplication.Equals("com.microsoft.azureauthenticator", StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// Sets broker response for continuing authentication flow.
+        /// </summary>
+        /// <param name="url"></param>
         public static void SetBrokerContinuationEventArgs(NSUrl url)
         {
             BrokerHelper.SetBrokerResponse(url);

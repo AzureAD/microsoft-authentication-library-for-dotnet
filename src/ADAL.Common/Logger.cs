@@ -66,16 +66,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AdalEventSource.Warning(log);
             LoggerCallbackHandler.ExecuteCallback(LogLevel.Warning, log);
         }
-
-        private static string GetCallerFilename(string callerFilePath)
-        {
-            return callerFilePath.Substring(callerFilePath.LastIndexOf("\\", StringComparison.Ordinal) + 1);
-        }
-
-        internal static string PrepareLogMessage(CallState callState, string classOrComponent, string message)
-        {
-            string correlationId = (callState != null) ? callState.CorrelationId.ToString() : string.Empty;
-            return string.Format(CultureInfo.CurrentCulture, "{0}: {1} - {2}: {3}", DateTime.UtcNow, correlationId, classOrComponent, message);
-        }
     }
 }

@@ -29,8 +29,14 @@ using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    /// <summary>
+    /// Helper class to get ADAL EventSource
+    /// </summary>
     public static class AdalOption
     {
+        /// <summary>
+        /// Returns ADAL EventSource
+        /// </summary>
         public static EventSource AdalEventSource
         {
             get

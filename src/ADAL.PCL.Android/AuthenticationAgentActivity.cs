@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     [Activity(Label = "Sign in")]
     [CLSCompliant(false)]
-    public class AuthenticationAgentActivity : Activity
+    internal class AuthenticationAgentActivity : Activity
     {
         private AdalWebViewClient client;
 

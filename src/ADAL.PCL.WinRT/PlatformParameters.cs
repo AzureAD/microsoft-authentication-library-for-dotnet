@@ -32,6 +32,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="promptBehavior">Prompt behavior enum to control UI</param>
+        /// <param name="useCorporateNetwork">flag to enable logged in user authentication</param>
         public PlatformParameters(PromptBehavior promptBehavior, bool useCorporateNetwork)
         {
             this.PromptBehavior = promptBehavior;
