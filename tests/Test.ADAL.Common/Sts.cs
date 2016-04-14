@@ -255,7 +255,7 @@ namespace Test.ADAL.Common
             this.ValidNonExistentRedirectUriClientId = this.ValidClientId;
             this.ValidClientIdWithExistingRedirectUri = this.ValidClientId;
             this.ValidConfidentialClientId = "91ce6b56-776c-4e07-83c3-ebbb11726999";
-            this.ValidConfidentialClientSecret = "3VFF+M+V/UibacSYtzpGHbHmIIKeFBkurOfl+fIqhrM=";
+            this.ValidConfidentialClientSecret = "<REPLACE>";
             this.ValidWinRTClientId = "786067bc-40cc-4171-be40-a73b2d05a461";
             this.ValidUserName = @"adaltest@aadadfs.onmicrosoft.com";
             this.ValidUserName2 = "adaltest2@aadadfs.onmicrosoft.com";
