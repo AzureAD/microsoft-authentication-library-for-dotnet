@@ -35,7 +35,7 @@ using Foundation;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     [Foundation.Register("UniversalView")]
-    public class UniversalView : UIView
+    internal class UniversalView : UIView
     {
         public UniversalView()
         {

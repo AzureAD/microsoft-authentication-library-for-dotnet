@@ -33,7 +33,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public static class AdalInitializer
+    /// <summary>
+    /// 
+    /// </summary>
+    internal static class AdalInitializer
     {
         public static void Initialize()
         {

@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = "x5c", IsRequired = true)]
         public List<string> X5c { get; set; }
 
-        [DataMember(Name = "type", IsRequired = true)]
+        [DataMember(Name = "typ", IsRequired = true)]
         public string Type { get; set; }
 
         [DataMember(Name = "alg", IsRequired = true)]

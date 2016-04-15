@@ -30,7 +30,7 @@ using System;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
-    /// 
+    /// This class represents the response from the service when requesting device code.
     /// </summary>
     public sealed class DeviceCodeResult
     {
@@ -38,20 +38,44 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
         }
 
+        /// <summary>
+        /// User code returned by the service
+        /// </summary>
         public string UserCode { get; internal set; }
 
+        /// <summary>
+        /// Device code returned by the service
+        /// </summary>
         public string DeviceCode { get; internal set; }
 
+        /// <summary>
+        /// Verification URL where the user must navigate to authenticate using the device code and credentials.
+        /// </summary>
         public string VerificationUrl { get; internal set; }
 
+        /// <summary>
+        /// Time when the device code will expire.
+        /// </summary>
         public DateTimeOffset ExpiresOn { get; internal set; }
 
+        /// <summary>
+        /// Polling interval time to check for completion of authentication flow.
+        /// </summary>
         public long Interval { get; internal set; }
 
+        /// <summary>
+        /// User friendly text response that can be used for display purpose.
+        /// </summary>
         public string Message { get; internal set; }
 
+        /// <summary>
+        /// Identifier of the client requesting device code.
+        /// </summary>
         public string ClientId { get; internal set; }
 
+        /// <summary>
+        /// Identifier of the target resource that would be the recipient of the token.
+        /// </summary>
         public string Resource { get; internal set; }
     }
 }

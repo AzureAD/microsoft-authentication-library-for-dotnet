@@ -30,6 +30,9 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    /// <summary>
+    /// Extension class to support username/password flow.
+    /// </summary>
     public static class AuthenticationContextIntegratedAuthExtensions
 	{
 
@@ -37,6 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Acquires security token from the authority.
         /// </summary>
         /// <remarks>This feature is supported only for Azure Active Directory and Active Directory Federation Services (ADFS) on Windows 10.</remarks>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userCredential">The user credential to use for token acquisition.</param>

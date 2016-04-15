@@ -48,3 +48,6 @@ tests/TestApp/XFormsApp.Droid/obj/
 tests/TestApp/XFormsApp.iOS/obj/
 tests/TestApp/XFormsApp/obj/
 .nuget/NuGet.Config
+*.suo
+src/ADAL.PCL.Android/ADAL.PCL.Android.csproj.bak
+*.suo

@@ -29,6 +29,9 @@ using System.ComponentModel;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class WebBrowserNavigateErrorEventArgs : CancelEventArgs
     {
         // Fields
@@ -37,7 +40,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         private readonly int statusCode;
         private readonly object webBrowserActiveXInstance;
 
-        // Methods
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="targetFrameName"></param>
+        /// <param name="statusCode"></param>
+        /// <param name="webBrowserActiveXInstance"></param>
         public WebBrowserNavigateErrorEventArgs(string url, string targetFrameName, int statusCode, object webBrowserActiveXInstance)
         {
             this.url = url;
@@ -46,7 +55,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             this.webBrowserActiveXInstance = webBrowserActiveXInstance;
         }
 
-        // Properties
+        /// <summary>
+        /// 
+        /// </summary>
         public string TargetFrameName
         {
             get
@@ -55,7 +66,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             }
         }
 
-        // url as a string, as in case of error it could be invalid url
+        /// <summary>
+        /// url as a string, as in case of error it could be invalid url
+        /// </summary>
         public string Url
         {
             get
@@ -64,8 +77,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             }
         }
 
-        // ADAL.Native has code for interpretation of this code to string
-        // we don't do it here, as we need to come consideration should we do it or not.
+        /// <summary>
+        /// ADAL.Native has code for interpretation of this code to string we don't do it here, as we need to come consideration should we do it or not.
+        /// </summary>
         public int StatusCode
         {
             get
@@ -74,6 +88,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             }
         }
 
+        /// <summary>
+        /// return object
+        /// </summary>
         public object WebBrowserActiveXInstance
         {
             get

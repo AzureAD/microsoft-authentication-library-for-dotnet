@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             IBuffer signed = await CryptographicEngine.SignAsync(keyPair, input);
 
-            string signedJwt = string.Format(CultureInfo.CurrentCulture, " {0}.{1}", response.GetResponseToSign(),
+            string signedJwt = string.Format(CultureInfo.CurrentCulture, "{0}.{1}", response.GetResponseToSign(),
                 Base64UrlEncoder.Encode(signed.ToArray()));
             string authToken = string.Format(CultureInfo.CurrentCulture, " AuthToken=\"{0}\"", signedJwt);
             return string.Format(authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     string distinguishedIssuerName = dNames[dNames.Length - 1];
                     for (int i = dNames.Length - 2; i >= 0; i--)
                     {
-                        distinguishedIssuerName = distinguishedIssuerName.Insert(0, dNames[i].Trim() + " + ");
+                        distinguishedIssuerName += " + " + dNames[i].Trim();
                     }
 
                     query.IssuerName = distinguishedIssuerName;

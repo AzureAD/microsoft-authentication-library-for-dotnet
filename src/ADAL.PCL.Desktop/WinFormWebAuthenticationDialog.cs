@@ -54,6 +54,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             this.WebBrowser.ObjectForScripting = this;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void OnAuthenticate()
         {
             this.zoomed = false;
@@ -63,6 +66,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             base.OnAuthenticate();
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
         public void ShowBrowser()
         {
             DialogResult uiResult = this.ShowDialog(this.ownerWindow);
@@ -79,17 +86,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
         {
             this.SetBrowserZoom();
             base.WebBrowserNavigatingHandler(sender, e);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void OnClosingUrl()
         {
             this.DialogResult = DialogResult.OK;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void OnNavigationCanceled(int inputStatusCode)
         {
             this.statusCode = inputStatusCode;

@@ -34,16 +34,28 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="callerActivity">activity calling ADAL to acquire token</param>
         public PlatformParameters(Activity callerActivity):this(callerActivity, false)
         {
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="callerActivity">activity calling ADAL to acquire token</param>
+        /// <param name="useBroker">flag to enable or disable broker flow. FALSE by default.</param>
         public PlatformParameters(Activity callerActivity, bool useBroker)
         {
             this.CallerActivity = callerActivity;
             UseBroker = useBroker;
         }
 
+        /// <summary>
+        /// Flag to enable or disable broker flow. FALSE by default.
+        /// </summary>
         public bool UseBroker { get; set; }
 
         /// <summary>

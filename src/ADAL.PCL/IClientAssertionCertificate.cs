@@ -27,8 +27,16 @@
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    /// <summary>
+    /// Interface for implementing certificate based operations
+    /// </summary>
     public interface IClientAssertionCertificate
     {
+        /// <summary>
+        /// Signs a message using the private key in the certificate
+        /// </summary>
+        /// <param name="message">Message that needs to be signed</param>
+        /// <returns>Signed message as a byte array</returns>
         byte[] Sign(string message);
 
         /// <summary>
@@ -36,6 +44,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         string ClientId { get; }
 
+        /// <summary>
+        /// Thumbprint of the Certificate
+        /// </summary>
         string Thumbprint { get; }
     }
 }

@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public class SilentWindowsFormsAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
+    internal class SilentWindowsFormsAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
     {
         internal delegate void SilentWebUIDoneEventHandler(object sender, SilentWebUIDoneEventArgs args);
         internal event SilentWebUIDoneEventHandler Done;

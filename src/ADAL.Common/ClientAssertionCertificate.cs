@@ -84,6 +84,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public X509Certificate2 Certificate { get; private set; }
 
+        /// <summary>
+        /// Signs a message using the private key in the certificate
+        /// </summary>
+        /// <param name="message">Message that needs to be signed</param>
+        /// <returns>Signed message as a byte array</returns>
         public byte[] Sign(string message)
         {
             CryptographyHelper helper = new CryptographyHelper();
@@ -91,7 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// 
+        /// Returns thumbprint of the certificate
         /// </summary>
         public string Thumbprint
         {

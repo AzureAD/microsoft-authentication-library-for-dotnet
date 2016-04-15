@@ -27,7 +27,7 @@
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public static class BrokerConstants
+    internal static class BrokerConstants
     {
 
         public const int BrokerRequestId = 1177;
