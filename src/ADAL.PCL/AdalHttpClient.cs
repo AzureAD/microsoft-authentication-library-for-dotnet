@@ -43,9 +43,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public AdalHttpClient(string uri, CallState callState)
         {
-            this.Client = PlatformPlugin.HttpClientFactory.Create(CheckForExtraQueryParameter(uri), callState);
+            this.RequestUri = CheckForExtraQueryParameter(uri);
+            this.Client = PlatformPlugin.HttpClientFactory.Create(RequestUri, callState);
             this.CallState = callState;
         }
+
+        internal string RequestUri { get; set; }
 
         public IHttpClient Client { get; private set; }
 
@@ -143,12 +146,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             IDictionary<string, string> data = new Dictionary<string, string>();
             string wwwAuthenticate = response.Headers[WwwAuthenticateHeader];
             wwwAuthenticate = wwwAuthenticate.Substring(PKeyAuthName.Length + 1);
-            wwwAuthenticate = wwwAuthenticate.Replace("\"", "");
-            string[] headerPairs = wwwAuthenticate.Split(',');
+            List<string> headerPairs = EncodingHelper.SplitWithQuotes(wwwAuthenticate, ',');
             foreach (string pair in headerPairs)
             {
-                string[] keyValue = pair.Split('=');
-                data.Add(keyValue[0].Trim(),keyValue[1].Trim());
+                List<string> keyValue = EncodingHelper.SplitWithQuotes(pair, '=');
+                data.Add(keyValue[0].Trim(),keyValue[1].Trim().Replace("\"",""));
             }
 
             return data;
@@ -157,6 +159,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private async Task<T> HandleDeviceAuthChallenge<T>(string endpointType, IHttpWebResponse response)
         {
             IDictionary<string, string> responseDictionary = this.ParseChallengeData(response);
+
+            if (!responseDictionary.ContainsKey("SubmitUrl"))
+            {
+                responseDictionary["SubmitUrl"] = RequestUri;
+            }
+
             string responseHeader = await PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(responseDictionary);
             IRequestParameters rp = this.Client.BodyParameters;
             this.Client = PlatformPlugin.HttpClientFactory.Create(CheckForExtraQueryParameter(responseDictionary["SubmitUrl"]), this.CallState);
