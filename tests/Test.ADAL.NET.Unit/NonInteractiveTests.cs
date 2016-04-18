@@ -223,7 +223,7 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         [Description("WS-Trust Address Extraction Test")]
         [TestCategory("AdalDotNet")]
-        public async Task WsTrustPolicyExtraction()
+        public void WsTrustPolicyExtraction()
         {
             XDocument mexDocument = null;
             using (Stream stream = new FileStream("TestMex2005.xml", FileMode.Open))

@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -124,7 +125,7 @@ namespace Test.ADAL.Common
         /// <param name="pwi">A pointer to a WINDOWINFO structure to receive the information. Note that you must set the cbSize member to sizeof(WINDOWINFO) before calling this function.</param>
         /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. To get extended error information, call GetLastError.</returns>
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool GetWindowInfo(IntPtr hwnd, ref WINDOWINFO pwi);
+        internal static extern bool GetWindowInfo(IntPtr hwnd, ref WINDOWINFO pwi);
 
         /// <summary>
         /// Retrieves a handle to a window whose class name and window name match the specified strings. 
@@ -136,38 +137,38 @@ namespace Test.ADAL.Common
         /// <param name="className"></param>
         /// <param name="windowTitle">set to null to search all</param>
         /// <returns></returns>
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string className, string windowTitle);
+        [DllImport("user32.dll", SetLastError = true, CharSet =  CharSet.Unicode)]
+        internal static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string className, string windowTitle);
 
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern IntPtr SetActiveWindow(IntPtr hWnd);
+        internal static extern IntPtr SetActiveWindow(IntPtr hWnd);
 
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern IntPtr GetForegroundWindow();
+        internal static extern IntPtr GetForegroundWindow();
 
-        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
-        public static extern IntPtr GetWindow(IntPtr hWnd, int uCmd);
+        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Unicode)]
+        internal static extern IntPtr GetWindow(IntPtr hWnd, int uCmd);
 
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern int GetWindowText(IntPtr handleToWindow, StringBuilder windowText, int maxTextLength);
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        internal static extern int GetWindowText(IntPtr handleToWindow, StringBuilder windowText, int maxTextLength);
 
-        [DllImport("user32.dll", EntryPoint = "SetWindowText", CharSet = CharSet.Ansi)]
-        public static extern bool SetWindowText(IntPtr hwnd, string lpString);
+        [DllImport("user32.dll", EntryPoint = "SetWindowText", CharSet = CharSet.Unicode)]
+        internal static extern bool SetWindowText(IntPtr hwnd, string lpString);
 
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern int GetWindowTextLength(IntPtr hWnd);
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        internal static extern int GetWindowTextLength(IntPtr hWnd);
 
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
-
-        [DllImport("user32.dll")]
-        public static extern bool IsWindow(IntPtr hWnd);
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        internal static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
 
         [DllImport("user32.dll")]
-        public static extern bool IsWindowEnabled(IntPtr hWnd);
+        internal static extern bool IsWindow(IntPtr hWnd);
 
         [DllImport("user32.dll")]
-        public static extern bool IsWindowVisible(IntPtr hWnd);
+        internal static extern bool IsWindowEnabled(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        internal static extern bool IsWindowVisible(IntPtr hWnd);
 
         /// <summary>
         /// MSDN: Sends the specified message to a window or windows. The SendMessage function calls the window procedure for the specified window and does not return until the window procedure has processed the message. 
@@ -178,31 +179,31 @@ namespace Test.ADAL.Common
         /// <param name="wParam"></param>
         /// <param name="lParam"></param>
         /// <returns>depends on call type</returns>
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        internal static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
 
         // to send chars
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern IntPtr SendMessage(HandleRef hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+        internal static extern IntPtr SendMessage(HandleRef hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, int wParam, IntPtr lParam);
+        internal static extern IntPtr SendMessage(IntPtr hWnd, uint msg, int wParam, IntPtr lParam);
 
         [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool SetForegroundWindow(IntPtr hWnd);
+        internal static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr SetFocus(IntPtr hWnd);
+        internal static extern IntPtr SetFocus(IntPtr hWnd);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int y, int cx, int cy, int wFlags);
+        internal static extern IntPtr SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int y, int cx, int cy, int wFlags);
         
         [DllImport("user32.dll")]
-        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
         [DllImport("User32.dll")]
-        public static extern IntPtr GetParent(IntPtr hwnd);
+        internal static extern IntPtr GetParent(IntPtr hwnd);
 
         // to go through child windows for lookup..best to find ok buttons
         public delegate bool EnumChildWindowsProc(IntPtr hWnd, IntPtr lParam);
@@ -214,19 +215,19 @@ namespace Test.ADAL.Common
         /// <param name="lpEnumFunc">A pointer to an application-defined callback function. For more information, see EnumChildProc.</param>
         /// <param name="lParam">An application-defined value to be passed to the callback function.</param>
         /// <returns></returns>
-        [DllImport("user32", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
+        [DllImport("user32", CharSet = CharSet.Unicode, SetLastError = true, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool EnumChildWindows(IntPtr hWndParent, EnumChildWindowsProc lpEnumFunc, IntPtr lParam);
+        internal static extern bool EnumChildWindows(IntPtr hWndParent, EnumChildWindowsProc lpEnumFunc, IntPtr lParam);
 
-        [DllImport("user32", CharSet = CharSet.Auto, ExactSpelling = true)]
+        [DllImport("user32", CharSet = CharSet.Unicode, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool EnumThreadWindows(int threadId, EnumChildWindowsProc lpEnumFunc, IntPtr lParam);
+        internal static extern bool EnumThreadWindows(int threadId, EnumChildWindowsProc lpEnumFunc, IntPtr lParam);
                 
-        [DllImport("user32", EntryPoint = "GetClassNameA", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
-        public static extern int GetClassName(IntPtr handleToWindow, StringBuilder className, int maxClassNameLength);
+        [DllImport("user32", EntryPoint = "GetClassNameA", CharSet = CharSet.Unicode, SetLastError = true, ExactSpelling = true)]
+        internal static extern int GetClassName(IntPtr handleToWindow, StringBuilder className, int maxClassNameLength);
 
         [DllImport("Kernel32", ExactSpelling = true)]
-        public static extern Int32 GetCurrentThreadId();
+        internal static extern Int32 GetCurrentThreadId();
 
         public static string GetFullClassName(IntPtr hwnd)
         {
@@ -261,7 +262,7 @@ namespace Test.ADAL.Common
             {
                 string titleText = GetWindowText(childHwnd);
 
-                if (ClassNameAreEqual(childHwnd, className) && titleText.ToLower() == title.ToLower())
+                if (ClassNameAreEqual(childHwnd, className) && titleText.ToLower(CultureInfo.InvariantCulture) == title.ToLower(CultureInfo.InvariantCulture))
                 {
                     hWnd = childHwnd;
                     return false;
@@ -283,7 +284,7 @@ namespace Test.ADAL.Common
                 {
                     string titleText = GetWindowText(childHwnd);
 
-                    if (ClassNameAreEqual(childHwnd, className) && titleText.ToLower() == title.ToLower())
+                    if (ClassNameAreEqual(childHwnd, className) && titleText.ToLower(CultureInfo.InvariantCulture) == title.ToLower(CultureInfo.InvariantCulture))
                     {
                         hWnd = childHwnd;
                         return false;
@@ -329,7 +330,7 @@ namespace Test.ADAL.Common
             {
                 string titleText = GetWindowText(childHwnd);
 
-                if (ClassNameAreEqual(childHwnd, className) && titleText.ToLower() == title.ToLower())
+                if (ClassNameAreEqual(childHwnd, className) && titleText.ToLower(CultureInfo.InvariantCulture) == title.ToLower(CultureInfo.InvariantCulture))
                 {
                     hWnd = childHwnd;
                     return false;

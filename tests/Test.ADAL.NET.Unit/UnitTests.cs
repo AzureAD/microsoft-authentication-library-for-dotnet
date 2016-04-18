@@ -245,8 +245,7 @@ namespace Test.ADAL.NET.Unit
                 ClientAssertionCertificate cac = new ClientAssertionCertificate("some_id", x509Certificate);
                 byte[] signature = cac.Sign(Message);
                 Verify.IsNotNull(signature);
-
-                GC.Collect();
+                
                 GC.WaitForPendingFinalizers();
 
                 signature = cac.Sign(Message);
@@ -356,14 +355,14 @@ namespace Test.ADAL.NET.Unit
             {
                 app.Run(ctx =>
                 {
-                    int delay = int.Parse(ctx.Request.Query["delay"]);
+                    int delay = int.Parse(ctx.Request.Query["delay"], CultureInfo.InvariantCulture);
                     if (delay > 0)
                     {
                         Thread.Sleep(delay);
                     }
 
                     var response = ctx.Response;
-                    response.StatusCode = int.Parse(ctx.Request.Query["response_code"]);
+                    response.StatusCode = int.Parse(ctx.Request.Query["response_code"], CultureInfo.InvariantCulture);
                     return response.WriteAsync("dummy");
                 });
             }

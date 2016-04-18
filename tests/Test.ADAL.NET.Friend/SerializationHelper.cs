@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -63,7 +64,7 @@ namespace Test.ADAL.Common
         public static string SerializeException(HttpRequestWrapperException ex)
         {
             var dictionary = new Dictionary<string, string>();
-            dictionary["StatusCode"] = ((int)(ex.WebResponse.StatusCode)).ToString();
+            dictionary["StatusCode"] = ((int)(ex.WebResponse.StatusCode)).ToString(CultureInfo.InvariantCulture);
             Stream responseStream = ex.WebResponse.ResponseStream;
             if (responseStream != null)
             {

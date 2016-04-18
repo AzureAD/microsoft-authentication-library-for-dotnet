@@ -433,7 +433,6 @@ namespace Test.ADAL.Common.Unit
             tokenCache.Clear();
 
             const int MaxItemCount = 100;
-            const int MaxFieldSize = 256;
             TokenCacheKey[] keys = new TokenCacheKey[MaxItemCount];
             AuthenticationResultEx[] values = new AuthenticationResultEx[MaxItemCount];
 

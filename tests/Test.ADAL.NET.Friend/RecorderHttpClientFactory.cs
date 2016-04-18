@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Test.ADAL.NET.Friend
@@ -57,12 +58,12 @@ namespace Test.ADAL.NET.Friend
             const string JsonWebTokenValidFrom = "JsonWebTokenValidFrom";
             if (IOMap.ContainsKey(JsonWebTokenValidFrom))
             {
-                return new DateTime(long.Parse(IOMap[JsonWebTokenValidFrom]));
+                return new DateTime(long.Parse(IOMap[JsonWebTokenValidFrom], CultureInfo.InvariantCulture));
             }
 
             DateTime result = DateTime.UtcNow;
 
-            IOMap[JsonWebTokenValidFrom] = result.Ticks.ToString();
+            IOMap[JsonWebTokenValidFrom] = result.Ticks.ToString(CultureInfo.InvariantCulture);
 
             return result;
         }
