@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
             get { return false; }
         }
 
-        public async Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
+        public Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
             throw new NotImplementedException();
         }

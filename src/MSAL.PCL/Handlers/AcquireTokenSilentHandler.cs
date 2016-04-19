@@ -32,7 +32,6 @@ namespace Microsoft.Identity.Client.Handlers
 {
     internal class AcquireTokenSilentHandler : AcquireTokenHandlerBase
     {
-        private IPlatformParameters parameters;
 
 
         public AcquireTokenSilentHandler(HandlerData handlerData, string userIdentifer, IPlatformParameters parameters, bool forceRefresh) 

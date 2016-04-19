@@ -50,38 +50,33 @@ namespace UniversalTestApp
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private TokenBroker tokenBroker;
 
         public MainPage()
         {
             this.InitializeComponent();
         }
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
             //this.Token.Text = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(false));
         }
 
-        private async void Button_Click_1(object sender, RoutedEventArgs e)
+        private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
             string token = null;//await tokenBroker.GetTokenWithUsernamePasswordAsync();
             this.AccessToken.Text = token;
         }
 
-        private async void Button_Click_2(object sender, RoutedEventArgs e)
+        private void Button_Click_2(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
-            string token = await tokenBroker.GetTokenInteractiveWithMsAppAsync(new PlatformParameters(false));
-            this.AccessToken.Text = token;
         }
 
-        private async void Button_Click_3(object sender, RoutedEventArgs e)
+        private void Button_Click_3(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
-            string token = await tokenBroker.GetTokenWithClientCredentialAsync();
-            this.AccessToken.Text = token;
         }
     }
 }

@@ -90,7 +90,7 @@ namespace TestApp.PCL
         }
 
 
-        public async Task<string> GetTokenInteractiveWithMsAppAsync(IPlatformParameters parameters)
+        public string GetTokenInteractiveWithMsAppAsync(IPlatformParameters parameters)
         {
             try
             {
@@ -107,7 +107,7 @@ namespace TestApp.PCL
         }
         
 
-        public async Task<string> GetTokenWithClientCredentialAsync()
+        public string GetTokenWithClientCredentialAsync()
         {
             try
             {

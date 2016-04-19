@@ -79,7 +79,7 @@ namespace MsaliOSSample
 
         #endregion
 
-        async partial void UIButton11_TouchUpInside(UIButton sender)
+        partial void UIButton11_TouchUpInside(UIButton sender)
         {
             try
             {
@@ -101,7 +101,7 @@ namespace MsaliOSSample
             }
         }
 
-        async partial void UIButton16_TouchUpInside(UIButton sender)
+        partial void UIButton16_TouchUpInside(UIButton sender)
         {
             try
             {
