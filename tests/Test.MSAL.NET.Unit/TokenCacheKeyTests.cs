@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
@@ -115,7 +116,7 @@ namespace Test.MSAL.NET.Unit
             HashSet<string> uppercaseScope = new HashSet<string>();
             foreach (var item in TestConstants.DefaultScope)
             {
-                uppercaseScope.Add(item.ToUpper());
+                uppercaseScope.Add(item.ToUpper(CultureInfo.InvariantCulture));
             }
 
             key2 = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,

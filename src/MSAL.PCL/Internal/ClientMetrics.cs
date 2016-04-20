@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -114,7 +115,7 @@ namespace Microsoft.Identity.Client.Internal
                     }
 
                     parameters[ClientMetricsHeaderLastRequest] = pendingClientMetrics.lastCorrelationId.ToString();
-                    parameters[ClientMetricsHeaderLastResponseTime] = pendingClientMetrics.lastResponseTime.ToString();
+                    parameters[ClientMetricsHeaderLastResponseTime] = pendingClientMetrics.lastResponseTime.ToString(CultureInfo.InvariantCulture);
                     parameters[ClientMetricsHeaderLastEndpoint] = pendingClientMetrics.lastEndpoint;
 
                     pendingClientMetrics = null;

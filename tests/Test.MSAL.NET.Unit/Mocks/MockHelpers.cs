@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -85,7 +86,7 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string rootId, string[] scope)
         {
-            string idToken = string.Format("someheader.{0}.somesignature", CreateIdToken(uniqueId, displayableId));
+            string idToken = string.Format(CultureInfo.InvariantCulture,"someheader.{0}.somesignature", CreateIdToken(uniqueId, displayableId));
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
             HttpContent content =
                 new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":\"" +

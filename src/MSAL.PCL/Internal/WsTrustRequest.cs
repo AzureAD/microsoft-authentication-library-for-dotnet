@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.Internal
                 requestType = "http://schemas.xmlsoap.org/ws/2005/02/trust/Issue";
             }
 
-            messageBuilder.AppendFormat(WsTrustEnvelopeTemplate,
+            messageBuilder.AppendFormat(CultureInfo.InvariantCulture,WsTrustEnvelopeTemplate,
                 schemaLocation, soapAction,
                                 guid, wsTrustAddress.Uri, securityHeaderBuilder,
                                 rstTrustNamespace, appliesTo, keyType,

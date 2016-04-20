@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.MSAL.Common;
@@ -43,19 +44,19 @@ namespace Test.MSAL.NET.Unit
             string authority = "https://login.windows.net/common/oauth2/authorize";
             const string Resource = "test_resource";
 
-            AuthenticationParameters authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(@"Bearer authorization_uri=""{0}"",resource_id=""{1}""", authority, Resource));
+            AuthenticationParameters authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(CultureInfo.InvariantCulture,@"Bearer authorization_uri=""{0}"",resource_id=""{1}""", authority, Resource));
             Assert.AreEqual(authority, authParams.Authority);
             Assert.AreEqual(Resource, authParams.Resource);
 
-            authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(@"bearer Authorization_uri=""{0}"",Resource_ID=""{1}""", authority, Resource));
+            authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(CultureInfo.InvariantCulture,@"bearer Authorization_uri=""{0}"",Resource_ID=""{1}""", authority, Resource));
             Assert.AreEqual(authority, authParams.Authority);
             Assert.AreEqual(Resource, authParams.Resource);
 
-            authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(@"Bearer authorization_uri=""{0}""", authority));
+            authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(CultureInfo.InvariantCulture,@"Bearer authorization_uri=""{0}""", authority));
             Assert.AreEqual(authority, authParams.Authority);
             Assert.IsNull(authParams.Resource);
 
-            authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(@"Bearer resource_id=""{0}""", Resource));
+            authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(CultureInfo.InvariantCulture,@"Bearer resource_id=""{0}""", Resource));
             Assert.AreEqual(Resource, authParams.Resource);
             Assert.IsNull(authParams.Authority);
 
@@ -70,7 +71,7 @@ namespace Test.MSAL.NET.Unit
 
             try
             {
-                AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(@"authorization_uri=""{0}"",Resource_id=""{1}""", authority, Resource));
+                AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(CultureInfo.InvariantCulture,@"authorization_uri=""{0}"",Resource_id=""{1}""", authority, Resource));
             }
             catch (ArgumentException ex)
             {

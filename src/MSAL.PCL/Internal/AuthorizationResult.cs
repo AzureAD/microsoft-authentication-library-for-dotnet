@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Internal
                 {
                     this.Code = response[TokenResponseClaim.Code];
                 }
-                else if (webAuthenticationResult.StartsWith("msauth://"))
+                else if (webAuthenticationResult.StartsWith("msauth://", StringComparison.OrdinalIgnoreCase))
                 {
                     this.Code = webAuthenticationResult;
                 }

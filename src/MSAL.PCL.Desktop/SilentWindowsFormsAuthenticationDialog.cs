@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client
                     (
                         from element in doc.GetElementsByTagName("INPUT").Cast<HtmlElement>()
                         where
-                               0 == String.Compare(element.GetAttribute("type"), "password", true, CultureInfo.InvariantCulture)
+                               0 == String.Compare(element.GetAttribute("type"), "password",StringComparison.Ordinal)
                             && element.Enabled
                             && element.OffsetRectangle.Height > 0
                             && element.OffsetRectangle.Width > 0

@@ -28,6 +28,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace Microsoft.Identity.Client.Internal
@@ -90,7 +91,7 @@ namespace Microsoft.Identity.Client.Internal
         public override string ToString()
         {
             return
-                string.Format(
+                string.Format(CultureInfo.InvariantCulture,
                     "Authority:{0}, Scope:{1}, ClientId:{2}, UniqueId:{3}, DisplayableId:{4}, HomeObjectId:{5}, Policy:{6}",
                     this.Authority, MsalStringHelper.AsSingleString(this.Scope.ToArray()), this.ClientId,
                     this.UniqueId, this.DisplayableId, this.HomeObjectId, this.Policy);

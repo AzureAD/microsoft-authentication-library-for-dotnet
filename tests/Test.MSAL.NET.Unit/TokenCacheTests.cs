@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -137,7 +138,7 @@ namespace Test.MSAL.Common.Unit
                 TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(resultEx);
             Assert.IsTrue(
-                resultEx.Result.Token.Contains(string.Format("Scope:{0},",
+                resultEx.Result.Token.Contains(string.Format(CultureInfo.InvariantCulture,"Scope:{0},",
                     TestConstants.DefaultScope.AsSingleString())));
 
             scope.Add("r1/unique-scope");
@@ -847,7 +848,7 @@ namespace Test.MSAL.Common.Unit
 
         internal AuthenticationResultEx CreateCacheValue(string uniqueId, string displayableId)
         {
-            string refreshToken = string.Format("RefreshToken{0}", Rand.Next());
+            string refreshToken = string.Format(CultureInfo.InvariantCulture,"RefreshToken{0}", Rand.Next());
             var result = new AuthenticationResult(null, "some-access-token",
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
             {

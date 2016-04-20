@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A string representation of the current exception.</returns>
         public override string ToString()
         {
-            return base.ToString() + string.Format("\n\tErrorCode: {0}", this.ErrorCode);
+            return base.ToString() + string.Format(CultureInfo.InvariantCulture,"\n\tErrorCode: {0}", this.ErrorCode);
         }
 
         protected static string GetErrorMessage(string errorCode)

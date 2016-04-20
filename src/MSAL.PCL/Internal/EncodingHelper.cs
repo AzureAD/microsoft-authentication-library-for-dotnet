@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Internal
@@ -73,7 +74,7 @@ namespace Microsoft.Identity.Client.Internal
             StringBuilder builder = new StringBuilder();
             foreach (var key in input.Keys)
             {
-                builder.AppendFormat("{0}={1}&", key, UrlEncode(input[key]));
+                builder.AppendFormat(CultureInfo.InvariantCulture,"{0}={1}&", key, UrlEncode(input[key]));
             }
 
             builder.Remove(builder.Length - 1, 1);
@@ -112,7 +113,7 @@ namespace Microsoft.Identity.Client.Internal
 
                     if (response.ContainsKey(key) && callState != null)
                     {
-                        PlatformPlugin.Logger.Warning(callState, string.Format("Key/value pair list contains redundant key '{0}'.", key));
+                        PlatformPlugin.Logger.Warning(callState, string.Format(CultureInfo.InvariantCulture,"Key/value pair list contains redundant key '{0}'.", key));
                     }
 
                     response[key] = value;
@@ -282,7 +283,7 @@ namespace Microsoft.Identity.Client.Internal
         private static void AddKeyValueString(StringBuilder messageBuilder, string key, char[] value)
         {
             string delimiter = (messageBuilder.Length == 0) ? string.Empty : "&";
-            messageBuilder.AppendFormat("{0}{1}=", delimiter, key);
+            messageBuilder.AppendFormat(CultureInfo.InvariantCulture,"{0}{1}=", delimiter, key);
             messageBuilder.Append(value);
         }
 

@@ -31,6 +31,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using System.Globalization;
 
 namespace Microsoft.Identity.Client.Handlers
 {
@@ -213,7 +214,7 @@ namespace Microsoft.Identity.Client.Handlers
                 {
                     if (authorizationRequestParameters.ContainsKey(kvp.Key))
                     {
-                        throw new MsalException(MsalError.DuplicateQueryParameter, string.Format(MsalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
+                        throw new MsalException(MsalError.DuplicateQueryParameter, string.Format(CultureInfo.InvariantCulture,MsalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
                     }
                 }
 
