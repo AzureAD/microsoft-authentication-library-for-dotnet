@@ -75,7 +75,7 @@ namespace Test.ADAL.Common
                 var headers = new Dictionary<string, string>();
                 foreach (var key in dictionary.Keys)
                 {
-                    if (key.StartsWith("Header-"))
+                    if (key.StartsWith("Header-", StringComparison.OrdinalIgnoreCase))
                     {
                         headers.Add(key.Substring(7), dictionary[key]);
                     }

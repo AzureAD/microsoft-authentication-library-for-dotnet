@@ -43,9 +43,11 @@ namespace Test.ADAL.Common
         private static readonly string UserIDToken = "$USER_ID$";
         private static readonly string PasswordToken = "$PASSWORD$";
 
-        private static readonly string UsernameToken = @"<wsse:UsernameToken Id=""user""><wsse:Username>$USER_ID$</wsse:Username><wsse:Password>$PASSWORD$</wsse:Password></wsse:UsernameToken>";
+        private static readonly string UsernameToken =
+            @"<wsse:UsernameToken Id=""user""><wsse:Username>$USER_ID$</wsse:Username><wsse:Password>$PASSWORD$</wsse:Password></wsse:UsernameToken>";
 
-        public static string TryGetSamlToken(string qualifiedLoginHostUrl, string username, string password, string siteDnsName)
+        public static string TryGetSamlToken(string qualifiedLoginHostUrl, string username, string password,
+            string siteDnsName)
         {
             string token = UsernameToken;
             token = token.Replace(UserIDToken, username).Replace(PasswordToken, password);
@@ -58,7 +60,9 @@ namespace Test.ADAL.Common
             UriBuilder builder = new UriBuilder(qualifiedLoginHostUrl);
             builder.Path = "rst2.srf";
             string request = ReadTemplateFile();
-            request = request.Replace(Token, token).Replace(AddressToken, siteDnsName).Replace(AuthPolicyToken, "LBI_FED_STS_CLEAR");
+            request = request.Replace(Token, token)
+                .Replace(AddressToken, siteDnsName)
+                .Replace(AuthPolicyToken, "LBI_FED_STS_CLEAR");
             string returnedToken = MakeRawSoapRequest(builder.Uri, request);
             return GetTokenFromResponse(returnedToken);
         }
@@ -66,7 +70,7 @@ namespace Test.ADAL.Common
         private static string ReadTemplateFile()
         {
             using (Stream stream = Assembly.GetExecutingAssembly()
-                               .GetManifestResourceStream("Test.ADAL.NET.SamlLoginTemplate.xml"))
+                .GetManifestResourceStream("Test.ADAL.NET.SamlLoginTemplate.xml"))
             using (StreamReader reader = new StreamReader(stream))
             {
                 string result = reader.ReadToEnd();
@@ -77,8 +81,13 @@ namespace Test.ADAL.Common
         private static string GetTokenFromResponse(string returnedToken)
         {
             XmlDocument document = new XmlDocument();
+            document.XmlResolver = null;
             document.PreserveWhitespace = false;
-            document.LoadXml(returnedToken);
+            using (var xmlReader = new XmlTextReader(new StringReader(returnedToken)))
+            {
+                xmlReader.Settings.DtdProcessing = DtdProcessing.Ignore;
+                document.Load(xmlReader);
+            }
 
             XmlNamespaceManager nsXml = new XmlNamespaceManager(document.NameTable);
             nsXml.AddNamespace("S", "http://www.w3.org/2003/05/soap-envelope");

@@ -582,7 +582,7 @@ namespace Test.ADAL.Common
 
             if (!equal)
             {
-                Log.Comment(result.ExpiresOn.ToString("R") + " <> " + result2.ExpiresOn.ToString("R"));
+                Log.Comment(result.ExpiresOn.ToString("R", CultureInfo.InvariantCulture) + " <> " + result2.ExpiresOn.ToString("R", CultureInfo.InvariantCulture));
             }
 
             Verify.IsTrue(equal, "AuthenticationResult.ExpiresOn");
@@ -594,7 +594,7 @@ namespace Test.ADAL.Common
 
             if (equal)
             {
-                Log.Comment(result.ExpiresOn.ToString("R") + " <> " + result2.ExpiresOn.ToString("R"));
+                Log.Comment(result.ExpiresOn.ToString("R", CultureInfo.InvariantCulture) + " <> " + result2.ExpiresOn.ToString("R", CultureInfo.InvariantCulture));
             }
 
             Verify.IsFalse(equal, "AuthenticationResult.ExpiresOn");

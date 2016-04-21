@@ -55,7 +55,7 @@ namespace AdalUniversalTestApp
             this.AccessToken.Text = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(PromptBehavior.Auto, false));
         }
 
-        private async void Button_Click_1(object sender, RoutedEventArgs e)
+        private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
         }
