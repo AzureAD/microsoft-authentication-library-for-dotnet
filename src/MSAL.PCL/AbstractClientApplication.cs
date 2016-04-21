@@ -34,8 +34,14 @@ using System.Globalization;
 
 namespace Microsoft.Identity.Client
 {
+    ///<Summary>
+    /// AbstractClientApplication
+    ///</Summary>
     public abstract class AbstractClientApplication
     {
+        ///<Summary>
+        /// DefaultAuthority
+        ///</Summary>
         protected const string DefaultAuthority = "https://login.microsoftonline.com/common/";
 
         /// <summary>
@@ -43,6 +49,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool RestrictToSingleUser { get; set; }
 
+        ///<Summary>
+        /// Authority
+        ///</Summary>
         public string Authority { get; private set; }
 
         /// <summary>
@@ -55,6 +64,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string RedirectUri { get; set; }
 
+        ///<Summary>
+        /// UserTokenCache
+        ///</Summary>
         public TokenCache UserTokenCache { get; set; }
 
         /// <summary>
@@ -90,13 +102,17 @@ namespace Microsoft.Identity.Client
                 return this.UserTokenCache.GetUsers(this.ClientId);
             }
         }
-
+        ///<Summary>
+        /// AbstractClientApplication
+        ///</Summary>
         static AbstractClientApplication()
         {
             PlatformPlugin.Logger.Information(null, string.Format(CultureInfo.InvariantCulture,"MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
                 PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(), MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
         }
-
+        ///<Summary>
+        /// AbstractClientApplication
+        ///</Summary>
         protected AbstractClientApplication(string authority, string clientId, string redirectUri, bool validateAuthority)
         {
             this.Authority = authority;

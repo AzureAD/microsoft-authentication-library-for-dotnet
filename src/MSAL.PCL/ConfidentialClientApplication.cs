@@ -32,14 +32,20 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-   public sealed class ConfidentialClientApplication : AbstractClientApplication
+    /// <summary>
+    /// ConfidentialClientApplication
+    /// </summary>
+    public sealed class ConfidentialClientApplication : AbstractClientApplication
    {
-       /// <summary>
-       /// 
-       /// </summary>
-       public ClientCredential ClientCredential { get; private set; }
+        /// <summary>
+        /// ClientCredential
+        /// </summary>
+        public ClientCredential ClientCredential { get; private set; }
 
-       public TokenCache AppTokenCache { get; set; }
+        /// <summary>
+        /// AppTokenCache
+        /// </summary>
+        public TokenCache AppTokenCache { get; set; }
 
         /// <summary>
         /// 
@@ -47,11 +53,12 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId"></param>
         /// <param name="redirectUri"></param>
         /// <param name="clientCredential"></param>
+        /// <param name="userTokenCache"></param>
         public ConfidentialClientApplication(string clientId, string redirectUri,
            ClientCredential clientCredential, TokenCache userTokenCache):this(DefaultAuthority, clientId, redirectUri, clientCredential, userTokenCache)
        {
        }
-    
+
         /// <summary>
         /// 
         /// </summary>
@@ -59,13 +66,16 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId"></param>
         /// <param name="redirectUri"></param>
         /// <param name="clientCredential"></param>
-       public ConfidentialClientApplication(string authority, string clientId, string redirectUri, ClientCredential clientCredential, TokenCache userTokenCache) :base(authority, clientId, redirectUri, true)
+        /// <param name="userTokenCache"></param>
+        public ConfidentialClientApplication(string authority, string clientId, string redirectUri, ClientCredential clientCredential, TokenCache userTokenCache) :base(authority, clientId, redirectUri, true)
         {
             this.ClientCredential = clientCredential;
             this.UserTokenCache = userTokenCache;
             this.AppTokenCache = TokenCache.DefaultSharedAppTokenCache;
         }
-
+        /// <summary>
+        /// AcquireTokenOnBehalfOfAsync
+        /// </summary> 
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(string[] scope, UserAssertion userAssertion)
         {
             Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
@@ -74,8 +84,10 @@ namespace Microsoft.Identity.Client
                     this.AcquireTokenOnBehalfCommonAsync(authenticator, scope, userAssertion, null)
                         .ConfigureAwait(false);
         }
-    
 
+        /// <summary>
+        /// AcquireTokenOnBehalfOfAsync
+        /// </summary>
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(string[] scope, UserAssertion userAssertion, string authority, string policy)
         {
             Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
@@ -85,14 +97,18 @@ namespace Microsoft.Identity.Client
                         .ConfigureAwait(false);
         }
 
-
+        /// <summary>
+        ///AcquireTokenByAuthorizationCodeAsync
+        /// </summary>
         public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string[] scope, string authorizationCode)
         {
             return
                 await
                     this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, scope, new Uri(this.RedirectUri), null).ConfigureAwait(false);
         }
-
+        /// <summary>
+        ///AcquireTokenByAuthorizationCodeAsync
+        /// </summary>
         public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string[] scope, string authorizationCode, string policy)
         {
             return
@@ -100,8 +116,10 @@ namespace Microsoft.Identity.Client
                     this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, scope, new Uri(this.RedirectUri), policy).ConfigureAwait(false);
         }
 
-
-       public async Task<AuthenticationResult> AcquireTokenForClient(string[] scope, string policy)
+        /// <summary>
+        ///AcquireTokenForClient
+        /// </summary>
+        public async Task<AuthenticationResult> AcquireTokenForClient(string[] scope, string policy)
         {
            return
                await

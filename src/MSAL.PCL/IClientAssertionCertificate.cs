@@ -27,10 +27,19 @@
 
 namespace Microsoft.Identity.Client
 {
+    ///<Summary>
+    /// IClientAssertionCertificate
+    ///</Summary>
     public interface IClientAssertionCertificate
     {
+        ///<Summary>
+        ///Sign
+        ///</Summary>
         byte[] Sign(string message);
 
+        ///<Summary>
+        ///Thumbprint
+        ///</Summary>
         string Thumbprint { get; }
 
     }
