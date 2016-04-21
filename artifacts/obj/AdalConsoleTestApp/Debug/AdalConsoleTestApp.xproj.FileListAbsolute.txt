@@ -1,1 +1,0 @@
-C:\git\azure-activedirectory-library-for-dotnet\artifacts\obj\AdalConsoleTestApp\Debug\AdalConsoleTestApp.xprojResolveAssemblyReference.cache
