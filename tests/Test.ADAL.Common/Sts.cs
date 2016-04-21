@@ -242,7 +242,7 @@ namespace Test.ADAL.Common
             this.ValidateAuthority = true;
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
             this.ValidExpiresIn = 28800;
-            this.ValidNonExistingRedirectUri = new Uri("http://foo-bar.com");
+            this.ValidNonExistingRedirectUri = new Uri("http://non-existant-uri.com");
             this.ValidLoggedInFederatedUserName = "dummy\\dummy";
             string[] segments = this.ValidLoggedInFederatedUserName.Split(new[] { '\\' });
             this.ValidLoggedInFederatedUserId = string.Format(CultureInfo.CurrentCulture, " {0}@microsoft.com", (segments.Length == 2) ? segments[1] : segments[0]);
@@ -262,7 +262,7 @@ namespace Test.ADAL.Common
             this.ValidUserName3 = "adaltest3@aadadfs.onmicrosoft.com";
             this.ValidDefaultRedirectUri = new Uri("https://login.live.com/");
             this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
-            this.ValidRedirectUriForConfidentialClient = new Uri("https://confidential.foo-bar.com");
+            this.ValidRedirectUriForConfidentialClient = new Uri("https://confidentialclient.com");
             this.ValidPassword = "<REPLACE>";
             this.ValidPassword2 = "<REPLACE>";
             this.ValidPassword3 = "<REPLACE>";
