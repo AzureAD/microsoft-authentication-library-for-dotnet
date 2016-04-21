@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -195,13 +196,13 @@ namespace Microsoft.Identity.Client.Internal
                     if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
                     {
                         PlatformPlugin.Logger.Warning(CallState,
-                            string.Format("Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
+                            string.Format(CultureInfo.InvariantCulture,"Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
                     }
                     else if (correlationIdInResponse != this.CallState.CorrelationId)
                     {
                         PlatformPlugin.Logger.Warning(
                             this.CallState,
-                            string.Format("Returned correlation id '{0}' does not match the sent correlation id '{1}'",
+                            string.Format(CultureInfo.InvariantCulture,"Returned correlation id '{0}' does not match the sent correlation id '{1}'",
                                 correlationIdHeader, CallState.CorrelationId));
                     }
 

@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal
             // For security reasons, it is important to have PublicKeyToken mentioned referencing the assembly.
             const string PlatformSpecificAssemblyNameTemplate = "Microsoft.Identity.Client.Platform, Version={0}, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
 
-            string platformSpecificAssemblyName = string.Format(PlatformSpecificAssemblyNameTemplate, MsalIdHelper.GetMsalVersion());
+            string platformSpecificAssemblyName = string.Format(CultureInfo.InvariantCulture,PlatformSpecificAssemblyNameTemplate, MsalIdHelper.GetMsalVersion());
 
             try
             {

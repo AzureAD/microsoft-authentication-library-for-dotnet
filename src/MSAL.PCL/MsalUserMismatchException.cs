@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
@@ -39,7 +40,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public MsalUserMismatchException(string requestedUser, string returnedUser)
             : base(MsalError.UserMismatch, 
-                   string.Format(MsalErrorMessage.UserMismatch, returnedUser, requestedUser))
+                   string.Format(CultureInfo.InvariantCulture,MsalErrorMessage.UserMismatch, returnedUser, requestedUser))
         {
             this.RequestedUser = requestedUser;
             this.ReturnedUser = returnedUser;
@@ -61,7 +62,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A string representation of the current exception.</returns>
         public override string ToString()
         {
-            return base.ToString() + string.Format("\n\tRequestedUser: {0}\n\tReturnedUser: {1}", this.RequestedUser, this.ReturnedUser);
+            return base.ToString() + string.Format(CultureInfo.InvariantCulture,"\n\tRequestedUser: {0}\n\tReturnedUser: {1}", this.RequestedUser, this.ReturnedUser);
         }
     }
 }

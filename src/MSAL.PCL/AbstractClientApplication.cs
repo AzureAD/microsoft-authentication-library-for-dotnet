@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Handlers;
 using Microsoft.Identity.Client.Internal;
+using System.Globalization;
 
 namespace Microsoft.Identity.Client
 {
@@ -92,7 +93,7 @@ namespace Microsoft.Identity.Client
 
         static AbstractClientApplication()
         {
-            PlatformPlugin.Logger.Information(null, string.Format("MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
+            PlatformPlugin.Logger.Information(null, string.Format(CultureInfo.InvariantCulture,"MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
                 PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(), MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
         }
 

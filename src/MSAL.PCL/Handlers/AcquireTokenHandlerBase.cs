@@ -47,9 +47,9 @@ namespace Microsoft.Identity.Client.Handlers
             this.CallState = CreateCallState(this.Authenticator.CorrelationId);
 
             PlatformPlugin.Logger.Information(this.CallState,
-                string.Format("=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
+                string.Format(CultureInfo.InvariantCulture,"=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
                 Authenticator.Authority, handlerData.Scope.AsSingleString(), handlerData.ClientKey.ClientId,
-                (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(" ({0} items)", tokenCache.Count) : "null"));
+                (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(CultureInfo.InvariantCulture," ({0} items)", tokenCache.Count) : "null"));
 
             this.tokenCache = handlerData.TokenCache;
             this.ClientKey = handlerData.ClientKey;
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client.Handlers
             //check if scope or additional scope contains client ID.
             if (scopesToValidate.Intersect(OAuthValue.ReservedScopes.CreateSetFromArray()).Any())
             {
-                throw new ArgumentException(string.Format("API does not accept '{0}' value as user-provided scopes", OAuthValue.ReservedScopes.AsSingleString()));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,"API does not accept '{0}' value as user-provided scopes", OAuthValue.ReservedScopes.AsSingleString()));
             }
 
             if (scopesToValidate.Contains(this.ClientKey.ClientId))
@@ -367,7 +367,7 @@ namespace Microsoft.Identity.Client.Handlers
             {
                 string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.Token);
 
-                PlatformPlugin.Logger.Information(this.CallState, string.Format("=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tExpiration Time: {1}\n\tUser Hash: {2}\n\t",
+                PlatformPlugin.Logger.Information(this.CallState, string.Format(CultureInfo.InvariantCulture,"=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tExpiration Time: {1}\n\tUser Hash: {2}\n\t",
                     accessTokenHash,
                     result.ExpiresOn,                    
                     result.User != null ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.User.UniqueId) : "null"));
@@ -379,7 +379,7 @@ namespace Microsoft.Identity.Client.Handlers
             if (!string.IsNullOrWhiteSpace(this.Policy))
             {
                 string delimiter = (endpoint.IndexOf('?') > 0) ? "&" : "?";
-                endpoint += string.Concat(delimiter, string.Format("p={0}", this.Policy));
+                endpoint += string.Concat(delimiter, string.Format(CultureInfo.InvariantCulture,"p={0}", this.Policy));
             }
 
             return endpoint;

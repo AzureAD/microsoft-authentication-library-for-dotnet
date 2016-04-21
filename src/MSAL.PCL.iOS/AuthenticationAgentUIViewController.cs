@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using CoreFoundation;
 using CoreGraphics;
 using Foundation;
@@ -70,7 +71,7 @@ namespace Microsoft.Identity.Client
 
                 string requestUrlString = request.Url.ToString();
                 
-                if (requestUrlString.StartsWith(BrokerConstants.BrowserExtPrefix))
+                if (requestUrlString.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     DispatchQueue.MainQueue.DispatchAsync(() => CancelAuthentication(null, null));
                     requestUrlString = requestUrlString.Replace(BrokerConstants.BrowserExtPrefix, "https://");
@@ -80,7 +81,7 @@ namespace Microsoft.Identity.Client
                     return false;
                 }
 
-                if (requestUrlString.ToLower().StartsWith(_callback.ToLower()) || requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix))
+                if (requestUrlString.ToLower(CultureInfo.InvariantCulture).StartsWith(_callback.ToLower(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase) || requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, request.Url.ToString()));
                     this.DismissViewController(true, null);
@@ -91,7 +92,7 @@ namespace Microsoft.Identity.Client
                 {
                     Uri uri = new Uri(requestUrlString);
                     string query = uri.Query;
-                    if (query.StartsWith("?"))
+                    if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
                     {
                         query = query.Substring(1);
                     }

@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -150,11 +151,11 @@ namespace Microsoft.Identity.Client
                     BinaryWriter writer = new BinaryWriter(stream);
                     writer.Write(SchemaVersion);
                     PlatformPlugin.Logger.Information(null,
-                        string.Format("Serializing token cache with {0} items.", this.tokenCacheDictionary.Count));
+                        string.Format(CultureInfo.InvariantCulture,"Serializing token cache with {0} items.", this.tokenCacheDictionary.Count));
                     writer.Write(this.tokenCacheDictionary.Count);
                     foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> kvp in this.tokenCacheDictionary)
                     {
-                        writer.Write(string.Format("{1}{0}{2}{0}{3}{0}{4}", Delimiter, kvp.Key.Authority,
+                        writer.Write(string.Format(CultureInfo.InvariantCulture,"{1}{0}{2}{0}{3}{0}{4}", Delimiter, kvp.Key.Authority,
                             kvp.Key.Scope.AsSingleString(), kvp.Key.ClientId, kvp.Key.Policy));
                         writer.Write(kvp.Value.Serialize());
                     }
@@ -213,7 +214,7 @@ namespace Microsoft.Identity.Client
                     }
 
                     PlatformPlugin.Logger.Information(null,
-                        string.Format("Deserialized {0} items to token cache.", count));
+                        string.Format(CultureInfo.InvariantCulture,"Deserialized {0} items to token cache.", count));
                 }
             }
         }
@@ -378,7 +379,7 @@ namespace Microsoft.Identity.Client
                     {
                         //requested scope are not a subset or authority does not match (cross-tenant RT) or client id is not same (FoCI).
                         PlatformPlugin.Logger.Verbose(callState,
-                            string.Format("Refresh token for scope '{0}' will be used to acquire token for '{1}'",
+                            string.Format(CultureInfo.InvariantCulture,"Refresh token for scope '{0}' will be used to acquire token for '{1}'",
                                 cacheKey.Scope.AsSingleString(),
                                 scope.AsSingleString()));
 
@@ -393,7 +394,7 @@ namespace Microsoft.Identity.Client
                     else
                     {
                         PlatformPlugin.Logger.Verbose(callState,
-                            string.Format("{0} minutes left until token in cache expires",
+                            string.Format(CultureInfo.InvariantCulture,"{0} minutes left until token in cache expires",
                                 (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
                     }
 

@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Security.Authentication.Web;
@@ -88,7 +89,7 @@ namespace Microsoft.Identity.Client
                     result = new AuthorizationResult(AuthorizationStatus.Success, webAuthenticationResult.ResponseData);
                     break;
                 case WebAuthenticationStatus.ErrorHttp:
-                    result = new AuthorizationResult(AuthorizationStatus.ErrorHttp, webAuthenticationResult.ResponseErrorDetail.ToString());
+                    result = new AuthorizationResult(AuthorizationStatus.ErrorHttp, webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture));
                     break;
                 case WebAuthenticationStatus.UserCancel:
                     result = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
