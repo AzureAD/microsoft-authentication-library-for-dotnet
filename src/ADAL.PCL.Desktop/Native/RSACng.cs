@@ -489,7 +489,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
             if (hashAlgorithm == null)
                 throw new ArgumentNullException("hashAlgorithm");
 
-            // Keep a local copy of the key to prevent races with the key container that the key references
+            // Keep a local copy of the key to prevent multi-threading issues with the key container that the key references
             // and the key container permission we're going to demand.
             CngKey key = Key;
 
