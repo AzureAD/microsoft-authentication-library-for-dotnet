@@ -54,7 +54,9 @@ namespace Microsoft.Identity.Client
             this.WebBrowser.DocumentTitleChanged += this.WebBrowserDocumentTitleChangedHandler;
             this.WebBrowser.ObjectForScripting = this;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void OnAuthenticate()
         {
             this.zoomed = false;
@@ -63,7 +65,9 @@ namespace Microsoft.Identity.Client
 
             base.OnAuthenticate();
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void ShowBrowser()
         {
             DialogResult uiResult = this.ShowDialog(this.ownerWindow);
@@ -79,18 +83,24 @@ namespace Microsoft.Identity.Client
                     throw this.CreateExceptionForAuthenticationUiFailed(this.statusCode);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
         {
             this.SetBrowserZoom();
             base.WebBrowserNavigatingHandler(sender, e);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void OnClosingUrl()
         {
             this.DialogResult = DialogResult.OK;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void OnNavigationCanceled(int inputStatusCode)
         {
             this.statusCode = inputStatusCode;

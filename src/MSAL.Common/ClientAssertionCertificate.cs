@@ -69,7 +69,9 @@ namespace Microsoft.Identity.Client
         /// Gets the certificate used as credential.
         /// </summary>
         public X509Certificate2 Certificate { get; private set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public byte[] Sign(string message)
         {
             CryptographyHelper helper = new CryptographyHelper();

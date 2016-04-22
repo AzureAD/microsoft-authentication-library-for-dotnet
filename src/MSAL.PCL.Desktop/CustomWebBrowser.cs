@@ -257,6 +257,8 @@ namespace Microsoft.Identity.Client
 
         public event WebBrowserNavigateErrorEventHandler NavigateError;
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
     public delegate void WebBrowserNavigateErrorEventHandler(object sender, WebBrowserNavigateErrorEventArgs e);
 }

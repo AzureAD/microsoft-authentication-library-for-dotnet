@@ -35,13 +35,21 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Activity(Label = "Sign in")]
     [CLSCompliant(false)]
     public class AuthenticationAgentActivity : Activity
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public static IDictionary<string, string> AdditionalHeaders;
         private MsalWebViewClient client;
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
@@ -72,7 +80,9 @@ namespace Microsoft.Identity.Client
             webView.LoadUrl(url, AdditionalHeaders);
 
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public override void Finish()
         {
             if (this.client.ReturnIntent != null)
@@ -109,7 +119,9 @@ namespace Microsoft.Identity.Client
                     this.Finish(view, url);
                 }
             }
-
+            /// <summary>
+            /// 
+            /// </summary>
             public override bool ShouldOverrideUrlLoading(WebView view, string url)
             {
                 Uri uri = new Uri(url);
@@ -173,7 +185,9 @@ namespace Microsoft.Identity.Client
                 Intent intent = new Intent(Intent.ActionView, Android.Net.Uri.Parse(link));
                 activity.StartActivity(intent);
             }
-
+            /// <summary>
+            /// 
+            /// </summary>
             public override void OnPageFinished(WebView view, string url)
             {
                 if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
@@ -184,7 +198,9 @@ namespace Microsoft.Identity.Client
 
                 base.OnPageFinished(view, url);
             }
-
+            /// <summary>
+            /// 
+            /// </summary>
             public override void OnPageStarted(WebView view, string url, Android.Graphics.Bitmap favicon)
             {
                 if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
@@ -194,7 +210,9 @@ namespace Microsoft.Identity.Client
 
                 base.OnPageStarted(view, url, favicon);
             }
-
+            /// <summary>
+            /// 
+            /// </summary>
             private void Finish(WebView view, string url)
             {
                 var activity = ((Activity)view.Context);

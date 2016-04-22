@@ -35,6 +35,9 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public class SilentWindowsFormsAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
@@ -47,16 +50,22 @@ namespace Microsoft.Identity.Client
         private Timer timer;
 
         private bool doneSignaled;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public int NavigationWaitMiliSecs { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public SilentWindowsFormsAuthenticationDialog(object ownerWindow)
             : base(ownerWindow)
         {
             this.SuppressBrowserSubDialogs();
             this.WebBrowser.DocumentCompleted += this.DocumentCompletedHandler;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void CloseBrowser()
         {
             this.SignalDone();
@@ -71,7 +80,9 @@ namespace Microsoft.Identity.Client
             var webBrowser2 = (NativeWrapper.IWebBrowser2)this.WebBrowser.ActiveXInstance;
             webBrowser2.Silent = true;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
         {
             if (null == timer)
@@ -140,12 +151,16 @@ namespace Microsoft.Identity.Client
             this.SignalDone(
                 new MsalException(MsalError.UserInteractionRequired));
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void OnClosingUrl()
         {
             this.SignalDone();
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void OnNavigationCanceled(int statusCode)
         {
             this.SignalDone(this.CreateExceptionForAuthenticationUiFailed(statusCode));
@@ -172,7 +187,9 @@ namespace Microsoft.Identity.Client
 
             return passwordFieldElement != null;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (this.timer != null)

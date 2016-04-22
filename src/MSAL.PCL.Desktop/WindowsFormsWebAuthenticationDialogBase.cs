@@ -36,6 +36,9 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class WindowsFormsWebAuthenticationDialogBase : Form
@@ -49,12 +52,18 @@ namespace Microsoft.Identity.Client
 
         private Uri desiredCallbackUri;
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected IWin32Window ownerWindow;
 
         private Keys key = Keys.None;
 
         internal AuthorizationResult Result { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow)
         {
             // From MSDN (http://msdn.microsoft.com/en-us/library/ie/dn720860(v=vs.85).aspx): 
@@ -112,7 +121,9 @@ namespace Microsoft.Identity.Client
                 return this.webBrowser;
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected virtual void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
         {
             if (this.webBrowser.IsDisposed)
@@ -156,7 +167,9 @@ namespace Microsoft.Identity.Client
                 PlatformPlugin.Logger.Verbose(null, string.Format(CultureInfo.InvariantCulture,"Navigated to '{0}'.", EncodingHelper.UrlDecode(e.Url.ToString())));
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected virtual void WebBrowserNavigateErrorHandler(object sender, WebBrowserNavigateErrorEventArgs e)
         {
             // e.StatusCode - Contains error code which we are able to translate this error to text
@@ -227,9 +240,13 @@ namespace Microsoft.Identity.Client
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected abstract void OnClosingUrl();
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected abstract void OnNavigationCanceled(int statusCode);
 
         internal AuthorizationResult AuthenticateAAD(Uri requestUri, Uri callbackUri, string headers)
@@ -249,7 +266,9 @@ namespace Microsoft.Identity.Client
 
             return this.Result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected virtual void OnAuthenticate()
         { }
 
@@ -314,7 +333,9 @@ namespace Microsoft.Identity.Client
         {
             public IntPtr Handle { get; set; }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -324,7 +345,9 @@ namespace Microsoft.Identity.Client
 
             base.Dispose(disposing);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected MsalException CreateExceptionForAuthenticationUiFailed(int statusCode)
         {
             if (NavigateErrorStatus.Messages.ContainsKey(statusCode))
@@ -338,7 +361,9 @@ namespace Microsoft.Identity.Client
                 MsalError.AuthenticationUiFailed,
                 string.Format(CultureInfo.InvariantCulture,"The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}", statusCode)) { StatusCode = statusCode };
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected static class DpiHelper
         {
             static DpiHelper()
@@ -369,11 +394,15 @@ namespace Microsoft.Identity.Client
 
                 ZoomPercent = Math.Min(zoomPercentX, zoomPercentY);
             }
-
+            /// <summary>
+            /// 
+            /// </summary>
             public static int ZoomPercent { get; private set; }
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         internal static class NativeMethods
         {
             internal enum SessionOp 

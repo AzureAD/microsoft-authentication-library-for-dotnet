@@ -35,14 +35,22 @@ using Foundation;
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Foundation.Register("UniversalView")]
     public class UniversalView : UIView
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public UniversalView()
         {
             Initialize();
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public UniversalView(CGRect bounds)
             : base(bounds)
         {
@@ -62,7 +70,9 @@ namespace Microsoft.Identity.Client
         private string callback;
         private IDictionary<string, string> additionalHeaders;
         private AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public AuthenticationAgentUINavigationController(string url, string callback, IDictionary<string, string> additionalHeaders, AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod)
         {
             this.url = url;
