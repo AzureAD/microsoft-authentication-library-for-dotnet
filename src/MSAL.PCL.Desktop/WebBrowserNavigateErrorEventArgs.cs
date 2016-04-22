@@ -29,6 +29,9 @@ using System.ComponentModel;
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class WebBrowserNavigateErrorEventArgs : CancelEventArgs
     {
         // Fields
@@ -38,6 +41,9 @@ namespace Microsoft.Identity.Client
         private readonly object webBrowserActiveXInstance;
 
         // Methods
+        /// <summary>
+        /// 
+        /// </summary>
         public WebBrowserNavigateErrorEventArgs(string url, string targetFrameName, int statusCode, object webBrowserActiveXInstance)
         {
             this.url = url;
@@ -47,6 +53,9 @@ namespace Microsoft.Identity.Client
         }
 
         // Properties
+        /// <summary>
+        /// 
+        /// </summary>
         public string TargetFrameName
         {
             get
@@ -56,6 +65,9 @@ namespace Microsoft.Identity.Client
         }
 
         // url as a string, as in case of error it could be invalid url
+        /// <summary>
+        /// 
+        /// </summary>
         public string Url
         {
             get
@@ -66,6 +78,9 @@ namespace Microsoft.Identity.Client
 
         // ADAL.Native has code for interpretation of this code to string
         // we don't do it here, as we need to come consideration should we do it or not.
+        /// <summary>
+        /// 
+        /// </summary>
         public int StatusCode
         {
             get
@@ -73,7 +88,9 @@ namespace Microsoft.Identity.Client
                 return this.statusCode;
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public object WebBrowserActiveXInstance
         {
             get

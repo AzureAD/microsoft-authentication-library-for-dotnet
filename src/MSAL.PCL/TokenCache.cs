@@ -37,7 +37,7 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     accessToken cache class used by <see cref="AuthenticationContext" /> to store access and refresh tokens.
+    ///
     /// </summary>
     public class TokenCache
     {

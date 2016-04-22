@@ -42,7 +42,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="promptBehavior"></param>
         /// <param name="ownerWindow"></param>
         public PlatformParameters(object ownerWindow)
         {

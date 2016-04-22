@@ -29,8 +29,14 @@ using System.Diagnostics.Tracing;
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class MsalOption
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public static EventSource MsalEventSource
         {
             get
