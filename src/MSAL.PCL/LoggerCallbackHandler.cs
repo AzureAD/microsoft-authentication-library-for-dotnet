@@ -31,13 +31,25 @@ using System.Threading;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
+    /// LogLevel
     /// </summary>
     public enum LogLevel
     {
+        /// <summary>
+        /// 
+        /// </summary>
         Information,
+        /// <summary>
+        /// 
+        /// </summary>
         Verbose,
+        /// <summary>
+        /// 
+        /// </summary>
         Warning,
+        /// <summary>
+        /// 
+        /// </summary>
         Error
     }
 
@@ -46,6 +58,9 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public interface IMsalLogCallback
     {
+        /// <summary>
+        /// 
+        /// </summary>
         void Log(LogLevel level, string message);
     }
 

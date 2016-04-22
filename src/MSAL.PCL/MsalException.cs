@@ -114,7 +114,9 @@ namespace Microsoft.Identity.Client
         {
             return base.ToString() + string.Format(CultureInfo.InvariantCulture,"\n\tErrorCode: {0}", this.ErrorCode);
         }
-
+        /// <summary>
+        /// Gets the Error Message
+        /// </summary>
         protected static string GetErrorMessage(string errorCode)
         {
             string message;

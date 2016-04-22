@@ -42,19 +42,23 @@ namespace Microsoft.Identity.Client
     {
         private const string DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
 
-/*
+        /*
+                /// <summary>
+                /// Default consutructor of the application.
+                /// </summary>
+                public PublicClientApplication():this(DefaultAuthority)
+                {
+                }
+        */
         /// <summary>
         /// Default consutructor of the application.
         /// </summary>
-        public PublicClientApplication():this(DefaultAuthority)
-        {
-        }
-*/
-
         public PublicClientApplication(string clientId) :this(DefaultAuthority, clientId)
         {
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public PublicClientApplication(string authority, string clientId) : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
         {
             this.UserTokenCache = TokenCache.DefaultSharedUserTokenCache;
@@ -95,6 +99,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scope"></param>
         /// <param name="loginHint"></param>
         /// <param name="extraQueryParameters"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string loginHint,
             UiOptions options, string extraQueryParameters)

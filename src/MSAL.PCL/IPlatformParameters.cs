@@ -27,6 +27,9 @@
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface IPlatformParameters
     {
     }

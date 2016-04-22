@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Constructor to create Secret with client id and secret
         /// </summary>
-        /// <param name="credential">Secret of the client requesting the token.</param>
+        /// <param name="certificate">Secret of the client requesting the token.</param>
         public ClientCredential(IClientAssertionCertificate certificate)
         {
             this.Certificate = certificate;
