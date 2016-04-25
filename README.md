@@ -3,8 +3,8 @@
 Microsoft Authentication Library (MSAL) provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Azure Active Directory v2 (serves Microsoft Account and AAD) and B2C.
 Here you can find the source code for the library. You can find the corresponding releases on the NuGet gallery at [https://www.nuget.org/packages/Microsoft.Identity.Client/](https://www.nuget.org/packages/Microsoft.Identity.Client/).
 
-- This is a prerelease version.
-- 
+# This is a prerelease version.
+
 ## Samples and Documentation
 
 [We provide a full suite of sample applications and documentation on GitHub](https://github.com/AzureADSamples) to help you get started with learning the Azure Identity system. This includes tutorials for native clients such as Windows, Android, iOS, OSX, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features. 
