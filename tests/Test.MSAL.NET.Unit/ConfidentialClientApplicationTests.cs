@@ -192,6 +192,7 @@ namespace Test.MSAL.NET.Unit
             //check for new assertion Hash
             AuthenticationResultEx resultEx =
                 cache.tokenCacheDictionary.Values.First(r => r.Result.User.UniqueId.Equals("unique_id_3"));
+            //[SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine")]
             Assert.AreEqual("nC2j5wL7iN83cU5DJsDXnt11TdEObirkKTVKari51Ps=", resultEx.UserAssertionHash);
         }
 
@@ -226,6 +227,7 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(result);
             Assert.AreEqual(key.UniqueId, result.User.UniqueId);
             Assert.AreEqual(key.DisplayableId, result.User.DisplayableId);
+            //[SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine")]
             Assert.AreEqual("nC2j5wL7iN83cU5DJsDXnt11TdEObirkKTVKari51Ps=",
                 cache.tokenCacheDictionary[key].UserAssertionHash);
         }
@@ -261,6 +263,7 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(result);
             Assert.AreEqual(key.UniqueId, result.User.UniqueId);
             Assert.AreEqual(key.DisplayableId, result.User.DisplayableId);
+            //[SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine")]
             Assert.AreEqual("nC2j5wL7iN83cU5DJsDXnt11TdEObirkKTVKari51Ps=",
                 cache.tokenCacheDictionary[key].UserAssertionHash);
         }
