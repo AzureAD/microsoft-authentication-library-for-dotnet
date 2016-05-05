@@ -27,6 +27,7 @@
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    [Android.Runtime.Preserve(AllMembers = true)]
     internal class WebUIFactory : IWebUIFactory
     {
         public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)

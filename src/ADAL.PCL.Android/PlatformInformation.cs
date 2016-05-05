@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    [Android.Runtime.Preserve(AllMembers = true)]
     internal class PlatformInformation : PlatformInformationBase
     {
         public override string GetProductName()

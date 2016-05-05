@@ -36,6 +36,7 @@ using Java.IO;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    [Android.Runtime.Preserve(AllMembers = true)]
     class BrokerHelper : IBrokerHelper
     {
         private static SemaphoreSlim readyForResponse = null;
