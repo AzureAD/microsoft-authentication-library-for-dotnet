@@ -302,8 +302,17 @@ namespace Test.ADAL.Common.Unit
             }
             
             Log.Comment("====== Verifying that correct values are retrieved when requested for different tenant with user and without user");
-            AuthenticationResultEx resultEx = tokenCache.LoadFromCache("https://localhost/MockSts1", "resource1", "client1", TokenSubjectType.User, null,
-                "user1", null);
+            CacheQueryData data = new CacheQueryData()
+            {
+                Authority = "https://localhost/MockSts1",
+                Resource = "resource1",
+                ClientId = "client1",
+                UniqueId = null,
+                DisplayableId = "user1",
+                SubjectType = TokenSubjectType.User
+            };
+
+            AuthenticationResultEx resultEx = tokenCache.LoadFromCache(data, null);
             Verify.IsNotNull(resultEx);
             
 
@@ -425,6 +434,49 @@ namespace Test.ADAL.Common.Unit
 
             cacheDictionary.Clear();
             Verify.AreEqual(0, cacheDictionary.Keys.Count);
+        }
+
+        internal static void MultipleUserAssertionHashTest()
+        {
+
+            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1", TokenSubjectType.User, null, "user1");
+            TokenCacheKey key2 = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1", TokenSubjectType.User, null, "user2");
+            AuthenticationResultEx value = CreateCacheValue(null, "user1");
+            value.UserAssertionHash = "hash1";
+            AuthenticationResultEx value2 = CreateCacheValue(null, "user2");
+            value2.UserAssertionHash = "hash2";
+
+            TokenCache cache = new TokenCache();
+            cache.tokenCacheDictionary[key] = value;
+            cache.tokenCacheDictionary[key2] = value2;
+            CacheQueryData data = new CacheQueryData() {AssertionHash = "hash1",
+                Authority = "https://localhost/MockSts/",
+                Resource = "resource1",
+                ClientId = "client1",
+                SubjectType = TokenSubjectType.User,
+                UniqueId = null,
+                DisplayableId = null
+            };
+
+            AuthenticationResultEx resultEx = cache.LoadFromCache(data, null);
+            AreAuthenticationResultExsEqual(value, resultEx);
+
+            data.AssertionHash = "hash2";
+            resultEx = cache.LoadFromCache(data, null);
+            AreAuthenticationResultExsEqual(value2, resultEx);
+
+            data.AssertionHash = null;
+
+            try
+            {
+                cache.LoadFromCache(data, null);
+            }
+            catch (Exception exc)
+            {
+                Verify.IsTrue(exc is AdalException);
+                Verify.AreEqual(((AdalException) exc).ErrorCode, AdalError.MultipleTokensMatched);
+            }
+            
         }
 
         internal static void TokenCacheCapacityTest()

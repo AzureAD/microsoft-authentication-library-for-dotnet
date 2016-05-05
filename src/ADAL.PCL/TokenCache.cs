@@ -340,7 +340,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        internal AuthenticationResultEx LoadFromCache(string authority, string resource, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId, CallState callState)
+        internal AuthenticationResultEx LoadFromCache(CacheQueryData cacheQueryData, CallState callState)
         {
             lock (cacheLock)
             {
@@ -348,8 +348,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 AuthenticationResultEx resultEx = null;
 
-                KeyValuePair<TokenCacheKey, AuthenticationResultEx>? kvp = this.LoadSingleItemFromCache(authority,
-                    resource, clientId, subjectType, uniqueId, displayableId, callState);
+                KeyValuePair<TokenCacheKey, AuthenticationResultEx>? kvp = this.LoadSingleItemFromCache(cacheQueryData, callState);
 
                 if (kvp.HasValue)
                 {
@@ -364,12 +363,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         PlatformPlugin.Logger.Verbose(callState,
                             "An expired or near expiry token was found in the cache");
                     }
-                    else if (!cacheKey.ResourceEquals(resource))
+                    else if (!cacheKey.ResourceEquals(cacheQueryData.Resource))
                     {
                         PlatformPlugin.Logger.Verbose(callState,
                             string.Format(CultureInfo.CurrentCulture,
                                 "Multi resource refresh token for resource '{0}' will be used to acquire token for '{1}'",
-                                cacheKey.Resource, resource));
+                                cacheKey.Resource, cacheQueryData.Resource));
                         var newResultEx = new AuthenticationResultEx
                         {
                             Result = new AuthenticationResult(null, null, DateTimeOffset.MinValue),
@@ -459,18 +458,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private KeyValuePair<TokenCacheKey, AuthenticationResultEx>? LoadSingleItemFromCache(string authority, string resource, string clientId, TokenSubjectType subjectType, string uniqueId, string displayableId, CallState callState)
+        private KeyValuePair<TokenCacheKey, AuthenticationResultEx>? LoadSingleItemFromCache(CacheQueryData cacheQueryData, CallState callState)
         {
             lock (cacheLock)
             {
                 // First identify all potential tokens.
-                List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> items = this.QueryCache(authority, clientId,
-                    subjectType, uniqueId, displayableId);
-
+                List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> items = this.QueryCache(cacheQueryData.Authority, cacheQueryData.ClientId, cacheQueryData.SubjectType, cacheQueryData.UniqueId, cacheQueryData.DisplayableId);
+                
                 List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> resourceSpecificItems =
-                    items.Where(p => p.Key.ResourceEquals(resource)).ToList();
-
+                    items.Where(p => p.Key.ResourceEquals(cacheQueryData.Resource)).ToList();
                 int resourceValuesCount = resourceSpecificItems.Count();
+
+                //multiple tokens matched. scope down the results to the matching userAssertion Hash, if provided
+                if (resourceValuesCount > 1 && cacheQueryData.AssertionHash != null)
+                {
+                    resourceSpecificItems =
+                        resourceSpecificItems.Where(p => p.Value.UserAssertionHash.Equals(cacheQueryData.AssertionHash))
+                            .ToList();
+                    resourceValuesCount = resourceSpecificItems.Count();
+                }
+
                 KeyValuePair<TokenCacheKey, AuthenticationResultEx>? returnValue = null;
                 switch (resourceValuesCount)
                 {
@@ -500,8 +507,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 // check for tokens issued to same client_id/user_id combination, but any tenant.
                 if (returnValue == null)
                 {
-                    List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForAllTenants = this.QueryCache(
-                        null, clientId, subjectType, uniqueId, displayableId);
+                    List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForAllTenants = this.QueryCache(null, cacheQueryData.ClientId, cacheQueryData.SubjectType, cacheQueryData.UniqueId, cacheQueryData.DisplayableId);
                     if (itemsForAllTenants.Count != 0)
                     {
                         returnValue = itemsForAllTenants.First();

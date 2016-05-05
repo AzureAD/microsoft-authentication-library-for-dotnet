@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected readonly static Task CompletedTask = Task.FromResult(false);
         private readonly TokenCache tokenCache;
         protected readonly IDictionary<string, string> brokerParameters;
-
+        protected readonly CacheQueryData CacheQueryData = null;
 
         protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string resource,
             ClientKey clientKey, TokenSubjectType subjectType)
@@ -74,6 +74,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             brokerParameters["correlation_id"] = this.CallState.CorrelationId.ToString();
             brokerParameters["client_version"] = AdalIdHelper.GetAdalVersion();
             this.ResultEx = null;
+
+            CacheQueryData = new CacheQueryData();
+            CacheQueryData.Authority = Authenticator.Authority;
+            CacheQueryData.Resource = this.Resource;
+            CacheQueryData.ClientId = this.ClientKey.ClientId;
+            CacheQueryData.SubjectType = this.TokenSubjectType;
+            CacheQueryData.UniqueId = this.UniqueId;
+            CacheQueryData.DisplayableId = this.DisplayableId;
         }
 
         internal CallState CallState { get; set; }
@@ -114,7 +122,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    ResultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.UniqueId, this.DisplayableId, this.CallState);
+                    ResultEx = this.tokenCache.LoadFromCache(CacheQueryData, this.CallState);
                     this.ValidateResult();
 
                     if (ResultEx != null && ResultEx.Result.AccessToken == null && ResultEx.RefreshToken != null)
