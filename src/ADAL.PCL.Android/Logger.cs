@@ -31,6 +31,7 @@ using Android.Util;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    [Android.Runtime.Preserve(AllMembers = true)]
     internal class Logger : LoggerBase
     {
         internal override void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")

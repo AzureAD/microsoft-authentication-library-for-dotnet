@@ -29,6 +29,7 @@ using System;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    [Android.Runtime.Preserve(AllMembers = true)]
     internal class CryptographyHelper : ICryptographyHelper
     {
         public string CreateSha256Hash(string input)
