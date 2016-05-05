@@ -35,7 +35,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal class AcquireTokenOnBehalfHandler : AcquireTokenHandlerBase
     {
         private readonly UserAssertion userAssertion;
-        private readonly string assertionHash;
 
         public AcquireTokenOnBehalfHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserAssertion userAssertion)
             : base(authenticator, tokenCache, resource, clientKey, TokenSubjectType.UserPlusClient)
@@ -47,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.userAssertion = userAssertion;
             this.DisplayableId = userAssertion.UserName;
-            this.assertionHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(userAssertion.Assertion);
+            CacheQueryData.AssertionHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(userAssertion.Assertion);
 
             this.SupportADFS = true;
         }
@@ -62,7 +61,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (!string.IsNullOrEmpty(this.ResultEx.UserAssertionHash))
                 {
                     //if user assertion hash does not match then return null
-                    if (!this.ResultEx.UserAssertionHash.Equals(assertionHash))
+                    if (!this.ResultEx.UserAssertionHash.Equals(CacheQueryData.AssertionHash))
                     {
                         this.ResultEx = null;
                     }
@@ -83,7 +82,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AuthenticationResultEx resultEx = await base.SendTokenRequestAsync();
             if (resultEx != null)
             {
-                resultEx.UserAssertionHash = this.assertionHash;
+                resultEx.UserAssertionHash = CacheQueryData.AssertionHash;
             }
 
             return resultEx;

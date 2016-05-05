@@ -78,6 +78,15 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
+        [Description("Test for Multiple User tokens found, hash fallback test")]
+        [TestCategory("AdalDotNetUnit")]
+        public void MultipleUserAssertionHashTest()
+        {
+            TokenCacheTests.MultipleUserAssertionHashTest();
+        }
+
+
+        [TestMethod]
         [Description("Test for Token Cache Serialization")]
         [TestCategory("AdalDotNetUnit")]
         public void TokenCacheSerializationTest()
