@@ -168,7 +168,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             var authorizationRequestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
             authorizationRequestParameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
-
+            authorizationRequestParameters[OAuthParameter.HasChrome] = "1";
             authorizationRequestParameters[OAuthParameter.RedirectUri] = this.redirectUriRequestParameter;
 
             if (!string.IsNullOrWhiteSpace(loginHint))
