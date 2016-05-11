@@ -210,7 +210,7 @@ namespace Test.ADAL.Common
             if (sts.Type != StsType.ADFS)
             {
                 Uri uri = new Uri(sts.Authority);
-                context = new AuthenticationContextProxy(string.Format(CultureInfo.CurrentCulture, " {0}://{1}/non_existing_tenant", uri.Scheme, uri.Authority));
+                context = new AuthenticationContextProxy(string.Format(CultureInfo.CurrentCulture, "{0}://{1}/non_existing_tenant", uri.Scheme, uri.Authority));
                 result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
                 VerifyErrorResult(result, Sts.AuthenticationCanceledError, null);
             }

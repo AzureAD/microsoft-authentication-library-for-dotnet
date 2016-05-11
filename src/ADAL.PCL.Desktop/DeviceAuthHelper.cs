@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 sig = rsa.SignData(response.GetResponseToSign().ToByteArray());
             }
 
-            string signedJwt = string.Format(CultureInfo.CurrentCulture, " {0}.{1}", response.GetResponseToSign(),
+            string signedJwt = string.Format(CultureInfo.CurrentCulture, "{0}.{1}", response.GetResponseToSign(),
                 Base64UrlEncoder.Encode(sig));
             string authToken = string.Format(CultureInfo.CurrentCulture, " AuthToken=\"{0}\"", signedJwt);
             Task<string> resultTask =

@@ -280,7 +280,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return items;
         }
 
-        private static void AddKeyValueString(StringBuilder messageBuilder, string key, char[] value)
+        internal static void AddKeyValueString(StringBuilder messageBuilder, string key, char[] value)
         {
             string delimiter = (messageBuilder.Length == 0) ? string.Empty : "&";
             messageBuilder.AppendFormat(CultureInfo.CurrentCulture, "{0}{1}=", delimiter, key);

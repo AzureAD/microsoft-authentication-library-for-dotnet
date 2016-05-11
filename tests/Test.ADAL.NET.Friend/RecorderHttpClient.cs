@@ -127,7 +127,10 @@ namespace Test.ADAL.NET.Friend
             string key = string.Empty;
             foreach (var kvp in this.keyElements)
             {
-                key += string.Format(CultureInfo.CurrentCulture, " {0}={1},", kvp.Key, kvp.Value);
+                if (!kvp.Key.Contains("x-ms-PKeyAuth"))
+                {
+                    key += string.Format(CultureInfo.CurrentCulture, "{0}={1},", kvp.Key, kvp.Value);
+                }
             }
 
             if (IOMap.ContainsKey(key))

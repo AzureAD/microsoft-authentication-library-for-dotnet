@@ -50,7 +50,7 @@ namespace TestApp.PCL
             this.ValidNonExistingRedirectUri = new Uri("urn:ietf:wg:oauth:2.0:oob");
             this.ValidLoggedInFederatedUserName = "dummy\\dummy";
             string[] segments = this.ValidLoggedInFederatedUserName.Split(new[] { '\\' });
-            this.ValidLoggedInFederatedUserId = string.Format(CultureInfo.CurrentCulture, " {0}@microsoft.com", (segments.Length == 2) ? segments[1] : segments[0]);
+            this.ValidLoggedInFederatedUserId = string.Format(CultureInfo.CurrentCulture, "{0}@microsoft.com", (segments.Length == 2) ? segments[1] : segments[0]);
 
             this.TenantName = "<REPLACE>";
             this.Authority = string.Format(CultureInfo.CurrentCulture, " https://login.windows.net/{0}", this.TenantName);
