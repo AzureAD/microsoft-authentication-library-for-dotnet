@@ -82,9 +82,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
             requestParameters[OAuthParameter.Username] = this.UserName;
-
-            requestParameters.AddUrlEncodedParameter(EncodingHelper.UrlEncode(OAuthParameter.Password), EncodingHelper.UrlEncode(PasswordToCharArray()));
-            SecurePassword.Clear();
+            requestParameters[OAuthParameter.Password] = new string(PasswordToCharArray());
+            
+            if (SecurePassword != null)
+            {
+                SecurePassword.Clear();
+            }
         }
     }
 }

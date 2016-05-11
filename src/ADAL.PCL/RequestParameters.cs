@@ -36,8 +36,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
     internal class DictionaryRequestParameters : Dictionary<string, string>, IRequestParameters
     {
-        private Dictionary<string, char[]> _secureParameters = new Dictionary<string, char[]>();
-
         public DictionaryRequestParameters(string resource, ClientKey clientKey)
         {
             if (!string.IsNullOrWhiteSpace(resource))
@@ -49,33 +47,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         public string ExtraQueryParameter { get; set; }
-
-        public override string ToString()
-        {
-            StringBuilder messageBuilder = new StringBuilder();
-
-            foreach (KeyValuePair<string, char[]> kvp in _secureParameters)
-            {
-                EncodingHelper.AddKeyValueString(messageBuilder, kvp.Key, kvp.Value);
-            }
-
-            foreach (KeyValuePair<string, string> kvp in this)
-            {
-                EncodingHelper.AddKeyValueString(messageBuilder, EncodingHelper.UrlEncode(kvp.Key), EncodingHelper.UrlEncode(kvp.Value));
-            }
-
-            if (this.ExtraQueryParameter != null)
-            {
-                messageBuilder.Append('&' + this.ExtraQueryParameter);
-            }
-
-            return messageBuilder.ToString();
-        }
-
-        public void AddUrlEncodedParameter(string urlEncodedKey, char[] urlEncodedValue)
-        {
-            _secureParameters[urlEncodedKey] = urlEncodedValue;
-        }
     }
 
     internal class StringRequestParameters : IRequestParameters
