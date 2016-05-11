@@ -25,6 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Runtime.InteropServices;
+using System.Security;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
@@ -32,7 +36,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public sealed class UserPasswordCredential : UserCredential
     {
-
         /// <summary>
         /// Constructor to create credential with client id and secret
         /// </summary>
@@ -43,29 +46,48 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.Password = password;
         }
 
-        internal string Password { get; private set; }
+        /// <summary>
+        /// Constructor to create credential with client id and secret
+        /// </summary>
+        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
+        /// <param name="securePassword">User password.</param>
+        public UserPasswordCredential(string userName, SecureString securePassword) : base(userName, UserAuthType.UsernamePassword)
+        {
+            this.SecurePassword = securePassword;
+        }
+
+        internal SecureString SecurePassword { get; }
+
+        internal string Password { get; }
 
         internal override char[] PasswordToCharArray()
         {
-            return (this.Password != null) ? this.Password.ToCharArray() : null;
-        }
+            if (SecurePassword != null)
+            {
+                var output = new char[SecurePassword.Length];
+                IntPtr secureStringPtr = Marshal.SecureStringToCoTaskMemUnicode(SecurePassword);
+                for (int i = 0; i < SecurePassword.Length; i++)
+                {
+                    output[i] = (char)Marshal.ReadInt16(secureStringPtr, i * 2);
+                }
 
-        internal char[] EscapedPasswordToCharArray()
-        {
-            string password = this.Password;
-            password = password.Replace("&", "&amp;");
-            password = password.Replace("\"", "&quot;");
-            password = password.Replace("'", "&apos;");
-            password = password.Replace("<", "&lt;");
-            password = password.Replace(">", "&gt;");
-            return (password != null) ? password.ToCharArray() : null;
+                Marshal.ZeroFreeCoTaskMemUnicode(secureStringPtr);
+                return output;
+            }
+
+            return (this.Password != null) ? this.Password.ToCharArray() : null;
         }
 
         internal override void ApplyTo(DictionaryRequestParameters requestParameters)
         {
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
             requestParameters[OAuthParameter.Username] = this.UserName;
-            requestParameters[OAuthParameter.Password] = this.Password;
+            requestParameters[OAuthParameter.Password] = new string(PasswordToCharArray());
+            
+            if (SecurePassword != null)
+            {
+                SecurePassword.Clear();
+            }
         }
     }
 }

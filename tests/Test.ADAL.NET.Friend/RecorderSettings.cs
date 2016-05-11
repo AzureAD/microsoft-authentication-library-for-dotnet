@@ -56,7 +56,7 @@ namespace Test.ADAL.NET.Friend
         {
             try
             {
-                Mock = bool.Parse((string)testContext.DataRow["Mock"]);
+                Mock = true;//bool.Parse((string)testContext.DataRow["Mock"]);
             }
             catch (ArgumentException)
             {

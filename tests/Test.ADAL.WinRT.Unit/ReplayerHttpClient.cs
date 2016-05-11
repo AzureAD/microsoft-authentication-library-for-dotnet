@@ -111,7 +111,7 @@ namespace Test.ADAL.WinRT.Unit
                 string key = string.Empty;
                 foreach (var kvp in this.keyElements)
                 {
-                    key += string.Format(CultureInfo.CurrentCulture, " {0}={1},", kvp.Key, kvp.Value);
+                    key += string.Format(CultureInfo.CurrentCulture, "{0}={1},", kvp.Key, kvp.Value);
                 }
 
                 if (IOMap.ContainsKey(key))

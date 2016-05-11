@@ -228,12 +228,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 var str = new string(singleChar);
                 string encodedStr = UrlEncode(str);
                 char[] encodedSingleChar = encodedStr.ToCharArray();
-                encodedSingleChar.CopyTo(encodedMessage, length);
                 if (length + encodedSingleChar.Length > encodedMessage.Length)
                 {
-                    Array.Resize(ref encodedMessage, message.Length * 2);
+                    Array.Resize(ref encodedMessage, encodedMessage.Length + message.Length * 2);
                 }
 
+                encodedSingleChar.CopyTo(encodedMessage, length);
                 length += encodedSingleChar.Length;
             }
 
@@ -280,7 +280,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return items;
         }
 
-        private static void AddKeyValueString(StringBuilder messageBuilder, string key, char[] value)
+        internal static void AddKeyValueString(StringBuilder messageBuilder, string key, char[] value)
         {
             string delimiter = (messageBuilder.Length == 0) ? string.Empty : "&";
             messageBuilder.AppendFormat(CultureInfo.CurrentCulture, "{0}{1}=", delimiter, key);
