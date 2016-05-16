@@ -1,0 +1,4 @@
+Version 3.10.305161347
+======================
+This release contains
+- Fix in GetAuthorizationURLAsync where QP were not getting appended correctly.
