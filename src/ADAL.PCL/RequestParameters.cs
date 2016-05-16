@@ -46,6 +46,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             clientKey.AddToParameters(this);    
         }
 
+        public override string ToString()
+        {
+            StringBuilder messageBuilder = new StringBuilder();
+
+            foreach (KeyValuePair<string, string> kvp in this)
+            {
+                EncodingHelper.AddKeyValueString(messageBuilder, EncodingHelper.UrlEncode(kvp.Key), EncodingHelper.UrlEncode(kvp.Value));
+            }
+
+            if (this.ExtraQueryParameter != null)
+            {
+                messageBuilder.Append('&' + this.ExtraQueryParameter);
+            }
+
+            return messageBuilder.ToString();
+        }
+
         public string ExtraQueryParameter { get; set; }
     }
 
