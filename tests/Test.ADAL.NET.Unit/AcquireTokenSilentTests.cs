@@ -28,11 +28,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.Common;
+using Test.ADAL.NET.Unit.Mocks;
 
 namespace Test.ADAL.NET.Unit
 {
@@ -57,6 +59,11 @@ namespace Test.ADAL.NET.Unit
 
             try
             {
+                HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+                {
+                    Method = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage()
+                };
                 await context.AcquireTokenSilentAsync(sts.ValidResource, sts.ValidClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
                 Verify.Fail("AdalSilentTokenAcquisitionException was expected");
             }

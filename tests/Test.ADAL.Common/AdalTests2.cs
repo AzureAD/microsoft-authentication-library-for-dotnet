@@ -63,64 +63,6 @@ namespace Test.ADAL.Common
             Verify.IsFalse(eventListener.TraceBuffer.Contains(correlationId.ToString()));
         }
 
-        public static async Task AuthenticationParametersDiscoveryTestAsync(Sts sts)
-        {
-            const string RelyingPartyWithDiscoveryUrl = "http://localhost:8080";
-
-            using (Microsoft.Owin.Hosting.WebApp.Start<RelyingParty>(RelyingPartyWithDiscoveryUrl))
-            {
-                Log.Comment("Relying Party Started");
-
-                HttpWebResponse response = null;
-                AuthenticationParametersProxy authParams = null;
-
-                try
-                {
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(RelyingPartyWithDiscoveryUrl);
-                    request.ContentType = "application/x-www-form-urlencoded";
-                    response = (HttpWebResponse)request.GetResponse();
-                }
-                catch (WebException ex)
-                {
-                    response = (HttpWebResponse)ex.Response;
-                    if (response.StatusCode == HttpStatusCode.Unauthorized)
-                    {
-                        authParams = AuthenticationParametersProxy.CreateFromResponseAuthenticateHeader(response.Headers["WWW-authenticate"]);
-                    }
-                }
-                finally
-                {
-                    response.Close();
-                }
-
-                SetCredential(sts);
-                var context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheType.Null);
-                var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
-                VerifySuccessResult(sts, result);
-
-                // ADAL WinRT does not support AuthenticationParameters.CreateFromUnauthorizedResponse API
-                if (TestType != TestType.WinRT)
-                {
-                    using (HttpClient client = new HttpClient())
-                    {
-                        HttpResponseMessage responseMessage = await client.GetAsync(RelyingPartyWithDiscoveryUrl);
-                        authParams = await AuthenticationParametersProxy.CreateFromUnauthorizedResponseAsync(responseMessage);
-                    }
-
-                    context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheType.Null);
-                    result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
-                    VerifySuccessResult(sts, result);
-                }
-
-                authParams = await AuthenticationParametersProxy.CreateFromResourceUrlAsync(new Uri(RelyingPartyWithDiscoveryUrl));
-                context = new AuthenticationContextProxy(authParams.Authority, sts.ValidateAuthority, TokenCacheType.Null);
-                result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, sts.ValidDefaultRedirectUri, PlatformParameters, sts.ValidUserId);
-                AdalTests.VerifySuccessResult(sts, result);
-
-                Log.Comment("Relying Party Terminating...");
-            }
-        }
-
         private static void VerifyTokenContent(AuthenticationResultProxy result)
         {
 

@@ -305,15 +305,6 @@ namespace Test.ADAL.NET
         }
 
         [TestMethod]
-        [Description("Positive Test for discovery of authentication parameters")]
-        [TestCategory("AdalDotNetMock")]
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
-        public async Task AuthenticationParametersDiscoveryTest()
-        {
-            await AdalTests.AuthenticationParametersDiscoveryTestAsync(Sts);
-        }
-
-        [TestMethod]
         [Description("Test for reading WebException as inner exception")]
         [TestCategory("AdalDotNetMock")]
         [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", @"TestMetadata.xml", "MockAAD", DataAccessMethod.Sequential)]
