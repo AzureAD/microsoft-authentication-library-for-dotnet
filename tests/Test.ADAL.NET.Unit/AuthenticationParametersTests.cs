@@ -42,7 +42,7 @@ namespace Test.ADAL.NET.Unit
         public void AuthenticationParametersTest()
         {
             Sts sts = new AadSts();
-            string authority = sts.Authority + "/oauth2/authorize";
+            string authority = TestConstants.DefaultAuthorityCommonTenant + "/oauth2/authorize";
             const string Resource = "test_resource";
 
             AuthenticationParameters authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(CultureInfo.InvariantCulture, @"Bearer authorization_uri=""{0}"",resource_id=""{1}""", authority, Resource));

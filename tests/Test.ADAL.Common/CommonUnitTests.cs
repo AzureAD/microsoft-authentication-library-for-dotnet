@@ -46,35 +46,22 @@ namespace Test.ADAL.Common
 
         public static void AdalIdTest()
         {
-            IHttpClient request = PlatformPlugin.HttpClientFactory.Create("https://test", null);
             var adalParameters = AdalIdHelper.GetAdalIdParameters();
 
             Verify.AreEqual(4, adalParameters.Count);
             Verify.IsNotNull(adalParameters[AdalIdParameter.Product]);
             Verify.IsNotNull(adalParameters[AdalIdParameter.Version]);
             Verify.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
-#if TEST_ADAL_WINRT_UNIT
-            Verify.IsFalse(adalParameters.ContainsKey(AdalIdParameter.OS));
-            Verify.IsNotNull(adalParameters[AdalIdParameter.DeviceModel]);
-#else
             Verify.IsNotNull(adalParameters[AdalIdParameter.OS]);
             Verify.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
-#endif
-
-            var parameters = new DictionaryRequestParameters(null, new ClientKey("client_id"));
             adalParameters = AdalIdHelper.GetAdalIdParameters();
 
             Verify.AreEqual(4, adalParameters.Count);
             Verify.IsNotNull(adalParameters[AdalIdParameter.Product]);
             Verify.IsNotNull(adalParameters[AdalIdParameter.Version]);
             Verify.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
-#if TEST_ADAL_WINRT_UNIT
-            Verify.IsFalse(adalParameters.ContainsKey(AdalIdParameter.OS));
-            Verify.IsNotNull(adalParameters[AdalIdParameter.DeviceModel]);
-#else
             Verify.IsNotNull(adalParameters[AdalIdParameter.OS]);
             Verify.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
-#endif
         }
     }
 }

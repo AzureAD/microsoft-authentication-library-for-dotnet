@@ -87,9 +87,9 @@ namespace AdaliOSTestApp
                 ReportLabel.Text = string.Empty;
                 TokenBroker tokenBroker = new TokenBroker();
 
-                sts.Authority = "https://login.microsoftonline.com/common";
-                sts.ValidClientId = "<CLIENT_ID>";
-                sts.ValidResource = "<RESOURCE>";
+                TestConstants.DefaultAuthorityCommonTenant = "https://login.microsoftonline.com/common";
+                TestConstants.DefaultClientId = "<CLIENT_ID>";
+                TestConstants.DefaultResource = "<RESOURCE>";
                 sts.ValidUserName = "<USER>";
                 sts.ValidNonExistingRedirectUri = new Uri("REDIRECT_URI");
                 tokenBroker.Sts = sts;
@@ -108,9 +108,9 @@ namespace AdaliOSTestApp
             {
                 ReportLabel.Text = string.Empty;
                 TokenBroker tokenBroker = new TokenBroker();
-                sts.Authority = "https://login.microsoftonline.com/common";
-                sts.ValidClientId = "<CLIENT_ID>";
-                sts.ValidResource = "<RESOURCE>";
+                TestConstants.DefaultAuthorityCommonTenant = "https://login.microsoftonline.com/common";
+                TestConstants.DefaultClientId = "<CLIENT_ID>";
+                TestConstants.DefaultResource = "<RESOURCE>";
                 sts.ValidUserName = "<USER>";
                 sts.ValidNonExistingRedirectUri = new Uri("REDIRECT_URI");
                 tokenBroker.Sts = sts;

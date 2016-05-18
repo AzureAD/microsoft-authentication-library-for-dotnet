@@ -75,7 +75,7 @@ namespace Test.ADAL.NET.Unit.Mocks
                         "\"oid\": \"" + uniqueId + "\"," +
                         "\"upn\": \"" + displayableId + "\"," +
                         "\"sub\": \"werwerewrewrew-Qd80ehIEdFus\"," +
-                        "\"tid\": \"6c3d51dd-f0e5-4959-b4ea-a80c4e36fe5e\"," +
+                        "\"tid\": \"some-tenant-id\"," +
                         "\"ver\": \"2.0\"}";
             return Base64UrlEncoder.Encode(id);
         }

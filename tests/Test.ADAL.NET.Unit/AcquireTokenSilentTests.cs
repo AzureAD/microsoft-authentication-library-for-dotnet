@@ -47,15 +47,15 @@ namespace Test.ADAL.NET.Unit
         {
             Sts sts = new AadSts();
             TokenCache cache = new TokenCache();
-            TokenCacheKey key = new TokenCacheKey(sts.Authority, sts.ValidResource, sts.ValidClientId, TokenSubjectType.User, "unique_id", "displayable@id.com");
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User, "unique_id", "displayable@id.com");
             cache.tokenCacheDictionary[key] = new AuthenticationResultEx
             {
                 RefreshToken = "something-invalid",
-                ResourceInResponse = sts.ValidResource,
+                ResourceInResponse = TestConstants.DefaultResource,
                 Result = new AuthenticationResult("Bearer", "some-access-token", DateTimeOffset.UtcNow)
             };
 
-            AuthenticationContext context = new AuthenticationContext(sts.Authority, sts.ValidateAuthority, cache);
+            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, sts.ValidateAuthority, cache);
 
             try
             {
@@ -64,7 +64,7 @@ namespace Test.ADAL.NET.Unit
                     Method = HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage()
                 };
-                await context.AcquireTokenSilentAsync(sts.ValidResource, sts.ValidClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
+                await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
                 Verify.Fail("AdalSilentTokenAcquisitionException was expected");
             }
             catch (AdalSilentTokenAcquisitionException ex)

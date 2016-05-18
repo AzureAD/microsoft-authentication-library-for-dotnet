@@ -29,17 +29,12 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
-using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.Owin.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Owin;
 
 using Test.ADAL.Common;
 
@@ -258,30 +253,9 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public async Task TimeoutTest()
         {
-            const string TestServiceUrl = "http://localhost:8080";
-            using (WebApp.Start<TestService>(TestServiceUrl))
-            {
-                HttpClientWrapper webClient = new HttpClientWrapper(TestServiceUrl + "?delay=0&response_code=200", null) { TimeoutInMilliSeconds = 10000 };
-                await webClient.GetResponseAsync();
-
-                webClient = new HttpClientWrapper(TestServiceUrl + "?delay=0&response_code=200", null) { TimeoutInMilliSeconds = 10000 };
-                await webClient.GetResponseAsync();
-
                 try
                 {
-                    webClient = new HttpClientWrapper(TestServiceUrl + "?delay=0&response_code=400", null) { TimeoutInMilliSeconds = 10000 };
-                    await webClient.GetResponseAsync();
-                }
-                catch (HttpRequestWrapperException ex)
-                {
-                    Verify.AreEqual(ex.WebResponse.StatusCode, HttpStatusCode.BadRequest);
-                }
 
-
-                try
-                {
-                    webClient = new HttpClientWrapper(TestServiceUrl + "?delay=10000&response_code=200", null) { TimeoutInMilliSeconds = 500 };
-                    await webClient.GetResponseAsync();
                 }
                 catch (HttpRequestWrapperException ex)
                 {
@@ -289,7 +263,6 @@ namespace Test.ADAL.NET.Unit
                     var serviceException = new AdalServiceException(AdalError.Unknown, ex);
                     Verify.AreEqual(serviceException.StatusCode, (int)HttpStatusCode.RequestTimeout);
                 }
-            }
         }
         
         private static void RunAuthenticationParametersPositive(string authenticateHeader, string expectedAuthority, string excepectedResource)
@@ -348,25 +321,6 @@ namespace Test.ADAL.NET.Unit
             string encodedStr2 = (encodedChars == null) ? null : new string(encodedChars);
 
             Verify.AreEqual(encodedStr, encodedStr2);            
-        }
-
-        internal class TestService
-        {
-            public void Configuration(IAppBuilder app)
-            {
-                app.Run(ctx =>
-                {
-                    int delay = int.Parse(ctx.Request.Query["delay"], CultureInfo.InvariantCulture);
-                    if (delay > 0)
-                    {
-                        Thread.Sleep(delay);
-                    }
-
-                    var response = ctx.Response;
-                    response.StatusCode = int.Parse(ctx.Request.Query["response_code"], CultureInfo.InvariantCulture);
-                    return response.WriteAsync("dummy");
-                });
-            }
         }
     }
 }

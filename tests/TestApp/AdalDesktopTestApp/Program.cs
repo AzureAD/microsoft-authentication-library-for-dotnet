@@ -57,8 +57,8 @@ namespace AdalDesktopTestApp
         private static async Task AcquireTokenAsync()
         {
             Sts sts = new MobileAppSts();
-            AuthenticationContext context = new AuthenticationContext(sts.Authority, true);
-            var result = await context.AcquireTokenAsync(sts.ValidResource, sts.ValidClientId, new UserPasswordCredential(sts.ValidUserName, sts.ValidPassword));
+            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, true);
+            var result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserPasswordCredential(sts.ValidUserName, sts.ValidPassword));
 
             string token = result.AccessToken;
             Console.WriteLine(token + "\n");
