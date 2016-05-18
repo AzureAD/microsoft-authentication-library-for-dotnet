@@ -42,7 +42,7 @@ namespace Test.ADAL.NET.Unit
     [TestClass]
     [DeploymentItem("TestMex.xml")]
     [DeploymentItem("TestMex2005.xml")]
-    public class NonInteractiveTests : AdalTestsBase
+    public class NonInteractiveTests
     {
         // Switch this to true to run test against actual service
         private const bool MockService = true;

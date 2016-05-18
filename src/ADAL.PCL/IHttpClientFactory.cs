@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     interface IHttpClientFactory
@@ -34,9 +32,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         IHttpClient Create(string uri, CallState callState);
 
         bool AddAdditionalHeaders { get; }
-
-        DateTime GetJsonWebTokenValidFrom();
-
-        string GetJsonWebTokenId();
     }
 }

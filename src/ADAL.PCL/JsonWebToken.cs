@@ -72,8 +72,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public JsonWebToken(IClientAssertionCertificate certificate, string audience)
         {
-            DateTime validFrom = PlatformPlugin.HttpClientFactory.GetJsonWebTokenValidFrom();
-
+            DateTime validFrom = DateTime.UtcNow;
             DateTime validTo = validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds);
 
             this.payload = new JWTPayload
@@ -83,8 +82,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                                ValidFrom = ConvertToTimeT(validFrom),
                                ValidTo = ConvertToTimeT(validTo),
                                Subject = certificate.ClientId,
-                               JwtIdentifier = PlatformPlugin.HttpClientFactory.GetJsonWebTokenId()
-                           };
+                               JwtIdentifier = Guid.NewGuid().ToString()
+            };
         }
 
         public ClientAssertion Sign(IClientAssertionCertificate credential)

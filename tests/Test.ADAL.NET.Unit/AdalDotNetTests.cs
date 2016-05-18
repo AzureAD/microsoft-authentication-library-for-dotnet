@@ -87,30 +87,25 @@ namespace Test.ADAL.NET
             AuthenticationResult result = null;
             try
             {
-                context = new AuthenticationContext(sts.InvalidAuthority, true);
-                Verify.AreNotEqual(sts.Type, StsType.ADFS);
-                result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
-                VerifyErrorResult(result, TestConstants.DefaultAuthorityCommonTenantNotInValidList, "authority");
+                context = new AuthenticationContext("https://login.contoso.com/adfs");
+                await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, platformParameters);
             }
             catch (ArgumentException ex)
             {
-                Verify.AreEqual(sts.Type, StsType.ADFS);
                 Verify.AreEqual(ex.ParamName, "validateAuthority");
             }
 
-            context = new AuthenticationContext(sts.InvalidAuthority, false);
+            context = new AuthenticationContext("https://login.microsoft0nline.com/common");
             result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
             VerifyErrorResult(result, Sts.AuthenticationUiFailedError, "authentication dialog");
             context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, false);
             result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, result);
 
-            if (sts.Type != StsType.ADFS)
-            {
-                context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, true);
-                result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
-                VerifySuccessResult(sts, result);
-            }
+            //whitelisted authority
+            context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, true);
+            result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
+            VerifySuccessResult(sts, result);
 
             try
             {
@@ -766,7 +761,7 @@ namespace Test.ADAL.NET
             Verify.AreEqual(result.TenantId, result2.TenantId);
         }
 
-        public static void VerifySuccessResult(Sts sts, AuthenticationResult result, bool supportRefreshToken = true, bool supportUserInfo = true)
+        public static void VerifySuccessResult(AuthenticationResult result, bool supportRefreshToken = true, bool supportUserInfo = true)
         {
             Log.Comment("Verifying success result...");
             if (result.Status != AuthenticationStatusProxy.Success)
@@ -812,37 +807,6 @@ namespace Test.ADAL.NET
             long expiresIn = (long)(result.ExpiresOn - DateTime.UtcNow).TotalSeconds;
             Log.Comment("Verifying token expiration...");
             Verify.IsGreaterThanOrEqual(expiresIn, (long)0, "Token ExpiresOn");
-        }
-
-        public static void VerifyErrorResult(AuthenticationResult result, string error, string errorDescriptionKeyword, int statusCode = 0, string serviceErrorCode = null)
-        {
-            Log.Comment(string.Format(CultureInfo.CurrentCulture, " Verifying error result '{0}':'{1}'...", result.Error, result.ErrorDescription));
-            Verify.AreNotEqual(AuthenticationStatusProxy.Success, result.Status);
-            Verify.IsNullOrEmptyString(result.AccessToken);
-            Verify.IsNotNullOrEmptyString(result.Error);
-            Verify.IsNotNullOrEmptyString(result.ErrorDescription);
-            Verify.IsFalse(result.ErrorDescription.Contains("+"), "Error description should not be in URL form encoding!");
-            Verify.IsFalse(result.ErrorDescription.Contains("%2"), "Error description should not be in URL encoding!");
-
-            if (!string.IsNullOrEmpty(error))
-            {
-                Verify.AreEqual(error, result.Error);
-            }
-
-            if (!string.IsNullOrEmpty(errorDescriptionKeyword))
-            {
-                VerifyErrorDescriptionContains(result.ErrorDescription, errorDescriptionKeyword);
-            }
-
-            if (statusCode != 0)
-            {
-                Verify.AreEqual(statusCode, result.ExceptionStatusCode);
-            }
-
-            if (serviceErrorCode != null)
-            {
-                Verify.IsTrue(result.ExceptionServiceErrorCodes.Contains(serviceErrorCode));
-            }
         }
 
 
