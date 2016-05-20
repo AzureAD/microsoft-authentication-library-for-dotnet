@@ -26,16 +26,13 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 using Test.ADAL.Common;
-using Test.ADAL.NET.Unit;
 using Test.ADAL.NET.Unit.Mocks;
 
 namespace Test.ADAL.NET.Unit
@@ -67,8 +64,12 @@ namespace Test.ADAL.NET.Unit
 
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, true);
             AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, platformParameters);
-            Verify.IsNotNull(result);
-            Verify.AreEqual(result.AccessToken, "some-access-token");
+            Assert.IsNotNull(result);
+            Assert.IsTrue(context.Authenticator.Authority.EndsWith("/some-tenant-id/"));
+            Assert.AreEqual(result.AccessToken, "some-access-token");
+            Assert.IsNotNull(result.UserInfo);
+            Assert.AreEqual("displayable@id.com", result.UserInfo.DisplayableId);
+            Assert.AreEqual("unique_id", result.UserInfo.UniqueId);
         }
         
         [TestMethod]
@@ -175,32 +176,10 @@ namespace Test.ADAL.NET.Unit
             {
                 await context.AcquireTokenSilentAsync("random-resource", TestConstants.DefaultClientId);
             }
-            catch (Exception exc)
+            catch (AdalServiceException exc)
             {
-                Assert.IsInstanceOfType(exc, Type.GetType("AdalServiceException"));
+                Assert.AreEqual(AdalError.FailedToRefreshToken, exc.ErrorCode);
             }
-        }
-
-        /*
-        [TestMethod]
-        [Description("Negative Test for AcquireToken with invalid client id")]
-        [TestCategory("AdalDotNetMock")]
-        public static async Task AcquireTokenWithInvalidClientIdTestAsync()
-        {
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, sts.ValidateAuthority);
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, sts.InvalidClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
-            VerifyErrorResult(result, Sts.AuthenticationCanceledError, null);
-        }
-
-        [TestMethod]
-        [Description("Negative Test for AcquireToken with incorrect user credential")]
-        [TestCategory("AdalDotNetMock")]
-        public static async Task AcquireTokenWithIncorrectUserCredentialTestAsync()
-        {
-            AuthenticationContext.SetCredentials(sts.InvalidUserName, "invalid_password");
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, sts.ValidateAuthority);
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, UserIdentifier.AnyUser, "incorrect_user");
-            VerifyErrorResult(result, Sts.AuthenticationCanceledError, "canceled");
         }
 
         [TestMethod]
@@ -208,42 +187,39 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetMock")]
         public async Task AcquireTokenWithAuthenticationCanceledTest()
         {
-            // ADFS security dialog hang up
-            await AdalTests.AcquireTokenWithAuthenticationCanceledTestAsync(Sts);
+
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.UserCancel,
+                 TestConstants.DefaultRedirectUri + "?error=user_cancelled"));
+            try
+            {
+                await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, platformParameters);
+            }
+            catch (AdalServiceException ex)
+            {
+                Verify.AreEqual(ex.ErrorCode, AdalError.AuthenticationCanceled);
+            }
         }
 
         [TestMethod]
         [Description("Positive Test for AcquireToken testing default token cache")]
-        [TestCategory("AdalDotNetMock")]
-        public async Task AcquireTokenPositiveWithDefaultCacheTest()
-        {
-            await AdalTests.AcquireTokenPositiveWithDefaultCacheTestAsync(Sts);
-        }
-
-        [TestMethod]
-        [Description("Positive Test for AcquireToken testing custom in memory token cache")]
-        [TestCategory("AdalDotNetMock")]
-        public async Task AcquireTokenPositiveWithInMemoryCacheTest()
-        {
-            await AdalTests.AcquireTokenPositiveWithInMemoryCacheTestAsync(Sts);
-        }
-
-        [TestMethod]
-        [Description("Positive Test for AcquireToken testing default token cache")]
-        [TestCategory("AdalDotNetMock")]
-        [Ignore]    // Enable once the test bug is fixed.
         public async Task AcquireTokenPositiveWithNullCacheTest()
         {
-            await AdalTests.AcquireTokenPositiveWithNullCacheTestAsync(Sts);
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                 TestConstants.DefaultRedirectUri + "?code=some-code"));
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            });
+
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, null);
+            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, platformParameters);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.AccessToken, "some-access-token");
+            Assert.IsNotNull(result.UserInfo);
         }
 
-        [TestMethod]
-        [Description("Test for UserInfo")]
-        [TestCategory("AdalDotNetMock")]
-        public async Task UserInfoTest()
-        {
-            await AdalTests.UserInfoTestAsync(Sts);
-        }
 
         [TestMethod]
         [Description("Test for multi resource refresh token")]
@@ -256,7 +232,7 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         [Description("Test for acquring token using tenantless endpoint")]
         [TestCategory("AdalDotNetMock")]
-        public async Task TenantlessTest()
+        public async Task TenantSpecificAuthorityTest()
         {
             var context = new AuthenticationContext(sts.TenantlessAuthority, sts.ValidateAuthority);
             AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
@@ -277,8 +253,9 @@ namespace Test.ADAL.NET.Unit
             context = new AuthenticationContext(sts.TenantlessAuthority.Replace("Common", result.TenantId), sts.ValidateAuthority, TokenCacheType.Null);
             result2 = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
             VerifySuccessResult(sts, result2);
-        }
+        }*/
 
+        /*
         [TestMethod]
         [Description("Test for STS Instance Discovery")]
         [TestCategory("AdalDotNetMock")]
