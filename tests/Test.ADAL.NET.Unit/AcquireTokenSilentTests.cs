@@ -59,11 +59,11 @@ namespace Test.ADAL.NET.Unit
 
             try
             {
-                HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+                HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
                 {
                     Method = HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage()
-                };
+                });
                 await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
                 Verify.Fail("AdalSilentTokenAcquisitionException was expected");
             }

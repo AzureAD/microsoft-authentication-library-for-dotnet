@@ -29,7 +29,7 @@ namespace Test.ADAL.NET.Unit.Mocks
             {
                 Assert.AreEqual(Url, uri.AbsoluteUri.Split(new[] { '?' })[0]);
             }
-
+            
             //match QP passed in for validation. 
             if (QueryParams != null)
             {

@@ -64,7 +64,6 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for RequestParameters class")]
-        [TestCategory("AdalDotNetUnit")]
         public void RequestParametersTest()
         {
             const string ClientId = "client_id";
@@ -93,7 +92,6 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for authority type detection")]
-        [TestCategory("AdalDotNetUnit")]
         public void AuthorityTypeDetectionTest()
         {
             Verify.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://login.windows.net/tenant/dummy/"));
@@ -251,11 +249,11 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("AdalDotNetUnit")]
-        public async Task TimeoutTest()
+        public Task TimeoutTest()
         {
                 try
                 {
-
+                    return null;
                 }
                 catch (HttpRequestWrapperException ex)
                 {
@@ -263,6 +261,8 @@ namespace Test.ADAL.NET.Unit
                     var serviceException = new AdalServiceException(AdalError.Unknown, ex);
                     Verify.AreEqual(serviceException.StatusCode, (int)HttpStatusCode.RequestTimeout);
                 }
+
+            return null;
         }
         
         private static void RunAuthenticationParametersPositive(string authenticateHeader, string expectedAuthority, string excepectedResource)

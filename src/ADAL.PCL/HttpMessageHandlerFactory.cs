@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Net.Http;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -33,14 +34,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         internal static HttpMessageHandler GetMessageHandler(bool useDefaultCredentials)
         {
-            if (MockHandler != null)
+            if (MockHandlerList.Count > 0)
             {
-                return MockHandler;
+                HttpMessageHandler retVal = MockHandlerList[0];
+                MockHandlerList.RemoveAt(0);
+                return retVal;
             }
 
             return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials };
         }
 
-        internal static HttpMessageHandler MockHandler { get; set; }
+        private readonly static List<HttpMessageHandler> MockHandlerList = new List<HttpMessageHandler>();
+
+        public static void AddMockHandler(HttpMessageHandler mockHandler)
+        {
+            MockHandlerList.Add(mockHandler);
+        }
+
     }
 }

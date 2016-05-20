@@ -1,4 +1,5 @@
-﻿//----------------------------------------------------------------------
+﻿/*
+//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -97,7 +98,6 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNet")]
         public async Task MexFetchingTest()
         {
-            var federatedSts = SetupStsService(StsType.AADFederatedWithADFS3);
             AuthenticationContext context = new AuthenticationContext(federatedTestConstants.DefaultAuthorityCommonTenant, federatedSts.ValidateAuthority);
             await context.Authenticator.UpdateFromTemplateAsync(null);
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
@@ -307,3 +307,4 @@ namespace Test.ADAL.NET.Unit
         }
     }
 }
+*/
