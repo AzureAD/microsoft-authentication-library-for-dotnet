@@ -105,8 +105,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected UserIdentifierType UserIdentifierType { get; set; }
 
         protected bool LoadFromCache { get; set; }
-        
+
         protected bool StoreToCache { get; set; }
+
+        private const int ExpirationMarginInMinutes = 5;
+
+        private bool _tokenNearExpiry;
+
+        private bool _tokenExtendedLifeTimeExpired;
 
         public async Task<AuthenticationResult> RunAsync()
         {
@@ -116,7 +122,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 await this.PreRunAsync();
 
-                
+
                 if (this.LoadFromCache)
                 {
                     this.NotifyBeforeAccessCache();
@@ -124,8 +130,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     ResultEx = this.tokenCache.LoadFromCache(CacheQueryData, this.CallState);
                     this.ValidateResult();
+                    if (ResultEx.Result.AccessToken != null)
+                    {
+                        _tokenNearExpiry = (ResultEx.Result.ExpiresOn <=
+                                            DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
+                        _tokenExtendedLifeTimeExpired = (ResultEx.Result.ExpiresOn <=
+                                            DateTime.UtcNow);
 
-                    if (ResultEx != null && ResultEx.Result.AccessToken == null && ResultEx.RefreshToken != null)
+                        if (_tokenNearExpiry)
+                        {
+                            PlatformPlugin.Logger.Verbose(null, "An expired or near expiry token was found in the cache");
+                        }
+
+                    }
+
+                    if ((ResultEx != null && ResultEx.Result.AccessToken == null && ResultEx.RefreshToken != null) || _tokenNearExpiry)
                     {
                         ResultEx = await this.RefreshAccessTokenAsync(ResultEx);
                         if (ResultEx != null && ResultEx.Exception == null)
@@ -144,7 +163,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     else
                     {
                         await this.PreTokenRequest();
-                        
+
                         // check if broker app installation is required for authentication.
                         if (this.BrokerInvocationRequired())
                         {
@@ -157,6 +176,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
 
                     //broker token acquisition failed
+
+                    //return the stale token here
+                    if (!_tokenExtendedLifeTimeExpired)
+                    {
+                        ResultEx.Result.ExtendedLifeTimeToken = true;
+                        ResultEx.Exception = null;
+                    }
+
                     if (ResultEx != null && ResultEx.Exception != null)
                     {
                         throw ResultEx.Exception;
@@ -195,7 +222,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected virtual void ValidateResult()
         {
-           
+              
         }
 
         protected virtual void UpdateBrokerParameters(IDictionary<string, string> parameters)
@@ -342,7 +369,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 PlatformPlugin.Logger.Information(this.CallState, string.Format(CultureInfo.CurrentCulture, "=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tExpiration Time: {1}\n\tUser Hash: {2}\n\t",
                     accessTokenHash,
-                    result.ExpiresOn,                    
+                    result.ExpiresOn,
                     result.UserInfo != null ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.UserInfo.UniqueId) : "null"));
             }
         }
