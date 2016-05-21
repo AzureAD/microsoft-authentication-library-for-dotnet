@@ -89,12 +89,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 client.Timeout = TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds);
 
                 HttpResponseMessage responseMessage;
+                HttpContent content=null;
 
+                bool getRequest = false;
                 try
                 {
                     if (this.BodyParameters != null)
                     {
-                        HttpContent content;
+                        
                         if (this.BodyParameters is StringRequestParameters)
                         {
 
@@ -110,6 +112,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     else
                     {
                         responseMessage = await client.GetAsync(uri);
+                        getRequest = true;
                     }
                 }
                 catch (TaskCanceledException ex)
@@ -118,6 +121,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 IHttpWebResponse webResponse = await CreateResponseAsync(responseMessage);
+
+                // Retry the request here
+                if ((int) webResponse.StatusCode == 500 || (int) webResponse.StatusCode == 503 ||
+                    (int) webResponse.StatusCode == 504)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                    if (getRequest)
+                    {
+                        responseMessage = await client.GetAsync(uri);
+                    }
+                    else
+                    {
+                        responseMessage = await client.PostAsync(uri, content);
+                    }
+                }
+
+                webResponse = await CreateResponseAsync(responseMessage);
 
                 if (!responseMessage.IsSuccessStatusCode)
                 {
