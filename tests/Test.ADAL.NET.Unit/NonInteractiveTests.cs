@@ -1,5 +1,4 @@
-﻿/*
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -103,16 +102,6 @@ namespace Test.ADAL.NET.Unit
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
             XDocument mexDocument = await FecthMexAsync(userRealmResponse.FederationMetadataUrl);
             Verify.IsNotNull(mexDocument);
-
-            try
-            {
-                await FecthMexAsync(userRealmResponse.FederationMetadataUrl + "x");
-                Verify.Fail("Exception expected");
-            }
-            catch (AdalException ex)
-            {
-                Verify.AreEqual(ex.ErrorCode, AdalError.AccessingWsMetadataExchangeFailed);
-            }
         }
 
         [TestMethod]
@@ -307,4 +296,3 @@ namespace Test.ADAL.NET.Unit
         }
     }
 }
-*/

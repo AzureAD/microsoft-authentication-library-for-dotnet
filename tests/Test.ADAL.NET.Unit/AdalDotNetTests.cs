@@ -342,7 +342,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, result.UserInfo.UniqueId);
         }
-
+        /*
         [TestMethod]
         [Description("Positive Test for Confidential Client")]
         public async Task ConfidentialClientWithX509Test()
