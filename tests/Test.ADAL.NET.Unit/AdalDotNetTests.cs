@@ -26,7 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -68,8 +70,8 @@ namespace Test.ADAL.NET.Unit
             Assert.IsTrue(context.Authenticator.Authority.EndsWith("/some-tenant-id/"));
             Assert.AreEqual(result.AccessToken, "some-access-token");
             Assert.IsNotNull(result.UserInfo);
-            Assert.AreEqual("displayable@id.com", result.UserInfo.DisplayableId);
-            Assert.AreEqual("unique_id", result.UserInfo.UniqueId);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, result.UserInfo.UniqueId);
         }
         
         [TestMethod]
@@ -172,6 +174,7 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateInvalidRequestTokenResponseMessage()
             });
+
             try
             {
                 await context.AcquireTokenSilentAsync("random-resource", TestConstants.DefaultClientId);
@@ -184,7 +187,6 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Negative Test for AcquireToken with user canceling authentication")]
-        [TestCategory("AdalDotNetMock")]
         public async Task AcquireTokenWithAuthenticationCanceledTest()
         {
 
@@ -222,167 +224,127 @@ namespace Test.ADAL.NET.Unit
 
 
         [TestMethod]
-        [Description("Test for multi resource refresh token")]
-        [TestCategory("AdalDotNetMock")]
-        public async Task MultiResourceRefreshTokenTest()
+        [Description("Test for simple refresh token")]
+        public async Task SimpleRefreshTokenTest()
         {
-            await AdalTests.MultiResourceRefreshTokenTestAsync(Sts);
+            var context = new AuthenticationContext(TestConstants.DefaultAdfsAuthorityTenant, false, new TokenCache());
+            //add simple RT to cache
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAdfsAuthorityTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User, null, null);
+            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            {
+                RefreshToken = "some-rt",
+                Result = new AuthenticationResult("Bearer", "some-access-token", DateTimeOffset.UtcNow)
+            };
+
+            //token request for some other resource should fail.
+            try
+            {
+                await context.AcquireTokenSilentAsync("random-resource", TestConstants.DefaultClientId);
+            }
+            catch (AdalSilentTokenAcquisitionException exc)
+            {
+                Assert.AreEqual(AdalError.FailedToAcquireTokenSilently, exc.ErrorCode);
+            }
         }
 
         [TestMethod]
-        [Description("Test for acquring token using tenantless endpoint")]
-        [TestCategory("AdalDotNetMock")]
+        [Description("Test for acquring token using tenant specific endpoint")]
         public async Task TenantSpecificAuthorityTest()
         {
-            var context = new AuthenticationContext(sts.TenantlessAuthority, sts.ValidateAuthority);
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
-            VerifySuccessResult(sts, result);
-            Verify.IsNotNullOrEmptyString(result.TenantId);
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                 TestConstants.DefaultRedirectUri + "?code=some-code"));
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            });
 
-            AuthenticationContext.SetCredentials(null, null);
-            AuthenticationResult result2 = await context.AcquireTokenAsync(
-                TestConstants.DefaultResource,
-                TestConstants.DefaultClientId,
-                TestConstants.DefaultResource,
-                platformParameters,
-                sts.ValidUserId);
-
-            ValidateAuthenticationResultsAreEqual(result, result2);
-
-            SetCredential(sts);
-            context = new AuthenticationContext(sts.TenantlessAuthority.Replace("Common", result.TenantId), sts.ValidateAuthority, TokenCacheType.Null);
-            result2 = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
-            VerifySuccessResult(sts, result2);
-        }*/
-
-        /*
-        [TestMethod]
-        [Description("Test for STS Instance Discovery")]
-        [TestCategory("AdalDotNetMock")]
-        public async Task InstanceDiscoveryTest()
-        {
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, sts.ValidateAuthority);
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
-            VerifySuccessResult(sts, result);
-
-            AuthenticationContext.SetEnvironmentVariable("ExtraQueryParameter", string.Empty);
-
-            // PROD discovery endpoint knows about PPE as well, so this passes discovery and fails later as refresh token is invalid for PPE.
-            context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant.Replace("windows.net", "windows-ppe.net"), sts.ValidateAuthority);
-            result = await context.AcquireTokenAsync(TestConstants.DefaultResource, new ClientCredential(TestConstants.DefaultClientId, sts.ValidPassword));
-            VerifyErrorResult(result, "invalid_request", "No service namespace");
-
-            context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant.Replace("windows.net", "windows.unknown"), sts.ValidateAuthority);
-            result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
-            VerifyErrorResult(result, "authority_not_in_valid_list", "authority");
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true);
+            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, platformParameters);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
+            Assert.AreEqual(result.AccessToken, "some-access-token");
+            Assert.IsNotNull(result.UserInfo);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, result.UserInfo.UniqueId);
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNet")]
         [Description("Test for Force Prompt")]
-        public  async Task ForcePromptTestAsync(Sts sts)
+        public async Task ForcePromptTestAsync()
         {
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, sts.ValidateAuthority);
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
-            VerifySuccessResult(sts, result);
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                 TestConstants.DefaultRedirectUri + "?code=some-code"));
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                PostData = new Dictionary<string, string>()
+                {
+                    {"grant_type", "authorization_code"}
+                }
+            });
 
-            AuthenticationContext.SetCredentials(null, null);
-            AuthenticationResult result2 = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters,
-                (sts.Type == StsType.ADFS) ? null : sts.ValidUserId);
-            VerifySuccessResult(sts, result2);
-            Verify.AreEqual(result2.AccessToken, result.AccessToken);
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true);
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User, TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
+            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            {
+                RefreshToken = "some-rt",
+                ResourceInResponse = TestConstants.DefaultResource,
+                Result = new AuthenticationResult("Bearer", "existing-access-token", DateTimeOffset.UtcNow)
+            };
 
-            AuthenticationContext.SetCredentials(sts.ValidUserName, sts.ValidPassword);
-            var neverAuthorizationParameters = new platformParameters(PromptBehavior.Always, null);
-            result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, neverAuthorizationParameters);
-            VerifySuccessResult(sts, result);
-            Verify.AreNotEqual(result2.AccessToken, result.AccessToken);
+            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.Always));
+            Assert.IsNotNull(result);
+            Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
+            Assert.AreEqual(result.AccessToken, "some-access-token");
+            Assert.IsNotNull(result.UserInfo);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, result.UserInfo.UniqueId);
         }
 
-
-#if TEST_ADAL_NET
         [TestMethod]
         [Description("Positive Test for AcquireToken non-interactive")]
-        [TestCategory("AdalDotNet")]
         public async Task AcquireTokenNonInteractivePositiveTestAsync()
         {
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, sts.ValidateAuthority);
-            UserCredentialProxy credential = new UserCredentialProxy(sts.ValidUserName, sts.ValidPassword);
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, credential);
-            VerifySuccessResult(sts, result);
-            Verify.IsNotNull(result.UserInfo);
-            Verify.IsNotNullOrEmptyString(result.UserInfo.UniqueId);
-            Verify.IsNotNullOrEmptyString(result.UserInfo.DisplayableId);
 
-            AuthenticationContext.Delay(2000);
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"Managed\",\"domain_name\":\"id.com\"}")
+                },
+                QueryParams = new Dictionary<string, string>()
+                {
+                    {"api-version", "1.0"}
+                }
+            });
 
-            // Test token cache
-            AuthenticationResult result2 = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, credential);
-            VerifySuccessResult(sts, result2);
-            VerifyExpiresOnAreEqual(result, result2);
-        }
-#endif
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                PostData = new Dictionary<string, string>()
+                {
+                    {"grant_type", "password"},
+                    {"username", TestConstants.DefaultDisplayableId},
+                    {"password", TestConstants.DefaultPassword}
+                }
+            });
 
-
-        [TestMethod]
-        [Description("Positive Test for AcquireToken using federated tenant and then refreshing the session")]
-        [TestCategory("AdalDotNet")]
-        public async Task AcquireTokenAndRefreshSessionTest()
-        {
-            var userId = sts.ValidUserId;
-
-            AuthenticationContext.SetCredentials(userId.Id, sts.ValidPassword);
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, false, TokenCacheType.InMemory);
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, userId);
-            VerifySuccessResult(sts, result);
-            AuthenticationContext.Delay(2000);
-            var refreshSessionAuthorizationParameters = new platformParameters(PromptBehavior.RefreshSession, null);
-            AuthenticationResult result2 = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, refreshSessionAuthorizationParameters, userId);
-            VerifySuccessResult(sts, result2);
-            Verify.AreNotEqual(result.AccessToken, result2.AccessToken);
-        }
-
-        [TestMethod]
-        [Description("Positive Test for AcquireToken using federated tenant")]
-        [TestCategory("AdalDotNet")]
-        public async Task AcquireTokenPositiveWithFederatedTenantTest()
-        {
-            var userId = sts.ValidUserId;
-
-            AuthenticationContext.SetCredentials(userId.Id, sts.ValidPassword);
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, false, TokenCacheType.Null);
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, userId);
-            VerifySuccessResult(sts, result);
-
-            result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, UserIdentifier.AnyUser);
-            VerifySuccessResult(sts, result);
-        }
-
-        [TestMethod]
-        [Description("Correlation Id test")]
-        [TestCategory("AdalDotNet")]
-        public async Task CorrelationIdTest()
-        {
-            await AdalTests.CorrelationIdTestAsync(Sts);
-        }
-
-        [TestMethod]
-        [Description("Test for reading WebException as inner exception")]
-        [TestCategory("AdalDotNetMock")]
-        public async Task InnerExceptionAccessTest()
-        {
-            SetCredential(sts);
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, sts.ValidateAuthority);
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultResource, platformParameters, sts.ValidUserId);
-            VerifySuccessResult(sts, result);
-            result = await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, sts.InvalidClientId);
-            VerifyErrorResult(result, "failed_to_acquire_token_silently", null);
-            Verify.IsNotNull(result.Exception);
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true);
+            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword));
+            Assert.IsNotNull(result);
+            Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
+            Assert.AreEqual(result.AccessToken, "some-access-token");
+            Assert.IsNotNull(result.UserInfo);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, result.UserInfo.UniqueId);
         }
 
         [TestMethod]
         [Description("Positive Test for Confidential Client")]
-        [TestCategory("AdalDotNetMock")]
         public async Task ConfidentialClientWithX509Test()
         {
             SetCredential(sts);
@@ -414,6 +376,7 @@ namespace Test.ADAL.NET.Unit
             VerifyErrorResult(result, Sts.InvalidArgumentError, "clientCertificate");
         }
 
+        /*
         [TestMethod]
         [Description("Test for Client credential")]
         [TestCategory("AdalDotNetMock")]
@@ -484,14 +447,6 @@ namespace Test.ADAL.NET.Unit
         public async Task AcquireTokenOnBehalfAndClientAssertionTest()
         {
             await AdalTests.AcquireTokenOnBehalfAndClientAssertionTestAsync(Sts);
-        }
-
-        [TestMethod]
-        [Description("Positive Test for AcquireToken from cache only")]
-        [TestCategory("AdalDotNetMock")]
-        public async Task AcquireTokenFromCacheTest()
-        {
-            await AdalTests.AcquireTokenFromCacheTestAsync(Sts);
         }
 
         [TestMethod]
@@ -600,22 +555,6 @@ namespace Test.ADAL.NET.Unit
         public async Task GetAuthorizationRequestUrlTest()
         {
             await AdalTests.GetAuthorizationRequestURLTestAsync(Sts);
-        }
-
-        [TestMethod]
-        [Description("Test for logging in ADAL")]
-        [TestCategory("AdalDotNetMock")]
-        public async Task LoggerTest()
-        {
-            await AdalTests.LoggerTestAsync(Sts);
-        }
-
-        [TestMethod]
-        [Description("Test for non-interactive federation with MSA")]
-        [TestCategory("AdalDotNet")]
-        public async Task MsaTest()
-        {
-            await AdalTests.MsaTestAsync();
         }
 
 #if TEST_ADAL_NET

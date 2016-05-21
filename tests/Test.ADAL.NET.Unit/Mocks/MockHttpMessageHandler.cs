@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -17,6 +16,8 @@ namespace Test.ADAL.NET.Unit.Mocks
         public string Url { get; set; }
 
         public IDictionary<string, string> QueryParams { get; set; }
+
+        public IDictionary<string, string> PostData { get; set; }
 
         public HttpMethod Method { get; set; }
 
@@ -39,6 +40,18 @@ namespace Test.ADAL.NET.Unit.Mocks
                 {
                     Assert.IsTrue(inputQp.ContainsKey(key));
                     Assert.AreEqual(QueryParams[key], inputQp[key]);
+                }
+            }
+
+            if (PostData != null)
+            {
+                string text = request.Content.ReadAsStringAsync().Result;
+                Dictionary<string, string> postDataInput = EncodingHelper.ParseKeyValueList(text, '&', true, null);
+
+                foreach (string key in PostData.Keys)
+                {
+                    Assert.IsTrue(postDataInput.ContainsKey(key));
+                    Assert.AreEqual(PostData[key], postDataInput[key]);
                 }
             }
             
