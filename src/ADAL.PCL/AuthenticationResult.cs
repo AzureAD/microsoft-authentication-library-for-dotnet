@@ -74,6 +74,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public DateTimeOffset ExpiresOn { get; internal set; }
 
         /// <summary>
+        /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid in ADAL's extended LifeTime.
+        /// This value is calculated based on current UTC time measured locally and the value ext_expiresIn received from the service.
+        /// </summary>
+        [DataMember]
+        public DateTimeOffset ExtendedExpiresOn { get; internal set; }
+
+        /// <summary>
+        /// Gives information to the developer whether token returned is during normal or extended lifetime.
+        /// </summary>
+        [DataMember]
+        public bool ExtendedLifeTimeToken { get; internal set; }
+
+        /// <summary>
         /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is not returned by the service.
         /// </summary>
         [DataMember]

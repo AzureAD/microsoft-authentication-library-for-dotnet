@@ -102,6 +102,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.TokenCache = tokenCache;
         }
+        /// <summary>
+        /// Used to set the flag for AAD extended lifetime
+        /// </summary>
+        public bool ExtendedLifeTimeEnabled { get; set; }
 
         /// <summary>
         /// Gets address of the authority to issue token.
@@ -149,7 +153,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this.Authenticator.CorrelationId = value;                
             }
         }
-        
+             
         /// <summary>
         /// Acquires device code from the authority.
         /// </summary>
