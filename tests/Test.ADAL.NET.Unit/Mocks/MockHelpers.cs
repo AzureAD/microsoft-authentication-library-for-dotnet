@@ -114,7 +114,7 @@ namespace Test.ADAL.NET.Unit.Mocks
                         "\"tid\": \"some-tenant-id\"," +
                         "\"ver\": \"2.0\"}";
 
-            return string.Format("{0}.{1}.", Base64UrlEncoder.Encode(header), Base64UrlEncoder.Encode(payload));
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.", Base64UrlEncoder.Encode(header), Base64UrlEncoder.Encode(payload));
         }
     }
 }
