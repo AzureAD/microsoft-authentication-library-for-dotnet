@@ -388,7 +388,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             +
             "1. The PromptBehavior.Never flag was passed, but the constraint could not be honored, because user interaction was required. "
             +
-            "2. An error occurred during a silent web authentication, which blocks the http authentication flow from completing";
+            "2. An error occurred during a silent web authentication that prevented the http authentication flow from completing in a short enough time frame";
 
         public const string UserRealmDiscoveryFailed = "User realm discovery failed";
 
