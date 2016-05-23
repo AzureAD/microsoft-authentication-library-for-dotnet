@@ -339,7 +339,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public const string InvalidArgumentLength = "Parameter has invalid length";
         public const string InvalidAuthenticateHeaderFormat = "Invalid authenticate header format";
-        public const string InvalidAuthorityTypeTemplate = "This method overload is not supported by '{0}'";
+        public const string InvalidAuthorityTypeTemplate = "Invalid authority type. This method overload is not supported by '{0}'";
         public const string InvalidCredentialType = "Invalid credential type";
         public const string InvalidFormatParameterTemplate = "Parameter '{0}' has invalid format";
         public const string InvalidTokenCacheKeyFormat = "Invalid token cache key format";
@@ -388,7 +388,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             +
             "1. The PromptBehavior.Never flag was passed, but the constraint could not be honored, because user interaction was required. "
             +
-            "2. An error occurred during a silent web authentication that prevented the http authentication flow from completing in a short enough time frame";
+            "2. An error occurred during a silent web authentication, which blocks the http authentication flow from completing";
 
         public const string UserRealmDiscoveryFailed = "User realm discovery failed";
 
