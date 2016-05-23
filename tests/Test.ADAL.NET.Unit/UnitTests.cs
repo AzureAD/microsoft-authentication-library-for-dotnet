@@ -51,7 +51,6 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Positive Test for UrlEncoding")]
-        [TestCategory("AdalDotNetUnit")]
         public void UrlEncodingTest()
         {
             TestUrlEncoding(null);
@@ -102,7 +101,6 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for AuthenticationParameters.CreateFromResponseAuthenticateHeader")]
-        [TestCategory("AdalDotNetUnit")]
         public void AuthenticationParametersTest()
         {
             RunAuthenticationParametersPositive("Bearer authorization_uri=abc, resource_id=de", "abc", "de");
@@ -129,7 +127,6 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for ParseKeyValueList method in EncodingHelper")]
-        [TestCategory("AdalDotNetUnit")]
         public void ParseKeyValueListTest()
         {
             RunParseKeyValueList(null, 0);
@@ -154,7 +151,6 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for SplitWithQuotes method in EncodingHelper")]
-        [TestCategory("AdalDotNetUnit")]
         public void SplitWithQuotesTest()
         {
             RunSplitWithQuotes(null, 0);
@@ -175,7 +171,6 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for CreateSha256Hash method in PlatformSpecificHelper")]
-        [TestCategory("AdalDotNetUnit")]
         public void CreateSha256HashTest()
         {
             CommonUnitTests.CreateSha256HashTest();
@@ -183,7 +178,6 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for ADAL Id")]
-        [TestCategory("AdalDotNetUnit")]
         public void AdalIdTest()
         {
             CommonUnitTests.AdalIdTest();
@@ -191,7 +185,6 @@ namespace Test.ADAL.NET.Unit
         
         [TestMethod]
         [Description("Test for Id Token Parsing")]
-        [TestCategory("AdalDotNetUnit")]
         public void IdTokenParsingPasswordClaimsTest()
         {
             TokenResponse tr = CreateTokenResponse();
@@ -203,7 +196,6 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for Id Token Parsing")]
-        [TestCategory("AdalDotNetUnit")]
         public void IdTokenParsingNoPasswordClaimsTest()
         {
             TokenResponse tr = CreateTokenResponse();
@@ -227,7 +219,6 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
-        [TestCategory("AdalDotNetUnit")]
         [Description("Test to verify CryptographyHelper.SignWithCertificate")]
         public void SignWithCertificateTest()
         {
@@ -245,24 +236,6 @@ namespace Test.ADAL.NET.Unit
                 signature = cac.Sign(Message);
                 Assert.IsNotNull(signature);
             }
-        }
-
-        [TestMethod]
-        [TestCategory("AdalDotNetUnit")]
-        public Task TimeoutTest()
-        {
-                try
-                {
-                    return null;
-                }
-                catch (HttpRequestWrapperException ex)
-                {
-                    Assert.IsTrue(ex.InnerException is TaskCanceledException);
-                    var serviceException = new AdalServiceException(AdalError.Unknown, ex);
-                    Assert.AreEqual(serviceException.StatusCode, (int)HttpStatusCode.RequestTimeout);
-                }
-
-            return null;
         }
         
         private static void RunAuthenticationParametersPositive(string authenticateHeader, string expectedAuthority, string excepectedResource)
