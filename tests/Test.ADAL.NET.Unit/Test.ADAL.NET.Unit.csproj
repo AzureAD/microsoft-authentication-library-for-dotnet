@@ -84,18 +84,11 @@
     <Compile Include="..\Test.ADAL.Common\Log.cs">
       <Link>Common\Log.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.Common\Sts.cs">
-      <Link>Common\Sts.cs</Link>
-    </Compile>
     <Compile Include="..\Test.ADAL.Common\TokenCacheTests.cs">
       <Link>Common\TokenCacheTests.cs</Link>
     </Compile>
-    <Compile Include="..\Test.ADAL.Common\Verify.cs">
-      <Link>Common\Verify.cs</Link>
-    </Compile>
     <Compile Include="AcquireTokenSilentTests.cs" />
     <Compile Include="AdalDotNetTests.cs" />
-    <Compile Include="AdalTests.cs" />
     <Compile Include="AuthenticationParametersTests.cs" />
     <Compile Include="LoggerCallbackTests.cs" />
     <Compile Include="Mocks\MockHelpers.cs" />
@@ -130,6 +123,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="oldcache.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="WsTrustResponse.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="TestMex.xml">

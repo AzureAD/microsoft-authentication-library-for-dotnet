@@ -28,6 +28,7 @@
 using System;
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.ADAL.Common
 {
@@ -39,29 +40,29 @@ namespace Test.ADAL.Common
             string hash = cryptoHelper.CreateSha256Hash("abc");
             string hash2 = cryptoHelper.CreateSha256Hash("abd");
             string hash3 = cryptoHelper.CreateSha256Hash("abc");
-            Verify.AreEqual(hash, hash3);
-            Verify.AreNotEqual(hash, hash2);
-            Verify.AreEqual(hash, "ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=");
+            Assert.AreEqual(hash, hash3);
+            Assert.AreNotEqual(hash, hash2);
+            Assert.AreEqual(hash, "ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=");
         }
 
         public static void AdalIdTest()
         {
             var adalParameters = AdalIdHelper.GetAdalIdParameters();
 
-            Verify.AreEqual(4, adalParameters.Count);
-            Verify.IsNotNull(adalParameters[AdalIdParameter.Product]);
-            Verify.IsNotNull(adalParameters[AdalIdParameter.Version]);
-            Verify.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
-            Verify.IsNotNull(adalParameters[AdalIdParameter.OS]);
-            Verify.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
+            Assert.AreEqual(4, adalParameters.Count);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.Product]);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.Version]);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.OS]);
+            Assert.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
             adalParameters = AdalIdHelper.GetAdalIdParameters();
 
-            Verify.AreEqual(4, adalParameters.Count);
-            Verify.IsNotNull(adalParameters[AdalIdParameter.Product]);
-            Verify.IsNotNull(adalParameters[AdalIdParameter.Version]);
-            Verify.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
-            Verify.IsNotNull(adalParameters[AdalIdParameter.OS]);
-            Verify.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
+            Assert.AreEqual(4, adalParameters.Count);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.Product]);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.Version]);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.OS]);
+            Assert.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
         }
     }
 }

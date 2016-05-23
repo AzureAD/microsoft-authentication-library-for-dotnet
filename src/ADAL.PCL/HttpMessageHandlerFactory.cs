@@ -51,5 +51,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             MockHandlerList.Add(mockHandler);
         }
 
+        public static void ClearMockHandlers()
+        {
+            MockHandlerList.Clear();
+        }
     }
 }

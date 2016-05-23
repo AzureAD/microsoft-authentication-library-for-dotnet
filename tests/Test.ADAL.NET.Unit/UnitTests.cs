@@ -74,29 +74,29 @@ namespace Test.ADAL.NET.Unit
             var param = new DictionaryRequestParameters(null, new ClientKey(ClientId));
             param[AdditionalParameter] = ComplexString;
             param[AdditionalParameter2] = ComplexString2;
-            Verify.AreEqual(expectedString, param.ToString());
+            Assert.AreEqual(expectedString, param.ToString());
 
             param = new DictionaryRequestParameters(null, new ClientKey(ClientId));
             param[AdditionalParameter] = ComplexString;
             param[AdditionalParameter2] = ComplexString2;
-            Verify.AreEqual(expectedString, param.ToString());
+            Assert.AreEqual(expectedString, param.ToString());
 
             param = new DictionaryRequestParameters(null, new ClientKey(ClientId));
             param[AdditionalParameter] = ComplexString;
             param[AdditionalParameter2] = ComplexString2;
-            Verify.AreEqual(expectedString, param.ToString());
+            Assert.AreEqual(expectedString, param.ToString());
 
             var stringParam = new StringRequestParameters(new StringBuilder(expectedString));
-            Verify.AreEqual(expectedString, stringParam.ToString());
+            Assert.AreEqual(expectedString, stringParam.ToString());
         }
 
         [TestMethod]
         [Description("Test for authority type detection")]
         public void AuthorityTypeDetectionTest()
         {
-            Verify.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://login.windows.net/tenant/dummy/"));
-            Verify.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://accounts-int.somethingelse.w/dummy/"));
-            Verify.AreEqual(AuthorityType.ADFS, Authenticator.DetectAuthorityType("https://abc.com/adfs/dummy/"));
+            Assert.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://login.windows.net/tenant/dummy/"));
+            Assert.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://accounts-int.somethingelse.w/dummy/"));
+            Assert.AreEqual(AuthorityType.ADFS, Authenticator.DetectAuthorityType("https://abc.com/adfs/dummy/"));
         }
 
 
@@ -197,8 +197,8 @@ namespace Test.ADAL.NET.Unit
             TokenResponse tr = CreateTokenResponse();
             tr.IdTokenString = "eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiI5MDgzY2NiOC04YTQ2LTQzZTctODQzOS0xZDY5NmRmOTg0YWUiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMGJhYTY2Ni04ZGY4LTQ4ZTctOTdlNi03N2NmZDA5OTU5NjMvIiwiaWF0IjoxNDAwNTQxMzk1LCJuYmYiOjE0MDA1NDEzOTUsImV4cCI6MTQwMDU0NTU5NSwidmVyIjoiMS4wIiwidGlkIjoiMzBiYWE2NjYtOGRmOC00OGU3LTk3ZTYtNzdjZmQwOTk1OTYzIiwib2lkIjoiNGY4NTk5ODktYTJmZi00MTFlLTkwNDgtYzMyMjI0N2FjNjJjIiwidXBuIjoiYWRtaW5AYWFsdGVzdHMub25taWNyb3NvZnQuY29tIiwidW5pcXVlX25hbWUiOiJhZG1pbkBhYWx0ZXN0cy5vbm1pY3Jvc29mdC5jb20iLCJzdWIiOiJCczVxVG4xQ3YtNC10VXIxTGxBb3pOS1NRd0Fjbm4ydHcyQjlmelduNlpJIiwiZmFtaWx5X25hbWUiOiJBZG1pbiIsImdpdmVuX25hbWUiOiJBREFMVGVzdHMiLCJwd2RfZXhwIjoiMzYwMDAiLCJwd2RfdXJsIjoiaHR0cHM6Ly9jaGFuZ2VfcHdkLmNvbSJ9.";
             AuthenticationResultEx result = tr.GetResult();
-            Verify.AreEqual(result.Result.UserInfo.PasswordChangeUrl, "https://change_pwd.com");
-            Verify.IsNotNull(result.Result.UserInfo.PasswordExpiresOn);
+            Assert.AreEqual(result.Result.UserInfo.PasswordChangeUrl, "https://change_pwd.com");
+            Assert.IsNotNull(result.Result.UserInfo.PasswordExpiresOn);
         }
 
         [TestMethod]
@@ -209,8 +209,8 @@ namespace Test.ADAL.NET.Unit
             TokenResponse tr = CreateTokenResponse();
             tr.IdTokenString = "eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiI5MDgzY2NiOC04YTQ2LTQzZTctODQzOS0xZDY5NmRmOTg0YWUiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMGJhYTY2Ni04ZGY4LTQ4ZTctOTdlNi03N2NmZDA5OTU5NjMvIiwiaWF0IjoxNDAwNTQxMzk1LCJuYmYiOjE0MDA1NDEzOTUsImV4cCI6MTQwMDU0NTU5NSwidmVyIjoiMS4wIiwidGlkIjoiMzBiYWE2NjYtOGRmOC00OGU3LTk3ZTYtNzdjZmQwOTk1OTYzIiwib2lkIjoiNGY4NTk5ODktYTJmZi00MTFlLTkwNDgtYzMyMjI0N2FjNjJjIiwidXBuIjoiYWRtaW5AYWFsdGVzdHMub25taWNyb3NvZnQuY29tIiwidW5pcXVlX25hbWUiOiJhZG1pbkBhYWx0ZXN0cy5vbm1pY3Jvc29mdC5jb20iLCJzdWIiOiJCczVxVG4xQ3YtNC10VXIxTGxBb3pOS1NRd0Fjbm4ydHcyQjlmelduNlpJIiwiZmFtaWx5X25hbWUiOiJBZG1pbiIsImdpdmVuX25hbWUiOiJBREFMVGVzdHMifQ.";
             AuthenticationResultEx result = tr.GetResult();
-            Verify.IsNull(result.Result.UserInfo.PasswordChangeUrl);
-            Verify.IsNull(result.Result.UserInfo.PasswordExpiresOn);
+            Assert.IsNull(result.Result.UserInfo.PasswordChangeUrl);
+            Assert.IsNull(result.Result.UserInfo.PasswordExpiresOn);
         }
 
         private static TokenResponse CreateTokenResponse()
@@ -238,12 +238,12 @@ namespace Test.ADAL.NET.Unit
                 X509Certificate2 x509Certificate = new X509Certificate2(certs[i], "password");
                 ClientAssertionCertificate cac = new ClientAssertionCertificate("some_id", x509Certificate);
                 byte[] signature = cac.Sign(Message);
-                Verify.IsNotNull(signature);
+                Assert.IsNotNull(signature);
                 
                 GC.WaitForPendingFinalizers();
 
                 signature = cac.Sign(Message);
-                Verify.IsNotNull(signature);
+                Assert.IsNotNull(signature);
             }
         }
 
@@ -257,9 +257,9 @@ namespace Test.ADAL.NET.Unit
                 }
                 catch (HttpRequestWrapperException ex)
                 {
-                    Verify.IsTrue(ex.InnerException is TaskCanceledException);
+                    Assert.IsTrue(ex.InnerException is TaskCanceledException);
                     var serviceException = new AdalServiceException(AdalError.Unknown, ex);
-                    Verify.AreEqual(serviceException.StatusCode, (int)HttpStatusCode.RequestTimeout);
+                    Assert.AreEqual(serviceException.StatusCode, (int)HttpStatusCode.RequestTimeout);
                 }
 
             return null;
@@ -268,8 +268,8 @@ namespace Test.ADAL.NET.Unit
         private static void RunAuthenticationParametersPositive(string authenticateHeader, string expectedAuthority, string excepectedResource)
         {
             AuthenticationParameters parameters = AuthenticationParameters.CreateFromResponseAuthenticateHeader(authenticateHeader);
-            Verify.AreEqual(expectedAuthority, parameters.Authority);
-            Verify.AreEqual(excepectedResource, parameters.Resource);            
+            Assert.AreEqual(expectedAuthority, parameters.Authority);
+            Assert.AreEqual(excepectedResource, parameters.Resource);            
         }
 
         private static void RunAuthenticationParametersNegative(string authenticateHeader)
@@ -280,20 +280,20 @@ namespace Test.ADAL.NET.Unit
             }
             catch (ArgumentException ex)
             {
-                Verify.AreEqual("authenticateHeader", ex.ParamName);
-                Verify.IsTrue(string.IsNullOrWhiteSpace(authenticateHeader) || ex.Message.Contains("header format"));
+                Assert.AreEqual("authenticateHeader", ex.ParamName);
+                Assert.IsTrue(string.IsNullOrWhiteSpace(authenticateHeader) || ex.Message.Contains("header format"));
             }
         }
 
         private static void RunParseKeyValueList(string input, int expectedCount, string[] keys = null, string[] values = null, bool urlDecode = false)
         {
             Dictionary<string, string> result = EncodingHelper.ParseKeyValueList(input, ',', urlDecode, null);
-            Verify.AreEqual(expectedCount, result.Count);
+            Assert.AreEqual(expectedCount, result.Count);
             if (keys != null && values != null)
             {
                 for (int i = 0; i < expectedCount; i++)
                 {
-                    Verify.AreEqual(result[keys[i]], values[i]);
+                    Assert.AreEqual(result[keys[i]], values[i]);
                 }
             }
         }
@@ -301,15 +301,15 @@ namespace Test.ADAL.NET.Unit
         private static void RunSplitWithQuotes(string input, int expectedCount, string first = null, string second = null)
         {
             List<string> items = EncodingHelper.SplitWithQuotes(input, ',');
-            Verify.AreEqual(expectedCount, items.Count);
+            Assert.AreEqual(expectedCount, items.Count);
             if (first != null)
             {
-                Verify.AreEqual(first, items[0]);
+                Assert.AreEqual(first, items[0]);
             }
 
             if (second != null)
             {
-                Verify.AreEqual(second, items[1]);
+                Assert.AreEqual(second, items[1]);
             }
         }
 
@@ -320,7 +320,7 @@ namespace Test.ADAL.NET.Unit
             char[] encodedChars = EncodingHelper.UrlEncode((str == null) ? null : str.ToCharArray());
             string encodedStr2 = (encodedChars == null) ? null : new string(encodedChars);
 
-            Verify.AreEqual(encodedStr, encodedStr2);            
+            Assert.AreEqual(encodedStr, encodedStr2);            
         }
     }
 }

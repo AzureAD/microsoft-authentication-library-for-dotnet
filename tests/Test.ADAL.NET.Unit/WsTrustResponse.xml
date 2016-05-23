@@ -1,0 +1,113 @@
+﻿<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+  <s:Header>
+    <a:Action s:mustUnderstand="1">http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTRC/IssueFinal</a:Action>
+    <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+      <u:Timestamp u:Id="_0">
+        <u:Created>2016-05-22T21:48:35.993Z</u:Created>
+        <u:Expires>2016-05-22T21:53:35.993Z</u:Expires>
+      </u:Timestamp>
+    </o:Security>
+  </s:Header>
+  <s:Body>
+    <trust:RequestSecurityTokenResponseCollection xmlns:trust="http://docs.oasis-open.org/ws-sx/ws-trust/200512">
+      <trust:RequestSecurityTokenResponse>
+        <trust:Lifetime>
+          <wsu:Created xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">2016-05-22T21:48:35.678Z</wsu:Created>
+          <wsu:Expires xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">2016-05-22T22:48:35.678Z</wsu:Expires>
+        </trust:Lifetime>
+        <wsp:AppliesTo xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+          <wsa:EndpointReference xmlns:wsa="http://www.w3.org/2005/08/addressing">
+            <wsa:Address>urn:federation:MicrosoftOnline</wsa:Address>
+          </wsa:EndpointReference>
+        </wsp:AppliesTo>
+        <trust:RequestedSecurityToken>
+          <saml:Assertion MajorVersion="1" MinorVersion="1" AssertionID="_912d8004-dea4-46f3-aa59-cacafecfe92a" Issuer="urn:federation:MSFT" IssueInstant="2016-05-22T21:48:35.973Z" xmlns:saml="urn:oasis:names:tc:SAML:1.0:assertion">
+            <saml:Conditions NotBefore="2016-05-22T21:48:35.678Z" NotOnOrAfter="2016-05-22T22:48:35.678Z">
+              <saml:AudienceRestrictionCondition>
+                <saml:Audience>urn:federation:MicrosoftOnline</saml:Audience>
+              </saml:AudienceRestrictionCondition>
+            </saml:Conditions>
+            <saml:AttributeStatement>
+              <saml:Subject>
+                <saml:NameIdentifier Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">561761</saml:NameIdentifier>
+                <saml:SubjectConfirmation>
+                  <saml:ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:bearer</saml:ConfirmationMethod>
+                </saml:SubjectConfirmation>
+              </saml:Subject>
+              <saml:Attribute AttributeName="UPN" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                <saml:AttributeValue>user@contoso.com</saml:AttributeValue>
+              </saml:Attribute>
+              <saml:Attribute AttributeName="objectGUID" AttributeNamespace="http://tempuri.com">
+                <saml:AttributeValue>oNtfdfQ=</saml:AttributeValue>
+              </saml:Attribute>
+              <saml:Attribute AttributeName="PersonnelNumber" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                <saml:AttributeValue>1</saml:AttributeValue>
+              </saml:Attribute>
+              <saml:Attribute AttributeName="ImmutableID" AttributeNamespace="http://schemas.contoso.com/LiveID/Federation/2008/05">
+                <saml:AttributeValue>1</saml:AttributeValue>
+              </saml:Attribute>
+              <saml:Attribute AttributeName="insidecorporatenetwork" AttributeNamespace="http://schemas.contoso.com/ws/2012/01">
+                <saml:AttributeValue>true</saml:AttributeValue>
+              </saml:Attribute>
+              <saml:Attribute AttributeName="psso" AttributeNamespace="http://schemas.contoso.com/2014/03">
+                <saml:AttributeValue>true</saml:AttributeValue>
+              </saml:Attribute>
+              <saml:Attribute AttributeName="authnmethodsreferences" AttributeNamespace="http://schemas.contoso.com/claims">
+                <saml:AttributeValue>http://schemas.contoso.com/ws/2008/06/identity/authenticationmethod/password</saml:AttributeValue>
+              </saml:Attribute>
+              <saml:Attribute AttributeName="passwordexpirationtime" AttributeNamespace="http://schemas.contoso.com/ws/2012/01">
+                <saml:AttributeValue>2016-06-24T01:13:56.743Z</saml:AttributeValue>
+              </saml:Attribute>
+              <saml:Attribute AttributeName="passwordchangeurl" AttributeNamespace="http://schemas.contoso.com/ws/2012/01">
+                <saml:AttributeValue>https://sspm.contoso.com</saml:AttributeValue>
+              </saml:Attribute>
+            </saml:AttributeStatement>
+            <saml:AuthenticationStatement AuthenticationMethod="urn:oasis:names:tc:SAML:1.0:am:password" AuthenticationInstant="2016-05-22T21:48:35.628Z">
+              <saml:Subject>
+                <saml:NameIdentifier Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">1</saml:NameIdentifier>
+                <saml:SubjectConfirmation>
+                  <saml:ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:bearer</saml:ConfirmationMethod>
+                </saml:SubjectConfirmation>
+              </saml:Subject>
+            </saml:AuthenticationStatement>
+            <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+              <ds:SignedInfo>
+                <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+                <ds:Reference URI="#_912d8004-dea4-46f3-aa59-cacafecfe92a">
+                  <ds:Transforms>
+                    <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                  </ds:Transforms>
+                  <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+                  <ds:DigestValue>bk=</ds:DigestValue>
+                </ds:Reference>
+              </ds:SignedInfo>
+              <ds:SignatureValue>Wq+7E11254=</ds:SignatureValue>
+              <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+                <X509Data>
+                  <X509Certificate>MIIFQTCGVwLJ2ZgSmYC14tsr37vbC8WAD5E1zyfGPU=</X509Certificate>
+                </X509Data>
+              </KeyInfo>
+            </ds:Signature>
+          </saml:Assertion>
+        </trust:RequestedSecurityToken>
+        <trust:RequestedAttachedReference>
+          <o:SecurityTokenReference k:TokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:k="http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd">
+            <o:KeyIdentifier ValueType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.0#SAMLAssertionID">_912d8004-dea4-46f3-aa59-cacafecfe92a</o:KeyIdentifier>
+          </o:SecurityTokenReference>
+        </trust:RequestedAttachedReference>
+        <trust:RequestedUnattachedReference>
+          <o:SecurityTokenReference k:TokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:k="http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd">
+            <o:KeyIdentifier ValueType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.0#SAMLAssertionID">_912d8004-dea4-46f3-aa59-cacafecfe92a</o:KeyIdentifier>
+          </o:SecurityTokenReference>
+        </trust:RequestedUnattachedReference>
+        <trust:TokenType>urn:oasis:names:tc:SAML:1.0:assertion</trust:TokenType>
+        <trust:RequestType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue</trust:RequestType>
+        <trust:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer</trust:KeyType>
+      </trust:RequestSecurityTokenResponse>
+    </trust:RequestSecurityTokenResponseCollection>
+  </s:Body>
+</s:Envelope>
+
+

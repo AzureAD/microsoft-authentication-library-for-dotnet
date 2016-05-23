@@ -28,6 +28,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,77 +38,78 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.Common;
 using System.Xml;
+using Test.ADAL.NET.Unit.Mocks;
 
 namespace Test.ADAL.NET.Unit
 {
     [TestClass]
+    [DeploymentItem("WsTrustResponse.xml")]
     [DeploymentItem("TestMex.xml")]
     [DeploymentItem("TestMex2005.xml")]
     public class NonInteractiveTests
     {
-        // Switch this to true to run test against actual service
-        private const bool MockService = true;
-
+        [TestInitialize]
+        public void Initialize()
+        {
+            HttpMessageHandlerFactory.ClearMockHandlers();    
+        }
+    
         [TestMethod]
         [Description("User Realm Discovery Test")]
-        [TestCategory("AdalDotNet")]
         public async Task UserRealmDiscoveryTest()
         {
-            var federatedSts = SetupStsService(StsType.AADFederatedWithADFS3);
-            AuthenticationContext context = new AuthenticationContext(federatedTestConstants.DefaultAuthorityCommonTenant, federatedSts.ValidateAuthority);
+            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
             await context.Authenticator.UpdateFromTemplateAsync(null);
-            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"Federated\",\"domain_name\":\"microsoft.com\"," +
+                                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
+                                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
+                                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
+                                                ",\"cloudinstancename\":\"login.microsoftonline.com\"}")
+                },
+                QueryParams = new Dictionary<string, string>()
+                {
+                    {"api-version", "1.0"}
+                }
+            });
+
+            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, null);
             VerifyUserRealmResponse(userRealmResponse, "Federated");
 
-            var managedSts = SetupStsService(StsType.AAD);
-            context = new AuthenticationContext(managedTestConstants.DefaultAuthorityCommonTenant, managedSts.ValidateAuthority);
-            await context.Authenticator.UpdateFromTemplateAsync(null);
-            userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, managedSts.ValidUserName, null);
-            VerifyUserRealmResponse(userRealmResponse, "Managed");
 
-            userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, managedSts.InvalidUserName, null);
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"Unknown\",\"cloudinstancename\":\"login.microsoftonline.com\"}")
+                },
+                QueryParams = new Dictionary<string, string>()
+                {
+                    {"api-version", "1.0"}
+                }
+            });
+            userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, null);
             VerifyUserRealmResponse(userRealmResponse, "Unknown");
 
             try
             {
                 await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, null, null);
-                Verify.Fail("Exception expected");
+                Assert.Fail("Exception expected");
             }
             catch (AdalException ex)
             {
-                Verify.IsNotNull(ex.ErrorCode, AdalError.UnknownUser);
+                Assert.IsNotNull(ex.ErrorCode, AdalError.UnknownUser);
             }
-
-            userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, "ab@cd@ef", null);
-            Verify.AreEqual("Unknown", userRealmResponse.AccountType);
-
-            try
-            {
-                await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, "#$%@#$(%@#$&%@#$&jahgfk2!#@$%346", null);
-                Verify.Fail("Exception expected");
-            }
-            catch (AdalException ex)
-            {
-                Verify.IsNotNull(ex.ErrorCode, AdalError.UserRealmDiscoveryFailed);
-                Verify.IsNotNull(ex.InnerException);
-            }
-        }
-
-        [TestMethod]
-        [Description("Mex Fetching Test")]
-        [TestCategory("AdalDotNet")]
-        public async Task MexFetchingTest()
-        {
-            AuthenticationContext context = new AuthenticationContext(federatedTestConstants.DefaultAuthorityCommonTenant, federatedSts.ValidateAuthority);
-            await context.Authenticator.UpdateFromTemplateAsync(null);
-            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
-            XDocument mexDocument = await FecthMexAsync(userRealmResponse.FederationMetadataUrl);
-            Verify.IsNotNull(mexDocument);
         }
 
         [TestMethod]
         [Description("WS-Trust Address Extraction Test")]
-        [TestCategory("AdalDotNet")]
         public async Task WsTrust2005AddressExtractionTest()
         {
             await Task.Factory.StartNew(() => {
@@ -116,123 +119,53 @@ namespace Test.ADAL.NET.Unit
                     mexDocument = XDocument.Load(stream);
                 }
 
-                Verify.IsNotNull(mexDocument);
+                Assert.IsNotNull(mexDocument);
                 WsTrustAddress wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.IntegratedAuth, null);
-                Verify.IsNotNull(wsTrustAddress);
-                Verify.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust13);
+                Assert.IsNotNull(wsTrustAddress);
+                Assert.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust2005);
                 wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
-                Verify.IsNotNull(wsTrustAddress);
-                Verify.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust2005);
+                Assert.IsNotNull(wsTrustAddress);
+                Assert.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust2005);
             });
         }
 
         [TestMethod]
-        [Description("WS-Trust Address Extraction Test")]
-        [TestCategory("AdalDotNet")]
-        public async Task WsTrustAddressExtractionTest()
-        {
-            var federatedSts = SetupStsService(StsType.AADFederatedWithADFS3);
-            AuthenticationContext context = new AuthenticationContext(federatedTestConstants.DefaultAuthorityCommonTenant, federatedSts.ValidateAuthority);
-            await context.Authenticator.UpdateFromTemplateAsync(null);
-            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
-            XDocument mexDocument = await FecthMexAsync(userRealmResponse.FederationMetadataUrl);
-            Verify.IsNotNull(mexDocument);
-            WsTrustAddress wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.IntegratedAuth, null);
-            Verify.IsNotNull(wsTrustAddress);
-            wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
-            Verify.IsNotNull(wsTrustAddress);
-
-            string mexDocumentContent = mexDocument.ToString();
-            string modifiedMexDocumentContent = null;
-            XDocument modifiedMexDocument = null;
-
-            try
-            {
-                modifiedMexDocumentContent = mexDocumentContent.Replace("securitypolicy", string.Empty);
-                modifiedMexDocument = ConvertStringToXDocument(modifiedMexDocumentContent);
-                MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword, null);
-                Verify.Fail("Exception expected");
-            }
-            catch (AdalException ex)
-            {
-                Verify.AreEqual(ex.ErrorCode, AdalError.WsTrustEndpointNotFoundInMetadataDocument);
-            }
-            
-                modifiedMexDocumentContent = mexDocumentContent.Replace(wsTrustAddress.Uri.AbsoluteUri, string.Empty);
-                modifiedMexDocument = ConvertStringToXDocument(modifiedMexDocumentContent);
-                wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(modifiedMexDocument, UserAuthType.UsernamePassword, null);
-                //falls back to WS-Trust 2005
-                Assert.IsTrue(wsTrustAddress.Version == WsTrustVersion.WsTrust2005);
-        }
-
-
-        [TestMethod]
         [Description("WS-Trust Request Test")]
-        [TestCategory("AdalDotNet")]
         public async Task WsTrustRequestTest()
         {
-            var federatedSts = SetupStsService(StsType.AADFederatedWithADFS3);
-            AuthenticationContext context = new AuthenticationContext(federatedTestConstants.DefaultAuthorityCommonTenant, federatedSts.ValidateAuthority);
-            await context.Authenticator.UpdateFromTemplateAsync(null);
-            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, federatedSts.ValidUserName, null);
-            XDocument mexDocument = await FecthMexAsync(userRealmResponse.FederationMetadataUrl);
-            Verify.IsNotNull(mexDocument);
-            WsTrustAddress wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
-            Verify.IsNotNull(wsTrustAddress);
-
-            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, new UserPasswordCredential(federatedSts.ValidUserName, federatedSts.ValidPassword), null);
-            Verify.IsNotNull(wstResponse.Token);
-            Verify.IsTrue(wstResponse.TokenType.Contains("SAML"));
-
-            Verify.IsNotNull(wstResponse.Token);
-            Verify.IsTrue(wstResponse.TokenType.Contains("SAML"));
-
-            try
+            WsTrustAddress address = new WsTrustAddress()
             {
-                await WsTrustRequest.SendRequestAsync(new WsTrustAddress { Uri = new Uri(wsTrustAddress.Uri.AbsoluteUri + "x") },
-                    new UserPasswordCredential(federatedSts.ValidUserName, federatedSts.ValidPassword), null);
-            }
-            catch (AdalException ex)
+                Uri = new Uri("https://some/address/usernamemixed"),
+                Version = WsTrustVersion.WsTrust13
+            };
+            
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
-                Verify.IsNotNull(ex.ErrorCode, AdalError.FederatedServiceReturnedError);
-                Verify.IsNotNull(ex.InnerException);
-            }
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                }
+            });
 
-            try
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
-                await WsTrustRequest.SendRequestAsync(new WsTrustAddress { Uri = new Uri(wsTrustAddress.Uri.AbsoluteUri) }, new UserPasswordCredential(federatedSts.ValidUserName, "InvalidPassword"), null);
-            }
-            catch (AdalException ex)
-            {
-                Verify.IsNotNull(ex.ErrorCode, AdalError.FederatedServiceReturnedError);
-                Verify.IsNotNull(ex.InnerException);
-            }
-        }
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                }
+            });
 
-        [TestMethod]
-        [Description("WS-Trust Address Extraction Test")]
-        [TestCategory("AdalDotNet")]
-        public void WsTrustPolicyExtraction()
-        {
-            XDocument mexDocument = null;
-            using (Stream stream = new FileStream("TestMex2005.xml", FileMode.Open))
-            {
-                mexDocument = XDocument.Load(stream);
-            }
+            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword), null);
+            Assert.IsNotNull(wstResponse.Token);
 
-            Verify.IsNotNull(mexDocument);
-            Dictionary<string, MexPolicy> policies = MexParser.ReadPolicies(mexDocument);
-            Verify.IsNotNull(policies);
-            Verify.IsTrue(policies.Count == 2);
-            foreach (var policy in policies)
-            {
-                Verify.IsTrue(policy.Value.Version == WsTrustVersion.WsTrust2005);
-            }
+            wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null);
+            Assert.IsNotNull(wstResponse.Token);
         }
 
         [TestMethod]
         [Description("WS-Trust Request Xml Format Test")]
-        [TestCategory("AdalDotNet")]
         public async Task WsTrustRequestXmlFormatTest()
         {
             await Task.Factory.StartNew(() =>
@@ -247,52 +180,27 @@ namespace Test.ADAL.NET.Unit
                 }
                 catch (Exception ex)
                 {
-                    Verify.Fail("Not expected -- " + ex.Message);
+                    Assert.Fail("Not expected -- " + ex.Message);
                 }
             });
         }
 
         private static void VerifyUserRealmResponse(UserRealmDiscoveryResponse userRealmResponse, string expectedAccountType)
         {
-            Verify.AreEqual("1.0", userRealmResponse.Version);
-            Verify.AreEqual(userRealmResponse.AccountType, expectedAccountType);
+            Assert.AreEqual("1.0", userRealmResponse.Version);
+            Assert.AreEqual(userRealmResponse.AccountType, expectedAccountType);
             if (expectedAccountType == "Federated")
             {
-                Verify.IsNotNull(userRealmResponse.FederationActiveAuthUrl);
-                Verify.IsNotNull(userRealmResponse.FederationMetadataUrl);
-                Verify.AreEqual("WSTrust", userRealmResponse.FederationProtocol);
+                Assert.IsNotNull(userRealmResponse.FederationActiveAuthUrl);
+                Assert.IsNotNull(userRealmResponse.FederationMetadataUrl);
+                Assert.AreEqual("WSTrust", userRealmResponse.FederationProtocol);
             }
             else
             {
-                Verify.IsNull(userRealmResponse.FederationActiveAuthUrl);
-                Verify.IsNull(userRealmResponse.FederationMetadataUrl);
-                Verify.IsNull(userRealmResponse.FederationProtocol);
+                Assert.IsNull(userRealmResponse.FederationActiveAuthUrl);
+                Assert.IsNull(userRealmResponse.FederationMetadataUrl);
+                Assert.IsNull(userRealmResponse.FederationProtocol);
             }
-        }
-
-        private static XDocument ConvertStringToXDocument(string mexDocumentContent)
-        {
-            byte[] serializedMexDocumentContent = Encoding.UTF8.GetBytes(mexDocumentContent);
-            using (MemoryStream stream = new MemoryStream(serializedMexDocumentContent))
-            {
-                return XDocument.Load(stream);
-            }
-        }
-
-        private async static Task<XDocument> FecthMexAsync(string metadataUrl)
-        {
-            return await Task.Factory.StartNew(() =>
-            {
-                if (metadataUrl.EndsWith("xx"))
-                {
-                    throw new AdalException(AdalError.AccessingWsMetadataExchangeFailed);
-                }
-
-                using (Stream stream = new FileStream("TestMex.xml", FileMode.Open))
-                {
-                    return XDocument.Load(stream);
-                }
-            });
         }
     }
 }
