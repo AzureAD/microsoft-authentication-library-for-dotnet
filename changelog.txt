@@ -1,3 +1,10 @@
+Version 3.10.305231913
+======================
+This release contains
+- Retargeting Xamarin Android to Lollipop (5.0)
+- Fix for PromptBehavior.Always in UWP apps where prompt=login was not sent to server.
+
+
 Version 3.10.305161347
 ======================
 This release contains
