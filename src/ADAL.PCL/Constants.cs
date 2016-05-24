@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public const string CannotAccessUserInformation = "Cannot access user information. Check machine's Privacy settings or initialize UserCredential with userId";
         public const string RedirectUriUnsupportedWithPromptBehaviorNever = "PromptBehavior.Never is supported in SSO mode only (null or application's callback URI as redirectUri)";
-        public const string UnauthorizedUserInformationAccess = "Unauthorized accessing user information. Check application's 'Enterprise Authentication' capability";
+        public const string UnauthorizedUserInformationAccess = "Unauthorized to access user information. Check application's 'Enterprise Authentication' capability";
         public const string NeedToSetCallbackUriAsLocalSetting = "You need to add the value of WebAuthenticationBroker.GetCurrentApplicationCallbackUri() to an application's local setting named CurrentApplicationCallbackUri.";
     }
 
@@ -329,13 +329,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public const string EncodedTokenTooLong = "Encoded token size is beyond the upper limit";
         public const string FailedToAcquireTokenSilently = "Failed to acquire token silently as no token was found in the cache. Call method AcquireToken";
-        public const string FailedToRefreshToken = "Failed to refresh token";
+        public const string FailedToRefreshToken = "Failed to refresh access token";
         public const string FederatedServiceReturnedErrorTemplate = "Federated service at {0} returned error: {1}";
         public const string IdentityProtocolLoginUrlNull = "The LoginUrl property in identityProvider cannot be null";
         public const string IdentityProtocolMismatch = "No identity provider matches the requested protocol";
 
         public const string IdentityProviderRequestFailed =
-            "Token request to identity provider failed. Check InnerException for more details";
+            "Token request made to identity provider failed. Check InnerException for more details";
 
         public const string InvalidArgumentLength = "Parameter has invalid length";
         public const string InvalidAuthenticateHeaderFormat = "Invalid authenticate header format";
@@ -346,7 +346,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string MissingAuthenticateHeader = "WWW-Authenticate header was expected in the response";
 
         public const string MultipleTokensMatched =
-            "The cache contains multiple tokens satisfying the requirements. Call AcquireToken again providing more requirements (e.g. UserId)";
+            "The cache contains multiple tokens satisfying the requirements. Call AcquireToken again providing more arguments (e.g. UserId)";
 
         public const string NetworkIsNotAvailable = "The network is down so authentication cannot proceed";
         public const string NoDataFromSTS = "No data received from security token service";

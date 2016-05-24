@@ -70,20 +70,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public async Task<IHttpWebResponse> GetResponseAsync()
         {
-            using (HttpClient client = new HttpClient(new HttpClientHandler { UseDefaultCredentials = this.UseDefaultCredentials }))
+            using (HttpClient client = new HttpClient(HttpMessageHandlerFactory.GetMessageHandler(this.UseDefaultCredentials)))
             {
                 client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(this.Accept ?? "application/json"));
+                HttpRequestMessage requestMessage = new HttpRequestMessage();
+                requestMessage.RequestUri = new Uri(uri);
+                requestMessage.Headers.Accept.Clear();
+
+                requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(this.Accept ?? "application/json"));
                 foreach (KeyValuePair<string, string> kvp in this.Headers)
                 {
-                    client.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);
+                    requestMessage.Headers.Add(kvp.Key, kvp.Value);
                 }
 
                 bool addCorrelationId = (this.CallState != null && this.CallState.CorrelationId != Guid.Empty);
                 if (addCorrelationId)
                 {
-                    client.DefaultRequestHeaders.Add(OAuthHeader.CorrelationId, this.CallState.CorrelationId.ToString());
-                    client.DefaultRequestHeaders.Add(OAuthHeader.RequestCorrelationIdInResponse, "true");                   
+                    requestMessage.Headers.Add(OAuthHeader.CorrelationId, this.CallState.CorrelationId.ToString());
+                    requestMessage.Headers.Add(OAuthHeader.RequestCorrelationIdInResponse, "true");
                 }
 
                 client.Timeout = TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds);
@@ -97,7 +101,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         HttpContent content;
                         if (this.BodyParameters is StringRequestParameters)
                         {
-
                             content = new StringContent(this.BodyParameters.ToString(), Encoding.UTF8, this.ContentType);
                         }
                         else
@@ -105,12 +108,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             content = new FormUrlEncodedContent(((DictionaryRequestParameters)this.BodyParameters).ToList());
                         }
 
-                        responseMessage = await client.PostAsync(uri, content);
+                        requestMessage.Method = HttpMethod.Post;
+                        requestMessage.Content = content;
                     }
                     else
                     {
-                        responseMessage = await client.GetAsync(uri);
+                        requestMessage.Method = HttpMethod.Get;
                     }
+
+                    responseMessage = await client.SendAsync(requestMessage).ConfigureAwait(false);
                 }
                 catch (TaskCanceledException ex)
                 {

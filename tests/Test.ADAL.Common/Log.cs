@@ -35,15 +35,5 @@ namespace Test.ADAL.Common
         {
             Debug.WriteLine(message, args);
         }
-
-        internal static void Warning(string message, params object[] args)
-        {
-            Debug.WriteLine("WARNING: " + message, args);
-        }
-
-        internal static void Error(string message, params object[] args)
-        {
-            Verify.Fail("ERROR: " + message, args);
-        }
     }
 }

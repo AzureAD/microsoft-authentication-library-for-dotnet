@@ -38,28 +38,26 @@ namespace Test.ADAL.NET.Unit
     {
         [TestMethod]
         [Description("Test for discovery via 401 challenge response")]
-        [TestCategory("AdalDotNetUnit")]
         public void AuthenticationParametersTest()
         {
-            Sts sts = new AadSts();
-            string authority = sts.Authority + "/oauth2/authorize";
+            string authority = TestConstants.DefaultAuthorityCommonTenant + "/oauth2/authorize";
             const string Resource = "test_resource";
 
             AuthenticationParameters authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(CultureInfo.InvariantCulture, @"Bearer authorization_uri=""{0}"",resource_id=""{1}""", authority, Resource));
-            Verify.AreEqual(authority, authParams.Authority);
-            Verify.AreEqual(Resource, authParams.Resource);
+            Assert.AreEqual(authority, authParams.Authority);
+            Assert.AreEqual(Resource, authParams.Resource);
 
             authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(CultureInfo.InvariantCulture, @"bearer Authorization_uri=""{0}"",Resource_ID=""{1}""", authority, Resource));
-            Verify.AreEqual(authority, authParams.Authority);
-            Verify.AreEqual(Resource, authParams.Resource);
+            Assert.AreEqual(authority, authParams.Authority);
+            Assert.AreEqual(Resource, authParams.Resource);
 
             authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(CultureInfo.InvariantCulture, @"Bearer authorization_uri=""{0}""", authority));
-            Verify.AreEqual(authority, authParams.Authority);
-            Verify.IsNull(authParams.Resource);
+            Assert.AreEqual(authority, authParams.Authority);
+            Assert.IsNull(authParams.Resource);
 
             authParams = AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(CultureInfo.InvariantCulture, @"Bearer resource_id=""{0}""", Resource));
-            Verify.AreEqual(Resource, authParams.Resource);
-            Verify.IsNull(authParams.Authority);
+            Assert.AreEqual(Resource, authParams.Resource);
+            Assert.IsNull(authParams.Authority);
 
             try
             {
@@ -67,7 +65,7 @@ namespace Test.ADAL.NET.Unit
             }
             catch(ArgumentNullException ex)
             {
-                Verify.AreEqual(ex.ParamName, "authenticateHeader");
+                Assert.AreEqual(ex.ParamName, "authenticateHeader");
             }
 
             try
@@ -76,8 +74,8 @@ namespace Test.ADAL.NET.Unit
             }
             catch (ArgumentException ex)
             {
-                Verify.AreEqual(ex.ParamName, "authenticateHeader");
-                Verify.IsTrue(ex.Message.Contains("format"));
+                Assert.AreEqual(ex.ParamName, "authenticateHeader");
+                Assert.IsTrue(ex.Message.Contains("format"));
             }
         }
     }

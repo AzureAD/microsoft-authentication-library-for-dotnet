@@ -139,6 +139,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
+
+        public override bool GetCacheLoadPolicy(IPlatformParameters parameters)
+        {
+            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
+            if (authorizationParameters == null)
+            {
+                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
+            }
+
+            PromptBehavior promptBehavior = (parameters as PlatformParameters).PromptBehavior;
+
+            return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession;
+        }
+
         public override Uri ValidateRedirectUri(Uri redirectUri, CallState callState)
         {
             if (redirectUri == null)
