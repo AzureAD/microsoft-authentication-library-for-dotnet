@@ -122,7 +122,69 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 clientMetrics.EndClientMetricsRecord(endpointType, this.CallState);
             }
+            //logic for retry
 
+            if ((int)response.StatusCode == 500 || (int)response.StatusCode == 503 ||
+                    (int)response.StatusCode == 504)
+            {
+                ClientMetrics clientMetricsRetry = new ClientMetrics();
+                try
+                {
+                    clientMetricsRetry.BeginClientMetricsRecord(this.CallState);
+
+                    if (PlatformPlugin.HttpClientFactory.AddAdditionalHeaders)
+                    {
+                        Dictionary<string, string> clientMetricsHeaders = clientMetricsRetry.GetPreviousRequestRecord(this.CallState);
+                        foreach (KeyValuePair<string, string> kvp in clientMetricsHeaders)
+                        {
+                            this.Client.Headers[kvp.Key] = kvp.Value;
+                        }
+
+                        IDictionary<string, string> adalIdHeaders = AdalIdHelper.GetAdalIdParameters();
+                        foreach (KeyValuePair<string, string> kvp in adalIdHeaders)
+                        {
+                            this.Client.Headers[kvp.Key] = kvp.Value;
+                        }
+                    }
+                    this.Client.Headers[DeviceAuthHeaderName] = DeviceAuthHeaderValue;
+                    using (response = await this.Client.GetResponseAsync())
+                    {
+                        typedResponse = DeserializeResponse<T>(response.ResponseStream);
+                        clientMetricsRetry.SetLastError(null);
+                    }
+                }
+                catch (HttpRequestWrapperException ex)
+                {
+                    if (!this.isDeviceAuthChallenge(endpointType, ex.WebResponse, respondToDeviceAuthChallenge))
+                    {
+                        AdalServiceException serviceEx;
+                        if (ex.WebResponse != null)
+                        {
+                            TokenResponse tokenResponse = TokenResponse.CreateFromErrorResponse(ex.WebResponse);
+                            string[] errorCodes = tokenResponse.ErrorCodes ?? new[] { ex.WebResponse.StatusCode.ToString() };
+                            serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
+                                errorCodes, ex);
+                        }
+                        else
+                        {
+                            serviceEx = new AdalServiceException(AdalError.Unknown, ex);
+                        }
+
+                        clientMetricsRetry.SetLastError(serviceEx.ServiceErrorCodes);
+                        PlatformPlugin.Logger.Error(CallState, serviceEx);
+                        throw serviceEx;
+                    }
+                    else
+                    {
+                        response = ex.WebResponse;
+                    }
+                }
+                finally
+                {
+                    clientMetricsRetry.EndClientMetricsRecord(endpointType, this.CallState);
+                }
+            }
+                
             //check for pkeyauth challenge
             if (this.isDeviceAuthChallenge(endpointType, response, respondToDeviceAuthChallenge))
             {
@@ -131,6 +193,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return typedResponse;
         }
+
 
         private bool isDeviceAuthChallenge(string endpointType, IHttpWebResponse response, bool respondToDeviceAuthChallenge)
         {
