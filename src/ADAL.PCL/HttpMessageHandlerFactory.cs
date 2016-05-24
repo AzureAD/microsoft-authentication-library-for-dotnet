@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (MockHandlerQueue.Count > 0)
             {
-                MockHandlerQueue.Dequeue();
+                return MockHandlerQueue.Dequeue();
             }
 
             return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials };
