@@ -40,15 +40,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return new HttpClientWrapper(uri, callState);
         }
-
-        public DateTime GetJsonWebTokenValidFrom()
-        {
-            return DateTime.UtcNow;
-        }
-
-        public string GetJsonWebTokenId()
-        {
-            return Guid.NewGuid().ToString();
-        }
     }
 }
