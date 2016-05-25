@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// This value is calculated based on current UTC time measured locally and the value ext_expiresIn received from the service.
         /// </summary>
         [DataMember]
-        public DateTimeOffset ExtendedExpiresOn { get; internal set; }
+        internal DateTimeOffset ExtendedExpiresOn { get; internal set; }
 
         /// <summary>
         /// Gives information to the developer whether token returned is during normal or extended lifetime.
