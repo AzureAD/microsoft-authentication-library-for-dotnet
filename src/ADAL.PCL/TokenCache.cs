@@ -356,13 +356,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     resultEx = kvp.Value.Value;
                     bool tokenNearExpiry = (resultEx.Result.ExpiresOn <=
                                             DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
+                    bool tokenExtendedLifeTimeExpired = (resultEx.Result.ExtendedExpiresOn <=
+                                            DateTime.UtcNow);
 
-                    if (tokenNearExpiry)
+                    if (tokenNearExpiry && !cacheQueryData.ExtendedLifeTimeEnabled)
                     {
                         resultEx.Result.AccessToken = null;
                         PlatformPlugin.Logger.Verbose(callState,
                             "An expired or near expiry token was found in the cache");
                     }
+                   
                     else if (!cacheKey.ResourceEquals(cacheQueryData.Resource))
                     {
                         PlatformPlugin.Logger.Verbose(callState,
@@ -379,6 +382,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         newResultEx.Result.UpdateTenantAndUserInfo(resultEx.Result.TenantId, resultEx.Result.IdToken,
                             resultEx.Result.UserInfo);
                         resultEx = newResultEx;
+                    }
+
+                    else if (!tokenExtendedLifeTimeExpired && cacheQueryData.ExtendedLifeTimeEnabled)
+                    {
+                        resultEx.Result.ExtendedLifeTimeToken = true;
+                        PlatformPlugin.Logger.Verbose(callState,
+                            "The extendedLifeTime is enabled and a stale AT with extendedLifeTimeEnabled is returned.");
+                    }
+                    else if (tokenExtendedLifeTimeExpired)
+                    {
+                        resultEx.Result.AccessToken = null;
+                        PlatformPlugin.Logger.Verbose(callState,
+                            "The AT has expired its ExtendedLifeTime");
                     }
                     else
                     {
