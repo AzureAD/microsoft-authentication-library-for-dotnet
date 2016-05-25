@@ -32,9 +32,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class AcquireTokenSilentHandler : AcquireTokenHandlerBase
     {
-        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserIdentifier userId, IPlatformParameters parameters,bool extendedLifeTimeEnabled)
-            : base(authenticator, tokenCache, resource, clientKey, clientKey.HasCredential ? TokenSubjectType.UserPlusClient : TokenSubjectType.User,extendedLifeTimeEnabled)
+        public AcquireTokenSilentHandler(HandlerData handlerData, UserIdentifier userId, IPlatformParameters parameters)
+            : base(handlerData)
         {
+            handlerData.subjectType = handlerData.clientKey.HasCredential
+                ? TokenSubjectType.UserPlusClient
+                : TokenSubjectType.User;
             if (userId == null)
             {
                 throw new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);

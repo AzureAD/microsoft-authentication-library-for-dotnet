@@ -34,16 +34,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private DeviceCodeResult deviceCodeResult = null;
 
-        public AcquireTokenByDeviceCodeHandler(Authenticator authenticator, TokenCache tokenCache, DeviceCodeResult deviceCodeResult, bool extendedLifeTimeEnabled)
-            : base(authenticator, tokenCache, deviceCodeResult.Resource, new ClientKey(deviceCodeResult.ClientId), TokenSubjectType.User , extendedLifeTimeEnabled)
+        public AcquireTokenByDeviceCodeHandler(HandlerData handlerData, DeviceCodeResult deviceCodeResult)
+            : base(handlerData)
         {
+            handlerData.clientKey = new ClientKey(deviceCodeResult.ClientId);
             if (deviceCodeResult == null)
             {
                 throw new ArgumentNullException("deviceCodeResult");
             }
             
             this.LoadFromCache = false; //no cache lookup for token
-            this.StoreToCache = (tokenCache != null);
+            this.StoreToCache = (handlerData.tokenCache != null);
             this.SupportADFS = false;
             this.deviceCodeResult = deviceCodeResult;
         }

@@ -35,8 +35,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly Uri redirectUri;
 
-        public AcquireTokenByAuthorizationCodeHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, string authorizationCode, Uri redirectUri, bool extendedLifeTimeEnabled)
-            : base(authenticator, tokenCache, resource ?? NullResource, clientKey, TokenSubjectType.UserPlusClient, extendedLifeTimeEnabled)
+        public AcquireTokenByAuthorizationCodeHandler(HandlerData handlerData, string authorizationCode, Uri redirectUri)
+            : base(handlerData)
         {
             if (string.IsNullOrWhiteSpace(authorizationCode))
             {

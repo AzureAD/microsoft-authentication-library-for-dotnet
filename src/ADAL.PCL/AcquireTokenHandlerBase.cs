@@ -41,36 +41,35 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected readonly IDictionary<string, string> brokerParameters;
         protected readonly CacheQueryData CacheQueryData = null;
        
-        protected AcquireTokenHandlerBase(Authenticator authenticator, TokenCache tokenCache, string resource,
-            ClientKey clientKey, TokenSubjectType subjectType, bool extendedLifeTimeEnabled)
+        protected AcquireTokenHandlerBase(HandlerData handlerData)
         {
-            this.Authenticator = authenticator;
+            this.Authenticator = handlerData.authenticator;
             this.CallState = CreateCallState(this.Authenticator.CorrelationId);
             PlatformPlugin.Logger.Information(this.CallState,
                 string.Format(CultureInfo.CurrentCulture, "=== Token Acquisition started:\n\tAuthority: {0}\n\tResource: {1}\n\tClientId: {2}\n\tCacheType: {3}\n\tAuthentication Target: {4}\n\t",
-                authenticator.Authority, resource, clientKey.ClientId,
+                handlerData.authenticator.Authority, handlerData.resource, handlerData.clientKey.ClientId,
                 (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(CultureInfo.CurrentCulture, " ({0} items)", tokenCache.Count) : "null",
-                subjectType));
+                handlerData.subjectType));
 
-            this.tokenCache = tokenCache;
+            this.tokenCache = handlerData.tokenCache;
 
-            if (string.IsNullOrWhiteSpace(resource))
+            if (string.IsNullOrWhiteSpace(handlerData.resource))
             {
                 throw new ArgumentNullException("resource");
             }
 
-            this.Resource = (resource != NullResource) ? resource : null;
-            this.ClientKey = clientKey;
-            this.TokenSubjectType = subjectType;
+            this.Resource = (handlerData.resource != NullResource) ? handlerData.resource : null;
+            this.ClientKey = handlerData.clientKey;
+            this.TokenSubjectType = handlerData.subjectType;
 
             this.LoadFromCache = (tokenCache != null);
             this.StoreToCache = (tokenCache != null);
             this.SupportADFS = false;
 
             this.brokerParameters = new Dictionary<string, string>();
-            brokerParameters["authority"] = authenticator.Authority;
-            brokerParameters["resource"] = resource;
-            brokerParameters["client_id"] = clientKey.ClientId;
+            brokerParameters["authority"] = handlerData.authenticator.Authority;
+            brokerParameters["resource"] = handlerData.resource;
+            brokerParameters["client_id"] = handlerData.clientKey.ClientId;
             brokerParameters["correlation_id"] = this.CallState.CorrelationId.ToString();
             brokerParameters["client_version"] = AdalIdHelper.GetAdalVersion();
             this.ResultEx = null;
@@ -82,7 +81,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             CacheQueryData.SubjectType = this.TokenSubjectType;
             CacheQueryData.UniqueId = this.UniqueId;
             CacheQueryData.DisplayableId = this.DisplayableId;
-            CacheQueryData.ExtendedLifeTimeEnabled = extendedLifeTimeEnabled;
+            CacheQueryData.ExtendedLifeTimeEnabled = handlerData.extendedLifeTimeEnabled;
         }
         
         internal CallState CallState { get; set; }

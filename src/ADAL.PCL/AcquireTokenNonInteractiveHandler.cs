@@ -38,8 +38,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private UserAssertion userAssertion;
         
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserCredential userCredential, bool extendedLifeTimeEnabled)
-            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User, extendedLifeTimeEnabled)
+        public AcquireTokenNonInteractiveHandler(HandlerData handlerData, UserCredential userCredential)
+            : base(handlerData)
         {
             if (userCredential == null)
             {
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             // We enable ADFS support only when it makes sense to do so
-            if (authenticator.AuthorityType == AuthorityType.ADFS)
+            if (handlerData.authenticator.AuthorityType == AuthorityType.ADFS)
             {
                 this.SupportADFS = true;
             }
@@ -55,8 +55,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.userCredential = userCredential;
         }
 
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserAssertion userAssertion,bool extendedLifeTimeEnabled)
-            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User, extendedLifeTimeEnabled)
+        public AcquireTokenNonInteractiveHandler(HandlerData handlerData, UserAssertion userAssertion)
+            : base(handlerData)
         {
             if (userAssertion == null)
             {
@@ -67,8 +67,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 throw new ArgumentException(AdalErrorMessage.UserCredentialAssertionTypeEmpty, "userAssertion");
             }
-
-            this.userAssertion = userAssertion;
         }
 
         protected override async Task PreRunAsync()
