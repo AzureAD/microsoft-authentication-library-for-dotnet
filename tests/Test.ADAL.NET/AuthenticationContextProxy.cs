@@ -234,7 +234,7 @@ namespace Test.ADAL.Common
             return resultProxy;
         }
 
-        private async Task<AuthenticationResultProxy> AcquireAccessCodeAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters, int retryCount = 0)
+        private async Task<AuthenticationResultProxy> AcquireAccessCodeAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters, bool extendedLifeTimeEnabled, int retryCount = 0)
         {
             AuthenticationResultProxy resultProxy;
             bool exceptionOccured = false;
@@ -256,7 +256,7 @@ namespace Test.ADAL.Common
                         abortTest.Start();
 
                         string authorizationCode = await AdalFriend.AcquireAccessCodeAsync(this.context, resource, clientId,
-                            redirectUri, userId);
+                            redirectUri, userId,extendedLifeTimeEnabled);
                         return new AuthenticationResultProxy() { AccessToken = authorizationCode };
                     }
                 }
@@ -274,15 +274,15 @@ namespace Test.ADAL.Common
 
             if (exceptionOccured)
             {
-                return await AcquireAccessCodeAsync(resource, clientId, redirectUri, userId, extraQueryParameters, retryCount + 1);
+                return await AcquireAccessCodeAsync(resource, clientId, redirectUri, userId, extraQueryParameters, extendedLifeTimeEnabled, retryCount + 1);
             }
 
             return resultProxy;
         }
 
-        public async Task<string> AcquireAccessCodeAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId)
+        public async Task<string> AcquireAccessCodeAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId,bool extendedLifeTimeEnabled)
         {
-            AuthenticationResultProxy result = await AcquireAccessCodeAsync(resource, clientId, redirectUri, userId, null);
+            AuthenticationResultProxy result = await AcquireAccessCodeAsync(resource, clientId, redirectUri, userId, null, extendedLifeTimeEnabled);
             return result.AccessToken;
         }
 

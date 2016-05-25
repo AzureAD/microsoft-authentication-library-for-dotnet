@@ -38,8 +38,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private UserAssertion userAssertion;
         
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserCredential userCredential)
-            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User)
+        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserCredential userCredential, bool extendedLifeTimeEnabled)
+            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User, extendedLifeTimeEnabled)
         {
             if (userCredential == null)
             {
@@ -55,8 +55,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.userCredential = userCredential;
         }
 
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserAssertion userAssertion)
-            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User)
+        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserAssertion userAssertion,bool extendedLifeTimeEnabled)
+            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User, extendedLifeTimeEnabled)
         {
             if (userAssertion == null)
             {

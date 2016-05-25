@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public async Task<AuthenticationResult> AcquireTokenByDeviceCodeAsync(DeviceCodeResult deviceCodeResult)
         {
-            var handler = new AcquireTokenByDeviceCodeHandler(this.Authenticator, this.TokenCache, deviceCodeResult);
+            var handler = new AcquireTokenByDeviceCodeHandler(this.Authenticator, this.TokenCache, deviceCodeResult ,ExtendedLifeTimeEnabled);
             return await handler.RunAsync();
         }
 
@@ -435,7 +435,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
         public async Task<Uri> GetAuthorizationRequestUrlAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters)
         {
-            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, redirectUri, null, userId, extraQueryParameters, null);
+            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, redirectUri, null, userId, extraQueryParameters, null,ExtendedLifeTimeEnabled);
             return await handler.CreateAuthorizationUriAsync(this.CorrelationId);
         }
 
@@ -485,19 +485,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode, Uri redirectUri, ClientKey clientKey, string resource)
         {
-            var handler = new AcquireTokenByAuthorizationCodeHandler(this.Authenticator, this.TokenCache, resource, clientKey, authorizationCode, redirectUri);
+            var handler = new AcquireTokenByAuthorizationCodeHandler(this.Authenticator, this.TokenCache, resource, clientKey, authorizationCode, redirectUri,ExtendedLifeTimeEnabled);
             return await handler.RunAsync();
         }
 
         private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(string resource, ClientKey clientKey)
         {
-            var handler = new AcquireTokenForClientHandler(this.Authenticator, this.TokenCache, resource, clientKey);
+            var handler = new AcquireTokenForClientHandler(this.Authenticator, this.TokenCache, resource, clientKey,ExtendedLifeTimeEnabled);
             return await handler.RunAsync();
         }
 
         private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(string resource, ClientKey clientKey, UserAssertion userAssertion)
         {
-            var handler = new AcquireTokenOnBehalfHandler(this.Authenticator, this.TokenCache, resource, clientKey, userAssertion);
+            var handler = new AcquireTokenOnBehalfHandler(this.Authenticator, this.TokenCache, resource, clientKey, userAssertion,ExtendedLifeTimeEnabled);
             return await handler.RunAsync();
         }
 
@@ -508,25 +508,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserCredential userCredential)
         {
-            var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, userCredential);
+            var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, userCredential,ExtendedLifeTimeEnabled);
             return await handler.RunAsync();
         }
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserAssertion userAssertion)
         {
-            var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, userAssertion);
+            var handler = new AcquireTokenNonInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, userAssertion, ExtendedLifeTimeEnabled);
             return await handler.RunAsync();
         }
         
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters = null)
         {
-            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, redirectUri, parameters, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters));
+            var handler = new AcquireTokenInteractiveHandler(this.Authenticator, this.TokenCache, resource, clientId, redirectUri, parameters, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters),ExtendedLifeTimeEnabled);
             return await handler.RunAsync();
         }
 
         private async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string resource, ClientKey clientKey, UserIdentifier userId, IPlatformParameters parameters)
         {
-            var handler = new AcquireTokenSilentHandler(this.Authenticator, this.TokenCache, resource, clientKey, userId, parameters);
+            var handler = new AcquireTokenSilentHandler(this.Authenticator, this.TokenCache, resource, clientKey, userId, parameters,ExtendedLifeTimeEnabled);
             return await handler.RunAsync();
         }
     }

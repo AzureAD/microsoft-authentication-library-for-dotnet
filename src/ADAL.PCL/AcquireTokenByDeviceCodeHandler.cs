@@ -34,8 +34,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private DeviceCodeResult deviceCodeResult = null;
 
-        public AcquireTokenByDeviceCodeHandler(Authenticator authenticator, TokenCache tokenCache, DeviceCodeResult deviceCodeResult)
-            : base(authenticator, tokenCache, deviceCodeResult.Resource, new ClientKey(deviceCodeResult.ClientId), TokenSubjectType.User)
+        public AcquireTokenByDeviceCodeHandler(Authenticator authenticator, TokenCache tokenCache, DeviceCodeResult deviceCodeResult, bool extendedLifeTimeEnabled)
+            : base(authenticator, tokenCache, deviceCodeResult.Resource, new ClientKey(deviceCodeResult.ClientId), TokenSubjectType.User , extendedLifeTimeEnabled)
         {
             if (deviceCodeResult == null)
             {

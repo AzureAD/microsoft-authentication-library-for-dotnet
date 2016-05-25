@@ -29,8 +29,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class AcquireTokenForClientHandler : AcquireTokenHandlerBase
     {
-        public AcquireTokenForClientHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey)
-            : base(authenticator, tokenCache, resource, clientKey, TokenSubjectType.Client)
+        public AcquireTokenForClientHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey,bool extendedLifeTimeEnabled)
+            : base(authenticator, tokenCache, resource, clientKey, TokenSubjectType.Client, extendedLifeTimeEnabled)
         {
             this.SupportADFS = true;
         }
