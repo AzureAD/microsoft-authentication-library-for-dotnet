@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (UnauthorizedAccessException)
             {
-                PlatformPlugin.Logger.Information(callState, "Cannot try Windows Integrated Auth due to lack of Enterprise capability.");
+                PlatformPlugin.Logger.Information(callState, "Cannot try Windows Integrated Authentication due to lack of Enterprise capability.");
                 // This mostly means Enterprise capability is missing, so WIA cannot be used and
                 // we return true to add form auth parameter in the caller.
                 return true;
@@ -137,6 +137,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
                     break;
             }
+        }
+
+
+        public override bool GetCacheLoadPolicy(IPlatformParameters parameters)
+        {
+            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
+            if (authorizationParameters == null)
+            {
+                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
+            }
+
+            PromptBehavior promptBehavior = (parameters as PlatformParameters).PromptBehavior;
+
+            return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession;
         }
 
         public override Uri ValidateRedirectUri(Uri redirectUri, CallState callState)

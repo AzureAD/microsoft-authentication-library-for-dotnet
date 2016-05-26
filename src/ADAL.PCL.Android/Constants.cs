@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string IncorrectBrokerAppSignate = "Incorrect broker app signature";
         public const string FailedToGetBrokerAppSignature = "Failed to get broker app signature";
         public const string MissingBrokerRelatedPackage = "Broker related package does not exist";
-        public const string MissingDigestShaAlgorithm = "Digest SHA algorithm does not exists";
+        public const string MissingDigestShaAlgorithm = "Digest SHA algorithm does not exist";
         public const string SignatureVerificationFailed = "Error in verifying broker app's signature";
         public const string NoBrokerAccountFound = "No account found in broker app";
         public const string BrokerApplicationRequired = "Broker application must be installed to continue authentication";

@@ -95,6 +95,7 @@
     <Compile Include="DeviceCodeResult.cs" />
     <Compile Include="HttpClientWrapper.cs" />
     <Compile Include="HttpClientFactory.cs" />
+    <Compile Include="HttpMessageHandlerFactory.cs" />
     <Compile Include="HttpRequestWrapperException.cs" />
     <Compile Include="HttpWebResponseWrapper.cs" />
     <Compile Include="IAdalLogCallback.cs" />

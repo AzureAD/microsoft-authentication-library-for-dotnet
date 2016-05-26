@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,32 +25,34 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
-using Test.ADAL.Common;
+using System.Net.Http;
 
-namespace Test.ADAL.NET.Friend
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    public class RecorderBase
+    internal static class HttpMessageHandlerFactory
     {
-        protected static Dictionary<string, string> IOMap;
-
-        private static string dictionaryFilePath;
-
-        public static void Initialize()
+        internal static HttpMessageHandler GetMessageHandler(bool useDefaultCredentials)
         {
-            if (IOMap == null)
+            if (MockHandlerQueue.Count > 0)
             {
-                dictionaryFilePath = RecorderSettings.Path + @"recorded_data.dat";
-                IOMap = (RecorderSettings.Mode == RecorderMode.Replay && File.Exists(dictionaryFilePath))
-                    ? SerializationHelper.DeserializeDictionary(dictionaryFilePath)
-                    : new Dictionary<string, string>();
+                return MockHandlerQueue.Dequeue();
             }
+
+            return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials };
         }
 
-        public static void WriteToFile()
+        private readonly static Queue<HttpMessageHandler> MockHandlerQueue = new Queue<HttpMessageHandler>();
+
+        public static void AddMockHandler(HttpMessageHandler mockHandler)
         {
-            SerializationHelper.SerializeDictionary(IOMap, dictionaryFilePath);
+            MockHandlerQueue.Enqueue(mockHandler);
+        }
+
+        public static void ClearMockHandlers()
+        {
+            MockHandlerQueue.Clear();
         }
     }
 }
