@@ -45,7 +45,11 @@ namespace Test.ADAL.NET.Friend
 
         public async static Task<string> AcquireAccessCodeAsync(AuthenticationContext context, string resource, string clientId, Uri redirectUri, UserIdentifier userId, bool extendedLifeTimeEnabled)
         {
-            HandlerData handlerData = new HandlerData(context.Authenticator,resource, clientId, extendedLifeTimeEnabled);
+            HandlerData handlerData = new HandlerData();
+            handlerData.Authenticator=context.Authenticator;
+            handlerData.Resource=resource;
+            handlerData.ClientKey = new ClientKey(clientId);
+            handlerData.ExtendedLifeTimeEnabled = extendedLifeTimeEnabled;
             var handler = new AcquireTokenInteractiveHandler(handlerData, redirectUri, new PlatformParameters(PromptBehavior.Auto, null), userId, null,
                 context.CreateWebAuthenticationDialog(new PlatformParameters(PromptBehavior.Auto, null)));
             handler.CallState = null;

@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             // We enable ADFS support only when it makes sense to do so
-            if (handlerData.authenticator.AuthorityType == AuthorityType.ADFS)
+            if (handlerData.Authenticator.AuthorityType == AuthorityType.ADFS)
             {
                 this.SupportADFS = true;
             }

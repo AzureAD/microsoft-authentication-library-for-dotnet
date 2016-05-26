@@ -37,14 +37,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public AcquireTokenByDeviceCodeHandler(HandlerData handlerData, DeviceCodeResult deviceCodeResult)
             : base(handlerData)
         {
-            handlerData.clientKey = new ClientKey(deviceCodeResult.ClientId);
+            handlerData.ClientKey = new ClientKey(deviceCodeResult.ClientId);
             if (deviceCodeResult == null)
             {
                 throw new ArgumentNullException("deviceCodeResult");
             }
             
             this.LoadFromCache = false; //no cache lookup for token
-            this.StoreToCache = (handlerData.tokenCache != null);
+            this.StoreToCache = (handlerData.TokenCache != null);
             this.SupportADFS = false;
             this.deviceCodeResult = deviceCodeResult;
         }

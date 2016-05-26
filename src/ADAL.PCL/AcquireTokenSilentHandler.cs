@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public AcquireTokenSilentHandler(HandlerData handlerData, UserIdentifier userId, IPlatformParameters parameters)
             : base(handlerData)
         {
-            handlerData.subjectType = handlerData.clientKey.HasCredential
+            handlerData.SubjectType = handlerData.ClientKey.HasCredential
                 ? TokenSubjectType.UserPlusClient
                 : TokenSubjectType.User;
             if (userId == null)
