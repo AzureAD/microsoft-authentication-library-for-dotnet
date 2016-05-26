@@ -339,7 +339,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public const string InvalidArgumentLength = "Parameter has invalid length";
         public const string InvalidAuthenticateHeaderFormat = "Invalid authenticate header format";
-        public const string InvalidAuthorityTypeTemplate = "This method overload is not supported by '{0}'";
+        public const string InvalidAuthorityTypeTemplate = "Invalid authority type. This method overload is not supported by '{0}'";
         public const string InvalidCredentialType = "Invalid credential type";
         public const string InvalidFormatParameterTemplate = "Parameter '{0}' has invalid format";
         public const string InvalidTokenCacheKeyFormat = "Invalid token cache key format";
