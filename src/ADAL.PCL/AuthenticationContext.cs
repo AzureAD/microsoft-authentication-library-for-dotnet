@@ -590,7 +590,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 Authenticator = Authenticator,
                 Resource = resource,
-                ExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled
+                ExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled,
+                ClientKey = clientKey
             };
             var handler = new AcquireTokenSilentHandler(handlerData, userId, parameters);
             return await handler.RunAsync();
