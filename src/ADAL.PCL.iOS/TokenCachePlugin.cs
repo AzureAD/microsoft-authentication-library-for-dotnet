@@ -92,10 +92,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     };
 
                     var err = SecKeyChain.Remove(s);
+                    if (err != SecStatusCode.Success)
+                    {
+                        PlatformPlugin.Logger.Warning(null, "Failed to remove cache record: " + err);
+                    }
+
                     if (args.TokenCache.Count > 0)
                     {
                         s.ValueData = NSData.FromArray(args.TokenCache.Serialize());
                         err = SecKeyChain.Add(s);
+                        if (err != SecStatusCode.Success)
+                        {
+                            PlatformPlugin.Logger.Warning(null, "Failed to save cache record: " + err);
+                        }
                     }
 
                     args.TokenCache.HasStateChanged = false;
