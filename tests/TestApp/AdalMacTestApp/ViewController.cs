@@ -37,14 +37,13 @@ namespace AdalMacTestApp
     public partial class ViewController : NSViewController
     {
         //
-        //NOTE: Replace these wih valid values
+        //NOTE: Replace these with valid values
         //
-
-        const string REDIRECT_URI = "<URI>";
-        const string AUTHORITY = "<AUTHORITY>";
+        const string AUTHORITY = "https://login.windows.net/common";
         const string CLIENTID = "<CLIENTID>";
         const string RESOURCE = "<RESOURCE>";
-        const string USER = "<USER>";
+        const string USER = null;
+        const string REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
 
         MobileAppSts sts = new MobileAppSts();
 
