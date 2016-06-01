@@ -33,6 +33,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class TokenCachePlugin : ITokenCachePlugin
     {
+#if MAC
+        const string NAME = "ADAL.PCL.Mac";
+#else
+        const string NAME = "ADAL.PCL.iOS";
+#endif
+
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
         public void BeforeAccess(TokenCacheNotificationArgs args)
@@ -50,10 +56,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     Generic = NSData.FromString(LocalSettingsContainerName),
                     Accessible = SecAccessible.Always,
-                    Service = "ADAL.PCL.iOS Service",
-                    Account = "ADAL.PCL.iOS cache",
-                    Label = "ADAL.PCL.iOS Label",
-                    Comment = "ADAL.PCL.iOS Cache",
+                    Service = NAME + " Service",
+                    Account = NAME + " cache",
+                    Label = NAME + " Label",
+                    Comment = NAME + " Cache",
                     Description = "Storage for cache"
                 };
 
@@ -83,11 +89,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     var s = new SecRecord(SecKind.GenericPassword)
                     {
                         Generic = NSData.FromString(LocalSettingsContainerName),
-	                Accessible = SecAccessible.Always,
-                        Service = "ADAL.PCL.iOS Service",
-                        Account = "ADAL.PCL.iOS cache",
-                        Label = "ADAL.PCL.iOS Label",
-                        Comment = "ADAL.PCL.iOS Cache",
+	                    Accessible = SecAccessible.Always,
+                        Service = NAME + " Service",
+                        Account = NAME + " cache",
+                        Label = NAME + " Label",
+                        Comment = NAME + " Cache",
                         Description = "Storage for cache"
                     };
 
