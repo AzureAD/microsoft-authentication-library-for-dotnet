@@ -95,7 +95,7 @@
     <Compile Include="..\ADAL.PCL.iOS\GlobalSuppressions.cs">
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.PCL.iOS\TokenCachePlugin.cs">
+    <Compile Include="..\ADAL.PCL.Desktop\TokenCachePlugin.cs">
       <Link>TokenCachePlugin.cs</Link>
     </Compile>
   </ItemGroup>

@@ -33,11 +33,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class TokenCachePlugin : ITokenCachePlugin
     {
-#if MAC
-        const string NAME = "ADAL.PCL.Mac";
-#else
         const string NAME = "ADAL.PCL.iOS";
-#endif
 
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
