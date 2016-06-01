@@ -198,9 +198,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (requestUrlString.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                DispatchQueue.MainQueue.DispatchAsync(CancelAuthentication);
-                requestUrlString = requestUrlString.Replace(BrokerConstants.BrowserExtPrefix, "https://");
-                DispatchQueue.MainQueue.DispatchAsync(() => NSWorkspace.SharedWorkspace.OpenUrl(new NSUrl(requestUrlString)));
+                var result = new AuthorizationResult(AuthorizationStatus.ProtocolError)
+                {
+                    Error = "Unsupported request",
+                    ErrorDescription = "Server is redirecting client to browser. This behavior is not yet defined on Mac OS X."
+                };
+                callbackMethod(result);
                 WebView.DecideIgnore(decisionToken);
                 Close();
                 return;
