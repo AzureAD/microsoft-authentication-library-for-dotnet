@@ -387,6 +387,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     else if (!tokenExtendedLifeTimeExpired && cacheQueryData.ExtendedLifeTimeEnabled)
                     {
                         resultEx.Result.ExtendedLifeTimeToken = true;
+                        resultEx.Result.ExpiresOn = resultEx.Result.ExtendedExpiresOn;
                         PlatformPlugin.Logger.Verbose(callState,
                             "The extendedLifeTime is enabled and a stale AT with extendedLifeTimeEnabled is returned.");
                     }

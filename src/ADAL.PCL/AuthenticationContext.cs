@@ -578,6 +578,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 Authenticator = this.Authenticator,
                 TokenCache = this.TokenCache,
                 Resource = resource,
+                ClientKey = new ClientKey(clientId),
                 ExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled,
             };
             var handler = new AcquireTokenInteractiveHandler(handlerData, redirectUri, parameters, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters));
@@ -589,10 +590,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             HandlerData handlerData = new HandlerData
             {
                 Authenticator = Authenticator,
+                TokenCache = this.TokenCache,
                 Resource = resource,
                 ExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled,
                 ClientKey = clientKey
             };
+
             var handler = new AcquireTokenSilentHandler(handlerData, userId, parameters);
             return await handler.RunAsync();
         }

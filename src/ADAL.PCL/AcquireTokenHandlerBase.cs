@@ -126,12 +126,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     ResultEx = this.tokenCache.LoadFromCache(CacheQueryData, this.CallState);
                     this.ValidateResult();
 
-                    if ((ResultEx != null && ResultEx.Result.AccessToken == null && ResultEx.RefreshToken != null) || (ResultEx!=null && ResultEx.Result.ExtendedLifeTimeToken))
+                    if (ResultEx != null && ResultEx.Result!=null)
                     {
-                        ResultEx = await this.RefreshAccessTokenAsync(ResultEx);
-                        if (ResultEx != null && ResultEx.Exception == null)
+                        if ((ResultEx.Result.AccessToken == null && ResultEx.RefreshToken != null) ||
+                            (ResultEx.Result.ExtendedLifeTimeToken))
                         {
-                            this.tokenCache.StoreToCache(ResultEx, this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
+                            ResultEx = await this.RefreshAccessTokenAsync(ResultEx);
+                            if (ResultEx != null && ResultEx.Exception == null)
+                            {
+                                this.tokenCache.StoreToCache(ResultEx, this.Authenticator.Authority, this.Resource,
+                                    this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
+                            }
                         }
                     }
                 }
