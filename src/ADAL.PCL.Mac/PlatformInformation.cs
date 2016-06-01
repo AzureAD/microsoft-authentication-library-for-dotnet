@@ -28,6 +28,7 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Foundation;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -50,12 +51,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public override string GetProcessorArchitecture()
         {
-            return null;
+            return Environment.Is64BitProcess ? "x64" : "x86";
         }
 
         public override string GetOperatingSystem()
         {
-            return null;
+            return NSProcessInfo.ProcessInfo.OperatingSystemVersionString;
         }
 
         public override string GetDeviceModel()
