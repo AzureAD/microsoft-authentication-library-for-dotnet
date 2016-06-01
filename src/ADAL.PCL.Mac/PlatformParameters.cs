@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Additional parameters used in acquiring user's authorization
         /// </summary>
-        /// <param name="callerViewController">UIViewController instance</param>
+        /// <param name="callerWindow">NSWindow instance</param>
         public PlatformParameters(NSWindow callerWindow):this()
         {
             this.CallerWindow = callerWindow;
@@ -51,10 +51,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Caller NSWindow
         /// </summary>
         public NSWindow CallerWindow { get; private set; }
-
-        /// <summary>
-        /// Shows the prompt in a modal dialog.
-        /// </summary>
-        public bool UseModalDialog { get; set; }
     }
 }

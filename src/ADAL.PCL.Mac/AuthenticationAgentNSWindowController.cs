@@ -47,7 +47,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         NSProgressIndicator progressIndicator;
 
         NSWindow callerWindow;
-        bool isModal;
 
         readonly string url;
         readonly string callback;
@@ -68,27 +67,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [Export("windowWillClose:")]
         public void WillClose(NSNotification notification)
         {
-            if (isModal)
-            {
-                NSApplication.SharedApplication.StopModal ();
-            }
+            NSApplication.SharedApplication.StopModal ();
 
             NSUrlProtocol.UnregisterClass(new ObjCRuntime.Class(typeof(AdalCustomUrlProtocol)));
         }
 
-        public void Run(NSWindow callerWindow, bool modal)
+        public void Run(NSWindow callerWindow)
         {
             this.callerWindow = callerWindow;
 
-            if (modal)
-            {
-                isModal = true;
-                RunModal();
-            }
-            else
-            {
-                ShowWindow(null);
-            }
+            RunModal();
         }
 
         //webview only works on main runloop, not nested, so set up manual modal runloop
