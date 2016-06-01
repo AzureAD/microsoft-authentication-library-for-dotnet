@@ -67,7 +67,6 @@ namespace AdalMacTestApp
 
         async partial void AcquireInteractiveClicked(NSObject sender)
         {
-            Console.WriteLine(View.Window.WorksWhenModal ());
             textView.Value = string.Empty;
             string token = await CreateBrokerWithSts().GetTokenInteractiveAsync(new PlatformParameters(this.View.Window, false) { UseModalDialog = true });
             textView.Value = token;

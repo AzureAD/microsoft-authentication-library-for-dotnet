@@ -66,5 +66,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Skips calling to broker if broker is present. false, by default
         /// </summary>
         public bool UseBroker { get; set; }
+
+        /// <summary>
+        /// Shows the prompt in a modal dialog.
+        /// </summary>
+        public bool UseModalDialog { get; set; }
     }
 }

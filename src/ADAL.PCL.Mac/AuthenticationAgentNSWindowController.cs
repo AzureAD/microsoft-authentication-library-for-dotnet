@@ -46,6 +46,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         WebView webView;
         NSProgressIndicator progressIndicator;
 
+        NSWindow callerWindow;
+        bool isModal;
+
         readonly string url;
         readonly string callback;
 
@@ -62,26 +65,79 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             NSUrlProtocol.RegisterClass(new ObjCRuntime.Class(typeof(AdalCustomUrlProtocol)));
         }
 
-        internal void Run(NSWindow callerWindow)
+        [Export("windowWillClose:")]
+        public void WillClose(NSNotification notification)
         {
-            //TODO: should this be modal for the parent?
-            ShowWindow(null);
+            if (isModal)
+            {
+                NSApplication.SharedApplication.StopModal ();
+            }
+
+            NSUrlProtocol.UnregisterClass(new ObjCRuntime.Class(typeof(AdalCustomUrlProtocol)));
+        }
+
+        public void Run(NSWindow callerWindow, bool modal)
+        {
+            this.callerWindow = callerWindow;
+
+            if (modal)
+            {
+                isModal = true;
+                RunModal();
+            }
+            else
+            {
+                ShowWindow(null);
+            }
+        }
+
+        //webview only works on main runloop, not nested, so set up manual modal runloop
+        void RunModal()
+        {
+            var window = Window;
+            IntPtr session = NSApplication.SharedApplication.BeginModalSession(window);
+            NSRunResponse result = NSRunResponse.Continues;
+
+            while (result == NSRunResponse.Continues)
+            {
+                using (var pool = new NSAutoreleasePool())
+                {
+                    var nextEvent = NSApplication.SharedApplication.NextEvent(NSEventMask.AnyEvent, NSDate.DistantFuture, NSRunLoop.NSDefaultRunLoopMode, true);
+
+                    //discard events that are not for our window, else other windows
+                    //remain somewhat interactive
+                    if (nextEvent.Window != window)
+                    {
+                        continue;
+                    }
+
+                    NSApplication.SharedApplication.SendEvent(nextEvent);
+
+                    // Run the window modally until there are no events to process
+                    result = (NSRunResponse)(long)NSApplication.SharedApplication.RunModalSession(session);
+
+                    // Give the main loop some time
+                    NSRunLoop.Current.LimitDateForMode(NSRunLoopMode.Default);
+                }
+            }
+
+            NSApplication.SharedApplication.EndModalSession(session);
         }
 
         //largely ported from azure-activedirectory-library-for-objc
         //ADAuthenticationViewController.m
         public override void LoadWindow()
         {
-            var mainWindow = NSApplication.SharedApplication.MainWindow;
+            var parentWindow = callerWindow ?? NSApplication.SharedApplication.MainWindow;
 
             CGRect windowRect;
-            if (mainWindow != null)
+            if (parentWindow != null)
             {
-                windowRect = mainWindow.Frame;
+                windowRect = parentWindow.Frame;
             }
             else
             {
-                // If we didn't get a main window then center it in the screen
+                // If we didn't get a parent window then center it in the screen
                 windowRect = NSScreen.MainScreen.Frame;
             }
 
@@ -139,12 +195,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             rect2.X = y;
 
             return rect2;
-        }
-
-        [Export("windowWillClose:")]
-        public void WillClose(NSNotification notification)
-        {
-            NSUrlProtocol.UnregisterClass(new ObjCRuntime.Class(typeof(AdalCustomUrlProtocol)));
         }
 
         [Export("webView:decidePolicyForNavigationAction:request:frame:decisionListener:")]

@@ -66,8 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
 #if MAC
                 var windowController = new AuthenticationAgentNSWindowController(authorizationUri.AbsoluteUri, redirectUri.OriginalString, CallbackMethod);
-                windowController.Run (this.parameters.CallerWindow);
-
+                windowController.Run (parameters.CallerWindow, parameters.UseModalDialog);
 #else
                 this.parameters.CallerViewController.PresentViewController(new AuthenticationAgentUINavigationController(authorizationUri.AbsoluteUri, redirectUri.OriginalString, CallbackMethod), false, null);
 #endif
