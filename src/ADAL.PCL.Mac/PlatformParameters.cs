@@ -48,24 +48,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Additional parameters used in acquiring user's authorization
-        /// </summary>
-        /// <param name="callerViewController">UIViewController instance</param>
-        /// <param name="useBroker">skips calling to broker if broker is present. false, by default</param>
-        public PlatformParameters(NSWindow callerWindow, bool useBroker):this(callerWindow)
-        {
-            UseBroker = useBroker;
-        }
-
-        /// <summary>
         /// Caller NSWindow
         /// </summary>
         public NSWindow CallerWindow { get; private set; }
-
-        /// <summary>
-        /// Skips calling to broker if broker is present. false, by default
-        /// </summary>
-        public bool UseBroker { get; set; }
 
         /// <summary>
         /// Shows the prompt in a modal dialog.
