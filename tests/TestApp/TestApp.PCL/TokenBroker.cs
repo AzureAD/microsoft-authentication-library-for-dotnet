@@ -80,13 +80,21 @@ namespace TestApp.PCL
         public Sts Sts = new AadSts();
 
 
+        UserIdentifier GetUserIdentifier()
+        {
+            if (Sts.ValidUserName != null)
+            {
+                return new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId);
+            }
+            return UserIdentifier.AnyUser;
+        }
+
         public async Task<string> GetTokenSilentAsync(IPlatformParameters parameters)
         {
             try
             {
                 context = new AuthenticationContext(Sts.Authority, true);
-                var result = await context.AcquireTokenSilentAsync(Sts.ValidResource, Sts.ValidClientId, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId), parameters);
-
+                var result = await context.AcquireTokenSilentAsync(Sts.ValidResource, Sts.ValidClientId, GetUserIdentifier(), parameters);
                 return result.AccessToken;
             }
             catch (Exception ex)
@@ -102,7 +110,7 @@ namespace TestApp.PCL
             try
             {
                 context = new AuthenticationContext(Sts.Authority, true);
-                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, Sts.ValidNonExistingRedirectUri, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
+                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, Sts.ValidNonExistingRedirectUri, parameters, GetUserIdentifier());
                 return result.AccessToken;
             }
             catch (Exception ex)
@@ -118,7 +126,7 @@ namespace TestApp.PCL
             try
             {
                 context = new AuthenticationContext(Sts.Authority, true);
-                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, null, parameters, new UserIdentifier(Sts.ValidUserName, UserIdentifierType.OptionalDisplayableId));
+                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, null, parameters, GetUserIdentifier());
 
                 return result.AccessToken;
             }

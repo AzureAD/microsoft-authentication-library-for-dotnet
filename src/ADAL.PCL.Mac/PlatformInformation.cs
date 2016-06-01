@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,19 +25,49 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Globalization;
+using System;
+using System.Reflection;
 using System.Threading.Tasks;
+using Foundation;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class DeviceAuthHelper : IDeviceAuthHelper
+    internal class PlatformInformation : PlatformInformationBase
     {
-        public bool CanHandleDeviceAuthChallenge { get { return false; } }
-
-        public Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
+        public override string GetProductName()
         {
-            return Task.FromResult(string.Format(CultureInfo.InvariantCulture, @"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData[BrokerConstants.ChallengeResponseContext], challengeData[BrokerConstants.ChallengeResponseVersion]));
+            return "PCL.Mac";
+        }
+
+        public override string GetEnvironmentVariable(string variable)
+        {
+            return Environment.GetEnvironmentVariable(variable);
+        }
+
+        public override Task<string> GetUserPrincipalNameAsync()
+        {
+            return Task.FromResult (Environment.UserName);
+        }
+
+        public override string GetProcessorArchitecture()
+        {
+            return Environment.Is64BitProcess ? "x64" : "x86";
+        }
+
+        public override string GetOperatingSystem()
+        {
+            return NSProcessInfo.ProcessInfo.OperatingSystemVersionString;
+        }
+
+        public override string GetDeviceModel()
+        {
+            return null;
+        }
+
+        public override string GetAssemblyFileVersionAttribute()
+        {
+            // TODO: Check if assembly file version can be read in Mac assembly as well or not. For now, we use assembly version instead.
+            return typeof(AdalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
         }
     }
 }

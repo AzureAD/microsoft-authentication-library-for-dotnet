@@ -29,6 +29,9 @@
 using System;
 using CoreFoundation;
 using Foundation;
+#if MAC
+using INSUrlProtocolClient = Foundation.NSUrlProtocolClient;
+#endif
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -80,26 +83,32 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private class AdalCustomConnectionDelegate : NSUrlConnectionDataDelegate
         {
             private AdalCustomUrlProtocol handler;
+            private INSUrlProtocolClient client;
 
             public AdalCustomConnectionDelegate(AdalCustomUrlProtocol handler)
             {
                 this.handler = handler;
+#if MAC
+                client = (INSUrlProtocolClient)handler.WeakClient;
+#else
+                client = handler.Client;
+#endif
             }
 
             public override void ReceivedData(NSUrlConnection connection, NSData data)
             {
-                handler.Client.DataLoaded(handler, data);
+                client.DataLoaded(handler, data);
             }
 
             public override void FailedWithError(NSUrlConnection connection, NSError error)
             {
-                handler.Client.FailedWithError(handler, error);
+                client.FailedWithError(handler, error);
                 connection.Cancel();
             }
 
             public override void ReceivedResponse(NSUrlConnection connection, NSUrlResponse response)
             {
-                handler.Client.ReceivedResponse(handler, response, NSUrlCacheStoragePolicy.NotAllowed);
+                client.ReceivedResponse(handler, response, NSUrlCacheStoragePolicy.NotAllowed);
             }
 
             public override NSUrlRequest WillSendRequest(NSUrlConnection connection, NSUrlRequest request,
@@ -109,7 +118,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (response != null)
                 {
                     RemoveProperty("ADURLProtocol", mutableRequest);
-                    handler.Client.Redirected(handler, mutableRequest, response);
+                    client.Redirected(handler, mutableRequest, response);
                     connection.Cancel();
                     if (!request.Headers.ContainsKey(new NSString("x-ms-PkeyAuth")))
                     {
@@ -128,7 +137,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             public override void FinishedLoading(NSUrlConnection connection)
             {
-                handler.Client.FinishedLoading(handler);
+                client.FinishedLoading(handler);
                 connection.Cancel();
             }
         }
