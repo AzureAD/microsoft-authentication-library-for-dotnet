@@ -38,6 +38,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public AcquireTokenByAuthorizationCodeHandler(HandlerData handlerData, string authorizationCode, Uri redirectUri)
             : base(handlerData)
         {
+            if (handlerData.Resource == null)
+            {
+                handlerData.Resource = NullResource;
+            }
+
             if (string.IsNullOrWhiteSpace(authorizationCode))
             {
                 throw new ArgumentNullException("authorizationCode");

@@ -27,6 +27,7 @@
 
 using System;
 using System.Globalization;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -498,7 +499,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode, Uri redirectUri, ClientKey clientKey, string resource)
         {
-            HandlerData handlerData = new HandlerData
+            
+         const string nullResource = "null_resource_as_optional";
+         HandlerData handlerData = new HandlerData
             {
                 Authenticator = this.Authenticator,
                 TokenCache = this.TokenCache,
@@ -506,6 +509,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 ClientKey = clientKey,
                 ExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled
             };
+            if (handlerData.Resource == null)
+            {
+                handlerData.Resource = nullResource;
+            }
             var handler = new AcquireTokenByAuthorizationCodeHandler(handlerData, authorizationCode, redirectUri);
             return await handler.RunAsync();
         }
