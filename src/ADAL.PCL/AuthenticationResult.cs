@@ -52,6 +52,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.AccessTokenType = accessTokenType;
             this.AccessToken = accessToken;
             this.ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
+            this.ExtendedExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
         }
 
         /// <summary>

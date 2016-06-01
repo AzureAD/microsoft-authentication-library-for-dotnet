@@ -445,6 +445,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 Authenticator = this.Authenticator,
                 TokenCache = this.TokenCache,
                 Resource = resource,
+                ClientKey = new ClientKey(clientId),
                 ExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled
             };
             var handler = new AcquireTokenInteractiveHandler(handlerData, redirectUri, null, userId, extraQueryParameters, null);
