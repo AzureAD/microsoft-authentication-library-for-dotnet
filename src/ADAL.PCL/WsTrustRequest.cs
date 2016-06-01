@@ -78,6 +78,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             StringBuilder messageBuilder = BuildMessage(DefaultAppliesTo, wsTrustAddress, credential);
+            string soapAction = XmlNamespace.Issue.ToString();
+            if (wsTrustAddress.Version == WsTrustVersion.WsTrust2005)
+            {
+                soapAction = XmlNamespace.Issue2005.ToString();
+            }
 
             WsTrustResponse wstResponse;
 
