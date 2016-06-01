@@ -79,16 +79,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             StringBuilder messageBuilder = BuildMessage(DefaultAppliesTo, wsTrustAddress, credential);
 
-            Dictionary<string, string> headers = new Dictionary<string, string>
-            {
-                { "SOAPAction", soapAction }
-            };
-
             WsTrustResponse wstResponse;
 
             try
             {
                 request.BodyParameters = new StringRequestParameters(messageBuilder);
+                request.Headers["SOAPAction"] = soapAction;
                 IHttpWebResponse response = await request.GetResponseAsync();
                 wstResponse = WsTrustResponse.CreateFromResponse(response.ResponseStream, wsTrustAddress.Version);
             }
