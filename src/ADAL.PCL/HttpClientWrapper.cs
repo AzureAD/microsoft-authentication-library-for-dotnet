@@ -124,7 +124,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 IHttpWebResponse webResponse = await CreateResponseAsync(responseMessage);
-
                 if (!responseMessage.IsSuccessStatusCode)
                 {
                     try
@@ -137,7 +136,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         throw new HttpRequestWrapperException(webResponse, ex);
                     }
                 }
-
+                
                 if (addCorrelationId)
                 {
                     VerifyCorrelationIdHeaderInReponse(webResponse.Headers);

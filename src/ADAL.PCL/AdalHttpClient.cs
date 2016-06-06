@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         private async Task<T> GetResponseAsync<T>(string endpointType, bool respondToDeviceAuthChallenge)
-        {
+        { 
             T typedResponse = default(T);
             IHttpWebResponse response;
             ClientMetrics clientMetrics = new ClientMetrics();
@@ -103,6 +103,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         string[] errorCodes = tokenResponse.ErrorCodes ?? new[] {ex.WebResponse.StatusCode.ToString()};
                         serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
                             errorCodes, ex);
+                        if (ex.WebResponse.StatusCode.ToString().Equals("504") || ex.WebResponse.StatusCode.ToString().Equals("GatewayTimeout") ||
+                   ex.WebResponse.StatusCode.ToString().Equals("500"))
+                        {
+                            await Task.Delay(1000);
+                            return await this.GetResponseAsync<T>(endpointType, respondToDeviceAuthChallenge);
+                        }
                     }
                     else
                     {
@@ -123,13 +129,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 clientMetrics.EndClientMetricsRecord(endpointType, this.CallState);
             }
             //logic for retry
-
-            if ((int)response.StatusCode == 500 || (int)response.StatusCode == 503 ||
-                    (int)response.StatusCode == 504)
-            {
-                await Task.Delay(1000);
-                return await this.GetResponseAsync<T>(endpointType, respondToDeviceAuthChallenge);
-            }
                 
             //check for pkeyauth challenge
             if (this.isDeviceAuthChallenge(endpointType, response, respondToDeviceAuthChallenge))

@@ -54,5 +54,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             MockHandlerQueue.Clear();
         }
+
+        public static int CountMockHandlers()
+        {
+            return MockHandlerQueue.Count;
+        }
     }
 }

@@ -72,6 +72,14 @@ namespace Test.ADAL.NET.Unit.Mocks
             return responseMessage;
         }
 
+        public static HttpResponseMessage CreateGateWayTimeOutMessage()
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.GatewayTimeout);
+            HttpContent content = new StringContent("GateWay TimeOut");
+            responseMessage.Content = content;
+            return responseMessage;
+        }
+
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage()
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
