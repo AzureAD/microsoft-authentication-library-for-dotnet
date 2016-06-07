@@ -72,11 +72,30 @@ namespace Test.ADAL.NET.Unit.Mocks
             return responseMessage;
         }
 
-        public static HttpResponseMessage CreateGateWayTimeOutMessage()
+        public static HttpResponseMessage CreateResiliencyMessage(int statusCode)
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.GatewayTimeout);
-            HttpContent content = new StringContent("GateWay TimeOut");
-            responseMessage.Content = content;
+            HttpResponseMessage responseMessage = null;
+            HttpContent content = null;
+
+            switch (statusCode)
+            {
+                case 500:
+                    responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                    content = new StringContent("Internal Server Error");
+                    break;
+                case 503:
+                    responseMessage = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+                    content = new StringContent("Service Unavailable");
+                    break;
+                case 504:
+                    responseMessage = new HttpResponseMessage(HttpStatusCode.GatewayTimeout);
+                    content = new StringContent("Gateway Timeout");
+                    break;
+            }
+            if (responseMessage != null)
+            {
+                responseMessage.Content = content;
+            }            
             return responseMessage;
         }
 

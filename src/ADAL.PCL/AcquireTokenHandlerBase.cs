@@ -112,6 +112,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public async Task<AuthenticationResult> RunAsync()
         {
             bool notifiedBeforeAccessCache = false;
+            AuthenticationResultEx extendedLifetimeResultEx = null;
             try
             {
                 await this.PreRunAsync();
@@ -125,6 +126,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     ResultEx = this.tokenCache.LoadFromCache(CacheQueryData, this.CallState);
                     this.ValidateResult();
+                    extendedLifetimeResultEx = ResultEx;
 
                     if (ResultEx != null && ResultEx.Result!=null)
                     {
@@ -142,13 +144,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 if (ResultEx == null || ResultEx.Exception != null)
-                {
+                {  
                     if (PlatformPlugin.BrokerHelper.CanInvokeBroker)
                     {
                         ResultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters);
                     }
                     else
                     {
+
                         await this.PreTokenRequest();
 
                         // check if broker app installation is required for authentication.
@@ -189,6 +192,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (Exception ex)
             {
                 PlatformPlugin.Logger.Error(this.CallState, ex);
+                if (ex.InnerException.Message.Equals("Gateway Timeout") && extendedLifetimeResultEx!=null)
+                {
+                    return extendedLifetimeResultEx.Result;
+                }
                 throw;
             }
             finally

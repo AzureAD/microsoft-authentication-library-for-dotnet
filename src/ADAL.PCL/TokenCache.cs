@@ -384,7 +384,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         resultEx = newResultEx;
                     }
 
-                    else if (!tokenExtendedLifeTimeExpired && cacheQueryData.ExtendedLifeTimeEnabled)
+                    else if (!tokenExtendedLifeTimeExpired && cacheQueryData.ExtendedLifeTimeEnabled && tokenNearExpiry)
                     {
                         resultEx.Result.ExtendedLifeTimeToken = true;
                         resultEx.Result.ExpiresOn = resultEx.Result.ExtendedExpiresOn;
