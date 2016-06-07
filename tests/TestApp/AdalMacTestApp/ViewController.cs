@@ -67,14 +67,14 @@ namespace AdalMacTestApp
         async partial void AcquireInteractiveClicked(NSObject sender)
         {
             textView.Value = string.Empty;
-            string token = await CreateBrokerWithSts().GetTokenInteractiveAsync(new PlatformParameters(this.View.Window, false) { UseModalDialog = true });
+            string token = await CreateBrokerWithSts().GetTokenInteractiveAsync(new PlatformParameters(this.View.Window));
             textView.Value = token;
         }
 
         async partial void AcquireSilentClicked(NSObject sender)
         {
             textView.Value = string.Empty;
-            string token = await CreateBrokerWithSts ().GetTokenSilentAsync(new PlatformParameters(View.Window, false) { UseModalDialog = true });
+            string token = await CreateBrokerWithSts ().GetTokenSilentAsync(new PlatformParameters(View.Window));
             textView.Value = token;
         }
 
