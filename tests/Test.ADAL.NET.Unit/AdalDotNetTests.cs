@@ -260,6 +260,7 @@ namespace Test.ADAL.NET.Unit
             }
         }
 
+
         [TestMethod]
         [Description("Test for ExtendedLifetime feature flag being not set in normal(non-outage) for Client Credentials")]
         public async Task ClientCredentialExtendedExpiryFlagNotSet()
@@ -313,12 +314,33 @@ namespace Test.ADAL.NET.Unit
         public async Task ClientCredentialExtendedExpiryPositiveTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
+                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
+            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            {
+                ResourceInResponse = TestConstants.DefaultResource,
+                Result = new AuthenticationResult("Bearer", "some-access-token", DateTimeOffset.UtcNow, (DateTimeOffset.UtcNow + TimeSpan.FromMinutes(180)))
+            };
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.GatewayTimeout)
+                {
+                    Content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"some-access-token\"}")
+                },
+                PostData = new Dictionary<string, string>()
+                {
+                    {"client_id", TestConstants.DefaultClientId},
+                    {"client_secret", TestConstants.DefaultClientSecret},
+                    {"grant_type", "client_credentials"}
+                }
+            });
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.GatewayTimeout)
                 {
                     Content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"some-access-token\"}")
                 },
@@ -330,12 +352,94 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential, TestConstants.DefaultExtendedLifeTimeEnabled);
-            Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(), 2);
+
+            var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
+
 
             // cache look up
-            var result2 = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential, TestConstants.DefaultExtendedLifeTimeEnabled);
-            Assert.AreEqual(result.AccessToken, result2.AccessToken);
+            var result = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential, TestConstants.PositiveExtendedLifeTimeEnabled);
+            Assert.IsNotNull(result.AccessToken);
+
+            try
+            {
+                await context.AcquireTokenAsync(null, credential);
+            }
+            catch (ArgumentNullException exc)
+            {
+                Assert.AreEqual(exc.ParamName, "resource");
+            }
+
+            try
+            {
+                await context.AcquireTokenAsync(TestConstants.DefaultResource, (ClientCredential)null);
+            }
+            catch (ArgumentNullException exc)
+            {
+                Assert.AreEqual(exc.ParamName, "clientCredential");
+            }
+        }
+
+        [TestMethod]
+        [Description("Test for ExtendedLifetime feature flag being not set in normal(non-outage) for Client Credentials")]
+        public async Task ClientCredentialExtendedExpiryNegativeTest()
+        {
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
+                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
+            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            {
+                ResourceInResponse = TestConstants.DefaultResource,
+                Result = new AuthenticationResult("Bearer", "some-access-token", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow)
+            };
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.GatewayTimeout)
+                {
+                    Content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"some-access-token\"}")
+                },
+                PostData = new Dictionary<string, string>()
+                {
+                    {"client_id", TestConstants.DefaultClientId},
+                    {"client_secret", TestConstants.DefaultClientSecret},
+                    {"grant_type", "client_credentials"}
+                }
+            });
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.GatewayTimeout)
+                {
+                    Content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"some-access-token\"}")
+                },
+                PostData = new Dictionary<string, string>()
+                {
+                    {"client_id", TestConstants.DefaultClientId},
+                    {"client_secret", TestConstants.DefaultClientSecret},
+                    {"grant_type", "client_credentials"}
+                }
+            });
+
+            Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(), 2);
+
+            var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
+
+
+            // cache look up
+            try
+            {
+                var result =
+                    await
+                        context.AcquireTokenAsync(TestConstants.DefaultResource, credential,
+                            TestConstants.PositiveExtendedLifeTimeEnabled);
+            }
+            catch (AdalServiceException ex)
+            {
+                Assert.AreEqual(ex.InnerException.Message, " Response status code does not indicate success: 504 (GatewayTimeout).");
+            }
 
             try
             {

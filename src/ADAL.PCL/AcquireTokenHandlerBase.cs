@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (ResultEx != null && ResultEx.Result!=null)
                     {
                         if ((ResultEx.Result.AccessToken == null && ResultEx.RefreshToken != null) ||
-                            (ResultEx.Result.ExtendedLifeTimeToken))
+                            (ResultEx.Result.ExtendedLifeTimeToken && ResultEx.RefreshToken!=null))
                         {
                             ResultEx = await this.RefreshAccessTokenAsync(ResultEx);
                             if (ResultEx != null && ResultEx.Exception == null)

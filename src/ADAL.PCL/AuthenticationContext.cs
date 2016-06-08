@@ -473,6 +473,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, bool extendedLifeTimeEnabled = false)
         {
             return await this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, UserIdentifier.AnyUser,extendedLifeTimeEnabled);
+
         }
 
         /// <summary>
@@ -486,14 +487,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <param name="extendedLifeTimeEnabled">Address to return to upon receiving a response from the authority.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId,bool extendedLifeTimeEnabled=false)
         {
-            return await this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId);
-        }
-
-        private Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId)
-        {
-            throw new NotImplementedException();
+            return await this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId,extendedLifeTimeEnabled);
         }
 
         /// <summary>
