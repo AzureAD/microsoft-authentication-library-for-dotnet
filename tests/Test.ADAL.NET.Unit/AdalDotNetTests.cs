@@ -434,7 +434,7 @@ namespace Test.ADAL.NET.Unit
                 var result =
                     await
                         context.AcquireTokenAsync(TestConstants.DefaultResource, credential,
-                            TestConstants.PositiveExtendedLifeTimeEnabled);
+                            TestConstants.DefaultExtendedLifeTimeEnabled);
             }
             catch (AdalServiceException ex)
             {

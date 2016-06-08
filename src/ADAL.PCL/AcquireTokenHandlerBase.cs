@@ -192,7 +192,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (Exception ex)
             {
                 PlatformPlugin.Logger.Error(this.CallState, ex);
-                if (ex.InnerException.Message.Equals("Gateway Timeout") && extendedLifetimeResultEx!=null)
+                if (ex.InnerException!=null && ex.InnerException.Message.Equals("Gateway Timeout") && extendedLifetimeResultEx!=null)
                 {
                     return extendedLifetimeResultEx.Result;
                 }

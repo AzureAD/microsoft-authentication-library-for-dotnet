@@ -382,7 +382,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// /// <param name="extendedLifeTimeEnabled">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
+        /// /// <param name="extendedLifeTimeEnabled">ExtendedLifeTime token is used. <see cref="UserIdentifier"/>.Any.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId, UserIdentifier userId, bool extendedLifeTimeEnabled = false)
         {
