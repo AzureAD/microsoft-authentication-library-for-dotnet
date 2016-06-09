@@ -72,12 +72,12 @@ namespace Test.ADAL.NET.Unit.Mocks
             return responseMessage;
         }
 
-        public static HttpResponseMessage CreateResiliencyMessage(int statusCode)
+        public static HttpResponseMessage CreateResiliencyMessage(HttpStatusCode statusCode)
         {
             HttpResponseMessage responseMessage = null;
             HttpContent content = null;
 
-            switch (statusCode)
+            switch ((int)statusCode)
             {
                 case 500:
                     responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);

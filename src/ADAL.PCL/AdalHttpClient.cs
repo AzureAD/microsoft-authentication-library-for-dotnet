@@ -103,8 +103,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         string[] errorCodes = tokenResponse.ErrorCodes ?? new[] {ex.WebResponse.StatusCode.ToString()};
                         serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
                             errorCodes, ex);
-                        if ((ex.WebResponse.StatusCode.ToString().Equals("ServiceUnavailable") || ex.WebResponse.StatusCode.ToString().Equals("GatewayTimeout") ||
-                   ex.WebResponse.StatusCode.ToString().Equals("InternalServerError")) && retryOnce)
+                        if ((((int)ex.WebResponse.StatusCode).Equals(500) || ((int)ex.WebResponse.StatusCode).Equals(504) ||
+                   ((int)ex.WebResponse.StatusCode).Equals(503)) && retryOnce)
                         {
                             await Task.Delay(1000);
                             return await this.GetResponseAsync<T>(endpointType, respondToDeviceAuthChallenge,false);

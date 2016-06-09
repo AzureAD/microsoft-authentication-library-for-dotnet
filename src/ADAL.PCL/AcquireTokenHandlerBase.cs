@@ -29,6 +29,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -40,7 +41,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private readonly TokenCache tokenCache;
         protected readonly IDictionary<string, string> brokerParameters;
         protected readonly CacheQueryData CacheQueryData = null;
-       
+
+        private readonly HashSet<String> _extendedLifeTimeCodes = new HashSet<String>();
+
         protected AcquireTokenHandlerBase(HandlerData handlerData)
         {
             this.Authenticator = handlerData.Authenticator;
@@ -82,6 +85,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             CacheQueryData.UniqueId = this.UniqueId;
             CacheQueryData.DisplayableId = this.DisplayableId;
             CacheQueryData.ExtendedLifeTimeEnabled = handlerData.ExtendedLifeTimeEnabled;
+
+            _extendedLifeTimeCodes.Add("Gateway Timeout");
+            _extendedLifeTimeCodes.Add("Internal Server Error");
+            _extendedLifeTimeCodes.Add("Service Unavailable");
         }
         
         internal CallState CallState { get; set; }
@@ -167,7 +174,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     //broker token acquisition failed
 
-                    //return the stale token here
                     if (ResultEx != null && ResultEx.Exception != null)
                     {
                         throw ResultEx.Exception;
@@ -192,9 +198,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (Exception ex)
             {
                 PlatformPlugin.Logger.Error(this.CallState, ex);
-                if (ex.InnerException!=null && ex.InnerException.Message.Equals("Gateway Timeout") && extendedLifetimeResultEx!=null)
+                if (((ex.InnerException!=null && _extendedLifeTimeCodes.Contains(ex.InnerException.Message)) ||(ex.Message.Equals("Handler did not return a response message.")))&& extendedLifetimeResultEx != null)
                 {
-                    return extendedLifetimeResultEx.Result;
+                   return extendedLifetimeResultEx.Result;  
                 }
                 throw;
             }
@@ -300,6 +306,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 catch (AdalException ex)
                 {
+
                     AdalServiceException serviceException = ex as AdalServiceException;
                     if (serviceException != null && serviceException.ErrorCode == "invalid_request")
                     {
