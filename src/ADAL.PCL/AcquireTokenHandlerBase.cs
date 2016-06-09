@@ -37,6 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal abstract class AcquireTokenHandlerBase
     {
         protected const string NullResource = "null_resource_as_optional";
+        protected const string  RequestTimeout = "Handler did not return a response message.";
         protected readonly static Task CompletedTask = Task.FromResult(false);
         private readonly TokenCache tokenCache;
         protected readonly IDictionary<string, string> brokerParameters;
@@ -198,7 +199,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             catch (Exception ex)
             {
                 PlatformPlugin.Logger.Error(this.CallState, ex);
-                if (((ex.InnerException!=null && _extendedLifeTimeCodes.Contains(ex.InnerException.Message)) ||(ex.Message.Equals("Handler did not return a response message.")))&& extendedLifetimeResultEx != null)
+                if (((ex.InnerException!=null && _extendedLifeTimeCodes.Contains(ex.InnerException.Message)) ||(ex.Message.Equals(RequestTimeout)))&& extendedLifetimeResultEx != null)
                 {
                    return extendedLifetimeResultEx.Result;  
                 }
