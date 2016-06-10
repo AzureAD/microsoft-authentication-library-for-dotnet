@@ -235,16 +235,15 @@ namespace Test.ADAL.NET.Unit
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateResiliencyMessage(HttpStatusCode.RequestTimeout),
+                ResponseMessage = MockHelpers.CreateResiliencyMessage(HttpStatusCode.GatewayTimeout),
             });
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateResiliencyMessage(HttpStatusCode.RequestTimeout),
+                ExceptionToThrow = new TaskCanceledException("request timed out")
             });
-
-            //Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(), 2);
+            
             AuthenticationResult result =
                 await
                     context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
@@ -355,7 +354,7 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
-        [Description("Test for ExtendedLifetime feature flag being not set in normal(non-outage) for Client Credentials")]
+        [Description("Test for getting back access token when the extendedExpiresOn flag is set")]
         public async Task ClientCredentialExtendedExpiryPositiveTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());

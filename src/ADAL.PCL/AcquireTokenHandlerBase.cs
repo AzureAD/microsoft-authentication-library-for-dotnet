@@ -43,7 +43,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected readonly IDictionary<string, string> brokerParameters;
         protected readonly CacheQueryData CacheQueryData = null;
 
-        private readonly HashSet<String> _extendedLifeTimeCodes = new HashSet<String>();
+        private bool resiliency = false;
+
+        private AdalHttpClient client = null;
 
         protected AcquireTokenHandlerBase(HandlerData handlerData)
         {
@@ -87,9 +89,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             CacheQueryData.DisplayableId = this.DisplayableId;
             CacheQueryData.ExtendedLifeTimeEnabled = handlerData.ExtendedLifeTimeEnabled;
 
-            _extendedLifeTimeCodes.Add("Gateway Timeout");
-            _extendedLifeTimeCodes.Add("Internal Server Error");
-            _extendedLifeTimeCodes.Add("Service Unavailable");
         }
         
         internal CallState CallState { get; set; }
@@ -198,11 +197,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (Exception ex)
             {
+                
                 PlatformPlugin.Logger.Error(this.CallState, ex);
-                if (((ex.InnerException!=null && _extendedLifeTimeCodes.Contains(ex.InnerException.Message)) ||(ex.Message.Equals(RequestTimeout)))&& extendedLifetimeResultEx != null)
-                {
-                   return extendedLifetimeResultEx.Result;  
-                }
+                    if ((client!=null && client.resiliency && extendedLifetimeResultEx != null) || (ex.InnerException!=null && (ex.InnerException.InnerException is TaskCanceledException) && extendedLifetimeResultEx!=null))
+                    {
+                        return extendedLifetimeResultEx.Result;
+                    }
+      
                 throw;
             }
             finally
@@ -307,7 +308,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 catch (AdalException ex)
                 {
-
                     AdalServiceException serviceException = ex as AdalServiceException;
                     if (serviceException != null && serviceException.ErrorCode == "invalid_request")
                     {
@@ -317,7 +317,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             serviceException.ServiceErrorCodes,
                             serviceException);
                     }
-
                     newResultEx = new AuthenticationResultEx { Exception = ex };
                 }
             }
@@ -327,9 +326,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private async Task<AuthenticationResultEx> SendHttpMessageAsync(IRequestParameters requestParameters)
         {
-            var client = new AdalHttpClient(this.Authenticator.TokenUri, this.CallState) { Client = { BodyParameters = requestParameters } };
+            client = new AdalHttpClient(this.Authenticator.TokenUri, this.CallState) { Client = { BodyParameters = requestParameters } };
             TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>(ClientMetricsEndpointType.Token);
-
             return tokenResponse.GetResult();
         }
 

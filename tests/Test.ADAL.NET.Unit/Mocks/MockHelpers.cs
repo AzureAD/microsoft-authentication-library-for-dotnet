@@ -92,6 +92,7 @@ namespace Test.ADAL.NET.Unit.Mocks
                     content = new StringContent("Gateway Timeout");
                     break;
             }
+
             if (responseMessage != null)
             {
                 responseMessage.Content = content;
