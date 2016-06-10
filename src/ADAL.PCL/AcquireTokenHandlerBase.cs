@@ -37,13 +37,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal abstract class AcquireTokenHandlerBase
     {
         protected const string NullResource = "null_resource_as_optional";
-        protected const string  RequestTimeout = "Handler did not return a response message.";
         protected readonly static Task CompletedTask = Task.FromResult(false);
         private readonly TokenCache tokenCache;
         protected readonly IDictionary<string, string> brokerParameters;
         protected readonly CacheQueryData CacheQueryData = null;
-
-        private bool resiliency = false;
 
         private AdalHttpClient client = null;
 
