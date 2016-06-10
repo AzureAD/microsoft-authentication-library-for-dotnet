@@ -39,6 +39,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         NotProvided
     }
 
+    
     /// <summary>
     /// The AuthenticationContext class retrieves authentication tokens from Azure Active Directory and ADFS services.
     /// </summary>
@@ -103,10 +104,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.TokenCache = tokenCache;
         }
+
         /// <summary>
         /// Used to set the flag for AAD extended lifetime
         /// </summary>
-        public bool ExtendedLifeTimeEnabled { get; set; }
+        public bool ExtendedLifeTimeEnabled { get; set;}
 
         /// <summary>
         /// Gets address of the authority to issue token.
@@ -184,16 +186,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
         /// </summary>
         /// <param name="deviceCodeResult">The device code result received from calling AcquireDeviceCodeAsync.</param>
-        /// <param name="extendedLifeTimeEnabled">Enabling the extendedlifetime feature</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByDeviceCodeAsync(DeviceCodeResult deviceCodeResult, bool extendedLifeTimeEnabled=false)
+        public async Task<AuthenticationResult> AcquireTokenByDeviceCodeAsync(DeviceCodeResult deviceCodeResult)
         {
             HandlerData handlerData = new HandlerData{
                 Authenticator = this.Authenticator,
                 TokenCache = this.TokenCache,
                 ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled
             };
-            var handler = new AcquireTokenByDeviceCodeHandler(handlerData, deviceCodeResult, extendedLifeTimeEnabled);
+            var handler = new AcquireTokenByDeviceCodeHandler(handlerData, deviceCodeResult, this.ExtendedLifeTimeEnabled);
             return await handler.RunAsync();
         }
 
@@ -204,9 +205,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userAssertion">The assertion to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, UserAssertion userAssertion, bool extendedLifeTimeEnabled=false)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, UserAssertion userAssertion)
         {
-            return await this.AcquireTokenCommonAsync(resource, clientId, userAssertion,extendedLifeTimeEnabled);
+            return await this.AcquireTokenCommonAsync(resource, clientId, userAssertion);
         }
 
         /// <summary>
@@ -216,9 +217,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientCredential">The client credential to use for token acquisition.</param>
         /// <param name="extendedLifeTimeEnabled">Enables the extendedLifeTime feature for ADAL.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>        
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientCredential clientCredential, bool extendedLifeTimeEnabled=false)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientCredential clientCredential)
         {
-            return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCredential), extendedLifeTimeEnabled);
+            return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCredential));
         }
 
         /// <summary>
@@ -228,9 +229,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <param name="extendedLifeTimeEnabled">The extendedLifeTimeEnabled feature will enable it.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, IClientAssertionCertificate clientCertificate, bool extendedLifeTimeEnabled = false)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, IClientAssertionCertificate clientCertificate)
         {
-            return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCertificate, this.Authenticator), extendedLifeTimeEnabled);
+            return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCertificate, this.Authenticator));
         }
 
         /// <summary>
@@ -240,9 +241,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
         /// <param name="extendedLifeTimeEnabled">The client assertion to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientAssertion clientAssertion, bool extendedLifeTimeEnabled = false)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientAssertion clientAssertion)
         {
-            return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientAssertion), extendedLifeTimeEnabled);
+            return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientAssertion));
         }
 
         /// <summary>
@@ -334,9 +335,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
         /// <param name="extendedLifeTimeEnabled">The user assertion (token) to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientCredential clientCredential, UserAssertion userAssertion,bool extendedLifeTimeEnabled = false)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientCredential clientCredential, UserAssertion userAssertion)
         {
-            return await this.AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientCredential), userAssertion, extendedLifeTimeEnabled);
+            return await this.AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientCredential), userAssertion);
         }
 
         /// <summary>
@@ -347,9 +348,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
         /// <param name="extendedLifeTimeEnabled">The user assertion (token) to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, IClientAssertionCertificate clientCertificate, UserAssertion userAssertion, bool extendedLifeTimeEnabled = false)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, IClientAssertionCertificate clientCertificate, UserAssertion userAssertion)
         {
-            return await this.AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientCertificate, this.Authenticator), userAssertion, extendedLifeTimeEnabled);
+            return await this.AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientCertificate, this.Authenticator), userAssertion);
         }
 
         /// <summary>
@@ -360,9 +361,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
         /// <param name="extendedLifeTimeEnabled">The user assertion (token) to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientAssertion clientAssertion, UserAssertion userAssertion, bool extendedLifeTimeEnabled = false)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientAssertion clientAssertion, UserAssertion userAssertion)
         {
-            return await this.AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientAssertion), userAssertion, extendedLifeTimeEnabled);
+            return await this.AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientAssertion), userAssertion);
         }
 
         /// <summary>
@@ -384,9 +385,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// /// <param name="extendedLifeTimeEnabled">ExtendedLifeTime token is used. <see cref="UserIdentifier"/>.Any.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId, UserIdentifier userId, bool extendedLifeTimeEnabled = false)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId, UserIdentifier userId)
         {
-            return await this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientId), userId, null, extendedLifeTimeEnabled);
+            return await this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientId), userId, null);
         }
 
         /// <summary>
@@ -470,9 +471,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="parameters">An object of type PlatformParameters which may pass additional parameters used for authorization.</param>
         /// <param name="extendedLifeTimeEnabled">ExtendedLifeTime Feature.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, bool extendedLifeTimeEnabled = false)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters)
         {
-            return await this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, UserIdentifier.AnyUser,extendedLifeTimeEnabled);
+            return await this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, UserIdentifier.AnyUser);
 
         }
 
@@ -487,9 +488,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <param name="extendedLifeTimeEnabled">Address to return to upon receiving a response from the authority.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId,bool extendedLifeTimeEnabled=false)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId)
         {
-            return await this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId,extendedLifeTimeEnabled);
+            return await this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId);
         }
 
         /// <summary>
@@ -504,12 +505,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="extendedLifeTimeEnabled">Address to return to upon receiving a response from the authority.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters, bool extendedLifeTimeEnabled = false)
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters)
         {
             return await this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId, extraQueryParameters);
         }
 
         private Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters)
+        {
+            throw new NotImplementedException();
+        }
+
+        private Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId)
         {
             throw new NotImplementedException();
         }
@@ -534,7 +540,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await handler.RunAsync();
         }
 
-        private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(string resource, ClientKey clientKey,bool extendedLifeTimeEnabled)
+        private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(string resource, ClientKey clientKey)
         {
             HandlerData handlerData = new HandlerData
             {
@@ -542,13 +548,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 TokenCache = this.TokenCache,
                 Resource = resource,
                 ClientKey = clientKey,
-                ExtendedLifeTimeEnabled = extendedLifeTimeEnabled
             };
             var handler = new AcquireTokenForClientHandler(handlerData);
             return await handler.RunAsync();
         }
 
-        private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(string resource, ClientKey clientKey, UserAssertion userAssertion, bool extendedLifeTimeEnabled= false)
+        private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(string resource, ClientKey clientKey, UserAssertion userAssertion)
         {
             HandlerData handlerData = new HandlerData
             {
@@ -556,7 +561,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 TokenCache = this.TokenCache,
                 Resource = resource,
                 ClientKey = clientKey,
-                ExtendedLifeTimeEnabled = extendedLifeTimeEnabled
             };
 
             var handler = new AcquireTokenOnBehalfHandler(handlerData, userAssertion);
@@ -568,7 +572,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parameters);
         }
 
-        internal async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserCredential userCredential, bool extendedLifeTimeEnabled= false)
+        internal async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserCredential userCredential)
         {
             HandlerData handlerData = new HandlerData
             {
@@ -576,13 +580,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 TokenCache = this.TokenCache,
                 Resource = resource,
                 ClientKey = new ClientKey(clientId),
-                ExtendedLifeTimeEnabled = extendedLifeTimeEnabled
             };
             var handler = new AcquireTokenNonInteractiveHandler(handlerData, userCredential);
             return await handler.RunAsync();
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserAssertion userAssertion, bool extendedLifeTimeEnabled= false)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, UserAssertion userAssertion)
         {
             HandlerData handlerData = new HandlerData
             {
@@ -590,34 +593,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 TokenCache = this.TokenCache,
                 Resource = resource,
                 ClientKey = new ClientKey(clientId),
-                ExtendedLifeTimeEnabled = extendedLifeTimeEnabled,
             };
             var handler = new AcquireTokenNonInteractiveHandler(handlerData, userAssertion);
             return await handler.RunAsync();
         }
-        
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, bool extendedLifeTimeEnabled, string extraQueryParameters = null)
-        {
-            HandlerData handlerData = new HandlerData
-            {
-                Authenticator = this.Authenticator,
-                TokenCache = this.TokenCache,
-                Resource = resource,
-                ClientKey = new ClientKey(clientId),
-                ExtendedLifeTimeEnabled = extendedLifeTimeEnabled,
-            };
-            var handler = new AcquireTokenInteractiveHandler(handlerData, redirectUri, parameters, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters));
-            return await handler.RunAsync();
-        }
+       
 
-        private async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string resource, ClientKey clientKey, UserIdentifier userId, IPlatformParameters parameters, bool extendedLifeTimeEnabled = false)
+        private async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string resource, ClientKey clientKey, UserIdentifier userId, IPlatformParameters parameters)
         {
             HandlerData handlerData = new HandlerData
             {
                 Authenticator = Authenticator,
                 TokenCache = this.TokenCache,
                 Resource = resource,
-                ExtendedLifeTimeEnabled = extendedLifeTimeEnabled,
+ 
                 ClientKey = clientKey
             };
 
