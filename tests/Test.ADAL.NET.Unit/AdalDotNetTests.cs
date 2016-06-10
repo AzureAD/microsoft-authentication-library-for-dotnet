@@ -97,9 +97,8 @@ namespace Test.ADAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
             });
             Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(), 2);
-            context.ExtendedLifeTimeEnabled = true;
             AuthenticationResult result =
-  await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,TestConstants.DefaultRedirectUri, platformParameters);
+  await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,TestConstants.DefaultRedirectUri, platformParameters, TestConstants.PositiveExtendedLifeTimeEnabled);
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(),0);     
@@ -133,9 +132,8 @@ namespace Test.ADAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
             });
             Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(), 2);
-            context.ExtendedLifeTimeEnabled = true;
             AuthenticationResult result =
-                    await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
+                    await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId), TestConstants.PositiveExtendedLifeTimeEnabled);
             Assert.IsNotNull(result);
             Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(), 0);
             Assert.AreEqual(result.AccessToken, "some-access-token");
@@ -170,9 +168,8 @@ namespace Test.ADAL.NET.Unit
             });
 
                 Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(), 2);
-            context.ExtendedLifeTimeEnabled = true;
                 AuthenticationResult result =
-                     await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
+                     await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId), TestConstants.PositiveExtendedLifeTimeEnabled);
             Assert.IsNull(result.AccessToken);
             Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(), 0);
         }
@@ -207,11 +204,11 @@ namespace Test.ADAL.NET.Unit
             });            
 
             //Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(), 2);
-            context.ExtendedLifeTimeEnabled = true;
                 AuthenticationResult result =
                     await
                         context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                            new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
+                            new UserIdentifier("unique_id", UserIdentifierType.UniqueId),
+                            TestConstants.PositiveExtendedLifeTimeEnabled);
 
                 Assert.IsNotNull(result);
                 Assert.IsFalse(result.ExpiresOn <=
@@ -243,15 +240,15 @@ namespace Test.ADAL.NET.Unit
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
+                Method = HttpMethod.Post,
                 ExceptionToThrow = new TaskCanceledException("request timed out")
             });
-
-            //Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(), 2);
-            context.ExtendedLifeTimeEnabled = true;
+            
             AuthenticationResult result =
                 await
                     context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
+                        new UserIdentifier("unique_id", UserIdentifierType.UniqueId),
+                        TestConstants.PositiveExtendedLifeTimeEnabled);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.ExpiresOn <=
@@ -280,12 +277,12 @@ namespace Test.ADAL.NET.Unit
                     {"grant_type", "client_credentials"}
                 }
             });
-            context.ExtendedLifeTimeEnabled = true;
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential);
+
+            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential, TestConstants.PositiveExtendedLifeTimeEnabled);
             Assert.IsNotNull(result.AccessToken);
 
             // cache look up
-            var result2 = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential);
+            var result2 = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential,TestConstants.PositiveExtendedLifeTimeEnabled);
             Assert.AreEqual(result.AccessToken, result2.AccessToken);
 
             try
@@ -330,11 +327,11 @@ namespace Test.ADAL.NET.Unit
                 }
             });
             
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential);
+            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential, TestConstants.DefaultExtendedLifeTimeEnabled);
             Assert.IsNotNull(result.AccessToken);
 
             // cache look up
-            var result2 = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential);
+            var result2 = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential, TestConstants.DefaultExtendedLifeTimeEnabled);
             Assert.AreEqual(result.AccessToken, result2.AccessToken);
 
             try
@@ -403,9 +400,9 @@ namespace Test.ADAL.NET.Unit
 
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
 
-            context.ExtendedLifeTimeEnabled = true;
+
             // cache look up
-            var result = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential);
+            var result = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential, TestConstants.PositiveExtendedLifeTimeEnabled);
             Assert.IsNotNull(result.AccessToken);
 
             try
@@ -474,13 +471,14 @@ namespace Test.ADAL.NET.Unit
 
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
 
-            context.ExtendedLifeTimeEnabled = true;
+
             // cache look up
             try
             {
                 var result =
                     await
-                        context.AcquireTokenAsync(TestConstants.DefaultResource, credential);
+                        context.AcquireTokenAsync(TestConstants.DefaultResource, credential,
+                            TestConstants.PositiveExtendedLifeTimeEnabled);
             }
             catch (AdalServiceException ex)
             {
@@ -553,13 +551,14 @@ namespace Test.ADAL.NET.Unit
 
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
 
-            context.ExtendedLifeTimeEnabled = true;
+
             // cache look up
             try
             {
                 var result =
                     await
-                        context.AcquireTokenAsync(TestConstants.DefaultResource, credential);
+                        context.AcquireTokenAsync(TestConstants.DefaultResource, credential,
+                            TestConstants.PositiveExtendedLifeTimeEnabled);
             }
             catch (AdalServiceException ex)
             {
@@ -632,13 +631,14 @@ namespace Test.ADAL.NET.Unit
 
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
 
-            context.ExtendedLifeTimeEnabled = false;
+
             // cache look up
             try
             {
                 var result =
                     await
-                        context.AcquireTokenAsync(TestConstants.DefaultResource, credential);
+                        context.AcquireTokenAsync(TestConstants.DefaultResource, credential,
+                            TestConstants.DefaultExtendedLifeTimeEnabled);
             }
             catch (AdalServiceException ex)
             {
