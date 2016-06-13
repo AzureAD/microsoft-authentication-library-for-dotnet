@@ -41,7 +41,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private const string WwwAuthenticateHeader = "WWW-Authenticate";
         private const string PKeyAuthName = "PKeyAuth";
 
-        internal bool resiliency = false;
+        internal bool Resiliency = false;
+        internal bool RetryOnce = true;
 
         public AdalHttpClient(string uri, CallState callState)
         {
@@ -61,7 +62,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await this.GetResponseAsync<T>(endpointType, true);
         }
 
-        private async Task<T> GetResponseAsync<T>(string endpointType, bool respondToDeviceAuthChallenge, bool retryOnce=true)
+        private async Task<T> GetResponseAsync<T>(string endpointType, bool respondToDeviceAuthChallenge)
         { 
             T typedResponse = default(T);
             IHttpWebResponse response;
@@ -96,6 +97,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (HttpRequestWrapperException ex)
             {
+                if (ex.InnerException is TaskCanceledException)
+                {
+                    Resiliency = true;
+                }
                 if (!this.isDeviceAuthChallenge(endpointType, ex.WebResponse, respondToDeviceAuthChallenge))
                 {
                     AdalServiceException serviceEx;
@@ -110,14 +115,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             ((int) ex.WebResponse.StatusCode).Equals(504) ||
                             ((int) ex.WebResponse.StatusCode).Equals(503))
                         {
-                            if (retryOnce)
+                            if (RetryOnce)
                             {
                                 await Task.Delay(1000);
-                                return await this.GetResponseAsync<T>(endpointType, respondToDeviceAuthChallenge, false);
+                                RetryOnce = false;
+                                return await this.GetResponseAsync<T>(endpointType, respondToDeviceAuthChallenge);
                             }
                             else
                             {
-                                resiliency = true;
+                                Resiliency = true;
                             }
                         }
                     }

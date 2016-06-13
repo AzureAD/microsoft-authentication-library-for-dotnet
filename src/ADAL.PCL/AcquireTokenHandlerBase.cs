@@ -196,7 +196,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 
                 PlatformPlugin.Logger.Error(this.CallState, ex);
-                    if ((client!=null && client.resiliency && extendedLifetimeResultEx != null) || (ex.InnerException!=null && (ex.InnerException.InnerException is TaskCanceledException) && extendedLifetimeResultEx!=null))
+                    if (client!=null && client.Resiliency && extendedLifetimeResultEx != null)
                     {
                         return extendedLifetimeResultEx.Result;
                     }
