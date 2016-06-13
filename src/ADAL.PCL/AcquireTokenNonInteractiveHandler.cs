@@ -38,8 +38,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private UserAssertion userAssertion;
         
-        public AcquireTokenNonInteractiveHandler(HandlerData handlerData, UserCredential userCredential)
-            : base(handlerData)
+        public AcquireTokenNonInteractiveHandler(RequestData requestData, UserCredential userCredential)
+            : base(requestData)
         {
             if (userCredential == null)
             {
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             // We enable ADFS support only when it makes sense to do so
-            if (handlerData.Authenticator.AuthorityType == AuthorityType.ADFS)
+            if (requestData.Authenticator.AuthorityType == AuthorityType.ADFS)
             {
                 this.SupportADFS = true;
             }
@@ -55,8 +55,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.userCredential = userCredential;
         }
 
-        public AcquireTokenNonInteractiveHandler(HandlerData handlerData, UserAssertion userAssertion)
-            : base(handlerData)
+        public AcquireTokenNonInteractiveHandler(RequestData requestData, UserAssertion userAssertion)
+            : base(requestData)
         {
             if (userAssertion == null)
             {

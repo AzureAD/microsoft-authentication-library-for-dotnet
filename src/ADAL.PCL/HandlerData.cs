@@ -33,7 +33,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    class HandlerData
+    class RequestData
     {
         public Authenticator Authenticator { get; set; }
 

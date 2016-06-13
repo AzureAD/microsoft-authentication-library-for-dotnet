@@ -32,10 +32,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class AcquireTokenSilentHandler : AcquireTokenHandlerBase
     {
-        public AcquireTokenSilentHandler(HandlerData handlerData, UserIdentifier userId, IPlatformParameters parameters)
-            : base(handlerData)
+        public AcquireTokenSilentHandler(RequestData requestData, UserIdentifier userId, IPlatformParameters parameters)
+            : base(requestData)
         {
-            handlerData.SubjectType = handlerData.ClientKey.HasCredential
+            requestData.SubjectType = requestData.ClientKey.HasCredential
                 ? TokenSubjectType.UserPlusClient
                 : TokenSubjectType.User;
             if (userId == null)

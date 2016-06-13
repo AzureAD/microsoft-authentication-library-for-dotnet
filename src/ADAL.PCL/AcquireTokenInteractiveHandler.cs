@@ -48,8 +48,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly UserIdentifier userId;
 
-        public AcquireTokenInteractiveHandler(HandlerData handlerData, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters, IWebUI webUI)
-            : base(handlerData)
+        public AcquireTokenInteractiveHandler(RequestData requestData, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters, IWebUI webUI)
+            : base(requestData)
         {
             this.redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
 
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.UniqueId = userId.UniqueId;
             this.DisplayableId = userId.DisplayableId;
             this.UserIdentifierType = userId.Type;
-            this.LoadFromCache = (handlerData.TokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters));
+            this.LoadFromCache = (requestData.TokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters));
             this.SupportADFS = true;
 
             this.brokerParameters["force"] = "NO";
