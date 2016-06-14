@@ -84,7 +84,7 @@
     <Compile Include="Base64UrlEncoder.cs" />
     <Compile Include="CacheQueryData.cs" />
     <Compile Include="CallState.cs" />
-    <Compile Include="HandlerData.cs" />
+    <Compile Include="RequestData.cs" />
     <Compile Include="ClientAssertion.cs" />
     <Compile Include="ClientCredential.cs" />
     <Compile Include="ClientKey.cs" />
