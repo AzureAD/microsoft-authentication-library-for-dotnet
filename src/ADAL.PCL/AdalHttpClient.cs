@@ -40,6 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private const string DeviceAuthHeaderValue = "1.0";
         private const string WwwAuthenticateHeader = "WWW-Authenticate";
         private const string PKeyAuthName = "PKeyAuth";
+        private const int DelayTimePeriod = 1000;
 
         internal bool Resiliency = false;
         internal bool RetryOnce = true;
@@ -111,20 +112,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
                             errorCodes, ex);
 
-                        if (((int) ex.WebResponse.StatusCode).Equals(500) ||
-                            ((int) ex.WebResponse.StatusCode).Equals(504) ||
-                            ((int) ex.WebResponse.StatusCode).Equals(503))
+                        if ((ex.WebResponse.StatusCode.Equals(HttpStatusCode.InternalServerError)) ||
+                            (ex.WebResponse.StatusCode).Equals(HttpStatusCode.GatewayTimeout) ||
+                            (ex.WebResponse.StatusCode).Equals(HttpStatusCode.ServiceUnavailable))
                         {
                             if (RetryOnce)
                             {
-                                await Task.Delay(1000);
+                                await Task.Delay(DelayTimePeriod);
                                 RetryOnce = false;
                                 return await this.GetResponseAsync<T>(endpointType, respondToDeviceAuthChallenge);
                             }
-                            else
-                            {
                                 Resiliency = true;
-                            }
                         }
                     }
                     else
@@ -159,7 +157,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private bool isDeviceAuthChallenge(string endpointType, IHttpWebResponse response, bool respondToDeviceAuthChallenge)
         {
             return PlatformPlugin.DeviceAuthHelper.CanHandleDeviceAuthChallenge &&
-                   respondToDeviceAuthChallenge && response!=null &&
+                   respondToDeviceAuthChallenge && response != null &&
                    (response.Headers.ContainsKey(WwwAuthenticateHeader) &&
                     response.Headers[WwwAuthenticateHeader].StartsWith(PKeyAuthName, StringComparison.CurrentCulture)) &&
                    endpointType.Equals(ClientMetricsEndpointType.Token);

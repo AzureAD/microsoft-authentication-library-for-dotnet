@@ -67,6 +67,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 throw new ArgumentException(AdalErrorMessage.UserCredentialAssertionTypeEmpty, "userAssertion");
             }
+            this.userAssertion = userAssertion;
         }
 
         protected override async Task PreRunAsync()

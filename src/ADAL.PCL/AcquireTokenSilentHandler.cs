@@ -35,14 +35,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public AcquireTokenSilentHandler(RequestData requestData, UserIdentifier userId, IPlatformParameters parameters)
             : base(requestData)
         {
-            requestData.SubjectType = requestData.ClientKey.HasCredential
-                ? TokenSubjectType.UserPlusClient
-                : TokenSubjectType.User;
             if (userId == null)
             {
                 throw new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
             }
-
+            requestData.SubjectType = requestData.ClientKey.HasCredential
+                ? TokenSubjectType.UserPlusClient
+                : TokenSubjectType.User;
             this.UniqueId = userId.UniqueId;
             this.DisplayableId = userId.DisplayableId;
             this.UserIdentifierType = userId.Type;

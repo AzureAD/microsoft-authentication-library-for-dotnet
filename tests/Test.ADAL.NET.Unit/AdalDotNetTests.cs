@@ -99,7 +99,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(), 2);
             context.ExtendedLifeTimeEnabled = true;
             AuthenticationResult result =
-  await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,TestConstants.DefaultRedirectUri, platformParameters);
+            await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,TestConstants.DefaultRedirectUri, platformParameters);
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(),0);     

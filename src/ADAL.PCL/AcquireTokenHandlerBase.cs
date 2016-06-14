@@ -120,22 +120,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             try
             {
                 await this.PreRunAsync();
-                
-
                 if (this.LoadFromCache)
                 {
-                    
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
-
                     ResultEx = this.tokenCache.LoadFromCache(CacheQueryData, this.CallState);
                     this.ValidateResult();
                     extendedLifetimeResultEx = ResultEx;
-
                     if (ResultEx != null && ResultEx.Result!=null)
                     {
                         if ((ResultEx.Result.AccessToken == null && ResultEx.RefreshToken != null) ||
-                            (ResultEx.Result.ExtendedLifeTimeToken && ResultEx.RefreshToken!=null))
+                            (ResultEx.Result.ExtendedLifeTimeToken && ResultEx.RefreshToken != null))
                         {
                             ResultEx = await this.RefreshAccessTokenAsync(ResultEx);
                             if (ResultEx != null && ResultEx.Exception == null)
@@ -146,7 +141,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         }
                     }
                 }
-
                 if (ResultEx == null || ResultEx.Exception != null)
                 {  
                     if (PlatformPlugin.BrokerHelper.CanInvokeBroker)
@@ -155,9 +149,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
                     else
                     {
-
                         await this.PreTokenRequest();
-
                         // check if broker app installation is required for authentication.
                         if (this.BrokerInvocationRequired())
                         {
@@ -168,14 +160,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             ResultEx = await this.SendTokenRequestAsync();
                         }
                     }
-
                     //broker token acquisition failed
-
                     if (ResultEx != null && ResultEx.Exception != null)
                     {
                         throw ResultEx.Exception;
                     }
-
                     this.PostTokenRequest(ResultEx);
                     if (this.StoreToCache)
                     {
@@ -184,11 +173,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             this.NotifyBeforeAccessCache();
                             notifiedBeforeAccessCache = true;
                         }
-
                         this.tokenCache.StoreToCache(ResultEx, this.Authenticator.Authority, this.Resource, this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
                     }
                 }
-
                 await this.PostRunAsync(ResultEx.Result);
                 return ResultEx.Result;
             }
@@ -196,11 +183,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 
                 PlatformPlugin.Logger.Error(this.CallState, ex);
-                    if (client!=null && client.Resiliency && extendedLifetimeResultEx != null)
-                    {
-                        return extendedLifetimeResultEx.Result;
-                    }
-      
+                if (client!=null && client.Resiliency && extendedLifetimeResultEx != null)
+                {
+                    return extendedLifetimeResultEx.Result;
+                }
                 throw;
             }
             finally
@@ -323,7 +309,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private async Task<AuthenticationResultEx> SendHttpMessageAsync(IRequestParameters requestParameters)
         {
-            client = new AdalHttpClient(this.Authenticator.TokenUri, this.CallState) { Client = { BodyParameters = requestParameters } };
+            client = new AdalHttpClient(this.Authenticator.TokenUri, this.CallState)
+                    { Client = { BodyParameters = requestParameters } };
             TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>(ClientMetricsEndpointType.Token);
             return tokenResponse.GetResult();
         }
