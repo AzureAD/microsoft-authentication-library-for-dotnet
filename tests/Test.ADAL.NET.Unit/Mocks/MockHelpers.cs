@@ -84,7 +84,7 @@ namespace Test.ADAL.NET.Unit.Mocks
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string resource)
         {
-            string idToken = string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", CreateIdToken(uniqueId, displayableId));
+            string idToken = string.Format(CultureInfo.InvariantCulture, "{0}", CreateIdToken(uniqueId, displayableId));
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
             HttpContent content =
                 new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"resource\":\"" +
@@ -114,7 +114,7 @@ namespace Test.ADAL.NET.Unit.Mocks
                         "\"tid\": \"some-tenant-id\"," +
                         "\"ver\": \"2.0\"}";
 
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.", Base64UrlEncoder.Encode(header), Base64UrlEncoder.Encode(payload));
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.signature", Base64UrlEncoder.Encode(header), Base64UrlEncoder.Encode(payload));
         }
     }
 }
