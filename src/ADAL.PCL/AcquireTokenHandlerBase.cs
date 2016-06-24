@@ -185,6 +185,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 PlatformPlugin.Logger.Error(this.CallState, ex);
                 if (client!=null && client.Resiliency && extendedLifetimeResultEx != null)
                 {
+                    PlatformPlugin.Logger.Information(this.CallState, "Refreshing AT failed either due to one of these :- Internal Server Error,Gateway Timeout and Service Unavailable.Hence returning back stale AT as a part of client resiliency");
                     return extendedLifetimeResultEx.Result;
                 }
                 throw;

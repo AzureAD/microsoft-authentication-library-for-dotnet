@@ -101,6 +101,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (ex.InnerException is TaskCanceledException)
                 {
                     Resiliency = true;
+                    PlatformPlugin.Logger.Information(this.CallState, ex.InnerException + "Network timeout..Client Resiliency feature enabled..");
                 }
                 if (!this.isDeviceAuthChallenge(endpointType, ex.WebResponse, respondToDeviceAuthChallenge))
                 {
@@ -120,9 +121,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             {
                                 await Task.Delay(DelayTimePeriod);
                                 RetryOnce = false;
+                                PlatformPlugin.Logger.Information(this.CallState, "WebResponse is not a success due to either one of these :- Internal Server Error,Gateway Timeout and Service Unavailable.Retrying one more time..");
                                 return await this.GetResponseAsync<T>(endpointType, respondToDeviceAuthChallenge);
                             }
                                 Resiliency = true;
+                                PlatformPlugin.Logger.Information(this.CallState, "Retry Failed.Client Resiliency feature enabled");
                         }
                     }
                     else
