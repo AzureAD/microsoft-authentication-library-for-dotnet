@@ -98,6 +98,9 @@
     <Compile Include="..\ADAL.PCL.Desktop\TokenCachePlugin.cs">
       <Link>TokenCachePlugin.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\PromptBehavior.cs">
+      <Link>PromptBehavior.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ADAL.PCL\ADAL.PCL.csproj">

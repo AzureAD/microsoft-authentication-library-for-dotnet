@@ -38,6 +38,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
         }
 
+
+        /// <summary>
+        /// Additional parameters used in acquiring user's authorization
+        /// </summary>
+        /// <param name="callerWindow">NSWindow instance</param>
+        public PlatformParameters(NSWindow callerWindow, PromptBehavior promptBehavior) : this(callerWindow)
+        {
+            this.PromptBehavior = promptBehavior;
+        }
+
         /// <summary>
         /// Additional parameters used in acquiring user's authorization
         /// </summary>
@@ -51,5 +61,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Caller NSWindow
         /// </summary>
         public NSWindow CallerWindow { get; private set; }
+
+
+        /// <summary>
+        /// Gets prompt behavior. If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user. PromptBehavior.Never is not supported.
+        /// </summary>
+        public PromptBehavior PromptBehavior { get; private set; }
     }
 }
