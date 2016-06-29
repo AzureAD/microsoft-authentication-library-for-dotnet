@@ -54,29 +54,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public CallState CallState { get; private set; }
 
-        public async Task<T> GetResponseAsync<T>(string endpointType)
+        public async Task<T> GetResponseAsync<T>()
         {
-            return await this.GetResponseAsync<T>(endpointType, true);
+            return await this.GetResponseAsync<T>(true);
         }
 
-        private async Task<T> GetResponseAsync<T>(string endpointType, bool respondToDeviceAuthChallenge)
+        private async Task<T> GetResponseAsync<T>(bool respondToDeviceAuthChallenge)
         {
             T typedResponse = default(T);
             IHttpWebResponse response;
-            ClientMetrics clientMetrics = new ClientMetrics();
 
             try
             {
-                clientMetrics.BeginClientMetricsRecord(this.CallState);
 
                 if (PlatformPlugin.HttpClientFactory.AddAdditionalHeaders)
                 {
-                    Dictionary<string, string> clientMetricsHeaders = clientMetrics.GetPreviousRequestRecord(this.CallState);
-                    foreach (KeyValuePair<string, string> kvp in clientMetricsHeaders)
-                    {
-                        this.Client.Headers[kvp.Key] = kvp.Value;
-                    }
-
                     IDictionary<string, string> adalIdHeaders = AdalIdHelper.GetAdalIdParameters();
                     foreach (KeyValuePair<string, string> kvp in adalIdHeaders)
                     {
@@ -89,12 +81,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 using (response = await this.Client.GetResponseAsync())
                 {
                     typedResponse = DeserializeResponse<T>(response.ResponseStream);
-                    clientMetrics.SetLastError(null);
                 }
             }
             catch (HttpRequestWrapperException ex)
             {
-                if (!this.isDeviceAuthChallenge(endpointType, ex.WebResponse, respondToDeviceAuthChallenge))
+                if (!this.isDeviceAuthChallenge(ex.WebResponse, respondToDeviceAuthChallenge))
                 {
                     AdalServiceException serviceEx;
                     if (ex.WebResponse != null)
@@ -109,7 +100,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         serviceEx = new AdalServiceException(AdalError.Unknown, ex);
                     }
 
-                    clientMetrics.SetLastError(serviceEx.ServiceErrorCodes);
                     PlatformPlugin.Logger.Error(CallState, serviceEx);
                     throw serviceEx;
                 }
@@ -118,27 +108,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     response = ex.WebResponse;
                 }
             }
-            finally
-            {
-                clientMetrics.EndClientMetricsRecord(endpointType, this.CallState);
-            }
 
             //check for pkeyauth challenge
-            if (this.isDeviceAuthChallenge(endpointType, response, respondToDeviceAuthChallenge))
+            if (this.isDeviceAuthChallenge(response, respondToDeviceAuthChallenge))
             {
-                return await HandleDeviceAuthChallenge<T>(endpointType, response);
+                return await HandleDeviceAuthChallenge<T>(response);
             }
 
             return typedResponse;
         }
 
-        private bool isDeviceAuthChallenge(string endpointType, IHttpWebResponse response, bool respondToDeviceAuthChallenge)
+        private bool isDeviceAuthChallenge(IHttpWebResponse response, bool respondToDeviceAuthChallenge)
         {
             return PlatformPlugin.DeviceAuthHelper.CanHandleDeviceAuthChallenge &&
                    respondToDeviceAuthChallenge &&
                    (response.Headers.ContainsKey(WwwAuthenticateHeader) &&
-                    response.Headers[WwwAuthenticateHeader].StartsWith(PKeyAuthName, StringComparison.CurrentCulture)) &&
-                   endpointType.Equals(ClientMetricsEndpointType.Token);
+                    response.Headers[WwwAuthenticateHeader].StartsWith(PKeyAuthName, StringComparison.CurrentCulture));
         }
 
         private IDictionary<string, string> ParseChallengeData(IHttpWebResponse response)
@@ -156,7 +141,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return data;
         }
 
-        private async Task<T> HandleDeviceAuthChallenge<T>(string endpointType, IHttpWebResponse response)
+        private async Task<T> HandleDeviceAuthChallenge<T>(IHttpWebResponse response)
         {
             IDictionary<string, string> responseDictionary = this.ParseChallengeData(response);
 
@@ -170,7 +155,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.Client = PlatformPlugin.HttpClientFactory.Create(CheckForExtraQueryParameter(responseDictionary["SubmitUrl"]), this.CallState);
             this.Client.BodyParameters = rp;
             this.Client.Headers["Authorization"] = responseHeader;
-            return await this.GetResponseAsync<T>(endpointType, false);
+            return await this.GetResponseAsync<T>(false);
         }
 
         private static T DeserializeResponse<T>(Stream responseStream)
