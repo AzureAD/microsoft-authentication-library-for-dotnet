@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private bool isDeviceAuthChallenge(string endpointType, IHttpWebResponse response, bool respondToDeviceAuthChallenge)
         {
             return PlatformPlugin.DeviceAuthHelper.CanHandleDeviceAuthChallenge &&
-                   respondToDeviceAuthChallenge &&
+                   respondToDeviceAuthChallenge && response != null && response.Headers != null &&
                    (response.Headers.ContainsKey(WwwAuthenticateHeader) &&
                     response.Headers[WwwAuthenticateHeader].StartsWith(PKeyAuthName, StringComparison.CurrentCulture)) &&
                    endpointType.Equals(ClientMetricsEndpointType.Token);
