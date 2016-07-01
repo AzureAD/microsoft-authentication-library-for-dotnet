@@ -54,7 +54,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.userCredential = userCredential;
             this.DisplayableId = this.userCredential.UserName;
-            this.CacheQueryData.DisplayableId = this.DisplayableId;
         }
 
         public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserAssertion userAssertion)
