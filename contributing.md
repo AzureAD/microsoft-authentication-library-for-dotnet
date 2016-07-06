@@ -5,7 +5,7 @@ through the process.
 
 ### CONTRIBUTOR LICENSE AGREEMENT
 
-Please visit [https://cla.msopentech.com/](https://cla.msopentech.com/) and sign the Contributor License
+Please visit [https://cla.microsoft.com/](https://cla.microsoft.com/) and sign the Contributor License
 Agreement.  You only need to do that once. We can not look at your code until you've submitted this request.
 
 

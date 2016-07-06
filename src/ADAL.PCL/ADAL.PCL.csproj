@@ -88,7 +88,6 @@
     <Compile Include="ClientAssertion.cs" />
     <Compile Include="ClientCredential.cs" />
     <Compile Include="ClientKey.cs" />
-    <Compile Include="ClientMetrics.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="DeviceAuthJWTResponse.cs" />
     <Compile Include="DeviceCodeResponse.cs" />

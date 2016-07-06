@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,19 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
-{
-    internal class DeviceAuthHelper : IDeviceAuthHelper
-    {
-        public bool CanHandleDeviceAuthChallenge { get { return false; } }
+[assembly: AssemblyTitle ("Microsoft.IdentityModel.Clients.ActiveDirectory.Platform")]
 
-        public Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
-        {
-            return Task.FromResult(string.Format(CultureInfo.InvariantCulture, @"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData[BrokerConstants.ChallengeResponseContext], challengeData[BrokerConstants.ChallengeResponseVersion]));
-        }
-    }
-}
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible (false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid ("ff47962a-d498-4c63-b7e9-4db3653ad7e0")]
+
+// Assembly version information is in file ADAL.Common\CommonAssemblyInfo.cs

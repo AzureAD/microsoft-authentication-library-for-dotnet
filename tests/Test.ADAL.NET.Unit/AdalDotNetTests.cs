@@ -954,8 +954,36 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true);
-            AuthenticationResult result =
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content =
+            new StringContent("{\"ver\":\"1.0\",\"account_type\":\"Managed\",\"domain_name\":\"id.com\"}")
+                },
+                QueryParams = new Dictionary<string, string>()
+                {
+                    {"api-version", "1.0"}
+                }
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.DefaultUniqueId, "user2@id.com", TestConstants.DefaultResource),
+                PostData = new Dictionary<string, string>()
+                {
+                    {"grant_type", "password"},
+                    {"username", "user2@id.com"},
+                    {"password", TestConstants.DefaultPassword}
+                }
+            });
+
+            TokenCache cache = new TokenCache();
+            
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, cache);
+            var result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
                         new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword));
@@ -964,6 +992,18 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(result.AccessToken, "some-access-token");
             Assert.IsNotNull(result.UserInfo);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, result.UserInfo.UniqueId);
+
+            context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, cache);
+            result =
+                await
+                    context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
+                        new UserPasswordCredential("user2@id.com", TestConstants.DefaultPassword));
+            Assert.IsNotNull(result);
+            Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
+            Assert.AreEqual(result.AccessToken, "some-access-token");
+            Assert.IsNotNull(result.UserInfo);
+            Assert.AreEqual("user2@id.com", result.UserInfo.DisplayableId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, result.UserInfo.UniqueId);
         }
 

@@ -53,6 +53,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.userCredential = userCredential;
+            this.DisplayableId = this.userCredential.UserName;
         }
 
         public AcquireTokenNonInteractiveHandler(RequestData requestData, UserAssertion userAssertion)

@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         protected readonly static Task CompletedTask = Task.FromResult(false);
         private readonly TokenCache tokenCache;
         protected readonly IDictionary<string, string> brokerParameters;
-        protected readonly CacheQueryData CacheQueryData = null;
+        protected CacheQueryData CacheQueryData = new CacheQueryData();
 
         private AdalHttpClient client = null;
 
@@ -77,13 +77,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             brokerParameters["client_version"] = AdalIdHelper.GetAdalVersion();
             this.ResultEx = null;
 
-            CacheQueryData = new CacheQueryData();
-            CacheQueryData.Authority = Authenticator.Authority;
-            CacheQueryData.Resource = this.Resource;
-            CacheQueryData.ClientId = this.ClientKey.ClientId;
-            CacheQueryData.SubjectType = this.TokenSubjectType;
-            CacheQueryData.UniqueId = this.UniqueId;
-            CacheQueryData.DisplayableId = this.DisplayableId;
             CacheQueryData.ExtendedLifeTimeEnabled = requestData.ExtendedLifeTimeEnabled;
 
         }
@@ -117,6 +110,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             bool notifiedBeforeAccessCache = false;
             AuthenticationResultEx extendedLifetimeResultEx = null;
+            CacheQueryData.Authority = Authenticator.Authority;
+            CacheQueryData.Resource = this.Resource;
+            CacheQueryData.ClientId = this.ClientKey.ClientId;
+            CacheQueryData.SubjectType = this.TokenSubjectType;
+            CacheQueryData.UniqueId = this.UniqueId;
+            CacheQueryData.DisplayableId = this.DisplayableId;
+
             try
             {
                 await this.PreRunAsync();
@@ -312,7 +312,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             client = new AdalHttpClient(this.Authenticator.TokenUri, this.CallState)
                     { Client = { BodyParameters = requestParameters } };
-            TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>(ClientMetricsEndpointType.Token);
+            TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>();
             return tokenResponse.GetResult();
         }
 

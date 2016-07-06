@@ -25,19 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
+using AppKit;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class DeviceAuthHelper : IDeviceAuthHelper
+    /// <summary>
+    /// Additional parameters used in acquiring user's authorization
+    /// </summary>
+    public class PlatformParameters : IPlatformParameters
     {
-        public bool CanHandleDeviceAuthChallenge { get { return false; } }
-
-        public Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
+        private PlatformParameters()
         {
-            return Task.FromResult(string.Format(CultureInfo.InvariantCulture, @"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData[BrokerConstants.ChallengeResponseContext], challengeData[BrokerConstants.ChallengeResponseVersion]));
         }
+
+
+        /// <summary>
+        /// Additional parameters used in acquiring user's authorization
+        /// </summary>
+        /// <param name="callerWindow">NSWindow instance</param>
+        public PlatformParameters(NSWindow callerWindow, PromptBehavior promptBehavior) : this(callerWindow)
+        {
+            this.PromptBehavior = promptBehavior;
+        }
+
+        /// <summary>
+        /// Additional parameters used in acquiring user's authorization
+        /// </summary>
+        /// <param name="callerWindow">NSWindow instance</param>
+        public PlatformParameters(NSWindow callerWindow):this()
+        {
+            this.CallerWindow = callerWindow;
+        }
+
+        /// <summary>
+        /// Caller NSWindow
+        /// </summary>
+        public NSWindow CallerWindow { get; private set; }
+
+
+        /// <summary>
+        /// Gets prompt behavior. If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user. PromptBehavior.Never is not supported.
+        /// </summary>
+        public PromptBehavior PromptBehavior { get; private set; }
     }
 }

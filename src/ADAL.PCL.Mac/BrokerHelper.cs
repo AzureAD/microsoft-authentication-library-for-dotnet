@@ -25,19 +25,31 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Threading.Tasks;
+using Foundation;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class DeviceAuthHelper : IDeviceAuthHelper
+    class BrokerHelper : IBrokerHelper
     {
-        public bool CanHandleDeviceAuthChallenge { get { return false; } }
+        public IPlatformParameters PlatformParameters { get; set; }
 
-        public Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
+        public bool CanInvokeBroker {
+            get {
+                return false;
+            }
+        }
+
+        public Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {
-            return Task.FromResult(string.Format(CultureInfo.InvariantCulture, @"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData[BrokerConstants.ChallengeResponseContext], challengeData[BrokerConstants.ChallengeResponseVersion]));
+            throw new InvalidOperationException("Broker not supported on Mac");
+        }
+
+        public static void SetBrokerResponse(NSUrl brokerResponse)
+        {
+            throw new InvalidOperationException("Broker not supported on Mac");
         }
     }
 }
