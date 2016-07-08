@@ -42,5 +42,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string DisplayableId { get; set; }
 
         public string AssertionHash { get; set; }
+
+        public bool ExtendedLifeTimeEnabled { get; set; }
     }
 }

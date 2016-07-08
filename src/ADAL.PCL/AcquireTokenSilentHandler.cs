@@ -32,14 +32,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class AcquireTokenSilentHandler : AcquireTokenHandlerBase
     {
-        public AcquireTokenSilentHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserIdentifier userId, IPlatformParameters parameters)
-            : base(authenticator, tokenCache, resource, clientKey, clientKey.HasCredential ? TokenSubjectType.UserPlusClient : TokenSubjectType.User)
+        public AcquireTokenSilentHandler(RequestData requestData, UserIdentifier userId, IPlatformParameters parameters)
+            : base(requestData)
         {
             if (userId == null)
             {
                 throw new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
             }
-
+            requestData.SubjectType = requestData.ClientKey.HasCredential
+                ? TokenSubjectType.UserPlusClient
+                : TokenSubjectType.User;
             this.UniqueId = userId.UniqueId;
             this.DisplayableId = userId.DisplayableId;
             this.UserIdentifierType = userId.Type;

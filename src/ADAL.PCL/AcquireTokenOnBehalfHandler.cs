@@ -34,8 +34,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private readonly UserAssertion userAssertion;
 
-        public AcquireTokenOnBehalfHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, UserAssertion userAssertion)
-            : base(authenticator, tokenCache, resource, clientKey, TokenSubjectType.UserPlusClient)
+        public AcquireTokenOnBehalfHandler(RequestData requestData, UserAssertion userAssertion)
+            : base(requestData)
         {
             if (userAssertion == null)
             {

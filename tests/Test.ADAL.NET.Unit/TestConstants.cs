@@ -17,5 +17,7 @@ namespace Test.ADAL.NET.Unit
         public static readonly bool DefaultRestrictToSingleUser = false;
         public static readonly string DefaultClientSecret = "client_secret";
         public static readonly string DefaultPassword = "password";
+        public static readonly bool DefaultExtendedLifeTimeEnabled = false;
+        public static readonly bool PositiveExtendedLifeTimeEnabled = true;
     }
 }

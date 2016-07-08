@@ -35,9 +35,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly Uri redirectUri;
 
-        public AcquireTokenByAuthorizationCodeHandler(Authenticator authenticator, TokenCache tokenCache, string resource, ClientKey clientKey, string authorizationCode, Uri redirectUri)
-            : base(authenticator, tokenCache, resource ?? NullResource, clientKey, TokenSubjectType.UserPlusClient)
+        public AcquireTokenByAuthorizationCodeHandler(RequestData requestData, string authorizationCode, Uri redirectUri)
+            : base(requestData)
         {
+            if (requestData.Resource == null)
+            {
+                requestData.Resource = NullResource;
+            }
+
             if (string.IsNullOrWhiteSpace(authorizationCode))
             {
                 throw new ArgumentNullException("authorizationCode");

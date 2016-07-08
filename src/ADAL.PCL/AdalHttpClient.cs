@@ -40,6 +40,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private const string DeviceAuthHeaderValue = "1.0";
         private const string WwwAuthenticateHeader = "WWW-Authenticate";
         private const string PKeyAuthName = "PKeyAuth";
+        private const int DelayTimePeriodMilliSeconds = 1000;
+
+        internal bool Resiliency = false;
+        internal bool RetryOnce = true;
 
         public AdalHttpClient(string uri, CallState callState)
         {
@@ -85,6 +89,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (HttpRequestWrapperException ex)
             {
+                if (ex.InnerException is TaskCanceledException)
+                {
+                    Resiliency = true;
+                    PlatformPlugin.Logger.Information(this.CallState, "Network timeout - " + ex.InnerException.Message);
+                }
                 if (!this.isDeviceAuthChallenge(ex.WebResponse, respondToDeviceAuthChallenge))
                 {
                     AdalServiceException serviceEx;
@@ -94,6 +103,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         string[] errorCodes = tokenResponse.ErrorCodes ?? new[] {ex.WebResponse.StatusCode.ToString()};
                         serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
                             errorCodes, ex);
+
+                        if ((ex.WebResponse.StatusCode.Equals(HttpStatusCode.InternalServerError)) ||
+                            (ex.WebResponse.StatusCode).Equals(HttpStatusCode.GatewayTimeout) ||
+                            (ex.WebResponse.StatusCode).Equals(HttpStatusCode.ServiceUnavailable))
+                        {
+                            if (RetryOnce)
+                            {
+                                PlatformPlugin.Logger.Information(this.CallState,"HttpStatus code: "+ ex.WebResponse.StatusCode + " - " + ex.InnerException.Message );
+                                await Task.Delay(DelayTimePeriodMilliSeconds);
+                                RetryOnce = false;
+                                PlatformPlugin.Logger.Information(this.CallState,"Retrying one more time..");
+                                return await this.GetResponseAsync<T>(respondToDeviceAuthChallenge);
+                            }
+                                Resiliency = true;
+                                PlatformPlugin.Logger.Information(this.CallState, "Retry Failed - "+ ex.InnerException.Message );
+                        }
                     }
                     else
                     {
@@ -108,7 +133,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     response = ex.WebResponse;
                 }
             }
-
             //check for pkeyauth challenge
             if (this.isDeviceAuthChallenge(response, respondToDeviceAuthChallenge))
             {

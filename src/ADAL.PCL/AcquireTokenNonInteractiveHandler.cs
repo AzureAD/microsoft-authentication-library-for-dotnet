@@ -38,8 +38,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private UserAssertion userAssertion;
         
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserCredential userCredential)
-            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User)
+        public AcquireTokenNonInteractiveHandler(RequestData requestData, UserCredential userCredential)
+            : base(requestData)
         {
             if (userCredential == null)
             {
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             // We enable ADFS support only when it makes sense to do so
-            if (authenticator.AuthorityType == AuthorityType.ADFS)
+            if (requestData.Authenticator.AuthorityType == AuthorityType.ADFS)
             {
                 this.SupportADFS = true;
             }
@@ -56,8 +56,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.DisplayableId = this.userCredential.UserName;
         }
 
-        public AcquireTokenNonInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, string resource, string clientId, UserAssertion userAssertion)
-            : base(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User)
+        public AcquireTokenNonInteractiveHandler(RequestData requestData, UserAssertion userAssertion)
+            : base(requestData)
         {
             if (userAssertion == null)
             {
@@ -68,7 +68,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 throw new ArgumentException(AdalErrorMessage.UserCredentialAssertionTypeEmpty, "userAssertion");
             }
-
             this.userAssertion = userAssertion;
         }
 

@@ -25,19 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class AcquireTokenForClientHandler : AcquireTokenHandlerBase
+    class RequestData
     {
-        public AcquireTokenForClientHandler(RequestData requestData)
-            : base(requestData)
-        {
-            this.SupportADFS = true;
-        }
+        public Authenticator Authenticator { get; set; }
 
-        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
-        {
-            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.ClientCredentials;
-        }
+        public TokenCache TokenCache { get; set; }
+
+        public string Resource { get; set; }
+
+        public ClientKey ClientKey { get; set; }
+
+        public TokenSubjectType SubjectType { get; set; }
+
+        public bool ExtendedLifeTimeEnabled { get; set; }
+
     }
 }

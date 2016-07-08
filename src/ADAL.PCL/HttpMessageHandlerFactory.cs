@@ -28,6 +28,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -53,6 +55,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static void ClearMockHandlers()
         {
             MockHandlerQueue.Clear();
+        }
+
+        public static int CountMockHandlers()
+        {
+            return MockHandlerQueue.Count;
         }
     }
 }

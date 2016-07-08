@@ -52,8 +52,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.AccessTokenType = accessTokenType;
             this.AccessToken = accessToken;
             this.ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
+            this.ExtendedExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
         }
-
+        /// <summary>
+        /// Creates result returned from AcquireToken. Except in advanced scenarios related to token caching, you do not need to create any instance of AuthenticationResult.
+        /// </summary>
+        /// <param name="accessTokenType">Type of the Access Token returned</param>
+        /// <param name="accessToken">The Access Token requested</param>
+        /// <param name="expiresOn">The point in time in which the Access Token returned in the AccessToken property ceases to be valid</param>
+        /// <param name="extendedExpiresOn">The point in time in which the Access Token returned in the AccessToken property ceases to be valid</param>
+        internal AuthenticationResult(string accessTokenType, string accessToken, DateTimeOffset expiresOn, DateTimeOffset extendedExpiresOn)
+        {
+            this.AccessTokenType = accessTokenType;
+            this.AccessToken = accessToken;
+            this.ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
+            this.ExtendedExpiresOn = DateTime.SpecifyKind(extendedExpiresOn.DateTime, DateTimeKind.Utc);
+        }
         /// <summary>
         /// Gets the type of the Access Token returned. 
         /// </summary>
@@ -72,6 +86,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         [DataMember]
         public DateTimeOffset ExpiresOn { get; internal set; }
+
+        /// <summary>
+        /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid in ADAL's extended LifeTime.
+        /// This value is calculated based on current UTC time measured locally and the value ext_expiresIn received from the service.
+        /// </summary>
+        [DataMember]
+        internal DateTimeOffset ExtendedExpiresOn { get; set; }
+
+        /// <summary>
+        /// Gives information to the developer whether token returned is during normal or extended lifetime.
+        /// </summary>
+        [DataMember]
+        public bool ExtendedLifeTimeToken { get; internal set; }
 
         /// <summary>
         /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is not returned by the service.
