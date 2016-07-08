@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,19 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
+using AppKit;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace AdalMacTestApp
 {
-    internal class DeviceAuthHelper : IDeviceAuthHelper
+    static class MainClass
     {
-        public bool CanHandleDeviceAuthChallenge { get { return false; } }
-
-        public Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
+        static void Main(string[] args)
         {
-            return Task.FromResult(string.Format(CultureInfo.InvariantCulture, @"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData[BrokerConstants.ChallengeResponseContext], challengeData[BrokerConstants.ChallengeResponseVersion]));
+            NSApplication.Init();
+            NSApplication.Main(args);
         }
     }
 }

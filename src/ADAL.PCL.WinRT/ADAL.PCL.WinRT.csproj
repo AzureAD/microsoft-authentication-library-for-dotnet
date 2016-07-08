@@ -126,7 +126,7 @@
     <Compile Include="..\ADAL.Common\Logger.cs">
       <Link>Logger.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.PCL.Desktop\PromptBehavior.cs">
+    <Compile Include="..\ADAL.Common\PromptBehavior.cs">
       <Link>PromptBehavior.cs</Link>
     </Compile>
     <Compile Include="..\ADAL.PCL\AdalOption.cs">

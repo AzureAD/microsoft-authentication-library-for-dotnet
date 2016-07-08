@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,19 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class DeviceAuthHelper : IDeviceAuthHelper
+    class RequestData
     {
-        public bool CanHandleDeviceAuthChallenge { get { return false; } }
+        public Authenticator Authenticator { get; set; }
 
-        public Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
-        {
-            return Task.FromResult(string.Format(CultureInfo.InvariantCulture, @"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData[BrokerConstants.ChallengeResponseContext], challengeData[BrokerConstants.ChallengeResponseVersion]));
-        }
+        public TokenCache TokenCache { get; set; }
+
+        public string Resource { get; set; }
+
+        public ClientKey ClientKey { get; set; }
+
+        public TokenSubjectType SubjectType { get; set; }
+
+        public bool ExtendedLifeTimeEnabled { get; set; }
+
     }
 }

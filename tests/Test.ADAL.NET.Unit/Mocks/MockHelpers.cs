@@ -72,6 +72,34 @@ namespace Test.ADAL.NET.Unit.Mocks
             return responseMessage;
         }
 
+        public static HttpResponseMessage CreateResiliencyMessage(HttpStatusCode statusCode)
+        {
+            HttpResponseMessage responseMessage = null;
+            HttpContent content = null;
+
+            switch ((int)statusCode)
+            {
+                case 500:
+                    responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                    content = new StringContent("Internal Server Error");
+                    break;
+                case 503:
+                    responseMessage = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+                    content = new StringContent("Service Unavailable");
+                    break;
+                case 504:
+                    responseMessage = new HttpResponseMessage(HttpStatusCode.GatewayTimeout);
+                    content = new StringContent("Gateway Timeout");
+                    break;
+            }
+
+            if (responseMessage != null)
+            {
+                responseMessage.Content = content;
+            }            
+            return responseMessage;
+        }
+
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage()
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
@@ -84,7 +112,7 @@ namespace Test.ADAL.NET.Unit.Mocks
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string resource)
         {
-            string idToken = string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", CreateIdToken(uniqueId, displayableId));
+            string idToken = string.Format(CultureInfo.InvariantCulture, "{0}", CreateIdToken(uniqueId, displayableId));
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
             HttpContent content =
                 new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"resource\":\"" +
@@ -114,7 +142,7 @@ namespace Test.ADAL.NET.Unit.Mocks
                         "\"tid\": \"some-tenant-id\"," +
                         "\"ver\": \"2.0\"}";
 
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.", Base64UrlEncoder.Encode(header), Base64UrlEncoder.Encode(payload));
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.signature", Base64UrlEncoder.Encode(header), Base64UrlEncoder.Encode(payload));
         }
     }
 }
