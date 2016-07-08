@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private const string DeviceAuthHeaderValue = "1.0";
         private const string WwwAuthenticateHeader = "WWW-Authenticate";
         private const string PKeyAuthName = "PKeyAuth";
-        private const int DelayTimePeriod = 1000;
+        private const int DelayTimePeriodMilliSeconds = 1000;
 
         internal bool Resiliency = false;
         internal bool RetryOnce = true;
@@ -110,13 +110,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         {
                             if (RetryOnce)
                             {
-                                await Task.Delay(DelayTimePeriod);
+                                PlatformPlugin.Logger.Information(this.CallState,"Status code:-"+ ex.WebResponse.StatusCode + ex.InnerException + "Retrying one more time..");
+                                await Task.Delay(DelayTimePeriodMilliSeconds);
                                 RetryOnce = false;
-                                PlatformPlugin.Logger.Information(this.CallState, "WebResponse is not a success due to :-" + ex.InnerException + "Retrying one more time..");
                                 return await this.GetResponseAsync<T>(respondToDeviceAuthChallenge);
                             }
                                 Resiliency = true;
-                                PlatformPlugin.Logger.Information(this.CallState,ex.InnerException + "Retry Failed.Client Resiliency feature enabled");
+                                PlatformPlugin.Logger.Information(this.CallState,ex.InnerException + "Retry Failed.");
                         }
                     }
                     else
