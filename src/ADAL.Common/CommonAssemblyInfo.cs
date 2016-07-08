@@ -32,15 +32,12 @@ using System.Reflection;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCulture("")]
-[assembly: AssemblyCompany("Microsoft Open Technologies")]
-[assembly: AssemblyCopyright("Copyright (c) Microsoft Open Technologies. All rights reserved.")]
+[assembly: AssemblyCompany("Microsoft Corporation")]
+[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
 [assembly: AssemblyTrademark("")]
+[assembly: AssemblyMetadata("Serviceable", "True")]
 
-[assembly: AssemblyVersion("3.10.0.0")]
-
-// Keep major and minor versions in AssemblyFileVersion in sync with AssemblyVersion.
-// Build and revision numbers are replaced on build machine for official builds.
-[assembly: AssemblyFileVersion("3.10.00000.0000")]
+[assembly: AssemblyVersion("3.11.0.0")]
 
 // On official build, attribute AssemblyInformationalVersionAttribute is added as well
 // with its value equal to the hash of the last commit to the git branch.
