@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (ex.InnerException is TaskCanceledException)
                 {
                     Resiliency = true;
-                    PlatformPlugin.Logger.Information(this.CallState, ex.InnerException.Message + "Network timeout.");
+                    PlatformPlugin.Logger.Information(this.CallState, "Network timeout - " + ex.InnerException.Message);
                 }
                 if (!this.isDeviceAuthChallenge(ex.WebResponse, respondToDeviceAuthChallenge))
                 {
@@ -110,13 +110,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         {
                             if (RetryOnce)
                             {
-                                PlatformPlugin.Logger.Information(this.CallState,"Status code:-"+ ex.WebResponse.StatusCode + ex.InnerException.Message + "Retrying one more time..");
+                                PlatformPlugin.Logger.Information(this.CallState,"HttpStatus code: "+ ex.WebResponse.StatusCode + " - " + ex.InnerException.Message );
                                 await Task.Delay(DelayTimePeriodMilliSeconds);
                                 RetryOnce = false;
+                                PlatformPlugin.Logger.Information(this.CallState,"Retrying one more time..");
                                 return await this.GetResponseAsync<T>(respondToDeviceAuthChallenge);
                             }
                                 Resiliency = true;
-                                PlatformPlugin.Logger.Information(this.CallState,ex.InnerException.Message + "Retry Failed.");
+                                PlatformPlugin.Logger.Information(this.CallState, "Retry Failed - "+ ex.InnerException.Message );
                         }
                     }
                     else
