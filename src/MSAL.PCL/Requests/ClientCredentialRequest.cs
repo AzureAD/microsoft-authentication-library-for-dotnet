@@ -25,49 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Handlers
+namespace Microsoft.Identity.Client.Requests
 {
-    internal class AcquireTokenSilentHandler : AcquireTokenHandlerBase
+    internal class ClientCredentialRequest : BaseRequest
     {
-
-
-        public AcquireTokenSilentHandler(HandlerData handlerData, string userIdentifer, IPlatformParameters parameters, bool forceRefresh) 
-            : this(handlerData, (User)null, parameters, forceRefresh)
+        public ClientCredentialRequest(RequestData requestData)
+            : base(requestData)
         {
-            this.User = this.MapIdentifierToUser(userIdentifer);
-            PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
             this.SupportADFS = false;
         }
 
-        public AcquireTokenSilentHandler(HandlerData handlerData, User user, IPlatformParameters parameters, bool forceRefresh)
-            : base(handlerData)
+        protected override HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
         {
-            if (user != null)
-            {
-                this.User = user;
-            }
-
-            PlatformPlugin.BrokerHelper.PlatformParameters = parameters;    
-            this.SupportADFS = false;
-            this.ForceRefresh = forceRefresh;
-        }
-
-        protected override Task<AuthenticationResultEx> SendTokenRequestAsync()
-        {
-            if (ResultEx == null)
-            {
-                PlatformPlugin.Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
-                throw new MsalSilentTokenAcquisitionException();
-            }
-
-            throw new MsalSilentTokenAcquisitionException(ResultEx.Exception);
+            return inputScope;
         }
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
-        {            
+        {
+            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.ClientCredentials;
         }
     }
 }

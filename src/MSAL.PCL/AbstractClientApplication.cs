@@ -28,9 +28,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Handlers;
 using Microsoft.Identity.Client.Internal;
 using System.Globalization;
+using Microsoft.Identity.Client.Requests;
 
 namespace Microsoft.Identity.Client
 {
@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Client
                 parameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var handler = new AcquireTokenSilentHandler(this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), userIdentifier,  parameters, forceRefresh);
+            var handler = new SilentRequest(this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), userIdentifier,  parameters, forceRefresh);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
@@ -209,13 +209,13 @@ namespace Microsoft.Identity.Client
                 parameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var handler = new AcquireTokenSilentHandler(this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), user, parameters, forceRefresh);
+            var handler = new SilentRequest(this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), user, parameters, forceRefresh);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal virtual HandlerData GetHandlerData(Authenticator authenticator, string[] scope, string policy, TokenCache cache)
+        internal virtual RequestData GetHandlerData(Authenticator authenticator, string[] scope, string policy, TokenCache cache)
         {
-            return new HandlerData
+            return new RequestData
             {
                 Authenticator = authenticator,
                 Scope = scope,

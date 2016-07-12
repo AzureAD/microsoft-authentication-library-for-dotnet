@@ -29,7 +29,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Handlers;
+using Microsoft.Identity.Client.Requests;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 
@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client
 
         private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(Authenticator authenticator, string[] scope, UserCredential userCredential, string policy)
         {
-            var handler = new AcquireTokenNonInteractiveHandler(this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), userCredential);
+            var handler = new SilentWebUiRequest(this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), userCredential);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Client
             }
 
             var handler =
-                new AcquireTokenInteractiveHandler(
+                new InteractiveRequest(
                     this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), additionalScope, redirectUri,
                     this.PlatformParameters, loginHint, uiOptions, extraQueryParameters,
                     this.CreateWebAuthenticationDialog(this.PlatformParameters));
@@ -237,17 +237,17 @@ namespace Microsoft.Identity.Client
             }
 
             var handler =
-                new AcquireTokenInteractiveHandler(
+                new InteractiveRequest(
                     this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), additionalScope, redirectUri,
                     this.PlatformParameters, user, uiOptions, extraQueryParameters,
                     this.CreateWebAuthenticationDialog(this.PlatformParameters));
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal override HandlerData GetHandlerData(Authenticator authenticator, string[] scope, string policy,
+        internal override RequestData GetHandlerData(Authenticator authenticator, string[] scope, string policy,
             TokenCache cache)
         {
-            HandlerData data = base.GetHandlerData(authenticator, scope, policy, cache);
+            RequestData data = base.GetHandlerData(authenticator, scope, policy, cache);
             data.ClientKey = new ClientKey(this.ClientId);
 
             return data;

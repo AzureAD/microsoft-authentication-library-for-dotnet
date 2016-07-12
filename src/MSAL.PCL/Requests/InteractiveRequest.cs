@@ -33,9 +33,9 @@ using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using System.Globalization;
 
-namespace Microsoft.Identity.Client.Handlers
+namespace Microsoft.Identity.Client.Requests
 {
-    internal class AcquireTokenInteractiveHandler : AcquireTokenHandlerBase
+    internal class InteractiveRequest : BaseRequest
     {
 
         internal AuthorizationResult authorizationResult;
@@ -50,16 +50,16 @@ namespace Microsoft.Identity.Client.Handlers
         private readonly UiOptions? _uiOptions;
 
 
-        public AcquireTokenInteractiveHandler(HandlerData handlerData,
+        public InteractiveRequest(RequestData requestData,
             string[] additionalScope, Uri redirectUri, IPlatformParameters parameters, User user,
-            UiOptions uiOptions, string extraQueryParameters, IWebUI webUI) :this(handlerData, additionalScope, redirectUri, parameters, user?.DisplayableId, uiOptions, extraQueryParameters, webUI)
+            UiOptions uiOptions, string extraQueryParameters, IWebUI webUI) :this(requestData, additionalScope, redirectUri, parameters, user?.DisplayableId, uiOptions, extraQueryParameters, webUI)
         {
             this.User = user;
         }
 
-        public AcquireTokenInteractiveHandler(HandlerData handlerData,
+        public InteractiveRequest(RequestData requestData,
             string[] additionalScope, Uri redirectUri, IPlatformParameters parameters, string loginHint, UiOptions? uiOptions, string extraQueryParameters, IWebUI webUI)
-            : base(handlerData)
+            : base(requestData)
         {
             this._redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
 

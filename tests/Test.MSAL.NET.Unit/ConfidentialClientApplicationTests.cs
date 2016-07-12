@@ -62,7 +62,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
             Assert.IsNotNull(app.ClientCredential);
             Assert.IsNotNull(app.ClientCredential.Secret);
-            Assert.AreEqual("secret", app.ClientCredential.Secret);
+            Assert.AreEqual(TestConstants.DefaultClientSecret, app.ClientCredential.Secret);
             Assert.IsNull(app.ClientCredential.Certificate);
             Assert.IsNull(app.ClientCredential.ClientAssertion);
             Assert.AreEqual(0, app.ClientCredential.ValidTo);

@@ -25,27 +25,48 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.Requests;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Handlers
+namespace Microsoft.Identity.Client.Requests
 {
-    internal class AcquireTokenForClientHandler : AcquireTokenHandlerBase
+    internal class SilentRequest : BaseRequest
     {
-        public AcquireTokenForClientHandler(HandlerData handlerData)
-            : base(handlerData)
+        public SilentRequest(RequestData requestData, string userIdentifer, IPlatformParameters parameters, bool forceRefresh) 
+            : this(requestData, (User)null, parameters, forceRefresh)
         {
+            this.User = this.MapIdentifierToUser(userIdentifer);
+            PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
             this.SupportADFS = false;
         }
 
-        protected override HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
+        public SilentRequest(RequestData requestData, User user, IPlatformParameters parameters, bool forceRefresh)
+            : base(requestData)
         {
-            return inputScope;
+            if (user != null)
+            {
+                this.User = user;
+            }
+
+            PlatformPlugin.BrokerHelper.PlatformParameters = parameters;    
+            this.SupportADFS = false;
+            this.ForceRefresh = forceRefresh;
+        }
+
+        protected override Task<AuthenticationResultEx> SendTokenRequestAsync()
+        {
+            if (ResultEx == null)
+            {
+                PlatformPlugin.Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
+                throw new MsalSilentTokenAcquisitionException();
+            }
+
+            throw new MsalSilentTokenAcquisitionException(ResultEx.Exception);
         }
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
-        {
-            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.ClientCredentials;
+        {            
         }
     }
 }

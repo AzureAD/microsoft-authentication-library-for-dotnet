@@ -28,16 +28,15 @@
 using System;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Handlers
+namespace Microsoft.Identity.Client.Requests
 {
-    class AcquireTokenByAuthorizationCodeHandler : AcquireTokenHandlerBase
+    class AuthorizationCodeRequest : BaseRequest
     {
         private readonly string authorizationCode;
-
         private readonly Uri redirectUri;
 
-        public AcquireTokenByAuthorizationCodeHandler(HandlerData handlerData, string authorizationCode, Uri redirectUri)
-            : base(handlerData)
+        public AuthorizationCodeRequest(RequestData requestData, string authorizationCode, Uri redirectUri)
+            : base(requestData)
         {
             if (string.IsNullOrWhiteSpace(authorizationCode))
             {

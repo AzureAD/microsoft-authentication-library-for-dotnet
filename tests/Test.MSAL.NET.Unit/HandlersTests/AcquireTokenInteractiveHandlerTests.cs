@@ -31,7 +31,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Handlers;
+using Microsoft.Identity.Client.Requests;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -39,7 +39,7 @@ using NSubstitute;
 using Test.MSAL.Common.Unit;
 using Test.MSAL.NET.Unit.Mocks;
 
-namespace Test.MSAL.NET.Unit.HandlersTests
+namespace Test.MSAL.NET.Unit.RequestsTests
 {
     [TestClass]
     public class AcquireTokenInteractiveHandlerTests
@@ -81,7 +81,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             mockHandler.ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage();
             HttpMessageHandlerFactory.MockHandler = mockHandler;
 
-            HandlerData data = new HandlerData()
+            RequestData data = new RequestData()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -91,11 +91,11 @@ namespace Test.MSAL.NET.Unit.HandlersTests
                 TokenCache = cache
             };
 
-            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+            InteractiveRequest request = new InteractiveRequest(data,
                 TestConstants.ScopeForAnotherResource.ToArray(),
                 new Uri("some://uri"), new PlatformParameters(), TestConstants.DefaultDisplayableId,
                 UiOptions.SelectAccount, "extra=qp", ui);
-            Task<AuthenticationResult> task = handler.RunAsync();
+            Task<AuthenticationResult> task = request.RunAsync();
             task.Wait();
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
@@ -139,7 +139,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
                     webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
                         TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
 
-                    HandlerData data = new HandlerData()
+                    RequestData data = new RequestData()
                     {
                         Authenticator = authenticator,
                         ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -149,7 +149,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
                         TokenCache = cache
                     };
 
-                    AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+                    InteractiveRequest handler = new InteractiveRequest(data,
                         TestConstants.ScopeForAnotherResource.ToArray(),
                         new Uri("some://uri"), new PlatformParameters(),
                         ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", webUi);
@@ -185,7 +185,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
 
-            HandlerData data = new HandlerData()
+            RequestData data = new RequestData()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -195,12 +195,12 @@ namespace Test.MSAL.NET.Unit.HandlersTests
                 TokenCache = cache
             };
 
-            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+            InteractiveRequest request = new InteractiveRequest(data,
                 TestConstants.ScopeForAnotherResource.ToArray(),
                 new Uri("some://uri"), new PlatformParameters(),
                 ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", webUi);
-            handler.PreRunAsync().Wait();
-            handler.PreTokenRequest().Wait();
+            request.PreRunAsync().Wait();
+            request.PreTokenRequest().Wait();
         }
 
 
@@ -212,7 +212,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             try
             {
 
-                HandlerData data = new HandlerData()
+                RequestData data = new RequestData()
                 {
                     Authenticator = authenticator,
                     ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -222,7 +222,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
                     TokenCache = null
                 };
 
-                AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data, TestConstants.ScopeForAnotherResource.ToArray(),
+                InteractiveRequest request = new InteractiveRequest(data, TestConstants.ScopeForAnotherResource.ToArray(),
                     new Uri("some://uri#fragment=not-so-good"), new PlatformParameters(),
                     (string) null, UiOptions.ForceLogin, "extra=qp", new MockWebUI()
                     );
@@ -244,7 +244,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             try
             {
 
-                HandlerData data = new HandlerData()
+                RequestData data = new RequestData()
                 {
                     Authenticator = authenticator,
                     ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -254,7 +254,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
                     TokenCache = cache
                 };
 
-                AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+                InteractiveRequest request = new InteractiveRequest(data,
                     TestConstants.ScopeForAnotherResource.ToArray(),
                     new Uri("some://uri"), new PlatformParameters(),
                     new User {UniqueId = TestConstants.DefaultUniqueId}, UiOptions.ForceLogin, "extra=qp",
@@ -279,7 +279,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
                 TestConstants.DefaultAuthorityHomeTenant + "?error="+OAuthError.LoginRequired);
 
-            HandlerData data = new HandlerData()
+            RequestData data = new RequestData()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -289,13 +289,13 @@ namespace Test.MSAL.NET.Unit.HandlersTests
                 TokenCache = null
             };
 
-            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+            InteractiveRequest request = new InteractiveRequest(data,
                 TestConstants.ScopeForAnotherResource.ToArray(), new Uri("some://uri"), new PlatformParameters(),
                 (string) null, UiOptions.ForceLogin, "extra=qp", webUi);
-            handler.PreRunAsync().Wait();
+            request.PreRunAsync().Wait();
             try
             {
-                handler.PreTokenRequest().Wait();
+                request.PreTokenRequest().Wait();
                 Assert.Fail("MsalException should have been thrown here");
             }
             catch (Exception exc)
@@ -309,14 +309,14 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
                 TestConstants.DefaultAuthorityHomeTenant + "?error=invalid_request&error_description=some error description");
 
-            handler = new AcquireTokenInteractiveHandler(data,
+            request = new InteractiveRequest(data,
                 TestConstants.ScopeForAnotherResource.ToArray(), new Uri("some://uri"), new PlatformParameters(),
                 (string)null, UiOptions.ForceLogin, "extra=qp", webUi);
-            handler.PreRunAsync().Wait();
+            request.PreRunAsync().Wait();
 
             try
             {
-                handler.PreTokenRequest().Wait();
+                request.PreTokenRequest().Wait();
                 Assert.Fail("MsalException should have been thrown here");
             }
             catch (Exception exc)
@@ -335,7 +335,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             try
             {
 
-                HandlerData data = new HandlerData()
+                RequestData data = new RequestData()
                 {
                     Authenticator = authenticator,
                     ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -345,7 +345,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
                     TokenCache = null
                 };
 
-                AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+                InteractiveRequest request = new InteractiveRequest(data,
                     TestConstants.ScopeForAnotherResource.ToArray(),
                     new Uri("some://uri"), new PlatformParameters(),
                     (string) null, UiOptions.ActAsCurrentUser, "extra=qp", new MockWebUI());
@@ -364,7 +364,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
             try
             {
-                HandlerData data = new HandlerData()
+                RequestData data = new RequestData()
                 {
                     Authenticator = authenticator,
                     ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -374,7 +374,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
                     TokenCache = null
                 };
 
-                AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+                InteractiveRequest request = new InteractiveRequest(data,
                     TestConstants.ScopeForAnotherResource.ToArray(), new Uri("some://uri"), new PlatformParameters(),
                     (User) null, UiOptions.ActAsCurrentUser, "extra=qp", new MockWebUI());
                 Assert.Fail("ArgumentException should be thrown here");
@@ -391,7 +391,7 @@ namespace Test.MSAL.NET.Unit.HandlersTests
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
 
-            HandlerData data = new HandlerData()
+            RequestData data = new RequestData()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -401,15 +401,15 @@ namespace Test.MSAL.NET.Unit.HandlersTests
                 TokenCache = null
             };
 
-            AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(data,
+            InteractiveRequest request = new InteractiveRequest(data,
                 TestConstants.ScopeForAnotherResource.ToArray(),
                 new Uri("some://uri"), new PlatformParameters(),
                 (User) null, UiOptions.ForceLogin, "extra=qp&prompt=login", new MockWebUI());
-            handler.PreRunAsync().Wait();
+            request.PreRunAsync().Wait();
 
             try
             {
-                    handler.PreTokenRequest().Wait();
+                    request.PreTokenRequest().Wait();
                     Assert.Fail("MsalException should be thrown here");
             }
             catch (Exception exc)
