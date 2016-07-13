@@ -29,7 +29,7 @@ using System.Threading;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    internal class RequestData
+    internal class AuthenticationRequestParameters
     {
         public Authenticator Authenticator { get; set; }
 
