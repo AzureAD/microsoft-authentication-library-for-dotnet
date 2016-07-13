@@ -37,8 +37,8 @@ namespace Microsoft.Identity.Client.Requests
         private readonly UserCredential userCredential;
         private UserAssertion userAssertion;
         
-        public SilentWebUiRequest(RequestData requestData, UserCredential userCredential)
-            : base(requestData)
+        public SilentWebUiRequest(AuthenticationRequestParameters authenticationRequestParameters, UserCredential userCredential)
+            : base(authenticationRequestParameters)
         {
             if (userCredential == null)
             {
@@ -48,8 +48,8 @@ namespace Microsoft.Identity.Client.Requests
             this.userCredential = userCredential;
         }
 
-        public SilentWebUiRequest(RequestData requestData, UserAssertion userAssertion)
-            : base(requestData)
+        public SilentWebUiRequest(AuthenticationRequestParameters authenticationRequestParameters, UserAssertion userAssertion)
+            : base(authenticationRequestParameters)
         {
             if (userAssertion == null)
             {

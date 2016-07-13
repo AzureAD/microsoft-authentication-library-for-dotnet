@@ -35,8 +35,8 @@ namespace Microsoft.Identity.Client.Requests
         private readonly string authorizationCode;
         private readonly Uri redirectUri;
 
-        public AuthorizationCodeRequest(RequestData requestData, string authorizationCode, Uri redirectUri)
-            : base(requestData)
+        public AuthorizationCodeRequest(AuthenticationRequestParameters authenticationRequestParameters, string authorizationCode, Uri redirectUri)
+            : base(authenticationRequestParameters)
         {
             if (string.IsNullOrWhiteSpace(authorizationCode))
             {

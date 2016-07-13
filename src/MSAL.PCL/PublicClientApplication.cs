@@ -244,13 +244,13 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal override RequestData GetHandlerData(Authenticator authenticator, string[] scope, string policy,
+        internal override AuthenticationRequestParameters GetHandlerData(Authenticator authenticator, string[] scope, string policy,
             TokenCache cache)
         {
-            RequestData data = base.GetHandlerData(authenticator, scope, policy, cache);
-            data.ClientKey = new ClientKey(this.ClientId);
+            AuthenticationRequestParameters parameters = base.GetHandlerData(authenticator, scope, policy, cache);
+            parameters.ClientKey = new ClientKey(this.ClientId);
 
-            return data;
+            return parameters;
         }
 
     }

@@ -47,7 +47,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
                 Guid.NewGuid());
             TokenCache cache = new TokenCache();
-            RequestData data = new RequestData()
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -57,20 +57,20 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 TokenCache = cache
             };
 
-            SilentRequest request = new SilentRequest(data, (string) null,
+            SilentRequest request = new SilentRequest(parameters, (string) null,
                 new PlatformParameters(), false);
             Assert.IsNotNull(request);
 
-            request = new SilentRequest(data, (User) null, new PlatformParameters(), false);
+            request = new SilentRequest(parameters, (User) null, new PlatformParameters(), false);
             Assert.IsNotNull(request);
 
-            request = new SilentRequest(data, TestConstants.DefaultDisplayableId, new PlatformParameters(), false);
+            request = new SilentRequest(parameters, TestConstants.DefaultDisplayableId, new PlatformParameters(), false);
             Assert.IsNotNull(request);
 
-            request = new SilentRequest(data, TestConstants.DefaultUniqueId, new PlatformParameters(), false);
+            request = new SilentRequest(parameters, TestConstants.DefaultUniqueId, new PlatformParameters(), false);
             Assert.IsNotNull(request);
 
-            request = new SilentRequest(data, TestConstants.DefaultUser, new PlatformParameters(), false);
+            request = new SilentRequest(parameters, TestConstants.DefaultUser, new PlatformParameters(), false);
             Assert.IsNotNull(request);
         }
 
@@ -82,7 +82,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
                 Guid.NewGuid());
             TokenCache cache = new TokenCache();
-            RequestData data = new RequestData()
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -92,7 +92,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 TokenCache = cache
             };
 
-            SilentRequest request = new SilentRequest(data, (string)null,
+            SilentRequest request = new SilentRequest(parameters, (string)null,
                 new PlatformParameters(), false);
             User user = request.MapIdentifierToUser(null);
             Assert.IsNull(user);
@@ -105,7 +105,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
                 Guid.NewGuid());
             TokenCache cache = new TokenCache();
-            RequestData data = new RequestData()
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -115,7 +115,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 TokenCache = cache
             };
 
-            SilentRequest request = new SilentRequest(data, (string) null,
+            SilentRequest request = new SilentRequest(parameters, (string) null,
                 new PlatformParameters(), false);
             User user = request.MapIdentifierToUser(TestConstants.DefaultUniqueId);
             Assert.IsNull(user);
@@ -128,7 +128,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
                 Guid.NewGuid());
             TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
-            RequestData data = new RequestData()
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -138,7 +138,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 TokenCache = cache
             };
 
-            SilentRequest request = new SilentRequest(data, (string)null,
+            SilentRequest request = new SilentRequest(parameters, (string)null,
                 new PlatformParameters(), false);
             User user = request.MapIdentifierToUser(TestConstants.DefaultUniqueId);
             Assert.IsNotNull(user);
@@ -173,7 +173,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             cache.tokenCacheDictionary[key] = ex;
 
 
-            RequestData data = new RequestData()
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -183,7 +183,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 TokenCache = cache
             };
 
-            SilentRequest request = new SilentRequest(data, (string) null,
+            SilentRequest request = new SilentRequest(parameters, (string) null,
                 new PlatformParameters(), false);
             User user = request.MapIdentifierToUser(TestConstants.DefaultUniqueId);
             Assert.IsNotNull(user);
@@ -198,7 +198,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Guid.NewGuid());
             TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
 
-            RequestData data = new RequestData()
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -214,7 +214,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
             };
 
-            SilentRequest request = new SilentRequest(data, (string)null,
+            SilentRequest request = new SilentRequest(parameters, (string)null,
                 new PlatformParameters(), false);
             Task<AuthenticationResult> task = request.RunAsync();
             AuthenticationResult result = task.Result;
@@ -232,7 +232,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Guid.NewGuid());
             TokenCache cache = new TokenCache();
 
-            RequestData data = new RequestData()
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -250,7 +250,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             try
             {
-                SilentRequest request = new SilentRequest(data, (string) null,
+                SilentRequest request = new SilentRequest(parameters, (string) null,
                     new PlatformParameters(), false);
                 Task<AuthenticationResult> task = request.RunAsync();
                 var authenticationResult = task.Result;

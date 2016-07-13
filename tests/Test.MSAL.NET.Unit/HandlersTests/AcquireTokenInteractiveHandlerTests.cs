@@ -81,7 +81,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             mockHandler.ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage();
             HttpMessageHandlerFactory.MockHandler = mockHandler;
 
-            RequestData data = new RequestData()
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -91,7 +91,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 TokenCache = cache
             };
 
-            InteractiveRequest request = new InteractiveRequest(data,
+            InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
                 new Uri("some://uri"), new PlatformParameters(), TestConstants.DefaultDisplayableId,
                 UiOptions.SelectAccount, "extra=qp", ui);
@@ -139,7 +139,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
                         TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
 
-                    RequestData data = new RequestData()
+                    AuthenticationRequestParameters data = new AuthenticationRequestParameters()
                     {
                         Authenticator = authenticator,
                         ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -185,7 +185,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
 
-            RequestData data = new RequestData()
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -195,7 +195,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 TokenCache = cache
             };
 
-            InteractiveRequest request = new InteractiveRequest(data,
+            InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
                 new Uri("some://uri"), new PlatformParameters(),
                 ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", webUi);
@@ -212,7 +212,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             try
             {
 
-                RequestData data = new RequestData()
+                AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authenticator = authenticator,
                     ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -222,7 +222,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     TokenCache = null
                 };
 
-                InteractiveRequest request = new InteractiveRequest(data, TestConstants.ScopeForAnotherResource.ToArray(),
+                InteractiveRequest request = new InteractiveRequest(parameters, TestConstants.ScopeForAnotherResource.ToArray(),
                     new Uri("some://uri#fragment=not-so-good"), new PlatformParameters(),
                     (string) null, UiOptions.ForceLogin, "extra=qp", new MockWebUI()
                     );
@@ -244,7 +244,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             try
             {
 
-                RequestData data = new RequestData()
+                AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authenticator = authenticator,
                     ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -254,7 +254,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     TokenCache = cache
                 };
 
-                InteractiveRequest request = new InteractiveRequest(data,
+                InteractiveRequest request = new InteractiveRequest(parameters,
                     TestConstants.ScopeForAnotherResource.ToArray(),
                     new Uri("some://uri"), new PlatformParameters(),
                     new User {UniqueId = TestConstants.DefaultUniqueId}, UiOptions.ForceLogin, "extra=qp",
@@ -279,7 +279,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
                 TestConstants.DefaultAuthorityHomeTenant + "?error="+OAuthError.LoginRequired);
 
-            RequestData data = new RequestData()
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -289,7 +289,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 TokenCache = null
             };
 
-            InteractiveRequest request = new InteractiveRequest(data,
+            InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(), new Uri("some://uri"), new PlatformParameters(),
                 (string) null, UiOptions.ForceLogin, "extra=qp", webUi);
             request.PreRunAsync().Wait();
@@ -309,7 +309,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
                 TestConstants.DefaultAuthorityHomeTenant + "?error=invalid_request&error_description=some error description");
 
-            request = new InteractiveRequest(data,
+            request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(), new Uri("some://uri"), new PlatformParameters(),
                 (string)null, UiOptions.ForceLogin, "extra=qp", webUi);
             request.PreRunAsync().Wait();
@@ -335,7 +335,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             try
             {
 
-                RequestData data = new RequestData()
+                AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authenticator = authenticator,
                     ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -345,7 +345,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     TokenCache = null
                 };
 
-                InteractiveRequest request = new InteractiveRequest(data,
+                InteractiveRequest request = new InteractiveRequest(parameters,
                     TestConstants.ScopeForAnotherResource.ToArray(),
                     new Uri("some://uri"), new PlatformParameters(),
                     (string) null, UiOptions.ActAsCurrentUser, "extra=qp", new MockWebUI());
@@ -364,7 +364,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
             try
             {
-                RequestData data = new RequestData()
+                AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authenticator = authenticator,
                     ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -374,7 +374,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     TokenCache = null
                 };
 
-                InteractiveRequest request = new InteractiveRequest(data,
+                InteractiveRequest request = new InteractiveRequest(parameters,
                     TestConstants.ScopeForAnotherResource.ToArray(), new Uri("some://uri"), new PlatformParameters(),
                     (User) null, UiOptions.ActAsCurrentUser, "extra=qp", new MockWebUI());
                 Assert.Fail("ArgumentException should be thrown here");
@@ -391,7 +391,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
 
-            RequestData data = new RequestData()
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authenticator = authenticator,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
@@ -401,7 +401,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 TokenCache = null
             };
 
-            InteractiveRequest request = new InteractiveRequest(data,
+            InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
                 new Uri("some://uri"), new PlatformParameters(),
                 (User) null, UiOptions.ForceLogin, "extra=qp&prompt=login", new MockWebUI());

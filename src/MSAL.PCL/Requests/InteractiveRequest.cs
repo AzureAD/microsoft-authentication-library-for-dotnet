@@ -50,16 +50,16 @@ namespace Microsoft.Identity.Client.Requests
         private readonly UiOptions? _uiOptions;
 
 
-        public InteractiveRequest(RequestData requestData,
+        public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
             string[] additionalScope, Uri redirectUri, IPlatformParameters parameters, User user,
-            UiOptions uiOptions, string extraQueryParameters, IWebUI webUI) :this(requestData, additionalScope, redirectUri, parameters, user?.DisplayableId, uiOptions, extraQueryParameters, webUI)
+            UiOptions uiOptions, string extraQueryParameters, IWebUI webUI) :this(authenticationRequestParameters, additionalScope, redirectUri, parameters, user?.DisplayableId, uiOptions, extraQueryParameters, webUI)
         {
             this.User = user;
         }
 
-        public InteractiveRequest(RequestData requestData,
+        public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
             string[] additionalScope, Uri redirectUri, IPlatformParameters parameters, string loginHint, UiOptions? uiOptions, string extraQueryParameters, IWebUI webUI)
-            : base(requestData)
+            : base(authenticationRequestParameters)
         {
             this._redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
 

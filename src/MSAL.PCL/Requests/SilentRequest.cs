@@ -33,16 +33,16 @@ namespace Microsoft.Identity.Client.Requests
 {
     internal class SilentRequest : BaseRequest
     {
-        public SilentRequest(RequestData requestData, string userIdentifer, IPlatformParameters parameters, bool forceRefresh) 
-            : this(requestData, (User)null, parameters, forceRefresh)
+        public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, string userIdentifer, IPlatformParameters parameters, bool forceRefresh) 
+            : this(authenticationRequestParameters, (User)null, parameters, forceRefresh)
         {
             this.User = this.MapIdentifierToUser(userIdentifer);
             PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
             this.SupportADFS = false;
         }
 
-        public SilentRequest(RequestData requestData, User user, IPlatformParameters parameters, bool forceRefresh)
-            : base(requestData)
+        public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, User user, IPlatformParameters parameters, bool forceRefresh)
+            : base(authenticationRequestParameters)
         {
             if (user != null)
             {

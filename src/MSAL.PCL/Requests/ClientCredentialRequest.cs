@@ -32,8 +32,8 @@ namespace Microsoft.Identity.Client.Requests
 {
     internal class ClientCredentialRequest : BaseRequest
     {
-        public ClientCredentialRequest(RequestData requestData)
-            : base(requestData)
+        public ClientCredentialRequest(AuthenticationRequestParameters authenticationRequestParameters)
+            : base(authenticationRequestParameters)
         {
             this.SupportADFS = false;
         }

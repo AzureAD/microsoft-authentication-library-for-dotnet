@@ -36,8 +36,8 @@ namespace Microsoft.Identity.Client.Requests
         private readonly UserAssertion userAssertion;
         private readonly string assertionHash;
 
-        public OnBehalfOfRequest(RequestData requestData, UserAssertion userAssertion)
-            : base(requestData)
+        public OnBehalfOfRequest(AuthenticationRequestParameters authenticationRequestParameters, UserAssertion userAssertion)
+            : base(authenticationRequestParameters)
         {
             if (userAssertion == null)
             {

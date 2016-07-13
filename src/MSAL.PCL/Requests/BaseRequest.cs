@@ -41,27 +41,27 @@ namespace Microsoft.Identity.Client.Requests
         protected readonly bool restrictToSingleUser;
 
 
-        protected BaseRequest(RequestData requestData)
+        protected BaseRequest(AuthenticationRequestParameters authenticationRequestParameters)
         {
-            this.Authenticator = requestData.Authenticator;
+            this.Authenticator = authenticationRequestParameters.Authenticator;
             this.CallState = CreateCallState(this.Authenticator.CorrelationId);
 
             PlatformPlugin.Logger.Information(this.CallState,
                 string.Format(CultureInfo.InvariantCulture,"=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
-                Authenticator.Authority, requestData.Scope.AsSingleString(), requestData.ClientKey.ClientId,
+                Authenticator.Authority, authenticationRequestParameters.Scope.AsSingleString(), authenticationRequestParameters.ClientKey.ClientId,
                 (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(CultureInfo.InvariantCulture," ({0} items)", tokenCache.Count) : "null"));
 
-            this.tokenCache = requestData.TokenCache;
-            this.ClientKey = requestData.ClientKey;
-            this.Policy = requestData.Policy;
-            this.restrictToSingleUser = requestData.RestrictToSingleUser;
+            this.tokenCache = authenticationRequestParameters.TokenCache;
+            this.ClientKey = authenticationRequestParameters.ClientKey;
+            this.Policy = authenticationRequestParameters.Policy;
+            this.restrictToSingleUser = authenticationRequestParameters.RestrictToSingleUser;
 
-            if (MsalStringHelper.IsNullOrEmpty(requestData.Scope))
+            if (MsalStringHelper.IsNullOrEmpty(authenticationRequestParameters.Scope))
             {
                 throw new ArgumentNullException("scope");
             }
             
-            this.Scope = requestData.Scope.CreateSetFromArray();
+            this.Scope = authenticationRequestParameters.Scope.CreateSetFromArray();
             ValidateScopeInput(this.Scope);
 
 

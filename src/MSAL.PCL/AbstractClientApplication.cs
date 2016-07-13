@@ -213,9 +213,9 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal virtual RequestData GetHandlerData(Authenticator authenticator, string[] scope, string policy, TokenCache cache)
+        internal virtual AuthenticationRequestParameters GetHandlerData(Authenticator authenticator, string[] scope, string policy, TokenCache cache)
         {
-            return new RequestData
+            return new AuthenticationRequestParameters
             {
                 Authenticator = authenticator,
                 Scope = scope,
