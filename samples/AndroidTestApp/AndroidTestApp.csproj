@@ -83,11 +83,11 @@
     <Content Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\MSAL.PCL.Android\MSAL.PCL.Android.csproj">
+    <ProjectReference Include="..\..\src\MSAL.PCL.Android\MSAL.PCL.Android.csproj">
       <Project>{0c5100d0-54f2-4075-b604-dde15da218d5}</Project>
       <Name>MSAL.PCL.Android</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\MSAL.PCL\MSAL.PCL.csproj">
+    <ProjectReference Include="..\..\src\MSAL.PCL\MSAL.PCL.csproj">
       <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
       <Name>MSAL.PCL</Name>
     </ProjectReference>

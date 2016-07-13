@@ -30,15 +30,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Handlers
+namespace Microsoft.Identity.Client.Requests
 {
-    internal class AcquireTokenNonInteractiveHandler : AcquireTokenHandlerBase
+    internal class SilentWebUiRequest : BaseRequest
     {
         private readonly UserCredential userCredential;
         private UserAssertion userAssertion;
         
-        public AcquireTokenNonInteractiveHandler(HandlerData handlerData, UserCredential userCredential)
-            : base(handlerData)
+        public SilentWebUiRequest(AuthenticationRequestParameters authenticationRequestParameters, UserCredential userCredential)
+            : base(authenticationRequestParameters)
         {
             if (userCredential == null)
             {
@@ -48,8 +48,8 @@ namespace Microsoft.Identity.Client.Handlers
             this.userCredential = userCredential;
         }
 
-        public AcquireTokenNonInteractiveHandler(HandlerData handlerData, UserAssertion userAssertion)
-            : base(handlerData)
+        public SilentWebUiRequest(AuthenticationRequestParameters authenticationRequestParameters, UserAssertion userAssertion)
+            : base(authenticationRequestParameters)
         {
             if (userAssertion == null)
             {

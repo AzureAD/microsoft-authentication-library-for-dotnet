@@ -29,15 +29,15 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Handlers
+namespace Microsoft.Identity.Client.Requests
 {
-    internal class AcquireTokenOnBehalfHandler : AcquireTokenHandlerBase
+    internal class OnBehalfOfRequest : BaseRequest
     {
         private readonly UserAssertion userAssertion;
         private readonly string assertionHash;
 
-        public AcquireTokenOnBehalfHandler(HandlerData handlerData, UserAssertion userAssertion)
-            : base(handlerData)
+        public OnBehalfOfRequest(AuthenticationRequestParameters authenticationRequestParameters, UserAssertion userAssertion)
+            : base(authenticationRequestParameters)
         {
             if (userAssertion == null)
             {

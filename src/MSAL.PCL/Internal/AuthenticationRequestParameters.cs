@@ -25,27 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using Microsoft.Identity.Client.Internal;
+using System.Threading;
 
-namespace Microsoft.Identity.Client.Handlers
+namespace Microsoft.Identity.Client.Internal
 {
-    internal class AcquireTokenForClientHandler : AcquireTokenHandlerBase
+    internal class AuthenticationRequestParameters
     {
-        public AcquireTokenForClientHandler(HandlerData handlerData)
-            : base(handlerData)
-        {
-            this.SupportADFS = false;
-        }
+        public Authenticator Authenticator { get; set; }
 
-        protected override HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
-        {
-            return inputScope;
-        }
+        public TokenCache TokenCache { get; set; }
 
-        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
-        {
-            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.ClientCredentials;
-        }
+        public string[] Scope { get; set; }
+
+        public ClientKey ClientKey { get; set; }
+
+        public string Policy { get; set; }
+
+        public bool RestrictToSingleUser { get; set; }
     }
 }
