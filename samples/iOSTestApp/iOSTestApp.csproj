@@ -127,11 +127,11 @@
     <Reference Include="Xamarin.iOS" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\MSAL.PCL.iOS\MSAL.PCL.iOS.csproj">
+    <ProjectReference Include="..\..\src\MSAL.PCL.iOS\MSAL.PCL.iOS.csproj">
       <Project>{2f80e14c-b186-4aee-92bc-0de3b6fdb107}</Project>
       <Name>MSAL.PCL.iOS</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\MSAL.PCL\MSAL.PCL.csproj">
+    <ProjectReference Include="..\..\src\MSAL.PCL\MSAL.PCL.csproj">
       <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
       <Name>MSAL.PCL</Name>
     </ProjectReference>

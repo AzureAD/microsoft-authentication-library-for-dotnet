@@ -32,36 +32,36 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Handlers
+namespace Microsoft.Identity.Client.Requests
 {
-    internal abstract class AcquireTokenHandlerBase
+    internal abstract class BaseRequest
     {
         protected readonly static Task CompletedTask = Task.FromResult(false);
         internal readonly TokenCache tokenCache;
         protected readonly bool restrictToSingleUser;
 
 
-        protected AcquireTokenHandlerBase(HandlerData handlerData)
+        protected BaseRequest(AuthenticationRequestParameters authenticationRequestParameters)
         {
-            this.Authenticator = handlerData.Authenticator;
+            this.Authenticator = authenticationRequestParameters.Authenticator;
             this.CallState = CreateCallState(this.Authenticator.CorrelationId);
 
             PlatformPlugin.Logger.Information(this.CallState,
                 string.Format(CultureInfo.InvariantCulture,"=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
-                Authenticator.Authority, handlerData.Scope.AsSingleString(), handlerData.ClientKey.ClientId,
+                Authenticator.Authority, authenticationRequestParameters.Scope.AsSingleString(), authenticationRequestParameters.ClientKey.ClientId,
                 (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(CultureInfo.InvariantCulture," ({0} items)", tokenCache.Count) : "null"));
 
-            this.tokenCache = handlerData.TokenCache;
-            this.ClientKey = handlerData.ClientKey;
-            this.Policy = handlerData.Policy;
-            this.restrictToSingleUser = handlerData.RestrictToSingleUser;
+            this.tokenCache = authenticationRequestParameters.TokenCache;
+            this.ClientKey = authenticationRequestParameters.ClientKey;
+            this.Policy = authenticationRequestParameters.Policy;
+            this.restrictToSingleUser = authenticationRequestParameters.RestrictToSingleUser;
 
-            if (MsalStringHelper.IsNullOrEmpty(handlerData.Scope))
+            if (MsalStringHelper.IsNullOrEmpty(authenticationRequestParameters.Scope))
             {
                 throw new ArgumentNullException("scope");
             }
             
-            this.Scope = handlerData.Scope.CreateSetFromArray();
+            this.Scope = authenticationRequestParameters.Scope.CreateSetFromArray();
             ValidateScopeInput(this.Scope);
 
 

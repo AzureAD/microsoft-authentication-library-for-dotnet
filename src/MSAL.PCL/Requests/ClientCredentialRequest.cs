@@ -28,12 +28,12 @@
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Handlers
+namespace Microsoft.Identity.Client.Requests
 {
-    internal class AcquireTokenForClientHandler : AcquireTokenHandlerBase
+    internal class ClientCredentialRequest : BaseRequest
     {
-        public AcquireTokenForClientHandler(HandlerData handlerData)
-            : base(handlerData)
+        public ClientCredentialRequest(AuthenticationRequestParameters authenticationRequestParameters)
+            : base(authenticationRequestParameters)
         {
             this.SupportADFS = false;
         }

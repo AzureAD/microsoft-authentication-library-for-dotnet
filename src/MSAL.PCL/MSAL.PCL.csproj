@@ -27,7 +27,7 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisRuleSet>Sdl7.0.ruleset</CodeAnalysisRuleSet>
-	<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -40,7 +40,7 @@
     <CodeAnalysisRuleSet>Sdl7.0.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -61,17 +61,17 @@
     <Compile Include="..\MSAL.Common\CommonAssemblyInfo.cs">
       <Link>Internal\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Internal\HandlerData.cs" />
+    <Compile Include="Internal\RequestData.cs" />
     <Compile Include="Internal\HttpMessageHandlerFactory.cs" />
     <Compile Include="Internal\MsalError.cs" />
     <Compile Include="AbstractClientApplication.cs" />
-    <Compile Include="Handlers\AcquireTokenByAuthorizationCodeHandler.cs" />
-    <Compile Include="Handlers\AcquireTokenForClientHandler.cs" />
-    <Compile Include="Handlers\AcquireTokenHandlerBase.cs" />
-    <Compile Include="Handlers\AcquireTokenInteractiveHandler.cs" />
-    <Compile Include="Handlers\AcquireTokenNonInteractiveHandler.cs" />
-    <Compile Include="Handlers\AcquireTokenOnBehalfHandler.cs" />
-    <Compile Include="Handlers\AcquireTokenSilentHandler.cs" />
+    <Compile Include="Requests\AuthorizationCodeRequest.cs" />
+    <Compile Include="Requests\ClientCredentialRequest.cs" />
+    <Compile Include="Requests\BaseRequest.cs" />
+    <Compile Include="Requests\InteractiveRequest.cs" />
+    <Compile Include="Requests\SilentWebUiRequest.cs" />
+    <Compile Include="Requests\OnBehalfOfRequest.cs" />
+    <Compile Include="Requests\SilentRequest.cs" />
     <Compile Include="IClientAssertionCertificate.cs" />
     <Compile Include="LoggerCallbackHandler.cs" />
     <Compile Include="MsalException.cs" />
