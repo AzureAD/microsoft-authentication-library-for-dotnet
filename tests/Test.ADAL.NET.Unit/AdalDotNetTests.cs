@@ -74,6 +74,34 @@ namespace Test.ADAL.NET.Unit
             Assert.IsTrue(context.Authenticator.Authority.EndsWith("/some-tenant-id/"));
             Assert.AreEqual(result.AccessToken, "some-access-token");
             Assert.IsNotNull(result.UserInfo);
+            Assert.AreEqual(result.ExpiresOn, result.ExtendedExpiresOn);
+            Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
+            Assert.AreEqual(TestConstants.DefaultUniqueId, result.UserInfo.UniqueId);
+        }
+
+        [TestMethod]
+        [Description("Positive Test for AcquireToken with extended expires on support")]
+        [TestCategory("AdalDotNet")]
+        public async Task SmokeTestWithExtendedExpiresOn()
+        {
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                TestConstants.DefaultRedirectUri + "?code=some-code"));
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(true)
+            });
+
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, true);
+            AuthenticationResult result =
+                await
+                    context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
+                        TestConstants.DefaultRedirectUri, platformParameters);
+            Assert.IsNotNull(result);
+            Assert.IsTrue(context.Authenticator.Authority.EndsWith("/some-tenant-id/"));
+            Assert.AreEqual(result.AccessToken, "some-access-token");
+            Assert.IsNotNull(result.UserInfo);
+            Assert.IsTrue(result.ExtendedExpiresOn.Subtract(result.ExpiresOn) > TimeSpan.FromSeconds(5));
             Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, result.UserInfo.UniqueId);
         }

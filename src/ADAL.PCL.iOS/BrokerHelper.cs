@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             var dateTimeOffset = new DateTimeOffset(new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
             dateTimeOffset = dateTimeOffset.AddSeconds(response.ExpiresOn);
-            return response.GetResult(dateTimeOffset);
+            return response.GetResult(dateTimeOffset, dateTimeOffset);
         }
         
         public static void SetBrokerResponse(NSUrl brokerResponse)
