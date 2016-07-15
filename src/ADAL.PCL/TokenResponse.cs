@@ -47,6 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string CreatedOn = "created_on";
         public const string ExpiresOn = "expires_on";
         public const string ExpiresIn = "expires_in";
+        public const string ExtendedExpiresIn = "ext_expires_in";
         public const string Error = "error";
         public const string ErrorDescription = "error_description";
         public const string ErrorCodes = "error_codes";
@@ -81,6 +82,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = TokenResponseClaim.ExpiresIn, IsRequired = false)]
         public long ExpiresIn { get; set; }
 
+        [DataMember(Name = TokenResponseClaim.ExtendedExpiresIn, IsRequired = false)]
+        public long ExtendedExpiresIn { get; set; }
+
         [DataMember(Name = TokenResponseClaim.Error, IsRequired = false)]
         public string Error { get; set; }
 
@@ -103,19 +107,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     ErrorDescription = responseDictionary[TokenResponseClaim.ErrorDescription]
                 };
             }
-            else
+
+            return new TokenResponse
             {
-                return new TokenResponse
-                {
-                    AccessToken = responseDictionary["access_token"],
-                    RefreshToken = responseDictionary["refresh_token"],
-                    IdTokenString = responseDictionary["id_token"],
-                    TokenType = "Bearer",
-                    CorrelationId = responseDictionary["correlation_id"],
-                    Resource = responseDictionary["resource"],
-                    ExpiresOn = long.Parse(responseDictionary["expires_on"].Split('.')[0], CultureInfo.CurrentCulture)
-                };
-            }
+                AccessToken = responseDictionary["access_token"],
+                RefreshToken = responseDictionary["refresh_token"],
+                IdTokenString = responseDictionary["id_token"],
+                TokenType = "Bearer",
+                CorrelationId = responseDictionary["correlation_id"],
+                Resource = responseDictionary["resource"],
+                ExpiresOn = long.Parse(responseDictionary["expires_on"].Split('.')[0], CultureInfo.CurrentCulture)
+            };
         }
 
         public static TokenResponse CreateFromErrorResponse(IHttpWebResponse webResponse)
@@ -168,16 +170,30 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public AuthenticationResultEx GetResult()
         {
-            return this.GetResult(DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn));
+            // extendedExpiresOn can be less than expiresOn if
+            // the server did not return extendedExpiresOn in the
+            // token response. Default json deserialization will set
+            // the value to 0.
+            if (ExtendedExpiresIn < ExpiresIn)
+            {
+                PlatformPlugin.Logger.Information(null,
+                    string.Format(CultureInfo.InvariantCulture,
+                        "ExtendedExpiresIn({0}) is less than ExpiresIn({1}). Set ExpiresIn as ExtendedExpiresIn",
+                        this.ExtendedExpiresIn, this.ExpiresIn));
+                ExtendedExpiresIn = ExpiresIn;
+            }
+
+            return this.GetResult(DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn),
+                DateTime.UtcNow + TimeSpan.FromSeconds(this.ExtendedExpiresIn));
         }
 
-        public AuthenticationResultEx GetResult(DateTimeOffset expiresOn)
+        public AuthenticationResultEx GetResult(DateTimeOffset expiresOn, DateTimeOffset extendedExpiresOn)
         {
             AuthenticationResultEx resultEx;
 
             if (this.AccessToken != null)
             {
-                var result = new AuthenticationResult(this.TokenType, this.AccessToken, expiresOn);
+                var result = new AuthenticationResult(this.TokenType, this.AccessToken, expiresOn, extendedExpiresOn);
 
                 IdToken idToken = IdToken.Parse(this.IdTokenString);
                 if (idToken != null)
@@ -219,7 +235,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         changePasswordUri = new Uri(idToken.PasswordChangeUrl);
                     }
 
-                    result.UpdateTenantAndUserInfo(tenantId, this.IdTokenString, new UserInfo { UniqueId = uniqueId, DisplayableId = displayableId, GivenName = givenName, FamilyName = familyName, IdentityProvider = identityProvider, PasswordExpiresOn = passwordExpiresOffest, PasswordChangeUrl = changePasswordUri });
+                    result.UpdateTenantAndUserInfo(tenantId, this.IdTokenString,
+                        new UserInfo
+                        {
+                            UniqueId = uniqueId,
+                            DisplayableId = displayableId,
+                            GivenName = givenName,
+                            FamilyName = familyName,
+                            IdentityProvider = identityProvider,
+                            PasswordExpiresOn = passwordExpiresOffest,
+                            PasswordChangeUrl = changePasswordUri
+                        });
                 }
 
                 resultEx = new AuthenticationResultEx
@@ -252,5 +278,4 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
     }
-
 }

@@ -54,6 +54,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
             this.ExtendedExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
         }
+
         /// <summary>
         /// Creates result returned from AcquireToken. Except in advanced scenarios related to token caching, you do not need to create any instance of AuthenticationResult.
         /// </summary>
@@ -68,6 +69,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
             this.ExtendedExpiresOn = DateTime.SpecifyKind(extendedExpiresOn.DateTime, DateTimeKind.Utc);
         }
+
         /// <summary>
         /// Gets the type of the Access Token returned. 
         /// </summary>
