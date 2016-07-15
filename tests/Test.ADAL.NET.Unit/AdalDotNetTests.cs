@@ -80,6 +80,7 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
+        [Description("Positive Test for AcquireToken with extended expires on support")]
         [TestCategory("AdalDotNet")]
         public async Task SmokeTestWithExtendedExpiresOn()
         {
