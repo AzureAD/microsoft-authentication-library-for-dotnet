@@ -347,28 +347,35 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 PlatformPlugin.Logger.Verbose(callState, "Looking up cache for a token...");
 
                 AuthenticationResultEx resultEx = null;
-
                 KeyValuePair<TokenCacheKey, AuthenticationResultEx>? kvp = this.LoadSingleItemFromCache(cacheQueryData, callState);
 
                 if (kvp.HasValue)
                 {
                     TokenCacheKey cacheKey = kvp.Value.Key;
-                    resultEx = kvp.Value.Value;
+                    resultEx = kvp.Value.Value.Clone();
+
                     bool tokenNearExpiry = (resultEx.Result.ExpiresOn <=
                                             DateTime.UtcNow + TimeSpan.FromMinutes(ExpirationMarginInMinutes));
                     bool tokenExtendedLifeTimeExpired = (resultEx.Result.ExtendedExpiresOn <=
                                             DateTime.UtcNow);
 
-                    if (tokenNearExpiry && !cacheQueryData.ExtendedLifeTimeEnabled)
+                    //check for cross-tenant authority
+                    if (!cacheKey.Authority.Equals(cacheQueryData.Authority))
+                    {
+                        // this is a cross-tenant result. use RT only
+                        resultEx.Result.AccessToken = null;
+                        PlatformPlugin.Logger.Information(callState,
+                            "Cross Tenant refresh token was found in the cache");
+                    }
+                    else if (tokenNearExpiry && !cacheQueryData.ExtendedLifeTimeEnabled)
                     {
                         resultEx.Result.AccessToken = null;
-                        PlatformPlugin.Logger.Verbose(callState,
+                        PlatformPlugin.Logger.Information(callState, 
                             "An expired or near expiry token was found in the cache");
                     }
-                   
                     else if (!cacheKey.ResourceEquals(cacheQueryData.Resource))
                     {
-                        PlatformPlugin.Logger.Verbose(callState,
+                        PlatformPlugin.Logger.Information(callState,
                             string.Format(CultureInfo.CurrentCulture,
                                 "Multi resource refresh token for resource '{0}' will be used to acquire token for '{1}'",
                                 cacheKey.Resource, cacheQueryData.Resource));
@@ -383,23 +390,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             resultEx.Result.UserInfo);
                         resultEx = newResultEx;
                     }
-
                     else if (!tokenExtendedLifeTimeExpired && cacheQueryData.ExtendedLifeTimeEnabled && tokenNearExpiry)
                     {
                         resultEx.Result.ExtendedLifeTimeToken = true;
                         resultEx.Result.ExpiresOn = resultEx.Result.ExtendedExpiresOn;
-                        PlatformPlugin.Logger.Verbose(callState,
+                        PlatformPlugin.Logger.Information(callState,
                             "The extendedLifeTime is enabled and a stale AT with extendedLifeTimeEnabled is returned.");
                     }
                     else if (tokenExtendedLifeTimeExpired)
                     {
                         resultEx.Result.AccessToken = null;
-                        PlatformPlugin.Logger.Verbose(callState,
+                        PlatformPlugin.Logger.Information(callState,
                             "The AT has expired its ExtendedLifeTime");
                     }
                     else
                     {
-                        PlatformPlugin.Logger.Verbose(callState,
+                        PlatformPlugin.Logger.Information(callState,
                             string.Format(CultureInfo.CurrentCulture, "{0} minutes left until token in cache expires",
                                 (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
                     }
@@ -522,7 +528,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 // check for tokens issued to same client_id/user_id combination, but any tenant.
-                if (returnValue == null)
+                // this check only applies to user tokens. client tokens should be ignored.
+                if (returnValue == null && cacheQueryData.SubjectType != TokenSubjectType.Client)
                 {
                     List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForAllTenants = this.QueryCache(null, cacheQueryData.ClientId, cacheQueryData.SubjectType, cacheQueryData.UniqueId, cacheQueryData.DisplayableId);
                     if (itemsForAllTenants.Count != 0)
@@ -532,12 +539,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     // check if the token was issued by AAD
                     if (returnValue != null &&
-                        Authenticator.DetectAuthorityType(returnValue.Value.Key.Authority) != AuthorityType.ADFS)
-                    {
-                        //remove access token to redeem refresh token against a different tenant.
-                        returnValue.Value.Value.Result.AccessToken = null;
-                    }
-                    else
+                        Authenticator.DetectAuthorityType(returnValue.Value.Key.Authority) == AuthorityType.ADFS)
                     {
                         returnValue = null;
                     }

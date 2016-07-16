@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is not returned by the service.
         /// </summary>
         [DataMember]
-        public string TenantId { get; private set; }
+        public string TenantId { get; internal set; }
 
         /// <summary>
         /// Gets user information including user Id. Some elements in UserInfo might be null if not returned by the service.
