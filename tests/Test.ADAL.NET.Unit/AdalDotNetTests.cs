@@ -1417,9 +1417,15 @@ namespace Test.ADAL.NET.Unit
             };
 
             AcquireTokenOnBehalfHandler handler = new AcquireTokenOnBehalfHandler(data, new UserAssertion("non-existant"));
-
-            AuthenticationResult result = await handler.RunAsync();
-            Assert.IsNotNull(result);
+            try
+            {
+                await handler.RunAsync();
+                Assert.Fail("acquire token call should have failed due to hash mistmatch");
+            }
+            catch (Exception exc)
+            {
+                Assert.IsNotNull(exc);
+            }
         }
 
     }
