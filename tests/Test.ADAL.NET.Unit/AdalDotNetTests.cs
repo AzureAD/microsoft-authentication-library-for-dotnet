@@ -35,6 +35,7 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.Common;
+using Test.ADAL.Common.Unit;
 using Test.ADAL.NET.Unit.Mocks;
 
 namespace Test.ADAL.NET.Unit
@@ -1394,5 +1395,32 @@ namespace Test.ADAL.NET.Unit
             Assert.IsNotNull(uri);
             Assert.IsTrue(uri.AbsoluteUri.Contains("client-request-id="));
         }
+
+        [TestMethod]
+        [Description("Positive Test for AcquireTokenOnBehalf with client credential")]
+        public async Task UserAssertionValidationTest()
+        {
+            TokenCache cache = new TokenCache();
+            AuthenticationResultEx resultEx = TokenCacheTests.CreateCacheValue("id", "user1");
+            resultEx.UserAssertionHash = "hash1";
+            cache.tokenCacheDictionary.Add(
+            new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
+                TokenSubjectType.Client, "id", "user1"), resultEx);
+            RequestData data = new RequestData
+            {
+                Authenticator = new Authenticator("https://localhost/MockSts/", false),
+                TokenCache = cache,
+                Resource = "resource1",
+                ClientKey = new ClientKey(new ClientCredential("client1", "something")),
+                SubjectType = TokenSubjectType.Client,
+                ExtendedLifeTimeEnabled = false
+            };
+
+            AcquireTokenOnBehalfHandler handler = new AcquireTokenOnBehalfHandler(data, new UserAssertion("non-existant"));
+
+            AuthenticationResult result = await handler.RunAsync();
+            Assert.IsNotNull(result);
+        }
+
     }
 }
