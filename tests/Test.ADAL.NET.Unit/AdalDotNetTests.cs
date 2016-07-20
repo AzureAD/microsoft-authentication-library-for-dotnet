@@ -35,6 +35,7 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.Common;
+using Test.ADAL.Common.Unit;
 using Test.ADAL.NET.Unit.Mocks;
 
 namespace Test.ADAL.NET.Unit
@@ -1108,6 +1109,44 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for Client credential")]
+        public async Task ClientCredentialNoCrossTenantTestAsync()
+        {
+            TokenCache cache = new TokenCache();
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, cache);
+            var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"some-access-token\"}")
+                },
+                PostData = new Dictionary<string, string>()
+                {
+                    {"client_id", TestConstants.DefaultClientId},
+                    {"client_secret", TestConstants.DefaultClientSecret},
+                    {"grant_type", "client_credentials"}
+                }
+            });
+
+            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential);
+            Assert.IsNotNull(result.AccessToken);
+
+            context = new AuthenticationContext(TestConstants.DefaultAuthorityGuestTenant, cache);
+
+            try
+            {
+                var result2 = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential);
+            }
+            catch (AdalException)
+            {
+                Assert.AreEqual(1, cache.tokenCacheDictionary.Count);
+            }
+        }
+
+        [TestMethod]
+        [Description("Test for Client credential")]
         public async Task ClientCredentialTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
@@ -1422,5 +1461,38 @@ namespace Test.ADAL.NET.Unit
             Assert.IsNotNull(uri);
             Assert.IsTrue(uri.AbsoluteUri.Contains("client-request-id="));
         }
+
+        [TestMethod]
+        [Description("Positive Test for AcquireTokenOnBehalf with client credential")]
+        public async Task UserAssertionValidationTest()
+        {
+            TokenCache cache = new TokenCache();
+            AuthenticationResultEx resultEx = TokenCacheTests.CreateCacheValue("id", "user1");
+            resultEx.UserAssertionHash = "hash1";
+            cache.tokenCacheDictionary.Add(
+            new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
+                TokenSubjectType.Client, "id", "user1"), resultEx);
+            RequestData data = new RequestData
+            {
+                Authenticator = new Authenticator("https://localhost/MockSts/", false),
+                TokenCache = cache,
+                Resource = "resource1",
+                ClientKey = new ClientKey(new ClientCredential("client1", "something")),
+                SubjectType = TokenSubjectType.Client,
+                ExtendedLifeTimeEnabled = false
+            };
+
+            AcquireTokenOnBehalfHandler handler = new AcquireTokenOnBehalfHandler(data, new UserAssertion("non-existant"));
+            try
+            {
+                await handler.RunAsync();
+                Assert.Fail("acquire token call should have failed due to hash mistmatch");
+            }
+            catch (Exception exc)
+            {
+                Assert.IsNotNull(exc);
+            }
+        }
+
     }
 }

@@ -520,9 +520,9 @@ namespace Test.ADAL.Common.Unit
         internal static void MultipleUserAssertionHashTest()
         {
             TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
-                TokenSubjectType.User, null, "user1");
+                TokenSubjectType.Client, null, "user1");
             TokenCacheKey key2 = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
-                TokenSubjectType.User, null, "user2");
+                TokenSubjectType.Client, null, "user2");
             AuthenticationResultEx value = CreateCacheValue(null, "user1");
             value.UserAssertionHash = "hash1";
             AuthenticationResultEx value2 = CreateCacheValue(null, "user2");
@@ -537,7 +537,7 @@ namespace Test.ADAL.Common.Unit
                 Authority = "https://localhost/MockSts/",
                 Resource = "resource1",
                 ClientId = "client1",
-                SubjectType = TokenSubjectType.User,
+                SubjectType = TokenSubjectType.Client,
                 UniqueId = null,
                 DisplayableId = null
             };
@@ -554,6 +554,7 @@ namespace Test.ADAL.Common.Unit
             try
             {
                 cache.LoadFromCache(data, null);
+                Assert.Fail("multiple_tokens_detected should have been thrown");
             }
             catch (Exception exc)
             {
