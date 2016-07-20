@@ -526,7 +526,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 TokenCache = this.TokenCache,
                 Resource = resource,
                 ClientKey = clientKey,
-                ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled
+                ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled,
+                SubjectType = TokenSubjectType.Client
             };
             var handler = new AcquireTokenForClientHandler(requestData);
             return await handler.RunAsync();

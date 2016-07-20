@@ -1081,6 +1081,44 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for Client credential")]
+        public async Task ClientCredentialNoCrossTenantTestAsync()
+        {
+            TokenCache cache = new TokenCache();
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, cache);
+            var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"some-access-token\"}")
+                },
+                PostData = new Dictionary<string, string>()
+                {
+                    {"client_id", TestConstants.DefaultClientId},
+                    {"client_secret", TestConstants.DefaultClientSecret},
+                    {"grant_type", "client_credentials"}
+                }
+            });
+
+            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential);
+            Assert.IsNotNull(result.AccessToken);
+
+            context = new AuthenticationContext(TestConstants.DefaultAuthorityGuestTenant, cache);
+
+            try
+            {
+                var result2 = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential);
+            }
+            catch (AdalException)
+            {
+                Assert.AreEqual(1, cache.tokenCacheDictionary.Count);
+            }
+        }
+
+        [TestMethod]
+        [Description("Test for Client credential")]
         public async Task ClientCredentialTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
