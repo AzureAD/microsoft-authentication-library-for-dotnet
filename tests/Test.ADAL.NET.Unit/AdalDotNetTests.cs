@@ -388,9 +388,9 @@ namespace Test.ADAL.NET.Unit
         [Description("Test for getting back access token when the extendedExpiresOn flag is set")]
         public async Task ClientCredentialExtendedExpiryPositiveTest()
         {
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
-                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.Client,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
             {
@@ -426,9 +426,7 @@ namespace Test.ADAL.NET.Unit
                     {"grant_type", "client_credentials"}
                 }
             });
-
-            Assert.AreEqual(HttpMessageHandlerFactory.CountMockHandlers(), 2);
-
+            
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
 
             context.ExtendedLifeTimeEnabled = true;
