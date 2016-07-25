@@ -110,18 +110,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             bool notifiedBeforeAccessCache = false;
             AuthenticationResultEx extendedLifetimeResultEx = null;
-            CacheQueryData.Authority = Authenticator.Authority;
-            CacheQueryData.Resource = this.Resource;
-            CacheQueryData.ClientId = this.ClientKey.ClientId;
-            CacheQueryData.SubjectType = this.TokenSubjectType;
-            CacheQueryData.UniqueId = this.UniqueId;
-            CacheQueryData.DisplayableId = this.DisplayableId;
 
             try
             {
                 await this.PreRunAsync();
+
                 if (this.LoadFromCache)
                 {
+                    CacheQueryData.Authority = Authenticator.Authority;
+                    CacheQueryData.Resource = this.Resource;
+                    CacheQueryData.ClientId = this.ClientKey.ClientId;
+                    CacheQueryData.SubjectType = this.TokenSubjectType;
+                    CacheQueryData.UniqueId = this.UniqueId;
+                    CacheQueryData.DisplayableId = this.DisplayableId;
+
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
                     ResultEx = this.tokenCache.LoadFromCache(CacheQueryData, this.CallState);
