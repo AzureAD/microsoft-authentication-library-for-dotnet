@@ -94,6 +94,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Resiliency = true;
                     PlatformPlugin.Logger.Information(this.CallState, "Network timeout - " + ex.InnerException.Message);
                 }
+
                 if (!this.isDeviceAuthChallenge(ex.WebResponse, respondToDeviceAuthChallenge))
                 {
                     AdalServiceException serviceEx;
@@ -108,21 +109,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             (ex.WebResponse.StatusCode).Equals(HttpStatusCode.GatewayTimeout) ||
                             (ex.WebResponse.StatusCode).Equals(HttpStatusCode.ServiceUnavailable))
                         {
-                            if (RetryOnce)
-                            {
-                                PlatformPlugin.Logger.Information(this.CallState,"HttpStatus code: "+ ex.WebResponse.StatusCode + " - " + ex.InnerException.Message );
-                                await Task.Delay(DelayTimePeriodMilliSeconds);
-                                RetryOnce = false;
-                                PlatformPlugin.Logger.Information(this.CallState,"Retrying one more time..");
-                                return await this.GetResponseAsync<T>(respondToDeviceAuthChallenge);
-                            }
-                                Resiliency = true;
-                                PlatformPlugin.Logger.Information(this.CallState, "Retry Failed - "+ ex.InnerException.Message );
+                            PlatformPlugin.Logger.Information(this.CallState, "HttpStatus code: " + ex.WebResponse.StatusCode + " - " + ex.InnerException.Message);
+                            Resiliency = true;
                         }
                     }
                     else
                     {
                         serviceEx = new AdalServiceException(AdalError.Unknown, ex);
+                    }
+
+                    if (Resiliency)
+                    {
+                        if (RetryOnce)
+                        {
+                            await Task.Delay(DelayTimePeriodMilliSeconds);
+                            RetryOnce = false;
+                            PlatformPlugin.Logger.Information(this.CallState, "Retrying one more time..");
+                            return await this.GetResponseAsync<T>(respondToDeviceAuthChallenge);
+                        }
+
+                        PlatformPlugin.Logger.Information(this.CallState,
+                                "Retry Failed - " + ex.InnerException.Message);
                     }
 
                     PlatformPlugin.Logger.Error(CallState, serviceEx);

@@ -99,12 +99,11 @@
     <Compile Include="InteractiveWebUI.cs" />
     <Compile Include="NavigateErrorStatus.cs" />
     <Compile Include="PlatformInformation.cs" />
-
     <Compile Include="..\ADAL.Common\PromptBehavior.cs">
       <Link>PromptBehavior.cs</Link>
     </Compile>
-		
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SecureClientSecret.cs" />
     <Compile Include="SilentWebUI.cs" />
     <Compile Include="SilentWebUIDoneEventArgs.cs" />
     <Compile Include="SilentWindowsFormsAuthenticationDialog.cs">

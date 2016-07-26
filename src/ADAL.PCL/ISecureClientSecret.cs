@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,41 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal static class HttpMessageHandlerFactory
+    /// <summary>
+    /// Interface to allow for client secret to be passed in as a SecureString
+    /// </summary>
+    public interface ISecureClientSecret
     {
-        internal static HttpMessageHandler GetMessageHandler(bool useDefaultCredentials)
-        {
-            if (MockHandlerQueue.Count > 0)
-            {
-                return MockHandlerQueue.Dequeue();
-            }
-
-            return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials };
-        }
-
-        private readonly static Queue<HttpMessageHandler> MockHandlerQueue = new Queue<HttpMessageHandler>();
-
-        public static void AddMockHandler(HttpMessageHandler mockHandler)
-        {
-            MockHandlerQueue.Enqueue(mockHandler);
-        }
-
-        public static void ClearMockHandlers()
-        {
-            MockHandlerQueue.Clear();
-        }
-
-        public static int MockHandlersCount()
-        {
-            return MockHandlerQueue.Count;
-        }
+        /// <summary>
+        /// Writes SecureString to the dictionary.
+        /// </summary>
+        /// <param name="parameters"></param>
+        void ApplyTo(IDictionary<string, string> parameters);
     }
 }

@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -45,6 +46,28 @@ namespace Test.ADAL.NET.Unit
     {
         private const string ComplexString = "asdfk+j0a-=skjwe43;1l234 1#$!$#%345903485qrq@#$!@#$!(rekr341!#$%Ekfaآزمايشsdsdfsddfdgsfgjsglk==CVADS";
         private const string ComplexString2 = @"a\u0304\u0308"" = ""ā̈";
+
+        [TestMethod]
+        [Description("Tests for SecureClientSecret")]
+        public void SecureClientSecretTest()
+        {
+            SecureString str = new SecureString();
+            str.AppendChar('x');
+            str.MakeReadOnly();
+            SecureClientSecret secret = new SecureClientSecret(str);
+            IDictionary<string, string> paramStr = new Dictionary<string, string>();
+            secret.ApplyTo(paramStr);
+            Assert.IsTrue(paramStr.ContainsKey("client_secret"));
+            Assert.AreEqual("x", paramStr["client_secret"]);
+
+            str = new SecureString();
+            str.AppendChar('x');
+            secret = new SecureClientSecret(str);
+            paramStr = new Dictionary<string, string>();
+            secret.ApplyTo(paramStr);
+            Assert.IsTrue(paramStr.ContainsKey("client_secret"));
+            Assert.AreEqual("x", paramStr["client_secret"]);
+        }
 
         [TestMethod]
         [Description("Positive Test for UrlEncoding")]

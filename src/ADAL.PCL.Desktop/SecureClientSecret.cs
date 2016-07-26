@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,41 +25,52 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Concurrent;
+using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using System.Security;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal static class HttpMessageHandlerFactory
+    /// <summary>
+    /// This class allows to pass client secret as a SecureString to the API.
+    /// </summary>
+    public class SecureClientSecret : ISecureClientSecret
     {
-        internal static HttpMessageHandler GetMessageHandler(bool useDefaultCredentials)
+        private SecureString secureString;
+
+        /// <summary>
+        /// Required Constructor
+        /// </summary>
+        /// <param name="secret">SecureString secret. Required and cannot be null.</param>
+        public SecureClientSecret(SecureString secret)
         {
-            if (MockHandlerQueue.Count > 0)
+            if (secret == null)
             {
-                return MockHandlerQueue.Dequeue();
+                throw new ArgumentNullException(nameof(secret));
             }
 
-            return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials };
+            this.secureString = secret;
         }
 
-        private readonly static Queue<HttpMessageHandler> MockHandlerQueue = new Queue<HttpMessageHandler>();
-
-        public static void AddMockHandler(HttpMessageHandler mockHandler)
+        public void ApplyTo(IDictionary<string, string> parameters)
         {
-            MockHandlerQueue.Enqueue(mockHandler);
-        }
+            var output = new char[secureString.Length];
+            IntPtr secureStringPtr = Marshal.SecureStringToCoTaskMemUnicode(secureString);
+            for (int i = 0; i < secureString.Length; i++)
+            {
+                output[i] = (char) Marshal.ReadInt16(secureStringPtr, i*2);
+            }
 
-        public static void ClearMockHandlers()
-        {
-            MockHandlerQueue.Clear();
-        }
+            Marshal.ZeroFreeCoTaskMemUnicode(secureStringPtr);
+            parameters[OAuthParameter.ClientSecret] = new string(output);
 
-        public static int MockHandlersCount()
-        {
-            return MockHandlerQueue.Count;
+            if (secureString != null && !secureString.IsReadOnly())
+            {
+                secureString.Clear();
+            }
+
+            secureString = null;
         }
     }
 }

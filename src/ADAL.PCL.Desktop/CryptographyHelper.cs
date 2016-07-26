@@ -38,6 +38,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public string CreateSha256Hash(string input)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return null;
+            }
+
             using (SHA256Cng sha = new SHA256Cng())
             {
                 UTF8Encoding encoding = new UTF8Encoding();
