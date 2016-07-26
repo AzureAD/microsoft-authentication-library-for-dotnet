@@ -30,19 +30,13 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    class AcquireTokenByDeviceCodeHandler : AcquireTokenHandlerBase
+    internal class AcquireTokenByDeviceCodeHandler : AcquireTokenHandlerBase
     {
         private DeviceCodeResult deviceCodeResult = null;
 
         public AcquireTokenByDeviceCodeHandler(RequestData requestData, DeviceCodeResult deviceCodeResult)
             : base(requestData)
         {
-            requestData.ClientKey = new ClientKey(deviceCodeResult.ClientId);
-            if (deviceCodeResult == null)
-            {
-                throw new ArgumentNullException("deviceCodeResult");
-            }
-            
             this.LoadFromCache = false; //no cache lookup for token
             this.StoreToCache = (requestData.TokenCache != null);
             this.SupportADFS = false;
