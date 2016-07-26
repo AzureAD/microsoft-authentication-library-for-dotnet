@@ -187,12 +187,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public async Task<AuthenticationResult> AcquireTokenByDeviceCodeAsync(DeviceCodeResult deviceCodeResult)
         {
+            if (deviceCodeResult == null)
+            {
+                throw new ArgumentNullException("deviceCodeResult");
+            }
+
             RequestData requestData = new RequestData
             {
                 Authenticator = this.Authenticator,
                 TokenCache = this.TokenCache,
-                ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled
+                ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled,
+                Resource = deviceCodeResult.Resource,
+                ClientKey = new ClientKey(deviceCodeResult.ClientId)
             };
+
             var handler = new AcquireTokenByDeviceCodeHandler(requestData, deviceCodeResult);
             return await handler.RunAsync();
         }
