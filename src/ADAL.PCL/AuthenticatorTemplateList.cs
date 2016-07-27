@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (matchingAuthenticatorTemplate == null)
                 {
                     // We only check with the first trusted authority (login.windows.net) for instance discovery
-                    await this.First().VerifyAnotherHostByInstanceDiscoveryAsync(host, tenant, callState);
+                    await this.First().VerifyAnotherHostByInstanceDiscoveryAsync(host, tenant, callState).ConfigureAwait(false);
                 }
             }
 

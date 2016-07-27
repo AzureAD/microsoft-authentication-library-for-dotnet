@@ -100,23 +100,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected override async Task PreTokenRequest()
         {
-            await base.PreTokenRequest();
+            await base.PreTokenRequest().ConfigureAwait(false);
 
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
-            await this.AcquireAuthorizationAsync();
+            await this.AcquireAuthorizationAsync().ConfigureAwait(false);
             this.VerifyAuthorizationResult();
         }
 
         internal async Task AcquireAuthorizationAsync()
         {
             Uri authorizationUri = this.CreateAuthorizationUri();
-            this.authorizationResult = await this.webUi.AcquireAuthorizationAsync(authorizationUri, this.redirectUri, this.CallState);
+            this.authorizationResult = await this.webUi.AcquireAuthorizationAsync(authorizationUri, this.redirectUri, this.CallState).ConfigureAwait(false);
         }
 
         internal async Task<Uri> CreateAuthorizationUriAsync(Guid correlationId)
         {
             this.CallState.CorrelationId = correlationId;
-            await this.Authenticator.UpdateFromTemplateAsync(this.CallState);
+            await this.Authenticator.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
             return this.CreateAuthorizationUri();
         }
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)

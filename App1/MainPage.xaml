@@ -1,0 +1,15 @@
+﻿<Page
+    x:Class="App1.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:App1"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="0,0,-321,115">
+        <Button x:Name="button" Content="Button" HorizontalAlignment="Left" Margin="197,97,0,0" VerticalAlignment="Top" Height="53" Width="196" Click="button_Click"/>
+        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="82,225,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="290" Width="468"/>
+
+    </Grid>
+</Page>

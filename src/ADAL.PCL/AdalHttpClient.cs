@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public async Task<T> GetResponseAsync<T>()
         {
-            return await this.GetResponseAsync<T>(true);
+            return await this.GetResponseAsync<T>(true).ConfigureAwait(false);
         }
 
         private async Task<T> GetResponseAsync<T>(bool respondToDeviceAuthChallenge)
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 //add pkeyauth header
                 this.Client.Headers[DeviceAuthHeaderName] = DeviceAuthHeaderValue;
-                using (response = await this.Client.GetResponseAsync())
+                using (response = await this.Client.GetResponseAsync().ConfigureAwait(false))
                 {
                     typedResponse = DeserializeResponse<T>(response.ResponseStream);
                 }
@@ -122,10 +122,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     {
                         if (RetryOnce)
                         {
-                            await Task.Delay(DelayTimePeriodMilliSeconds);
+                            await Task.Delay(DelayTimePeriodMilliSeconds).ConfigureAwait(false);
                             RetryOnce = false;
                             PlatformPlugin.Logger.Information(this.CallState, "Retrying one more time..");
-                            return await this.GetResponseAsync<T>(respondToDeviceAuthChallenge);
+                            return await this.GetResponseAsync<T>(respondToDeviceAuthChallenge).ConfigureAwait(false);
                         }
 
                         PlatformPlugin.Logger.Information(this.CallState,
@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             //check for pkeyauth challenge
             if (this.isDeviceAuthChallenge(response, respondToDeviceAuthChallenge))
             {
-                return await HandleDeviceAuthChallenge<T>(response);
+                return await HandleDeviceAuthChallenge<T>(response).ConfigureAwait(false);
             }
 
             return typedResponse;
@@ -181,12 +181,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 responseDictionary["SubmitUrl"] = RequestUri;
             }
 
-            string responseHeader = await PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(responseDictionary);
+            string responseHeader = await PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(responseDictionary).ConfigureAwait(false);
             IRequestParameters rp = this.Client.BodyParameters;
             this.Client = PlatformPlugin.HttpClientFactory.Create(CheckForExtraQueryParameter(responseDictionary["SubmitUrl"]), this.CallState);
             this.Client.BodyParameters = rp;
             this.Client.Headers["Authorization"] = responseHeader;
-            return await this.GetResponseAsync<T>(false);
+            return await this.GetResponseAsync<T>(false).ConfigureAwait(false);
         }
 
         private static T DeserializeResponse<T>(Stream responseStream)

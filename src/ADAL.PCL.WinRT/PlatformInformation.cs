@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                return await UserInformation.GetPrincipalNameAsync();
+                return await UserInformation.GetPrincipalNameAsync().AsTask().ConfigureAwait(false);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                return string.IsNullOrEmpty(await UserInformation.GetDomainNameAsync());
+                return string.IsNullOrEmpty(await UserInformation.GetDomainNameAsync().AsTask().ConfigureAwait(false));
             }
             catch (UnauthorizedAccessException)
             {

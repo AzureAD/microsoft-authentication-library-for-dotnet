@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     throw new HttpRequestWrapperException(null, ex);
                 }
 
-                IHttpWebResponse webResponse = await CreateResponseAsync(responseMessage);
+                IHttpWebResponse webResponse = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
 
                 if (!responseMessage.IsSuccessStatusCode)
                 {
@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
 
-            return new HttpWebResponseWrapper(await response.Content.ReadAsStreamAsync(), headers, response.StatusCode);
+            return new HttpWebResponseWrapper(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), headers, response.StatusCode);
         }
 
         private void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers)
