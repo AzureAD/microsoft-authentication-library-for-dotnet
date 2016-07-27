@@ -1,3 +1,32 @@
+Version 3.13.0
+==============
+This release contains
+- Fix to add ConfigureAwait(false) to all await calls to avoid deadlocks.
+- Fix bug where null reference was thrown in Android when onResult was called for an activity.
+- ext_expires_in claim was not being read from server response.
+- Disable Cross-Tenant refresh token redemption for client credentials flow.
+- Fix the bug where access token in authentication result could be null in multi-threaded scenarios.
+- Fix a bug where UserAssertion was not assumed to be JWT by default.
+- Add support for SecureString client secret.
+- Fix bug where null reference exception was thrown for AcquireTokenUsingDeviceCode.
+
+
+Version 3.12.0
+==============
+This release contains
+- Support for extended lifetime tokens.
+- Fix to allow hardware based keys to perform authentication.
+- Validate signing certificate chain in Android.
+- Update NetStandard GA packages.
+- Fix bug in cache lookup where developer provided parameters were ignored.
+
+Version 3.10.305231913
+======================
+This release contains
+- Retargeting Xamarin Android to Lollipop (5.0)
+- Fix for PromptBehavior.Always in UWP apps where prompt=login was not sent to server.
+
+
 Version 3.10.305161347
 ======================
 This release contains
