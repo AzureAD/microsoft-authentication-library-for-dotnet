@@ -51,16 +51,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
             
-            Certificate certificate = await FindCertificate(challengeData);
+            Certificate certificate = await FindCertificate(challengeData).ConfigureAwait(false);
             DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
                 challengeData["nonce"], Convert.ToBase64String(certificate.GetCertificateBlob().ToArray()));
             IBuffer input = CryptographicBuffer.ConvertStringToBinary(response.GetResponseToSign(),
                 BinaryStringEncoding.Utf8);
-            CryptographicKey keyPair = await 
-                    PersistedKeyProvider.OpenKeyPairFromCertificateAsync(certificate, HashAlgorithmNames.Sha256,
-                        CryptographicPadding.RsaPkcs1V15);
+            CryptographicKey keyPair = await
+                PersistedKeyProvider.OpenKeyPairFromCertificateAsync(certificate, HashAlgorithmNames.Sha256,
+                    CryptographicPadding.RsaPkcs1V15).AsTask().ConfigureAwait(false);
 
-            IBuffer signed = await CryptographicEngine.SignAsync(keyPair, input);
+            IBuffer signed = await CryptographicEngine.SignAsync(keyPair, input).AsTask().ConfigureAwait(false);
 
             string signedJwt = string.Format(CultureInfo.CurrentCulture, "{0}.{1}", response.GetResponseToSign(),
                 Base64UrlEncoder.Encode(signed.ToArray()));
@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     }
 
                     query.IssuerName = distinguishedIssuerName;
-                    certificates = await CertificateStores.FindAllAsync(query);
+                    certificates = await CertificateStores.FindAllAsync(query).AsTask().ConfigureAwait(false);
                     if (certificates.Count > 0)
                     {
                         break;
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 errMessage = "Cert Thumbprint:" + challengeData["CertThumbprint"];
                 PlatformPlugin.Logger.Verbose(null, "Looking up certificate matching thumbprint:" + challengeData["CertThumbprint"]);
                 query.Thumbprint = HexStringToByteArray(challengeData["CertThumbprint"]);
-                certificates = await CertificateStores.FindAllAsync(query);
+                certificates = await CertificateStores.FindAllAsync(query).AsTask().ConfigureAwait(false);
             }
 
             if (certificates == null || certificates.Count == 0)

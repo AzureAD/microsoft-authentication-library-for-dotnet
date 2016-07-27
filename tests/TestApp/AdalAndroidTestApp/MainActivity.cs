@@ -86,7 +86,7 @@ namespace AdalAndroidTestApp
             string value = null;
             try
             {
-                value = await tokenBroker.GetTokenSilentAsync(new PlatformParameters(this, false));
+                value = await tokenBroker.GetTokenSilentAsync(new PlatformParameters(this, false)).ConfigureAwait(false);
             }
             catch (Java.Lang.Exception ex)
             {

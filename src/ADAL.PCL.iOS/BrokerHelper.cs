@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url));
             }
 
-            await brokerResponseReady.WaitAsync();
+            await brokerResponseReady.WaitAsync().ConfigureAwait(false);
             return ProcessBrokerResponse();
         }
 

@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             challengeData["Version"]);
                     });
 
-            return await resultTask;
+            return await resultTask.ConfigureAwait(false);
         }
 
         public bool CanUseBroker

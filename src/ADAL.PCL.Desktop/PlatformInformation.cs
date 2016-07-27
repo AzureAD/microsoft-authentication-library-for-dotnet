@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 return sb.ToString();
-            });
+            }).ConfigureAwait(false);
         }
 
         public override string GetEnvironmentVariable(string variable)
@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 return false;
-            });
+            }).ConfigureAwait(false);
         }
 
         public override bool IsDomainJoined()

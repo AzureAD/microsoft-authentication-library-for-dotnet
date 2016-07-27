@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                await this.PreRunAsync();
+                await this.PreRunAsync().ConfigureAwait(false);
 
                 if (this.LoadFromCache)
                 {
@@ -138,7 +138,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         if ((ResultEx.Result.AccessToken == null && ResultEx.RefreshToken != null) ||
                             (ResultEx.Result.ExtendedLifeTimeToken && ResultEx.RefreshToken != null))
                         {
-                            ResultEx = await this.RefreshAccessTokenAsync(ResultEx);
+                            ResultEx = await this.RefreshAccessTokenAsync(ResultEx).ConfigureAwait(false);
                             if (ResultEx != null && ResultEx.Exception == null)
                             {
                                 this.tokenCache.StoreToCache(ResultEx, this.Authenticator.Authority, this.Resource,
@@ -152,19 +152,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     if (PlatformPlugin.BrokerHelper.CanInvokeBroker)
                     {
-                        ResultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters);
+                        ResultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters).ConfigureAwait(false);
                     }
                     else
                     {
-                        await this.PreTokenRequest();
+                        await this.PreTokenRequest().ConfigureAwait(false);
                         // check if broker app installation is required for authentication.
                         if (this.BrokerInvocationRequired())
                         {
-                            ResultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters);
+                            ResultEx = await PlatformPlugin.BrokerHelper.AcquireTokenUsingBroker(brokerParameters).ConfigureAwait(false);
                         }
                         else
                         {
-                            ResultEx = await this.SendTokenRequestAsync();
+                            ResultEx = await this.SendTokenRequestAsync().ConfigureAwait(false);
                         }
                     }
                     //broker token acquisition failed
@@ -184,7 +184,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
                     }
                 }
-                await this.PostRunAsync(ResultEx.Result);
+                await this.PostRunAsync(ResultEx.Result).ConfigureAwait(false);
                 return ResultEx.Result;
             }
             catch (Exception ex)
@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected virtual async Task PreRunAsync()
         {
-            await this.Authenticator.UpdateFromTemplateAsync(this.CallState);
+            await this.Authenticator.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
             this.ValidateAuthorityType();
         }
 
@@ -256,7 +256,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
             this.AddAditionalRequestParameters(requestParameters);
-            return await this.SendHttpMessageAsync(requestParameters);
+            return await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
         }
 
         protected async Task<AuthenticationResultEx> SendTokenRequestByRefreshTokenAsync(string refreshToken)
@@ -266,7 +266,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             requestParameters[OAuthParameter.RefreshToken] = refreshToken;
             requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
 
-            AuthenticationResultEx result = await this.SendHttpMessageAsync(requestParameters);
+            AuthenticationResultEx result = await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
 
             if (result.RefreshToken == null)
             {
@@ -288,7 +288,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 try
                 {
-                    newResultEx = await this.SendTokenRequestByRefreshTokenAsync(result.RefreshToken);
+                    newResultEx = await this.SendTokenRequestByRefreshTokenAsync(result.RefreshToken).ConfigureAwait(false);
                     this.Authenticator.UpdateTenantId(result.Result.TenantId);
 
                     if (newResultEx.Result.IdToken == null)
@@ -320,7 +320,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             client = new AdalHttpClient(this.Authenticator.TokenUri, this.CallState)
             {Client = {BodyParameters = requestParameters}};
-            TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>();
+            TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>().ConfigureAwait(false);
             return tokenResponse.GetResult();
         }
 

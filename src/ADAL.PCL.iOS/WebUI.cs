@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, callState);
-            await returnedUriReady.WaitAsync();
+            await returnedUriReady.WaitAsync().ConfigureAwait(false);
             return authorizationResult;
         }
 

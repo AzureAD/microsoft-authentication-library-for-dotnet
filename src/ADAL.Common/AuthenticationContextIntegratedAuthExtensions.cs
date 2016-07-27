@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public static async Task<AuthenticationResult> AcquireTokenAsync(this AuthenticationContext ctx, string resource, string clientId, UserCredential userCredential)
         {
-            return await ctx.AcquireTokenCommonAsync(resource, clientId, userCredential);
+            return await ctx.AcquireTokenCommonAsync(resource, clientId, userCredential).ConfigureAwait(false);
         }
     }
 
