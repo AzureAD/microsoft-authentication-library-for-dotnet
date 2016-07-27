@@ -52,7 +52,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.secureString = secret;
         }
-
+        
+        /// <summary>
+        /// Applies the secret to the dictionary.
+        /// </summary>
+        /// <param name="parameters">Dictionary to which the securestring is applied to be sent to server</param>
         public void ApplyTo(IDictionary<string, string> parameters)
         {
             var output = new char[secureString.Length];
