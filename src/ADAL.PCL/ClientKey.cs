@@ -103,7 +103,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if (this.Credential != null)
             {
-                parameters[OAuthParameter.ClientSecret] = this.Credential.ClientSecret;
+                if (this.Credential.SecureClientSecret != null)
+                {
+                    this.Credential.SecureClientSecret.ApplyTo(parameters);
+                }
+                else
+                {
+                    parameters[OAuthParameter.ClientSecret] = this.Credential.ClientSecret;
+                }
             }
             else if (this.Assertion != null)
             {

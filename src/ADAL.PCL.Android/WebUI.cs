@@ -72,14 +72,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new AdalException(AdalError.AuthenticationUiFailed, ex);
             }
 
-            await returnedUriReady.WaitAsync();
+            await returnedUriReady.WaitAsync().ConfigureAwait(false);
             return authorizationResult;
         }
 
         public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
         {
-            authorizationResult = authorizationResultInput;
-            returnedUriReady.Release();
+            if (returnedUriReady != null)
+            {
+                authorizationResult = authorizationResultInput;
+                returnedUriReady.Release();
+            }
+            else
+            {
+                PlatformPlugin.Logger.Information(null, "No pending request for response from web ui.");
+            }
         }
     }
 }

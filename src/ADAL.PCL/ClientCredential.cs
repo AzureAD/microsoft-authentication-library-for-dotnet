@@ -56,10 +56,33 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
+        /// Constructor to create credential with client id and secret
+        /// </summary>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="secureClientSecret">Secure secret of the client requesting the token.</param>
+        public ClientCredential(string clientId, ISecureClientSecret secureClientSecret)
+        {
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                throw new ArgumentNullException("clientId");
+            }
+
+            if (secureClientSecret == null)
+            {
+                throw new ArgumentNullException("clientSecret");
+            }
+
+            this.ClientId = clientId;
+            this.SecureClientSecret = secureClientSecret;
+        }
+
+        /// <summary>
         /// Gets the identifier of the client requesting the token.
         /// </summary>
         public string ClientId { get; private set; }
 
         internal string ClientSecret { get; private set; }
+
+        internal ISecureClientSecret SecureClientSecret { get; private set; }
     }
 }

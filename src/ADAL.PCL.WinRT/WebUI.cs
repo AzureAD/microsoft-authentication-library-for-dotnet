@@ -59,7 +59,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             
             WebAuthenticationResult webAuthenticationResult;
 
-            WebAuthenticationOptions options = (this.useCorporateNetwork && (ssoMode || redirectUri.Scheme == Constant.MsAppScheme)) ? WebAuthenticationOptions.UseCorporateNetwork : WebAuthenticationOptions.None;
+            WebAuthenticationOptions options = (this.useCorporateNetwork &&
+                                                (ssoMode || redirectUri.Scheme == Constant.MsAppScheme))
+                ? WebAuthenticationOptions.UseCorporateNetwork
+                : WebAuthenticationOptions.None;
 
             if (this.promptBehavior == PromptBehavior.Never)
             {
@@ -70,11 +73,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 if (ssoMode)
                 {
-                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri);
+                    webAuthenticationResult =
+                        await
+                            WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri)
+                                .AsTask()
+                                .ConfigureAwait(false);
                 }
                 else
-                { 
-                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri, redirectUri);
+                {
+                    webAuthenticationResult =
+                        await
+                            WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri, redirectUri)
+                                .AsTask()
+                                .ConfigureAwait(false);
                 }
             }
             catch (FileNotFoundException ex)

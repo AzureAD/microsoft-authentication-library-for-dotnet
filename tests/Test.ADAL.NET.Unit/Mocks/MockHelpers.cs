@@ -42,8 +42,20 @@ namespace Test.ADAL.NET.Unit.Mocks
         
         public static HttpResponseMessage CreateSuccessTokenResponseMessage()
         {
+            return CreateSuccessTokenResponseMessage(false);
+        }
+
+        public static HttpResponseMessage CreateSuccessTokenResponseMessage(bool setExtendedExpiresIn)
+        {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
-            HttpContent content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"resource\":\"resource1\",\"access_token\":\"some-access-token\",\"refresh_token\":\"something-encrypted\",\"id_token\":\"" +
+            string extendedExpiresIn = "";
+
+            if (setExtendedExpiresIn)
+            {
+                extendedExpiresIn = "\"ext_expires_in\":\"7200\",";
+            }
+
+            HttpContent content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3600\","+ extendedExpiresIn + "\"resource\":\"resource1\",\"access_token\":\"some-access-token\",\"refresh_token\":\"something-encrypted\",\"id_token\":\"" +
                                   CreateIdToken(TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId) +
                                   "\"}");
             responseMessage.Content = content;

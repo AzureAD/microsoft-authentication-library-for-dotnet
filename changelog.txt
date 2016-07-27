@@ -1,3 +1,15 @@
+Version 3.13.0
+==============
+This release contains
+- Fix to add ConfigureAwait(false) to all await calls to avoid deadlocks.
+- Fix bug where null reference was thrown in Android when onResult was called for an activity.
+- ext_expires_in claim was not being read from server response.
+- Disable Cross-Tenant refresh token redemption for client credentials flow.
+- Fix the bug where access token in authentication result could be null in multi-threaded scenarios.
+- Fix a bug where UserAssertion was not assumed to be JWT by default.
+- Add support for SecureString client secret.
+- Fix bug where null reference exception was thrown for AcquireTokenUsingDeviceCode.
+
 Version 3.12.0
 ==============
 This release contains

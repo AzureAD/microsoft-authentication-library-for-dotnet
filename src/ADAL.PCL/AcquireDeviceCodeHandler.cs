@@ -87,10 +87,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal async Task<DeviceCodeResult> RunHandlerAsync()
         {
-            await this.authenticator.UpdateFromTemplateAsync(this.callState);
+            await this.authenticator.UpdateFromTemplateAsync(this.callState).ConfigureAwait(false);
             this.ValidateAuthorityType();
             AdalHttpClient client = new AdalHttpClient(CreateDeviceCodeRequestUriString(), this.callState);
-            DeviceCodeResponse response = await client.GetResponseAsync<DeviceCodeResponse>();
+            DeviceCodeResponse response = await client.GetResponseAsync<DeviceCodeResponse>().ConfigureAwait(false);
 
             if (!string.IsNullOrEmpty(response.Error))
             {

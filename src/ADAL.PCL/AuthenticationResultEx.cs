@@ -104,5 +104,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         
         [DataMember]
         public string UserAssertionHash { get; set; }
+
+        internal AuthenticationResultEx Clone()
+        {
+            return new AuthenticationResultEx
+            {
+                UserAssertionHash = this.UserAssertionHash,
+                Exception = this.Exception,
+                RefreshToken = this.RefreshToken,
+                ResourceInResponse = this.ResourceInResponse,
+                Result = new AuthenticationResult(this.Result.AccessTokenType, this.Result.AccessToken, this.Result.ExpiresOn, this.Result.ExtendedExpiresOn)
+                {
+                    ExtendedLifeTimeToken = this.Result.ExtendedLifeTimeToken,
+                    IdToken = this.Result.IdToken,
+                    TenantId = this.Result.TenantId,
+                    UserInfo = new UserInfo(this.Result.UserInfo)
+                }
+            };
+        }
     }
 }

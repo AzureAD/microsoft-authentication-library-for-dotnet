@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Globalization;
 using Android.App;
 using Android.Content;
 
@@ -44,6 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static void SetAuthenticationAgentContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
             AuthorizationResult authorizationResult = null;
+            PlatformPlugin.Logger.Information(null, string.Format(CultureInfo.InvariantCulture,"Received Activity Result({0})", (int)resultCode));
             switch ((int)resultCode)
             {
                 case (int)Result.Ok:
@@ -65,7 +67,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     break;
             }
 
-            if (authorizationResult!=null)
+            if (authorizationResult != null)
             {
                 WebUI.SetAuthorizationResult(authorizationResult);
             }

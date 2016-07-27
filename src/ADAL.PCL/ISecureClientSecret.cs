@@ -25,30 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
-    /// Extension class to support username/password flow.
+    /// Interface to allow for client secret to be passed in as a SecureString
     /// </summary>
-    public static class AuthenticationContextIntegratedAuthExtensions
-	{
-
+    public interface ISecureClientSecret
+    {
         /// <summary>
-        /// Acquires security token from the authority.
+        /// Writes SecureString to the dictionary.
         /// </summary>
-        /// <remarks>This feature is supported only for Azure Active Directory and Active Directory Federation Services (ADFS) on Windows 10.</remarks>
-        /// <param name="ctx">Authentication context instance</param>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="userCredential">The user credential to use for token acquisition.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public static async Task<AuthenticationResult> AcquireTokenAsync(this AuthenticationContext ctx, string resource, string clientId, UserCredential userCredential)
-        {
-            return await ctx.AcquireTokenCommonAsync(resource, clientId, userCredential).ConfigureAwait(false);
-        }
+        /// <param name="parameters"></param>
+        void ApplyTo(IDictionary<string, string> parameters);
     }
-
 }

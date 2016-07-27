@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.SecurePassword = securePassword;
         }
 
-        internal SecureString SecurePassword { get; }
+        internal SecureString SecurePassword { get; private set; }
 
         internal string Password { get; }
 
@@ -84,10 +84,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             requestParameters[OAuthParameter.Username] = this.UserName;
             requestParameters[OAuthParameter.Password] = new string(PasswordToCharArray());
             
-            if (SecurePassword != null)
+            if (SecurePassword != null && !SecurePassword.IsReadOnly())
             {
                 SecurePassword.Clear();
             }
+
+            SecurePassword = null;
         }
     }
 }

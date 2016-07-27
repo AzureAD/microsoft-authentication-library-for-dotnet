@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 sendAuthorizeRequest();
             }
 
-            return await Task.Factory.StartNew(() => authorizationResult);
+            return await Task.Factory.StartNew(() => authorizationResult).ConfigureAwait(false);
         }
 
         internal AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri)

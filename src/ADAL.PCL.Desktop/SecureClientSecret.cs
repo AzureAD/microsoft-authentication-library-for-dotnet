@@ -26,29 +26,51 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Security;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
-    /// Extension class to support username/password flow.
+    /// This class allows to pass client secret as a SecureString to the API.
     /// </summary>
-    public static class AuthenticationContextIntegratedAuthExtensions
-	{
+    public class SecureClientSecret : ISecureClientSecret
+    {
+        private SecureString secureString;
 
         /// <summary>
-        /// Acquires security token from the authority.
+        /// Required Constructor
         /// </summary>
-        /// <remarks>This feature is supported only for Azure Active Directory and Active Directory Federation Services (ADFS) on Windows 10.</remarks>
-        /// <param name="ctx">Authentication context instance</param>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="userCredential">The user credential to use for token acquisition.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public static async Task<AuthenticationResult> AcquireTokenAsync(this AuthenticationContext ctx, string resource, string clientId, UserCredential userCredential)
+        /// <param name="secret">SecureString secret. Required and cannot be null.</param>
+        public SecureClientSecret(SecureString secret)
         {
-            return await ctx.AcquireTokenCommonAsync(resource, clientId, userCredential).ConfigureAwait(false);
+            if (secret == null)
+            {
+                throw new ArgumentNullException(nameof(secret));
+            }
+
+            this.secureString = secret;
+        }
+
+        public void ApplyTo(IDictionary<string, string> parameters)
+        {
+            var output = new char[secureString.Length];
+            IntPtr secureStringPtr = Marshal.SecureStringToCoTaskMemUnicode(secureString);
+            for (int i = 0; i < secureString.Length; i++)
+            {
+                output[i] = (char) Marshal.ReadInt16(secureStringPtr, i*2);
+            }
+
+            Marshal.ZeroFreeCoTaskMemUnicode(secureStringPtr);
+            parameters[OAuthParameter.ClientSecret] = new string(output);
+
+            if (secureString != null && !secureString.IsReadOnly())
+            {
+                secureString.Clear();
+            }
+
+            secureString = null;
         }
     }
-
 }
