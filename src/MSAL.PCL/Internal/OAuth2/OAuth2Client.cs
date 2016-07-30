@@ -32,24 +32,17 @@ using System.IO;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization.Json;
 using Microsoft.Identity.Client.Internal.Http;
-using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.Internal.OAuth2
 {
     internal class OAuth2Client
     {
-        public readonly Authenticator Authenticator;
-        public readonly Dictionary<string, string> BodyParameters = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> BodyParameters = new Dictionary<string, string>();
 
         public readonly Dictionary<string, string> Headers =
             new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters());
 
         public readonly Dictionary<string, string> QueryParameters = new Dictionary<string, string>();
-
-        public OAuth2Client(Authenticator authenticator, AuthenticationRequestParameters parameters)
-        {
-            this.Authenticator = authenticator;
-        }
 
         public void AddQueryParameter(string key, string value)
         {
@@ -63,39 +56,41 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
 
         public void AddBodyParameter(string key, string value)
         {
-            BodyParameters[key] = value;
+            BodyParameters[EncodingHelper.UrlEncode(key)] = EncodingHelper.UrlEncode(value);
         }
 
-        public TokenResponse GetToken(CallState callstate)
+        public InstanceDiscoveryResponse DoAuthorityValidation(Uri endPoint, CallState callstate)
         {
-            UriBuilder endpointUri = new UriBuilder(Authenticator.TokenUri);
+            return null;
+        }
+
+        public TokenResponse GetToken(Uri endPoint, CallState callState)
+        {
+            UriBuilder endpointUri = new UriBuilder(endPoint);
+            foreach (var VARIABLE in QueryParameters.ToQueryParameter())
+            {
+                
+            }
 
             try
             {
-                requestMessage.Headers.Accept.Clear();
-
-                requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(this.Accept ?? "application/json"));
-                foreach (KeyValuePair<string, string> kvp in this.Headers)
-                {
-                    requestMessage.Headers.Add(kvp.Key, kvp.Value);
-                }
-
-                bool addCorrelationId = (this.CallState != null && this.CallState.CorrelationId != Guid.Empty);
+                bool addCorrelationId = (callState != null && callState.CorrelationId != Guid.Empty);
                 if (addCorrelationId)
                 {
-                    requestMessage.Headers.Add(OAuth2Header.CorrelationId, this.CallState.CorrelationId.ToString());
-                    requestMessage.Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
+                    Headers.Add(OAuth2Header.CorrelationId, callState.CorrelationId.ToString());
+                    Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
                 }
-                MsalHttpRequest.SendPost(, this.Headers, this.BodyParameters, callstate);
+
+                MsalHttpResponse response = MsalHttpRequest.SendPost(endpointUri., this.Headers, this.BodyParameters, callState);
 
                 if (addCorrelationId)
                 {
-                    VerifyCorrelationIdHeaderInReponse(webResponse.Headers);
+                    VerifyCorrelationIdHeaderInReponse(response.Headers);
                 }
             }
             catch (HttpRequestWrapperException ex)
             {
-                PlatformPlugin.Logger.Error(this.CallState, ex);
+                PlatformPlugin.Logger.Error(callState, ex);
                 MsalServiceException serviceEx;
                 if (ex.WebResponse != null)
                 {

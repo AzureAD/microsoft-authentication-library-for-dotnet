@@ -61,6 +61,7 @@
     <Compile Include="..\MSAL.Common\CommonAssemblyInfo.cs">
       <Link>Internal\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Internal\InstanceDiscoveryResponse.cs" />
     <Compile Include="Internal\Requests\AuthenticationRequestParameters.cs" />
     <Compile Include="Internal\Http\HttpClientFactory.cs" />
     <Compile Include="Internal\Http\HttpMessageHandlerFactory.cs" />
@@ -97,9 +98,7 @@
     <Compile Include="Internal\ClientKey.cs" />
     <Compile Include="ConfidentialClientApplication.cs" />
     <Compile Include="Internal\Constants.cs" />
-    <Compile Include="Internal\Http\HttpClientWrapper.cs" />
     <Compile Include="Internal\Http\HttpRequestWrapperException.cs" />
-    <Compile Include="Internal\Http\MsalHttpWebResponse.cs" />
     <Compile Include="Internal\Interfaces\IBrokerHelper.cs" />
     <Compile Include="Internal\Interfaces\IDeviceAuthHelper.cs" />
     <Compile Include="IPlatformParameters.cs" />
@@ -121,7 +120,6 @@
     <Compile Include="Internal\Interfaces\IWebUIFactory.cs" />
     <Compile Include="Internal\PlatformPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Internal\RequestParameters.cs" />
     <Compile Include="TokenCache.cs" />
     <Compile Include="TokenCacheItem.cs" />
     <Compile Include="Internal\TokenCacheKey.cs" />

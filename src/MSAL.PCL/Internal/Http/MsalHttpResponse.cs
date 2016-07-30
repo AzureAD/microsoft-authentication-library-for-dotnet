@@ -33,7 +33,9 @@ namespace Microsoft.Identity.Client.Internal.Http
     internal class MsalHttpResponse
     {
         public Dictionary<string, string> Headers { get; set; }
+
         public string Body { get; set; }
+
         public HttpStatusCode StatusCode { get; set; }
     }
 }

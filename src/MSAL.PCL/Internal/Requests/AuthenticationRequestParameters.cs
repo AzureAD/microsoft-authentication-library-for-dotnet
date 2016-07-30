@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -33,14 +34,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class AuthenticationRequestParameters
     {
         public bool RestrictToSingleUser { get; set; }
+
         public HashSet<string> Scope { get; set; }
+
         public ClientKey ClientKey { get; set; }
+
         public string Policy { get; set; }
+
         public string AuthorizationCode { get; set; }
-        public string RedirectUri { get; set; }
+
+        public Uri RedirectUri { get; set; }
+
         public string LoginHint { get; set; }
+
         public string ExtraQueryParameters { get; set; }
+
         public string Prompt { get; set; }
+
         public string Assertion { get; set; }
     }
 }

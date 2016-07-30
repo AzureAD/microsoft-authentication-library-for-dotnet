@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,43 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using Microsoft.Identity.Client.Interfaces;
+using System.Runtime.Serialization;
 
-namespace Microsoft.Identity.Client.Internal.Http
+namespace Microsoft.Identity.Client.Internal
 {
-    internal class MsalHttpWebResponse : IHttpWebResponse
+
+    [DataContract]
+    internal sealed class InstanceDiscoveryResponse
     {
-        public MsalHttpWebResponse(Stream responseStream, Dictionary<string, string> headers, HttpStatusCode statusCode)
-        {
-            this.ResponseStream = responseStream;
-            this.Headers = headers;
-            this.StatusCode = statusCode;
-        }
-
-        public HttpStatusCode StatusCode { get; }
-        public Dictionary<string, string> Headers { get; }
-        public Stream ResponseStream { get; private set; }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (this.ResponseStream != null)
-                {
-                    this.ResponseStream.Dispose();
-                    this.ResponseStream = null;
-                }
-            }
-        }
+        [DataMember(Name = "tenant_discovery_endpoint")]
+        public string TenantDiscoveryEndpoint { get; set; }
     }
 }

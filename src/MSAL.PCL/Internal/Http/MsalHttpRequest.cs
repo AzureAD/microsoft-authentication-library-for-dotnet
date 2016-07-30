@@ -31,6 +31,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Internal.Http
@@ -77,6 +78,8 @@ namespace Microsoft.Identity.Client.Internal.Http
             bool canRetry = true)
         {
             HttpClient client = HttpClientFactory.GetHttpClient();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
             bool isRetryable = false;
             MsalHttpResponse response = null;
 

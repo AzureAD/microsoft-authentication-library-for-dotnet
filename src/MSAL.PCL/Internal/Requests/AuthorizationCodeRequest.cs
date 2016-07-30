@@ -26,35 +26,32 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class AuthorizationCodeRequest : BaseRequest
     {
         public AuthorizationCodeRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            Authenticator authenticator, TokenCache tokenCache,
-            string authorizationCode, Uri redirectUri)
+            Authenticator authenticator, TokenCache tokenCache)
             : base(authenticationRequestParameters, authenticator, tokenCache)
         {
-            if (string.IsNullOrWhiteSpace(authorizationCode))
+            if (string.IsNullOrWhiteSpace(authenticationRequestParameters.AuthorizationCode))
             {
                 throw new ArgumentNullException("authorizationCode");
             }
 
-            authenticationRequestParameters.AuthorizationCode = authorizationCode;
-
-            PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
-            if (!string.IsNullOrWhiteSpace(redirectUri.Fragment))
+            PlatformPlugin.PlatformInformation.ValidateRedirectUri(authenticationRequestParameters.RedirectUri, this.CallState);
+            if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))
             {
                 throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
-
-            authenticationRequestParameters.RedirectUri = redirectUri.AbsoluteUri;
+            
             this.LoadFromCache = false;
             this.SupportADFS = false;
         }
 
-        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
+        protected override void AddAditionalRequestParameters()
         {
             requestParameters[OAuth2Parameter.GrantType] = OAuth2GrantType.AuthorizationCode;
             requestParameters[OAuth2Parameter.Code] = this.authorizationCode;

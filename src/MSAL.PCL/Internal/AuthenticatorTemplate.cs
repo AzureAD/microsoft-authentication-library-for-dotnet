@@ -113,11 +113,5 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        [DataContract]
-        internal sealed class InstanceDiscoveryResponse
-        {
-            [DataMember(Name = "tenant_discovery_endpoint")]
-            public string TenantDiscoveryEndpoint { get; set; }
-        }
     }
 }

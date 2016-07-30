@@ -36,8 +36,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly UserAssertion userAssertion;
 
         public OnBehalfOfRequest(AuthenticationRequestParameters authenticationRequestParameters,
+            Authenticator authenticator, TokenCache tokenCache,
             UserAssertion userAssertion)
-            : base(authenticationRequestParameters)
+            : base(authenticationRequestParameters, authenticator, tokenCache)
         {
             if (userAssertion == null)
             {

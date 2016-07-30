@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -37,7 +38,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         protected static readonly Task CompletedTask = Task.FromResult(false);
         internal readonly AuthenticationRequestParameters AuthenticationRequestParameters;
+        internal readonly Authenticator Authenticator;
         internal readonly TokenCache TokenCache;
+
+        internal CallState CallState { get; set; }
+        protected bool SupportADFS { get; set; }
+        protected User User { get; set; }
+        protected AuthenticationResultEx ResultEx { get; set; }
+        protected bool LoadFromCache { get; set; }
+        protected bool ForceRefresh { get; set; }
+        protected bool StoreToCache { get; set; }
 
         protected BaseRequest(AuthenticationRequestParameters authenticationRequestParameters,
             Authenticator authenticator, TokenCache tokenCache)
@@ -64,8 +74,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             ValidateScopeInput(authenticationRequestParameters.Scope);
-
-
+            
             this.LoadFromCache = (tokenCache != null);
             this.StoreToCache = (tokenCache != null);
             this.SupportADFS = false;
@@ -78,15 +87,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     "Cache cannot have entries for more than 1 unique id when RestrictToSingleUser is set to TRUE.");
             }
         }
-
-        internal CallState CallState { get; set; }
-        protected bool SupportADFS { get; set; }
-        protected Authenticator Authenticator { get; }
-        protected User User { get; set; }
-        protected AuthenticationResultEx ResultEx { get; set; }
-        protected bool LoadFromCache { get; set; }
-        protected bool ForceRefresh { get; set; }
-        protected bool StoreToCache { get; set; }
 
         protected virtual HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
         {
@@ -252,24 +252,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
             this.Authenticator.UpdateTenantId(result.Result.TenantId);
         }
 
-        protected abstract void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters);
+        protected abstract void AddAditionalRequestParameters(IDictionary<string, string> parameters);
 
         protected virtual async Task<AuthenticationResultEx> SendTokenRequestAsync()
         {
-            var requestParameters =
-                new DictionaryRequestParameters(this.GetDecoratedScope(AuthenticationRequestParameters.Scope),
-                    AuthenticationRequestParameters.ClientKey);
-            this.AddAditionalRequestParameters(requestParameters);
+            OAuth2Client client = new OAuth2Client();
+            AuthenticationRequestParameters.ClientKey.AddToParameters(client.BodyParameters);
+            client.BodyParameters[OAuth2Parameter.Scope] = this.GetDecoratedScope(AuthenticationRequestParameters.Scope).AsSingleString();
+
+            this.AddAditionalRequestParameters(client.BodyParameters);
             return await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
         }
 
         internal async Task<AuthenticationResultEx> SendTokenRequestByRefreshTokenAsync(string refreshToken)
         {
+            OAuth2Client client = new OAuth2Client(Authenticator);
             var requestParameters =
                 new DictionaryRequestParameters(this.GetDecoratedScope(AuthenticationRequestParameters.Scope),
                     AuthenticationRequestParameters.ClientKey);
-            requestParameters[OAuth2Parameter.GrantType] = OAuth2GrantType.RefreshToken;
-            requestParameters[OAuth2Parameter.RefreshToken] = refreshToken;
+            client.BodyParameters[OAuth2Parameter.GrantType] = OAuth2GrantType.RefreshToken;
+            client.BodyParameters[OAuth2Parameter.RefreshToken] = refreshToken;
 
             AuthenticationResultEx result = await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
 
@@ -323,7 +325,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return newResultEx;
         }
 
-        private async Task<AuthenticationResultEx> SendHttpMessageAsync(IRequestParameters requestParameters)
+        private async Task<AuthenticationResultEx> SendHttpMessageAsync()
         {
             string endpoint = this.Authenticator.TokenUri;
             endpoint = AddPolicyParameter(endpoint);
