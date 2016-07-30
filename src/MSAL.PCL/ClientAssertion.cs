@@ -30,12 +30,12 @@ using System;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     Secret type containing an assertion of type "urn:ietf:params:oauth:token-type:jwt".
+    /// Secret type containing an assertion of type "urn:ietf:params:oauth:token-type:jwt".
     /// </summary>
     public sealed class ClientAssertion
     {
         /// <summary>
-        ///     Constructor to create credential with a jwt token encoded as a base64 url encoded string.
+        /// Constructor to create credential with a jwt token encoded as a base64 url encoded string.
         /// </summary>
         /// <param name="assertion">The jwt used as credential.</param>
         public ClientAssertion(string assertion)
@@ -50,12 +50,12 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     Gets the assertion.
+        /// Gets the assertion.
         /// </summary>
         public string Assertion { get; private set; }
 
         /// <summary>
-        ///     Gets the assertion type.
+        /// Gets the assertion type.
         /// </summary>
         public string AssertionType { get; private set; }
     }

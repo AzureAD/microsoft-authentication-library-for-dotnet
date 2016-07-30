@@ -28,7 +28,7 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     LogLevel
+    /// LogLevel
     /// </summary>
     public enum LogLevel
     {

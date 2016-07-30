@@ -31,12 +31,12 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     The exception type thrown when a token cannot be acquired silently.
+    /// The exception type thrown when a token cannot be acquired silently.
     /// </summary>
     public class MsalSilentTokenAcquisitionException : MsalException
     {
         /// <summary>
-        ///     Initializes a new instance of the exception class.
+        /// Initializes a new instance of the exception class.
         /// </summary>
         public MsalSilentTokenAcquisitionException()
             : base(MsalError.FailedToAcquireTokenSilently, MsalErrorMessage.FailedToAcquireTokenSilently)

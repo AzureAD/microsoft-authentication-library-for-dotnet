@@ -33,7 +33,7 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     Native applications (desktop/phone/iOS/Android).
+    /// Native applications (desktop/phone/iOS/Android).
     /// </summary>
     public sealed class PublicClientApplication : AbstractClientApplication
     {
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
         */
 
         /// <summary>
-        ///     Default consutructor of the application.
+        /// Default consutructor of the application.
         /// </summary>
         public PublicClientApplication(string clientId) : this(DefaultAuthority, clientId)
         {
@@ -169,8 +169,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific
-        ///     libraries.
+        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific
+        /// libraries.
         /// </summary>
         /// <param name="scope"></param>
         /// <returns></returns>
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     .NET specific method for intergrated auth.
+        /// .NET specific method for intergrated auth.
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="authority"></param>

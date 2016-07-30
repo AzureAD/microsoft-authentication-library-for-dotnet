@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal
 
 
     /// <summary>
-    ///     The active directory authentication error message.
+    /// The active directory authentication error message.
     /// </summary>
     internal static class MsalErrorMessage
     {

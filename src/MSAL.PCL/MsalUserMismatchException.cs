@@ -31,12 +31,12 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     The exception type thrown when user returned by service does not match user in the request.
+    /// The exception type thrown when user returned by service does not match user in the request.
     /// </summary>
     public class MsalUserMismatchException : MsalException
     {
         /// <summary>
-        ///     Initializes a new instance of the exception class.
+        /// Initializes a new instance of the exception class.
         /// </summary>
         public MsalUserMismatchException(string requestedUser, string returnedUser)
             : base(MsalError.UserMismatch,
@@ -47,17 +47,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     Gets the user requested from service.
+        /// Gets the user requested from service.
         /// </summary>
         public string RequestedUser { get; }
 
         /// <summary>
-        ///     Gets the user returned by service.
+        /// Gets the user returned by service.
         /// </summary>
         public string ReturnedUser { get; }
 
         /// <summary>
-        ///     Creates and returns a string representation of the current exception.
+        /// Creates and returns a string representation of the current exception.
         /// </summary>
         /// <returns>A string representation of the current exception.</returns>
         public override string ToString()

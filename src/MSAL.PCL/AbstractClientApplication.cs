@@ -34,17 +34,17 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <Summary>
-    ///     AbstractClientApplication
+    /// AbstractClientApplication
     /// </Summary>
     public abstract class AbstractClientApplication
     {
         /// <Summary>
-        ///     DefaultAuthority
+        /// DefaultAuthority
         /// </Summary>
         protected const string DefaultAuthority = "https://login.microsoftonline.com/common/";
 
         /// <Summary>
-        ///     AbstractClientApplication
+        /// AbstractClientApplication
         /// </Summary>
         static AbstractClientApplication()
         {
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <Summary>
-        ///     AbstractClientApplication
+        /// AbstractClientApplication
         /// </Summary>
         protected AbstractClientApplication(string authority, string clientId, string redirectUri,
             bool validateAuthority)
@@ -68,50 +68,50 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     default false.
+        /// default false.
         /// </summary>
         public bool RestrictToSingleUser { get; set; }
 
         /// <Summary>
-        ///     Authority
+        /// Authority
         /// </Summary>
         public string Authority { get; }
 
         /// <summary>
-        ///     Will be a default value. Can be overriden by the developer. Once set, application will bind to the client Id.
+        /// Will be a default value. Can be overriden by the developer. Once set, application will bind to the client Id.
         /// </summary>
         public string ClientId { get; set; }
 
         /// <summary>
-        ///     Redirect Uri configured in the portal. Will have a default value. Not required, if the developer is using the
-        ///     default client Id.
+        /// Redirect Uri configured in the portal. Will have a default value. Not required, if the developer is using the
+        /// default client Id.
         /// </summary>
         public string RedirectUri { get; set; }
 
         /// <Summary>
-        ///     UserTokenCache
+        /// UserTokenCache
         /// </Summary>
         public TokenCache UserTokenCache { get; set; }
 
         /// <summary>
-        ///     Gets or sets correlation Id which would be sent to the service with the next request.
-        ///     Correlation Id is to be used for diagnostics purposes.
+        /// Gets or sets correlation Id which would be sent to the service with the next request.
+        /// Correlation Id is to be used for diagnostics purposes.
         /// </summary>
         public Guid CorrelationId { get; set; }
 
         /// <summary>
-        ///     Gets a value indicating whether address validation is ON or OFF.
+        /// Gets a value indicating whether address validation is ON or OFF.
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
         /// <summary>
-        ///     .NET specific property that allows configuration of platform specific properties. For example, in iOS/Android it
-        ///     would include the flag to enable/disable broker.
+        /// .NET specific property that allows configuration of platform specific properties. For example, in iOS/Android it
+        /// would include the flag to enable/disable broker.
         /// </summary>
         public IPlatformParameters PlatformParameters { get; set; }
 
         /// <summary>
-        ///     Returns a User centric view over the cache that provides a list of all the signed in users.
+        /// Returns a User centric view over the cache that provides a list of all the signed in users.
         /// </summary>
         public IEnumerable<User> Users
         {

@@ -67,8 +67,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     Make sure that the browser control does not surface any of it's own dialogs.
-        ///     For instance bad certificate or javascript error dialogs.
+        /// Make sure that the browser control does not surface any of it's own dialogs.
+        /// For instance bad certificate or javascript error dialogs.
         /// </summary>
         private void SuppressBrowserSubDialogs()
         {
@@ -110,10 +110,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     This method must only be called from the UI thread.  Since this is the
-        ///     callers opportunity to call dispose on this object.  Calling
-        ///     Dispose must be done on the same thread on which this object
-        ///     was constructed.
+        /// This method must only be called from the UI thread.  Since this is the
+        /// callers opportunity to call dispose on this object.  Calling
+        /// Dispose must be done on the same thread on which this object
+        /// was constructed.
         /// </summary>
         /// <param name="exception"></param>
         private void SignalDone(Exception exception = null)

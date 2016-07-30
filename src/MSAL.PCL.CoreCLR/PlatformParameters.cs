@@ -28,7 +28,7 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     Additional parameters used in acquiring user's authorization
+    /// Additional parameters used in acquiring user's authorization
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {

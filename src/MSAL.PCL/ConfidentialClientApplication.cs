@@ -32,7 +32,7 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     ConfidentialClientApplication
+    /// ConfidentialClientApplication
     /// </summary>
     public sealed class ConfidentialClientApplication : AbstractClientApplication
     {
@@ -64,17 +64,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     ClientCredential
+        /// ClientCredential
         /// </summary>
         public ClientCredential ClientCredential { get; }
 
         /// <summary>
-        ///     AppTokenCache
+        /// AppTokenCache
         /// </summary>
         public TokenCache AppTokenCache { get; set; }
 
         /// <summary>
-        ///     AcquireTokenOnBehalfOfAsync
+        /// AcquireTokenOnBehalfOfAsync
         /// </summary>
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(string[] scope, UserAssertion userAssertion)
         {
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     AcquireTokenOnBehalfOfAsync
+        /// AcquireTokenOnBehalfOfAsync
         /// </summary>
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(string[] scope, UserAssertion userAssertion,
             string authority, string policy)
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     AcquireTokenByAuthorizationCodeAsync
+        /// AcquireTokenByAuthorizationCodeAsync
         /// </summary>
         public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string[] scope,
             string authorizationCode)
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     AcquireTokenByAuthorizationCodeAsync
+        /// AcquireTokenByAuthorizationCodeAsync
         /// </summary>
         public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string[] scope,
             string authorizationCode, string policy)
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     AcquireTokenForClient
+        /// AcquireTokenForClient
         /// </summary>
         public async Task<AuthenticationResult> AcquireTokenForClient(string[] scope, string policy)
         {
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     Gets URL of the authorize endpoint including the query parameters.
+        /// Gets URL of the authorize endpoint including the query parameters.
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="loginHint"></param>
@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     Gets URL of the authorize endpoint including the query parameters.
+        /// Gets URL of the authorize endpoint including the query parameters.
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="redirectUri"></param>

@@ -30,7 +30,7 @@ using UIKit;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     Additional parameters used in acquiring user's authorization
+    /// Additional parameters used in acquiring user's authorization
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     Caller UIViewController
+        /// Caller UIViewController
         /// </summary>
         public UIViewController CallerViewController { get; private set; }
     }

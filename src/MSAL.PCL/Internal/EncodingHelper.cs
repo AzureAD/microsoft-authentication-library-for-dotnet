@@ -33,7 +33,7 @@ using System.Text;
 namespace Microsoft.Identity.Client.Internal
 {
     /// <summary>
-    ///     The encoding helper.
+    /// The encoding helper.
     /// </summary>
     internal static class EncodingHelper
     {

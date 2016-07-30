@@ -35,13 +35,13 @@ namespace Microsoft.Identity.Client
     internal class SilentWebUI : WebUI, IDisposable
     {
         /// <summary>
-        ///     This is how long we allow between completed navigations.
+        /// This is how long we allow between completed navigations.
         /// </summary>
         private const int NavigationWaitMiliSecs = 250;
 
         /// <summary>
-        ///     This is how long all redirect navigations are allowed to run for before a graceful
-        ///     termination of the entire browser based authentication process is attempted.
+        /// This is how long all redirect navigations are allowed to run for before a graceful
+        /// termination of the entire browser based authentication process is attempted.
         /// </summary>
         private const int NavigationOverallTimeout = 2000;
 
@@ -69,9 +69,9 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     Waits on the UI Thread to complete normally for NavigationOverallTimeout.
-        ///     After it attempts shutdown the UI thread graceful followed by aborting
-        ///     the thread if a graceful shutdown is not successful.
+        /// Waits on the UI Thread to complete normally for NavigationOverallTimeout.
+        /// After it attempts shutdown the UI thread graceful followed by aborting
+        /// the thread if a graceful shutdown is not successful.
         /// </summary>
         /// <param name="uiThread"></param>
         /// <returns>Returns true if the UI thread completed on its own before the timeout.  Otherwise false.</returns>
@@ -143,12 +143,12 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     Callers expect the call to show the authentication dialog to be synchronous.  This is easy in the
-        ///     interactive case as ShowDialog is a synchronous call.  However, ShowDialog will always show
-        ///     the dialog.  It can not be hidden. So it can not be used in the silent case.  Instead we need
-        ///     to do the equivalent of creating our own modal dialog.  We start a new thread, launch an
-        ///     invisible window on that thread.  The original calling thread blocks until the secondary
-        ///     UI thread completes.
+        /// Callers expect the call to show the authentication dialog to be synchronous.  This is easy in the
+        /// interactive case as ShowDialog is a synchronous call.  However, ShowDialog will always show
+        /// the dialog.  It can not be hidden. So it can not be used in the silent case.  Instead we need
+        /// to do the equivalent of creating our own modal dialog.  We start a new thread, launch an
+        /// invisible window on that thread.  The original calling thread blocks until the secondary
+        /// UI thread completes.
         /// </summary>
         /// <returns></returns>
         protected override AuthorizationResult OnAuthenticate(string headers)

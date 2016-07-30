@@ -88,8 +88,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     Cleans up the scheduler by indicating that no more tasks will be queued.
-        ///     This method blocks until all threads successfully shutdown.
+        /// Cleans up the scheduler by indicating that no more tasks will be queued.
+        /// This method blocks until all threads successfully shutdown.
         /// </summary>
         public void Dispose()
         {

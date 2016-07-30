@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client
         internal AuthorizationResult Result { get; set; }
 
         /// <summary>
-        ///     Gets Web Browser control used by the dialog.
+        /// Gets Web Browser control used by the dialog.
         /// </summary>
         public WebBrowser WebBrowser
         {

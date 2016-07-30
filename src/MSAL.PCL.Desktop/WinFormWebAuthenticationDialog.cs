@@ -34,7 +34,7 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     The browser dialog used for user authentication
+    /// The browser dialog used for user authentication
     /// </summary>
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
         private bool zoomed;
 
         /// <summary>
-        ///     Default constructor
+        /// Default constructor
         /// </summary>
         public WindowsFormsWebAuthenticationDialog(object ownerWindow)
             : base(ownerWindow)

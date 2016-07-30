@@ -28,7 +28,7 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     Additional parameters used in acquiring user's authorization
+    /// Additional parameters used in acquiring user's authorization
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     Gets the owner of the browser dialog which pops up for receiving user credentials. It can be null.
+        /// Gets the owner of the browser dialog which pops up for receiving user credentials. It can be null.
         /// </summary>
         public object OwnerWindow { get; private set; }
     }

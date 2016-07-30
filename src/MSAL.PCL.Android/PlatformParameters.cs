@@ -30,7 +30,7 @@ using Android.App;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     Additional parameters used in acquiring user's authorization
+    /// Additional parameters used in acquiring user's authorization
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     Caller Android Activity
+        /// Caller Android Activity
         /// </summary>
         public Activity CallerActivity { get; private set; }
     }

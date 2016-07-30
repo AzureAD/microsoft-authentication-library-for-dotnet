@@ -40,14 +40,14 @@ namespace Microsoft.Identity.Client.Internal
         public AuthenticationResult Result { get; set; }
 
         /// <summary>
-        ///     Gets the Refresh Token associated with the requested Access Token. Note: not all operations will return a Refresh
-        ///     Token.
+        /// Gets the Refresh Token associated with the requested Access Token. Note: not all operations will return a Refresh
+        /// Token.
         /// </summary>
         [DataMember]
         public string RefreshToken { get; set; }
 
         /// <summary>
-        ///     Gets a value indicating whether the refresh token can be used for requesting access token for other resources.
+        /// Gets a value indicating whether the refresh token can be used for requesting access token for other resources.
         /// </summary>
         internal bool IsMultipleScopeRefreshToken
         {
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Internal
         internal Exception Exception { get; set; }
 
         /// <summary>
-        ///     Serializes the object to a JSON string
+        /// Serializes the object to a JSON string
         /// </summary>
         /// <returns>Deserialized authentication result</returns>
         public static AuthenticationResultEx Deserialize(string serializedObject)
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         /// <summary>
-        ///     Serializes the object to a JSON string
+        /// Serializes the object to a JSON string
         /// </summary>
         /// <returns>Serialized authentication result</returns>
         public string Serialize()

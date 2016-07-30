@@ -34,8 +34,8 @@ namespace Microsoft.Identity.Client
     public static class PublicClientApplicationExtensions
     {
         /// <summary>
-        ///     .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific
-        ///     libraries.
+        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific
+        /// libraries.
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="app"></param>
@@ -49,8 +49,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific
-        ///     libraries.
+        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific
+        /// libraries.
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="authority"></param>

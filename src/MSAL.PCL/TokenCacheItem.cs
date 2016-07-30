@@ -32,12 +32,12 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///     Token cache item
+    /// Token cache item
     /// </summary>
     public sealed class TokenCacheItem
     {
         /// <summary>
-        ///     Default constructor.
+        /// Default constructor.
         /// </summary>
         internal TokenCacheItem(TokenCacheKey key, AuthenticationResult result)
         {
@@ -60,69 +60,69 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///     Gets the Authority.
+        /// Gets the Authority.
         /// </summary>
         public string Authority { get; }
 
         /// <summary>
-        ///     Gets the ClientId.
+        /// Gets the ClientId.
         /// </summary>
         public string ClientId { get; internal set; }
 
         /// <summary>
-        ///     Gets the Expiration.
+        /// Gets the Expiration.
         /// </summary>
         public DateTimeOffset ExpiresOn { get; internal set; }
 
         /// <summary>
-        ///     Gets the Version.
+        /// Gets the Version.
         /// </summary>
         public string FamilyName { get; internal set; }
 
         /// <summary>
-        ///     Gets the Name.
+        /// Gets the Name.
         /// </summary>
         public string Name { get; internal set; }
 
         /// <summary>
-        ///     Gets the IdentityProviderName.
+        /// Gets the IdentityProviderName.
         /// </summary>
         public string IdentityProvider { get; internal set; }
 
         /// <summary>
-        ///     Gets the Scope.
+        /// Gets the Scope.
         /// </summary>
         public HashSet<string> Scope { get; internal set; }
 
         /// <summary>
-        ///     Gets the Policy.
+        /// Gets the Policy.
         /// </summary>
         public string Policy { get; internal set; }
 
         /// <summary>
-        ///     Gets the TenantId.
+        /// Gets the TenantId.
         /// </summary>
         public string TenantId { get; internal set; }
 
         /// <summary>
-        ///     Gets the user's unique Id.
+        /// Gets the user's unique Id.
         /// </summary>
         public string UniqueId { get; internal set; }
 
         /// <summary>
-        ///     Gets the user's displayable Id.
+        /// Gets the user's displayable Id.
         /// </summary>
         public string DisplayableId { get; internal set; }
 
         internal string HomeObjectId { get; set; }
 
         /// <summary>
-        ///     Gets the Access Token requested.
+        /// Gets the Access Token requested.
         /// </summary>
         public string Token { get; internal set; }
 
         /// <summary>
-        ///     Gets the entire Profile Info if returned by the service or null if no Id Token is returned.
+        /// Gets the entire Profile Info if returned by the service or null if no Id Token is returned.
         /// </summary>
         public User User { get; internal set; }
 

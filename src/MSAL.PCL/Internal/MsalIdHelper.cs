@@ -35,34 +35,34 @@ namespace Microsoft.Identity.Client.Internal
     internal static class MsalIdParameter
     {
         /// <summary>
-        ///     ADAL Flavor: .NET or WinRT
+        /// ADAL Flavor: .NET or WinRT
         /// </summary>
         public const string Product = "x-client-SKU";
 
         /// <summary>
-        ///     ADAL assembly version
+        /// ADAL assembly version
         /// </summary>
         public const string Version = "x-client-Ver";
 
         /// <summary>
-        ///     CPU platform with x86, x64 or ARM as value
+        /// CPU platform with x86, x64 or ARM as value
         /// </summary>
         public const string CpuPlatform = "x-client-CPU";
 
         /// <summary>
-        ///     Version of the operating system. This will not be sent on WinRT
+        /// Version of the operating system. This will not be sent on WinRT
         /// </summary>
         public const string OS = "x-client-OS";
 
         /// <summary>
-        ///     Device model. This will not be sent on .NET
+        /// Device model. This will not be sent on .NET
         /// </summary>
         public const string DeviceModel = "x-client-DM";
     }
 
     /// <summary>
-    ///     This class adds additional query parameters or headers to the requests sent to STS. This can help us in
-    ///     collecting statistics and potentially on diagnostics.
+    /// This class adds additional query parameters or headers to the requests sent to STS. This can help us in
+    /// collecting statistics and potentially on diagnostics.
     /// </summary>
     internal static class MsalIdHelper
     {
