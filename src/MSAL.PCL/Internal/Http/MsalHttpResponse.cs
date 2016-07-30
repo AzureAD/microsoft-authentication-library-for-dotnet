@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,23 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Net.Http;
+using System.Collections.Generic;
+using System.Net;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.Http
 {
-
-    internal static class HttpMessageHandlerFactory
+    internal class MsalHttpResponse
     {
-        internal static HttpMessageHandler GetMessageHandler(bool useDefaultCredentials)
-        {
-            if (MockHandler != null)
-            {
-                return MockHandler;
-            }
-
-            return new HttpClientHandler {UseDefaultCredentials = useDefaultCredentials};
-        }
-
-        internal static HttpMessageHandler MockHandler { get; set; }
+        public Dictionary<string, string> Headers { get; set; }
+        public string Body { get; set; }
+        public HttpStatusCode StatusCode { get; set; }
     }
 }

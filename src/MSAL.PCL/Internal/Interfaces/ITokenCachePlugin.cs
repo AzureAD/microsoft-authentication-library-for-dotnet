@@ -25,22 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Threading;
-
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Interfaces
 {
-    internal class AuthenticationRequestParameters
+    internal interface ITokenCachePlugin
     {
-        public Authenticator Authenticator { get; set; }
-
-        public TokenCache TokenCache { get; set; }
-
-        public string[] Scope { get; set; }
-
-        public ClientKey ClientKey { get; set; }
-
-        public string Policy { get; set; }
-
-        public bool RestrictToSingleUser { get; set; }
+        void BeforeAccess(TokenCacheNotificationArgs args);
+        void AfterAccess(TokenCacheNotificationArgs args);
     }
 }

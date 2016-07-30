@@ -26,12 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
-using Android.Accounts;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 
@@ -57,13 +55,14 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
+            IDictionary<string, string> additionalHeaders, CallState callState)
         {
             returnedUriReady = new SemaphoreSlim(0);
 
             try
             {
-                var agentIntent = new Intent(this.parameters.CallerActivity, typeof(AuthenticationAgentActivity));
+                var agentIntent = new Intent(this.parameters.CallerActivity, typeof (AuthenticationAgentActivity));
                 agentIntent.PutExtra("Url", authorizationUri.AbsoluteUri);
                 agentIntent.PutExtra("Callback", redirectUri.AbsoluteUri);
                 AuthenticationAgentActivity.AdditionalHeaders = additionalHeaders;

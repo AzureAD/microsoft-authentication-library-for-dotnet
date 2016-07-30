@@ -37,32 +37,24 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
     /// </summary>
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class WindowsFormsWebAuthenticationDialogBase : Form
     {
-        private static readonly NavigateErrorStatus NavigateErrorStatus = new NavigateErrorStatus();
-
         private const int UIWidth = 566;
-
-        private Panel webBrowserPanel;
+        private static readonly NavigateErrorStatus NavigateErrorStatus = new NavigateErrorStatus();
         private readonly CustomWebBrowser webBrowser;
-
         private Uri desiredCallbackUri;
+        private Keys key = Keys.None;
 
         /// <summary>
-        /// 
         /// </summary>
         protected IWin32Window ownerWindow;
 
-        private Keys key = Keys.None;
-
-        internal AuthorizationResult Result { get; set; }
+        private Panel webBrowserPanel;
 
         /// <summary>
-        /// 
         /// </summary>
         protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow)
         {
@@ -86,15 +78,15 @@ namespace Microsoft.Identity.Client
             }
             else if (ownerWindow is IWin32Window)
             {
-                this.ownerWindow = (IWin32Window)ownerWindow;
+                this.ownerWindow = (IWin32Window) ownerWindow;
             }
             else if (ownerWindow is IntPtr)
             {
-                this.ownerWindow = new WindowsFormsWin32Window { Handle = (IntPtr)ownerWindow };
+                this.ownerWindow = new WindowsFormsWin32Window {Handle = (IntPtr) ownerWindow};
             }
             else
             {
-                throw new MsalException(MsalError.InvalidOwnerWindowType, 
+                throw new MsalException(MsalError.InvalidOwnerWindowType,
                     "Invalid owner window type. Expected types are IWin32Window or IntPtr (for window handle).");
             }
 
@@ -102,7 +94,17 @@ namespace Microsoft.Identity.Client
             this.webBrowser.PreviewKeyDown += webBrowser_PreviewKeyDown;
             this.InitializeComponent();
         }
-        
+
+        internal AuthorizationResult Result { get; set; }
+
+        /// <summary>
+        ///     Gets Web Browser control used by the dialog.
+        /// </summary>
+        public WebBrowser WebBrowser
+        {
+            get { return this.webBrowser; }
+        }
+
         private void webBrowser_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
             if (e.KeyCode == Keys.Back)
@@ -112,17 +114,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Gets Web Browser control used by the dialog.
-        /// </summary>
-        public WebBrowser WebBrowser
-        {
-            get
-            {
-                return this.webBrowser;
-            }
-        }
-        /// <summary>
-        /// 
         /// </summary>
         protected virtual void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
         {
@@ -156,7 +147,9 @@ namespace Microsoft.Identity.Client
 
             if (!e.Cancel)
             {
-                PlatformPlugin.Logger.Verbose(null, string.Format(CultureInfo.InvariantCulture,"Navigating to '{0}'.", EncodingHelper.UrlDecode(e.Url.ToString())));
+                PlatformPlugin.Logger.Verbose(null,
+                    string.Format(CultureInfo.InvariantCulture, "Navigating to '{0}'.",
+                        EncodingHelper.UrlDecode(e.Url.ToString())));
             }
         }
 
@@ -164,11 +157,13 @@ namespace Microsoft.Identity.Client
         {
             if (!this.CheckForClosingUrl(e.Url))
             {
-                PlatformPlugin.Logger.Verbose(null, string.Format(CultureInfo.InvariantCulture,"Navigated to '{0}'.", EncodingHelper.UrlDecode(e.Url.ToString())));
+                PlatformPlugin.Logger.Verbose(null,
+                    string.Format(CultureInfo.InvariantCulture, "Navigated to '{0}'.",
+                        EncodingHelper.UrlDecode(e.Url.ToString())));
             }
         }
+
         /// <summary>
-        /// 
         /// </summary>
         protected virtual void WebBrowserNavigateErrorHandler(object sender, WebBrowserNavigateErrorEventArgs e)
         {
@@ -204,17 +199,19 @@ namespace Microsoft.Identity.Client
         {
             bool readyToClose = false;
 
-            if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) && url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath))
+            if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) &&
+                url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath))
             {
                 this.Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
                 readyToClose = true;
             }
 
-            if (!readyToClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) && !url.AbsoluteUri.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase))
+            if (!readyToClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) &&
+                !url.AbsoluteUri.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase))
             {
                 this.Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
                 this.Result.Error = MsalError.NonHttpsRedirectNotSupported;
-                this.Result.ErrorDescription= MsalErrorMessage.NonHttpsRedirectNotSupported;
+                this.Result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
                 readyToClose = true;
             }
 
@@ -234,18 +231,26 @@ namespace Microsoft.Identity.Client
             {
                 if (this.webBrowser.IsBusy)
                 {
-                    PlatformPlugin.Logger.Verbose(null, string.Format(CultureInfo.InvariantCulture,"WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}", this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created, this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
+                    PlatformPlugin.Logger.Verbose(null,
+                        string.Format(CultureInfo.InvariantCulture,
+                            "WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
+                            this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
+                            this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
                     this.webBrowser.Stop();
-                    PlatformPlugin.Logger.Verbose(null, string.Format(CultureInfo.InvariantCulture,"WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}", this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created, this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
+                    PlatformPlugin.Logger.Verbose(null,
+                        string.Format(CultureInfo.InvariantCulture,
+                            "WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
+                            this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
+                            this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
                 }
             }
         }
+
         /// <summary>
-        /// 
         /// </summary>
         protected abstract void OnClosingUrl();
+
         /// <summary>
-        /// 
         /// </summary>
         protected abstract void OnNavigationCanceled(int statusCode);
 
@@ -260,24 +265,27 @@ namespace Microsoft.Identity.Client
             this.webBrowser.Navigating += this.WebBrowserNavigatingHandler;
             this.webBrowser.Navigated += this.WebBrowserNavigatedHandler;
             this.webBrowser.NavigateError += this.WebBrowserNavigateErrorHandler;
-            
+
             this.webBrowser.Navigate(requestUri, null, null, headers);
             this.OnAuthenticate();
 
             return this.Result;
         }
+
         /// <summary>
-        /// 
         /// </summary>
         protected virtual void OnAuthenticate()
-        { }
+        {
+        }
 
         private void InitializeComponent()
         {
-            Screen screen = (this.ownerWindow != null) ? Screen.FromHandle(this.ownerWindow.Handle) : Screen.PrimaryScreen;
+            Screen screen = (this.ownerWindow != null)
+                ? Screen.FromHandle(this.ownerWindow.Handle)
+                : Screen.PrimaryScreen;
 
             // Window height is set to 70% of the screen height.
-            int uiHeight = (int)(Math.Max(screen.WorkingArea.Height, 160) * 70.0 / DpiHelper.ZoomPercent);
+            int uiHeight = (int) (Math.Max(screen.WorkingArea.Height, 160)*70.0/DpiHelper.ZoomPercent);
             this.webBrowserPanel = new Panel();
             this.webBrowserPanel.SuspendLayout();
             this.SuspendLayout();
@@ -315,7 +323,9 @@ namespace Microsoft.Identity.Client
             this.Name = "BrowserAuthenticationWindow";
 
             // Move the window to the center of the parent window only if owner window is set.
-            this.StartPosition = (this.ownerWindow != null) ? FormStartPosition.CenterParent : FormStartPosition.CenterScreen;
+            this.StartPosition = (this.ownerWindow != null)
+                ? FormStartPosition.CenterParent
+                : FormStartPosition.CenterScreen;
             this.Text = string.Empty;
             this.ShowIcon = false;
             this.MaximizeBox = false;
@@ -328,13 +338,8 @@ namespace Microsoft.Identity.Client
             this.webBrowserPanel.ResumeLayout(false);
             this.ResumeLayout(false);
         }
-        
-        private sealed class WindowsFormsWin32Window : IWin32Window
-        {
-            public IntPtr Handle { get; set; }
-        }
+
         /// <summary>
-        /// 
         /// </summary>
         protected override void Dispose(bool disposing)
         {
@@ -345,8 +350,8 @@ namespace Microsoft.Identity.Client
 
             base.Dispose(disposing);
         }
+
         /// <summary>
-        /// 
         /// </summary>
         protected MsalException CreateExceptionForAuthenticationUiFailed(int statusCode)
         {
@@ -354,15 +359,24 @@ namespace Microsoft.Identity.Client
             {
                 return new MsalServiceException(
                     MsalError.AuthenticationUiFailed,
-                    string.Format(CultureInfo.InvariantCulture,"The browser based authentication dialog failed to complete. Reason: {0}", NavigateErrorStatus.Messages[statusCode])) { StatusCode = statusCode };
+                    string.Format(CultureInfo.InvariantCulture,
+                        "The browser based authentication dialog failed to complete. Reason: {0}",
+                        NavigateErrorStatus.Messages[statusCode])) {StatusCode = statusCode};
             }
 
             return new MsalServiceException(
                 MsalError.AuthenticationUiFailed,
-                string.Format(CultureInfo.InvariantCulture,"The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}", statusCode)) { StatusCode = statusCode };
+                string.Format(CultureInfo.InvariantCulture,
+                    "The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}",
+                    statusCode)) {StatusCode = statusCode};
         }
+
+        private sealed class WindowsFormsWin32Window : IWin32Window
+        {
+            public IntPtr Handle { get; set; }
+        }
+
         /// <summary>
-        /// 
         /// </summary>
         protected static class DpiHelper
         {
@@ -389,31 +403,30 @@ namespace Microsoft.Identity.Client
                     deviceDpiY = DefaultDpi;
                 }
 
-                int zoomPercentX = (int)(100 * (deviceDpiX / DefaultDpi));
-                int zoomPercentY = (int)(100 * (deviceDpiY / DefaultDpi));
+                int zoomPercentX = (int) (100*(deviceDpiX/DefaultDpi));
+                int zoomPercentY = (int) (100*(deviceDpiY/DefaultDpi));
 
                 ZoomPercent = Math.Min(zoomPercentX, zoomPercentY);
             }
+
             /// <summary>
-            /// 
             /// </summary>
-            public static int ZoomPercent { get; private set; }
+            public static int ZoomPercent { get; }
         }
 
         /// <summary>
-        /// 
         /// </summary>
         internal static class NativeMethods
         {
-            internal enum SessionOp 
+            [DllImport("IEFRAME.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
+            internal static extern int SetQueryNetSessionCount(SessionOp sessionOp);
+
+            internal enum SessionOp
             {
                 SESSION_QUERY = 0,
                 SESSION_INCREMENT,
                 SESSION_DECREMENT
             };
-
-            [DllImport("IEFRAME.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
-            internal static extern int SetQueryNetSessionCount(SessionOp sessionOp);        
         }
     }
 }

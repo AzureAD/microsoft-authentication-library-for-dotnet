@@ -31,13 +31,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///
     /// </summary>
     public class TokenCache
     {
@@ -49,9 +47,9 @@ namespace Microsoft.Identity.Client
 
         private const int SchemaVersion = 1;
         private const string Delimiter = ":::";
+        private readonly object lockObject = new object();
         internal readonly IDictionary<TokenCacheKey, AuthenticationResultEx> tokenCacheDictionary;
         private volatile bool hasStateChanged;
-        private object lockObject = new object();
 
         static TokenCache()
         {
@@ -92,9 +90,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public static TokenCache DefaultSharedUserTokenCache { get; private set; }
 
-
         /// <summary>
-        ///     Static client token cache shared by all instances of ConfidentialClientApplication which do not explicitly pass a cache instance
+        ///     Static client token cache shared by all instances of ConfidentialClientApplication which do not explicitly pass a
+        ///     cache instance
         ///     during construction.
         /// </summary>
         public static TokenCache DefaultSharedAppTokenCache { get; private set; }
@@ -151,11 +149,13 @@ namespace Microsoft.Identity.Client
                     BinaryWriter writer = new BinaryWriter(stream);
                     writer.Write(SchemaVersion);
                     PlatformPlugin.Logger.Information(null,
-                        string.Format(CultureInfo.InvariantCulture,"Serializing token cache with {0} items.", this.tokenCacheDictionary.Count));
+                        string.Format(CultureInfo.InvariantCulture, "Serializing token cache with {0} items.",
+                            this.tokenCacheDictionary.Count));
                     writer.Write(this.tokenCacheDictionary.Count);
                     foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> kvp in this.tokenCacheDictionary)
                     {
-                        writer.Write(string.Format(CultureInfo.InvariantCulture,"{1}{0}{2}{0}{3}{0}{4}", Delimiter, kvp.Key.Authority,
+                        writer.Write(string.Format(CultureInfo.InvariantCulture, "{1}{0}{2}{0}{3}{0}{4}", Delimiter,
+                            kvp.Key.Authority,
                             kvp.Key.Scope.AsSingleString(), kvp.Key.ClientId, kvp.Key.Policy));
                         writer.Write(kvp.Value.Serialize());
                     }
@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Client
                     }
 
                     PlatformPlugin.Logger.Information(null,
-                        string.Format(CultureInfo.InvariantCulture,"Deserialized {0} items to token cache.", count));
+                        string.Format(CultureInfo.InvariantCulture, "Deserialized {0} items to token cache.", count));
                 }
             }
         }
@@ -310,7 +310,7 @@ namespace Microsoft.Identity.Client
         {
             lock (lockObject)
             {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs {TokenCache = this};
                 this.OnBeforeAccess(args);
                 this.OnBeforeWrite(args);
 
@@ -318,7 +318,10 @@ namespace Microsoft.Identity.Client
                 IEnumerable<string> homeOids = this.GetHomeObjectIdsFromCache(clientId);
                 foreach (string homeOid in homeOids)
                 {
-                    User localUser = this.ReadItems(clientId).First(item => !string.IsNullOrEmpty(item.HomeObjectId) && item.HomeObjectId.Equals(homeOid)).User;
+                    User localUser =
+                        this.ReadItems(clientId)
+                            .First(item => !string.IsNullOrEmpty(item.HomeObjectId) && item.HomeObjectId.Equals(homeOid))
+                            .User;
                     localUser.ClientId = clientId;
                     localUser.TokenCache = this;
                     users.Add(localUser);
@@ -330,7 +333,6 @@ namespace Microsoft.Identity.Client
                 return users;
             }
         }
-
 
         internal void OnAfterAccess(TokenCacheNotificationArgs args)
         {
@@ -356,7 +358,8 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal virtual AuthenticationResultEx LoadFromCache(string authority, HashSet<string> scope, string clientId, User user, string policy, CallState callState)
+        internal virtual AuthenticationResultEx LoadFromCache(string authority, HashSet<string> scope, string clientId,
+            User user, string policy, CallState callState)
         {
             lock (lockObject)
             {
@@ -379,7 +382,8 @@ namespace Microsoft.Identity.Client
                     {
                         //requested scope are not a subset or authority does not match (cross-tenant RT) or client id is not same (FoCI).
                         PlatformPlugin.Logger.Verbose(callState,
-                            string.Format(CultureInfo.InvariantCulture,"Refresh token for scope '{0}' will be used to acquire token for '{1}'",
+                            string.Format(CultureInfo.InvariantCulture,
+                                "Refresh token for scope '{0}' will be used to acquire token for '{1}'",
                                 cacheKey.Scope.AsSingleString(),
                                 scope.AsSingleString()));
 
@@ -394,7 +398,7 @@ namespace Microsoft.Identity.Client
                     else
                     {
                         PlatformPlugin.Logger.Verbose(callState,
-                            string.Format(CultureInfo.InvariantCulture,"{0} minutes left until token in cache expires",
+                            string.Format(CultureInfo.InvariantCulture, "{0} minutes left until token in cache expires",
                                 (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
                     }
 
@@ -418,8 +422,8 @@ namespace Microsoft.Identity.Client
             }
         }
 
-
-        private AuthenticationResultEx CreateResultExFromCacheResultEx(TokenCacheKey key, AuthenticationResultEx resultEx)
+        private AuthenticationResultEx CreateResultExFromCacheResultEx(TokenCacheKey key,
+            AuthenticationResultEx resultEx)
         {
             var newResultEx = new AuthenticationResultEx
             {
@@ -442,7 +446,6 @@ namespace Microsoft.Identity.Client
 
             return newResultEx;
         }
-
 
         internal void StoreToCache(AuthenticationResultEx resultEx, string authority, string clientId,
             string policy, bool restrictToSingleUser, CallState callState)
@@ -499,7 +502,8 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private void UpdateCachedRefreshTokens(AuthenticationResultEx result, string authority, string clientId, string policy)
+        private void UpdateCachedRefreshTokens(AuthenticationResultEx result, string authority, string clientId,
+            string policy)
         {
             lock (lockObject)
             {
@@ -643,7 +647,8 @@ namespace Microsoft.Identity.Client
         ///     authority value that this AuthorizationContext was created with.  In every case passing
         ///     null results in a wildcard evaluation.
         /// </summary>
-        private List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> QueryCache(string authority, string clientId, string uniqueId, string displayableId, string rootId, string policy)
+        private List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> QueryCache(string authority, string clientId,
+            string uniqueId, string displayableId, string rootId, string policy)
         {
             return this.tokenCacheDictionary.Where(
                 p =>
@@ -655,14 +660,12 @@ namespace Microsoft.Identity.Client
                     && (string.IsNullOrWhiteSpace(policy) || p.Key.Equals(p.Key.Policy, policy))).ToList();
         }
 
-
         private List<TokenCacheItem> ReadItemsFromCache(string clientId)
         {
             return this.tokenCacheDictionary.Where(kvp => kvp.Key.ClientId.Equals(clientId))
                 .Select(kvp => new TokenCacheItem(kvp.Key, kvp.Value.Result))
                 .ToList();
         }
-
 
         private void DeleteItemFromCache(TokenCacheItem item)
         {

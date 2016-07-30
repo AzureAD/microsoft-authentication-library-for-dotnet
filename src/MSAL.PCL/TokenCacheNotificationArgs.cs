@@ -25,39 +25,36 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Contains parameters used by the ADAL call accessing the cache.
+    ///     Contains parameters used by the ADAL call accessing the cache.
     /// </summary>
     public sealed class TokenCacheNotificationArgs
     {
         /// <summary>
-        /// Gets the TokenCache
+        ///     Gets the TokenCache
         /// </summary>
         public TokenCache TokenCache { get; internal set; }
 
         /// <summary>
-        /// Gets the ClientId.
+        ///     Gets the ClientId.
         /// </summary>
         public string ClientId { get; internal set; }
 
         /// <summary>
-        /// Gets the Scope.
+        ///     Gets the Scope.
         /// </summary>
         public string[] Scope { get; internal set; }
 
         /// <summary>
-        /// Gets the user's unique Id.
+        ///     Gets the user's unique Id.
         /// </summary>
         public User User { get; set; }
 
         /// <summary>
-        /// Gets the policy.
+        ///     Gets the policy.
         /// </summary>
         public string Policy { get; internal set; }
-        
     }
 }

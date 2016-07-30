@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetAssemblyFileVersionAttribute()
         {
-            return typeof(MsalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
+            return typeof (MsalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
         }
     }
 }

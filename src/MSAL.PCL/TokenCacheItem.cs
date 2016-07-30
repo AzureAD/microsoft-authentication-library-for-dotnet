@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client
             this.User = result.User;
             this.Policy = key.Policy;
 
-            if (result.User!= null)
+            if (result.User != null)
             {
                 this.Name = result.User.Name;
             }
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         ///     Gets the Authority.
         /// </summary>
-        public string Authority { get; private set; }
+        public string Authority { get; }
 
         /// <summary>
         ///     Gets the ClientId.
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client
         ///     Gets the user's displayable Id.
         /// </summary>
         public string DisplayableId { get; internal set; }
-        
+
         internal string HomeObjectId { get; set; }
 
         /// <summary>

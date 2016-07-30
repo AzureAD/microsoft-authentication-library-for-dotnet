@@ -44,18 +44,14 @@ namespace Microsoft.Identity.Client.Internal
     internal class WsTrustAddress
     {
         public Uri Uri { get; set; }
-
         public WsTrustVersion Version { get; set; }
     }
 
     internal class MexPolicy
     {
         public WsTrustVersion Version { get; set; }
-
         public string Id { get; set; }
-
         public UserAuthType AuthType { get; set; }
-
         public Uri Url { get; set; }
     }
 
@@ -63,7 +59,8 @@ namespace Microsoft.Identity.Client.Internal
     {
         private const string WsTrustSoapTransport = "http://schemas.xmlsoap.org/soap/http";
 
-        public static async Task<WsTrustAddress> FetchWsTrustAddressFromMexAsync(string federationMetadataUrl, UserAuthType userAuthType, CallState callState)
+        public static async Task<WsTrustAddress> FetchWsTrustAddressFromMexAsync(string federationMetadataUrl,
+            UserAuthType userAuthType, CallState callState)
         {
             XDocument mexDocument = await FetchMexAsync(federationMetadataUrl, callState).ConfigureAwait(false);
             return ExtractWsTrustAddressFromMex(mexDocument, userAuthType, callState);
@@ -94,7 +91,8 @@ namespace Microsoft.Identity.Client.Internal
             return mexDocument;
         }
 
-        internal static WsTrustAddress ExtractWsTrustAddressFromMex(XDocument mexDocument, UserAuthType userAuthType, CallState callState)
+        internal static WsTrustAddress ExtractWsTrustAddressFromMex(XDocument mexDocument, UserAuthType userAuthType,
+            CallState callState)
         {
             WsTrustAddress address = null;
             MexPolicy policy = null;
@@ -105,8 +103,14 @@ namespace Microsoft.Identity.Client.Internal
                 SetPolicyEndpointAddresses(mexDocument, bindings);
                 Random random = new Random();
                 //try ws-trust 1.3 first
-                policy = policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType && p.Version == WsTrustVersion.WsTrust13).OrderBy(p => random.Next()).FirstOrDefault() ??
-                         policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType).OrderBy(p => random.Next()).FirstOrDefault();
+                policy =
+                    policies.Values.Where(
+                        p => p.Url != null && p.AuthType == userAuthType && p.Version == WsTrustVersion.WsTrust13)
+                        .OrderBy(p => random.Next())
+                        .FirstOrDefault() ??
+                    policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType)
+                        .OrderBy(p => random.Next())
+                        .FirstOrDefault();
 
                 if (policy != null)
                 {
@@ -116,7 +120,8 @@ namespace Microsoft.Identity.Client.Internal
                 }
                 else if (userAuthType == UserAuthType.IntegratedAuth)
                 {
-                    throw new MsalException(MsalError.IntegratedAuthFailed, new MsalException(MsalError.WsTrustEndpointNotFoundInMetadataDocument));
+                    throw new MsalException(MsalError.IntegratedAuthFailed,
+                        new MsalException(MsalError.WsTrustEndpointNotFoundInMetadataDocument));
                 }
                 else
                 {
@@ -189,10 +194,12 @@ namespace Microsoft.Identity.Client.Internal
             return policies;
         }
 
-        private static Dictionary<string, MexPolicy> ReadPolicyBindings(XContainer mexDocument, IReadOnlyDictionary<string, MexPolicy> policies)
+        private static Dictionary<string, MexPolicy> ReadPolicyBindings(XContainer mexDocument,
+            IReadOnlyDictionary<string, MexPolicy> policies)
         {
             var bindings = new Dictionary<string, MexPolicy>();
-            IEnumerable<XElement> bindingElements = mexDocument.Elements().First().Elements(XmlNamespace.Wsdl + "binding");
+            IEnumerable<XElement> bindingElements =
+                mexDocument.Elements().First().Elements(XmlNamespace.Wsdl + "binding");
             foreach (XElement binding in bindingElements)
             {
                 IEnumerable<XElement> policyReferences = binding.Elements(XmlNamespace.Wsp + "PolicyReference");
@@ -216,15 +223,20 @@ namespace Microsoft.Identity.Client.Internal
                         continue;
                     }
 
-                    XElement soapOperation = bindingOperation.Elements(XmlNamespace.Soap12 + "operation").FirstOrDefault();
+                    XElement soapOperation =
+                        bindingOperation.Elements(XmlNamespace.Soap12 + "operation").FirstOrDefault();
                     if (soapOperation == null)
                     {
                         continue;
                     }
 
                     XAttribute soapAction = soapOperation.Attribute("soapAction");
-                    if (soapAction == null || (string.Compare(XmlNamespace.Issue.ToString(), soapAction.Value, StringComparison.OrdinalIgnoreCase) != 0
-                        && string.Compare(XmlNamespace.Issue2005.ToString(), soapAction.Value, StringComparison.OrdinalIgnoreCase) != 0))
+                    if (soapAction == null ||
+                        (string.Compare(XmlNamespace.Issue.ToString(), soapAction.Value,
+                            StringComparison.OrdinalIgnoreCase) != 0
+                         &&
+                         string.Compare(XmlNamespace.Issue2005.ToString(), soapAction.Value,
+                             StringComparison.OrdinalIgnoreCase) != 0))
                     {
                         continue;
                     }
@@ -243,7 +255,9 @@ namespace Microsoft.Identity.Client.Internal
                     }
 
                     XAttribute soapBindingTransport = soapBinding.Attribute("transport");
-                    if (soapBindingTransport != null && string.Compare(WsTrustSoapTransport, soapBindingTransport.Value, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (soapBindingTransport != null &&
+                        string.Compare(WsTrustSoapTransport, soapBindingTransport.Value,
+                            StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         bindings.Add(bindingName.Value, policies[policyUri.Value]);
                     }
@@ -253,7 +267,8 @@ namespace Microsoft.Identity.Client.Internal
             return bindings;
         }
 
-        private static void SetPolicyEndpointAddresses(XContainer mexDocument, IReadOnlyDictionary<string, MexPolicy> bindings)
+        private static void SetPolicyEndpointAddresses(XContainer mexDocument,
+            IReadOnlyDictionary<string, MexPolicy> bindings)
         {
             XElement serviceElement = mexDocument.Elements().First().Elements(XmlNamespace.Wsdl + "service").First();
             IEnumerable<XElement> portElements = serviceElement.Elements(XmlNamespace.Wsdl + "port");
@@ -266,7 +281,7 @@ namespace Microsoft.Identity.Client.Internal
                 }
 
                 string portBindingName = portBinding.Value;
-                string[] portBindingNameSegments = portBindingName.Split(new[] { ':' }, 2);
+                string[] portBindingNameSegments = portBindingName.Split(new[] {':'}, 2);
                 if (portBindingNameSegments.Length < 2 || !bindings.ContainsKey(portBindingNameSegments[1]))
                 {
                     continue;
@@ -286,17 +301,18 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        private static void AddPolicy(IDictionary<string, MexPolicy> policies, XElement policy, UserAuthType policyAuthType)
+        private static void AddPolicy(IDictionary<string, MexPolicy> policies, XElement policy,
+            UserAuthType policyAuthType)
         {
             XElement binding = policy.Descendants(XmlNamespace.Sp + "TransportBinding").FirstOrDefault()
-                          ?? policy.Descendants(XmlNamespace.Sp2005 + "TransportBinding").FirstOrDefault();
+                               ?? policy.Descendants(XmlNamespace.Sp2005 + "TransportBinding").FirstOrDefault();
 
             if (binding != null)
             {
                 XAttribute id = policy.Attribute(XmlNamespace.Wsu + "Id");
                 if (id != null)
                 {
-                    policies.Add("#" + id.Value, new MexPolicy { Id = id.Value, AuthType = policyAuthType });
+                    policies.Add("#" + id.Value, new MexPolicy {Id = id.Value, AuthType = policyAuthType});
                 }
             }
         }

@@ -28,24 +28,22 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
     /// </summary>
     public enum UiOptions
     {
         /// <summary>
-        /// 
         /// </summary>
         SelectAccount,
+
         /// <summary>
-        /// 
         /// </summary>
         ForceLogin,
+
         /// <summary>
-        /// 
         /// </summary>
         ForceConsent,
+
         /// <summary>
-        /// 
         /// </summary>
         ActAsCurrentUser
     }

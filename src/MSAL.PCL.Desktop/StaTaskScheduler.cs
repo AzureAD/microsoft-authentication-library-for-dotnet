@@ -42,10 +42,11 @@ namespace Microsoft.Identity.Client
     /// <summary>Provides a scheduler that uses STA threads.</summary>
     internal sealed class StaTaskScheduler : TaskScheduler, IDisposable
     {
-        /// <summary>Stores the queued tasks to be executed by our pool of STA threads.</summary>
-        private BlockingCollection<Task> _tasks;
         /// <summary>The STA threads used by the scheduler.</summary>
         private readonly List<Thread> _threads;
+
+        /// <summary>Stores the queued tasks to be executed by our pool of STA threads.</summary>
+        private BlockingCollection<Task> _tasks;
 
         /// <summary>Initializes a new instance of the StaTaskScheduler class with the specified concurrency level.</summary>
         /// <param name="numberOfThreads">The number of threads that should be created and used by this scheduler.</param>
@@ -62,22 +63,48 @@ namespace Microsoft.Identity.Client
 
             // Create the threads to be used by this scheduler
             _threads = Enumerable.Range(0, numberOfThreads).Select(i =>
-                       {
-                           var thread = new Thread(() =>
-                           {
-                               // Continually get the next task and try to execute it.
-                               // This will continue until the scheduler is disposed and no more tasks remain.
-                               foreach (var t in _tasks.GetConsumingEnumerable())
-                               {
-                                   TryExecuteTask(t);
-                               }
-                           }) { IsBackground = true };
-                           thread.SetApartmentState(ApartmentState.STA);
-                           return thread;
-                       }).ToList();
+            {
+                var thread = new Thread(() =>
+                {
+                    // Continually get the next task and try to execute it.
+                    // This will continue until the scheduler is disposed and no more tasks remain.
+                    foreach (var t in _tasks.GetConsumingEnumerable())
+                    {
+                        TryExecuteTask(t);
+                    }
+                }) {IsBackground = true};
+                thread.SetApartmentState(ApartmentState.STA);
+                return thread;
+            }).ToList();
 
             // Start all of the threads
             _threads.ForEach(t => t.Start());
+        }
+
+        /// <summary>Gets the maximum concurrency level supported by this scheduler.</summary>
+        public override int MaximumConcurrencyLevel
+        {
+            get { return _threads.Count; }
+        }
+
+        /// <summary>
+        ///     Cleans up the scheduler by indicating that no more tasks will be queued.
+        ///     This method blocks until all threads successfully shutdown.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_tasks != null)
+            {
+                // Indicate that no new tasks will be coming in
+                _tasks.CompleteAdding();
+
+                // Wait for all threads to finish processing tasks
+                foreach (var thread in _threads) thread.Join();
+
+                // Cleanup
+                _tasks.Dispose();
+                _tasks = null;
+            }
         }
 
         /// <summary>Queues a Task to be executed by this scheduler.</summary>
@@ -106,32 +133,6 @@ namespace Microsoft.Identity.Client
             return
                 Thread.CurrentThread.GetApartmentState() == ApartmentState.STA &&
                 TryExecuteTask(task);
-        }
-
-        /// <summary>Gets the maximum concurrency level supported by this scheduler.</summary>
-        public override int MaximumConcurrencyLevel
-        {
-            get { return _threads.Count; }
-        }
-
-        /// <summary>
-        /// Cleans up the scheduler by indicating that no more tasks will be queued.
-        /// This method blocks until all threads successfully shutdown.
-        /// </summary>
-        public void Dispose()
-        {
-            if (_tasks != null)
-            {
-                // Indicate that no new tasks will be coming in
-                _tasks.CompleteAdding();
-
-                // Wait for all threads to finish processing tasks
-                foreach (var thread in _threads) thread.Join();
-
-                // Cleanup
-                _tasks.Dispose();
-                _tasks = null;
-            }
         }
     }
 }

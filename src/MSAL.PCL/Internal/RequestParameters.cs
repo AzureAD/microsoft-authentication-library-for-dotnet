@@ -38,9 +38,9 @@ namespace Microsoft.Identity.Client.Internal
     {
         public DictionaryRequestParameters(HashSet<string> scope, ClientKey clientKey)
         {
-            if (scope!=null && scope.Count>0)
+            if (scope != null && scope.Count > 0)
             {
-                this[OAuthParameter.Scope] = scope.AsSingleString();
+                this[OAuth2Parameter.Scope] = scope.AsSingleString();
             }
 
             clientKey.AddToParameters(this);
@@ -51,10 +51,11 @@ namespace Microsoft.Identity.Client.Internal
         public override string ToString()
         {
             StringBuilder messageBuilder = new StringBuilder();
-            
+
             foreach (KeyValuePair<string, string> kvp in this)
             {
-                EncodingHelper.AddKeyValueString(messageBuilder, EncodingHelper.UrlEncode(kvp.Key), EncodingHelper.UrlEncode(kvp.Value));
+                EncodingHelper.AddKeyValueString(messageBuilder, EncodingHelper.UrlEncode(kvp.Key),
+                    EncodingHelper.UrlEncode(kvp.Value));
             }
 
             if (this.ExtraQueryParameter != null)

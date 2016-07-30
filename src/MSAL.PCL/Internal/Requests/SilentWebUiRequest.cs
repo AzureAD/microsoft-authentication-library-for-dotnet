@@ -28,16 +28,16 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Requests
+namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class SilentWebUiRequest : BaseRequest
     {
         private readonly UserCredential userCredential;
         private UserAssertion userAssertion;
-        
-        public SilentWebUiRequest(AuthenticationRequestParameters authenticationRequestParameters, UserCredential userCredential)
+
+        public SilentWebUiRequest(AuthenticationRequestParameters authenticationRequestParameters,
+            UserCredential userCredential)
             : base(authenticationRequestParameters)
         {
             if (userCredential == null)
@@ -48,7 +48,8 @@ namespace Microsoft.Identity.Client.Requests
             this.userCredential = userCredential;
         }
 
-        public SilentWebUiRequest(AuthenticationRequestParameters authenticationRequestParameters, UserAssertion userAssertion)
+        public SilentWebUiRequest(AuthenticationRequestParameters authenticationRequestParameters,
+            UserAssertion userAssertion)
             : base(authenticationRequestParameters)
         {
             if (userAssertion == null)
@@ -72,21 +73,24 @@ namespace Microsoft.Identity.Client.Requests
             {
                 if (string.IsNullOrWhiteSpace(this.userCredential.UserName))
                 {
-                    this.userCredential.UserName = await PlatformPlugin.PlatformInformation.GetUserPrincipalNameAsync().ConfigureAwait(false);
+                    this.userCredential.UserName =
+                        await PlatformPlugin.PlatformInformation.GetUserPrincipalNameAsync().ConfigureAwait(false);
                     if (string.IsNullOrWhiteSpace(userCredential.UserName))
                     {
                         PlatformPlugin.Logger.Information(this.CallState, "Could not find UPN for logged in user");
                         throw new MsalException(MsalError.UnknownUser);
                     }
 
-                    PlatformPlugin.Logger.Verbose(this.CallState, string.Format("Logged in user with hash '{0}' detected", PlatformPlugin.CryptographyHelper.CreateSha256Hash(userCredential.UserName)));
+                    PlatformPlugin.Logger.Verbose(this.CallState,
+                        string.Format("Logged in user with hash '{0}' detected",
+                            PlatformPlugin.CryptographyHelper.CreateSha256Hash(userCredential.UserName)));
                 }
 
-                this.User = new User { DisplayableId = userCredential.UserName};
+                this.User = new User {DisplayableId = userCredential.UserName};
             }
             else if (this.userAssertion != null)
             {
-                this.User = new User { DisplayableId = userAssertion.UserName };
+                this.User = new User {DisplayableId = userAssertion.UserName};
             }
         }
 
@@ -95,8 +99,14 @@ namespace Microsoft.Identity.Client.Requests
             await base.PreTokenRequest().ConfigureAwait(false);
             if (this.PerformUserRealmDiscovery())
             {
-                UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, this.userCredential.UserName, this.CallState).ConfigureAwait(false);
-                PlatformPlugin.Logger.Information(this.CallState, string.Format("User with hash '{0}' detected as '{1}'", PlatformPlugin.CryptographyHelper.CreateSha256Hash(this.userCredential.UserName), userRealmResponse.AccountType));
+                UserRealmDiscoveryResponse userRealmResponse =
+                    await
+                        UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri,
+                            this.userCredential.UserName, this.CallState).ConfigureAwait(false);
+                PlatformPlugin.Logger.Information(this.CallState,
+                    string.Format("User with hash '{0}' detected as '{1}'",
+                        PlatformPlugin.CryptographyHelper.CreateSha256Hash(this.userCredential.UserName),
+                        userRealmResponse.AccountType));
 
                 if (string.Compare(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase) == 0)
                 {
@@ -105,14 +115,26 @@ namespace Microsoft.Identity.Client.Requests
                         throw new MsalException(MsalError.MissingFederationMetadataUrl);
                     }
 
-                    WsTrustAddress wsTrustAddress = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, this.userCredential.UserAuthType, this.CallState).ConfigureAwait(false);
-                    PlatformPlugin.Logger.Information(this.CallState, string.Format("WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustAddress.Uri, userRealmResponse.FederationMetadataUrl));
+                    WsTrustAddress wsTrustAddress =
+                        await
+                            MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl,
+                                this.userCredential.UserAuthType, this.CallState).ConfigureAwait(false);
+                    PlatformPlugin.Logger.Information(this.CallState,
+                        string.Format("WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustAddress.Uri,
+                            userRealmResponse.FederationMetadataUrl));
 
-                    WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, this.userCredential, this.CallState).ConfigureAwait(false);
-                    PlatformPlugin.Logger.Information(this.CallState, string.Format("Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType));
+                    WsTrustResponse wsTrustResponse =
+                        await
+                            WsTrustRequest.SendRequestAsync(wsTrustAddress, this.userCredential, this.CallState)
+                                .ConfigureAwait(false);
+                    PlatformPlugin.Logger.Information(this.CallState,
+                        string.Format("Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType));
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
-                    this.userAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer, this.userCredential.UserName);
+                    this.userAssertion = new UserAssertion(wsTrustResponse.Token,
+                        (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion)
+                            ? OAuth2GrantType.Saml11Bearer
+                            : OAuth2GrantType.Saml20Bearer, this.userCredential.UserName);
                 }
                 else
                 {
@@ -125,11 +147,12 @@ namespace Microsoft.Identity.Client.Requests
         {
             if (this.userAssertion != null)
             {
-                requestParameters[OAuthParameter.GrantType] = this.userAssertion.AssertionType;
-                requestParameters[OAuthParameter.Assertion] = Convert.ToBase64String(Encoding.UTF8.GetBytes(this.userAssertion.Assertion));
+                requestParameters[OAuth2Parameter.GrantType] = this.userAssertion.AssertionType;
+                requestParameters[OAuth2Parameter.Assertion] =
+                    Convert.ToBase64String(Encoding.UTF8.GetBytes(this.userAssertion.Assertion));
             }
         }
-        
+
         private bool PerformUserRealmDiscovery()
         {
             // To decide whether user realm discovery is needed or not

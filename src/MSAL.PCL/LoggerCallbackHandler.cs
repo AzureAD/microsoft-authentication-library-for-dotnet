@@ -25,56 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Threading;
-
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// LogLevel
+    ///     LogLevel
     /// </summary>
     public enum LogLevel
     {
         /// <summary>
-        /// 
         /// </summary>
         Information,
+
         /// <summary>
-        /// 
         /// </summary>
         Verbose,
+
         /// <summary>
-        /// 
         /// </summary>
         Warning,
+
         /// <summary>
-        /// 
         /// </summary>
         Error
     }
 
     /// <summary>
-    /// 
     /// </summary>
     public interface IMsalLogCallback
     {
         /// <summary>
-        /// 
         /// </summary>
         void Log(LogLevel level, string message);
     }
 
     /// <summary>
-    /// 
     /// </summary>
     public sealed class LoggerCallbackHandler
     {
         private static readonly object LockObj = new object();
-
         private static IMsalLogCallback _localCallback;
 
         /// <summary>
-        /// 
         /// </summary>
         public static IMsalLogCallback Callback
         {

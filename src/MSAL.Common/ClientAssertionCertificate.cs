@@ -33,12 +33,12 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Containing certificate used to create client assertion.
+    ///     Containing certificate used to create client assertion.
     /// </summary>
     public sealed class ClientAssertionCertificate : IClientAssertionCertificate
     {
         /// <summary>
-        /// Constructor to create credential using certificate.
+        ///     Constructor to create credential using certificate.
         /// </summary>
         /// <param name="certificate">The certificate used as credential.</param>
         public ClientAssertionCertificate(X509Certificate2 certificate)
@@ -51,14 +51,15 @@ namespace Microsoft.Identity.Client
             if (certificate.PublicKey.Key.KeySize < MinKeySizeInBits)
             {
                 throw new ArgumentOutOfRangeException("certificate",
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate, MinKeySizeInBits));
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
+                        MinKeySizeInBits));
             }
-            
+
             this.Certificate = certificate;
         }
 
         /// <summary>
-        /// Gets minimum X509 certificate key size in bits
+        ///     Gets minimum X509 certificate key size in bits
         /// </summary>
         public static int MinKeySizeInBits
         {
@@ -66,11 +67,11 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Gets the certificate used as credential.
+        ///     Gets the certificate used as credential.
         /// </summary>
-        public X509Certificate2 Certificate { get; private set; }
+        public X509Certificate2 Certificate { get; }
+
         /// <summary>
-        /// 
         /// </summary>
         public byte[] Sign(string message)
         {
@@ -79,7 +80,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
         /// </summary>
         public string Thumbprint
         {

@@ -34,23 +34,19 @@ namespace Microsoft.Identity.Client.Internal
     internal abstract class PlatformInformationBase
     {
         public abstract string GetProductName();
-
         public abstract string GetEnvironmentVariable(string variable);
-
         public abstract Task<string> GetUserPrincipalNameAsync();
-
         public abstract string GetProcessorArchitecture();
-
         public abstract string GetOperatingSystem();
-
         public abstract string GetDeviceModel();
 
         public virtual string GetAssemblyFileVersionAttribute()
         {
-            return typeof(MsalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+            return
+                typeof (MsalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
         }
 
-        public async virtual Task<bool> IsUserLocalAsync(CallState callState)
+        public virtual async Task<bool> IsUserLocalAsync(CallState callState)
         {
             return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
         }
@@ -60,9 +56,10 @@ namespace Microsoft.Identity.Client.Internal
             return false;
         }
 
-        public virtual void AddUiOptionsQueryParameter(UiOptions options, DictionaryRequestParameters authorizationRequestParameters)
+        public virtual void AddUiOptionsQueryParameter(UiOptions options,
+            DictionaryRequestParameters authorizationRequestParameters)
         {
-            authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
+            authorizationRequestParameters[OAuth2Parameter.Prompt] = PromptValue.Login;
         }
 
         public virtual Uri ValidateRedirectUri(Uri redirectUri, CallState callState)

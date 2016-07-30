@@ -30,27 +30,26 @@ using Android.App;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Additional parameters used in acquiring user's authorization
+    ///     Additional parameters used in acquiring user's authorization
     /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
         /// <summary>
-        /// 
         /// </summary>
         public PlatformParameters()
         {
         }
+
         /// <summary>
-        /// 
         /// </summary>
-        public PlatformParameters(Activity callerActivity):this()
+        public PlatformParameters(Activity callerActivity) : this()
         {
             this.CallerActivity = callerActivity;
         }
 
         /// <summary>
-        /// Caller Android Activity
+        ///     Caller Android Activity
         /// </summary>
-        public Activity CallerActivity { get; private set; } 
+        public Activity CallerActivity { get; private set; }
     }
 }

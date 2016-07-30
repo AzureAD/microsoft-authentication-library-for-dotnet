@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -26,18 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
 
-namespace Microsoft.Identity.Client.Interfaces
+namespace Microsoft.Identity.Client.Internal
 {
-    internal interface IHttpWebResponse : IDisposable
+    internal class RetryableRequestException : Exception
     {
-        HttpStatusCode StatusCode { get; }
-
-        Dictionary<string, string> Headers { get; }
-
-        Stream ResponseStream { get; }
     }
 }

@@ -25,9 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using Foundation;
 
 namespace Microsoft.Identity.Client
@@ -43,7 +41,7 @@ namespace Microsoft.Identity.Client
                 mutableRequest[BrokerConstants.ChallengeHeaderKey] = BrokerConstants.ChallengeHeaderValue;
             }
 
-            if (AdditionalHeaders!=null)
+            if (AdditionalHeaders != null)
             {
                 foreach (var key in AdditionalHeaders.Keys)
                 {
@@ -53,6 +51,5 @@ namespace Microsoft.Identity.Client
                 AdditionalHeaders = null;
             }
         }
-
     }
 }

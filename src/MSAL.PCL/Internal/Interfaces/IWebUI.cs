@@ -25,10 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal;
+
 namespace Microsoft.Identity.Client.Interfaces
 {
-    internal interface IWebUIFactory
+    internal interface IWebUI
     {
-        IWebUI CreateAuthenticationDialog(IPlatformParameters parameters);
+        Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
+            IDictionary<string, string> additionalHeaders, CallState callState);
     }
 }

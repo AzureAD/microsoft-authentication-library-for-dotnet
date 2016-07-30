@@ -36,9 +36,7 @@ namespace Microsoft.Identity.Client.Internal
     internal class WsTrustResponse
     {
         public const string Saml1Assertion = "urn:oasis:names:tc:SAML:1.0:assertion";
-
         public string Token { get; private set; }
-
         public string TokenType { get; private set; }
 
         public static WsTrustResponse CreateFromResponse(Stream responseStream, WsTrustVersion version)
@@ -157,7 +155,9 @@ namespace Microsoft.Identity.Client.Internal
                 throw new MsalException(MsalError.ParsingWsTrustResponseFailed);
             }
 
-            string tokenType = tokenResponseDictionary.ContainsKey(Saml1Assertion) ? Saml1Assertion : tokenResponseDictionary.Keys.First();
+            string tokenType = tokenResponseDictionary.ContainsKey(Saml1Assertion)
+                ? Saml1Assertion
+                : tokenResponseDictionary.Keys.First();
 
             WsTrustResponse wsTrustResponse = new WsTrustResponse
             {

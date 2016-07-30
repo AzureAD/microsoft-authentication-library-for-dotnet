@@ -25,19 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using Microsoft.Identity.Client.Interfaces;
+using System.Collections.Generic;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class HttpRequestWrapperException : Exception
+    internal class ClientCredentialRequest : BaseRequest
     {
-        public HttpRequestWrapperException(IHttpWebResponse webResponse, Exception innerException) 
-            : base(string.Empty, innerException)
+        public ClientCredentialRequest(AuthenticationRequestParameters authenticationRequestParameters,
+            Authenticator authenticator, TokenCache tokenCache)
+            : base(authenticationRequestParameters, authenticator, tokenCache, false)
         {
-            this.WebResponse = webResponse;
+            this.SupportADFS = false;
         }
 
-        public IHttpWebResponse WebResponse { get; private set; }
+        protected override HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
+        {
+            return inputScope;
+        }
+
+        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
+        {
+            requestParameters[OAuth2Parameter.GrantType] = OAuth2GrantType.ClientCredentials;
+        }
     }
 }

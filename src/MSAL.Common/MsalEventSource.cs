@@ -32,7 +32,6 @@ namespace Microsoft.Identity.Client
     [EventSource(Name = "Microsoft.Identity.Client")]
     internal class MsalEventSource : EventSource
     {
-
         [Event(1, Level = EventLevel.Verbose)]
         internal void Verbose(string message)
         {

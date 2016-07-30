@@ -39,20 +39,19 @@ namespace Microsoft.Identity.Client
     [Foundation.Register("AuthenticationAgentUIViewController")]
     internal class AuthenticationAgentUIViewController : UIViewController
     {
-        private UIWebView _webView;
-
-        private readonly string _url;
-        private readonly string _callback;
-        private readonly ReturnCodeCallback callbackMethod;
-
         public delegate void ReturnCodeCallback(AuthorizationResult result);
+
+        private readonly string _callback;
+        private readonly string _url;
+        private readonly ReturnCodeCallback callbackMethod;
+        private UIWebView _webView;
 
         public AuthenticationAgentUIViewController(string url, string callback, ReturnCodeCallback callbackMethod)
         {
             this._url = url;
             this._callback = callback;
             this.callbackMethod = callbackMethod;
-            NSUrlProtocol.RegisterClass(new ObjCRuntime.Class(typeof(MsalCustomUrlProtocol)));
+            NSUrlProtocol.RegisterClass(new ObjCRuntime.Class(typeof (MsalCustomUrlProtocol)));
         }
 
         public override void ViewDidLoad()
@@ -70,7 +69,7 @@ namespace Microsoft.Identity.Client
                 }
 
                 string requestUrlString = request.Url.ToString();
-                
+
                 if (requestUrlString.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     DispatchQueue.MainQueue.DispatchAsync(() => CancelAuthentication(null, null));
@@ -81,14 +80,19 @@ namespace Microsoft.Identity.Client
                     return false;
                 }
 
-                if (requestUrlString.ToLower(CultureInfo.InvariantCulture).StartsWith(_callback.ToLower(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase) || requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
+                if (
+                    requestUrlString.ToLower(CultureInfo.InvariantCulture)
+                        .StartsWith(_callback.ToLower(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase) ||
+                    requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix,
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, request.Url.ToString()));
                     this.DismissViewController(true, null);
                     return false;
                 }
 
-                if (requestUrlString.StartsWith(BrokerConstants.DeviceAuthChallengeRedirect, StringComparison.CurrentCultureIgnoreCase))
+                if (requestUrlString.StartsWith(BrokerConstants.DeviceAuthChallengeRedirect,
+                    StringComparison.CurrentCultureIgnoreCase))
                 {
                     Uri uri = new Uri(requestUrlString);
                     string query = uri.Query;
@@ -98,16 +102,18 @@ namespace Microsoft.Identity.Client
                     }
 
                     Dictionary<string, string> keyPair = EncodingHelper.ParseKeyValueList(query, '&', true, false, null);
-                    string responseHeader = PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(keyPair).Result;
-                    
-                    NSMutableUrlRequest newRequest = (NSMutableUrlRequest)request.MutableCopy();
+                    string responseHeader =
+                        PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(keyPair).Result;
+
+                    NSMutableUrlRequest newRequest = (NSMutableUrlRequest) request.MutableCopy();
                     newRequest.Url = new NSUrl(keyPair["SubmitUrl"]);
                     newRequest[BrokerConstants.ChallengeResponseHeader] = responseHeader;
                     wView.LoadRequest(newRequest);
                     return false;
                 }
-                
-                if (!request.Url.AbsoluteString.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) && !request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
+
+                if (!request.Url.AbsoluteString.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) &&
+                    !request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
                 {
                     AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
                     result.Error = MsalError.NonHttpsRedirectNotSupported;
@@ -147,7 +153,7 @@ namespace Microsoft.Identity.Client
 
         public override void DismissViewController(bool animated, Action completionHandler)
         {
-            NSUrlProtocol.UnregisterClass(new ObjCRuntime.Class(typeof(MsalCustomUrlProtocol)));
+            NSUrlProtocol.UnregisterClass(new ObjCRuntime.Class(typeof (MsalCustomUrlProtocol)));
             base.DismissViewController(animated, completionHandler);
         }
     }

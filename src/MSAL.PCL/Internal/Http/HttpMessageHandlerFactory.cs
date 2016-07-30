@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -26,14 +26,32 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Net.Http;
 
-namespace Microsoft.Identity.Client.Interfaces
+namespace Microsoft.Identity.Client.Internal.Http
 {
-    internal interface IDeviceAuthHelper
+    internal static class HttpMessageHandlerFactory
     {
-        bool CanHandleDeviceAuthChallenge { get; }
+        private static readonly Queue<HttpMessageHandler> MockHttpMessageHandlerQueue = new Queue<HttpMessageHandler>();
 
-        Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData);
+        internal static HttpMessageHandler GetMessageHandler()
+        {
+            if (!AreMocksConsumed())
+            {
+                return MockHttpMessageHandlerQueue.Dequeue();
+            }
+
+            return new HttpClientHandler();
+        }
+
+        internal static void AddMockHandler(HttpMessageHandler mockHandler)
+        {
+            MockHttpMessageHandlerQueue.Enqueue(mockHandler);
+        }
+
+        internal static bool AreMocksConsumed()
+        {
+            return MockHttpMessageHandlerQueue.Count == 0;
+        }
     }
 }

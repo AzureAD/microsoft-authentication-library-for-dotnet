@@ -25,13 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Internal;
-
 namespace Microsoft.Identity.Client.Interfaces
 {
-    internal interface ITokenCachePlugin
+    internal interface IWebUIFactory
     {
-        void BeforeAccess(TokenCacheNotificationArgs args);
-        void AfterAccess(TokenCacheNotificationArgs args);
+        IWebUI CreateAuthenticationDialog(IPlatformParameters parameters);
     }
 }

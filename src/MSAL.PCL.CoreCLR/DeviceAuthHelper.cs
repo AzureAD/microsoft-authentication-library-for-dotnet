@@ -31,9 +31,12 @@ using Microsoft.Identity.Client.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
-    class DeviceAuthHelper : IDeviceAuthHelper
+    internal class DeviceAuthHelper : IDeviceAuthHelper
     {
-        public bool CanHandleDeviceAuthChallenge { get { return false; } }
+        public bool CanHandleDeviceAuthChallenge
+        {
+            get { return false; }
+        }
 
         public Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {

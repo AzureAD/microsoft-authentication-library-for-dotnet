@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,45 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using Microsoft.Identity.Client.Interfaces;
+using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Interfaces
 {
-    internal class MsalHttpWebResponse : IHttpWebResponse
+    internal interface IDeviceAuthHelper
     {
-        public MsalHttpWebResponse(Stream responseStream, Dictionary<string, string> headers, HttpStatusCode statusCode)
-        {
-            this.ResponseStream = responseStream;
-            this.Headers = headers;
-            this.StatusCode = statusCode;
-        }
-
-        public HttpStatusCode StatusCode { get; private set; }
-
-        public Dictionary<string, string> Headers { get; private set; }
-
-        public Stream ResponseStream { get; private set; }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (this.ResponseStream != null)
-                {
-                    this.ResponseStream.Dispose();
-                    this.ResponseStream = null;
-                }
-            }
-        }
+        bool CanHandleDeviceAuthChallenge { get; }
+        Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData);
     }
 }

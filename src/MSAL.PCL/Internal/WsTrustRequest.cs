@@ -38,7 +38,6 @@ namespace Microsoft.Identity.Client.Internal
     internal static class WsTrustRequest
     {
         private const int MaxExpectedMessageSize = 1024;
-
         // appliesTo like urn:federation:MicrosoftOnline. Either wst:TokenType or wst:AppliesTo should be defined in the token request message. 
         // If both are specified, the wst:AppliesTo field takes precedence.
         // If we don't specify TokenType, it will return SAML v1.1
@@ -67,7 +66,8 @@ namespace Microsoft.Identity.Client.Internal
         // We currently send this for all requests. We may need to change it in the future.
         private const string DefaultAppliesTo = "urn:federation:MicrosoftOnline";
 
-        public static async Task<WsTrustResponse> SendRequestAsync(WsTrustAddress wsTrustAddress, UserCredential credential, CallState callState)
+        public static async Task<WsTrustResponse> SendRequestAsync(WsTrustAddress wsTrustAddress,
+            UserCredential credential, CallState callState)
         {
             HttpClientWrapper request = new HttpClientWrapper(wsTrustAddress.Uri.AbsoluteUri, callState);
             request.ContentType = "application/soap+xml";
@@ -92,7 +92,8 @@ namespace Microsoft.Identity.Client.Internal
 
                 try
                 {
-                    XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(ex.Response.GetResponseStream());
+                    XDocument responseDocument =
+                        WsTrustResponse.ReadDocumentFromResponse(ex.Response.GetResponseStream());
                     errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument, callState);
                 }
                 catch (MsalException)
@@ -102,7 +103,8 @@ namespace Microsoft.Identity.Client.Internal
 
                 throw new MsalServiceException(
                     MsalError.FederatedServiceReturnedError,
-                    string.Format(MsalErrorMessage.FederatedServiceReturnedErrorTemplate, wsTrustAddress.Uri, errorMessage),
+                    string.Format(MsalErrorMessage.FederatedServiceReturnedErrorTemplate, wsTrustAddress.Uri,
+                        errorMessage),
                     null,
                     ex);
             }
@@ -137,11 +139,11 @@ namespace Microsoft.Identity.Client.Internal
                 requestType = "http://schemas.xmlsoap.org/ws/2005/02/trust/Issue";
             }
 
-            messageBuilder.AppendFormat(CultureInfo.InvariantCulture,WsTrustEnvelopeTemplate,
+            messageBuilder.AppendFormat(CultureInfo.InvariantCulture, WsTrustEnvelopeTemplate,
                 schemaLocation, soapAction,
-                                guid, wsTrustAddress.Uri, securityHeaderBuilder,
-                                rstTrustNamespace, appliesTo, keyType,
-                                requestType);
+                guid, wsTrustAddress.Uri, securityHeaderBuilder,
+                rstTrustNamespace, appliesTo, keyType,
+                requestType);
             securityHeaderBuilder.SecureClear();
 
             return messageBuilder;

@@ -37,9 +37,9 @@ namespace Microsoft.Identity.Client.Internal
         {
             using (MemoryStream stream = new MemoryStream())
             {
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(T));
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof (T));
                 ser.WriteObject(stream, toEncode);
-                return Encoding.UTF8.GetString(stream.ToArray(), 0, (int)stream.Position);
+                return Encoding.UTF8.GetString(stream.ToArray(), 0, (int) stream.Position);
             }
         }
 

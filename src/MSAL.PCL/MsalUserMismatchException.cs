@@ -31,38 +31,40 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// The exception type thrown when user returned by service does not match user in the request.
+    ///     The exception type thrown when user returned by service does not match user in the request.
     /// </summary>
     public class MsalUserMismatchException : MsalException
     {
         /// <summary>
-        ///  Initializes a new instance of the exception class.
+        ///     Initializes a new instance of the exception class.
         /// </summary>
         public MsalUserMismatchException(string requestedUser, string returnedUser)
-            : base(MsalError.UserMismatch, 
-                   string.Format(CultureInfo.InvariantCulture,MsalErrorMessage.UserMismatch, returnedUser, requestedUser))
+            : base(MsalError.UserMismatch,
+                string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.UserMismatch, returnedUser, requestedUser))
         {
             this.RequestedUser = requestedUser;
             this.ReturnedUser = returnedUser;
         }
 
         /// <summary>
-        /// Gets the user requested from service.
+        ///     Gets the user requested from service.
         /// </summary>
-        public string RequestedUser { get; private set; }
+        public string RequestedUser { get; }
 
         /// <summary>
-        /// Gets the user returned by service.
+        ///     Gets the user returned by service.
         /// </summary>
-        public string ReturnedUser { get; private set; }
+        public string ReturnedUser { get; }
 
         /// <summary>
-        /// Creates and returns a string representation of the current exception.
+        ///     Creates and returns a string representation of the current exception.
         /// </summary>
         /// <returns>A string representation of the current exception.</returns>
         public override string ToString()
         {
-            return base.ToString() + string.Format(CultureInfo.InvariantCulture,"\n\tRequestedUser: {0}\n\tReturnedUser: {1}", this.RequestedUser, this.ReturnedUser);
+            return base.ToString() +
+                   string.Format(CultureInfo.InvariantCulture, "\n\tRequestedUser: {0}\n\tReturnedUser: {1}",
+                       this.RequestedUser, this.ReturnedUser);
         }
     }
 }

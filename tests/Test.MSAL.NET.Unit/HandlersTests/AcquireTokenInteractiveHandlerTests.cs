@@ -277,7 +277,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             MockWebUI webUi = new MockWebUI();
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
-                TestConstants.DefaultAuthorityHomeTenant + "?error="+OAuthError.LoginRequired);
+                TestConstants.DefaultAuthorityHomeTenant + "?error="+OAuth2Error.LoginRequired);
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {

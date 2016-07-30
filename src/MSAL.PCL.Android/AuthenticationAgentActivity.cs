@@ -36,19 +36,18 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
     /// </summary>
     [Activity(Label = "Sign in")]
     [CLSCompliant(false)]
     public class AuthenticationAgentActivity : Activity
     {
         /// <summary>
-        /// 
         /// </summary>
         public static IDictionary<string, string> AdditionalHeaders;
+
         private MsalWebViewClient client;
+
         /// <summary>
-        /// 
         /// </summary>
         protected override void OnCreate(Bundle bundle)
         {
@@ -63,10 +62,10 @@ namespace Microsoft.Identity.Client
             WebView webView = FindViewById<WebView>(Resource.Id.agentWebView);
             WebSettings webSettings = webView.Settings;
             string userAgent = webSettings.UserAgentString;
-            webSettings.UserAgentString = 
-                    userAgent + BrokerConstants.ClientTlsNotSupported;
+            webSettings.UserAgentString =
+                userAgent + BrokerConstants.ClientTlsNotSupported;
             PlatformPlugin.Logger.Verbose(null, "UserAgent:" + webSettings.UserAgentString);
-            
+
             webSettings.JavaScriptEnabled = true;
 
             webSettings.LoadWithOverviewMode = true;
@@ -75,13 +74,12 @@ namespace Microsoft.Identity.Client
             webSettings.BuiltInZoomControls = true;
 
             this.client = new MsalWebViewClient(Intent.GetStringExtra("Callback"));
-            
+
             webView.SetWebViewClient(client);
             webView.LoadUrl(url, AdditionalHeaders);
-
         }
+
         /// <summary>
-        /// 
         /// </summary>
         public override void Finish()
         {
@@ -98,7 +96,7 @@ namespace Microsoft.Identity.Client
             base.Finish();
         }
 
-        sealed class MsalWebViewClient : WebViewClient
+        private sealed class MsalWebViewClient : WebViewClient
         {
             private readonly string callback;
 
@@ -119,8 +117,8 @@ namespace Microsoft.Identity.Client
                     this.Finish(view, url);
                 }
             }
+
             /// <summary>
-            /// 
             /// </summary>
             public override bool ShouldOverrideUrlLoading(WebView view, string url)
             {
@@ -128,9 +126,9 @@ namespace Microsoft.Identity.Client
                 if (url.StartsWith(BrokerConstants.BrowserExtPrefix))
                 {
                     PlatformPlugin.Logger.Verbose(null, "It is browser launch request");
-                    OpenLinkInBrowser(url, ((Activity)view.Context));
+                    OpenLinkInBrowser(url, ((Activity) view.Context));
                     view.StopLoading();
-                    ((Activity)view.Context).Finish();
+                    ((Activity) view.Context).Finish();
                     return true;
                 }
 
@@ -151,7 +149,8 @@ namespace Microsoft.Identity.Client
                     }
 
                     Dictionary<string, string> keyPair = EncodingHelper.ParseKeyValueList(query, '&', true, false, null);
-                    string responseHeader = PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(keyPair).Result;
+                    string responseHeader =
+                        PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(keyPair).Result;
                     Dictionary<string, string> pkeyAuthEmptyResponse = new Dictionary<string, string>();
                     pkeyAuthEmptyResponse[BrokerConstants.ChallangeResponseHeader] = responseHeader;
                     view.LoadUrl(keyPair["SubmitUrl"], pkeyAuthEmptyResponse);
@@ -165,7 +164,8 @@ namespace Microsoft.Identity.Client
                 }
 
 
-                if (!url.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) && !uri.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
+                if (!url.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) &&
+                    !uri.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
                 {
                     UriBuilder errorUri = new UriBuilder(callback);
                     errorUri.Query = string.Format("error={0}&error_description={1}",
@@ -181,12 +181,12 @@ namespace Microsoft.Identity.Client
             private void OpenLinkInBrowser(string url, Activity activity)
             {
                 string link = url
-                        .Replace(BrokerConstants.BrowserExtPrefix, "https://");
+                    .Replace(BrokerConstants.BrowserExtPrefix, "https://");
                 Intent intent = new Intent(Intent.ActionView, Android.Net.Uri.Parse(link));
                 activity.StartActivity(intent);
             }
+
             /// <summary>
-            /// 
             /// </summary>
             public override void OnPageFinished(WebView view, string url)
             {
@@ -198,8 +198,8 @@ namespace Microsoft.Identity.Client
 
                 base.OnPageFinished(view, url);
             }
+
             /// <summary>
-            /// 
             /// </summary>
             public override void OnPageStarted(WebView view, string url, Android.Graphics.Bitmap favicon)
             {
@@ -210,20 +210,19 @@ namespace Microsoft.Identity.Client
 
                 base.OnPageStarted(view, url, favicon);
             }
+
             /// <summary>
-            /// 
             /// </summary>
             private void Finish(WebView view, string url)
             {
-                var activity = ((Activity)view.Context);
+                var activity = ((Activity) view.Context);
                 if (activity != null && !activity.IsFinishing)
                 {
                     this.ReturnIntent = new Intent("Return");
                     this.ReturnIntent.PutExtra("ReturnedUrl", url);
-                    ((Activity)view.Context).Finish();
+                    ((Activity) view.Context).Finish();
                 }
             }
-
         }
     }
 }

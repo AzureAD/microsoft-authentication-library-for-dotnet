@@ -25,9 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using Android.App;
 using Android.Content;
-using System;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
         private const string SharedPreferencesName = "ActiveDirectoryAuthenticationLibrary";
         private const string SharedPreferencesKey = "cache";
 
-        public IntPtr Handle 
+        public IntPtr Handle
         {
             get { return IntPtr.Zero; }
         }
@@ -53,7 +53,8 @@ namespace Microsoft.Identity.Client
 
             try
             {
-                ISharedPreferences preferences = Application.Context.GetSharedPreferences(SharedPreferencesName, FileCreationMode.Private);
+                ISharedPreferences preferences = Application.Context.GetSharedPreferences(SharedPreferencesName,
+                    FileCreationMode.Private);
                 string stateString = preferences.GetString(SharedPreferencesKey, null);
                 if (stateString != null)
                 {
@@ -67,14 +68,15 @@ namespace Microsoft.Identity.Client
                 // Ignore as the cache seems to be corrupt
             }
         }
-        
+
         public void AfterAccess(TokenCacheNotificationArgs args)
         {
             if (args.TokenCache.HasStateChanged)
             {
                 try
                 {
-                    ISharedPreferences preferences = Application.Context.GetSharedPreferences(SharedPreferencesName, FileCreationMode.Private);
+                    ISharedPreferences preferences = Application.Context.GetSharedPreferences(SharedPreferencesName,
+                        FileCreationMode.Private);
                     ISharedPreferencesEditor editor = preferences.Edit();
                     editor.Remove(SharedPreferencesKey);
 

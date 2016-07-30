@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
@@ -41,60 +40,61 @@ namespace Microsoft.Identity.Client.Internal
         public AuthenticationResult Result { get; set; }
 
         /// <summary>
-        /// Gets the Refresh Token associated with the requested Access Token. Note: not all operations will return a Refresh Token.
+        ///     Gets the Refresh Token associated with the requested Access Token. Note: not all operations will return a Refresh
+        ///     Token.
         /// </summary>
         [DataMember]
         public string RefreshToken { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether the refresh token can be used for requesting access token for other resources.
+        ///     Gets a value indicating whether the refresh token can be used for requesting access token for other resources.
         /// </summary>
         internal bool IsMultipleScopeRefreshToken
         {
             get
             {
                 return (!string.IsNullOrWhiteSpace(this.RefreshToken));
-                    // && this.ScopeInResponse!=null && this.ScopeInResponse.Length > 0);
-            }            
+                // && this.ScopeInResponse!=null && this.ScopeInResponse.Length > 0);
+            }
         }
 
         [DataMember]
         public string UserAssertionHash { get; set; }
 
+        internal Exception Exception { get; set; }
+
         /// <summary>
-        /// Serializes the object to a JSON string
+        ///     Serializes the object to a JSON string
         /// </summary>
         /// <returns>Deserialized authentication result</returns>
         public static AuthenticationResultEx Deserialize(string serializedObject)
         {
             AuthenticationResultEx resultEx;
-            var serializer = new DataContractJsonSerializer(typeof(AuthenticationResultEx));
+            var serializer = new DataContractJsonSerializer(typeof (AuthenticationResultEx));
             byte[] serializedObjectBytes = Encoding.UTF8.GetBytes(serializedObject);
             using (var stream = new MemoryStream(serializedObjectBytes))
             {
-                resultEx = (AuthenticationResultEx)serializer.ReadObject(stream);
+                resultEx = (AuthenticationResultEx) serializer.ReadObject(stream);
             }
 
             return resultEx;
         }
 
         /// <summary>
-        /// Serializes the object to a JSON string
+        ///     Serializes the object to a JSON string
         /// </summary>
         /// <returns>Serialized authentication result</returns>
         public string Serialize()
         {
             string serializedObject;
-            var serializer = new DataContractJsonSerializer(typeof(AuthenticationResultEx));
+            var serializer = new DataContractJsonSerializer(typeof (AuthenticationResultEx));
             using (MemoryStream stream = new MemoryStream())
             {
                 serializer.WriteObject(stream, this);
-                serializedObject = Encoding.UTF8.GetString(stream.ToArray(), 0, (int)stream.Position);
+                serializedObject = Encoding.UTF8.GetString(stream.ToArray(), 0, (int) stream.Position);
             }
 
             return serializedObject;
         }
-
-        internal Exception Exception { get; set; }
     }
 }

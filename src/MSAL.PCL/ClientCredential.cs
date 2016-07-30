@@ -30,13 +30,12 @@ using System;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Secret including client id and secret.
+    ///     Secret including client id and secret.
     /// </summary>
     public sealed class ClientCredential
     {
-
         /// <summary>
-        /// Constructor to create Secret with client id and secret
+        ///     Constructor to create Secret with client id and secret
         /// </summary>
         /// <param name="certificate">Secret of the client requesting the token.</param>
         public ClientCredential(IClientAssertionCertificate certificate)
@@ -45,26 +44,22 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Constructor to create Secret with client id and secret
+        ///     Constructor to create Secret with client id and secret
         /// </summary>
         /// <param name="secret">Secret of the client requesting the token.</param>
         public ClientCredential(string secret)
         {
-
             if (string.IsNullOrWhiteSpace(secret))
             {
                 throw new ArgumentNullException("secret");
             }
-            
+
             this.Secret = secret;
         }
 
         internal string Secret { get; private set; }
-
         internal IClientAssertionCertificate Certificate { get; private set; }
-
-        internal  ClientAssertion ClientAssertion { get; set; }
-
+        internal ClientAssertion ClientAssertion { get; set; }
         internal long ValidTo { get; set; }
     }
 }

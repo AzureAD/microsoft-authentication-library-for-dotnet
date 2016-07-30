@@ -27,7 +27,6 @@
 
 using System;
 using Microsoft.Identity.Client.Interfaces;
-using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -42,8 +41,8 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
-            
-            return new InteractiveWebUI { OwnerWindow = this.parameters.OwnerWindow };
-        }  
+
+            return new InteractiveWebUI {OwnerWindow = this.parameters.OwnerWindow};
+        }
     }
 }

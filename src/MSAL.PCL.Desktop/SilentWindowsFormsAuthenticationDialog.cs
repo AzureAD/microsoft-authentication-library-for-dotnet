@@ -27,7 +27,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -36,26 +35,16 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
     /// </summary>
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public class SilentWindowsFormsAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
     {
-        internal delegate void SilentWebUIDoneEventHandler(object sender, SilentWebUIDoneEventArgs args);
-        internal event SilentWebUIDoneEventHandler Done;
-
+        private bool doneSignaled;
         private DateTime navigationExpiry = DateTime.MaxValue;
-
         private Timer timer;
 
-        private bool doneSignaled;
         /// <summary>
-        /// 
-        /// </summary>
-        public int NavigationWaitMiliSecs { get; set; }
-        /// <summary>
-        /// 
         /// </summary>
         public SilentWindowsFormsAuthenticationDialog(object ownerWindow)
             : base(ownerWindow)
@@ -63,8 +52,14 @@ namespace Microsoft.Identity.Client
             this.SuppressBrowserSubDialogs();
             this.WebBrowser.DocumentCompleted += this.DocumentCompletedHandler;
         }
+
         /// <summary>
-        /// 
+        /// </summary>
+        public int NavigationWaitMiliSecs { get; set; }
+
+        internal event SilentWebUIDoneEventHandler Done;
+
+        /// <summary>
         /// </summary>
         public void CloseBrowser()
         {
@@ -72,16 +67,16 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Make sure that the browser control does not surface any of it's own dialogs.
-        /// For instance bad certificate or javascript error dialogs.
+        ///     Make sure that the browser control does not surface any of it's own dialogs.
+        ///     For instance bad certificate or javascript error dialogs.
         /// </summary>
         private void SuppressBrowserSubDialogs()
         {
-            var webBrowser2 = (NativeWrapper.IWebBrowser2)this.WebBrowser.ActiveXInstance;
+            var webBrowser2 = (NativeWrapper.IWebBrowser2) this.WebBrowser.ActiveXInstance;
             webBrowser2.Silent = true;
         }
+
         /// <summary>
-        /// 
         /// </summary>
         protected override void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
         {
@@ -108,17 +103,17 @@ namespace Microsoft.Identity.Client
 
         private static Timer CreateStartedTimer(Action onTickAction, int interval)
         {
-            Timer timer = new Timer { Interval = interval };
+            Timer timer = new Timer {Interval = interval};
             timer.Tick += (notUsedsender, notUsedEventArgs) => onTickAction();
             timer.Start();
             return timer;
         }
 
         /// <summary>
-        /// This method must only be called from the UI thread.  Since this is the 
-        /// callers opportunity to call dispose on this object.  Calling
-        /// Dispose must be done on the same thread on which this object
-        /// was constructed.
+        ///     This method must only be called from the UI thread.  Since this is the
+        ///     callers opportunity to call dispose on this object.  Calling
+        ///     Dispose must be done on the same thread on which this object
+        ///     was constructed.
         /// </summary>
         /// <param name="exception"></param>
         private void SignalDone(Exception exception = null)
@@ -151,15 +146,15 @@ namespace Microsoft.Identity.Client
             this.SignalDone(
                 new MsalException(MsalError.UserInteractionRequired));
         }
+
         /// <summary>
-        /// 
         /// </summary>
         protected override void OnClosingUrl()
         {
             this.SignalDone();
         }
+
         /// <summary>
-        /// 
         /// </summary>
         protected override void OnNavigationCanceled(int statusCode)
         {
@@ -177,18 +172,18 @@ namespace Microsoft.Identity.Client
                     (
                         from element in doc.GetElementsByTagName("INPUT").Cast<HtmlElement>()
                         where
-                               0 == String.Compare(element.GetAttribute("type"), "password",StringComparison.Ordinal)
+                            0 == String.Compare(element.GetAttribute("type"), "password", StringComparison.Ordinal)
                             && element.Enabled
                             && element.OffsetRectangle.Height > 0
                             && element.OffsetRectangle.Width > 0
                         select element
-                    ).FirstOrDefault();
+                        ).FirstOrDefault();
             }
 
             return passwordFieldElement != null;
         }
+
         /// <summary>
-        /// 
         /// </summary>
         protected override void Dispose(bool disposing)
         {
@@ -198,5 +193,7 @@ namespace Microsoft.Identity.Client
             }
             base.Dispose(disposing);
         }
+
+        internal delegate void SilentWebUIDoneEventHandler(object sender, SilentWebUIDoneEventArgs args);
     }
 }

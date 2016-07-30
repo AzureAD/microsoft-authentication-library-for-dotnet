@@ -34,6 +34,6 @@ namespace Microsoft.Identity.Client
         public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
         {
             return new WebUI(parameters);
-        }   
+        }
     }
 }

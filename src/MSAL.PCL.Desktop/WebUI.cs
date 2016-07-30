@@ -39,12 +39,11 @@ namespace Microsoft.Identity.Client
     internal abstract class WebUI : IWebUI
     {
         protected Uri RequestUri { get; private set; }
-
         protected Uri CallbackUri { get; private set; }
-
         public Object OwnerWindow { get; set; }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
+            IDictionary<string, string> additionalHeaders, CallState callState)
         {
             AuthorizationResult authorizationResult = null;
             StringBuilder builder = new StringBuilder();
@@ -65,10 +64,7 @@ namespace Microsoft.Identity.Client
             }
 
             var sendAuthorizeRequest = new Action(
-                delegate
-                {
-                    authorizationResult = this.Authenticate(authorizationUri, redirectUri, builder.ToString());
-                });
+                delegate { authorizationResult = this.Authenticate(authorizationUri, redirectUri, builder.ToString()); });
 
             // If the thread is MTA, it cannot create or communicate with WebBrowser which is a COM control.
             // In this case, we have to create the browser in an STA thread via StaTaskScheduler object.
@@ -78,7 +74,8 @@ namespace Microsoft.Identity.Client
                 {
                     try
                     {
-                        Task.Factory.StartNew(sendAuthorizeRequest, CancellationToken.None, TaskCreationOptions.None, staTaskScheduler).Wait();
+                        Task.Factory.StartNew(sendAuthorizeRequest, CancellationToken.None, TaskCreationOptions.None,
+                            staTaskScheduler).Wait();
                     }
                     catch (AggregateException ae)
                     {
@@ -90,7 +87,7 @@ namespace Microsoft.Identity.Client
                         // In MTA case, AggregateException is two layer deep, so checking the InnerException for that.
                         if (innerException is AggregateException)
                         {
-                            innerException = ((AggregateException)innerException).InnerExceptions[0];
+                            innerException = ((AggregateException) innerException).InnerExceptions[0];
                         }
 
                         throw innerException;

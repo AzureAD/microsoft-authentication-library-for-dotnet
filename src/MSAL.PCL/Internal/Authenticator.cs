@@ -35,10 +35,8 @@ namespace Microsoft.Identity.Client.Internal
     internal class Authenticator
     {
         private static readonly string[] TenantlessTenantName = {"Common", "Organizations", "Consumers"};
-
         private static readonly AuthenticatorTemplateList AuthenticatorTemplateList = new AuthenticatorTemplateList();
-
-        private bool updatedFromTemplate; 
+        private bool updatedFromTemplate;
 
         public Authenticator(string authority, bool validateAuthority, Guid correlationId)
         {
@@ -48,21 +46,13 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         public string Authority { get; private set; }
-
         public bool ValidateAuthority { get; set; }
-
         public bool IsTenantless { get; private set; }
-
         public string AuthorizationUri { get; set; }
-
         public string DeviceCodeUri { get; set; }
-
         public string TokenUri { get; private set; }
-
         public string UserRealmUri { get; private set; }
-
         public string SelfSignedJwtAudience { get; private set; }
-
         public Guid CorrelationId { get; set; }
 
         public async Task UpdateFromTemplateAsync(CallState callState)
@@ -74,7 +64,10 @@ namespace Microsoft.Identity.Client.Internal
                 string path = authorityUri.AbsolutePath.Substring(1);
                 string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
 
-                AuthenticatorTemplate matchingTemplate = await AuthenticatorTemplateList.FindMatchingItemAsync(this.ValidateAuthority, host, tenant, callState).ConfigureAwait(false);
+                AuthenticatorTemplate matchingTemplate =
+                    await
+                        AuthenticatorTemplateList.FindMatchingItemAsync(this.ValidateAuthority, host, tenant, callState)
+                            .ConfigureAwait(false);
 
                 this.AuthorizationUri = matchingTemplate.AuthorizeEndpoint.Replace("{tenant}", tenant);
                 this.DeviceCodeUri = matchingTemplate.DeviceCodeEndpoint.Replace("{tenant}", tenant);
@@ -91,7 +84,8 @@ namespace Microsoft.Identity.Client.Internal
             var authorityUri = new Uri(authority);
             string path = authorityUri.AbsolutePath.Substring(1);
             string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-            return TenantlessTenantName.Any(name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
+            return
+                TenantlessTenantName.Any(name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         public void UpdateTenantId(string tenantId)

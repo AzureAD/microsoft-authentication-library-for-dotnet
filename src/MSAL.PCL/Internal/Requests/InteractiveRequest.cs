@@ -27,47 +27,43 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Interfaces;
-using Microsoft.Identity.Client.Internal;
-using System.Globalization;
 
-namespace Microsoft.Identity.Client.Requests
+namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class InteractiveRequest : BaseRequest
     {
-
-        internal AuthorizationResult authorizationResult;
-
         private readonly HashSet<string> _additionalScope;
-        private readonly Uri _redirectUri;
-        private readonly string _redirectUriRequestParameter;
         private readonly IPlatformParameters _authorizationParameters;
-        private readonly string _extraQueryParameters;
-        private readonly IWebUI _webUi;
-        private readonly string _loginHint;
         private readonly UiOptions? _uiOptions;
-
+        private readonly IWebUI _webUi;
+        internal AuthorizationResult authorizationResult;
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
             string[] additionalScope, Uri redirectUri, IPlatformParameters parameters, User user,
-            UiOptions uiOptions, string extraQueryParameters, IWebUI webUI) :this(authenticationRequestParameters, additionalScope, redirectUri, parameters, user?.DisplayableId, uiOptions, extraQueryParameters, webUI)
+            UiOptions uiOptions, string extraQueryParameters, IWebUI webUI)
+            : this(
+                authenticationRequestParameters, additionalScope, redirectUri, parameters, user?.DisplayableId,
+                uiOptions, extraQueryParameters, webUI)
         {
             this.User = user;
         }
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            string[] additionalScope, Uri redirectUri, IPlatformParameters parameters, string loginHint, UiOptions? uiOptions, string extraQueryParameters, IWebUI webUI)
+            string[] additionalScope, Uri redirectUri, IPlatformParameters parameters, string loginHint,
+            UiOptions? uiOptions, string extraQueryParameters, IWebUI webUI)
             : base(authenticationRequestParameters)
         {
-            this._redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
-
-            if (!string.IsNullOrWhiteSpace(this._redirectUri.Fragment))
+            PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
+            if (!string.IsNullOrWhiteSpace(redirectUri.Fragment))
             {
                 throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
-            
+
+            authenticationRequestParameters.RedirectUri = redirectUri.AbsoluteUri;
+
             _additionalScope = new HashSet<string>();
             if (!MsalStringHelper.IsNullOrEmpty(additionalScope))
             {
@@ -77,10 +73,9 @@ namespace Microsoft.Identity.Client.Requests
             ValidateScopeInput(this._additionalScope);
 
             this._authorizationParameters = parameters;
-            this._redirectUriRequestParameter = PlatformPlugin.PlatformInformation.GetRedirectUriAsString(this._redirectUri, this.CallState);
-            
 
-            this._loginHint = loginHint;
+
+            authenticationRequestParameters.LoginHint = loginHint;
             if (!string.IsNullOrWhiteSpace(extraQueryParameters) && extraQueryParameters[0] == '&')
             {
                 extraQueryParameters = extraQueryParameters.Substring(1);
@@ -96,7 +91,7 @@ namespace Microsoft.Identity.Client.Requests
             {
                 throw new ArgumentException(MsalErrorMessage.LoginHintNullForUiOption, "loginHint");
             }
-            
+
             PlatformPlugin.BrokerHelper.PlatformParameters = _authorizationParameters;
         }
 
@@ -139,13 +134,15 @@ namespace Microsoft.Identity.Client.Requests
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
             await this.AcquireAuthorizationAsync(headers).ConfigureAwait(false);
             this.VerifyAuthorizationResult();
-                
         }
 
         internal async Task AcquireAuthorizationAsync(IDictionary<string, string> headers)
         {
             Uri authorizationUri = this.CreateAuthorizationUri();
-            this.authorizationResult = await this._webUi.AcquireAuthorizationAsync(authorizationUri, this._redirectUri, headers, this.CallState).ConfigureAwait(false);
+            this.authorizationResult =
+                await
+                    this._webUi.AcquireAuthorizationAsync(authorizationUri, this._redirectUri, headers, this.CallState)
+                        .ConfigureAwait(false);
         }
 
         internal async Task<Uri> CreateAuthorizationUriAsync(Guid correlationId)
@@ -157,9 +154,9 @@ namespace Microsoft.Identity.Client.Requests
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {
-            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.AuthorizationCode;
-            requestParameters[OAuthParameter.Code] = this.authorizationResult.Code;
-            requestParameters[OAuthParameter.RedirectUri] = this._redirectUriRequestParameter;
+            requestParameters[OAuth2Parameter.GrantType] = OAuth2GrantType.AuthorizationCode;
+            requestParameters[OAuth2Parameter.Code] = this.authorizationResult.Code;
+            requestParameters[OAuth2Parameter.RedirectUri] = this._redirectUriRequestParameter;
         }
 
         protected override void PostTokenRequest(AuthenticationResultEx resultEx)
@@ -171,50 +168,54 @@ namespace Microsoft.Identity.Client.Requests
         private Uri CreateAuthorizationUri()
         {
             IRequestParameters requestParameters = this.CreateAuthorizationRequest(_loginHint);
-            return  new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + requestParameters);
+            return new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + requestParameters);
         }
 
         private DictionaryRequestParameters CreateAuthorizationRequest(string loginHint)
         {
-            HashSet<string> unionScope = this.GetDecoratedScope(new HashSet<string>(this.Scope.Union(this._additionalScope)));
+            HashSet<string> unionScope =
+                this.GetDecoratedScope(new HashSet<string>(this.Scope.Union(this._additionalScope)));
 
             var authorizationRequestParameters = new DictionaryRequestParameters(unionScope, this.ClientKey);
-            authorizationRequestParameters[OAuthParameter.ResponseType] = OAuthResponseType.Code;
+            authorizationRequestParameters[OAuth2Parameter.ResponseType] = OAuth2ResponseType.Code;
 
             if (!string.IsNullOrWhiteSpace(this.Policy))
             {
-                authorizationRequestParameters[OAuthParameter.Policy] = this.Policy;
+                authorizationRequestParameters[OAuth2Parameter.Policy] = this.Policy;
             }
 
-            authorizationRequestParameters[OAuthParameter.RedirectUri] = this._redirectUriRequestParameter;
+            authorizationRequestParameters[OAuth2Parameter.RedirectUri] = this._redirectUriRequestParameter;
 
             if (!string.IsNullOrWhiteSpace(loginHint))
             {
-                authorizationRequestParameters[OAuthParameter.LoginHint] = loginHint;
+                authorizationRequestParameters[OAuth2Parameter.LoginHint] = loginHint;
             }
 
             if (this.CallState != null && this.CallState.CorrelationId != Guid.Empty)
             {
-                authorizationRequestParameters[OAuthParameter.CorrelationId] = this.CallState.CorrelationId.ToString();
+                authorizationRequestParameters[OAuth2Parameter.CorrelationId] = this.CallState.CorrelationId.ToString();
             }
-            
-                IDictionary<string, string> adalIdParameters = MsalIdHelper.GetMsalIdParameters();
-                foreach (KeyValuePair<string, string> kvp in adalIdParameters)
-                {
-                    authorizationRequestParameters[kvp.Key] = kvp.Value;
-                }
+
+            IDictionary<string, string> adalIdParameters = MsalIdHelper.GetMsalIdParameters();
+            foreach (KeyValuePair<string, string> kvp in adalIdParameters)
+            {
+                authorizationRequestParameters[kvp.Key] = kvp.Value;
+            }
 
             AddUiOptionToRequestParameters(authorizationRequestParameters);
 
             if (!string.IsNullOrWhiteSpace(_extraQueryParameters))
             {
                 // Checks for _extraQueryParameters duplicating standard parameters
-                Dictionary<string, string> kvps = EncodingHelper.ParseKeyValueList(_extraQueryParameters, '&', false, this.CallState);
+                Dictionary<string, string> kvps = EncodingHelper.ParseKeyValueList(_extraQueryParameters, '&', false,
+                    this.CallState);
                 foreach (KeyValuePair<string, string> kvp in kvps)
                 {
                     if (authorizationRequestParameters.ContainsKey(kvp.Key))
                     {
-                        throw new MsalException(MsalError.DuplicateQueryParameter, string.Format(CultureInfo.InvariantCulture,MsalErrorMessage.DuplicateQueryParameterTemplate, kvp.Key));
+                        throw new MsalException(MsalError.DuplicateQueryParameter,
+                            string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.DuplicateQueryParameterTemplate,
+                                kvp.Key));
                     }
                 }
 
@@ -226,7 +227,7 @@ namespace Microsoft.Identity.Client.Requests
 
         private void VerifyAuthorizationResult()
         {
-            if (this.authorizationResult.Error == OAuthError.LoginRequired)
+            if (this.authorizationResult.Error == OAuth2Error.LoginRequired)
             {
                 throw new MsalException(MsalError.UserInteractionRequired);
             }
@@ -242,22 +243,21 @@ namespace Microsoft.Identity.Client.Requests
             switch (this._uiOptions)
             {
                 case UiOptions.ForceConsent:
-                    authorizationRequestParameters[OAuthParameter.Prompt]= "consent";
+                    authorizationRequestParameters[OAuth2Parameter.Prompt] = "consent";
                     break;
 
                 case UiOptions.ForceLogin:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = "login";
+                    authorizationRequestParameters[OAuth2Parameter.Prompt] = "login";
                     break;
 
                 case UiOptions.SelectAccount:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = "select_account";
+                    authorizationRequestParameters[OAuth2Parameter.Prompt] = "select_account";
                     break;
 
                 case UiOptions.ActAsCurrentUser:
-                    authorizationRequestParameters[OAuthParameter.RestrictToHint] = "true";
+                    authorizationRequestParameters[OAuth2Parameter.RestrictToHint] = "true";
                     break;
             }
-            
         }
     }
 }

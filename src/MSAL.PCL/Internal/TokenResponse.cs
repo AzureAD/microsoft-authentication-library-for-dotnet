@@ -55,7 +55,6 @@ namespace Microsoft.Identity.Client.Internal
     [DataContract]
     internal class TokenResponse
     {
-
         [DataMember(Name = TokenResponseClaim.TokenType, IsRequired = false)]
         public string TokenType { get; set; }
 
@@ -120,8 +119,8 @@ namespace Microsoft.Identity.Client.Internal
                     responseStreamString.Append(ReadStreamContent(responseStream));
                     using (MemoryStream ms = new MemoryStream(responseStreamString.ToByteArray()))
                     {
-                        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(TokenResponse));
-                        tokenResponse = ((TokenResponse)serializer.ReadObject(ms));
+                        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (TokenResponse));
+                        tokenResponse = ((TokenResponse) serializer.ReadObject(ms));
                     }
                 }
                 catch (SerializationException ex)
@@ -143,7 +142,7 @@ namespace Microsoft.Identity.Client.Internal
         public AuthenticationResultEx GetResultEx()
         {
             AuthenticationResultEx resultEx = null;
-            
+
             if (!string.IsNullOrEmpty(this.AccessToken) || !string.IsNullOrEmpty(this.IdToken))
             {
                 DateTimeOffset accessTokenExpiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn);
@@ -158,7 +157,7 @@ namespace Microsoft.Identity.Client.Internal
                 {
                     result = new AuthenticationResult(this.TokenType, this.IdToken, idTokenExpiresOn);
                 }
-                
+
 
                 result.FamilyId = FamilyId;
                 IdToken idToken = Internal.IdToken.Parse(this.IdToken);
@@ -219,5 +218,4 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
     }
-
 }

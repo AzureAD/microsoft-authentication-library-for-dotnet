@@ -26,26 +26,15 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Requests
+namespace Microsoft.Identity.Client.Interfaces
 {
-    internal class ClientCredentialRequest : BaseRequest
+    internal interface IBrokerHelper
     {
-        public ClientCredentialRequest(AuthenticationRequestParameters authenticationRequestParameters)
-            : base(authenticationRequestParameters)
-        {
-            this.SupportADFS = false;
-        }
-
-        protected override HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
-        {
-            return inputScope;
-        }
-
-        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
-        {
-            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.ClientCredentials;
-        }
+        IPlatformParameters PlatformParameters { get; set; }
+        bool CanInvokeBroker { get; }
+        Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload);
     }
 }

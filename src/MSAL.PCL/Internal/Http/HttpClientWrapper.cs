@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -35,21 +34,19 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Interfaces;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.Http
 {
     internal class HttpClientWrapper
     {
+        private static HttpClient clientForUsingCredential;
+        private static HttpClient clientWithoutCredential;
         private readonly string uri;
         private int timeoutInMilliSeconds = 30000;
 
-        private static HttpClient clientForUsingCredential;
-        private static HttpClient clientWithoutCredential;
-
-
         static HttpClientWrapper()
         {
-            clientForUsingCredential = new HttpClient(HttpMessageHandlerFactory.GetMessageHandler(true));
-            clientWithoutCredential = new HttpClient(HttpMessageHandlerFactory.GetMessageHandler(false));
+            clientForUsingCredential = new HttpClient(HttpMessageHandlerFactory.GetMessageHandler());
+            clientWithoutCredential = new HttpClient(HttpMessageHandlerFactory.GetMessageHandler());
         }
 
         public HttpClientWrapper(string uri, CallState callState)
@@ -60,16 +57,11 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         protected CallState CallState { get; set; }
-
         public IRequestParameters BodyParameters { get; set; }
-
         public string Accept { get; set; }
-
         public string ContentType { get; set; }
-
         public bool UseDefaultCredentials { get; set; }
-
-        public Dictionary<string, string> Headers { get; private set; }
+        public Dictionary<string, string> Headers { get; }
 
         public int TimeoutInMilliSeconds
         {
@@ -111,11 +103,11 @@ namespace Microsoft.Identity.Client.Internal
             bool addCorrelationId = (this.CallState != null && this.CallState.CorrelationId != Guid.Empty);
             if (addCorrelationId)
             {
-                requestMessage.Headers.Add(OAuthHeader.CorrelationId, this.CallState.CorrelationId.ToString());
-                requestMessage.Headers.Add(OAuthHeader.RequestCorrelationIdInResponse, "true");
+                requestMessage.Headers.Add(OAuth2Header.CorrelationId, this.CallState.CorrelationId.ToString());
+                requestMessage.Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
             }
-            
-            if(client.Timeout != TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds))
+
+            if (client.Timeout != TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds))
             {
                 client.Timeout = TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds);
             }
@@ -158,13 +150,9 @@ namespace Microsoft.Identity.Client.Internal
             {
                 throw new HttpRequestWrapperException(webResponse, new HttpRequestException(
                     string.Format("Response status code does not indicate success: {0} ({1}).",
-                        (int)webResponse.StatusCode, webResponse.StatusCode)));
+                        (int) webResponse.StatusCode, webResponse.StatusCode)));
             }
 
-            if (addCorrelationId)
-            {
-                VerifyCorrelationIdHeaderInReponse(webResponse.Headers);
-            }
 
             return webResponse;
         }
@@ -182,33 +170,6 @@ namespace Microsoft.Identity.Client.Internal
 
             return new MsalHttpWebResponse(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), headers,
                 response.StatusCode);
-        }
-
-        private void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers)
-        {
-            foreach (string reponseHeaderKey in headers.Keys)
-            {
-                string trimmedKey = reponseHeaderKey.Trim();
-                if (string.Compare(trimmedKey, OAuthHeader.CorrelationId, StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    string correlationIdHeader = headers[trimmedKey].Trim();
-                    Guid correlationIdInResponse;
-                    if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
-                    {
-                        PlatformPlugin.Logger.Warning(CallState,
-                            string.Format(CultureInfo.InvariantCulture,"Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
-                    }
-                    else if (correlationIdInResponse != this.CallState.CorrelationId)
-                    {
-                        PlatformPlugin.Logger.Warning(
-                            this.CallState,
-                            string.Format(CultureInfo.InvariantCulture,"Returned correlation id '{0}' does not match the sent correlation id '{1}'",
-                                correlationIdHeader, CallState.CorrelationId));
-                    }
-
-                    break;
-                }
-            }
         }
     }
 }

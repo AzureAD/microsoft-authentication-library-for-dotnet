@@ -26,10 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 using Microsoft.Identity.Client.Interfaces;
@@ -40,7 +36,6 @@ namespace Microsoft.Identity.Client
     internal class TokenCachePlugin : ITokenCachePlugin
     {
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
-
         private const string CacheValue = "CacheValue";
         private const string CacheValueSegmentCount = "CacheValueSegmentCount";
         private const string CacheValueLength = "CacheValueLength";
@@ -67,7 +62,7 @@ namespace Microsoft.Identity.Client
                 }
             }
         }
-        
+
         public void AfterAccess(TokenCacheNotificationArgs args)
         {
             if (args != null && args.TokenCache != null && args.TokenCache.HasStateChanged)
@@ -76,7 +71,8 @@ namespace Microsoft.Identity.Client
                 {
                     var localSettings = ApplicationData.Current.LocalSettings;
                     localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-                    SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values, args.TokenCache.Serialize());
+                    SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values,
+                        args.TokenCache.Serialize());
                     args.TokenCache.HasStateChanged = false;
                 }
                 catch (Exception ex)
@@ -97,15 +93,16 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                int segmentCount = (encryptedValue.Length / MaxCompositeValueLength) + ((encryptedValue.Length % MaxCompositeValueLength == 0) ? 0 : 1);
+                int segmentCount = (encryptedValue.Length/MaxCompositeValueLength) +
+                                   ((encryptedValue.Length%MaxCompositeValueLength == 0) ? 0 : 1);
                 byte[] subValue = new byte[MaxCompositeValueLength];
                 for (int i = 0; i < segmentCount - 1; i++)
                 {
-                    Array.Copy(encryptedValue, i * MaxCompositeValueLength, subValue, 0, MaxCompositeValueLength);
+                    Array.Copy(encryptedValue, i*MaxCompositeValueLength, subValue, 0, MaxCompositeValueLength);
                     containerValues[CacheValue + i] = subValue;
                 }
 
-                int copiedLength = (segmentCount - 1) * MaxCompositeValueLength;
+                int copiedLength = (segmentCount - 1)*MaxCompositeValueLength;
                 Array.Copy(encryptedValue, copiedLength, subValue, 0, encryptedValue.Length - copiedLength);
                 containerValues[CacheValue + (segmentCount - 1)] = subValue;
                 containerValues[CacheValueSegmentCount] = segmentCount;
@@ -119,23 +116,26 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            int encyptedValueLength = (int)containerValues[CacheValueLength];
-            int segmentCount = (int)containerValues[CacheValueSegmentCount];
+            int encyptedValueLength = (int) containerValues[CacheValueLength];
+            int segmentCount = (int) containerValues[CacheValueSegmentCount];
 
             byte[] encryptedValue = new byte[encyptedValueLength];
             if (segmentCount == 1)
             {
-                encryptedValue = (byte[])containerValues[CacheValue + 0];
+                encryptedValue = (byte[]) containerValues[CacheValue + 0];
             }
             else
             {
                 for (int i = 0; i < segmentCount - 1; i++)
                 {
-                    Array.Copy((byte[])containerValues[CacheValue + i], 0, encryptedValue, i * MaxCompositeValueLength, MaxCompositeValueLength);
+                    Array.Copy((byte[]) containerValues[CacheValue + i], 0, encryptedValue, i*MaxCompositeValueLength,
+                        MaxCompositeValueLength);
                 }
             }
 
-            Array.Copy((byte[])containerValues[CacheValue + (segmentCount - 1)], 0, encryptedValue, (segmentCount - 1) * MaxCompositeValueLength, encyptedValueLength - (segmentCount - 1) * MaxCompositeValueLength);
+            Array.Copy((byte[]) containerValues[CacheValue + (segmentCount - 1)], 0, encryptedValue,
+                (segmentCount - 1)*MaxCompositeValueLength,
+                encyptedValueLength - (segmentCount - 1)*MaxCompositeValueLength);
             return CryptographyHelper.Decrypt(encryptedValue);
         }
     }

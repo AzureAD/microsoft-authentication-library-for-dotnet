@@ -30,46 +30,49 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Requests
+namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal abstract class BaseRequest
     {
-        protected readonly static Task CompletedTask = Task.FromResult(false);
-        internal readonly TokenCache tokenCache;
-        protected readonly bool restrictToSingleUser;
+        protected static readonly Task CompletedTask = Task.FromResult(false);
+        internal readonly AuthenticationRequestParameters AuthenticationRequestParameters;
+        internal readonly TokenCache TokenCache;
 
-
-        protected BaseRequest(AuthenticationRequestParameters authenticationRequestParameters)
+        protected BaseRequest(AuthenticationRequestParameters authenticationRequestParameters,
+            Authenticator authenticator, TokenCache tokenCache)
         {
-            this.Authenticator = authenticationRequestParameters.Authenticator;
+            this.Authenticator = authenticator;
             this.CallState = CreateCallState(this.Authenticator.CorrelationId);
 
             PlatformPlugin.Logger.Information(this.CallState,
-                string.Format(CultureInfo.InvariantCulture,"=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
-                Authenticator.Authority, authenticationRequestParameters.Scope.AsSingleString(), authenticationRequestParameters.ClientKey.ClientId,
-                (tokenCache != null) ? tokenCache.GetType().FullName + string.Format(CultureInfo.InvariantCulture," ({0} items)", tokenCache.Count) : "null"));
+                string.Format(CultureInfo.InvariantCulture,
+                    "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
+                    Authenticator.Authority, authenticationRequestParameters.Scope.AsSingleString(),
+                    authenticationRequestParameters.ClientKey.ClientId,
+                    (tokenCache != null)
+                        ? tokenCache.GetType().FullName +
+                          string.Format(CultureInfo.InvariantCulture, " ({0} items)", tokenCache.Count)
+                        : "null"));
 
-            this.tokenCache = authenticationRequestParameters.TokenCache;
-            this.ClientKey = authenticationRequestParameters.ClientKey;
-            this.Policy = authenticationRequestParameters.Policy;
-            this.restrictToSingleUser = authenticationRequestParameters.RestrictToSingleUser;
+            this.TokenCache = tokenCache;
+            this.AuthenticationRequestParameters = authenticationRequestParameters;
 
-            if (MsalStringHelper.IsNullOrEmpty(authenticationRequestParameters.Scope))
+            if (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0)
             {
                 throw new ArgumentNullException("scope");
             }
-            
-            this.Scope = authenticationRequestParameters.Scope.CreateSetFromArray();
-            ValidateScopeInput(this.Scope);
+
+            ValidateScopeInput(authenticationRequestParameters.Scope);
 
 
             this.LoadFromCache = (tokenCache != null);
             this.StoreToCache = (tokenCache != null);
             this.SupportADFS = false;
-            
-            if (this.tokenCache != null && (restrictToSingleUser && this.tokenCache.GetUniqueIdsFromCache(this.ClientKey.ClientId).Count() > 1))
+
+            if (this.TokenCache != null &&
+                (authenticationRequestParameters.RestrictToSingleUser &&
+                 this.TokenCache.GetUniqueIdsFromCache(authenticationRequestParameters.ClientKey.ClientId).Count() > 1))
             {
                 throw new ArgumentException(
                     "Cache cannot have entries for more than 1 unique id when RestrictToSingleUser is set to TRUE.");
@@ -77,35 +80,22 @@ namespace Microsoft.Identity.Client.Requests
         }
 
         internal CallState CallState { get; set; }
-
         protected bool SupportADFS { get; set; }
-
-        protected Authenticator Authenticator { get; private set; }
-
-        protected HashSet<string> Scope { get; set; }
-
-        protected ClientKey ClientKey { get; private set; }
-
+        protected Authenticator Authenticator { get; }
         protected User User { get; set; }
-
-        protected string Policy { get; set; }
-
         protected AuthenticationResultEx ResultEx { get; set; }
-
         protected bool LoadFromCache { get; set; }
-
         protected bool ForceRefresh { get; set; }
-
         protected bool StoreToCache { get; set; }
 
         protected virtual HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
         {
             HashSet<string> set = new HashSet<string>(inputScope.ToArray());
-            set.UnionWith(OAuthValue.ReservedScopes.CreateSetFromArray());
-            set.Remove(this.ClientKey.ClientId);
+            set.UnionWith(OAuth2Value.ReservedScopes.CreateSetFromArray());
+            set.Remove(AuthenticationRequestParameters.ClientKey.ClientId);
 
             //special case b2c scenarios to not send email and profile as scopes for BUILD 
-            if (!string.IsNullOrEmpty(this.Policy))
+            if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Policy))
             {
                 set.Remove("email");
                 set.Remove("profile");
@@ -117,12 +107,14 @@ namespace Microsoft.Identity.Client.Requests
         protected void ValidateScopeInput(HashSet<string> scopesToValidate)
         {
             //check if scope or additional scope contains client ID.
-            if (scopesToValidate.Intersect(OAuthValue.ReservedScopes.CreateSetFromArray()).Any())
+            if (scopesToValidate.Intersect(OAuth2Value.ReservedScopes.CreateSetFromArray()).Any())
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,"API does not accept '{0}' value as user-provided scopes", OAuthValue.ReservedScopes.AsSingleString()));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,
+                    "API does not accept '{0}' value as user-provided scopes",
+                    OAuth2Value.ReservedScopes.AsSingleString()));
             }
 
-            if (scopesToValidate.Contains(this.ClientKey.ClientId))
+            if (scopesToValidate.Contains(AuthenticationRequestParameters.ClientKey.ClientId))
             {
                 if (scopesToValidate.Count > 1)
                 {
@@ -144,23 +136,29 @@ namespace Microsoft.Identity.Client.Requests
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    ResultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority, this.Scope,
-                        this.ClientKey.ClientId, this.User, this.Policy, this.CallState);
+                    ResultEx = this.TokenCache.LoadFromCache(this.Authenticator.Authority,
+                        AuthenticationRequestParameters.Scope,
+                        AuthenticationRequestParameters.ClientKey.ClientId, this.User,
+                        AuthenticationRequestParameters.Policy, this.CallState);
                     this.ValidateResult();
-                    if (ResultEx != null && (ResultEx.Result.Token == null || ForceRefresh) && ResultEx.RefreshToken != null)
+                    if (ResultEx != null && (ResultEx.Result.Token == null || ForceRefresh) &&
+                        ResultEx.RefreshToken != null)
 
                     {
                         ResultEx = await this.RefreshAccessTokenAsync(ResultEx).ConfigureAwait(false);
                         if (ResultEx != null && ResultEx.Exception == null)
                         {
-                            this.tokenCache.StoreToCache(ResultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.Policy, this.restrictToSingleUser, this.CallState);
+                            this.TokenCache.StoreToCache(ResultEx, this.Authenticator.Authority,
+                                AuthenticationRequestParameters.ClientKey.ClientId,
+                                AuthenticationRequestParameters.Policy,
+                                AuthenticationRequestParameters.RestrictToSingleUser, this.CallState);
                         }
                     }
                 }
 
-                if (ResultEx == null || ResultEx.Exception!=null)
+                if (ResultEx == null || ResultEx.Exception != null)
                 {
-                    await this.PreTokenRequest().ConfigureAwait(false);    
+                    await this.PreTokenRequest().ConfigureAwait(false);
                     ResultEx = await this.SendTokenRequestAsync().ConfigureAwait(false);
 
                     if (ResultEx.Exception != null)
@@ -170,7 +168,7 @@ namespace Microsoft.Identity.Client.Requests
 
                     this.PostTokenRequest(ResultEx);
 
-                    
+
                     if (this.StoreToCache)
                     {
                         if (!notifiedBeforeAccessCache)
@@ -179,7 +177,9 @@ namespace Microsoft.Identity.Client.Requests
                             notifiedBeforeAccessCache = true;
                         }
 
-                        this.tokenCache.StoreToCache(ResultEx, this.Authenticator.Authority, this.ClientKey.ClientId, this.Policy, this.restrictToSingleUser, this.CallState);
+                        this.TokenCache.StoreToCache(ResultEx, this.Authenticator.Authority,
+                            AuthenticationRequestParameters.ClientKey.ClientId, AuthenticationRequestParameters.Policy,
+                            AuthenticationRequestParameters.RestrictToSingleUser, this.CallState);
                     }
                 }
 
@@ -203,7 +203,6 @@ namespace Microsoft.Identity.Client.Requests
 
         protected virtual void ValidateResult()
         {
-
         }
 
         protected virtual bool BrokerInvocationRequired()
@@ -224,8 +223,8 @@ namespace Microsoft.Identity.Client.Requests
             //add client id, token cache and authority to User object
             if (result.User != null)
             {
-                result.User.TokenCache = this.tokenCache;
-                result.User.ClientId = this.ClientKey.ClientId;
+                result.User.TokenCache = this.TokenCache;
+                result.User.ClientId = AuthenticationRequestParameters.ClientKey.ClientId;
                 result.User.Authority = this.Authenticator.Authority;
             }
 
@@ -237,9 +236,9 @@ namespace Microsoft.Identity.Client.Requests
             await this.Authenticator.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
 
             //pull any user from the cache as they will all have the same uniqueId
-            if (this.User == null && this.tokenCache != null && restrictToSingleUser)
+            if (this.User == null && this.TokenCache != null && AuthenticationRequestParameters.RestrictToSingleUser)
             {
-                this.User = this.tokenCache.ReadItems(this.ClientKey.ClientId).First().User;
+                this.User = this.TokenCache.ReadItems(AuthenticationRequestParameters.ClientKey.ClientId).First().User;
             }
         }
 
@@ -257,23 +256,28 @@ namespace Microsoft.Identity.Client.Requests
 
         protected virtual async Task<AuthenticationResultEx> SendTokenRequestAsync()
         {
-            var requestParameters = new DictionaryRequestParameters(this.GetDecoratedScope(this.Scope), this.ClientKey);
+            var requestParameters =
+                new DictionaryRequestParameters(this.GetDecoratedScope(AuthenticationRequestParameters.Scope),
+                    AuthenticationRequestParameters.ClientKey);
             this.AddAditionalRequestParameters(requestParameters);
             return await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
         }
 
         internal async Task<AuthenticationResultEx> SendTokenRequestByRefreshTokenAsync(string refreshToken)
         {
-            var requestParameters = new DictionaryRequestParameters(this.GetDecoratedScope(this.Scope), this.ClientKey);
-            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
-            requestParameters[OAuthParameter.RefreshToken] = refreshToken;
+            var requestParameters =
+                new DictionaryRequestParameters(this.GetDecoratedScope(AuthenticationRequestParameters.Scope),
+                    AuthenticationRequestParameters.ClientKey);
+            requestParameters[OAuth2Parameter.GrantType] = OAuth2GrantType.RefreshToken;
+            requestParameters[OAuth2Parameter.RefreshToken] = refreshToken;
 
             AuthenticationResultEx result = await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
 
             if (result.RefreshToken == null)
             {
                 result.RefreshToken = refreshToken;
-                PlatformPlugin.Logger.Information(this.CallState, "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+                PlatformPlugin.Logger.Information(this.CallState,
+                    "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
             }
 
             return result;
@@ -283,21 +287,22 @@ namespace Microsoft.Identity.Client.Requests
         {
             AuthenticationResultEx newResultEx = null;
 
-            if (this.Scope != null)
+            if (AuthenticationRequestParameters.Scope != null)
             {
                 PlatformPlugin.Logger.Verbose(this.CallState, "Refreshing access token...");
 
                 try
                 {
-                    newResultEx = await this.SendTokenRequestByRefreshTokenAsync(result.RefreshToken).ConfigureAwait(false);
+                    newResultEx =
+                        await this.SendTokenRequestByRefreshTokenAsync(result.RefreshToken).ConfigureAwait(false);
                     this.Authenticator.UpdateTenantId(result.Result.TenantId);
 
                     if (newResultEx.Result.IdToken == null)
                     {
                         // If Id token is not returned by token endpoint when refresh token is redeemed, we should copy tenant and user information from the cached token.
-                        newResultEx.Result.UpdateTenantAndUser(result.Result.TenantId, result.Result.IdToken, result.Result.User);
+                        newResultEx.Result.UpdateTenantAndUser(result.Result.TenantId, result.Result.IdToken,
+                            result.Result.User);
                     }
-
                 }
                 catch (MsalException ex)
                 {
@@ -311,7 +316,7 @@ namespace Microsoft.Identity.Client.Requests
                             serviceException.InnerException);
                     }
 
-                    newResultEx = new AuthenticationResultEx { Exception = ex };
+                    newResultEx = new AuthenticationResultEx {Exception = ex};
                 }
             }
 
@@ -323,15 +328,17 @@ namespace Microsoft.Identity.Client.Requests
             string endpoint = this.Authenticator.TokenUri;
             endpoint = AddPolicyParameter(endpoint);
 
-            var client = new MsalHttpClient(endpoint, this.CallState) { Client = { BodyParameters = requestParameters } };
-            TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>(ClientMetricsEndpointType.Token).ConfigureAwait(false);
+            var client = new MsalHttpClient(endpoint, this.CallState) {Client = {BodyParameters = requestParameters}};
+            TokenResponse tokenResponse =
+                await client.GetResponseAsync<TokenResponse>(ClientMetricsEndpointType.Token).ConfigureAwait(false);
 
             AuthenticationResultEx resultEx = tokenResponse.GetResultEx();
-            
+
             if (resultEx.Result.ScopeSet == null || resultEx.Result.ScopeSet.Count == 0)
             {
-                resultEx.Result.ScopeSet = this.Scope;
-                PlatformPlugin.Logger.Information(this.CallState, "Scope was missing from the token response, so using developer provided scopes in the result");
+                resultEx.Result.ScopeSet = AuthenticationRequestParameters.Scope;
+                PlatformPlugin.Logger.Information(this.CallState,
+                    "Scope was missing from the token response, so using developer provided scopes in the result");
             }
 
             return resultEx;
@@ -339,25 +346,25 @@ namespace Microsoft.Identity.Client.Requests
 
         internal void NotifyBeforeAccessCache()
         {
-            this.tokenCache.OnBeforeAccess(new TokenCacheNotificationArgs
+            this.TokenCache.OnBeforeAccess(new TokenCacheNotificationArgs
             {
-                TokenCache = this.tokenCache,
-                Scope = this.Scope.ToArray(),
-                ClientId = this.ClientKey.ClientId,
+                TokenCache = this.TokenCache,
+                Scope = AuthenticationRequestParameters.Scope.ToArray(),
+                ClientId = AuthenticationRequestParameters.ClientKey.ClientId,
                 User = this.User,
-                Policy = this.Policy
+                Policy = AuthenticationRequestParameters.Policy
             });
         }
 
         internal void NotifyAfterAccessCache()
         {
-            this.tokenCache.OnAfterAccess(new TokenCacheNotificationArgs
+            this.TokenCache.OnAfterAccess(new TokenCacheNotificationArgs
             {
-                TokenCache = this.tokenCache,
-                Scope = this.Scope.ToArray(),
-                ClientId = this.ClientKey.ClientId,
+                TokenCache = this.TokenCache,
+                Scope = AuthenticationRequestParameters.Scope.ToArray(),
+                ClientId = AuthenticationRequestParameters.ClientKey.ClientId,
                 User = this.User,
-                Policy = this.Policy
+                Policy = AuthenticationRequestParameters.Policy
             });
         }
 
@@ -367,19 +374,24 @@ namespace Microsoft.Identity.Client.Requests
             {
                 string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.Token);
 
-                PlatformPlugin.Logger.Information(this.CallState, string.Format(CultureInfo.InvariantCulture,"=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tExpiration Time: {1}\n\tUser Hash: {2}\n\t",
-                    accessTokenHash,
-                    result.ExpiresOn,                    
-                    result.User != null ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.User.UniqueId) : "null"));
+                PlatformPlugin.Logger.Information(this.CallState,
+                    string.Format(CultureInfo.InvariantCulture,
+                        "=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tExpiration Time: {1}\n\tUser Hash: {2}\n\t",
+                        accessTokenHash,
+                        result.ExpiresOn,
+                        result.User != null
+                            ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.User.UniqueId)
+                            : "null"));
             }
         }
 
         internal string AddPolicyParameter(string endpoint)
         {
-            if (!string.IsNullOrWhiteSpace(this.Policy))
+            if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.Policy))
             {
                 string delimiter = (endpoint.IndexOf('?') > 0) ? "&" : "?";
-                endpoint += string.Concat(delimiter, string.Format(CultureInfo.InvariantCulture,"p={0}", this.Policy));
+                endpoint += string.Concat(delimiter,
+                    string.Format(CultureInfo.InvariantCulture, "p={0}", AuthenticationRequestParameters.Policy));
             }
 
             return endpoint;
@@ -402,12 +414,11 @@ namespace Microsoft.Identity.Client.Requests
                 }
             }
 
-            if (this.tokenCache != null)
+            if (this.TokenCache != null)
             {
                 bool notifiedBeforeAccessCache = false;
                 try
                 {
-
                     User user = new User()
                     {
                         UniqueId = uniqueId,
@@ -417,10 +428,10 @@ namespace Microsoft.Identity.Client.Requests
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    AuthenticationResultEx resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority,
-                        this.Scope,
-                        this.ClientKey.ClientId, user,
-                        this.Policy, this.CallState);
+                    AuthenticationResultEx resultEx = this.TokenCache.LoadFromCache(this.Authenticator.Authority,
+                        AuthenticationRequestParameters.Scope,
+                        AuthenticationRequestParameters.ClientKey.ClientId, user,
+                        AuthenticationRequestParameters.Policy, this.CallState);
                     if (resultEx != null)
                     {
                         return resultEx.Result.User;
@@ -432,12 +443,10 @@ namespace Microsoft.Identity.Client.Requests
                     {
                         this.NotifyAfterAccessCache();
                     }
-
                 }
             }
 
             return null;
         }
-
     }
 }

@@ -25,31 +25,25 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using CoreGraphics;
-
-using CoreFoundation;
 using UIKit;
-using Foundation;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
     /// </summary>
     [Foundation.Register("UniversalView")]
     public class UniversalView : UIView
     {
         /// <summary>
-        /// 
         /// </summary>
         public UniversalView()
         {
             Initialize();
         }
+
         /// <summary>
-        /// 
         /// </summary>
         public UniversalView(CGRect bounds)
             : base(bounds)
@@ -57,7 +51,7 @@ namespace Microsoft.Identity.Client
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             BackgroundColor = UIColor.Red;
         }
@@ -66,14 +60,16 @@ namespace Microsoft.Identity.Client
     [Foundation.Register("AuthenticationAgentUINavigationController")]
     internal class AuthenticationAgentUINavigationController : UINavigationController
     {
-        private string url;
-        private string callback;
-        private IDictionary<string, string> additionalHeaders;
-        private AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod;
+        private readonly IDictionary<string, string> additionalHeaders;
+        private readonly string callback;
+        private readonly AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod;
+        private readonly string url;
+
         /// <summary>
-        /// 
         /// </summary>
-        public AuthenticationAgentUINavigationController(string url, string callback, IDictionary<string, string> additionalHeaders, AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod)
+        public AuthenticationAgentUINavigationController(string url, string callback,
+            IDictionary<string, string> additionalHeaders,
+            AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod)
         {
             this.url = url;
             this.callback = callback;
@@ -95,7 +91,8 @@ namespace Microsoft.Identity.Client
 
             // Perform any additional setup after loading the view
             CustomHeaderHandler.AdditionalHeaders = this.additionalHeaders;
-            this.PushViewController(new AuthenticationAgentUIViewController(this.url, this.callback, this.callbackMethod), true);
+            this.PushViewController(
+                new AuthenticationAgentUIViewController(this.url, this.callback, this.callbackMethod), true);
         }
     }
 }

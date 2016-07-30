@@ -25,30 +25,25 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 using Microsoft.Identity.Client.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
     internal class DeviceAuthHelper : IDeviceAuthHelper
     {
-        public bool CanHandleDeviceAuthChallenge {
+        public bool CanHandleDeviceAuthChallenge
+        {
             get { return false; }
         }
 
         public Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
-            return Task.FromResult(string.Format(@"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData[BrokerConstants.ChallangeResponseContext], challengeData[BrokerConstants.ChallangeResponseVersion]));
+            return
+                Task.FromResult(string.Format(@"PKeyAuth Context=""{0}"",Version=""{1}""",
+                    challengeData[BrokerConstants.ChallangeResponseContext],
+                    challengeData[BrokerConstants.ChallangeResponseVersion]));
         }
     }
 }

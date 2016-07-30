@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -34,7 +33,7 @@ using System.Linq;
 namespace Microsoft.Identity.Client.Internal
 {
     /// <summary>
-    /// <see cref="TokenCacheKey"/> can be used with Linq to access items from the TokenCache dictionary.
+    ///     <see cref="TokenCacheKey" /> can be used with Linq to access items from the TokenCache dictionary.
     /// </summary>
     internal sealed class TokenCacheKey
     {
@@ -70,22 +69,15 @@ namespace Microsoft.Identity.Client.Internal
             this.Policy = policy;
         }
 
-        public string Authority { get; private set; }
-
-        public HashSet<string> Scope { get; internal set; }
-
-        public string ClientId { get; private set; }
-
-        public string UniqueId { get; private set; }
-
-        public string DisplayableId { get; private set; }
-
-        public string HomeObjectId { get; private set; }
-
-        public string Policy { get; private set; }
+        public string Authority { get; }
+        public HashSet<string> Scope { get; }
+        public string ClientId { get; }
+        public string UniqueId { get; }
+        public string DisplayableId { get; }
+        public string HomeObjectId { get; }
+        public string Policy { get; }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <returns></returns>
         public override string ToString()
@@ -98,12 +90,13 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         /// <summary>
-        /// Determines whether the specified object is equal to the current object.
+        ///     Determines whether the specified object is equal to the current object.
         /// </summary>
         /// <returns>
-        /// true if the specified object is equal to the current object; otherwise, false.
+        ///     true if the specified object is equal to the current object; otherwise, false.
         /// </returns>
-        /// <param name="obj">The object to compare with the current object. </param><filterpriority>2</filterpriority>
+        /// <param name="obj">The object to compare with the current object. </param>
+        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             TokenCacheKey other = obj as TokenCacheKey;
@@ -111,12 +104,13 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         /// <summary>
-        /// Determines whether the specified TokenCacheKey is equal to the current object.
+        ///     Determines whether the specified TokenCacheKey is equal to the current object.
         /// </summary>
         /// <returns>
-        /// true if the specified TokenCacheKey is equal to the current object; otherwise, false.
+        ///     true if the specified TokenCacheKey is equal to the current object; otherwise, false.
         /// </returns>
-        /// <param name="other">The TokenCacheKey to compare with the current object. </param><filterpriority>2</filterpriority>
+        /// <param name="other">The TokenCacheKey to compare with the current object. </param>
+        /// <filterpriority>2</filterpriority>
         public bool Equals(TokenCacheKey other)
         {
             return ReferenceEquals(this, other) ||
@@ -131,10 +125,10 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         /// <summary>
-        /// Returns the hash code for this TokenCacheKey.
+        ///     Returns the hash code for this TokenCacheKey.
         /// </summary>
         /// <returns>
-        /// A 32-bit signed integer hash code.
+        ///     A 32-bit signed integer hash code.
         /// </returns>
         public override int GetHashCode()
         {

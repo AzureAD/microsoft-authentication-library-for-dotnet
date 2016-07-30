@@ -25,15 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal;
-
 namespace Microsoft.Identity.Client.Interfaces
 {
-    interface IWebUI
+    internal interface ICryptographyHelper
     {
-        Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders, CallState callState);
+        string CreateSha256Hash(string input);
     }
 }

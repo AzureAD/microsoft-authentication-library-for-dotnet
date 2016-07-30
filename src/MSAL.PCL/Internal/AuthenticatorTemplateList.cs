@@ -36,7 +36,11 @@ namespace Microsoft.Identity.Client.Internal
     {
         public AuthenticatorTemplateList()
         {
-            string[] trustedHostList = { "login.windows.net", "login.chinacloudapi.cn", "login.cloudgovapi.us", "login.microsoftonline.com" };
+            string[] trustedHostList =
+            {
+                "login.windows.net", "login.chinacloudapi.cn", "login.cloudgovapi.us",
+                "login.microsoftonline.com"
+            };
 
             string customAuthorityHost = PlatformPlugin.PlatformInformation.GetEnvironmentVariable("customTrustedHost");
             if (string.IsNullOrWhiteSpace(customAuthorityHost))
@@ -52,16 +56,21 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        public async Task<AuthenticatorTemplate> FindMatchingItemAsync(bool validateAuthority, string host, string tenant, CallState callState)
+        public async Task<AuthenticatorTemplate> FindMatchingItemAsync(bool validateAuthority, string host,
+            string tenant, CallState callState)
         {
             AuthenticatorTemplate matchingAuthenticatorTemplate = null;
             if (validateAuthority)
             {
-                matchingAuthenticatorTemplate = this.FirstOrDefault(a => string.Compare(host, a.Host, StringComparison.OrdinalIgnoreCase) == 0);
+                matchingAuthenticatorTemplate =
+                    this.FirstOrDefault(a => string.Compare(host, a.Host, StringComparison.OrdinalIgnoreCase) == 0);
                 if (matchingAuthenticatorTemplate == null)
                 {
                     // We only check with the first trusted authority (login.windows.net) for instance discovery
-                    await this.First().VerifyAnotherHostByInstanceDiscoveryAsync(host, tenant, callState).ConfigureAwait(false);
+                    await
+                        this.First()
+                            .VerifyAnotherHostByInstanceDiscoveryAsync(host, tenant, callState)
+                            .ConfigureAwait(false);
                 }
             }
 

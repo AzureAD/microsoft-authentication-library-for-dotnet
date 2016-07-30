@@ -30,13 +30,14 @@ using System;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Credential type containing an assertion representing user credential.
+    ///     Credential type containing an assertion representing user credential.
     /// </summary>
     public sealed class UserAssertion
     {
         /// <summary>
-        /// Constructor to create the object with an assertion. This constructor can be used for On Behalf Of flow which assumes the
-        /// assertion is a JWT token. For other flows, the other construction with assertionType must be used.
+        ///     Constructor to create the object with an assertion. This constructor can be used for On Behalf Of flow which
+        ///     assumes the
+        ///     assertion is a JWT token. For other flows, the other construction with assertionType must be used.
         /// </summary>
         /// <param name="assertion">Assertion representing the user.</param>
         public UserAssertion(string assertion)
@@ -50,7 +51,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Constructor to create credential with client id, assertion and assertionType
+        ///     Constructor to create credential with client id, assertion and assertionType
         /// </summary>
         /// <param name="assertion">Assertion representing the user.</param>
         /// <param name="assertionType">Type of the assertion representing the user.</param>
@@ -60,7 +61,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Constructor to create credential with client id, assertion, assertionType and userId
+        ///     Constructor to create credential with client id, assertion, assertionType and userId
         /// </summary>
         /// <param name="assertion">Assertion representing the user.</param>
         /// <param name="assertionType">Type of the assertion representing the user.</param>
@@ -83,17 +84,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Gets the assertion.
+        ///     Gets the assertion.
         /// </summary>
         public string Assertion { get; private set; }
 
         /// <summary>
-        /// Gets the assertion type.
+        ///     Gets the assertion type.
         /// </summary>
         public string AssertionType { get; private set; }
 
         /// <summary>
-        /// Gets name of the user.
+        ///     Gets name of the user.
         /// </summary>
         public string UserName { get; internal set; }
     }

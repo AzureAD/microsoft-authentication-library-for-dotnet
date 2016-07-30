@@ -34,13 +34,14 @@ namespace Microsoft.Identity.Client
 
     // Disabled Non-Interactive Feature
     /// <summary>
-    /// Credential used for integrated authentication on domain-joined machines.
+    ///     Credential used for integrated authentication on domain-joined machines.
     /// </summary>
     public sealed class UserCredential
     {
         /// <summary>
-        /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
-        /// and it can only be used in domain joined scenarios.
+        ///     Constructor to create user credential. Using this constructor would imply integrated authentication with logged in
+        ///     user
+        ///     and it can only be used in domain joined scenarios.
         /// </summary>
         public UserCredential()
         {
@@ -48,7 +49,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Constructor to create credential with client id and secret
+        ///     Constructor to create credential with client id and secret
         /// </summary>
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
         public UserCredential(string userName)
@@ -56,13 +57,12 @@ namespace Microsoft.Identity.Client
             this.UserName = userName;
             this.UserAuthType = UserAuthType.IntegratedAuth;
         }
-        
+
         /// <summary>
-        /// Gets identifier of the user.
+        ///     Gets identifier of the user.
         /// </summary>
         public string UserName { get; internal set; }
 
         internal UserAuthType UserAuthType { get; private set; }
-        
     }
 }

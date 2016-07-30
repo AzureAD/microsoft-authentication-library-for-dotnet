@@ -33,8 +33,7 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal class JsonWebTokenConstants
     {
-        public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
-
+        public const uint JwtToAadLifetimeInSeconds = 60*10; // Ten minutes
         public const string HeaderType = "JWT";
 
         internal class Algorithms
@@ -59,13 +58,12 @@ namespace Microsoft.Identity.Client.Internal
             public const string Type = "typ";
             public const string X509CertificateThumbprint = "kid";
         }
-    }   
+    }
 
     internal class JsonWebToken
     {
         // (64K) This is an arbitrary large value for the token length. We can adjust it as needed.
-        private const int MaxTokenLength = 65536;   
-
+        private const int MaxTokenLength = 65536;
         public readonly JWTPayload Payload;
 
         public JsonWebToken(string clientId, string audience)
@@ -75,20 +73,20 @@ namespace Microsoft.Identity.Client.Internal
             DateTime validTo = validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds);
 
             this.Payload = new JWTPayload
-                           {
-                               Audience = audience,
-                               Issuer = clientId,
-                               ValidFrom = ConvertToTimeT(validFrom),
-                               ValidTo = ConvertToTimeT(validTo),
-                               Subject = clientId,
-                               JwtIdentifier = Guid.NewGuid().ToString()
+            {
+                Audience = audience,
+                Issuer = clientId,
+                ValidFrom = ConvertToTimeT(validFrom),
+                ValidTo = ConvertToTimeT(validTo),
+                Subject = clientId,
+                JwtIdentifier = Guid.NewGuid().ToString()
             };
         }
 
         public ClientAssertion Sign(IClientAssertionCertificate credential)
         {
             // Base64Url encoded header and claims
-            string token = this.Encode(credential);     
+            string token = this.Encode(credential);
 
             // Length check before sign
             if (MaxTokenLength < token.Length)
@@ -119,7 +117,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             var startTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
             TimeSpan diff = time - startTime;
-            return (long)(diff.TotalSeconds);
+            return (long) (diff.TotalSeconds);
         }
 
         private string Encode(IClientAssertionCertificate credential)
@@ -140,20 +138,17 @@ namespace Microsoft.Identity.Client.Internal
         [DataContract]
         internal class JWTHeader
         {
-            protected IClientAssertionCertificate Credential { get; private set; }
-
             public JWTHeader(IClientAssertionCertificate credential)
             {
                 this.Credential = credential;
             }
 
+            protected IClientAssertionCertificate Credential { get; }
+
             [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.Type)]
             public static string Type
             {
-                get
-                {
-                    return JsonWebTokenConstants.HeaderType;
-                }
+                get { return JsonWebTokenConstants.HeaderType; }
 
                 set
                 {
@@ -166,7 +161,9 @@ namespace Microsoft.Identity.Client.Internal
             {
                 get
                 {
-                    return this.Credential == null ? JsonWebTokenConstants.Algorithms.None : JsonWebTokenConstants.Algorithms.RsaSha256;
+                    return this.Credential == null
+                        ? JsonWebTokenConstants.Algorithms.None
+                        : JsonWebTokenConstants.Algorithms.RsaSha256;
                 }
 
                 set
@@ -195,7 +192,8 @@ namespace Microsoft.Identity.Client.Internal
                 EmitDefaultValue = false)]
             public string Subject { get; set; }
 
-            [DataMember(Name = JsonWebTokenConstants.ReservedClaims.JwtIdentifier, IsRequired=false, EmitDefaultValue=false)]
+            [DataMember(Name = JsonWebTokenConstants.ReservedClaims.JwtIdentifier, IsRequired = false,
+                EmitDefaultValue = false)]
             public string JwtIdentifier { get; set; }
         }
 

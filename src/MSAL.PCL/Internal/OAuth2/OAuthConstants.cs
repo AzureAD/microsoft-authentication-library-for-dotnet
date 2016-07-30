@@ -25,9 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.OAuth2
 {
-    internal class OAuthParameter
+    internal class OAuth2Parameter
     {
         public const string ResponseType = "response_type";
         public const string GrantType = "grant_type";
@@ -44,15 +44,17 @@ namespace Microsoft.Identity.Client.Internal
         public const string RequestedTokenUse = "requested_token_use";
         public const string Username = "username";
         public const string Password = "password";
-
         public const string LoginHint = "login_hint"; // login_hint is not standard oauth2 parameter
-        public const string CorrelationId = OAuthHeader.CorrelationId; // correlation id is not standard oauth2 parameter
+
+        public const string CorrelationId = OAuth2Header.CorrelationId;
+            // correlation id is not standard oauth2 parameter
+
         public const string Prompt = "prompt"; // prompt is not standard oauth2 parameter
         public const string RestrictToHint = "restrict_to_hint"; // restrict_to_hint is not standard oauth2 parameter
         public const string Policy = "p";
     }
 
-    internal class OAuthGrantType
+    internal class OAuth2GrantType
     {
         public const string AuthorizationCode = "authorization_code";
         public const string RefreshToken = "refresh_token";
@@ -64,33 +66,33 @@ namespace Microsoft.Identity.Client.Internal
         public const string DeviceCode = "device_code";
     }
 
-    internal class OAuthResponseType
+    internal class OAuth2ResponseType
     {
         public const string Code = "code";
     }
 
-    internal class OAuthAssertionType
+    internal class OAuth2AssertionType
     {
         public const string JwtBearer = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     }
 
-    internal class OAuthRequestedTokenUse
+    internal class OAuth2RequestedTokenUse
     {
         public const string OnBehalfOf = "on_behalf_of";
     }
 
-    internal class OAuthHeader
+    internal class OAuth2Header
     {
         public const string CorrelationId = "client-request-id";
         public const string RequestCorrelationIdInResponse = "return-client-request-id";
     }
 
-    internal class OAuthError
+    internal class OAuth2Error
     {
         public const string LoginRequired = "login_required";
     }
 
-    internal class OAuthValue
+    internal class OAuth2Value
     {
         public static readonly string[] ReservedScopes = {"openid", "email", "profile", "offline_access"};
     }
@@ -99,9 +101,8 @@ namespace Microsoft.Identity.Client.Internal
     {
         public const string Login = "login";
         public const string RefreshSession = "refresh_session";
-
         // The behavior of this value is identical to prompt=none for managed users; However, for federated users, AAD
         // redirects to ADFS as it cannot determine in advance whether ADFS can login user silently (e.g. via WIA) or not.
-        public const string AttemptNone = "attempt_none";        
+        public const string AttemptNone = "attempt_none";
     }
 }

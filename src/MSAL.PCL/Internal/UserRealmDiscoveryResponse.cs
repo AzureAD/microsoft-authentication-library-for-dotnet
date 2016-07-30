@@ -48,15 +48,20 @@ namespace Microsoft.Identity.Client.Internal
         [DataMember(Name = "federation_active_auth_url")]
         public string FederationActiveAuthUrl { get; set; }
 
-        internal static async Task<UserRealmDiscoveryResponse> CreateByDiscoveryAsync(string userRealmUri, string userName, CallState callState)
+        internal static async Task<UserRealmDiscoveryResponse> CreateByDiscoveryAsync(string userRealmUri,
+            string userName, CallState callState)
         {
             string userRealmEndpoint = userRealmUri;
             userRealmEndpoint += (userName + "?api-version=1.0");
 
-            PlatformPlugin.Logger.Information(callState, string.Format("Sending user realm discovery request to '{0}'", userRealmEndpoint));
+            PlatformPlugin.Logger.Information(callState,
+                string.Format("Sending user realm discovery request to '{0}'", userRealmEndpoint));
 
-            var client = new MsalHttpClient(userRealmEndpoint, callState) { Client = { Accept = "application/json" } };
-            return await client.GetResponseAsync<UserRealmDiscoveryResponse>(ClientMetricsEndpointType.UserRealmDiscovery).ConfigureAwait(false);
+            var client = new MsalHttpClient(userRealmEndpoint, callState) {Client = {Accept = "application/json"}};
+            return
+                await
+                    client.GetResponseAsync<UserRealmDiscoveryResponse>(ClientMetricsEndpointType.UserRealmDiscovery)
+                        .ConfigureAwait(false);
         }
     }
 }

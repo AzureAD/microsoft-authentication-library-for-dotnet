@@ -27,16 +27,16 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Requests
+namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class OnBehalfOfRequest : BaseRequest
     {
-        private readonly UserAssertion userAssertion;
         private readonly string assertionHash;
+        private readonly UserAssertion userAssertion;
 
-        public OnBehalfOfRequest(AuthenticationRequestParameters authenticationRequestParameters, UserAssertion userAssertion)
+        public OnBehalfOfRequest(AuthenticationRequestParameters authenticationRequestParameters,
+            UserAssertion userAssertion)
             : base(authenticationRequestParameters)
         {
             if (userAssertion == null)
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Requests
             }
 
             this.userAssertion = userAssertion;
-            this.User = new User { DisplayableId = userAssertion.UserName };
+            this.User = new User {DisplayableId = userAssertion.UserName};
             this.assertionHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(userAssertion.Assertion);
             this.SupportADFS = false;
         }
@@ -73,26 +73,25 @@ namespace Microsoft.Identity.Client.Requests
             //leave resultEx as is if it is null or provided userAssertion contains username
         }
 
-
         protected override async Task<AuthenticationResultEx> SendTokenRequestAsync()
-         {
-             AuthenticationResultEx resultEx = await base.SendTokenRequestAsync();
-             if (resultEx != null)
-             {
-                 resultEx.UserAssertionHash = this.assertionHash;
-             }
- 
-             return resultEx;
-         }
+        {
+            AuthenticationResultEx resultEx = await base.SendTokenRequestAsync();
+            if (resultEx != null)
+            {
+                resultEx.UserAssertionHash = this.assertionHash;
+            }
+
+            return resultEx;
+        }
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {
-            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.JwtBearer;
-            requestParameters[OAuthParameter.Assertion] = this.userAssertion.Assertion;
-            requestParameters[OAuthParameter.RequestedTokenUse] = OAuthRequestedTokenUse.OnBehalfOf;
+            requestParameters[OAuth2Parameter.GrantType] = OAuth2GrantType.JwtBearer;
+            requestParameters[OAuth2Parameter.Assertion] = this.userAssertion.Assertion;
+            requestParameters[OAuth2Parameter.RequestedTokenUse] = OAuth2RequestedTokenUse.OnBehalfOf;
 
             //TODO To request id_token in response
-            //requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
+            //requestParameters[OAuth2Parameter.Scope] = OAuth2Value.ScopeOpenId;
         }
     }
 }

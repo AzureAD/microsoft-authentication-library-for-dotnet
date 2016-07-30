@@ -26,22 +26,18 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Requests;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Native applications (desktop/phone/iOS/Android).
+    ///     Native applications (desktop/phone/iOS/Android).
     /// </summary>
     public sealed class PublicClientApplication : AbstractClientApplication
     {
         private const string DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
-
         /*
                 /// <summary>
                 /// Default consutructor of the application.
@@ -50,22 +46,23 @@ namespace Microsoft.Identity.Client
                 {
                 }
         */
+
         /// <summary>
-        /// Default consutructor of the application.
+        ///     Default consutructor of the application.
         /// </summary>
-        public PublicClientApplication(string clientId) :this(DefaultAuthority, clientId)
+        public PublicClientApplication(string clientId) : this(DefaultAuthority, clientId)
         {
         }
+
         /// <summary>
-        /// 
         /// </summary>
-        public PublicClientApplication(string authority, string clientId) : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
+        public PublicClientApplication(string authority, string clientId)
+            : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
         {
             this.UserTokenCache = TokenCache.DefaultSharedUserTokenCache;
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="scope"></param>
         /// <returns></returns>
@@ -79,7 +76,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="loginHint"></param>
@@ -94,7 +90,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="loginHint"></param>
@@ -112,7 +107,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="user"></param>
@@ -130,7 +124,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="loginHint"></param>
@@ -151,7 +144,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="user"></param>
@@ -170,14 +162,15 @@ namespace Microsoft.Identity.Client
                     this.AcquireTokenCommonAsync(authenticator, scope, additionalScope, new Uri(this.RedirectUri), user,
                         options, extraQueryParameters, policy).ConfigureAwait(false);
         }
-        
+
         internal IWebUI CreateWebAuthenticationDialog(IPlatformParameters parameters)
         {
             return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parameters);
         }
-        
+
         /// <summary>
-        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
+        ///     .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific
+        ///     libraries.
         /// </summary>
         /// <param name="scope"></param>
         /// <returns></returns>
@@ -191,13 +184,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// .NET specific method for intergrated auth.
+        ///     .NET specific method for intergrated auth.
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="authority"></param>
         /// <param name="policy"></param>
         /// <returns></returns>
-        internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope, string authority, string policy)
+        internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope,
+            string authority, string policy)
         {
             Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
             return
@@ -206,14 +200,17 @@ namespace Microsoft.Identity.Client
                         new UserCredential(), policy).ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(Authenticator authenticator, string[] scope, UserCredential userCredential, string policy)
+        private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(Authenticator authenticator,
+            string[] scope, UserCredential userCredential, string policy)
         {
-            var handler = new SilentWebUiRequest(this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), userCredential);
+            var handler = new SilentWebUiRequest(
+                this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), userCredential);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string[] additionalScope, Uri redirectUri, string loginHint, UiOptions uiOptions, string extraQueryParameters, string policy)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope,
+            string[] additionalScope, Uri redirectUri, string loginHint, UiOptions uiOptions,
+            string extraQueryParameters, string policy)
         {
             if (this.PlatformParameters == null)
             {
@@ -228,8 +225,9 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope, string[] additionalScope, Uri redirectUri, User user, UiOptions uiOptions, string extraQueryParameters, string policy)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope,
+            string[] additionalScope, Uri redirectUri, User user, UiOptions uiOptions, string extraQueryParameters,
+            string policy)
         {
             if (this.PlatformParameters == null)
             {
@@ -244,7 +242,8 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal override AuthenticationRequestParameters GetHandlerData(Authenticator authenticator, string[] scope, string policy,
+        internal override AuthenticationRequestParameters GetHandlerData(Authenticator authenticator, string[] scope,
+            string policy,
             TokenCache cache)
         {
             AuthenticationRequestParameters parameters = base.GetHandlerData(authenticator, scope, policy, cache);
@@ -252,6 +251,5 @@ namespace Microsoft.Identity.Client
 
             return parameters;
         }
-
     }
 }

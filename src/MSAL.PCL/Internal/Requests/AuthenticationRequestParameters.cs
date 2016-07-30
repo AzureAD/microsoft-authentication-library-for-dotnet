@@ -25,18 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
+
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Interfaces
+namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal interface IBrokerHelper
+    internal class AuthenticationRequestParameters
     {
-        IPlatformParameters PlatformParameters { get; set; }
-
-        bool CanInvokeBroker { get; }
-
-        Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload);
+        public bool RestrictToSingleUser { get; set; }
+        public HashSet<string> Scope { get; set; }
+        public ClientKey ClientKey { get; set; }
+        public string Policy { get; set; }
+        public string AuthorizationCode { get; set; }
+        public string RedirectUri { get; set; }
+        public string LoginHint { get; set; }
+        public string ExtraQueryParameters { get; set; }
+        public string Prompt { get; set; }
+        public string Assertion { get; set; }
     }
 }

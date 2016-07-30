@@ -28,7 +28,6 @@
 using System;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-
 using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
 using Windows.Security.Cryptography.DataProtection;
@@ -63,7 +62,7 @@ namespace Microsoft.Identity.Client
             DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
             IBuffer messageBuffer = CryptographicBuffer.ConvertStringToBinary(message, BinaryStringEncoding.Utf8);
             IBuffer protectedBuffer = RunAsyncTaskAndWait(dataProtectionProvider.ProtectAsync(messageBuffer).AsTask());
-            return Convert.ToBase64String(protectedBuffer.ToArray(0, (int)protectedBuffer.Length));
+            return Convert.ToBase64String(protectedBuffer.ToArray(0, (int) protectedBuffer.Length));
         }
 
         public static string Decrypt(string encryptedMessage)
@@ -75,7 +74,8 @@ namespace Microsoft.Identity.Client
 
             DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
             IBuffer messageBuffer = Convert.FromBase64String(encryptedMessage).AsBuffer();
-            IBuffer unprotectedBuffer = RunAsyncTaskAndWait(dataProtectionProvider.UnprotectAsync(messageBuffer).AsTask());
+            IBuffer unprotectedBuffer =
+                RunAsyncTaskAndWait(dataProtectionProvider.UnprotectAsync(messageBuffer).AsTask());
             return CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, unprotectedBuffer);
         }
 
@@ -87,8 +87,9 @@ namespace Microsoft.Identity.Client
             }
 
             DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
-            IBuffer protectedBuffer = RunAsyncTaskAndWait(dataProtectionProvider.ProtectAsync(message.AsBuffer()).AsTask());
-            return protectedBuffer.ToArray(0, (int)protectedBuffer.Length);
+            IBuffer protectedBuffer =
+                RunAsyncTaskAndWait(dataProtectionProvider.ProtectAsync(message.AsBuffer()).AsTask());
+            return protectedBuffer.ToArray(0, (int) protectedBuffer.Length);
         }
 
         public static byte[] Decrypt(byte[] encryptedMessage)
@@ -99,8 +100,9 @@ namespace Microsoft.Identity.Client
             }
 
             DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
-            IBuffer buffer = RunAsyncTaskAndWait(dataProtectionProvider.UnprotectAsync(encryptedMessage.AsBuffer()).AsTask());
-            return buffer.ToArray(0, (int)buffer.Length);
+            IBuffer buffer =
+                RunAsyncTaskAndWait(dataProtectionProvider.UnprotectAsync(encryptedMessage.AsBuffer()).AsTask());
+            return buffer.ToArray(0, (int) buffer.Length);
         }
 
         private static T RunAsyncTaskAndWait<T>(Task<T> task)

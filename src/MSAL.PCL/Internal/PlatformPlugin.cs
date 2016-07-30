@@ -35,12 +35,12 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal static class PlatformPluginSwitch
     {
-        public static bool DynamicallyLinkAssembly { get; set; }
-
         static PlatformPluginSwitch()
         {
             DynamicallyLinkAssembly = true;
         }
+
+        public static bool DynamicallyLinkAssembly { get; set; }
     }
 
     internal static class PlatformPlugin
@@ -67,18 +67,19 @@ namespace Microsoft.Identity.Client.Internal
             Assembly assembly = LoadPlatformSpecificAssembly();
             const string Namespace = "Microsoft.Identity.Client.";
             InjectDependecies(
-                (IWebUIFactory)Activator.CreateInstance(assembly.GetType(Namespace + "WebUIFactory")),
-                (ITokenCachePlugin)Activator.CreateInstance(assembly.GetType(Namespace + "TokenCachePlugin")),
-                (LoggerBase)Activator.CreateInstance(assembly.GetType(Namespace + "Logger")),
-                (PlatformInformationBase)Activator.CreateInstance(assembly.GetType(Namespace + "PlatformInformation")),
-                (ICryptographyHelper)Activator.CreateInstance(assembly.GetType(Namespace + "CryptographyHelper")),
-                (IDeviceAuthHelper)Activator.CreateInstance(assembly.GetType(Namespace + "DeviceAuthHelper")),
-                (IBrokerHelper)Activator.CreateInstance(assembly.GetType(Namespace + "BrokerHelper")),
-                (IPlatformParameters)Activator.CreateInstance(assembly.GetType(Namespace + "PlatformParameters"))
-            );
+                (IWebUIFactory) Activator.CreateInstance(assembly.GetType(Namespace + "WebUIFactory")),
+                (ITokenCachePlugin) Activator.CreateInstance(assembly.GetType(Namespace + "TokenCachePlugin")),
+                (LoggerBase) Activator.CreateInstance(assembly.GetType(Namespace + "Logger")),
+                (PlatformInformationBase) Activator.CreateInstance(assembly.GetType(Namespace + "PlatformInformation")),
+                (ICryptographyHelper) Activator.CreateInstance(assembly.GetType(Namespace + "CryptographyHelper")),
+                (IDeviceAuthHelper) Activator.CreateInstance(assembly.GetType(Namespace + "DeviceAuthHelper")),
+                (IBrokerHelper) Activator.CreateInstance(assembly.GetType(Namespace + "BrokerHelper")),
+                (IPlatformParameters) Activator.CreateInstance(assembly.GetType(Namespace + "PlatformParameters"))
+                );
         }
 
-        public static void InjectDependecies(IWebUIFactory webUIFactory, ITokenCachePlugin tokenCachePlugin, LoggerBase logger, 
+        public static void InjectDependecies(IWebUIFactory webUIFactory, ITokenCachePlugin tokenCachePlugin,
+            LoggerBase logger,
             PlatformInformationBase platformInformation, ICryptographyHelper cryptographyHelper,
             IDeviceAuthHelper deviceAuthHelper, IBrokerHelper brokerHelper, IPlatformParameters platformParameters)
         {
@@ -95,9 +96,11 @@ namespace Microsoft.Identity.Client.Internal
         private static Assembly LoadPlatformSpecificAssembly()
         {
             // For security reasons, it is important to have PublicKeyToken mentioned referencing the assembly.
-            const string PlatformSpecificAssemblyNameTemplate = "Microsoft.Identity.Client.Platform, Version={0}, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
+            const string PlatformSpecificAssemblyNameTemplate =
+                "Microsoft.Identity.Client.Platform, Version={0}, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
 
-            string platformSpecificAssemblyName = string.Format(CultureInfo.InvariantCulture,PlatformSpecificAssemblyNameTemplate, MsalIdHelper.GetMsalVersion());
+            string platformSpecificAssemblyName = string.Format(CultureInfo.InvariantCulture,
+                PlatformSpecificAssemblyNameTemplate, MsalIdHelper.GetMsalVersion());
 
             try
             {
@@ -106,12 +109,16 @@ namespace Microsoft.Identity.Client.Internal
             catch (FileNotFoundException ex)
             {
                 PlatformPlugin.Logger.Error(null, ex);
-                throw new MsalException(MsalError.AssemblyNotFound, string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.AssemblyNotFoundTemplate, platformSpecificAssemblyName), ex);
+                throw new MsalException(MsalError.AssemblyNotFound,
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.AssemblyNotFoundTemplate,
+                        platformSpecificAssemblyName), ex);
             }
             catch (Exception ex) // FileLoadException is missing from PCL
             {
                 PlatformPlugin.Logger.Error(null, ex);
-                throw new MsalException(MsalError.AssemblyLoadFailed, string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.AssemblyLoadFailedTemplate, platformSpecificAssemblyName), ex);
+                throw new MsalException(MsalError.AssemblyLoadFailed,
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.AssemblyLoadFailedTemplate,
+                        platformSpecificAssemblyName), ex);
             }
         }
     }

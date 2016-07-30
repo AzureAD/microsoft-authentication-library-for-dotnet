@@ -25,48 +25,48 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using Microsoft.Identity.Client.Internal;
+using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Requests
+namespace Microsoft.Identity.Client.Internal.Requests
 {
-    class AuthorizationCodeRequest : BaseRequest
+    internal class SilentRequest : BaseRequest
     {
-        private readonly string authorizationCode;
-        private readonly Uri redirectUri;
+        public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, string userIdentifer,
+            IPlatformParameters parameters, bool forceRefresh)
+            : this(authenticationRequestParameters, (User) null, parameters, forceRefresh)
+        {
+            this.User = this.MapIdentifierToUser(userIdentifer);
+            PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
+            this.SupportADFS = false;
+        }
 
-        public AuthorizationCodeRequest(AuthenticationRequestParameters authenticationRequestParameters, string authorizationCode, Uri redirectUri)
+        public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, User user,
+            IPlatformParameters parameters, bool forceRefresh)
             : base(authenticationRequestParameters)
         {
-            if (string.IsNullOrWhiteSpace(authorizationCode))
+            if (user != null)
             {
-                throw new ArgumentNullException("authorizationCode");
+                this.User = user;
             }
 
-            this.authorizationCode = authorizationCode;
-
-            if (redirectUri == null)
-            {
-                throw new ArgumentNullException("redirectUri");
-            }
-
-            this.redirectUri = redirectUri;
-
-            this.LoadFromCache = false;
+            PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
             this.SupportADFS = false;
+            this.ForceRefresh = forceRefresh;
+        }
+
+        protected override Task<AuthenticationResultEx> SendTokenRequestAsync()
+        {
+            if (ResultEx == null)
+            {
+                PlatformPlugin.Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
+                throw new MsalSilentTokenAcquisitionException();
+            }
+
+            throw new MsalSilentTokenAcquisitionException(ResultEx.Exception);
         }
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {
-            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.AuthorizationCode;
-            requestParameters[OAuthParameter.Code] = this.authorizationCode;
-            requestParameters[OAuthParameter.RedirectUri] = this.redirectUri.OriginalString;
-        }
-
-        protected override void PostTokenRequest(AuthenticationResultEx resultEx)
-        {
-            base.PostTokenRequest(resultEx);
-            this.User = resultEx.Result.User;
         }
     }
 }

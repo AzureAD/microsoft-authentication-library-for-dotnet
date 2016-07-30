@@ -38,22 +38,11 @@ namespace Microsoft.Identity.Client.Internal
     {
         private const string AuthorizeEndpointTemplate = "https://{host}/{tenant}/oauth2/v2.0/authorize";
         private const string DeviceCodeEndpointTemplate = "https://{host}/{tenant}/oauth2/v2.0/devicecode";
-        private const string MetadataTemplate = "{\"Host\":\"{host}\", \"Authority\":\"https://{host}/{tenant}/\", \"InstanceDiscoveryEndpoint\":\"https://{host}/common/discovery/instance\", \"DeviceCodeEndpoint\":\"" + DeviceCodeEndpointTemplate + "\", \"AuthorizeEndpoint\":\"" + AuthorizeEndpointTemplate + "\", \"TokenEndpoint\":\"https://{host}/{tenant}/oauth2/v2.0/token\", \"UserRealmEndpoint\":\"https://{host}/common/UserRealm\"}";
 
-        public static AuthenticatorTemplate CreateFromHost(string host)
-        {
-            string metadata = MetadataTemplate.Replace("{host}", host);
-            var serializer = new DataContractJsonSerializer(typeof(AuthenticatorTemplate));
-            byte[] serializedObjectBytes = Encoding.UTF8.GetBytes(metadata);
-            AuthenticatorTemplate authority;
-            using (var stream = new MemoryStream(serializedObjectBytes))
-            {
-                authority = (AuthenticatorTemplate)serializer.ReadObject(stream);
-                authority.Issuer = authority.TokenEndpoint;
-            }
-
-            return authority;
-        }
+        private const string MetadataTemplate =
+            "{\"Host\":\"{host}\", \"Authority\":\"https://{host}/{tenant}/\", \"InstanceDiscoveryEndpoint\":\"https://{host}/common/discovery/instance\", \"DeviceCodeEndpoint\":\"" +
+            DeviceCodeEndpointTemplate + "\", \"AuthorizeEndpoint\":\"" + AuthorizeEndpointTemplate +
+            "\", \"TokenEndpoint\":\"https://{host}/{tenant}/oauth2/v2.0/token\", \"UserRealmEndpoint\":\"https://{host}/common/UserRealm\"}";
 
         [DataMember]
         public string Host { get; internal set; }
@@ -79,6 +68,21 @@ namespace Microsoft.Identity.Client.Internal
         [DataMember]
         public string UserRealmEndpoint { get; internal set; }
 
+        public static AuthenticatorTemplate CreateFromHost(string host)
+        {
+            string metadata = MetadataTemplate.Replace("{host}", host);
+            var serializer = new DataContractJsonSerializer(typeof (AuthenticatorTemplate));
+            byte[] serializedObjectBytes = Encoding.UTF8.GetBytes(metadata);
+            AuthenticatorTemplate authority;
+            using (var stream = new MemoryStream(serializedObjectBytes))
+            {
+                authority = (AuthenticatorTemplate) serializer.ReadObject(stream);
+                authority.Issuer = authority.TokenEndpoint;
+            }
+
+            return authority;
+        }
+
         public async Task VerifyAnotherHostByInstanceDiscoveryAsync(string host, string tenant, CallState callState)
         {
             string instanceDiscoveryEndpoint = this.InstanceDiscoveryEndpoint;
@@ -89,7 +93,10 @@ namespace Microsoft.Identity.Client.Internal
             try
             {
                 var client = new MsalHttpClient(instanceDiscoveryEndpoint, callState);
-                InstanceDiscoveryResponse discoveryResponse = await client.GetResponseAsync<InstanceDiscoveryResponse>(ClientMetricsEndpointType.InstanceDiscovery).ConfigureAwait(false);
+                InstanceDiscoveryResponse discoveryResponse =
+                    await
+                        client.GetResponseAsync<InstanceDiscoveryResponse>(ClientMetricsEndpointType.InstanceDiscovery)
+                            .ConfigureAwait(false);
 
                 if (discoveryResponse.TenantDiscoveryEndpoint == null)
                 {
@@ -99,7 +106,10 @@ namespace Microsoft.Identity.Client.Internal
             catch (MsalServiceException ex)
             {
                 PlatformPlugin.Logger.Error(callState, ex);
-                throw new MsalException((ex.ErrorCode == "invalid_instance") ? MsalError.AuthorityNotInValidList : MsalError.AuthorityValidationFailed, ex);
+                throw new MsalException(
+                    (ex.ErrorCode == "invalid_instance")
+                        ? MsalError.AuthorityNotInValidList
+                        : MsalError.AuthorityValidationFailed, ex);
             }
         }
 
