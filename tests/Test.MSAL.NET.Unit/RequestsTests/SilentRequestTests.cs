@@ -39,10 +39,23 @@ using Test.MSAL.NET.Unit.Mocks;
 namespace Test.MSAL.NET.Unit.RequestsTests
 {
     [TestClass]
-    public class AcquireTokenSilentHandlerTests
+    public class SilentRequestTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            HttpClientFactory.ReturnHttpClientForMocks = true;
+            HttpMessageHandlerFactory.ClearMockHandlers();
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
         [TestMethod]
-        [TestCategory("AcquireTokenSilentHandlerTests")]
+        [TestCategory("SilentRequestTests")]
         public void ConstructorTests()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
@@ -77,7 +90,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
 
         [TestMethod]
-        [TestCategory("AcquireTokenSilentHandlerTests")]
+        [TestCategory("SilentRequestTests")]
         public void MapToIdentifierNullInputTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
@@ -100,7 +113,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("AcquireTokenSilentHandlerTests")]
+        [TestCategory("SilentRequestTests")]
         public void MapToIdentifierNoItemFoundTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
@@ -123,7 +136,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("AcquireTokenSilentHandlerTests")]
+        [TestCategory("SilentRequestTests")]
         public void MapToIdentifierItemFoundTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
@@ -147,7 +160,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("AcquireTokenSilentHandlerTests")]
+        [TestCategory("SilentRequestTests")]
         public void MapToIdentifierMultipleMatchingEntriesTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
@@ -192,7 +205,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("AcquireTokenSilentHandlerTests")]
+        [TestCategory("SilentRequestTests")]
         public void ExpiredTokenRefreshFlowTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
@@ -226,7 +239,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
 
         [TestMethod]
-        [TestCategory("AcquireTokenSilentHandlerTests")]
+        [TestCategory("SilentRequestTests")]
         public void SilentRefreshFailedNoCacheItemFoundTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
@@ -242,13 +255,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache
             };
-
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
-            });
-
+            
             try
             {
                 SilentRequest request = new SilentRequest(parameters, (string) null,

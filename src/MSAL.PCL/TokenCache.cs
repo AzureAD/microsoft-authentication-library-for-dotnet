@@ -88,14 +88,14 @@ namespace Microsoft.Identity.Client
         /// Static user token cache shared by all instances of application which do not explicitly pass a cache instance
         /// during construction.
         /// </summary>
-        public static TokenCache DefaultSharedUserTokenCache { get; private set; }
+        public static TokenCache DefaultSharedUserTokenCache { get; internal set; }
 
         /// <summary>
         /// Static client token cache shared by all instances of ConfidentialClientApplication which do not explicitly pass a
         /// cache instance
         /// during construction.
         /// </summary>
-        public static TokenCache DefaultSharedAppTokenCache { get; private set; }
+        public static TokenCache DefaultSharedAppTokenCache { get; internal set; }
 
         /// <summary>
         /// Notification method called before any library method accesses the cache.

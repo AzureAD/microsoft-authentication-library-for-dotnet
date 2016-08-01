@@ -83,9 +83,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="RequestsTests\AcquireTokenSilentHandlerTests.cs" />
+    <Compile Include="RequestsTests\SilentRequestTests.cs" />
     <Compile Include="TokenCacheTests.cs" />
-    <Compile Include="HandlersTests\AcquireTokenInteractiveHandlerTests.cs" />
+    <Compile Include="RequestsTests\InteractiveRequestTests.cs" />
     <Compile Include="Mocks\MockHelpers.cs" />
     <Compile Include="Mocks\MockHttpMessageHandler.cs" />
     <Compile Include="Mocks\MockWebUI.cs" />

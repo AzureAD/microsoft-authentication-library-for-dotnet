@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Http
             // for mocking purposes.
             if (ReturnHttpClientForMocks)
             {
-                return new HttpClient(HttpMessageHandlerFactory.GetMessageHandler());
+                return new HttpClient(HttpMessageHandlerFactory.GetMessageHandler(true));
             }
 
             if (_client == null)
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Http
                 {
                     if (_client == null)
                     {
-                        _client = new HttpClient(HttpMessageHandlerFactory.GetMessageHandler());
+                        _client = new HttpClient(HttpMessageHandlerFactory.GetMessageHandler(false));
                     }
                 }
             }

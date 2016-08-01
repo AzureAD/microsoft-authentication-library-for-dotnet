@@ -71,12 +71,17 @@ namespace Microsoft.Identity.Client.Internal
         public static string ToQueryParameter(this IDictionary<string, string> input)
         {
             StringBuilder builder = new StringBuilder();
+
             foreach (var key in input.Keys)
             {
                 builder.AppendFormat(CultureInfo.InvariantCulture, "{0}={1}&", key, UrlEncode(input[key]));
             }
 
-            builder.Remove(builder.Length - 1, 1);
+            if (builder.Length > 0)
+            {
+                builder.Remove(builder.Length - 1, 1);
+            }
+
             return builder.ToString();
         }
 

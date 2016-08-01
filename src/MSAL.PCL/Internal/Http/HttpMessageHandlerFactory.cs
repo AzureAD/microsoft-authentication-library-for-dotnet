@@ -34,9 +34,9 @@ namespace Microsoft.Identity.Client.Internal.Http
     {
         private static readonly Queue<HttpMessageHandler> MockHttpMessageHandlerQueue = new Queue<HttpMessageHandler>();
 
-        internal static HttpMessageHandler GetMessageHandler()
+        internal static HttpMessageHandler GetMessageHandler(bool forMock)
         {
-            return !IsMocksQueueEmpty ? MockHttpMessageHandlerQueue.Dequeue() : new HttpClientHandler();
+            return forMock ? MockHttpMessageHandlerQueue.Dequeue() : new HttpClientHandler();
         }
 
         internal static void AddMockHandler(HttpMessageHandler mockHandler)
@@ -44,6 +44,12 @@ namespace Microsoft.Identity.Client.Internal.Http
             MockHttpMessageHandlerQueue.Enqueue(mockHandler);
         }
 
+        internal static void ClearMockHandlers()
+        {
+            MockHttpMessageHandlerQueue.Clear();
+        }
+
         internal static bool IsMocksQueueEmpty => MockHttpMessageHandlerQueue.Count == 0;
+        internal static int MockCount => MockHttpMessageHandlerQueue.Count;
     }
 }

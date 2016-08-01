@@ -44,6 +44,19 @@ namespace Test.MSAL.NET.Unit
     [TestClass]
     public class PublicClientApplicationTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            HttpClientFactory.ReturnHttpClientForMocks = true;
+            HttpMessageHandlerFactory.ClearMockHandlers();
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
         public void ConstructorsTest()
@@ -160,13 +173,6 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual(TestConstants.DefaultClientId, item.Scope.AsSingleString());
             }
 
-            //call AcquireTokenSilent to make sure we get same token back and no call goes over network
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
-            });
-
             task = app.AcquireTokenSilentAsync(new string[] {TestConstants.DefaultClientId});
 
             AuthenticationResult result1 = task.Result;
@@ -194,12 +200,6 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId,
                 TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy));
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.Forbidden)
-                //fail the request if it goes to http client due to any error
-            });
 
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.DefaultScope.ToArray());
             AuthenticationResult result = task.Result;

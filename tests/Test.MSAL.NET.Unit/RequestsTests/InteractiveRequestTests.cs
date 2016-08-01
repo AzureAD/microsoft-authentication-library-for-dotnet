@@ -44,10 +44,23 @@ using Test.MSAL.NET.Unit.Mocks;
 namespace Test.MSAL.NET.Unit.RequestsTests
 {
     [TestClass]
-    public class AcquireTokenInteractiveHandlerTests
+    public class InteractiveRequestTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            HttpClientFactory.ReturnHttpClientForMocks = true;
+            HttpMessageHandlerFactory.ClearMockHandlers();
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
         [TestMethod]
-        [TestCategory("AcquireTokenInteractiveHandlerTests")]
+        [TestCategory("InteractiveRequestTests")]
         public void NoCacheLookup()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
@@ -117,7 +130,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
         //TODO commented code should be uncommented as per https://github.com/AzureAD/MSAL-Prototype/issues/66
         /*        [TestMethod]
-                [TestCategory("AcquireTokenInteractiveHandlerTests")]
+                [TestCategory("InteractiveRequestTests")]
                 public void SsoRrefreshTokenInHeaderTest()
                 {
                     Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
@@ -164,7 +177,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 }*/
 
         [TestMethod]
-        [TestCategory("AcquireTokenInteractiveHandlerTests")]
+        [TestCategory("InteractiveRequestTests")]
         public void ActAsCurrentUserNoSsoHeaderForLoginHintOnlyTest()
         {
             //this test validates that no SSO header is added when developer passes only login hint and UiOption.ActAsCurrentUser
@@ -215,7 +228,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
 
         [TestMethod]
-        [TestCategory("AcquireTokenInteractiveHandlerTests")]
+        [TestCategory("InteractiveRequestTests")]
         public void RedirectUriContainsFragmentErrorTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
@@ -248,7 +261,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("AcquireTokenInteractiveHandlerTests")]
+        [TestCategory("InteractiveRequestTests")]
         public void CacheWithMultipleUsersAndRestrictToSingleUserTrueTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
@@ -286,7 +299,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("AcquireTokenInteractiveHandlerTests")]
+        [TestCategory("InteractiveRequestTests")]
         public void VerifyAuthorizationResultTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
@@ -349,7 +362,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("AcquireTokenInteractiveHandlerTests")]
+        [TestCategory("InteractiveRequestTests")]
         public void NullLoginHintForActAsCurrentUserTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
@@ -381,7 +394,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("AcquireTokenInteractiveHandlerTests")]
+        [TestCategory("InteractiveRequestTests")]
         public void NullUserForActAsCurrentUserTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
@@ -413,7 +426,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("AcquireTokenInteractiveHandlerTests")]
+        [TestCategory("InteractiveRequestTests")]
         public void DuplicateQueryParameterErrorTest()
         {
             Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,

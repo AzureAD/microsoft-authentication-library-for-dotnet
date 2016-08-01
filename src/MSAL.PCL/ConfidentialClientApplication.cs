@@ -203,6 +203,7 @@ namespace Microsoft.Identity.Client
             Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
             var requestParameters = this.CreateRequestParameters(authenticator, scope, policy,
                 this.UserTokenCache);
+            requestParameters.RedirectUri = new Uri(redirectUri);
             requestParameters.ClientKey = new ClientKey(this.ClientId);
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
