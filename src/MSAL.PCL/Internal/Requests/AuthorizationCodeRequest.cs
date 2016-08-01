@@ -32,30 +32,31 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class AuthorizationCodeRequest : BaseRequest
     {
-        public AuthorizationCodeRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            Authenticator authenticator, TokenCache tokenCache)
-            : base(authenticationRequestParameters, authenticator, tokenCache)
+        public AuthorizationCodeRequest(AuthenticationRequestParameters authenticationRequestParameters)
+            : base(authenticationRequestParameters)
         {
             if (string.IsNullOrWhiteSpace(authenticationRequestParameters.AuthorizationCode))
             {
                 throw new ArgumentNullException("authorizationCode");
             }
 
-            PlatformPlugin.PlatformInformation.ValidateRedirectUri(authenticationRequestParameters.RedirectUri, this.CallState);
+            PlatformPlugin.PlatformInformation.ValidateRedirectUri(authenticationRequestParameters.RedirectUri,
+                this.CallState);
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))
             {
                 throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
-            
+
             this.LoadFromCache = false;
             this.SupportADFS = false;
         }
 
-        protected override void AddAditionalRequestParameters()
+        protected override void SetAdditionalRequestParameters(OAuth2Client client)
         {
-            requestParameters[OAuth2Parameter.GrantType] = OAuth2GrantType.AuthorizationCode;
-            requestParameters[OAuth2Parameter.Code] = this.authorizationCode;
-            requestParameters[OAuth2Parameter.RedirectUri] = this.redirectUri.OriginalString;
+            client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.AuthorizationCode);
+            client.AddBodyParameter(OAuth2Parameter.Code, AuthenticationRequestParameters.AuthorizationCode);
+            client.AddBodyParameter(OAuth2Parameter.RedirectUri,
+                AuthenticationRequestParameters.RedirectUri.OriginalString);
         }
 
         protected override void PostTokenRequest(AuthenticationResultEx resultEx)

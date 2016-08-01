@@ -25,11 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal.Http;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -92,12 +96,9 @@ namespace Microsoft.Identity.Client.Internal
 
             try
             {
-                var client = new MsalHttpClient(instanceDiscoveryEndpoint, callState);
-                InstanceDiscoveryResponse discoveryResponse =
-                    await
-                        client.GetResponseAsync<InstanceDiscoveryResponse>(ClientMetricsEndpointType.InstanceDiscovery)
-                            .ConfigureAwait(false);
-
+                OAuth2Client client = new OAuth2Client();
+                InstanceDiscoveryResponse discoveryResponse = await client.DoAuthorityValidation(new Uri(instanceDiscoveryEndpoint), callState);
+                
                 if (discoveryResponse.TenantDiscoveryEndpoint == null)
                 {
                     throw new MsalException(MsalError.AuthorityNotInValidList);

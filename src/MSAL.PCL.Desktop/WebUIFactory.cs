@@ -42,6 +42,11 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
 
+            if (parameters.UseHiddenBrowser)
+            {
+                return new SilentWebUI { OwnerWindow = this.parameters.OwnerWindow };
+            }
+
             return new InteractiveWebUI {OwnerWindow = this.parameters.OwnerWindow};
         }
     }

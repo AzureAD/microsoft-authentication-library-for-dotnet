@@ -29,13 +29,14 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Native applications (desktop/phone/iOS/Android).
     /// </summary>
-    public sealed class PublicClientApplication : AbstractClientApplication
+    public sealed class PublicClientApplication : ClientApplicationBase
     {
         private const string DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
         /*
@@ -71,7 +72,7 @@ namespace Microsoft.Identity.Client
             Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
             return
                 await
-                    this.AcquireTokenCommonAsync(authenticator, scope, null, new Uri(this.RedirectUri), (string) null,
+                    this.AcquireTokenCommonAsync(authenticator, scope, null, (string) null,
                         UiOptions.SelectAccount, null, null).ConfigureAwait(false);
         }
 
@@ -85,7 +86,7 @@ namespace Microsoft.Identity.Client
             Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
             return
                 await
-                    this.AcquireTokenCommonAsync(authenticator, scope, null, new Uri(this.RedirectUri), loginHint,
+                    this.AcquireTokenCommonAsync(authenticator, scope, null, loginHint,
                         UiOptions.SelectAccount, null, null).ConfigureAwait(false);
         }
 
@@ -102,7 +103,7 @@ namespace Microsoft.Identity.Client
             Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
             return
                 await
-                    this.AcquireTokenCommonAsync(authenticator, scope, null, new Uri(this.RedirectUri), loginHint,
+                    this.AcquireTokenCommonAsync(authenticator, scope, null, loginHint,
                         options, extraQueryParameters, null).ConfigureAwait(false);
         }
 
@@ -139,7 +140,7 @@ namespace Microsoft.Identity.Client
             Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
             return
                 await
-                    this.AcquireTokenCommonAsync(authenticator, scope, additionalScope, new Uri(this.RedirectUri),
+                    this.AcquireTokenCommonAsync(authenticator, scope, additionalScope,
                         loginHint, options, extraQueryParameters, policy).ConfigureAwait(false);
         }
 
@@ -203,13 +204,16 @@ namespace Microsoft.Identity.Client
         private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(Authenticator authenticator,
             string[] scope, UserCredential userCredential, string policy)
         {
-            var handler = new SilentWebUiRequest(
-                this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), userCredential);
-            return await handler.RunAsync().ConfigureAwait(false);
+/*            var requestParams = this.CreateRequestParameters(authenticator, scope, policy, this.UserTokenCache);
+            var handler = new SilentWebUiRequest(requestParams, userCredential);
+            return await handler.RunAsync().ConfigureAwait(false);*/
+            await Task.Run(() => {
+                                     throw new NotImplementedException(); });
+            return null;
         }
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope,
-            string[] additionalScope, Uri redirectUri, string loginHint, UiOptions uiOptions,
+            string[] additionalScope, string loginHint, UiOptions uiOptions,
             string extraQueryParameters, string policy)
         {
             if (this.PlatformParameters == null)
@@ -217,10 +221,12 @@ namespace Microsoft.Identity.Client
                 this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
+            var requestParams = this.CreateRequestParameters(authenticator, scope, policy, this.UserTokenCache);
+            requestParams.ExtraQueryParameters = extraQueryParameters;
+
             var handler =
-                new InteractiveRequest(
-                    this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), additionalScope, redirectUri,
-                    this.PlatformParameters, loginHint, uiOptions, extraQueryParameters,
+                new InteractiveRequest(requestParams, additionalScope, 
+                    this.PlatformParameters, loginHint, uiOptions,
                     this.CreateWebAuthenticationDialog(this.PlatformParameters));
             return await handler.RunAsync().ConfigureAwait(false);
         }
@@ -234,19 +240,21 @@ namespace Microsoft.Identity.Client
                 this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
+            var requestParams = this.CreateRequestParameters(authenticator, scope, policy, this.UserTokenCache);
+            requestParams.ExtraQueryParameters = extraQueryParameters;
+
             var handler =
-                new InteractiveRequest(
-                    this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), additionalScope, redirectUri,
-                    this.PlatformParameters, user, uiOptions, extraQueryParameters,
+                new InteractiveRequest(requestParams, additionalScope,
+                    this.PlatformParameters, user, uiOptions,
                     this.CreateWebAuthenticationDialog(this.PlatformParameters));
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal override AuthenticationRequestParameters GetHandlerData(Authenticator authenticator, string[] scope,
+        internal override AuthenticationRequestParameters CreateRequestParameters(Authenticator authenticator, string[] scope,
             string policy,
             TokenCache cache)
         {
-            AuthenticationRequestParameters parameters = base.GetHandlerData(authenticator, scope, policy, cache);
+            AuthenticationRequestParameters parameters = base.CreateRequestParameters(authenticator, scope, policy, cache);
             parameters.ClientKey = new ClientKey(this.ClientId);
 
             return parameters;

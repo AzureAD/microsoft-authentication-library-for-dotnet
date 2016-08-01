@@ -28,6 +28,7 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -54,12 +55,6 @@ namespace Microsoft.Identity.Client.Internal
         public virtual bool IsDomainJoined()
         {
             return false;
-        }
-
-        public virtual void AddUiOptionsQueryParameter(UiOptions options,
-            DictionaryRequestParameters authorizationRequestParameters)
-        {
-            authorizationRequestParameters[OAuth2Parameter.Prompt] = PromptValue.Login;
         }
 
         public virtual Uri ValidateRedirectUri(Uri redirectUri, CallState callState)

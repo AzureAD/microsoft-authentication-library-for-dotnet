@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
         /// exception is specified. It may especially contain the actual error message returned by the service.
         /// </param>
         internal MsalServiceException(string errorCode, Exception innerException)
-            : this(errorCode, GetErrorMessage(errorCode), null, innerException)
+            : this(errorCode, GetErrorMessage(errorCode), innerException)
         {
         }
 
@@ -80,45 +80,15 @@ namespace Microsoft.Identity.Client
         /// can rely on for exception handling.
         /// </param>
         /// <param name="message">The error message that explains the reason for the exception.</param>
-        /// <param name="serviceErrorCodes">The specific error codes that may be returned by the service.</param>
         /// <param name="innerException">
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified. It may especially contain the actual error message returned by the service.
         /// </param>
-        internal MsalServiceException(string errorCode, string message, string[] serviceErrorCodes,
+        internal MsalServiceException(string errorCode, string message,
             Exception innerException)
             : base(
-                errorCode, message,
-                (innerException is HttpRequestWrapperException) ? innerException.InnerException : innerException)
+                errorCode, message, innerException)
         {
-            var httpRequestWrapperException = (innerException as HttpRequestWrapperException);
-            if (httpRequestWrapperException != null)
-            {
-                IHttpWebResponse response = httpRequestWrapperException.WebResponse;
-                if (response != null)
-                {
-                    this.StatusCode = (int) response.StatusCode;
-                }
-                else if (innerException.InnerException is TaskCanceledException)
-                {
-                    var taskCanceledException = ((TaskCanceledException) (innerException.InnerException));
-                    if (!taskCanceledException.CancellationToken.IsCancellationRequested)
-                    {
-                        this.StatusCode = (int) HttpStatusCode.RequestTimeout;
-                    }
-                    else
-                    {
-                        // There is no HttpStatusCode for user cancelation
-                        this.StatusCode = 0;
-                    }
-                }
-                else
-                {
-                    this.StatusCode = 0;
-                }
-            }
-
-            this.ServiceErrorCodes = serviceErrorCodes;
         }
 
         /// <summary>

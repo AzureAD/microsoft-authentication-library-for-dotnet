@@ -27,10 +27,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

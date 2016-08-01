@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -73,8 +74,9 @@ namespace Microsoft.Identity.Client.Internal
         public string ClientId { get; }
         public bool HasCredential { get; private set; }
 
-        public void AddToParameters(IDictionary<string, string> parameters)
+        public IDictionary<string, string> ToParameters()
         {
+            IDictionary<string, string> parameters = new Dictionary<string, string>();
             if (this.ClientId != null)
             {
                 parameters[OAuth2Parameter.ClientId] = this.ClientId;
@@ -116,6 +118,8 @@ namespace Microsoft.Identity.Client.Internal
                 parameters[OAuth2Parameter.ClientAssertionType] = this.Assertion.AssertionType;
                 parameters[OAuth2Parameter.ClientAssertion] = this.Assertion.Assertion;
             }
+
+            return parameters;
         }
     }
 }

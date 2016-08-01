@@ -29,84 +29,115 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Net.Http.Headers;
+using System.Net;
+using System.Net.Http;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.Http;
 
 namespace Microsoft.Identity.Client.Internal.OAuth2
 {
     internal class OAuth2Client
     {
-        private readonly Dictionary<string, string> BodyParameters = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _bodyParameters = new Dictionary<string, string>();
 
-        public readonly Dictionary<string, string> Headers =
+        private readonly Dictionary<string, string> _headers =
             new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters());
 
-        public readonly Dictionary<string, string> QueryParameters = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
 
         public void AddQueryParameter(string key, string value)
         {
-            QueryParameters[key] = value;
+            _queryParameters[key] = value;
         }
 
         public void AddHeader(string key, string value)
         {
-            Headers[key] = value;
+            _headers[key] = value;
         }
 
         public void AddBodyParameter(string key, string value)
         {
-            BodyParameters[EncodingHelper.UrlEncode(key)] = EncodingHelper.UrlEncode(value);
+            _bodyParameters[EncodingHelper.UrlEncode(key)] = EncodingHelper.UrlEncode(value);
         }
 
-        public InstanceDiscoveryResponse DoAuthorityValidation(Uri endPoint, CallState callstate)
+        public async Task<InstanceDiscoveryResponse> DoAuthorityValidation(Uri endPoint, CallState callState)
         {
-            return null;
-        }
-
-        public TokenResponse GetToken(Uri endPoint, CallState callState)
-        {
-            UriBuilder endpointUri = new UriBuilder(endPoint);
-            foreach (var VARIABLE in QueryParameters.ToQueryParameter())
+            bool addCorrelationId = (callState != null && callState.CorrelationId != Guid.Empty);
+            if (addCorrelationId)
             {
-                
+                _headers.Add(OAuth2Header.CorrelationId, callState.CorrelationId.ToString());
+                _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
             }
 
+            MsalHttpResponse response =
+                await
+                    MsalHttpRequest.SendGet(CreateFullEndpointUri(endPoint), this._headers, callState);
+            return CreateResponse<InstanceDiscoveryResponse>(response, callState, addCorrelationId);
+        }
+
+        public async Task<TokenResponse> GetToken(Uri endPoint, CallState callState)
+        {
+            bool addCorrelationId = (callState != null && callState.CorrelationId != Guid.Empty);
+            if (addCorrelationId)
+            {
+                _headers.Add(OAuth2Header.CorrelationId, callState.CorrelationId.ToString());
+                _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
+            }
+
+            MsalHttpResponse response =
+                await
+                    MsalHttpRequest.SendPost(CreateFullEndpointUri(endPoint), this._headers, this._bodyParameters,
+                        callState);
+            return CreateResponse<TokenResponse>(response, callState, addCorrelationId);
+        }
+
+
+        private T CreateResponse<T>(MsalHttpResponse response, CallState callState, bool addCorrelationId)
+        {
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                CreateErrorResponse(response, callState);
+            }
+
+            if (addCorrelationId)
+            {
+                VerifyCorrelationIdHeaderInReponse(response.Headers, callState);
+            }
+
+            return DeserializeResponse<T>(response.Body);
+        }
+
+        private void CreateErrorResponse(MsalHttpResponse response, CallState callState)
+        {
+            MsalServiceException serviceEx;
             try
             {
-                bool addCorrelationId = (callState != null && callState.CorrelationId != Guid.Empty);
-                if (addCorrelationId)
-                {
-                    Headers.Add(OAuth2Header.CorrelationId, callState.CorrelationId.ToString());
-                    Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
-                }
-
-                MsalHttpResponse response = MsalHttpRequest.SendPost(endpointUri., this.Headers, this.BodyParameters, callState);
-
-                if (addCorrelationId)
-                {
-                    VerifyCorrelationIdHeaderInReponse(response.Headers);
-                }
+                TokenResponse tokenResponse = DeserializeResponse<TokenResponse>(response.Body);
+                serviceEx = new MsalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription);
             }
-            catch (HttpRequestWrapperException ex)
+            catch (SerializationException)
             {
-                PlatformPlugin.Logger.Error(callState, ex);
-                MsalServiceException serviceEx;
-                if (ex.WebResponse != null)
-                {
-                    TokenResponse tokenResponse = TokenResponse.CreateFromErrorResponse(ex.WebResponse);
-                    string[] errorCodes = tokenResponse.ErrorCodes ?? new[] {ex.WebResponse.StatusCode.ToString()};
-                    serviceEx = new MsalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
-                        errorCodes, ex);
-                }
-                else
-                {
-                    serviceEx = new MsalServiceException(MsalError.Unknown, ex);
-                }
-
-                PlatformPlugin.Logger.Error(CallState, serviceEx);
-                throw serviceEx;
+                serviceEx = new MsalServiceException(MsalError.Unknown, response.Body);
             }
+
+            PlatformPlugin.Logger.Error(callState, serviceEx);
+            throw serviceEx;
+        }
+
+        internal Uri CreateFullEndpointUri(Uri endPoint)
+        {
+            UriBuilder endpointUri = new UriBuilder(endPoint);
+            string extraQp = _queryParameters.ToQueryParameter();
+            if (endpointUri.Query.Length > 0)
+            {
+                extraQp = "&" + extraQp;
+            }
+
+            endpointUri.Query += extraQp;
+
+            return endpointUri.Uri;
         }
 
         private static string CheckForExtraQueryParameter(string url)
@@ -121,22 +152,32 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             return url;
         }
 
-        private static T DeserializeResponse<T>(Stream responseStream)
+        private T DeserializeResponse<T>(string response)
         {
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (T));
 
-            if (responseStream == null)
+            if (response == null)
             {
                 return default(T);
             }
 
-            using (Stream stream = responseStream)
+            using (Stream stream = GenerateStreamFromString(response))
             {
                 return ((T) serializer.ReadObject(stream));
             }
         }
 
-        private void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers)
+        public Stream GenerateStreamFromString(string s)
+        {
+            MemoryStream stream = new MemoryStream();
+            StreamWriter writer = new StreamWriter(stream);
+            writer.Write(s);
+            writer.Flush();
+            stream.Position = 0;
+            return stream;
+        }
+
+        private void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers, CallState callState)
         {
             foreach (string reponseHeaderKey in headers.Keys)
             {
@@ -147,22 +188,24 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                     Guid correlationIdInResponse;
                     if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
                     {
-                        PlatformPlugin.Logger.Warning(CallState,
+                        PlatformPlugin.Logger.Warning(callState,
                             string.Format(CultureInfo.InvariantCulture,
                                 "Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
                     }
-                    else if (correlationIdInResponse != this.CallState.CorrelationId)
+                    else if (correlationIdInResponse != callState.CorrelationId)
                     {
                         PlatformPlugin.Logger.Warning(
-                            this.CallState,
+                            callState,
                             string.Format(CultureInfo.InvariantCulture,
                                 "Returned correlation id '{0}' does not match the sent correlation id '{1}'",
-                                correlationIdHeader, CallState.CorrelationId));
+                                correlationIdHeader, callState.CorrelationId));
                     }
 
                     break;
                 }
             }
         }
+
+
     }
 }

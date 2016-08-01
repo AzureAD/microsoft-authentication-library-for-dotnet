@@ -27,27 +27,26 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class OnBehalfOfRequest : BaseRequest
     {
         private readonly string assertionHash;
-        private readonly UserAssertion userAssertion;
 
-        public OnBehalfOfRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            Authenticator authenticator, TokenCache tokenCache,
-            UserAssertion userAssertion)
-            : base(authenticationRequestParameters, authenticator, tokenCache)
+        public OnBehalfOfRequest(AuthenticationRequestParameters authenticationRequestParameters)
+            : base(authenticationRequestParameters)
         {
-            if (userAssertion == null)
+            if (authenticationRequestParameters.UserAssertion == null)
             {
                 throw new ArgumentNullException("userAssertion");
             }
 
-            this.userAssertion = userAssertion;
-            this.User = new User {DisplayableId = userAssertion.UserName};
-            this.assertionHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(userAssertion.Assertion);
+            this.User = new User {DisplayableId = authenticationRequestParameters.UserAssertion.UserName};
+            this.assertionHash =
+                PlatformPlugin.CryptographyHelper.CreateSha256Hash(
+                    authenticationRequestParameters.UserAssertion.Assertion);
             this.SupportADFS = false;
         }
 
@@ -55,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             // cache lookup returned a token. no username provided in the assertion. 
             // cannot deterministicly identify the user. fallback to compare hash. 
-            if (ResultEx != null && string.IsNullOrEmpty(userAssertion.UserName))
+            if (ResultEx != null && string.IsNullOrEmpty(this.User.DisplayableId))
             {
                 //if cache result does not contain hash then return null
                 if (!string.IsNullOrEmpty(ResultEx.UserAssertionHash))
@@ -85,11 +84,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return resultEx;
         }
 
-        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
+        protected override void SetAdditionalRequestParameters(OAuth2Client client)
         {
-            requestParameters[OAuth2Parameter.GrantType] = OAuth2GrantType.JwtBearer;
-            requestParameters[OAuth2Parameter.Assertion] = this.userAssertion.Assertion;
-            requestParameters[OAuth2Parameter.RequestedTokenUse] = OAuth2RequestedTokenUse.OnBehalfOf;
+            client.AddBodyParameter(OAuth2Parameter.GrantType,
+                AuthenticationRequestParameters.UserAssertion.AssertionType);
+            client.AddBodyParameter(OAuth2Parameter.Assertion, AuthenticationRequestParameters.UserAssertion.Assertion);
+            client.AddBodyParameter(OAuth2Parameter.RequestedTokenUse, OAuth2RequestedTokenUse.OnBehalfOf);
 
             //TODO To request id_token in response
             //requestParameters[OAuth2Parameter.Scope] = OAuth2Value.ScopeOpenId;

@@ -91,54 +91,6 @@ namespace Microsoft.Identity.Client.Internal
         [DataMember(Name = TokenResponseClaim.CorrelationId, IsRequired = false)]
         public string CorrelationId { get; set; }
 
-        public static TokenResponse CreateFromErrorResponse(IHttpWebResponse webResponse)
-        {
-            if (webResponse == null)
-            {
-                return new TokenResponse
-                {
-                    Error = MsalError.ServiceReturnedError,
-                    ErrorDescription = MsalErrorMessage.ServiceReturnedError
-                };
-            }
-            StringBuilder responseStreamString = new StringBuilder();
-            TokenResponse tokenResponse = null;
-            using (Stream responseStream = webResponse.ResponseStream)
-            {
-                if (responseStream == null)
-                {
-                    return new TokenResponse
-                    {
-                        Error = MsalError.Unknown,
-                        ErrorDescription = MsalErrorMessage.Unknown
-                    };
-                }
-
-                try
-                {
-                    responseStreamString.Append(ReadStreamContent(responseStream));
-                    using (MemoryStream ms = new MemoryStream(responseStreamString.ToByteArray()))
-                    {
-                        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (TokenResponse));
-                        tokenResponse = ((TokenResponse) serializer.ReadObject(ms));
-                    }
-                }
-                catch (SerializationException ex)
-                {
-                    PlatformPlugin.Logger.Warning(null, ex.Message);
-                    tokenResponse = new TokenResponse
-                    {
-                        Error = (webResponse.StatusCode == HttpStatusCode.ServiceUnavailable)
-                            ? MsalError.ServiceUnavailable
-                            : MsalError.Unknown,
-                        ErrorDescription = responseStreamString.ToString()
-                    };
-                }
-            }
-
-            return tokenResponse;
-        }
-
         public AuthenticationResultEx GetResultEx()
         {
             AuthenticationResultEx resultEx = null;
@@ -208,14 +160,6 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             return resultEx;
-        }
-
-        private static string ReadStreamContent(Stream stream)
-        {
-            using (StreamReader sr = new StreamReader(stream))
-            {
-                return sr.ReadToEnd();
-            }
         }
     }
 }

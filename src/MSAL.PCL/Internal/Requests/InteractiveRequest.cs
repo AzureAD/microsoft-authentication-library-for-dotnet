@@ -28,8 +28,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -39,30 +41,29 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly IPlatformParameters _authorizationParameters;
         private readonly UiOptions? _uiOptions;
         private readonly IWebUI _webUi;
-        internal AuthorizationResult authorizationResult;
+        private AuthorizationResult _authorizationResult;
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            string[] additionalScope, Uri redirectUri, IPlatformParameters parameters, User user,
-            UiOptions uiOptions, string extraQueryParameters, IWebUI webUI)
+            string[] additionalScope, IPlatformParameters parameters, User user,
+            UiOptions uiOptions, IWebUI webUI)
             : this(
-                authenticationRequestParameters, additionalScope, redirectUri, parameters, user?.DisplayableId,
-                uiOptions, extraQueryParameters, webUI)
+                authenticationRequestParameters, additionalScope, parameters, user?.DisplayableId,
+                uiOptions, webUI)
         {
             this.User = user;
         }
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            string[] additionalScope, Uri redirectUri, IPlatformParameters parameters, string loginHint,
-            UiOptions? uiOptions, string extraQueryParameters, IWebUI webUI)
+            string[] additionalScope, IPlatformParameters parameters, string loginHint,
+            UiOptions? uiOptions, IWebUI webUI)
             : base(authenticationRequestParameters)
         {
-            PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
-            if (!string.IsNullOrWhiteSpace(redirectUri.Fragment))
+            PlatformPlugin.PlatformInformation.ValidateRedirectUri(authenticationRequestParameters.RedirectUri,
+                this.CallState);
+            if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))
             {
                 throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
-
-            authenticationRequestParameters.RedirectUri = redirectUri.AbsoluteUri;
 
             _additionalScope = new HashSet<string>();
             if (!MsalStringHelper.IsNullOrEmpty(additionalScope))
@@ -76,12 +77,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
 
             authenticationRequestParameters.LoginHint = loginHint;
-            if (!string.IsNullOrWhiteSpace(extraQueryParameters) && extraQueryParameters[0] == '&')
+            if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ExtraQueryParameters) && authenticationRequestParameters.ExtraQueryParameters[0] == '&')
             {
-                extraQueryParameters = extraQueryParameters.Substring(1);
+                authenticationRequestParameters.ExtraQueryParameters = authenticationRequestParameters.ExtraQueryParameters.Substring(1);
             }
-
-            this._extraQueryParameters = extraQueryParameters;
+            
             this._webUi = webUI;
             this._uiOptions = uiOptions;
             this.LoadFromCache = false; //no cache lookup and refresh for interactive.
@@ -139,9 +139,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async Task AcquireAuthorizationAsync(IDictionary<string, string> headers)
         {
             Uri authorizationUri = this.CreateAuthorizationUri();
-            this.authorizationResult =
+            this._authorizationResult =
                 await
-                    this._webUi.AcquireAuthorizationAsync(authorizationUri, this._redirectUri, headers, this.CallState)
+                    this._webUi.AcquireAuthorizationAsync(authorizationUri, AuthenticationRequestParameters.RedirectUri,
+                        headers, this.CallState)
                         .ConfigureAwait(false);
         }
 
@@ -152,43 +153,70 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return this.CreateAuthorizationUri();
         }
 
-        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
+        protected override void SetAdditionalRequestParameters(OAuth2Client client)
         {
-            requestParameters[OAuth2Parameter.GrantType] = OAuth2GrantType.AuthorizationCode;
-            requestParameters[OAuth2Parameter.Code] = this.authorizationResult.Code;
-            requestParameters[OAuth2Parameter.RedirectUri] = this._redirectUriRequestParameter;
+            client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.AuthorizationCode);
+            client.AddBodyParameter(OAuth2Parameter.Code, this._authorizationResult.Code);
+            client.AddBodyParameter(OAuth2Parameter.RedirectUri, AuthenticationRequestParameters.RedirectUri.AbsoluteUri);
         }
 
         protected override void PostTokenRequest(AuthenticationResultEx resultEx)
         {
             base.PostTokenRequest(resultEx);
-            //MSAL does not compare the input loginHint to the returned identifier anymore.
         }
 
         private Uri CreateAuthorizationUri()
         {
-            IRequestParameters requestParameters = this.CreateAuthorizationRequest(_loginHint);
-            return new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + requestParameters);
-        }
+            IDictionary<string, string> requestParameters = this.CreateAuthorizationRequestParameters();
 
-        private DictionaryRequestParameters CreateAuthorizationRequest(string loginHint)
-        {
-            HashSet<string> unionScope =
-                this.GetDecoratedScope(new HashSet<string>(this.Scope.Union(this._additionalScope)));
-
-            var authorizationRequestParameters = new DictionaryRequestParameters(unionScope, this.ClientKey);
-            authorizationRequestParameters[OAuth2Parameter.ResponseType] = OAuth2ResponseType.Code;
-
-            if (!string.IsNullOrWhiteSpace(this.Policy))
+            if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.ExtraQueryParameters))
             {
-                authorizationRequestParameters[OAuth2Parameter.Policy] = this.Policy;
+                // Checks for _extraQueryParameters duplicating standard parameters
+                Dictionary<string, string> kvps =
+                    EncodingHelper.ParseKeyValueList(AuthenticationRequestParameters.ExtraQueryParameters, '&', false,
+                        this.CallState);
+                foreach (KeyValuePair<string, string> kvp in kvps)
+                {
+                    if (requestParameters.ContainsKey(kvp.Key))
+                    {
+                        throw new MsalException(MsalError.DuplicateQueryParameter,
+                            string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.DuplicateQueryParameterTemplate,
+                                kvp.Key));
+                    }
+                }
             }
 
-            authorizationRequestParameters[OAuth2Parameter.RedirectUri] = this._redirectUriRequestParameter;
-
-            if (!string.IsNullOrWhiteSpace(loginHint))
+            string qp = requestParameters.ToQueryParameter();
+            if (!string.IsNullOrEmpty(AuthenticationRequestParameters.ExtraQueryParameters))
             {
-                authorizationRequestParameters[OAuth2Parameter.LoginHint] = loginHint;
+                qp += "&" + AuthenticationRequestParameters.ExtraQueryParameters;
+            }
+
+            return new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + qp);
+        }
+
+        private Dictionary<string, string> CreateAuthorizationRequestParameters()
+        {
+            HashSet<string> unionScope =
+                this.GetDecoratedScope(
+                    new HashSet<string>(AuthenticationRequestParameters.Scope.Union(this._additionalScope)));
+
+            Dictionary<string, string> authorizationRequestParameters =
+                new Dictionary<string, string>(AuthenticationRequestParameters.ClientKey.ToParameters());
+            authorizationRequestParameters[OAuth2Parameter.Scope] = unionScope.AsSingleString();
+            authorizationRequestParameters[OAuth2Parameter.ResponseType] = OAuth2ResponseType.Code;
+
+            if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.Policy))
+            {
+                authorizationRequestParameters[OAuth2Parameter.Policy] = AuthenticationRequestParameters.Policy;
+            }
+
+            authorizationRequestParameters[OAuth2Parameter.RedirectUri] =
+                AuthenticationRequestParameters.RedirectUri.AbsoluteUri;
+
+            if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.LoginHint))
+            {
+                authorizationRequestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.LoginHint;
             }
 
             if (this.CallState != null && this.CallState.CorrelationId != Guid.Empty)
@@ -203,42 +231,24 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             AddUiOptionToRequestParameters(authorizationRequestParameters);
-
-            if (!string.IsNullOrWhiteSpace(_extraQueryParameters))
-            {
-                // Checks for _extraQueryParameters duplicating standard parameters
-                Dictionary<string, string> kvps = EncodingHelper.ParseKeyValueList(_extraQueryParameters, '&', false,
-                    this.CallState);
-                foreach (KeyValuePair<string, string> kvp in kvps)
-                {
-                    if (authorizationRequestParameters.ContainsKey(kvp.Key))
-                    {
-                        throw new MsalException(MsalError.DuplicateQueryParameter,
-                            string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.DuplicateQueryParameterTemplate,
-                                kvp.Key));
-                    }
-                }
-
-                authorizationRequestParameters.ExtraQueryParameter = _extraQueryParameters;
-            }
-
             return authorizationRequestParameters;
         }
 
         private void VerifyAuthorizationResult()
         {
-            if (this.authorizationResult.Error == OAuth2Error.LoginRequired)
+            if (this._authorizationResult.Error == OAuth2Error.LoginRequired)
             {
                 throw new MsalException(MsalError.UserInteractionRequired);
             }
 
-            if (this.authorizationResult.Status != AuthorizationStatus.Success)
+            if (this._authorizationResult.Status != AuthorizationStatus.Success)
             {
-                throw new MsalServiceException(this.authorizationResult.Error, this.authorizationResult.ErrorDescription);
+                throw new MsalServiceException(this._authorizationResult.Error,
+                    this._authorizationResult.ErrorDescription);
             }
         }
 
-        private void AddUiOptionToRequestParameters(DictionaryRequestParameters authorizationRequestParameters)
+        private void AddUiOptionToRequestParameters(Dictionary<string, string> authorizationRequestParameters)
         {
             switch (this._uiOptions)
             {

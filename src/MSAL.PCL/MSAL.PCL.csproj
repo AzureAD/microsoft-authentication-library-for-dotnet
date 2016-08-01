@@ -68,14 +68,13 @@
     <Compile Include="Internal\Http\MsalHttpRequest.cs" />
     <Compile Include="Internal\Http\MsalHttpResponse.cs" />
     <Compile Include="Internal\MsalError.cs" />
-    <Compile Include="AbstractClientApplication.cs" />
+    <Compile Include="ClientApplicationBase.cs" />
     <Compile Include="Internal\OAuth2\OAuth2Client.cs" />
     <Compile Include="Internal\RetryableRequestException.cs" />
     <Compile Include="Internal\Requests\AuthorizationCodeRequest.cs" />
     <Compile Include="Internal\Requests\ClientCredentialRequest.cs" />
     <Compile Include="Internal\Requests\BaseRequest.cs" />
     <Compile Include="Internal\Requests\InteractiveRequest.cs" />
-    <Compile Include="Internal\Requests\SilentWebUiRequest.cs" />
     <Compile Include="Internal\Requests\OnBehalfOfRequest.cs" />
     <Compile Include="Internal\Requests\SilentRequest.cs" />
     <Compile Include="IClientAssertionCertificate.cs" />
@@ -98,18 +97,15 @@
     <Compile Include="Internal\ClientKey.cs" />
     <Compile Include="ConfidentialClientApplication.cs" />
     <Compile Include="Internal\Constants.cs" />
-    <Compile Include="Internal\Http\HttpRequestWrapperException.cs" />
     <Compile Include="Internal\Interfaces\IBrokerHelper.cs" />
     <Compile Include="Internal\Interfaces\IDeviceAuthHelper.cs" />
     <Compile Include="IPlatformParameters.cs" />
     <Compile Include="Internal\Interfaces\ICryptographyHelper.cs" />
     <Compile Include="Internal\IdToken.cs" />
-    <Compile Include="Internal\Interfaces\IHttpWebResponse.cs" />
     <Compile Include="Internal\Interfaces\ITokenCachePlugin.cs" />
     <Compile Include="Internal\JsonHelper.cs" />
     <Compile Include="Internal\JsonWebToken.cs" />
     <Compile Include="Internal\LoggerBase.cs" />
-    <Compile Include="Internal\MexParser.cs" />
     <Compile Include="Internal\AuthenticationResultEx.cs" />
     <Compile Include="PublicClientApplication.cs" />
     <Compile Include="Internal\TokenResponse.cs" />
@@ -128,9 +124,6 @@
     <Compile Include="UserAssertion.cs" />
     <Compile Include="UserCredential.cs" />
     <Compile Include="User.cs" />
-    <Compile Include="Internal\UserRealmDiscoveryResponse.cs" />
-    <Compile Include="Internal\WsTrustRequest.cs" />
-    <Compile Include="Internal\WsTrustResponse.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

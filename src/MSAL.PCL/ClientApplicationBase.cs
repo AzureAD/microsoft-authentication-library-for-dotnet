@@ -30,13 +30,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client
 {
     /// <Summary>
-    /// AbstractClientApplication
+    /// ClientApplicationBase
     /// </Summary>
-    public abstract class AbstractClientApplication
+    public abstract class ClientApplicationBase
     {
         /// <Summary>
         /// DefaultAuthority
@@ -44,9 +45,9 @@ namespace Microsoft.Identity.Client
         protected const string DefaultAuthority = "https://login.microsoftonline.com/common/";
 
         /// <Summary>
-        /// AbstractClientApplication
+        /// ClientApplicationBase
         /// </Summary>
-        static AbstractClientApplication()
+        static ClientApplicationBase()
         {
             PlatformPlugin.Logger.Information(null,
                 string.Format(CultureInfo.InvariantCulture,
@@ -56,9 +57,9 @@ namespace Microsoft.Identity.Client
         }
 
         /// <Summary>
-        /// AbstractClientApplication
+        /// ClientApplicationBase
         /// </Summary>
-        protected AbstractClientApplication(string authority, string clientId, string redirectUri,
+        protected ClientApplicationBase(string authority, string clientId, string redirectUri,
             bool validateAuthority)
         {
             this.Authority = authority;
@@ -212,7 +213,7 @@ namespace Microsoft.Identity.Client
                 parameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var handler = new SilentRequest(this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache),
+            var handler = new SilentRequest(this.CreateRequestParameters(authenticator, scope, policy, this.UserTokenCache),
                 userIdentifier, parameters, forceRefresh);
             return await handler.RunAsync().ConfigureAwait(false);
         }
@@ -225,21 +226,22 @@ namespace Microsoft.Identity.Client
                 parameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var handler = new SilentRequest(this.GetHandlerData(authenticator, scope, policy, this.UserTokenCache), user,
+            var handler = new SilentRequest(this.CreateRequestParameters(authenticator, scope, policy, this.UserTokenCache), user,
                 parameters, forceRefresh);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal virtual AuthenticationRequestParameters GetHandlerData(Authenticator authenticator, string[] scope,
+        internal virtual AuthenticationRequestParameters CreateRequestParameters(Authenticator authenticator, string[] scope,
             string policy, TokenCache cache)
         {
             return new AuthenticationRequestParameters
             {
                 Authenticator = authenticator,
-                Scope = scope,
+                TokenCache =  cache,
+                Scope = scope.CreateSetFromArray(),
                 Policy = policy,
                 RestrictToSingleUser = this.RestrictToSingleUser,
-                TokenCache = cache
+                RedirectUri = new Uri(this.RedirectUri)
             };
         }
     }

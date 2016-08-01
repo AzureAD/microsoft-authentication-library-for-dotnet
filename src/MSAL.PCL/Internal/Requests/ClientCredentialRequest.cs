@@ -26,14 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class ClientCredentialRequest : BaseRequest
     {
-        public ClientCredentialRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            Authenticator authenticator, TokenCache tokenCache)
-            : base(authenticationRequestParameters, authenticator, tokenCache, false)
+        public ClientCredentialRequest(AuthenticationRequestParameters authenticationRequestParameters)
+            : base(authenticationRequestParameters)
         {
             this.SupportADFS = false;
         }
@@ -43,9 +43,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return inputScope;
         }
 
-        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
+        protected override void SetAdditionalRequestParameters(OAuth2Client client)
         {
-            requestParameters[OAuth2Parameter.GrantType] = OAuth2GrantType.ClientCredentials;
+            client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials);
         }
     }
 }

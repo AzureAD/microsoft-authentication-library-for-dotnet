@@ -36,12 +36,7 @@ namespace Microsoft.Identity.Client.Internal.Http
 
         internal static HttpMessageHandler GetMessageHandler()
         {
-            if (!AreMocksConsumed())
-            {
-                return MockHttpMessageHandlerQueue.Dequeue();
-            }
-
-            return new HttpClientHandler();
+            return !IsMocksQueueEmpty ? MockHttpMessageHandlerQueue.Dequeue() : new HttpClientHandler();
         }
 
         internal static void AddMockHandler(HttpMessageHandler mockHandler)
@@ -49,9 +44,6 @@ namespace Microsoft.Identity.Client.Internal.Http
             MockHttpMessageHandlerQueue.Enqueue(mockHandler);
         }
 
-        internal static bool AreMocksConsumed()
-        {
-            return MockHttpMessageHandlerQueue.Count == 0;
-        }
+        internal static bool IsMocksQueueEmpty => MockHttpMessageHandlerQueue.Count == 0;
     }
 }

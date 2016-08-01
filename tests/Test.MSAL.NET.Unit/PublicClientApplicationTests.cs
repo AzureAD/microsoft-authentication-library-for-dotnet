@@ -34,6 +34,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Test.MSAL.NET.Unit.Mocks;
@@ -139,11 +140,11 @@ namespace Test.MSAL.NET.Unit
             mockFactory.CreateAuthenticationDialog(Arg.Any<IPlatformParameters>()).Returns(webUi);
             PlatformPlugin.WebUIFactory = mockFactory;
             
-            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessIdTokenResponseMessage()
-            };
+            });
 
             // this is a flow where we pass client id as a scope
             PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
@@ -159,11 +160,11 @@ namespace Test.MSAL.NET.Unit
             }
 
             //call AcquireTokenSilent to make sure we get same token back and no call goes over network
-            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
-            };
+            });
 
             task = app.AcquireTokenSilentAsync(new string[] { TestConstants.DefaultClientId });
 
@@ -192,11 +193,11 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId,
                 TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy));
-            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.Forbidden) //fail the request if it goes to http client due to any error
-            };
+            });
 
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.DefaultScope.ToArray());
             AuthenticationResult result = task.Result;
@@ -213,11 +214,11 @@ namespace Test.MSAL.NET.Unit
             PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
             app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
 
-            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId, TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray())
-            };
+            });
 
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.DefaultScope.ToArray(), TestConstants.DefaultUniqueId, app.Authority, null, true);
             AuthenticationResult result = task.Result;
@@ -237,7 +238,7 @@ namespace Test.MSAL.NET.Unit
             MockHttpMessageHandler mockHandler = new MockHttpMessageHandler();
             mockHandler.Method = HttpMethod.Post;
             mockHandler.ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage();
-            HttpMessageHandlerFactory.MockHandler = mockHandler;
+            HttpMessageHandlerFactory.AddMockHandler(mockHandler);
                 try
                 {
                     Task<AuthenticationResult> task =app.AcquireTokenSilentAsync(TestConstants.ScopeForAnotherResource.ToArray(), TestConstants.DefaultUniqueId);

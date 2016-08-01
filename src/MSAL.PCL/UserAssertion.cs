@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client
 {
@@ -40,14 +41,8 @@ namespace Microsoft.Identity.Client
         /// assertion is a JWT token. For other flows, the other construction with assertionType must be used.
         /// </summary>
         /// <param name="assertion">Assertion representing the user.</param>
-        public UserAssertion(string assertion)
+        public UserAssertion(string assertion) : this(assertion, OAuth2GrantType.JwtBearer)
         {
-            if (string.IsNullOrWhiteSpace(assertion))
-            {
-                throw new ArgumentNullException("assertion");
-            }
-
-            this.Assertion = assertion;
         }
 
         /// <summary>

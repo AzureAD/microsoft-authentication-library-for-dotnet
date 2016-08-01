@@ -33,6 +33,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class AuthenticationRequestParameters
     {
+        public Authenticator Authenticator { get; set; }
+
+        public TokenCache TokenCache { get; set; }
+
         public bool RestrictToSingleUser { get; set; }
 
         public HashSet<string> Scope { get; set; }
@@ -51,6 +55,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public string Prompt { get; set; }
 
-        public string Assertion { get; set; }
+        public UserAssertion UserAssertion { get; set; }
     }
 }

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client
 {

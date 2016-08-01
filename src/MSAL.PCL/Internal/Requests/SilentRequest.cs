@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -54,6 +55,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             this.ForceRefresh = forceRefresh;
         }
 
+        protected override void SetAdditionalRequestParameters(OAuth2Client client)
+        {
+            throw new System.NotImplementedException();
+        }
+
         protected override Task<AuthenticationResultEx> SendTokenRequestAsync()
         {
             if (ResultEx == null)
@@ -63,10 +69,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             throw new MsalSilentTokenAcquisitionException(ResultEx.Exception);
-        }
-
-        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
-        {
         }
     }
 }
