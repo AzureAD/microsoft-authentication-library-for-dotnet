@@ -31,9 +31,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Requests;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Http;
+using Microsoft.Identity.Client.Internal.OAuth2;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Test.MSAL.Common.Unit;
@@ -48,7 +50,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void NoCacheLookup()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
+                Guid.NewGuid());
             TokenCache cache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
@@ -79,7 +82,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             mockHandler.QueryParams = new Dictionary<string, string>() {{"p", "some-policy"}};
 
             mockHandler.ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage();
-            HttpMessageHandlerFactory.MockHandler = mockHandler;
+            HttpMessageHandlerFactory.AddMockHandler(mockHandler);
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
@@ -87,14 +90,17 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = "some-policy",
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = TestConstants.DefaultScope.ToArray(),
+                Scope = TestConstants.DefaultScope,
                 TokenCache = cache
             };
 
+            parameters.RedirectUri = new Uri("some://uri");
+            parameters.ExtraQueryParameters = "extra=qp";
+
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
-                new Uri("some://uri"), new PlatformParameters(), TestConstants.DefaultDisplayableId,
-                UiOptions.SelectAccount, "extra=qp", ui);
+                new PlatformParameters(), TestConstants.DefaultDisplayableId,
+                UiOptions.SelectAccount, ui);
             Task<AuthenticationResult> task = request.RunAsync();
             task.Wait();
             AuthenticationResult result = task.Result;
@@ -145,7 +151,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                         ClientKey = new ClientKey(TestConstants.DefaultClientId),
                         Policy = TestConstants.DefaultPolicy,
                         RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                        Scope = TestConstants.DefaultScope.ToArray(),
+                        Scope = TestConstants.DefaultScope,
                         TokenCache = cache
                     };
 
@@ -162,7 +168,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         public void ActAsCurrentUserNoSsoHeaderForLoginHintOnlyTest()
         {
             //this test validates that no SSO header is added when developer passes only login hint and UiOption.ActAsCurrentUser
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
+                Guid.NewGuid());
             TokenCache cache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultScope, TestConstants.DefaultClientId,
@@ -191,14 +198,17 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = TestConstants.DefaultScope.ToArray(),
+                Scope = TestConstants.DefaultScope,
                 TokenCache = cache
             };
 
+            parameters.RedirectUri = new Uri("some://uri");
+            parameters.ExtraQueryParameters = "extra=qp";
+
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
-                new Uri("some://uri"), new PlatformParameters(),
-                ex.Result.User, UiOptions.ActAsCurrentUser, "extra=qp", webUi);
+                new PlatformParameters(),
+                ex.Result.User, UiOptions.ActAsCurrentUser, webUi);
             request.PreRunAsync().Wait();
             request.PreTokenRequest().Wait();
         }
@@ -208,23 +218,26 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void RedirectUriContainsFragmentErrorTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
+                Guid.NewGuid());
             try
             {
-
                 AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authenticator = authenticator,
                     ClientKey = new ClientKey(TestConstants.DefaultClientId),
                     Policy = TestConstants.DefaultPolicy,
                     RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                    Scope = TestConstants.DefaultScope.ToArray(),
+                    Scope = TestConstants.DefaultScope,
                     TokenCache = null
                 };
 
-                InteractiveRequest request = new InteractiveRequest(parameters, TestConstants.ScopeForAnotherResource.ToArray(),
-                    new Uri("some://uri#fragment=not-so-good"), new PlatformParameters(),
-                    (string) null, UiOptions.ForceLogin, "extra=qp", new MockWebUI()
+                parameters.RedirectUri = new Uri("some://uri#fragment=not-so-good");
+                parameters.ExtraQueryParameters = "extra=qp";
+
+                new InteractiveRequest(parameters, TestConstants.ScopeForAnotherResource.ToArray(),
+                    new PlatformParameters(),
+                    (string) null, UiOptions.ForceLogin, new MockWebUI()
                     );
                 Assert.Fail("ArgumentException should be thrown here");
             }
@@ -238,26 +251,29 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void CacheWithMultipleUsersAndRestrictToSingleUserTrueTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
+                Guid.NewGuid());
             TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
 
             try
             {
-
                 AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authenticator = authenticator,
                     ClientKey = new ClientKey(TestConstants.DefaultClientId),
                     Policy = TestConstants.DefaultPolicy,
                     RestrictToSingleUser = true,
-                    Scope = TestConstants.DefaultScope.ToArray(),
+                    Scope = TestConstants.DefaultScope,
                     TokenCache = cache
                 };
 
-                InteractiveRequest request = new InteractiveRequest(parameters,
+                parameters.RedirectUri = new Uri("some://uri");
+                parameters.ExtraQueryParameters = "extra=qp";
+
+                new InteractiveRequest(parameters,
                     TestConstants.ScopeForAnotherResource.ToArray(),
-                    new Uri("some://uri"), new PlatformParameters(),
-                    new User {UniqueId = TestConstants.DefaultUniqueId}, UiOptions.ForceLogin, "extra=qp",
+                    new PlatformParameters(),
+                    new User {UniqueId = TestConstants.DefaultUniqueId}, UiOptions.ForceLogin,
                     new MockWebUI());
                 Assert.Fail("ArgumentException should be thrown here");
             }
@@ -273,11 +289,12 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void VerifyAuthorizationResultTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
+                Guid.NewGuid());
 
             MockWebUI webUi = new MockWebUI();
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
-                TestConstants.DefaultAuthorityHomeTenant + "?error="+OAuth2Error.LoginRequired);
+                TestConstants.DefaultAuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired);
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
@@ -285,13 +302,16 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = TestConstants.DefaultScope.ToArray(),
+                Scope = TestConstants.DefaultScope,
                 TokenCache = null
             };
 
+            parameters.RedirectUri = new Uri("some://uri");
+            parameters.ExtraQueryParameters = "extra=qp";
+
             InteractiveRequest request = new InteractiveRequest(parameters,
-                TestConstants.ScopeForAnotherResource.ToArray(), new Uri("some://uri"), new PlatformParameters(),
-                (string) null, UiOptions.ForceLogin, "extra=qp", webUi);
+                TestConstants.ScopeForAnotherResource.ToArray(), new PlatformParameters(),
+                (string) null, UiOptions.ForceLogin, webUi);
             request.PreRunAsync().Wait();
             try
             {
@@ -301,17 +321,18 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             catch (Exception exc)
             {
                 Assert.IsTrue(exc.InnerException is MsalException);
-                Assert.AreEqual(MsalError.UserInteractionRequired, ((MsalException)exc.InnerException).ErrorCode);
+                Assert.AreEqual(MsalError.UserInteractionRequired, ((MsalException) exc.InnerException).ErrorCode);
             }
 
 
             webUi = new MockWebUI();
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
-                TestConstants.DefaultAuthorityHomeTenant + "?error=invalid_request&error_description=some error description");
+                TestConstants.DefaultAuthorityHomeTenant +
+                "?error=invalid_request&error_description=some error description");
 
             request = new InteractiveRequest(parameters,
-                TestConstants.ScopeForAnotherResource.ToArray(), new Uri("some://uri"), new PlatformParameters(),
-                (string)null, UiOptions.ForceLogin, "extra=qp", webUi);
+                TestConstants.ScopeForAnotherResource.ToArray(), new PlatformParameters(),
+                (string) null, UiOptions.ForceLogin, webUi);
             request.PreRunAsync().Wait();
 
             try
@@ -322,8 +343,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             catch (Exception exc)
             {
                 Assert.IsTrue(exc.InnerException is MsalException);
-                Assert.AreEqual("invalid_request", ((MsalException)exc.InnerException).ErrorCode);
-                Assert.AreEqual("some error description", ((MsalException)exc.InnerException).Message);
+                Assert.AreEqual("invalid_request", ((MsalException) exc.InnerException).ErrorCode);
+                Assert.AreEqual("some error description", ((MsalException) exc.InnerException).Message);
             }
         }
 
@@ -331,24 +352,26 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void NullLoginHintForActAsCurrentUserTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
+                Guid.NewGuid());
             try
             {
-
                 AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authenticator = authenticator,
                     ClientKey = new ClientKey(TestConstants.DefaultClientId),
                     Policy = TestConstants.DefaultPolicy,
                     RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                    Scope = TestConstants.DefaultScope.ToArray(),
+                    Scope = TestConstants.DefaultScope,
                     TokenCache = null
                 };
 
+                parameters.RedirectUri = new Uri("some://uri");
+                parameters.ExtraQueryParameters = "extra=qp";
+
                 InteractiveRequest request = new InteractiveRequest(parameters,
-                    TestConstants.ScopeForAnotherResource.ToArray(),
-                    new Uri("some://uri"), new PlatformParameters(),
-                    (string) null, UiOptions.ActAsCurrentUser, "extra=qp", new MockWebUI());
+                    TestConstants.ScopeForAnotherResource.ToArray(), new PlatformParameters(),
+                    (string) null, UiOptions.ActAsCurrentUser, new MockWebUI());
                 Assert.Fail("ArgumentException should be thrown here");
             }
             catch (ArgumentException ae)
@@ -361,7 +384,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void NullUserForActAsCurrentUserTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
+                Guid.NewGuid());
             try
             {
                 AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
@@ -370,13 +394,16 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     ClientKey = new ClientKey(TestConstants.DefaultClientId),
                     Policy = TestConstants.DefaultPolicy,
                     RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                    Scope = TestConstants.DefaultScope.ToArray(),
+                    Scope = TestConstants.DefaultScope,
                     TokenCache = null
                 };
 
-                InteractiveRequest request = new InteractiveRequest(parameters,
-                    TestConstants.ScopeForAnotherResource.ToArray(), new Uri("some://uri"), new PlatformParameters(),
-                    (User) null, UiOptions.ActAsCurrentUser, "extra=qp", new MockWebUI());
+                parameters.RedirectUri = new Uri("some://uri");
+                parameters.ExtraQueryParameters = "extra=qp";
+
+                new InteractiveRequest(parameters,
+                    TestConstants.ScopeForAnotherResource.ToArray(), new PlatformParameters(),
+                    (User) null, UiOptions.ActAsCurrentUser, new MockWebUI());
                 Assert.Fail("ArgumentException should be thrown here");
             }
             catch (ArgumentException ae)
@@ -389,7 +416,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("AcquireTokenInteractiveHandlerTests")]
         public void DuplicateQueryParameterErrorTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
+            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
+                Guid.NewGuid());
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
@@ -397,25 +425,28 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = TestConstants.DefaultScope.ToArray(),
+                Scope = TestConstants.DefaultScope,
                 TokenCache = null
             };
 
+            parameters.RedirectUri = new Uri("some://uri");
+            parameters.ExtraQueryParameters = "extra=qp&prompt=login";
+
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
-                new Uri("some://uri"), new PlatformParameters(),
-                (User) null, UiOptions.ForceLogin, "extra=qp&prompt=login", new MockWebUI());
+                new PlatformParameters(),
+                (User) null, UiOptions.ForceLogin, new MockWebUI());
             request.PreRunAsync().Wait();
 
             try
             {
-                    request.PreTokenRequest().Wait();
-                    Assert.Fail("MsalException should be thrown here");
+                request.PreTokenRequest().Wait();
+                Assert.Fail("MsalException should be thrown here");
             }
             catch (Exception exc)
             {
                 Assert.IsTrue(exc.InnerException is MsalException);
-                Assert.AreEqual(MsalError.DuplicateQueryParameter, ((MsalException)exc.InnerException).ErrorCode);
+                Assert.AreEqual(MsalError.DuplicateQueryParameter, ((MsalException) exc.InnerException).ErrorCode);
             }
         }
     }

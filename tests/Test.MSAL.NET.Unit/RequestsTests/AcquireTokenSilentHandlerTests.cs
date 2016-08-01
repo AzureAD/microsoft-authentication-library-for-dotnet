@@ -31,7 +31,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Requests;
+using Microsoft.Identity.Client.Internal.Http;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.MSAL.NET.Unit.Mocks;
 
@@ -53,7 +54,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = true,
-                Scope = TestConstants.DefaultScope.ToArray(),
+                Scope = TestConstants.DefaultScope,
                 TokenCache = cache
             };
 
@@ -88,7 +89,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = true,
-                Scope = TestConstants.DefaultScope.ToArray(),
+                Scope = TestConstants.DefaultScope,
                 TokenCache = cache
             };
 
@@ -111,7 +112,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = true,
-                Scope = TestConstants.DefaultScope.ToArray(),
+                Scope = TestConstants.DefaultScope,
                 TokenCache = cache
             };
 
@@ -134,7 +135,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = TestConstants.DefaultScope.ToArray(),
+                Scope = TestConstants.DefaultScope,
                 TokenCache = cache
             };
 
@@ -179,7 +180,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = new[] { "something" },
+                Scope = new[] { "something" }.CreateSetFromArray(),
                 TokenCache = cache
             };
 
@@ -204,15 +205,15 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = new[] { "some-scope1", "some-scope2" },
+                Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache
             };
 
-            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
-            };
+            });
 
             SilentRequest request = new SilentRequest(parameters, (string)null,
                 new PlatformParameters(), false);
@@ -238,15 +239,15 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = new[] { "some-scope1", "some-scope2" },
+                Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache
             };
 
-            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
-            };
+            });
 
             try
             {

@@ -33,6 +33,13 @@ namespace Microsoft.Identity.Client
 {
     internal class Logger : LoggerBase
     {
+        internal override void Error(CallState callState, string errorMessage, string callerFilePath = "")
+        {
+            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), errorMessage);
+            Log.Error(null, log);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, log);
+        }
+
         internal override void Error(CallState callState, Exception ex,
             [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {

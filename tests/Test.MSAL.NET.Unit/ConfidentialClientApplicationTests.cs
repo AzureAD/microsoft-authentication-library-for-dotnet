@@ -86,7 +86,7 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
             };
 
-            Task<AuthenticationResult> task = app.AcquireTokenForClient(TestConstants.DefaultScope.ToArray(),
+            Task<AuthenticationResult> task = app.AcquireTokenForClient(TestConstants.DefaultScope,
                 TestConstants.DefaultPolicy);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
@@ -119,7 +119,7 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
             };
 
-            Task<AuthenticationResult> task = app.AcquireTokenForClient(TestConstants.DefaultScope.ToArray(),
+            Task<AuthenticationResult> task = app.AcquireTokenForClient(TestConstants.DefaultScope,
                 TestConstants.DefaultPolicy);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);

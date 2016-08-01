@@ -39,6 +39,13 @@ namespace Microsoft.Identity.Client
 
         internal static MsalEventSource MsalEventSource { get; }
 
+        internal override void Error(CallState callState, string errorMessage, string callerFilePath = "")
+        {
+            string message = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), errorMessage);
+            MsalEventSource.Error(message);
+            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, message);
+        }
+
         internal override void Error(CallState callState, Exception ex,
             [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
