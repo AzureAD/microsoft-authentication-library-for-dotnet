@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -65,11 +66,15 @@ namespace Test.MSAL.NET.Unit.Mocks
             //match QP passed in for validation. 
             if (QueryParams != null)
             {
-                Assert.IsFalse(string.IsNullOrEmpty(uri.Query));
+                Assert.IsFalse(string.IsNullOrEmpty(uri.Query),
+                    string.Format(CultureInfo.InvariantCulture,
+                        "provided url ({0}) does not contain query parameters, as expected", uri.AbsolutePath));
                 IDictionary<string, string> inputQp = EncodingHelper.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
                 foreach (var key in QueryParams.Keys)
                 {
-                    Assert.IsTrue(inputQp.ContainsKey(key));
+                    Assert.IsTrue(inputQp.ContainsKey(key),
+                    string.Format(CultureInfo.InvariantCulture,
+                        "expected QP ({0}) not found in the url ({1})", key, uri.AbsolutePath));
                     Assert.AreEqual(QueryParams[key], inputQp[key]);
                 }
             }

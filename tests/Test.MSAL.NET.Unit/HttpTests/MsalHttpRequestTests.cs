@@ -76,17 +76,20 @@ namespace Test.MSAL.NET.Unit.HttpTests
         public void TestSendPostNoFailure()
         {
             Dictionary<string, string> bodyParameters = new Dictionary<string, string> { ["key1"] = "some value1", ["key2"] = "some value2" };
+            Dictionary<string, string> queryParams = new Dictionary<string, string> { ["key1"] = "qp1", ["key2"] = "qp2" };
+
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 PostData = bodyParameters,
+                QueryParams = queryParams,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
             });
 
 
             MsalHttpResponse response =
-                MsalHttpRequest.SendPost(new Uri(TestConstants.DefaultAuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), bodyParameters, null).Result;
+                MsalHttpRequest.SendPost(new Uri(TestConstants.DefaultAuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
+                    queryParams, bodyParameters, null).Result;
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -96,19 +99,76 @@ namespace Test.MSAL.NET.Unit.HttpTests
         [TestMethod]
         public void TestSendGetNoFailure()
         {
+            Dictionary<string, string> queryParams = new Dictionary<string, string> { ["key1"] = "qp1", ["key2"] = "qp2" };
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Get,
+                QueryParams = queryParams,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
             });
 
             MsalHttpResponse response =
-                MsalHttpRequest.SendPost(new Uri(TestConstants.DefaultAuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), new Dictionary<string, string>(), null).Result;
+                MsalHttpRequest.SendGet(new Uri(TestConstants.DefaultAuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"), queryParams, null).Result;
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             Assert.AreEqual(MockHelpers.DefaultAccessTokenResponse, response.Body);
+        }
+        
+        [TestMethod]
+        public void TestSendGetWithHttp500TypeFailure()
+        {
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateResiliencyMessage(HttpStatusCode.GatewayTimeout)
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateResiliencyMessage(HttpStatusCode.InternalServerError),
+            });
+
+            try
+            {
+                var msalHttpResponse = MsalHttpRequest.SendGet(new Uri(TestConstants.DefaultAuthorityHomeTenant + "oauth2/token"),
+                    new Dictionary<string, string>(), null).Result;
+                Assert.Fail("request should have failed");
+            }
+            catch (AggregateException exc)
+            {
+                Assert.IsNotNull(exc);
+                Assert.IsTrue(exc.InnerException is RetryableRequestException);
+            }
+        }
+
+        [TestMethod]
+        public void TestSendPostWithHttp500TypeFailure()
+        {
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateResiliencyMessage(HttpStatusCode.GatewayTimeout)
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateResiliencyMessage(HttpStatusCode.ServiceUnavailable),
+            });
+
+            try
+            {
+                var msalHttpResponse = MsalHttpRequest.SendPost(new Uri(TestConstants.DefaultAuthorityHomeTenant + "oauth2/token"),
+                    new Dictionary<string, string>(), null, null).Result;
+                Assert.Fail("request should have failed");
+            }
+            catch (AggregateException exc)
+            {
+                Assert.IsNotNull(exc);
+                Assert.IsTrue(exc.InnerException is RetryableRequestException);
+            }
         }
 
         [TestMethod]
