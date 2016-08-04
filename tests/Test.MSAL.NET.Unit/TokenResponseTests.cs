@@ -26,12 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Net;
-using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
-using Test.MSAL.NET.Unit.Mocks;
 
 namespace Test.MSAL.NET.Unit
 {

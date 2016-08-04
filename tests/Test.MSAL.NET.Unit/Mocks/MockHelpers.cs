@@ -40,6 +40,29 @@ namespace Test.MSAL.NET.Unit.Mocks
 {
     internal static class MockHelpers
     {
+        public static readonly string DefaultAccessTokenResponse =
+            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
+            "\"some-scope1 some-scope2\",\"access_token\":\"some-access-token\"" +
+            ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\"" +
+            ":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik1uQ19WWmNBVGZNNXBPW" +
+            "WlKSE1iYTlnb0VLWSIsImtpZCI6Ik1uQ19WWmNBVGZNNXBPWWlKSE1iYTlnb0VLWSJ9.ey" +
+            "JhdWQiOiJlODU0YTRhNy02YzM0LTQ0OWMtYjIzNy1mYzdhMjgwOTNkODQiLCJpc3MiOiJo" +
+            "dHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNmMzZDUxZGQtZjBlNS00OTU5LW" +
+            "I0ZWEtYTgwYzRlMzZmZTVlL3YyLjAvIiwiaWF0IjoxNDU1ODMzODI4LCJuYmYiOjE0NTU4" +
+            "MzM4MjgsImV4cCI6MTQ1NTgzNzcyOCwiaXBhZGRyIjoiMTMxLjEwNy4xNTkuMTE3Iiwibm" +
+            "FtZSI6Ik1hcmlvIFJvc3NpIiwib2lkIjoidW5pcXVlX2lkIiwicHJlZmVycmVkX3VzZXJu" +
+            "YW1lIjoiZGlzcGxheWFibGVAaWQuY29tIiwic3ViIjoiSzRfU0dHeEtxVzFTeFVBbWhnNk" +
+            "MxRjZWUGlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM2Q1MWRkLWYwZTUtNDk1OS1i" +
+            "NGVhLWE4MGM0ZTM2ZmU1ZSIsInZlciI6IjIuMCJ9.Z6Xc_PzqTtB-2TjyZwPpFGgkAs47m95F_I" +
+            "-NHxtIJT-H20i_1kbcBdmJaj7lMjHhJwAAMM-tE-iBVF9f7jNmsDZAADt-HgtrrXaXxkIK" +
+            "MwQ_MuB-OI4uY9KYIurEqmkGvOlRUK1ZVNNf7IKE5pqNTOZzyFDEyG8SwSvAmN-J4VnrxFz" +
+            "3d47klHoKVKwLjWJDj7edR2UUkdUQ6ZRj7YBj9UjC8UrmVNLBmvyatPyu9KQxyNyJpmTBT2j" +
+            "DjMZ3J1Z5iL98zWw_Ez0-6W0ti87UaPreJO3hejqQE_pRa4rXMLpw3oAnyEE1H7n0F6tK_3lJ" +
+            "ndZi9uLTIsdSMEXVnZdoHg\",\"id_token_expires_in\":\"3600\",\"profile_info\"" +
+            ":\"eyJ2ZXIiOiIxLjAiLCJuYW1lIjoiTWFyaW8gUm9zc2kiLCJwcmVmZXJyZWRfdXNlcm5hbW" +
+            "UiOiJtYXJpb0BkZXZlbG9wZXJ0ZW5hbnQub25taWNyb3NvZnQuY29tIiwic3ViIjoiSzRfU0d" +
+            "HeEtxVzFTeFVBbWhnNkMxRjZWUGlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM2Q1MWRk" +
+            "LWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZSJ9\"}";
         public static Stream GenerateStreamFromString(string s)
         {
             MemoryStream stream = new MemoryStream();
@@ -49,7 +72,15 @@ namespace Test.MSAL.NET.Unit.Mocks
             stream.Position = 0;
             return stream;
         }
-        
+
+        public static HttpResponseMessage CreateRequestTimeoutResponseMessage()
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.RequestTimeout);
+            HttpContent content = new StringContent("Request Timed Out.");
+            responseMessage.Content = content;
+            return responseMessage;
+        }
+
         public static HttpResponseMessage CreateSuccessIdTokenResponseMessage()
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
@@ -61,7 +92,7 @@ namespace Test.MSAL.NET.Unit.Mocks
         public static HttpResponseMessage CreateSuccessTokenResponseMessage()
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
-            HttpContent content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":\"some-scope1 some-scope2\",\"access_token\":\"some-access-token\",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik1uQ19WWmNBVGZNNXBPWWlKSE1iYTlnb0VLWSIsImtpZCI6Ik1uQ19WWmNBVGZNNXBPWWlKSE1iYTlnb0VLWSJ9.eyJhdWQiOiJlODU0YTRhNy02YzM0LTQ0OWMtYjIzNy1mYzdhMjgwOTNkODQiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNmMzZDUxZGQtZjBlNS00OTU5LWI0ZWEtYTgwYzRlMzZmZTVlL3YyLjAvIiwiaWF0IjoxNDU1ODMzODI4LCJuYmYiOjE0NTU4MzM4MjgsImV4cCI6MTQ1NTgzNzcyOCwiaXBhZGRyIjoiMTMxLjEwNy4xNTkuMTE3IiwibmFtZSI6Ik1hcmlvIFJvc3NpIiwib2lkIjoidW5pcXVlX2lkIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZGlzcGxheWFibGVAaWQuY29tIiwic3ViIjoiSzRfU0dHeEtxVzFTeFVBbWhnNkMxRjZWUGlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM2Q1MWRkLWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZSIsInZlciI6IjIuMCJ9.Z6Xc_PzqTtB-2TjyZwPpFGgkAs47m95F_I-NHxtIJT-H20i_1kbcBdmJaj7lMjHhJwAAMM-tE-iBVF9f7jNmsDZAADt-HgtrrXaXxkIKMwQ_MuB-OI4uY9KYIurEqmkGvOlRUK1ZVNNf7IKE5pqNTOZzyFDEyG8SwSvAmN-J4VnrxFz3d47klHoKVKwLjWJDj7edR2UUkdUQ6ZRj7YBj9UjC8UrmVNLBmvyatPyu9KQxyNyJpmTBT2jDjMZ3J1Z5iL98zWw_Ez0-6W0ti87UaPreJO3hejqQE_pRa4rXMLpw3oAnyEE1H7n0F6tK_3lJndZi9uLTIsdSMEXVnZdoHg\",\"id_token_expires_in\":\"3600\",\"profile_info\":\"eyJ2ZXIiOiIxLjAiLCJuYW1lIjoiTWFyaW8gUm9zc2kiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJtYXJpb0BkZXZlbG9wZXJ0ZW5hbnQub25taWNyb3NvZnQuY29tIiwic3ViIjoiSzRfU0dHeEtxVzFTeFVBbWhnNkMxRjZWUGlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM2Q1MWRkLWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZSJ9\"}");
+            HttpContent content = new StringContent(DefaultAccessTokenResponse);
             responseMessage.Content = content;
             return responseMessage;
         }
@@ -86,7 +117,7 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string rootId, string[] scope)
         {
-            string idToken = string.Format(CultureInfo.InvariantCulture,"someheader.{0}.somesignature", CreateIdToken(uniqueId, displayableId));
+            string idToken = string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", CreateIdToken(uniqueId, displayableId));
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
             HttpContent content =
                 new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":\"" +
@@ -108,8 +139,8 @@ namespace Test.MSAL.NET.Unit.Mocks
                         "\"exp\": 1455837728," +
                         "\"ipaddr\": \"131.107.159.117\"," +
                         "\"name\": \"Mario Rossi\"," +
-                        "\"oid\": \""+ uniqueId + "\"," +
-                        "\"preferred_username\": \""+displayableId+"\"," +
+                        "\"oid\": \"" + uniqueId + "\"," +
+                        "\"preferred_username\": \"" + displayableId + "\"," +
                         "\"sub\": \"K4_SGGxKqW1SxUAmhg6C1F6VPiFzcx-Qd80ehIEdFus\"," +
                         "\"tid\": \"6c3d51dd-f0e5-4959-b4ea-a80c4e36fe5e\"," +
                         "\"ver\": \"2.0\"}";

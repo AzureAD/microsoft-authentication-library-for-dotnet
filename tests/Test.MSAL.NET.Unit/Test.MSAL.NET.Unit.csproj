@@ -83,6 +83,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="HttpTests\MsalHttpRequestTests.cs" />
     <Compile Include="RequestsTests\SilentRequestTests.cs" />
     <Compile Include="TokenCacheTests.cs" />
     <Compile Include="RequestsTests\InteractiveRequestTests.cs" />

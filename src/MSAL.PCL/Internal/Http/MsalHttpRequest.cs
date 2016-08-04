@@ -45,91 +45,100 @@ namespace Microsoft.Identity.Client.Internal.Http
         public static async Task<MsalHttpResponse> SendPost(Uri endpoint, Dictionary<string, string> headers,
             Dictionary<string, string> bodyParameters, CallState callstate)
         {
-            HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers);
-            requestMessage.Content = new FormUrlEncodedContent(bodyParameters);
-            requestMessage.Method = HttpMethod.Post;
-
-            return await Execute(requestMessage, callstate).ConfigureAwait(false);
+            return await ExecuteWithRetry(endpoint, headers, bodyParameters, HttpMethod.Post, callstate).ConfigureAwait(false);
         }
 
         public static async Task<MsalHttpResponse> SendGet(Uri endpoint, Dictionary<string, string> headers,
             CallState callstate)
         {
-            HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers);
-            requestMessage.Method = HttpMethod.Get;
-
-            return await Execute(requestMessage, callstate).ConfigureAwait(false);
+            return await ExecuteWithRetry(endpoint, headers, null, HttpMethod.Get, callstate).ConfigureAwait(false);
         }
 
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, Dictionary<string, string> headers)
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage {RequestUri = endpoint};
+            HttpRequestMessage requestMessage = new HttpRequestMessage { RequestUri = endpoint };
             requestMessage.Headers.Accept.Clear();
-
-            foreach (KeyValuePair<string, string> kvp in headers)
+            if (headers != null)
             {
-                requestMessage.Headers.Add(kvp.Key, kvp.Value);
+                foreach (KeyValuePair<string, string> kvp in headers)
+                {
+                    requestMessage.Headers.Add(kvp.Key, kvp.Value);
+                }
             }
 
             return requestMessage;
         }
 
-        private static async Task<MsalHttpResponse> Execute(HttpRequestMessage requestMessage, CallState callstate,
-            bool canRetry = true)
-        {
-            HttpClient client = HttpClientFactory.GetHttpClient();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+        private static async Task<MsalHttpResponse> ExecuteWithRetry(Uri endpoint, Dictionary<string, string> headers,
+            Dictionary<string, string> bodyParameters, HttpMethod method,
+            CallState callstate, bool retry = true)
+        {
             bool isRetryable = false;
             MsalHttpResponse response = null;
-
-            using (requestMessage)
+            try
             {
-                try
+                response = await Execute(endpoint, headers, bodyParameters, method);
+
+                PlatformPlugin.Logger.Error(callstate,
+                    string.Format(CultureInfo.InvariantCulture,
+                        "Response status code does not indicate success: {0} ({1}).",
+                        (int) response.StatusCode, response.StatusCode));
+
+                if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    using (
-                        HttpResponseMessage responseMessage =
-                            await client.SendAsync(requestMessage).ConfigureAwait(false))
-                    {
-                        response = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
-                        if (response.StatusCode == HttpStatusCode.OK)
-                        {
-                            return response;
-                        }
-
-                        PlatformPlugin.Logger.Error(callstate,
-                            string.Format(CultureInfo.InvariantCulture,
-                                "Response status code does not indicate success: {0} ({1}).",
-                                (int) response.StatusCode, response.StatusCode));
-
-                        if ((response.StatusCode.Equals(HttpStatusCode.InternalServerError)) ||
-                            (response.StatusCode).Equals(HttpStatusCode.GatewayTimeout) ||
-                            (response.StatusCode).Equals(HttpStatusCode.ServiceUnavailable))
-                        {
-                            isRetryable = true;
-                        }
-                    }
+                    return response;
                 }
-                catch (TaskCanceledException exception)
+
+                if ((response.StatusCode.Equals(HttpStatusCode.InternalServerError)) ||
+                    (response.StatusCode).Equals(HttpStatusCode.GatewayTimeout) ||
+                    (response.StatusCode).Equals(HttpStatusCode.ServiceUnavailable))
                 {
-                    PlatformPlugin.Logger.Error(callstate, exception);
                     isRetryable = true;
                 }
 
-                if (isRetryable)
-                {
-                    if (canRetry)
-                    {
-                        PlatformPlugin.Logger.Information(callstate, "Retrying one more time..");
-                        return await Execute(requestMessage, callstate, false).ConfigureAwait(false);
-                    }
+            }
+            catch (TaskCanceledException exception)
+            {
+                PlatformPlugin.Logger.Error(callstate, exception);
+                isRetryable = true;
+            }
 
-                    PlatformPlugin.Logger.Information(callstate,
-                        "Request retry failed.");
-                    throw new RetryableRequestException();
+            if (isRetryable)
+            {
+                if (retry)
+                {
+                    PlatformPlugin.Logger.Information(callstate, "Retrying one more time..");
+                    return await ExecuteWithRetry(endpoint, headers, bodyParameters, method, callstate, false);
                 }
 
-                return response;
+                PlatformPlugin.Logger.Information(callstate, "Request retry failed.");
+                throw new RetryableRequestException();
+            }
+
+            return response;
+        }
+
+        private static async Task<MsalHttpResponse> Execute(Uri endpoint, Dictionary<string, string> headers,
+            Dictionary<string, string> bodyParameters, HttpMethod method)
+        {
+            HttpClient client = HttpClientFactory.GetHttpClient();
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
+            {
+                requestMessage.Method = method;
+                if (bodyParameters != null)
+                {
+                    requestMessage.Content = new FormUrlEncodedContent(bodyParameters);
+                }
+
+                using(HttpResponseMessage responseMessage =
+                    await client.SendAsync(requestMessage).ConfigureAwait(false))
+                {
+                    return await CreateResponseAsync(responseMessage).ConfigureAwait(false);
+                }
             }
         }
 

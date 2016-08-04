@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,9 +42,15 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public string Url { get; set; }
 
-        public IDictionary<string,string> QueryParams { get; set; }
+        public IDictionary<string, string> QueryParams { get; set; }
+
+        public IDictionary<string, string> PostData { get; set; }
+
+        public IDictionary<string, string> Headers { get; set; }
 
         public HttpMethod Method { get; set; }
+
+        public Exception ExceptionToThrow { get; set; }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
@@ -52,7 +59,7 @@ namespace Test.MSAL.NET.Unit.Mocks
             Uri uri = request.RequestUri;
             if (!string.IsNullOrEmpty(Url))
             {
-                Assert.AreEqual(Url, uri.AbsoluteUri.Split(new [] { '?'})[0]);
+                Assert.AreEqual(Url, uri.AbsoluteUri.Split(new[] { '?' })[0]);
             }
 
             //match QP passed in for validation. 
@@ -66,9 +73,37 @@ namespace Test.MSAL.NET.Unit.Mocks
                     Assert.AreEqual(QueryParams[key], inputQp[key]);
                 }
             }
-            
-        
-            return new TaskFactory().StartNew(()=> ResponseMessage, cancellationToken);
+
+            //match QP passed in for validation. 
+            if (QueryParams != null)
+            {
+                Assert.IsFalse(string.IsNullOrEmpty(uri.Query));
+                IDictionary<string, string> inputQp = EncodingHelper.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+                foreach (var key in QueryParams.Keys)
+                {
+                    Assert.IsTrue(inputQp.ContainsKey(key));
+                    Assert.AreEqual(QueryParams[key], inputQp[key]);
+                }
+            }
+
+            if (PostData != null)
+            {
+                string postData = request.Content.ReadAsStringAsync().Result;
+                Dictionary<string, string> requestPostDataPairs = EncodingHelper.ParseKeyValueList(postData, '&', true, null);
+
+                foreach (var key in PostData.Keys)
+                {
+                    Assert.IsTrue(requestPostDataPairs.ContainsKey(key));
+                    Assert.AreEqual(PostData[key], requestPostDataPairs[key]);
+                }
+            }
+
+            if (ExceptionToThrow != null)
+            {
+                throw ExceptionToThrow;
+            }
+
+            return new TaskFactory().StartNew(() => ResponseMessage, cancellationToken);
         }
     }
 }
