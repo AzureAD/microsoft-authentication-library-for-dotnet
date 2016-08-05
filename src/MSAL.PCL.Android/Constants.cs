@@ -52,7 +52,9 @@ namespace Microsoft.Identity.Client
         public const string MissingDigestShaAlgorithm = "Digest SHA algorithm does not exists";
         public const string SignatureVerificationFailed = "Error in verifying broker app's signature";
         public const string NoBrokerAccountFound = "No account found in broker app";
-        public const string BrokerApplicationRequired = "Broker application must be installed to continue authentication";
+
+        public const string BrokerApplicationRequired =
+            "Broker application must be installed to continue authentication";
     }
 
     internal static class BrokerResponseCode

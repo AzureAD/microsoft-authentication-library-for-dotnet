@@ -61,17 +61,22 @@
     <Compile Include="..\MSAL.Common\CommonAssemblyInfo.cs">
       <Link>Internal\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Internal\AuthenticationRequestParameters.cs" />
-    <Compile Include="Internal\HttpMessageHandlerFactory.cs" />
+    <Compile Include="Internal\InstanceDiscoveryResponse.cs" />
+    <Compile Include="Internal\Requests\AuthenticationRequestParameters.cs" />
+    <Compile Include="Internal\Http\HttpClientFactory.cs" />
+    <Compile Include="Internal\Http\HttpMessageHandlerFactory.cs" />
+    <Compile Include="Internal\Http\HttpRequest.cs" />
+    <Compile Include="Internal\Http\HttpResponse.cs" />
     <Compile Include="Internal\MsalError.cs" />
-    <Compile Include="AbstractClientApplication.cs" />
-    <Compile Include="Requests\AuthorizationCodeRequest.cs" />
-    <Compile Include="Requests\ClientCredentialRequest.cs" />
-    <Compile Include="Requests\BaseRequest.cs" />
-    <Compile Include="Requests\InteractiveRequest.cs" />
-    <Compile Include="Requests\SilentWebUiRequest.cs" />
-    <Compile Include="Requests\OnBehalfOfRequest.cs" />
-    <Compile Include="Requests\SilentRequest.cs" />
+    <Compile Include="ClientApplicationBase.cs" />
+    <Compile Include="Internal\OAuth2\OAuth2Client.cs" />
+    <Compile Include="Internal\RetryableRequestException.cs" />
+    <Compile Include="Internal\Requests\AuthorizationCodeRequest.cs" />
+    <Compile Include="Internal\Requests\ClientCredentialRequest.cs" />
+    <Compile Include="Internal\Requests\BaseRequest.cs" />
+    <Compile Include="Internal\Requests\InteractiveRequest.cs" />
+    <Compile Include="Internal\Requests\OnBehalfOfRequest.cs" />
+    <Compile Include="Internal\Requests\SilentRequest.cs" />
     <Compile Include="IClientAssertionCertificate.cs" />
     <Compile Include="LoggerCallbackHandler.cs" />
     <Compile Include="MsalException.cs" />
@@ -80,7 +85,6 @@
     <Compile Include="MsalServiceException.cs" />
     <Compile Include="MsalSilentTokenAcquisitionException.cs" />
     <Compile Include="MsalUserMismatchException.cs" />
-    <Compile Include="AuthenticationParameters.cs" />
     <Compile Include="AuthenticationResult.cs" />
     <Compile Include="Internal\Authenticator.cs" />
     <Compile Include="Internal\AuthenticatorTemplate.cs" />
@@ -91,37 +95,27 @@
     <Compile Include="ClientAssertion.cs" />
     <Compile Include="ClientCredential.cs" />
     <Compile Include="Internal\ClientKey.cs" />
-    <Compile Include="Internal\ClientMetrics.cs" />
     <Compile Include="ConfidentialClientApplication.cs" />
     <Compile Include="Internal\Constants.cs" />
-    <Compile Include="Internal\HttpClientWrapper.cs" />
-    <Compile Include="Internal\HttpRequestWrapperException.cs" />
-    <Compile Include="Internal\MsalHttpWebResponse.cs" />
-    <Compile Include="Interfaces\IBrokerHelper.cs" />
-    <Compile Include="Interfaces\IDeviceAuthHelper.cs" />
+    <Compile Include="Internal\Interfaces\IBrokerHelper.cs" />
+    <Compile Include="Internal\Interfaces\IDeviceAuthHelper.cs" />
     <Compile Include="IPlatformParameters.cs" />
-    <Compile Include="Interfaces\ICryptographyHelper.cs" />
+    <Compile Include="Internal\Interfaces\ICryptographyHelper.cs" />
     <Compile Include="Internal\IdToken.cs" />
-    <Compile Include="Interfaces\IHttpWebResponse.cs" />
-    <Compile Include="Interfaces\ITokenCachePlugin.cs" />
+    <Compile Include="Internal\Interfaces\ITokenCachePlugin.cs" />
     <Compile Include="Internal\JsonHelper.cs" />
     <Compile Include="Internal\JsonWebToken.cs" />
     <Compile Include="Internal\LoggerBase.cs" />
-    <Compile Include="Internal\MexParser.cs" />
     <Compile Include="Internal\AuthenticationResultEx.cs" />
     <Compile Include="PublicClientApplication.cs" />
     <Compile Include="Internal\TokenResponse.cs" />
-    <Compile Include="Internal\OAuthConstants.cs" />
+    <Compile Include="Internal\OAuth2\OAuthConstants.cs" />
     <Compile Include="Internal\PlatformInformationBase.cs" />
-    <Compile Include="Interfaces\IWebUI.cs" />
+    <Compile Include="Internal\Interfaces\IWebUI.cs" />
     <Compile Include="Internal\EncodingHelper.cs" />
-    <Compile Include="Interfaces\IWebUIFactory.cs" />
+    <Compile Include="Internal\Interfaces\IWebUIFactory.cs" />
     <Compile Include="Internal\PlatformPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Internal\RequestParameters.cs" />
-    <Compile Include="Internal\MsalHttpClient.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="TokenCache.cs" />
     <Compile Include="TokenCacheItem.cs" />
     <Compile Include="Internal\TokenCacheKey.cs" />
@@ -130,9 +124,6 @@
     <Compile Include="UserAssertion.cs" />
     <Compile Include="UserCredential.cs" />
     <Compile Include="User.cs" />
-    <Compile Include="Internal\UserRealmDiscoveryResponse.cs" />
-    <Compile Include="Internal\WsTrustRequest.cs" />
-    <Compile Include="Internal\WsTrustResponse.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

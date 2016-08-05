@@ -35,11 +35,11 @@ using System.Reflection;
 [assembly: AssemblyCompany("Microsoft Open Technologies")]
 [assembly: AssemblyCopyright("Copyright (c) Microsoft Open Technologies. All rights reserved.")]
 [assembly: AssemblyTrademark("")]
-
 [assembly: AssemblyVersion("1.0.0.0")]
 
 // Keep major and minor versions in AssemblyFileVersion in sync with AssemblyVersion.
 // Build and revision numbers are replaced on build machine for official builds.
+
 [assembly: AssemblyFileVersion("1.0.00000.0000")]
 
 // On official build, attribute AssemblyInformationalVersionAttribute is added as well

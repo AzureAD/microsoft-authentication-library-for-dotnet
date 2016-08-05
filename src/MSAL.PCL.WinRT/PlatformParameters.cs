@@ -42,8 +42,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Gets or Sets flag to enable logged in user authentication. Note that enabling this flag requires some extra application capabilites.
-        /// This flag only works in SSO mode and is ignored otherwise. To enable SSO mode, call AcquireTokenAsync with null or application's callback URI as redirectUri.
+        /// Gets or Sets flag to enable logged in user authentication. Note that enabling this flag requires some extra
+        /// application capabilites.
+        /// This flag only works in SSO mode and is ignored otherwise. To enable SSO mode, call AcquireTokenAsync with null or
+        /// application's callback URI as redirectUri.
         /// </summary>
         public bool UseCorporateNetwork { get; private set; }
     }

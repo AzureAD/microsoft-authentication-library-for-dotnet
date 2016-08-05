@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client
 {
@@ -45,8 +45,8 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException("assertion");
             }
-            
-            this.AssertionType = OAuthAssertionType.JwtBearer;
+
+            this.AssertionType = OAuth2AssertionType.JwtBearer;
             this.Assertion = assertion;
         }
 

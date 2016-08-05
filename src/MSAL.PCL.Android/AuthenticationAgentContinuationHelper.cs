@@ -32,23 +32,21 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
     /// </summary>
     public static class AuthenticationAgentContinuationHelper
     {
         /// <summary>
-        /// 
         /// </summary>
         public static void SetAuthenticationAgentContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
             AuthorizationResult authorizationResult = null;
-            switch ((int)resultCode)
+            switch ((int) resultCode)
             {
-                case (int)Result.Ok:
+                case (int) Result.Ok:
                     authorizationResult = CreateResultForOkResponse(data.GetStringExtra("ReturnedUrl"));
                     break;
 
-                case (int)Result.Canceled:
+                case (int) Result.Canceled:
                     authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
                     break;
 
@@ -66,11 +64,10 @@ namespace Microsoft.Identity.Client
 
             if (!string.IsNullOrEmpty(url))
             {
-                result.ParseAuthorizeResponse(url);       
+                result.ParseAuthorizeResponse(url);
             }
 
             return result;
         }
-
     }
 }

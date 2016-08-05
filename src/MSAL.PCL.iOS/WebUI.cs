@@ -49,7 +49,8 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
+            IDictionary<string, string> additionalHeaders, CallState callState)
         {
             returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, additionalHeaders, callState);
@@ -63,11 +64,14 @@ namespace Microsoft.Identity.Client
             returnedUriReady.Release();
         }
 
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders, CallState callState)
+        public void Authenticate(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders,
+            CallState callState)
         {
             try
             {
-                this.parameters.CallerViewController.PresentViewController(new AuthenticationAgentUINavigationController(authorizationUri.AbsoluteUri, redirectUri.OriginalString, additionalHeaders, CallbackMethod), false, null);
+                this.parameters.CallerViewController.PresentViewController(
+                    new AuthenticationAgentUINavigationController(authorizationUri.AbsoluteUri,
+                        redirectUri.OriginalString, additionalHeaders, CallbackMethod), false, null);
             }
             catch (Exception ex)
             {

@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -58,6 +56,5 @@ namespace Microsoft.Identity.Client
         /// Gets the policy.
         /// </summary>
         public string Policy { get; internal set; }
-        
     }
 }

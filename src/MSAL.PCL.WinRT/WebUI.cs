@@ -28,7 +28,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Threading.Tasks;
 using Windows.Security.Authentication.Web;
 using Microsoft.Identity.Client.Interfaces;
@@ -46,26 +45,38 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
-            
-            this.useCorporateNetwork = ((PlatformParameters)parameters).UseCorporateNetwork;
+
+            this.useCorporateNetwork = ((PlatformParameters) parameters).UseCorporateNetwork;
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
+            IDictionary<string, string> additionalHeaders, CallState callState)
         {
             bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
-            
+
             WebAuthenticationResult webAuthenticationResult;
-            WebAuthenticationOptions options = (this.useCorporateNetwork && (ssoMode || redirectUri.Scheme == Constant.MsAppScheme)) ? WebAuthenticationOptions.UseCorporateNetwork : WebAuthenticationOptions.None;
+            WebAuthenticationOptions options = (this.useCorporateNetwork &&
+                                                (ssoMode || redirectUri.Scheme == Constant.MsAppScheme))
+                ? WebAuthenticationOptions.UseCorporateNetwork
+                : WebAuthenticationOptions.None;
 
             try
             {
                 if (ssoMode)
                 {
-                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri).AsTask().ConfigureAwait(false);
+                    webAuthenticationResult =
+                        await
+                            WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri)
+                                .AsTask()
+                                .ConfigureAwait(false);
                 }
                 else
-                { 
-                    webAuthenticationResult = await WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri, redirectUri).AsTask().ConfigureAwait(false);
+                {
+                    webAuthenticationResult =
+                        await
+                            WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri, redirectUri)
+                                .AsTask()
+                                .ConfigureAwait(false);
                 }
             }
 
@@ -80,7 +91,8 @@ namespace Microsoft.Identity.Client
             return result;
         }
 
-        private static AuthorizationResult ProcessAuthorizationResult(WebAuthenticationResult webAuthenticationResult, CallState callState)
+        private static AuthorizationResult ProcessAuthorizationResult(WebAuthenticationResult webAuthenticationResult,
+            CallState callState)
         {
             AuthorizationResult result;
             switch (webAuthenticationResult.ResponseStatus)
@@ -89,7 +101,8 @@ namespace Microsoft.Identity.Client
                     result = new AuthorizationResult(AuthorizationStatus.Success, webAuthenticationResult.ResponseData);
                     break;
                 case WebAuthenticationStatus.ErrorHttp:
-                    result = new AuthorizationResult(AuthorizationStatus.ErrorHttp, webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture));
+                    result = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
+                        webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture));
                     break;
                 case WebAuthenticationStatus.UserCancel:
                     result = new AuthorizationResult(AuthorizationStatus.UserCancel, null);

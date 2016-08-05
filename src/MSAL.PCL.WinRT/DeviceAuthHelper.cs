@@ -27,17 +27,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
 using System.Threading.Tasks;
-using Windows.Security.Cryptography;
-using Windows.Security.Cryptography.Certificates;
-using Windows.Security.Cryptography.Core;
-using Windows.Storage.Streams;
 using Microsoft.Identity.Client.Interfaces;
-using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {

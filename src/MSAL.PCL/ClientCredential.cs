@@ -34,7 +34,6 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed class ClientCredential
     {
-
         /// <summary>
         /// Constructor to create Secret with client id and secret
         /// </summary>
@@ -50,21 +49,17 @@ namespace Microsoft.Identity.Client
         /// <param name="secret">Secret of the client requesting the token.</param>
         public ClientCredential(string secret)
         {
-
             if (string.IsNullOrWhiteSpace(secret))
             {
                 throw new ArgumentNullException("secret");
             }
-            
+
             this.Secret = secret;
         }
 
         internal string Secret { get; private set; }
-
         internal IClientAssertionCertificate Certificate { get; private set; }
-
-        internal  ClientAssertion ClientAssertion { get; set; }
-
+        internal ClientAssertion ClientAssertion { get; set; }
         internal long ValidTo { get; set; }
     }
 }

@@ -34,6 +34,7 @@ namespace Microsoft.Identity.Client
 
     internal static class MsalErrorMessageIOSEx
     {
-        public const string BrokerApplicationRequired = "Broker application must be installed to continue authentication";
+        public const string BrokerApplicationRequired =
+            "Broker application must be installed to continue authentication";
     }
 }

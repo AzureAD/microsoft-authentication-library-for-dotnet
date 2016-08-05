@@ -27,7 +27,6 @@
 
 
 using System;
-using CoreFoundation;
 using Foundation;
 
 namespace Microsoft.Identity.Client
@@ -35,6 +34,13 @@ namespace Microsoft.Identity.Client
     internal class MsalCustomUrlProtocol : NSUrlProtocol
     {
         private NSUrlConnection connection;
+
+        [Export("initWithRequest:cachedResponse:client:")]
+        public MsalCustomUrlProtocol(NSUrlRequest request, NSCachedUrlResponse cachedResponse,
+            INSUrlProtocolClient client)
+            : base(request, cachedResponse, client)
+        {
+        }
 
         [Export("canInitWithRequest:")]
         public new static bool CanInitWithRequest(NSUrlRequest request)
@@ -51,13 +57,6 @@ namespace Microsoft.Identity.Client
         public new static NSUrlRequest GetCanonicalRequest(NSUrlRequest request)
         {
             return request;
-        }
-
-        [Export("initWithRequest:cachedResponse:client:")]
-        public MsalCustomUrlProtocol(NSUrlRequest request, NSCachedUrlResponse cachedResponse,
-            INSUrlProtocolClient client)
-            : base(request, cachedResponse, client)
-        {
         }
 
         public override void StartLoading()

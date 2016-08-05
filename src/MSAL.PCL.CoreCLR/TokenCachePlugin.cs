@@ -25,13 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Interfaces;
-using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -40,7 +34,7 @@ namespace Microsoft.Identity.Client
         public void BeforeAccess(TokenCacheNotificationArgs args)
         {
         }
-        
+
         public void AfterAccess(TokenCacheNotificationArgs args)
         {
         }

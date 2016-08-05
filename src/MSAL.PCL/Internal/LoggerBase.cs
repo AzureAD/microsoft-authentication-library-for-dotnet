@@ -32,13 +32,20 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal abstract class LoggerBase
     {
-        internal abstract void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
+        internal abstract void Verbose(CallState callState, string message,
+            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
 
-        internal abstract void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
+        internal abstract void Information(CallState callState, string message,
+            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
 
-        internal abstract void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
+        internal abstract void Warning(CallState callState, string message,
+            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
 
-        internal abstract void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
+        internal abstract void Error(CallState callState, string errorMessage,
+            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
+
+        internal abstract void Error(CallState callState, Exception ex,
+            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
 
         internal static string GetCallerFilename(string callerFilePath)
         {
@@ -48,7 +55,8 @@ namespace Microsoft.Identity.Client.Internal
         internal static string PrepareLogMessage(CallState callState, string classOrComponent, string message)
         {
             string correlationId = (callState != null) ? callState.CorrelationId.ToString() : string.Empty;
-            return string.Format(CultureInfo.CurrentCulture, "{0}: {1} - {2}: {3}", DateTime.UtcNow, correlationId, classOrComponent, message);
+            return string.Format(CultureInfo.CurrentCulture, "{0}: {1} - {2}: {3}", DateTime.UtcNow, correlationId,
+                classOrComponent, message);
         }
     }
 }

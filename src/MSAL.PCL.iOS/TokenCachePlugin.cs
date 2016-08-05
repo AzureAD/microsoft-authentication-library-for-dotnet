@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using Foundation;
-using Security;
 using System;
+using Foundation;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Security;
 
 namespace Microsoft.Identity.Client
 {
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client
                 // Ignore as the cache seems to be corrupt
             }
         }
-        
+
         public void AfterAccess(TokenCacheNotificationArgs args)
         {
             if (args.TokenCache.HasStateChanged)
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client
                     var s = new SecRecord(SecKind.GenericPassword)
                     {
                         Generic = NSData.FromString(LocalSettingsContainerName),
-	                Accessible = SecAccessible.Always,
+                        Accessible = SecAccessible.Always,
                         Service = "MSAL.PCL.iOS Service",
                         Account = "MSAL.PCL.iOS cache",
                         Label = "MSAL.PCL.iOS Label",

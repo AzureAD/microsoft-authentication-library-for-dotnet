@@ -96,12 +96,12 @@ namespace Microsoft.Identity.Client.Internal
 
         public static string GetMsalVersion()
         {
-            string fullVersion = typeof(MsalIdHelper).GetTypeInfo().Assembly.FullName;
+            string fullVersion = typeof (MsalIdHelper).GetTypeInfo().Assembly.FullName;
             Regex regex = new Regex(@"Version=[\d]+.[\d+]+.[\d]+.[\d]+");
             Match match = regex.Match(fullVersion);
             if (match.Success)
             {
-                string[] version = match.Groups[0].Value.Split(new[] { '=' }, StringSplitOptions.None);
+                string[] version = match.Groups[0].Value.Split(new[] {'='}, StringSplitOptions.None);
                 return version[1];
             }
 
@@ -115,7 +115,8 @@ namespace Microsoft.Identity.Client.Internal
 
         public static string GetAssemblyInformationalVersion()
         {
-            AssemblyInformationalVersionAttribute attribute = typeof(MsalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            AssemblyInformationalVersionAttribute attribute =
+                typeof (MsalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
             return (attribute != null) ? attribute.InformationalVersion : string.Empty;
         }
     }

@@ -31,11 +31,11 @@ namespace Microsoft.Identity.Client
 {
     internal class SilentWebUIDoneEventArgs : EventArgs
     {
-        public Exception TransferedException { get; private set; }
-
         public SilentWebUIDoneEventArgs(Exception e)
         {
             this.TransferedException = e;
         }
+
+        public Exception TransferedException { get; private set; }
     }
 }

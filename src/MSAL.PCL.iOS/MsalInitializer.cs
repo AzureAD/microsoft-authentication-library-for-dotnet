@@ -25,11 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
@@ -40,7 +35,9 @@ namespace Microsoft.Identity.Client
         {
             PlatformPluginSwitch.DynamicallyLinkAssembly = false;
 
-            PlatformPlugin.InjectDependecies(new WebUIFactory(), new TokenCachePlugin(), new Logger(), new PlatformInformation(), new CryptographyHelper(), new DeviceAuthHelper(), new BrokerHelper(), new PlatformParameters());
+            PlatformPlugin.InjectDependecies(new WebUIFactory(), new TokenCachePlugin(), new Logger(),
+                new PlatformInformation(), new CryptographyHelper(), new DeviceAuthHelper(), new BrokerHelper(),
+                new PlatformParameters());
         }
     }
 }

@@ -55,7 +55,8 @@ namespace Microsoft.Identity.Client
         {
             if (!UserInformation.NameAccessAllowed)
             {
-                throw new MsalException(MsalErrorEx.CannotAccessUserInformation, MsalErrorMessageEx.CannotAccessUserInformation);
+                throw new MsalException(MsalErrorEx.CannotAccessUserInformation,
+                    MsalErrorMessageEx.CannotAccessUserInformation);
             }
 
             try
@@ -65,7 +66,8 @@ namespace Microsoft.Identity.Client
             catch (UnauthorizedAccessException ex)
             {
                 PlatformPlugin.Logger.Error(null, ex);
-                throw new MsalException(MsalErrorEx.UnauthorizedUserInformationAccess, MsalErrorMessageEx.UnauthorizedUserInformationAccess, ex);
+                throw new MsalException(MsalErrorEx.UnauthorizedUserInformationAccess,
+                    MsalErrorMessageEx.UnauthorizedUserInformationAccess, ex);
             }
         }
 
@@ -94,7 +96,8 @@ namespace Microsoft.Identity.Client
                 // The access is not allowed and we cannot determine whether this is a local user or not. So, we do NOT add form auth parameter.
                 // This is the case where we can advise customers to add extra query parameter if they want.
 
-                PlatformPlugin.Logger.Information(callState, "Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.");
+                PlatformPlugin.Logger.Information(callState,
+                    "Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.");
                 return false;
             }
 
@@ -105,11 +108,12 @@ namespace Microsoft.Identity.Client
             catch (UnauthorizedAccessException ae)
             {
                 PlatformPlugin.Logger.Warning(callState, ae.Message);
-                PlatformPlugin.Logger.Information(callState, "Cannot try Windows Integrated Auth due to lack of Enterprise capability.");
+                PlatformPlugin.Logger.Information(callState,
+                    "Cannot try Windows Integrated Auth due to lack of Enterprise capability.");
                 // This mostly means Enterprise capability is missing, so WIA cannot be used and
                 // we return true to add form auth parameter in the caller.
                 return true;
-            }            
+            }
         }
 
         public override bool IsDomainJoined()
@@ -130,9 +134,9 @@ namespace Microsoft.Identity.Client
 
         public override string GetRedirectUriAsString(Uri redirectUri, CallState callState)
         {
-            return ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri) ?
-                WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString :
-                redirectUri.OriginalString;
+            return ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri)
+                ? WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString
+                : redirectUri.OriginalString;
         }
 
         private static class NativeMethods
@@ -167,7 +171,7 @@ namespace Microsoft.Identity.Client
                             return "Unknown";
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     PlatformPlugin.Logger.Warning(null, ex.Message);
                     return "Unknown";
@@ -177,17 +181,17 @@ namespace Microsoft.Identity.Client
             [StructLayout(LayoutKind.Sequential)]
             private struct SYSTEM_INFO
             {
-                public short wProcessorArchitecture;
-                public short wReserved;
-                public int dwPageSize;
-                public IntPtr lpMinimumApplicationAddress;
-                public IntPtr lpMaximumApplicationAddress;
-                public IntPtr dwActiveProcessorMask;
-                public int dwNumberOfProcessors;
-                public int dwProcessorType;
-                public int dwAllocationGranularity;
-                public short wProcessorLevel;
-                public short wProcessorRevision;
+                public readonly short wProcessorArchitecture;
+                public readonly short wReserved;
+                public readonly int dwPageSize;
+                public readonly IntPtr lpMinimumApplicationAddress;
+                public readonly IntPtr lpMaximumApplicationAddress;
+                public readonly IntPtr dwActiveProcessorMask;
+                public readonly int dwNumberOfProcessors;
+                public readonly int dwProcessorType;
+                public readonly int dwAllocationGranularity;
+                public readonly short wProcessorLevel;
+                public readonly short wProcessorRevision;
             }
         }
     }

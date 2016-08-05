@@ -35,23 +35,21 @@ namespace Microsoft.Identity.Client
     public class PlatformParameters : IPlatformParameters
     {
         /// <summary>
-        /// 
         /// </summary>
         public PlatformParameters()
         {
         }
+
         /// <summary>
-        /// 
         /// </summary>
-        public PlatformParameters(UIViewController callerViewController):this()
+        public PlatformParameters(UIViewController callerViewController) : this()
         {
             this.CallerViewController = callerViewController;
         }
-        
+
         /// <summary>
         /// Caller UIViewController
         /// </summary>
-        public UIViewController CallerViewController { get; private set; } 
-        
+        public UIViewController CallerViewController { get; private set; }
     }
 }

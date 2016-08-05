@@ -36,14 +36,14 @@ namespace Microsoft.Identity.Client
     public class MsalSilentTokenAcquisitionException : MsalException
     {
         /// <summary>
-        ///  Initializes a new instance of the exception class.
+        /// Initializes a new instance of the exception class.
         /// </summary>
         public MsalSilentTokenAcquisitionException()
             : base(MsalError.FailedToAcquireTokenSilently, MsalErrorMessage.FailedToAcquireTokenSilently)
         {
         }
+
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="innerException"></param>
         public MsalSilentTokenAcquisitionException(Exception innerException)

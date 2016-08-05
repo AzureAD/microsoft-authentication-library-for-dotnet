@@ -40,9 +40,8 @@ namespace Microsoft.Identity.Client
     [EditorBrowsable(EditorBrowsableState.Never)]
     public class WindowsFormsWebAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
     {
-        private bool zoomed;
-
         private int statusCode;
+        private bool zoomed;
 
         /// <summary>
         /// Default constructor
@@ -54,8 +53,8 @@ namespace Microsoft.Identity.Client
             this.WebBrowser.DocumentTitleChanged += this.WebBrowserDocumentTitleChangedHandler;
             this.WebBrowser.ObjectForScripting = this;
         }
+
         /// <summary>
-        /// 
         /// </summary>
         protected override void OnAuthenticate()
         {
@@ -65,8 +64,8 @@ namespace Microsoft.Identity.Client
 
             base.OnAuthenticate();
         }
+
         /// <summary>
-        /// 
         /// </summary>
         public void ShowBrowser()
         {
@@ -83,23 +82,23 @@ namespace Microsoft.Identity.Client
                     throw this.CreateExceptionForAuthenticationUiFailed(this.statusCode);
             }
         }
+
         /// <summary>
-        /// 
         /// </summary>
         protected override void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
         {
             this.SetBrowserZoom();
             base.WebBrowserNavigatingHandler(sender, e);
         }
+
         /// <summary>
-        /// 
         /// </summary>
         protected override void OnClosingUrl()
         {
             this.DialogResult = DialogResult.OK;
         }
+
         /// <summary>
-        /// 
         /// </summary>
         protected override void OnNavigationCanceled(int inputStatusCode)
         {
@@ -123,14 +122,14 @@ namespace Microsoft.Identity.Client
 
         private void SetBrowserControlZoom(int zoomPercent)
         {
-            NativeWrapper.IWebBrowser2 browser2 = (NativeWrapper.IWebBrowser2)this.WebBrowser.ActiveXInstance;
+            NativeWrapper.IWebBrowser2 browser2 = (NativeWrapper.IWebBrowser2) this.WebBrowser.ActiveXInstance;
             NativeWrapper.IOleCommandTarget cmdTarget = browser2.Document as NativeWrapper.IOleCommandTarget;
             if (cmdTarget != null)
             {
                 const int OLECMDID_OPTICAL_ZOOM = 63;
                 const int OLECMDEXECOPT_DONTPROMPTUSER = 2;
 
-                object[] commandInput = { zoomPercent };
+                object[] commandInput = {zoomPercent};
 
                 int hResult = cmdTarget.Exec(
                     IntPtr.Zero, OLECMDID_OPTICAL_ZOOM, OLECMDEXECOPT_DONTPROMPTUSER, commandInput, IntPtr.Zero);

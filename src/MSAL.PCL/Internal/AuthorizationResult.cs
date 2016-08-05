@@ -43,9 +43,8 @@ namespace Microsoft.Identity.Client.Internal
     [DataContract]
     internal class AuthorizationResult
     {
-        internal AuthorizationResult(AuthorizationStatus status, string returnedUriInput):this(status)
+        internal AuthorizationResult(AuthorizationStatus status, string returnedUriInput) : this(status)
         {
-
             if (this.Status == AuthorizationStatus.UserCancel)
             {
                 this.Error = MsalError.AuthenticationCanceled;
@@ -61,7 +60,6 @@ namespace Microsoft.Identity.Client.Internal
                 this.ParseAuthorizeResponse(returnedUriInput);
             }
         }
-
 
         internal AuthorizationResult(AuthorizationStatus status)
         {
@@ -89,7 +87,8 @@ namespace Microsoft.Identity.Client.Internal
             if (!string.IsNullOrWhiteSpace(resultData))
             {
                 // Remove the leading '?' first
-                Dictionary<string, string> response = EncodingHelper.ParseKeyValueList(resultData.Substring(1), '&', true, null);
+                Dictionary<string, string> response = EncodingHelper.ParseKeyValueList(resultData.Substring(1), '&',
+                    true, null);
 
                 if (response.ContainsKey(TokenResponseClaim.Code))
                 {

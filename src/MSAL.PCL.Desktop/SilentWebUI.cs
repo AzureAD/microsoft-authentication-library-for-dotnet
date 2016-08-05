@@ -40,31 +40,21 @@ namespace Microsoft.Identity.Client
         private const int NavigationWaitMiliSecs = 250;
 
         /// <summary>
-        /// This is how long all redirect navigations are allowed to run for before a graceful 
+        /// This is how long all redirect navigations are allowed to run for before a graceful
         /// termination of the entire browser based authentication process is attempted.
         /// </summary>
         private const int NavigationOverallTimeout = 2000;
 
-        private bool disposed;
-
-        private WindowsFormsSynchronizationContext formsSyncContext;
-
-        private AuthorizationResult result;
-
-        private Exception uiException;
-
-        private ManualResetEvent threadInitializedEvent;
-
         private SilentWindowsFormsAuthenticationDialog dialog;
+        private bool disposed;
+        private WindowsFormsSynchronizationContext formsSyncContext;
+        private AuthorizationResult result;
+        private ManualResetEvent threadInitializedEvent;
+        private Exception uiException;
 
         public SilentWebUI()
         {
             this.threadInitializedEvent = new ManualResetEvent(false);
-        }
-
-        ~SilentWebUI()
-        {
-            Dispose(false);
         }
 
         public void Dispose()
@@ -73,8 +63,13 @@ namespace Microsoft.Identity.Client
             GC.SuppressFinalize(this);
         }
 
+        ~SilentWebUI()
+        {
+            Dispose(false);
+        }
+
         /// <summary>
-        /// Waits on the UI Thread to complete normally for NavigationOverallTimeout.  
+        /// Waits on the UI Thread to complete normally for NavigationOverallTimeout.
         /// After it attempts shutdown the UI thread graceful followed by aborting
         /// the thread if a graceful shutdown is not successful.
         /// </summary>
@@ -85,15 +80,15 @@ namespace Microsoft.Identity.Client
             long navigationOverallTimeout = NavigationOverallTimeout;
             long navigationStartTime = DateTime.Now.Ticks;
 
-            bool initialized = this.threadInitializedEvent.WaitOne((int)navigationOverallTimeout);
+            bool initialized = this.threadInitializedEvent.WaitOne((int) navigationOverallTimeout);
             if (initialized)
             {
                 // Calculate time remaining after time spend on initialization.
                 // There are 10 000 ticks in each millisecond.
-                long elapsedTimeSinceStart = (DateTime.Now.Ticks - navigationStartTime) / 10000;
+                long elapsedTimeSinceStart = (DateTime.Now.Ticks - navigationStartTime)/10000;
                 navigationOverallTimeout -= elapsedTimeSinceStart;
 
-                bool completedNormally = uiThread.Join(navigationOverallTimeout > 0 ? (int)navigationOverallTimeout : 0);
+                bool completedNormally = uiThread.Join(navigationOverallTimeout > 0 ? (int) navigationOverallTimeout : 0);
                 if (!completedNormally)
                 {
                     PlatformPlugin.Logger.Information(null, "Silent login thread did not complete on time.");
@@ -148,12 +143,12 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Callers expect the call to show the authentication dialog to be synchronous.  This is easy in the 
-        /// interactive case as ShowDialog is a synchronous call.  However, ShowDialog will always show 
+        /// Callers expect the call to show the authentication dialog to be synchronous.  This is easy in the
+        /// interactive case as ShowDialog is a synchronous call.  However, ShowDialog will always show
         /// the dialog.  It can not be hidden. So it can not be used in the silent case.  Instead we need
-        /// to do the equivalent of creating our own modal dialog.  We start a new thread, launch an 
+        /// to do the equivalent of creating our own modal dialog.  We start a new thread, launch an
         /// invisible window on that thread.  The original calling thread blocks until the secondary
-        /// UI thread completes.  
+        /// UI thread completes.
         /// </summary>
         /// <returns></returns>
         protected override AuthorizationResult OnAuthenticate(string headers)
@@ -194,7 +189,7 @@ namespace Microsoft.Identity.Client
                     if (this.formsSyncContext != null)
                     {
                         this.formsSyncContext.Dispose();
-                        this.formsSyncContext = null;                        
+                        this.formsSyncContext = null;
                     }
                 }
 
@@ -225,7 +220,7 @@ namespace Microsoft.Identity.Client
 
             // We need call dispose, while message loop is running.
             // WM_QUIT message from ExitThread will delayed, if Dispose will create a set of new messages (we suspect that it happens).
-            ((SilentWindowsFormsAuthenticationDialog)sender).Dispose();
+            ((SilentWindowsFormsAuthenticationDialog) sender).Dispose();
             Application.ExitThread();
         }
     }

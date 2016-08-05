@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -43,7 +44,8 @@ namespace Microsoft.Identity.Client.Internal
             this.HasCredential = false;
         }
 
-        public ClientKey(string clientId, ClientCredential clientCredential, Authenticator authenticator):this(clientId)
+        public ClientKey(string clientId, ClientCredential clientCredential, Authenticator authenticator)
+            : this(clientId)
         {
             if (clientCredential == null)
             {
@@ -55,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal
             this.HasCredential = true;
         }
 
-        public ClientKey(string clientId, ClientAssertion clientAssertion):this(clientId)
+        public ClientKey(string clientId, ClientAssertion clientAssertion) : this(clientId)
         {
             if (clientAssertion == null)
             {
@@ -66,28 +68,25 @@ namespace Microsoft.Identity.Client.Internal
             this.HasCredential = true;
         }
 
-        public ClientCredential Credential { get; private set; }
-
-        public ClientAssertion Assertion { get; private set; }
-
-        public Authenticator Authenticator { get; private set; }
-
-        public string ClientId { get; private set; }
-
+        public ClientCredential Credential { get; }
+        public ClientAssertion Assertion { get; }
+        public Authenticator Authenticator { get; }
+        public string ClientId { get; }
         public bool HasCredential { get; private set; }
 
-        public void AddToParameters(IDictionary<string, string> parameters)
+        public IDictionary<string, string> ToParameters()
         {
+            IDictionary<string, string> parameters = new Dictionary<string, string>();
             if (this.ClientId != null)
             {
-                parameters[OAuthParameter.ClientId] = this.ClientId;
+                parameters[OAuth2Parameter.ClientId] = this.ClientId;
             }
 
             if (this.Credential != null)
             {
                 if (!string.IsNullOrEmpty(this.Credential.Secret))
                 {
-                    parameters[OAuthParameter.ClientSecret] = this.Credential.Secret;
+                    parameters[OAuth2Parameter.ClientSecret] = this.Credential.Secret;
                 }
                 else
                 {
@@ -95,31 +94,32 @@ namespace Microsoft.Identity.Client.Internal
 
                     if (clientAssertion == null || this.Credential.ValidTo != 0)
                     {
-
                         bool assertionNearExpiry = (this.Credential.ValidTo <=
                                                     JsonWebToken.ConvertToTimeT(DateTime.UtcNow +
                                                                                 TimeSpan.FromMinutes(
                                                                                     Constant.ExpirationMarginInMinutes)));
                         if (assertionNearExpiry)
                         {
-                            JsonWebToken jwtToken = new JsonWebToken(this.ClientId, this.Authenticator.SelfSignedJwtAudience);
+                            JsonWebToken jwtToken = new JsonWebToken(this.ClientId,
+                                this.Authenticator.SelfSignedJwtAudience);
                             clientAssertion = jwtToken.Sign(this.Credential.Certificate);
                             this.Credential.ValidTo = jwtToken.Payload.ValidTo;
                             this.Credential.ClientAssertion = clientAssertion;
                         }
                     }
 
-                    parameters[OAuthParameter.ClientAssertionType] = clientAssertion.AssertionType;
-                    parameters[OAuthParameter.ClientAssertion] = clientAssertion.Assertion;
+                    parameters[OAuth2Parameter.ClientAssertionType] = clientAssertion.AssertionType;
+                    parameters[OAuth2Parameter.ClientAssertion] = clientAssertion.Assertion;
                 }
             }
 
             else if (this.Assertion != null)
             {
-                parameters[OAuthParameter.ClientAssertionType] = this.Assertion.AssertionType;
-                parameters[OAuthParameter.ClientAssertion] = this.Assertion.Assertion;
+                parameters[OAuth2Parameter.ClientAssertionType] = this.Assertion.AssertionType;
+                parameters[OAuth2Parameter.ClientAssertion] = this.Assertion.Assertion;
             }
-            
+
+            return parameters;
         }
     }
 }

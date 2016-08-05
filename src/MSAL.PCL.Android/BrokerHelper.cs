@@ -27,12 +27,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
-using Android.Accounts;
-using Android.App;
-using Android.Content;
-using Java.IO;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 
@@ -40,23 +35,21 @@ namespace Microsoft.Identity.Client
 {
     internal class BrokerHelper : IBrokerHelper
     {
-
         public IPlatformParameters PlatformParameters { get; set; }
-
-        private bool WillSkipBroker()
-        {
-            return true;
-        }
 
         public bool CanInvokeBroker
         {
             get { return false; }
         }
 
-
         public Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {
             throw new NotImplementedException();
+        }
+
+        private bool WillSkipBroker()
+        {
+            return true;
         }
     }
 }

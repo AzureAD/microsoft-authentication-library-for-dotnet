@@ -39,7 +39,9 @@ namespace Microsoft.Identity.Client.Internal
         private const char Base64UrlCharacter62 = '-';
         private const char Base64UrlCharacter63 = '_';
         private static readonly Encoding TextEncoding = Encoding.UTF8;
-        private static readonly string DoubleBase64PadCharacter = string.Format(CultureInfo.InvariantCulture, "{0}{0}", Base64PadCharacter);
+
+        private static readonly string DoubleBase64PadCharacter = string.Format(CultureInfo.InvariantCulture, "{0}{0}",
+            Base64PadCharacter);
 
         //
         // The following functions perform base64url encoding which differs from regular base64 encoding as follows
@@ -64,23 +66,22 @@ namespace Microsoft.Identity.Client.Internal
             s = s.Replace(Base64UrlCharacter62, Base64Character62); // 62nd char of encoding
             s = s.Replace(Base64UrlCharacter63, Base64Character63); // 63rd char of encoding
 
-            switch (s.Length % 4) 
+            switch (s.Length%4)
             {
                 // Pad 
                 case 0:
                     break; // No pad chars in this case
                 case 2:
-                    s += DoubleBase64PadCharacter; 
+                    s += DoubleBase64PadCharacter;
                     break; // Two pad chars
                 case 3:
-                    s += Base64PadCharacter; 
+                    s += Base64PadCharacter;
                     break; // One pad char
                 default:
                     throw new ArgumentException("Illegal base64url string!", "arg");
             }
 
             return Convert.FromBase64String(s); // Standard base64 decoder
-
         }
 
         internal static string Encode(byte[] arg)
@@ -92,8 +93,8 @@ namespace Microsoft.Identity.Client.Internal
 
             string s = Convert.ToBase64String(arg);
             s = s.Split(Base64PadCharacter)[0]; // Remove any trailing padding
-            s = s.Replace(Base64Character62, Base64UrlCharacter62);  // 62nd char of encoding
-            s = s.Replace(Base64Character63, Base64UrlCharacter63);  // 63rd char of encoding
+            s = s.Replace(Base64Character62, Base64UrlCharacter62); // 62nd char of encoding
+            s = s.Replace(Base64Character63, Base64UrlCharacter63); // 63rd char of encoding
 
             return s;
         }

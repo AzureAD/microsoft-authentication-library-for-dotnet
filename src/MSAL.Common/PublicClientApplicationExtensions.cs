@@ -25,25 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Globalization;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
-	/// <summary>
-    /// 
+    /// <summary>
     /// </summary>
     public static class PublicClientApplicationExtensions
     {
-
         /// <summary>
-        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
+        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific
+        /// libraries.
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="app"></param>
         /// <returns></returns>
-        public static async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthAsync(this PublicClientApplication app, string[] scope)
+        public static async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthAsync(
+            this PublicClientApplication app, string[] scope)
         {
             return
                 await
@@ -51,16 +49,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific libraries.
+        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific
+        /// libraries.
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="authority"></param>
         /// <param name="policy"></param>
         /// <param name="app"></param>
         /// <returns></returns>
-        public static async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthAsync(this PublicClientApplication app, string[] scope, string authority, string policy)
+        public static async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthAsync(
+            this PublicClientApplication app, string[] scope, string authority, string policy)
         {
-
             return
                 await
                     app.AcquireTokenWithIntegratedAuthInternalAsync(scope, authority, policy).ConfigureAwait(false);

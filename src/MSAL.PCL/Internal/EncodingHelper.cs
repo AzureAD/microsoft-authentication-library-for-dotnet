@@ -37,7 +37,6 @@ namespace Microsoft.Identity.Client.Internal
     /// </summary>
     internal static class EncodingHelper
     {
-
         public static string UrlEncode(string message)
         {
             if (string.IsNullOrEmpty(message))
@@ -72,16 +71,22 @@ namespace Microsoft.Identity.Client.Internal
         public static string ToQueryParameter(this IDictionary<string, string> input)
         {
             StringBuilder builder = new StringBuilder();
+
             foreach (var key in input.Keys)
             {
-                builder.AppendFormat(CultureInfo.InvariantCulture,"{0}={1}&", key, UrlEncode(input[key]));
+                builder.AppendFormat(CultureInfo.InvariantCulture, "{0}={1}&", key, UrlEncode(input[key]));
             }
 
-            builder.Remove(builder.Length - 1, 1);
+            if (builder.Length > 0)
+            {
+                builder.Remove(builder.Length - 1, 1);
+            }
+
             return builder.ToString();
         }
 
-        public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, bool lowercaseKeys,
+        public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode,
+            bool lowercaseKeys,
             CallState callState)
         {
             var response = new Dictionary<string, string>();
@@ -109,11 +114,13 @@ namespace Microsoft.Identity.Client.Internal
                         key = key.Trim().ToLower();
                     }
 
-                    value = value.Trim().Trim(new[] { '\"' }).Trim();
+                    value = value.Trim().Trim(new[] {'\"'}).Trim();
 
                     if (response.ContainsKey(key) && callState != null)
                     {
-                        PlatformPlugin.Logger.Warning(callState, string.Format(CultureInfo.InvariantCulture,"Key/value pair list contains redundant key '{0}'.", key));
+                        PlatformPlugin.Logger.Warning(callState,
+                            string.Format(CultureInfo.InvariantCulture,
+                                "Key/value pair list contains redundant key '{0}'.", key));
                     }
 
                     response[key] = value;
@@ -123,7 +130,8 @@ namespace Microsoft.Identity.Client.Internal
             return response;
         }
 
-        public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, CallState callState)
+        public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode,
+            CallState callState)
         {
             return ParseKeyValueList(input, delimiter, urlDecode, true, callState);
         }
@@ -219,7 +227,7 @@ namespace Microsoft.Identity.Client.Internal
                 return null;
             }
 
-            var encodedMessage = new char[message.Length * 2];
+            var encodedMessage = new char[message.Length*2];
             int length = 0;
             var singleChar = new char[1];
             foreach (char ch in message)
@@ -231,7 +239,7 @@ namespace Microsoft.Identity.Client.Internal
                 encodedSingleChar.CopyTo(encodedMessage, length);
                 if (length + encodedSingleChar.Length > encodedMessage.Length)
                 {
-                    Array.Resize(ref encodedMessage, message.Length * 2);
+                    Array.Resize(ref encodedMessage, message.Length*2);
                 }
 
                 length += encodedSingleChar.Length;
@@ -283,13 +291,13 @@ namespace Microsoft.Identity.Client.Internal
         private static void AddKeyValueString(StringBuilder messageBuilder, string key, char[] value)
         {
             string delimiter = (messageBuilder.Length == 0) ? string.Empty : "&";
-            messageBuilder.AppendFormat(CultureInfo.InvariantCulture,"{0}{1}=", delimiter, key);
+            messageBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}=", delimiter, key);
             messageBuilder.Append(value);
         }
 
         internal static string GetString(byte[] bytes)
         {
-            char[] chars = new char[bytes.Length / sizeof(char)];
+            char[] chars = new char[bytes.Length/sizeof (char)];
             System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
             return new string(chars);
         }

@@ -51,9 +51,10 @@ namespace Microsoft.Identity.Client
             if (certificate.PublicKey.Key.KeySize < MinKeySizeInBits)
             {
                 throw new ArgumentOutOfRangeException("certificate",
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate, MinKeySizeInBits));
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
+                        MinKeySizeInBits));
             }
-            
+
             this.Certificate = certificate;
         }
 
@@ -68,9 +69,9 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the certificate used as credential.
         /// </summary>
-        public X509Certificate2 Certificate { get; private set; }
+        public X509Certificate2 Certificate { get; }
+
         /// <summary>
-        /// 
         /// </summary>
         public byte[] Sign(string message)
         {
@@ -79,7 +80,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
         /// </summary>
         public string Thumbprint
         {

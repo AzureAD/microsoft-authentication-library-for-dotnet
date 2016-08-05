@@ -25,23 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Contains information of a single user. This information is used for token cache lookup. Also if created with userId, userId is sent to the service when login_hint is accepted.
+    /// Contains information of a single user. This information is used for token cache lookup. Also if created with
+    /// userId, userId is sent to the service when login_hint is accepted.
     /// </summary>
     [DataContract]
     public sealed class User
     {
-        
         internal User()
         {
-            
         }
 
         internal User(User other)
@@ -55,7 +53,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Gets identifier of the user authenticated during token acquisition. 
+        /// Gets identifier of the user authenticated during token acquisition.
         /// </summary>
         [DataMember]
         public string UniqueId { get; internal set; }
@@ -67,43 +65,42 @@ namespace Microsoft.Identity.Client
         public string DisplayableId { get; internal set; }
 
         /// <summary>
-        /// Gets given name of the user if provided by the service. If not, the value is null. 
+        /// Gets given name of the user if provided by the service. If not, the value is null.
         /// </summary>
         [DataMember]
         public string Name { get; internal set; }
 
         /// <summary>
-        /// Gets identity provider if returned by the service. If not, the value is null. 
+        /// Gets identity provider if returned by the service. If not, the value is null.
         /// </summary>
         [DataMember]
         public string IdentityProvider { get; internal set; }
-        
+
         [DataMember]
         internal string HomeObjectId { get; set; }
-
 
         internal TokenCache TokenCache { get; set; }
 
         /// <summary>
-        /// 
         /// </summary>
         public string ClientId { get; internal set; }
 
         /// <summary>
-        /// 
         /// </summary>
         public string Authority { get; internal set; }
 
-
         /// <summary>
-        /// 
         /// </summary>
         public void SignOut()
         {
-            if(this.TokenCache == null) { return; }
+            if (this.TokenCache == null)
+            {
+                return;
+            }
 
-            IEnumerable<TokenCacheItem> items = this.TokenCache.ReadItems(this.ClientId).Where(item => item.HomeObjectId.Equals(this.HomeObjectId));
-            foreach(var item in items)
+            IEnumerable<TokenCacheItem> items =
+                this.TokenCache.ReadItems(this.ClientId).Where(item => item.HomeObjectId.Equals(this.HomeObjectId));
+            foreach (var item in items)
             {
                 this.TokenCache.DeleteItem(item);
             }

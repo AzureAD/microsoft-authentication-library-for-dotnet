@@ -37,10 +37,9 @@ namespace Microsoft.Identity.Client
         private const int S_OK = 0;
         private const int S_FALSE = 1;
         private const int WM_CHAR = 0x102;
-
-        private AxHost.ConnectionPointCookie webBrowserEventCookie;
-        private CustomWebBrowserEvent webBrowserEvent;
         private static readonly HashSet<Shortcut> shortcutBlacklist = new HashSet<Shortcut>();
+        private CustomWebBrowserEvent webBrowserEvent;
+        private AxHost.ConnectionPointCookie webBrowserEventCookie;
 
         static CustomWebBrowser()
         {
@@ -51,11 +50,49 @@ namespace Microsoft.Identity.Client
             shortcutBlacklist.Add(Shortcut.AltUpArrow);
         }
 
-        [ComVisible(true), ComDefaultInterface(typeof(NativeWrapper.IDocHostUIHandler))]
+        protected override WebBrowserSiteBase CreateWebBrowserSiteBase()
+        {
+            return new CustomSite(this);
+        }
+
+        protected override void CreateSink()
+        {
+            base.CreateSink();
+
+            object activeXInstance = this.ActiveXInstance;
+            if (activeXInstance != null)
+            {
+                this.webBrowserEvent = new CustomWebBrowserEvent(this);
+                this.webBrowserEventCookie = new AxHost.ConnectionPointCookie(activeXInstance, this.webBrowserEvent,
+                    typeof (NativeWrapper.DWebBrowserEvents2));
+            }
+        }
+
+        protected override void DetachSink()
+        {
+            if (this.webBrowserEventCookie != null)
+            {
+                this.webBrowserEventCookie.Disconnect();
+                this.webBrowserEventCookie = null;
+            }
+
+            base.DetachSink();
+        }
+
+        protected virtual void OnNavigateError(WebBrowserNavigateErrorEventArgs e)
+        {
+            if (NavigateError != null)
+            {
+                this.NavigateError(this, e);
+            }
+        }
+
+        public event WebBrowserNavigateErrorEventHandler NavigateError;
+
+        [ComVisible(true), ComDefaultInterface(typeof (NativeWrapper.IDocHostUIHandler))]
         protected class CustomSite : WebBrowserSite, NativeWrapper.IDocHostUIHandler, ICustomQueryInterface
         {
             private const int NotImplemented = -2147467263;
-
             private readonly WebBrowser host;
 
             public CustomSite(WebBrowser host)
@@ -64,19 +101,36 @@ namespace Microsoft.Identity.Client
                 this.host = host;
             }
 
+            #region ICustomQueryInterface Members
+
+            public CustomQueryInterfaceResult GetInterface(ref Guid iid, out IntPtr ppv)
+            {
+                ppv = IntPtr.Zero;
+                if (iid == typeof (NativeWrapper.IDocHostUIHandler).GUID)
+                {
+                    ppv = Marshal.GetComInterfaceForObject(this, typeof (NativeWrapper.IDocHostUIHandler),
+                        CustomQueryInterfaceMode.Ignore);
+                    return CustomQueryInterfaceResult.Handled;
+                }
+                return CustomQueryInterfaceResult.NotHandled;
+            }
+
+            #endregion
 
             public int EnableModeless(bool fEnable)
             {
                 return NotImplemented;
             }
 
-            public int FilterDataObject(System.Runtime.InteropServices.ComTypes.IDataObject pDO, out System.Runtime.InteropServices.ComTypes.IDataObject ppDORet)
+            public int FilterDataObject(System.Runtime.InteropServices.ComTypes.IDataObject pDO,
+                out System.Runtime.InteropServices.ComTypes.IDataObject ppDORet)
             {
                 ppDORet = null;
                 return S_FALSE;
             }
 
-            public int GetDropTarget(NativeWrapper.IOleDropTarget pDropTarget, out NativeWrapper.IOleDropTarget ppDropTarget)
+            public int GetDropTarget(NativeWrapper.IOleDropTarget pDropTarget,
+                out NativeWrapper.IOleDropTarget ppDropTarget)
             {
                 ppDropTarget = null;
                 return S_OK;
@@ -87,6 +141,7 @@ namespace Microsoft.Identity.Client
                 ppDispatch = this.host.ObjectForScripting;
                 return S_OK;
             }
+
             public int GetHostInfo(NativeWrapper.DOCHOSTUIINFO info)
             {
                 const int DOCHOSTUIFLAG_ENABLE_REDIRECT_NOTIFICATION = 0x4000000;
@@ -161,13 +216,14 @@ namespace Microsoft.Identity.Client
                     case 0x4: // selected text CONTEXT_MENU_TEXTSELECT
                     case 0x9: // CONTEXT_MENU_VSCROLL
                     case 0x10: //CONTEXT_MENU_HSCROLL
-                         return S_FALSE; // allow to show menu; Host did not display its UI. MSHTML will display its UI.
-                        
+                        return S_FALSE; // allow to show menu; Host did not display its UI. MSHTML will display its UI.
                 }
                 return S_OK;
             }
 
-            public int ShowUI(int dwID, NativeWrapper.IOleInPlaceActiveObject activeObject, NativeWrapper.IOleCommandTarget commandTarget, NativeWrapper.IOleInPlaceFrame frame, NativeWrapper.IOleInPlaceUIWindow doc)
+            public int ShowUI(int dwID, NativeWrapper.IOleInPlaceActiveObject activeObject,
+                NativeWrapper.IOleCommandTarget commandTarget, NativeWrapper.IOleInPlaceFrame frame,
+                NativeWrapper.IOleInPlaceUIWindow doc)
             {
                 return S_FALSE;
             }
@@ -200,65 +256,10 @@ namespace Microsoft.Identity.Client
             {
                 return NotImplemented;
             }
-
-            #region ICustomQueryInterface Members
-
-            public CustomQueryInterfaceResult GetInterface(ref Guid iid, out IntPtr ppv)
-            {
-                ppv = IntPtr.Zero;
-                if (iid == typeof(NativeWrapper.IDocHostUIHandler).GUID)
-                {
-                    ppv = Marshal.GetComInterfaceForObject(this, typeof(NativeWrapper.IDocHostUIHandler), CustomQueryInterfaceMode.Ignore);
-                    return CustomQueryInterfaceResult.Handled;
-                }
-                return CustomQueryInterfaceResult.NotHandled;
-            }
-
-            #endregion
         }
-
-        protected override WebBrowserSiteBase CreateWebBrowserSiteBase()
-        {
-            return new CustomSite(this);
-        }
-
-        protected override void CreateSink()
-        {
-            base.CreateSink();
-
-            object activeXInstance = this.ActiveXInstance;
-            if (activeXInstance != null)
-            {
-                this.webBrowserEvent = new CustomWebBrowserEvent(this);
-                this.webBrowserEventCookie = new AxHost.ConnectionPointCookie(activeXInstance, this.webBrowserEvent, typeof(NativeWrapper.DWebBrowserEvents2));
-            }
-
-        }
-
-        protected override void DetachSink()
-        {
-            if (this.webBrowserEventCookie != null)
-            {
-                this.webBrowserEventCookie.Disconnect();
-                this.webBrowserEventCookie = null;
-            }
-
-            base.DetachSink();
-        }
-
-        protected virtual void OnNavigateError(WebBrowserNavigateErrorEventArgs e)
-        {
-            if (NavigateError != null)
-            {
-                this.NavigateError(this, e);
-            }
-        }
-        
-
-        public event WebBrowserNavigateErrorEventHandler NavigateError;
     }
+
     /// <summary>
-    /// 
     /// </summary>
     public delegate void WebBrowserNavigateErrorEventHandler(object sender, WebBrowserNavigateErrorEventArgs e);
 }

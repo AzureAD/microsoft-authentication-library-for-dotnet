@@ -33,7 +33,7 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Contains the results of one token acquisition operation. 
+    /// Contains the results of one token acquisition operation.
     /// </summary>
     [DataContract]
     public sealed class AuthenticationResult
@@ -41,7 +41,8 @@ namespace Microsoft.Identity.Client
         private const string Oauth2AuthorizationHeader = "Bearer ";
 
         /// <summary>
-        /// Creates result returned from AcquireToken. Except in advanced scenarios related to token caching, you do not need to create any instance of AuthenticationResult.
+        /// Creates result returned from AcquireToken. Except in advanced scenarios related to token caching, you do not need
+        /// to create any instance of AuthenticationResult.
         /// </summary>
         /// <param name="tokenType">Type of the Token returned</param>
         /// <param name="token">The Token requested</param>
@@ -54,7 +55,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Gets the type of the Token returned. 
+        /// Gets the type of the Token returned.
         /// </summary>
         [DataMember]
         public string TokenType { get; private set; }
@@ -67,27 +68,29 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the Token property ceases to be valid.
-        /// This value is calculated based on current UTC time measured locally and the value expiresIn received from the service.
+        /// This value is calculated based on current UTC time measured locally and the value expiresIn received from the
+        /// service.
         /// </summary>
         [DataMember]
         public DateTimeOffset ExpiresOn { get; internal set; }
 
         /// <summary>
-        /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is not returned by the service.
+        /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is
+        /// not returned by the service.
         /// </summary>
         [DataMember]
         public string TenantId { get; private set; }
 
-
         /// <summary>
-        /// Gets an identifier for the family the token was acquired from. This property will be null if tenant information is not returned by the service.
+        /// Gets an identifier for the family the token was acquired from. This property will be null if tenant information is
+        /// not returned by the service.
         /// </summary>
         [DataMember]
         internal string FamilyId { get; set; }
 
-
         /// <summary>
-        /// Gets otherUser information including otherUser Id. Some elements in User might be null if not returned by the service.
+        /// Gets otherUser information including otherUser Id. Some elements in User might be null if not returned by the
+        /// service.
         /// </summary>
         [DataMember]
         public User User { get; internal set; }
@@ -101,14 +104,16 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the scope values returned from the service.
         /// </summary>
-        public string[] Scope { get { return ScopeSet.AsArray(); } }
-
+        public string[] Scope
+        {
+            get { return ScopeSet.AsArray(); }
+        }
 
         /// <summary>
         /// Gets the scope values returned from the service.
         /// </summary>
         [DataMember]
-        internal HashSet<string >ScopeSet { get; set; }
+        internal HashSet<string> ScopeSet { get; set; }
 
         /// <summary>
         /// Creates authorization header from authentication result.

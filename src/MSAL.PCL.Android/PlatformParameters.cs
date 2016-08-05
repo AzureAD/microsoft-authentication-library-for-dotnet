@@ -35,15 +35,14 @@ namespace Microsoft.Identity.Client
     public class PlatformParameters : IPlatformParameters
     {
         /// <summary>
-        /// 
         /// </summary>
         public PlatformParameters()
         {
         }
+
         /// <summary>
-        /// 
         /// </summary>
-        public PlatformParameters(Activity callerActivity):this()
+        public PlatformParameters(Activity callerActivity) : this()
         {
             this.CallerActivity = callerActivity;
         }
@@ -51,6 +50,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Caller Android Activity
         /// </summary>
-        public Activity CallerActivity { get; private set; } 
+        public Activity CallerActivity { get; private set; }
     }
 }

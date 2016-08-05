@@ -67,7 +67,6 @@ namespace Microsoft.Identity.Client.Internal
 
         internal static string AsSingleString(this string[] arrayOfStrings)
         {
-
             if (IsNullOrEmpty(arrayOfStrings))
             {
                 return string.Empty;
@@ -84,25 +83,25 @@ namespace Microsoft.Identity.Client.Internal
 
             return sb.ToString();
         }
-        
+
         internal static HashSet<string> AsSet(this string singleString)
         {
             if (string.IsNullOrEmpty(singleString))
             {
-                return new HashSet<string>();    
+                return new HashSet<string>();
             }
 
-            return new HashSet<string>(singleString.Split(new[] { " " }, StringSplitOptions.None));
+            return new HashSet<string>(singleString.Split(new[] {" "}, StringSplitOptions.None));
         }
 
         internal static string[] AsArray(this string singleString)
         {
             if (string.IsNullOrWhiteSpace(singleString))
             {
-                return new string[] { };
+                return new string[] {};
             }
 
-            return singleString.Split(new[] { " " }, StringSplitOptions.None);
+            return singleString.Split(new[] {" "}, StringSplitOptions.None);
         }
 
         internal static HashSet<string> CreateSetFromArray(this string[] arrayStrings)

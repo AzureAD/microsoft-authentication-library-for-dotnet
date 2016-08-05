@@ -26,27 +26,20 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using CoreFoundation;
-using Foundation;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
-using UIKit;
 
 namespace Microsoft.Identity.Client
 {
     internal class BrokerHelper : IBrokerHelper
     {
         public IPlatformParameters PlatformParameters { get; set; }
-        
-        public bool CanInvokeBroker { get
+
+        public bool CanInvokeBroker
         {
-            return false;
-        }
+            get { return false; }
         }
 
         public Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)

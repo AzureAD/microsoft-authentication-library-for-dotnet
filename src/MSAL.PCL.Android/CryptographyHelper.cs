@@ -42,6 +42,5 @@ namespace Microsoft.Identity.Client
                 return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
             }
         }
-        
     }
 }

@@ -40,9 +40,14 @@ namespace Microsoft.Identity.Client.Internal
 
     internal static class MsalErrorMessageEx
     {
-        public const string CannotAccessUserInformation = "Cannot access user information. Check machine's Privacy settings or initialize UserCredential with userId";
-        public const string UnauthorizedUserInformationAccess = "Unauthorized accessing user information. Check application's 'Enterprise Authentication' capability";
-        public const string NeedToSetCallbackUriAsLocalSetting = "You need to add the value of WebAuthenticationBroker.GetCurrentApplicationCallbackUri() to an application's local setting named CurrentApplicationCallbackUri.";
+        public const string CannotAccessUserInformation =
+            "Cannot access user information. Check machine's Privacy settings or initialize UserCredential with userId";
+
+        public const string UnauthorizedUserInformationAccess =
+            "Unauthorized accessing user information. Check application's 'Enterprise Authentication' capability";
+
+        public const string NeedToSetCallbackUriAsLocalSetting =
+            "You need to add the value of WebAuthenticationBroker.GetCurrentApplicationCallbackUri() to an application's local setting named CurrentApplicationCallbackUri.";
     }
 
     internal static class Constant
@@ -115,7 +120,9 @@ namespace Microsoft.Identity.Client.Internal
         public const string RedirectUriContainsFragment = "'redirectUri' must NOT include a fragment component";
         public const string LoginHintNullForUiOption = "Null login_hint is not allowed for UiOptions.ActAsCurrentUser";
         public const string ServiceReturnedError = "Service returned error. Check InnerException for more details";
-        public const string BrokerReponseHashMismatch = "Unencrypted broker response hash did not match the expected hash";
+
+        public const string BrokerReponseHashMismatch =
+            "Unencrypted broker response hash did not match the expected hash";
 
         public const string StsMetadataRequestFailed =
             "Metadata request to Access Control service failed. Check InnerException for more details";
@@ -166,7 +173,6 @@ namespace Microsoft.Identity.Client.Internal
             "Integrated authentication failed. You may try an alternative authentication method";
 
         public const string DuplicateQueryParameterTemplate = "Duplicate query parameter '{0}' in extraQueryParameters";
-        
         public const string DeviceCertificateNotFoundTemplate = "Device Certificate was not found for {0}";
     }
 
@@ -189,5 +195,4 @@ namespace Microsoft.Identity.Client.Internal
         public static readonly XNamespace Issue2005 = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue";
         public static readonly XNamespace SoapEnvelope = "http://www.w3.org/2003/05/soap-envelope";
     }
-    
 }

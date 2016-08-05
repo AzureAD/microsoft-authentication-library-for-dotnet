@@ -35,6 +35,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.MSAL.NET.Unit.Mocks;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.Internal.Http;
 
 namespace Test.MSAL.NET.Unit
 {
@@ -46,6 +47,21 @@ namespace Test.MSAL.NET.Unit
         //The following string is hash code for a mocked Access Token
         //[SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine")]
         private const string HashAccessToken = "nC2j5wL7iN83cU5DJsDXnt11TdEObirkKTVKari51Ps=";
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TokenCache.DefaultSharedAppTokenCache = new TokenCache();
+            TokenCache.DefaultSharedUserTokenCache = new TokenCache();
+            HttpClientFactory.ReturnHttpClientForMocks = true;
+            HttpMessageHandlerFactory.ClearMockHandlers();
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
 
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
@@ -80,11 +96,12 @@ namespace Test.MSAL.NET.Unit
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
                 TestConstants.DefaultRedirectUri, new ClientCredential(TestConstants.DefaultClientSecret), new TokenCache());
             app.AppTokenCache = new TokenCache();
-            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            app.UserTokenCache = new TokenCache();
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
-            };
+            });
 
             Task<AuthenticationResult> task = app.AcquireTokenForClient(TestConstants.DefaultScope.ToArray(),
                 TestConstants.DefaultPolicy);
@@ -113,11 +130,17 @@ namespace Test.MSAL.NET.Unit
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
                 TestConstants.DefaultRedirectUri, cc, new TokenCache());
             app.AppTokenCache = new TokenCache();
-            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
-            };
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
+            });
 
             Task<AuthenticationResult> task = app.AcquireTokenForClient(TestConstants.DefaultScope.ToArray(),
                 TestConstants.DefaultPolicy);
@@ -145,12 +168,6 @@ namespace Test.MSAL.NET.Unit
             string cachedAssertion = cc.ClientAssertion.Assertion;
             long cacheValidTo = cc.ValidTo;
 
-            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
-            };
-
             task = app.AcquireTokenForClient(TestConstants.ScopeForAnotherResource.ToArray(),
                 TestConstants.DefaultPolicy);
             result = task.Result;
@@ -176,17 +193,18 @@ namespace Test.MSAL.NET.Unit
             app.UserTokenCache = cache;
 
             string[] scope = {"mail.read"};
-            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage =
                     MockHelpers.CreateSuccessTokenResponseMessage("unique_id_3", "displayable@id3.com", "root_id_3",
                         scope)
-            };
+            });
 
             UserAssertion assertion = new UserAssertion(someAssertion, AssertionType);
             Task<AuthenticationResult> task = app.AcquireTokenOnBehalfOfAsync(key.Scope.AsArray(),
                 assertion, key.Authority, TestConstants.DefaultPolicy);
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual("unique_id_3", result.User.UniqueId);
@@ -214,14 +232,6 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DefaultRedirectUri, new ClientCredential(TestConstants.DefaultClientSecret), new TokenCache());
             app.UserTokenCache = cache;
 
-            //this is a fail safe. No call should go on network
-            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage =
-                    MockHelpers.CreateInvalidGrantTokenResponseMessage()
-            };
-
             UserAssertion assertion = new UserAssertion(someAssertion, AssertionType);
             Task<AuthenticationResult> task = app.AcquireTokenOnBehalfOfAsync(key.Scope.AsArray(),
                 assertion, key.Authority, TestConstants.DefaultPolicy);
@@ -248,15 +258,7 @@ namespace Test.MSAL.NET.Unit
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
                 TestConstants.DefaultRedirectUri, new ClientCredential(TestConstants.DefaultClientSecret), new TokenCache());
             app.UserTokenCache = cache;
-
-            //this is a fail safe. No call should go on network
-            HttpMessageHandlerFactory.MockHandler = new MockHttpMessageHandler()
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage =
-                    MockHelpers.CreateInvalidGrantTokenResponseMessage()
-            };
-
+            
             UserAssertion assertion = new UserAssertion(someAssertion, AssertionType, key.DisplayableId);
             Task<AuthenticationResult> task = app.AcquireTokenOnBehalfOfAsync(key.Scope.AsArray(),
                 assertion, key.Authority, TestConstants.DefaultPolicy);
@@ -354,10 +356,11 @@ namespace Test.MSAL.NET.Unit
             Dictionary<string, string> qp = EncodingHelper.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
             Assert.IsNotNull(qp);
             Assert.AreEqual(12, qp.Count);
+            Assert.IsFalse(qp.ContainsKey("client_secret"));
             Assert.AreEqual("r1/scope1 r1/scope2 r2/scope1 r2/scope2 openid offline_access", qp["scope"]);
             Assert.AreEqual(TestConstants.DefaultClientId, qp["client_id"]);
             Assert.AreEqual("code", qp["response_type"]);
-            Assert.AreEqual("custom://redirect-uri", qp["redirect_uri"]);
+            Assert.AreEqual("custom://redirect-uri/", qp["redirect_uri"]);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, qp["login_hint"]);
             Assert.AreEqual("MSAL.Desktop", qp["x-client-sku"]);
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));

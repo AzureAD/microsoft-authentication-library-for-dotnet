@@ -32,11 +32,14 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-    class BrokerHelper : IBrokerHelper
+    internal class BrokerHelper : IBrokerHelper
     {
         public IPlatformParameters PlatformParameters { get; set; }
 
-        public bool CanInvokeBroker { get { return false; } }
+        public bool CanInvokeBroker
+        {
+            get { return false; }
+        }
 
         public Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {

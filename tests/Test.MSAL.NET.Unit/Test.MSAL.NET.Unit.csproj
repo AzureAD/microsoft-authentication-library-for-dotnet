@@ -83,14 +83,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="RequestsTests\AcquireTokenSilentHandlerTests.cs" />
+    <Compile Include="HttpTests\MsalHttpRequestTests.cs" />
+    <Compile Include="RequestsTests\SilentRequestTests.cs" />
     <Compile Include="TokenCacheTests.cs" />
-    <Compile Include="HandlersTests\AcquireTokenInteractiveHandlerTests.cs" />
-    <Compile Include="AuthenticationParametersTests.cs" />
+    <Compile Include="RequestsTests\InteractiveRequestTests.cs" />
     <Compile Include="Mocks\MockHelpers.cs" />
     <Compile Include="Mocks\MockHttpMessageHandler.cs" />
     <Compile Include="Mocks\MockWebUI.cs" />
-    <Compile Include="MexParserTests.cs" />
     <Compile Include="Mocks\TokenCacheHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestConstants.cs" />
@@ -99,7 +98,6 @@
     <Compile Include="PublicClientApplicationTests.cs" />
     <Compile Include="ConfidentialClientApplicationTests.cs" />
     <Compile Include="LoggerCallbackTests.cs" />
-    <Compile Include="UserRealDiscoveryResponseTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\MSAL.PCL.Desktop\MSAL.PCL.Desktop.csproj">

@@ -35,6 +35,6 @@ namespace Microsoft.Identity.Client
         public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
         {
             throw new NotImplementedException();
-        }   
+        }
     }
 }

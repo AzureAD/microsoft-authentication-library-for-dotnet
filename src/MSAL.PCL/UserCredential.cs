@@ -39,7 +39,8 @@ namespace Microsoft.Identity.Client
     public sealed class UserCredential
     {
         /// <summary>
-        /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
+        /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in
+        /// user
         /// and it can only be used in domain joined scenarios.
         /// </summary>
         public UserCredential()
@@ -56,13 +57,12 @@ namespace Microsoft.Identity.Client
             this.UserName = userName;
             this.UserAuthType = UserAuthType.IntegratedAuth;
         }
-        
+
         /// <summary>
         /// Gets identifier of the user.
         /// </summary>
         public string UserName { get; internal set; }
 
         internal UserAuthType UserAuthType { get; private set; }
-        
     }
 }

@@ -33,14 +33,12 @@ namespace Microsoft.Identity.Client
     public class PlatformParameters : IPlatformParameters
     {
         /// <summary>
-        /// 
         /// </summary>
-        public PlatformParameters():this(null)
+        public PlatformParameters() : this(null)
         {
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="ownerWindow"></param>
         public PlatformParameters(object ownerWindow)
@@ -52,6 +50,7 @@ namespace Microsoft.Identity.Client
         /// Gets the owner of the browser dialog which pops up for receiving user credentials. It can be null.
         /// </summary>
         public object OwnerWindow { get; private set; }
-        
+
+        internal bool UseHiddenBrowser { get; set; }
     }
 }

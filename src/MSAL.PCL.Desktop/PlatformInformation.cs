@@ -125,13 +125,22 @@ namespace Microsoft.Identity.Client
 
             return returnValue;
         }
-        
+
         private static class NativeMethods
         {
+            public enum NetJoinStatus
+            {
+                NetSetupUnknownStatus = 0,
+                NetSetupUnjoined,
+                NetSetupWorkgroupName,
+                NetSetupDomainName
+            }
+
             private const int PROCESSOR_ARCHITECTURE_AMD64 = 9;
             private const int PROCESSOR_ARCHITECTURE_ARM = 5;
             private const int PROCESSOR_ARCHITECTURE_IA64 = 6;
             private const int PROCESSOR_ARCHITECTURE_INTEL = 0;
+            public const int ErrorSuccess = 0;
 
             [DllImport("kernel32.dll")]
             private static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
@@ -139,7 +148,7 @@ namespace Microsoft.Identity.Client
             public static string GetProcessorArchitecture()
             {
                 try
-                { 
+                {
                     SYSTEM_INFO systemInfo = new SYSTEM_INFO();
                     GetNativeSystemInfo(ref systemInfo);
                     switch (systemInfo.wProcessorArchitecture)
@@ -158,7 +167,7 @@ namespace Microsoft.Identity.Client
                             return "Unknown";
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     PlatformPlugin.Logger.Warning(null, ex.Message);
                     return "Unknown";
@@ -169,36 +178,26 @@ namespace Microsoft.Identity.Client
             [return: MarshalAs(UnmanagedType.U1)]
             public static extern bool GetUserNameEx(int nameFormat, StringBuilder userName, ref uint userNameSize);
 
-            [StructLayout(LayoutKind.Sequential)]
-            private struct SYSTEM_INFO
-            {
-                public short wProcessorArchitecture;
-                public short wReserved;
-                public int dwPageSize;
-                public IntPtr lpMinimumApplicationAddress;
-                public IntPtr lpMaximumApplicationAddress;
-                public IntPtr dwActiveProcessorMask;
-                public int dwNumberOfProcessors;
-                public int dwProcessorType;
-                public int dwAllocationGranularity;
-                public short wProcessorLevel;
-                public short wProcessorRevision;
-            }
-
-            public const int ErrorSuccess = 0;
-
             [DllImport("Netapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
             public static extern int NetGetJoinInformation(string server, out IntPtr domain, out NetJoinStatus status);
 
             [DllImport("Netapi32.dll")]
             public static extern int NetApiBufferFree(IntPtr Buffer);
 
-            public enum NetJoinStatus
+            [StructLayout(LayoutKind.Sequential)]
+            private struct SYSTEM_INFO
             {
-                NetSetupUnknownStatus = 0,
-                NetSetupUnjoined,
-                NetSetupWorkgroupName,
-                NetSetupDomainName
+                public readonly short wProcessorArchitecture;
+                public readonly short wReserved;
+                public readonly int dwPageSize;
+                public readonly IntPtr lpMinimumApplicationAddress;
+                public readonly IntPtr lpMaximumApplicationAddress;
+                public readonly IntPtr dwActiveProcessorMask;
+                public readonly int dwNumberOfProcessors;
+                public readonly int dwProcessorType;
+                public readonly int dwAllocationGranularity;
+                public readonly short wProcessorLevel;
+                public readonly short wProcessorRevision;
             }
         }
     }

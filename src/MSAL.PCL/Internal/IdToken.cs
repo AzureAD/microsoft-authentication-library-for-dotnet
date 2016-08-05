@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal
             IdToken idTokenBody = null;
             if (!string.IsNullOrWhiteSpace(idToken))
             {
-                string[] idTokenSegments = idToken.Split(new[] { '.' });
+                string[] idTokenSegments = idToken.Split(new[] {'.'});
 
                 // If Id token format is invalid, we silently ignore the id token
                 if (idTokenSegments.Length == 3)
@@ -86,8 +86,8 @@ namespace Microsoft.Identity.Client.Internal
                         byte[] idTokenBytes = Base64UrlEncoder.DecodeBytes(idTokenSegments[1]);
                         using (var stream = new MemoryStream(idTokenBytes))
                         {
-                            var serializer = new DataContractJsonSerializer(typeof(IdToken));
-                            idTokenBody = (IdToken)serializer.ReadObject(stream);
+                            var serializer = new DataContractJsonSerializer(typeof (IdToken));
+                            idTokenBody = (IdToken) serializer.ReadObject(stream);
                         }
                     }
                     catch (SerializationException ex)
