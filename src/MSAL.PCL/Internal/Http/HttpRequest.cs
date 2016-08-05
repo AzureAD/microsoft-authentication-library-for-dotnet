@@ -36,19 +36,19 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Internal.Http
 {
-    internal class MsalHttpRequest
+    internal class HttpRequest
     {
-        private MsalHttpRequest()
+        private HttpRequest()
         {
         }
 
-        public static async Task<MsalHttpResponse> SendPost(Uri endpoint, Dictionary<string, string> headers,
+        public static async Task<HttpResponse> SendPost(Uri endpoint, Dictionary<string, string> headers,
             Dictionary<string, string> bodyParameters, CallState callstate)
         {
             return await ExecuteWithRetry(endpoint, headers, bodyParameters, HttpMethod.Post, callstate).ConfigureAwait(false);
         }
 
-        public static async Task<MsalHttpResponse> SendGet(Uri endpoint, Dictionary<string, string> headers,
+        public static async Task<HttpResponse> SendGet(Uri endpoint, Dictionary<string, string> headers,
             CallState callstate)
         {
             return await ExecuteWithRetry(endpoint, headers, null, HttpMethod.Get, callstate).ConfigureAwait(false);
@@ -70,25 +70,25 @@ namespace Microsoft.Identity.Client.Internal.Http
         }
 
 
-        private static async Task<MsalHttpResponse> ExecuteWithRetry(Uri endpoint, Dictionary<string, string> headers,
+        private static async Task<HttpResponse> ExecuteWithRetry(Uri endpoint, Dictionary<string, string> headers,
             Dictionary<string, string> bodyParameters, HttpMethod method,
             CallState callstate, bool retry = true)
         {
             bool isRetryable = false;
-            MsalHttpResponse response = null;
+            HttpResponse response = null;
             try
             {
                 response = await Execute(endpoint, headers, bodyParameters, method);
-
-                PlatformPlugin.Logger.Error(callstate,
-                    string.Format(CultureInfo.InvariantCulture,
-                        "Response status code does not indicate success: {0} ({1}).",
-                        (int) response.StatusCode, response.StatusCode));
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     return response;
                 }
+                
+                PlatformPlugin.Logger.Error(callstate,
+                    string.Format(CultureInfo.InvariantCulture,
+                        "Response status code does not indicate success: {0} ({1}).",
+                        (int)response.StatusCode, response.StatusCode));
 
                 if ((response.StatusCode.Equals(HttpStatusCode.InternalServerError)) ||
                     (response.StatusCode).Equals(HttpStatusCode.GatewayTimeout) ||
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client.Internal.Http
             return response;
         }
 
-        private static async Task<MsalHttpResponse> Execute(Uri endpoint, Dictionary<string, string> headers,
+        private static async Task<HttpResponse> Execute(Uri endpoint, Dictionary<string, string> headers,
             Dictionary<string, string> bodyParameters, HttpMethod method)
         {
             HttpClient client = HttpClientFactory.GetHttpClient();
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client.Internal.Http
             }
         }
 
-        private static async Task<MsalHttpResponse> CreateResponseAsync(HttpResponseMessage response)
+        private static async Task<HttpResponse> CreateResponseAsync(HttpResponseMessage response)
         {
             var headers = new Dictionary<string, string>();
             if (response.Headers != null)
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client.Internal.Http
                 }
             }
 
-            return new MsalHttpResponse
+            return new HttpResponse
             {
                 Headers = headers,
                 Body = await response.Content.ReadAsStringAsync().ConfigureAwait(false),

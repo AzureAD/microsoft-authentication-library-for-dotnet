@@ -30,7 +30,7 @@ using System.Net;
 
 namespace Microsoft.Identity.Client.Internal.Http
 {
-    internal class MsalHttpResponse
+    internal class HttpResponse
     {
         public Dictionary<string, string> Headers { get; set; }
 

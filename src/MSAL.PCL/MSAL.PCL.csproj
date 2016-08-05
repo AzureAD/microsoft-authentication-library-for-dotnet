@@ -65,8 +65,8 @@
     <Compile Include="Internal\Requests\AuthenticationRequestParameters.cs" />
     <Compile Include="Internal\Http\HttpClientFactory.cs" />
     <Compile Include="Internal\Http\HttpMessageHandlerFactory.cs" />
-    <Compile Include="Internal\Http\MsalHttpRequest.cs" />
-    <Compile Include="Internal\Http\MsalHttpResponse.cs" />
+    <Compile Include="Internal\Http\HttpRequest.cs" />
+    <Compile Include="Internal\Http\HttpResponse.cs" />
     <Compile Include="Internal\MsalError.cs" />
     <Compile Include="ClientApplicationBase.cs" />
     <Compile Include="Internal\OAuth2\OAuth2Client.cs" />

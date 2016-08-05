@@ -64,20 +64,15 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
 
         public async Task<InstanceDiscoveryResponse> DoAuthorityValidation(Uri endPoint, CallState callState)
         {
-            bool addCorrelationId = (callState != null && callState.CorrelationId != Guid.Empty);
-            if (addCorrelationId)
-            {
-                _headers.Add(OAuth2Header.CorrelationId, callState.CorrelationId.ToString());
-                _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
-            }
-
-            MsalHttpResponse response =
-                await
-                    MsalHttpRequest.SendGet(CreateFullEndpointUri(endPoint), this._headers, callState);
-            return CreateResponse<InstanceDiscoveryResponse>(response, callState, addCorrelationId);
+            return await ExecuteRequest<InstanceDiscoveryResponse>(endPoint, HttpMethod.Post, callState);
         }
 
         public async Task<TokenResponse> GetToken(Uri endPoint, CallState callState)
+        {
+            return await ExecuteRequest<TokenResponse>(endPoint, HttpMethod.Get, callState);
+        }
+
+        private async Task<T> ExecuteRequest<T>(Uri endPoint, HttpMethod method, CallState callState)
         {
             bool addCorrelationId = (callState != null && callState.CorrelationId != Guid.Empty);
             if (addCorrelationId)
@@ -86,15 +81,25 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                 _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
             }
 
-            MsalHttpResponse response =
-                await
-                    MsalHttpRequest.SendPost(CreateFullEndpointUri(endPoint), this._headers, this._bodyParameters,
+            HttpResponse response = null;
+
+            if (method == HttpMethod.Post)
+            {
+                response = await
+                    HttpRequest.SendPost(CreateFullEndpointUri(endPoint), this._headers, this._bodyParameters,
                         callState);
-            return CreateResponse<TokenResponse>(response, callState, addCorrelationId);
+            }
+            else
+            {
+                response =
+                   await
+                       HttpRequest.SendGet(CreateFullEndpointUri(endPoint), this._headers, callState);
+            }
+
+            return CreateResponse<T>(response, callState, addCorrelationId);
         }
 
-
-        private T CreateResponse<T>(MsalHttpResponse response, CallState callState, bool addCorrelationId)
+        private T CreateResponse<T>(HttpResponse response, CallState callState, bool addCorrelationId)
         {
             if (response.StatusCode != HttpStatusCode.OK)
             {
@@ -109,7 +114,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             return DeserializeResponse<T>(response.Body);
         }
 
-        private void CreateErrorResponse(MsalHttpResponse response, CallState callState)
+        private void CreateErrorResponse(HttpResponse response, CallState callState)
         {
             MsalServiceException serviceEx;
             try
