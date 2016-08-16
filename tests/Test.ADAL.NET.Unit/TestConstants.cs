@@ -19,5 +19,6 @@ namespace Test.ADAL.NET.Unit
         public static readonly string DefaultPassword = "password";
         public static readonly bool DefaultExtendedLifeTimeEnabled = false;
         public static readonly bool PositiveExtendedLifeTimeEnabled = true;
+        public static readonly string ErrorSubCode = "ErrorSubCode";
     }
 }
