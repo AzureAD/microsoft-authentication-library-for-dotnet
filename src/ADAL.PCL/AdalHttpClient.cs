@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this.Client.Headers[DeviceAuthHeaderName] = DeviceAuthHeaderValue;
                 using (response = await this.Client.GetResponseAsync().ConfigureAwait(false))
                 {
-                    typedResponse = DeserializeResponse<T>(response.ResponseStream);
+                    typedResponse = DeserializeResponse<T>(EncodingHelper.GenerateStreamFromString(response.ResponseString));
                 }
             }
             catch (HttpRequestWrapperException ex)

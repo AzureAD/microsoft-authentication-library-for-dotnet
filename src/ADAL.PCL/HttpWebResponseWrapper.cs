@@ -34,9 +34,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class HttpWebResponseWrapper : IHttpWebResponse
     {
-        public HttpWebResponseWrapper(Stream responseStream, Dictionary<string, string> headers, HttpStatusCode statusCode)
+        public HttpWebResponseWrapper(string responseString, Dictionary<string, string> headers, HttpStatusCode statusCode)
         {
-            this.ResponseStream = responseStream;
+            this.ResponseString = responseString;
             this.Headers = headers;
             this.StatusCode = statusCode;
         }
@@ -45,25 +45,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public Dictionary<string, string> Headers { get; private set; }
 
-        public Stream ResponseStream { get; private set; }
+        public string ResponseString { get; private set; }
 
         public void Dispose()
         {
-            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        private void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                // TODO: Address the missing Dispose method issue.
-                if (this.ResponseStream != null)
-                {
-                    this.ResponseStream.Dispose();
-                    this.ResponseStream = null;
-                }
-            }
-        }
     }
 }

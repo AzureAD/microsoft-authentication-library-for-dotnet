@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 request.BodyParameters = new StringRequestParameters(messageBuilder);
                 request.Headers["SOAPAction"] = soapAction;
                 IHttpWebResponse response = await request.GetResponseAsync().ConfigureAwait(false);
-                wstResponse = WsTrustResponse.CreateFromResponse(response.ResponseStream, wsTrustAddress.Version);
+                wstResponse = WsTrustResponse.CreateFromResponse(EncodingHelper.GenerateStreamFromString(response.ResponseString), wsTrustAddress.Version);
             }
             catch (WebException ex)
             {

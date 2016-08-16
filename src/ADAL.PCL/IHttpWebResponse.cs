@@ -38,6 +38,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         Dictionary<string, string> Headers { get; }
 
-        Stream ResponseStream { get; }
+        string ResponseString { get; }
     }
 }
