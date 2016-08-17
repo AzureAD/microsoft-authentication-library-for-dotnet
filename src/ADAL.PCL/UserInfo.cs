@@ -36,11 +36,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     [DataContract]
     public sealed class UserInfo
     {
-        internal UserInfo()
+        /// <summary>
+        /// Create user information for token cache lookup
+        /// </summary>
+        public UserInfo()
         {            
         }
 
-        internal UserInfo(UserInfo other)
+        /// <summary>
+        /// Create user information copied from another UserInfo object
+        /// </summary>
+        public UserInfo(UserInfo other)
         {
             if (other != null)
             {
