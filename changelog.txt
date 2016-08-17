@@ -1,4 +1,4 @@
-Version 3.13.0
+Version 3.13.1
 ==============
 This release contains
 - Fix to add ConfigureAwait(false) to all await calls to avoid deadlocks.
