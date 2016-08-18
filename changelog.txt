@@ -1,4 +1,4 @@
-Version 3.13.1
+Version 3.13.2
 ==============
 This release includes
 - Adding default constructor to UserInfo class to circumvent CoreCLR deserialization issue.
