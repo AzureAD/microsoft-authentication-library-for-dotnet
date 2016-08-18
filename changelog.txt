@@ -1,5 +1,10 @@
 Version 3.13.1
 ==============
+This release includes
+- Adding default constructor to UserInfo class to circumvent CoreCLR deserialization issue.
+
+Version 3.13.1
+==============
 This release contains
 - Fix to add ConfigureAwait(false) to all await calls to avoid deadlocks.
 - Fix bug where null reference was thrown in Android when onResult was called for an activity.
