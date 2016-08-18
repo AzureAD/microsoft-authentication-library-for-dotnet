@@ -130,12 +130,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     try
                     {
-                        StringBuilder httpErrorResponse = new StringBuilder();
-                        using (StreamReader reader = new StreamReader(EncodingHelper.GenerateStreamFromString(webResponse.ResponseString)))
-                        {
-                            httpErrorResponse.Append(reader.ReadToEnd());
-                        }
-                        throw new HttpRequestException(string.Format(CultureInfo.CurrentCulture, " Response status code does not indicate success: {0} ({1}).", (int)webResponse.StatusCode, webResponse.StatusCode), new Exception(httpErrorResponse.ToString()));
+                        throw new HttpRequestException(string.Format(CultureInfo.CurrentCulture, " Response status code does not indicate success: {0} ({1}).", (int)webResponse.StatusCode, webResponse.StatusCode), new Exception(webResponse.ResponseString));
                     }
                     catch (HttpRequestException ex)
                     {

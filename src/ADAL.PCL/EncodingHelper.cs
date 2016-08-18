@@ -201,7 +201,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return stream;
         }
 
-        private static T DeserializeResponse<T>(string response)
+        public static T DeserializeResponse<T>(string response)
         {
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
 
