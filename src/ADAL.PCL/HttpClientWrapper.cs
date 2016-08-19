@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
 
-            return new HttpWebResponseWrapper(await response.Content.ReadAsStringAsync(), headers, response.StatusCode);
+            return new HttpWebResponseWrapper(await response.Content.ReadAsStringAsync().ConfigureAwait(false), headers, response.StatusCode);
         }
 
         private void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers)
