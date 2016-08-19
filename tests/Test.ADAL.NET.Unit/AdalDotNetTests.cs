@@ -1494,5 +1494,34 @@ namespace Test.ADAL.NET.Unit
             }
         }
 
+        [TestMethod]
+        [Description("Test for returning entire HttpResponse as inner exception")]
+        public async Task HttpErrorResponseAsInnerException()
+        {
+            TokenCache cache = new TokenCache();
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User, "unique_id", "displayable@id.com");
+            cache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            {
+                RefreshToken = "something-invalid",
+                ResourceInResponse = TestConstants.DefaultResource,
+                Result = new AuthenticationResult("Bearer", "some-access-token", DateTimeOffset.UtcNow)
+            };
+
+            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, cache);
+
+            try
+            {
+                HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+                {
+                    Method = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateHttpErrorResponse()
+                });
+                await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
+            }
+            catch (AdalSilentTokenAcquisitionException ex)
+            {
+                Assert.IsTrue((ex.InnerException.InnerException.InnerException).Message.Contains(TestConstants.ErrorSubCode));
+            }
+        }
     }
 }

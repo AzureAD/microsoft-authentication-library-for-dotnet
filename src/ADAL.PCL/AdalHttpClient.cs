@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this.Client.Headers[DeviceAuthHeaderName] = DeviceAuthHeaderValue;
                 using (response = await this.Client.GetResponseAsync().ConfigureAwait(false))
                 {
-                    typedResponse = DeserializeResponse<T>(response.ResponseStream);
+                    typedResponse = EncodingHelper.DeserializeResponse<T>(response.ResponseString);
                 }
             }
             catch (HttpRequestWrapperException ex)
@@ -189,20 +189,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await this.GetResponseAsync<T>(false).ConfigureAwait(false);
         }
 
-        private static T DeserializeResponse<T>(Stream responseStream)
-        {
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
-
-            if (responseStream == null)
-            {
-                return default(T);
-            }
-
-            using (Stream stream = responseStream)
-            {
-                return ((T)serializer.ReadObject(stream));
-            }
-        }
 
         private static string CheckForExtraQueryParameter(string url)
         {

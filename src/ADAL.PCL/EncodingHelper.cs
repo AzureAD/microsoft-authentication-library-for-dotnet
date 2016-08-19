@@ -28,6 +28,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Runtime.Serialization.Json;
 using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -186,6 +188,31 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     chars[i] = '\0';
                 }
+            }
+        }
+
+        public static Stream GenerateStreamFromString(string s)
+        {
+            MemoryStream stream = new MemoryStream();
+            StreamWriter writer = new StreamWriter(stream);
+            writer.Write(s);
+            writer.Flush();
+            stream.Position = 0;
+            return stream;
+        }
+
+        public static T DeserializeResponse<T>(string response)
+        {
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
+
+            if (response == null)
+            {
+                return default(T);
+            }
+
+            using (Stream stream = GenerateStreamFromString(response))
+            {
+                return ((T)serializer.ReadObject(stream));
             }
         }
 
