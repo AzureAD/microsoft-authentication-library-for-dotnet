@@ -35,11 +35,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public string CreateSha256Hash(string input)
         {
-            using (SHA256Managed sha = new SHA256Managed())
+            if (input != null)
             {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
+                using (SHA256Managed sha = new SHA256Managed())
+                {
+                    UTF8Encoding encoding = new UTF8Encoding();
+                    return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
+                }
             }
+
+            return null;
         }
     }
 }
