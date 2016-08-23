@@ -44,11 +44,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         
         public IPlatformParameters PlatformParameters { get; set; }
 
-        public bool CanInvokeBroker { get
+        public bool CanInvokeBroker
         {
-            PlatformParameters pp = PlatformParameters as PlatformParameters;
-            return pp.UseBroker && UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://"));
-        } }
+            get
+            {
+                PlatformParameters pp = PlatformParameters as PlatformParameters;
+                return pp.UseBroker && UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://"));
+            }
+        }
 
         public async Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {
