@@ -1,4 +1,15 @@
-Version 3.13.0
+Version 3.13.3
+==============
+This release includes
+- Fix for null pointer exception when hash was computed on a null string.
+- Add support to return complete http response body as an inner exception.
+
+Version 3.13.2
+==============
+This release includes
+- Adding default constructor to UserInfo class to circumvent CoreCLR deserialization issue.
+
+Version 3.13.1
 ==============
 This release contains
 - Fix to add ConfigureAwait(false) to all await calls to avoid deadlocks.
@@ -9,7 +20,6 @@ This release contains
 - Fix a bug where UserAssertion was not assumed to be JWT by default.
 - Add support for SecureString client secret.
 - Fix bug where null reference exception was thrown for AcquireTokenUsingDeviceCode.
-
 
 Version 3.12.0
 ==============
