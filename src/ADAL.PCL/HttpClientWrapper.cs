@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -129,11 +130,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     try
                     {
-                        throw new HttpRequestException(string.Format(CultureInfo.CurrentCulture, " Response status code does not indicate success: {0} ({1}).", (int)webResponse.StatusCode, webResponse.StatusCode));
+                        throw new HttpRequestException(string.Format(CultureInfo.CurrentCulture, " Response status code does not indicate success: {0} ({1}).", (int)webResponse.StatusCode, webResponse.StatusCode), new Exception(webResponse.ResponseString));
                     }
                     catch (HttpRequestException ex)
                     {
-                        webResponse.ResponseStream.Position = 0;
                         throw new HttpRequestWrapperException(webResponse, ex);
                     }
                 }
@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
 
-            return new HttpWebResponseWrapper(await response.Content.ReadAsStreamAsync().ConfigureAwait(false), headers, response.StatusCode);
+            return new HttpWebResponseWrapper(await response.Content.ReadAsStringAsync().ConfigureAwait(false), headers, response.StatusCode);
         }
 
         private void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers)

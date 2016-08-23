@@ -1,3 +1,9 @@
+Version 3.13.3
+==============
+This release includes
+- Fix for null pointer exception when hash was computed on a null string.
+- Add support to return complete http response body as an inner exception.
+
 Version 3.13.2
 ==============
 This release includes

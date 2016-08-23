@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             StringBuilder responseStreamString = new StringBuilder();
             TokenResponse tokenResponse = null;
-            using (Stream responseStream = webResponse.ResponseStream)
+            using (Stream responseStream = EncodingHelper.GenerateStreamFromString(webResponse.ResponseString))
             {
                 if (responseStream == null)
                 {
