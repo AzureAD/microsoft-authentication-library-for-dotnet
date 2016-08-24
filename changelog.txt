@@ -1,3 +1,10 @@
+Version 3.13.4
+==============
+This release includes
+- Fix to force iOS UIViewController to run on UI thread.
+- Fix regresssion where content was passed as a file path for UserCredential flows.
+- Fix an issue where internal exception was being thrown back to the developer.
+
 Version 3.13.3
 ==============
 This release includes
