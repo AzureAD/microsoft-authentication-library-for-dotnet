@@ -53,7 +53,25 @@ namespace Test.ADAL.NET.Unit
         {
             HttpMessageHandlerFactory.ClearMockHandlers();    
         }
-    
+
+
+        [TestMethod]
+        [Description("Get WsTrust Address from mex")]
+        public async Task MexParserGetWsTrustAddressTest()
+        {
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText("TestMex2005.xml"))
+                }
+            });
+
+            WsTrustAddress address = await MexParser.FetchWsTrustAddressFromMexAsync("https://some-url", UserAuthType.IntegratedAuth, null);
+            Assert.IsNotNull(address);
+        }
+
         [TestMethod]
         [Description("User Realm Discovery Test")]
         public async Task UserRealmDiscoveryTest()
