@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     mexDocument = XDocument.Load(EncodingHelper.GenerateStreamFromString(response.ResponseString), LoadOptions.None);
                 }
             }
-            catch (WebException ex)
+            catch (HttpRequestWrapperException ex)
             {
                 throw new AdalServiceException(AdalError.AccessingWsMetadataExchangeFailed, ex);
             }
