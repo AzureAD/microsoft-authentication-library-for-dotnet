@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Net;
 using System.Security;
 using System.Text;
@@ -93,14 +94,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 IHttpWebResponse response = await request.GetResponseAsync().ConfigureAwait(false);
                 wstResponse = WsTrustResponse.CreateFromResponse(EncodingHelper.GenerateStreamFromString(response.ResponseString), wsTrustAddress.Version);
             }
-            catch (WebException ex)
+            catch (HttpRequestWrapperException ex)
             {
                 string errorMessage;
 
                 try
                 {
-                    XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(ex.Response.GetResponseStream());
-                    errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument, callState);
+                    using (Stream stream = EncodingHelper.GenerateStreamFromString(ex.WebResponse.ResponseString))
+                    {
+                        XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(stream);
+                        errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument, callState);
+                    }
                 }
                 catch (AdalException)
                 {
