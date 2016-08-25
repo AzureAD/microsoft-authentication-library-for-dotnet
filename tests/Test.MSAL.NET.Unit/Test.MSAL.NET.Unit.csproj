@@ -121,6 +121,8 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\OpenidConfiguration-MissingFields.txt" />
+    <Content Include="Resources\OpenidConfiguration.txt" />
     <Content Include="Resources\TestMex.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -138,7 +140,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
-    <None Include="Resources\packages.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

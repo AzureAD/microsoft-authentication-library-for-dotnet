@@ -361,7 +361,7 @@ namespace Microsoft.Identity.Client
                     MsalError.AuthenticationUiFailed,
                     string.Format(CultureInfo.InvariantCulture,
                         "The browser based authentication dialog failed to complete. Reason: {0}",
-                        NavigateErrorStatus.Messages[statusCode])) {StatusCode = statusCode};
+                        NavigateErrorStatus.Messages[statusCode]));
             }
 
             return new MsalServiceException(

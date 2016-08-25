@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
     internal abstract class Authority
     {
-        private static ConcurrentDictionary<string, Authority> _validatedAuthorities = new ConcurrentDictionary<string, Authority>();
+        internal static ConcurrentDictionary<string, Authority> _validatedAuthorities = new ConcurrentDictionary<string, Authority>();
         private static readonly string[] TenantlessTenantName = {"common", "organizations", "consumers"};
         private bool _updatedFromTemplate;  
 
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
         public string EndSessionEndpoint { get; set; }
         public string SelfSignedJwtAudience { get; private set; }
 
-        internal static Authority CreateInstance(string authority)
+        private static Authority CreateInstance(string authority)
         {
             if (string.IsNullOrWhiteSpace(authority))
             {

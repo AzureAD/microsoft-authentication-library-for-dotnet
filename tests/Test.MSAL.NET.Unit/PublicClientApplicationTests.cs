@@ -35,6 +35,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Http;
+using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Test.MSAL.NET.Unit.Mocks;
@@ -47,14 +48,11 @@ namespace Test.MSAL.NET.Unit
         [TestInitialize]
         public void TestInitialize()
         {
+            Authority._validatedAuthorities.Clear();
+            TokenCache.DefaultSharedAppTokenCache = new TokenCache();
+            TokenCache.DefaultSharedUserTokenCache = new TokenCache();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]
@@ -186,6 +184,8 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual(1, item.Scope.Count);
                 Assert.AreEqual(TestConstants.DefaultClientId, item.Scope.AsSingleString());
             }
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
 
@@ -234,6 +234,8 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(
                 TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray().AsSingleString(),
                 result.Scope.AsSingleString());
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]
@@ -265,6 +267,8 @@ namespace Test.MSAL.NET.Unit
                 Assert.IsNotNull(msalExc.InnerException, "MsalSilentTokenAcquisitionException inner exception is null");
                 Assert.AreEqual(((MsalException) msalExc.InnerException).ErrorCode, "invalid_grant");
             }
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
 

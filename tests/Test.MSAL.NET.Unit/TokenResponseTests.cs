@@ -27,6 +27,7 @@
 
 using System;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.OAuth2;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.MSAL.NET.Unit

@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal
 {

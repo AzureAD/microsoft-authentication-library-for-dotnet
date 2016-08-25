@@ -146,10 +146,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         .ConfigureAwait(false);
         }
 
-        internal async Task<Uri> CreateAuthorizationUriAsync(Guid correlationId)
+        internal async Task<Uri> CreateAuthorizationUriAsync(CallState callState)
         {
-            this.CallState.CorrelationId = correlationId;
-            await this.Authenticator.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
+            this.CallState = callState;
+            await this.Authority.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
             return this.CreateAuthorizationUri();
         }
 
@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 qp += "&" + AuthenticationRequestParameters.ExtraQueryParameters;
             }
 
-            return new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + qp);
+            return new Uri(new Uri(this.Authority.AuthorizationEndpoint), "?" + qp);
         }
 
         private Dictionary<string, string> CreateAuthorizationRequestParameters()
@@ -219,9 +219,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.LoginHint;
             }
 
-            if (this.CallState != null && this.CallState.CorrelationId != Guid.Empty)
+            if (this.CallState != null && !string.IsNullOrEmpty(CallState.CorrelationId))
             {
-                authorizationRequestParameters[OAuth2Parameter.CorrelationId] = this.CallState.CorrelationId.ToString();
+                authorizationRequestParameters[OAuth2Parameter.CorrelationId] = this.CallState.CorrelationId;
             }
 
             IDictionary<string, string> adalIdParameters = MsalIdHelper.GetMsalIdParameters();

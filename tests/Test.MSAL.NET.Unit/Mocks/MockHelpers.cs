@@ -26,14 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 
 namespace Test.MSAL.NET.Unit.Mocks
@@ -111,18 +107,43 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public static HttpResponseMessage CreateSuccessIdTokenResponseMessage()
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
-            HttpContent content = new StringContent("{\"token_type\":\"Bearer\",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik1uQ19WWmNBVGZNNXBPWWlKSE1iYTlnb0VLWSIsImtpZCI6Ik1uQ19WWmNBVGZNNXBPWWlKSE1iYTlnb0VLWSJ9.eyJhdWQiOiJlODU0YTRhNy02YzM0LTQ0OWMtYjIzNy1mYzdhMjgwOTNkODQiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNmMzZDUxZGQtZjBlNS00OTU5LWI0ZWEtYTgwYzRlMzZmZTVlL3YyLjAvIiwiaWF0IjoxNDU1ODMzODI4LCJuYmYiOjE0NTU4MzM4MjgsImV4cCI6MTQ1NTgzNzcyOCwiaXBhZGRyIjoiMTMxLjEwNy4xNTkuMTE3IiwibmFtZSI6Ik1hcmlvIFJvc3NpIiwib2lkIjoidW5pcXVlX2lkIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZGlzcGxheWFibGVAaWQuY29tIiwic3ViIjoiSzRfU0dHeEtxVzFTeFVBbWhnNkMxRjZWUGlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM2Q1MWRkLWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZSIsInZlciI6IjIuMCJ9.Z6Xc_PzqTtB-2TjyZwPpFGgkAs47m95F_I-NHxtIJT-H20i_1kbcBdmJaj7lMjHhJwAAMM-tE-iBVF9f7jNmsDZAADt-HgtrrXaXxkIKMwQ_MuB-OI4uY9KYIurEqmkGvOlRUK1ZVNNf7IKE5pqNTOZzyFDEyG8SwSvAmN-J4VnrxFz3d47klHoKVKwLjWJDj7edR2UUkdUQ6ZRj7YBj9UjC8UrmVNLBmvyatPyu9KQxyNyJpmTBT2jDjMZ3J1Z5iL98zWw_Ez0-6W0ti87UaPreJO3hejqQE_pRa4rXMLpw3oAnyEE1H7n0F6tK_3lJndZi9uLTIsdSMEXVnZdoHg\",\"id_token_expires_in\":\"3600\",\"profile_info\":\"eyJ2ZXIiOiIxLjAiLCJuYW1lIjoiTWFyaW8gUm9zc2kiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJtYXJpb0BkZXZlbG9wZXJ0ZW5hbnQub25taWNyb3NvZnQuY29tIiwic3ViIjoiSzRfU0dHeEtxVzFTeFVBbWhnNkMxRjZWUGlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM2Q1MWRkLWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZSJ9\"}");
-            responseMessage.Content = content;
-            return responseMessage;
+            return CreateSuccessResponseMessage("{\"token_type\":\"Bearer\"," +
+                                                "\"refresh_token\":\"OAAsomethingencryptedQwgAA\"" +
+                                                ",\"id_token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOi" +
+                                                "JSUzI1NiIsIng1dCI6Ik1uQ19WWmNBVGZNNXBPWWlKS" +
+                                                "E1iYTlnb0VLWSIsImtpZCI6Ik1uQ19WWmNBVGZNNXB" +
+                                                "PWWlKSE1iYTlnb0VLWSJ9.eyJhdWQiOiJlODU0YTR" +
+                                                "hNy02YzM0LTQ0OWMtYjIzNy1mYzdhMjgwOTNkODQiLCJ" +
+                                                "pc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGlu" +
+                                                "ZS5jb20vNmMzZDUxZGQtZjBlNS00OTU5LWI0ZWEtYTgwY" +
+                                                "zRlMzZmZTVlL3YyLjAvIiwiaWF0IjoxNDU1ODMzODI4LC" +
+                                                "JuYmYiOjE0NTU4MzM4MjgsImV4cCI6MTQ1NTgzNzcyOCwi" +
+                                                "aXBhZGRyIjoiMTMxLjEwNy4xNTkuMTE3IiwibmFtZSI6I" +
+                                                "k1hcmlvIFJvc3NpIiwib2lkIjoidW5pcXVlX2lkIiwicH" +
+                                                "JlZmVycmVkX3VzZXJuYW1lIjoiZGlzcGxheWFibGVAaWQ" +
+                                                "uY29tIiwic3ViIjoiSzRfU0dHeEtxVzFTeFVBbWhnNkMx" +
+                                                "RjZWUGlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM" +
+                                                "2Q1MWRkLWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZS" +
+                                                "IsInZlciI6IjIuMCJ9.Z6Xc_PzqTtB-2TjyZwPpFGgkAs" +
+                                                "47m95F_I-NHxtIJT-H20i_1kbcBdmJaj7lMjHhJwAAMM-tE" +
+                                                "-iBVF9f7jNmsDZAADt-HgtrrXaXxkIKMwQ_MuB-OI4uY9KY" +
+                                                "IurEqmkGvOlRUK1ZVNNf7IKE5pqNTOZzyFDEyG8SwSvAmN" +
+                                                "-J4VnrxFz3d47klHoKVKwLjWJDj7edR2UUkdUQ6ZRj7YBj9" +
+                                                "UjC8UrmVNLBmvyatPyu9KQxyNyJpmTBT2jDjMZ3J1Z5iL98" +
+                                                "zWw_Ez0-6W0ti87UaPreJO3hejqQE_pRa4rXMLpw3oAnyEE" +
+                                                "1H7n0F6tK_3lJndZi9uLTIsdSMEXVnZdoHg\"," +
+                                                "\"id_token_expires_in\":\"3600\"," +
+                                                "\"profile_info\":\"eyJ2ZXIiOiIxLjAiLCJuYW1lIjoi" +
+                                                "TWFyaW8gUm9zc2kiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ" +
+                                                "tYXJpb0BkZXZlbG9wZXJ0ZW5hbnQub25taWNyb3NvZnQuY2" +
+                                                "9tIiwic3ViIjoiSzRfU0dHeEtxVzFTeFVBbWhnNkMxRjZWU" +
+                                                "GlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM2Q1MWRk" +
+                                                "LWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZSJ9\"}");
         }
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage()
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
-            HttpContent content = new StringContent(DefaultAccessTokenResponse);
-            responseMessage.Content = content;
-            return responseMessage;
+            return CreateSuccessResponseMessage(DefaultAccessTokenResponse);
         }
 
         public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage()
@@ -135,12 +156,8 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage()
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
-            HttpContent content =
-                new StringContent(
-                    "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"header.payload.signature\"}");
-            responseMessage.Content = content;
-            return responseMessage;
+            return CreateSuccessResponseMessage(
+                "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"header.payload.signature\"}");
         }
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string rootId, string[] scope)
@@ -173,6 +190,30 @@ namespace Test.MSAL.NET.Unit.Mocks
                         "\"tid\": \"6c3d51dd-f0e5-4959-b4ea-a80c4e36fe5e\"," +
                         "\"ver\": \"2.0\"}";
             return Base64UrlEncoder.Encode(id);
+        }
+
+        public static HttpResponseMessage CreateSuccessResponseMessage(string sucessResponse)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+            HttpContent content =
+                new StringContent(sucessResponse);
+            responseMessage.Content = content;
+            return responseMessage;
+        }
+
+        public static HttpResponseMessage CreateOpenIdConfigurationResponse(string authority)
+        {
+            var authorityUri = new Uri(authority);
+            string path = authorityUri.AbsolutePath.Substring(1);
+            string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
+            if (tenant.ToLower(CultureInfo.InvariantCulture).Equals("common"))
+            {
+                tenant = "{tenant}";
+            }
+
+            return CreateSuccessResponseMessage(string.Format(CultureInfo.InvariantCulture,
+                "{{\"authorization_endpoint\":\"{0}oauth2/v2.0/authorize\",\"token_endpoint\":\"{0}oauth2/v2.0/token\",\"issuer\":\"https://sts.windows.net/{1}\"}}",
+                authority, tenant));
         }
     }
 }

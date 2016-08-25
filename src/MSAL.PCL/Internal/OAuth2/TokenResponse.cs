@@ -46,28 +46,28 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
     [DataContract]
     internal class TokenResponse : OAuth2ResponseBase
     {
-        [DataMember(Name = TokenResponseClaim.TokenType IsRequired = false)]
+        [DataMember(Name = TokenResponseClaim.TokenType, IsRequired = false)]
         public string TokenType { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.AccessToken IsRequired = false)]
+        [DataMember(Name = TokenResponseClaim.AccessToken, IsRequired = false)]
         public string AccessToken { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.RefreshToken IsRequired = false)]
+        [DataMember(Name = TokenResponseClaim.RefreshToken, IsRequired = false)]
         public string RefreshToken { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.Scope IsRequired = false)]
+        [DataMember(Name = TokenResponseClaim.Scope, IsRequired = false)]
         public string Scope { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.FamilyId IsRequired = false)]
+        [DataMember(Name = TokenResponseClaim.FamilyId, IsRequired = false)]
         public string FamilyId { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.IdToken IsRequired = false)]
+        [DataMember(Name = TokenResponseClaim.IdToken, IsRequired = false)]
         public string IdToken { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.ExpiresIn IsRequired = false)]
+        [DataMember(Name = TokenResponseClaim.ExpiresIn, IsRequired = false)]
         public long ExpiresIn { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.IdTokenExpiresIn IsRequired = false)]
+        [DataMember(Name = TokenResponseClaim.IdTokenExpiresIn, IsRequired = false)]
         public long IdTokenExpiresIn { get; set; }
 
         public AuthenticationResultEx GetResultEx()
@@ -82,11 +82,11 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                 AuthenticationResult result = null;
                 if (!string.IsNullOrEmpty(this.AccessToken))
                 {
-                    result = new AuthenticationResult(this.TokenType this.AccessToken accessTokenExpiresOn);
+                    result = new AuthenticationResult(this.TokenType, this.AccessToken, accessTokenExpiresOn);
                 }
                 else
                 {
-                    result = new AuthenticationResult(this.TokenType this.IdToken idTokenExpiresOn);
+                    result = new AuthenticationResult(this.TokenType, this.IdToken, idTokenExpiresOn);
                 }
 
 
@@ -111,13 +111,13 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                         idToken.HomeObjectId = uniqueId;
                     }
 
-                    result.UpdateTenantAndUser(tenantId this.IdToken
+                    result.UpdateTenantAndUser(tenantId, this.IdToken,
                         new User
                         {
-                            UniqueId = uniqueId
-                            DisplayableId = idToken.PreferredUsername
-                            HomeObjectId = idToken.HomeObjectId
-                            Name = idToken.Name
+                            UniqueId = uniqueId,
+                            DisplayableId = idToken.PreferredUsername,
+                            HomeObjectId = idToken.HomeObjectId,
+                            Name = idToken.Name,
                             IdentityProvider = idToken.Issuer
                         });
                 }
@@ -125,17 +125,17 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                 result.ScopeSet = Scope.AsSet();
                 resultEx = new AuthenticationResultEx
                 {
-                    Result = result
+                    Result = result,
                     RefreshToken = this.RefreshToken
                 };
             }
             else if (this.Error != null)
             {
-                throw new MsalServiceException(this.Error this.ErrorDescription);
+                throw new MsalServiceException(this.Error, this.ErrorDescription);
             }
             else
             {
-                throw new MsalServiceException(MsalError.Unknown MsalErrorMessage.Unknown);
+                throw new MsalServiceException(MsalError.Unknown, MsalErrorMessage.Unknown);
             }
 
             return resultEx;
