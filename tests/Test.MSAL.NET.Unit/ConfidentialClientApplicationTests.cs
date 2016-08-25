@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -128,8 +129,20 @@ namespace Test.MSAL.NET.Unit
         {
             ClientCredential cc = new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid_cert.pfx", "password")));
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.DefaultClientId,
-                TestConstants.DefaultRedirectUri, cc, new TokenCache());
+                TestConstants.DefaultRedirectUri, cc, new TokenCache())
+            {
+                ValidateAuthority = false
+            };
+
             app.AppTokenCache = new TokenCache();
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateSuccessResponseMessage(MockHelpers.CreateOpenIdConfigurationResponse(app.Authority))
+            });
+
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,

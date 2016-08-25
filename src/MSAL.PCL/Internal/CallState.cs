@@ -33,9 +33,9 @@ namespace Microsoft.Identity.Client.Internal
     {
         public CallState(Guid correlationId)
         {
-            this.CorrelationId = correlationId;
+            this.CorrelationId = correlationId.ToString();
         }
 
-        public Guid CorrelationId { get; set; }
+        public string CorrelationId { get; }
     }
 }

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal
@@ -44,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal
             this.HasCredential = false;
         }
 
-        public ClientKey(string clientId, ClientCredential clientCredential, Authenticator authenticator)
+        public ClientKey(string clientId, ClientCredential clientCredential, Authority authority)
             : this(clientId)
         {
             if (clientCredential == null)
@@ -52,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal
                 throw new ArgumentNullException("clientCredential");
             }
 
-            this.Authenticator = authenticator;
+            this.Authority = authority;
             this.Credential = clientCredential;
             this.HasCredential = true;
         }
@@ -70,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public ClientCredential Credential { get; }
         public ClientAssertion Assertion { get; }
-        public Authenticator Authenticator { get; }
+        public Authority Authority { get; }
         public string ClientId { get; }
         public bool HasCredential { get; private set; }
 
@@ -101,7 +102,7 @@ namespace Microsoft.Identity.Client.Internal
                         if (assertionNearExpiry)
                         {
                             JsonWebToken jwtToken = new JsonWebToken(this.ClientId,
-                                this.Authenticator.SelfSignedJwtAudience);
+                                this.Authority.SelfSignedJwtAudience);
                             clientAssertion = jwtToken.Sign(this.Credential.Certificate);
                             this.Credential.ValidTo = jwtToken.Payload.ValidTo;
                             this.Credential.ClientAssertion = clientAssertion;

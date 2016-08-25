@@ -61,7 +61,13 @@
     <Compile Include="..\MSAL.Common\CommonAssemblyInfo.cs">
       <Link>Internal\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Internal\InstanceDiscoveryResponse.cs" />
+    <Compile Include="Internal\Instance\AadAuthority.cs" />
+    <Compile Include="Internal\Instance\AdfsAuthority.cs" />
+    <Compile Include="Internal\Instance\AdfsWebFingerResponse.cs" />
+    <Compile Include="Internal\Instance\DrsMetadataResponse.cs" />
+    <Compile Include="Internal\Instance\TenantDiscoveryResponse.cs" />
+    <Compile Include="Internal\Instance\InstanceDiscoveryResponse.cs" />
+    <Compile Include="Internal\OAuth2\OAuth2ResponseBase.cs" />
     <Compile Include="Internal\Requests\AuthenticationRequestParameters.cs" />
     <Compile Include="Internal\Http\HttpClientFactory.cs" />
     <Compile Include="Internal\Http\HttpMessageHandlerFactory.cs" />
@@ -86,9 +92,7 @@
     <Compile Include="MsalSilentTokenAcquisitionException.cs" />
     <Compile Include="MsalUserMismatchException.cs" />
     <Compile Include="AuthenticationResult.cs" />
-    <Compile Include="Internal\Authenticator.cs" />
-    <Compile Include="Internal\AuthenticatorTemplate.cs" />
-    <Compile Include="Internal\AuthenticatorTemplateList.cs" />
+    <Compile Include="Internal\Instance\Authority.cs" />
     <Compile Include="Internal\AuthorizationResult.cs" />
     <Compile Include="Internal\Base64UrlEncoder.cs" />
     <Compile Include="Internal\CallState.cs" />
@@ -108,7 +112,7 @@
     <Compile Include="Internal\LoggerBase.cs" />
     <Compile Include="Internal\AuthenticationResultEx.cs" />
     <Compile Include="PublicClientApplication.cs" />
-    <Compile Include="Internal\TokenResponse.cs" />
+    <Compile Include="Internal\OAuth2\TokenResponse.cs" />
     <Compile Include="Internal\OAuth2\OAuthConstants.cs" />
     <Compile Include="Internal\PlatformInformationBase.cs" />
     <Compile Include="Internal\Interfaces\IWebUI.cs" />

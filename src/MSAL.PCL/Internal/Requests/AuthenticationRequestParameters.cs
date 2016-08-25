@@ -28,12 +28,15 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Internal.Instance;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class AuthenticationRequestParameters
     {
-        public Authenticator Authenticator { get; set; }
+        public CallState CallState { get; set; }
+
+        public Authority Authority { get; set; }
 
         public TokenCache TokenCache { get; set; }
 
