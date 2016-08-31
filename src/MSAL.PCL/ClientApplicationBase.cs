@@ -40,7 +40,6 @@ namespace Microsoft.Identity.Client
     /// </Summary>
     public abstract class ClientApplicationBase
     {
-        private readonly object _syncLock = new object();
         /// <Summary>
         /// DefaultAuthority
         /// </Summary>

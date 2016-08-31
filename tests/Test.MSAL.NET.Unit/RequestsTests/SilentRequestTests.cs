@@ -213,6 +213,13 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache
             };
+            
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+            });
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
@@ -238,6 +245,13 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         {
             Authority authenticator = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
             TokenCache cache = new TokenCache();
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+            });
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {

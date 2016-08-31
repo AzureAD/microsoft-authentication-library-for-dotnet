@@ -141,6 +141,14 @@ namespace Test.MSAL.NET.Unit.Mocks
                                                 "LWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZSJ9\"}");
         }
 
+        internal static HttpResponseMessage CreateFailureMessage(HttpStatusCode code, string message)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(code);
+            HttpContent content = new StringContent(message);
+            responseMessage.Content = content;
+            return responseMessage;
+        }
+
         public static HttpResponseMessage CreateSuccessTokenResponseMessage()
         {
             return CreateSuccessResponseMessage(DefaultAccessTokenResponse);
@@ -148,10 +156,14 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage()
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
-            HttpContent content = new StringContent("{\"error\":\"invalid_grant\",\"error_description\":\"AADSTS70002: Error validating credentials.AADSTS70008: The provided access grant is expired or revoked.Trace ID: f7ec686c-9196-4220-a754-cd9197de44e9Correlation ID: 04bb0cae-580b-49ac-9a10-b6c3316b1eaaTimestamp: 2015-09-16 07:24:55Z\",\"error_codes\":[70002,70008],\"timestamp\":\"2015-09-16 07:24:55Z\",\"trace_id\":\"f7ec686c-9196-4220-a754-cd9197de44e9\",\"correlation_id\":\"04bb0cae-580b-49ac-9a10-b6c3316b1eaa\"}");
-            responseMessage.Content = content;
-            return responseMessage;
+            return CreateFailureMessage(HttpStatusCode.BadRequest,
+                "{\"error\":\"invalid_grant\",\"error_description\":\"AADSTS70002: Error " +
+                "validating credentials.AADSTS70008: The provided access grant is expired " +
+                "or revoked.Trace ID: f7ec686c-9196-4220-a754-cd9197de44e9Correlation ID: " +
+                "04bb0cae-580b-49ac-9a10-b6c3316b1eaaTimestamp: 2015-09-16 07:24:55Z\"," +
+                "\"error_codes\":[70002,70008],\"timestamp\":\"2015-09-16 07:24:55Z\"," +
+                "\"trace_id\":\"f7ec686c-9196-4220-a754-cd9197de44e9\",\"correlation_id\":" +
+                "\"04bb0cae-580b-49ac-9a10-b6c3316b1eaa\"}");
         }
 
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage()

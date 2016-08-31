@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 string host = authorityUri.Authority;
                 string path = authorityUri.AbsolutePath.Substring(1);
                 string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-                this.IsTenantless = IsTenantLess(tenant);
+                this.IsTenantless = TenantlessTenantName.Any(name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
 
                 string openIdConfigurationEndpoint = await this.Validate(host, tenant, callState);
 
@@ -182,10 +182,12 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         protected abstract Task<string> Validate(string host, string tenant, CallState callState);
 
-        public static bool IsTenantLess(string tenant)
+        public static bool IsTenantLessAuthority(string authority)
         {
-            return
-                TenantlessTenantName.Any(name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
+            var authorityUri = new Uri(authority);
+            string path = authorityUri.AbsolutePath.Substring(1);
+            string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
+            return TenantlessTenantName.Any(name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         public void UpdateTenantId(string tenantId)

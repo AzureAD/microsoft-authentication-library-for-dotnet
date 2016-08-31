@@ -378,7 +378,7 @@ namespace Microsoft.Identity.Client
                     bool tokenNearExpiry = (resultEx.Result.ExpiresOn <=
                                             DateTime.UtcNow + TimeSpan.FromMinutes(Constant.ExpirationMarginInMinutes));
                     if (!cacheKey.ScopeContains(scope) ||
-                        (!Authority.IsTenantLess(authority) && !authority.Equals(cacheKey.Authority)) ||
+                        (!Authority.IsTenantLessAuthority(authority) && !authority.Equals(cacheKey.Authority)) ||
                         !clientId.Equals(cacheKey.ClientId))
                     {
                         //requested scope are not a subset or authority does not match (cross-tenant RT) or client id is not same (FoCI).
@@ -547,13 +547,13 @@ namespace Microsoft.Identity.Client
                     // if authority is common and there are multiple unique ids in the cache
                     // then throw MultipleTokensMatched because code cannot guess which user
                     // is requested by the developer.
-                    if (Authority.IsTenantLess(authority) && this.GetUniqueIdsFromCache(clientId).Count() > 1)
+                    if (Authority.IsTenantLessAuthority(authority) && this.GetUniqueIdsFromCache(clientId).Count() > 1)
                     {
                         throw new MsalException(MsalError.MultipleTokensMatched);
                     }
                 }
 
-                if (Authority.IsTenantLess(authority))
+                if (Authority.IsTenantLessAuthority(authority))
                 {
                     authority = null; //ignore authority
                 }

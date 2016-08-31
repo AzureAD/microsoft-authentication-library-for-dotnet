@@ -48,7 +48,6 @@ namespace Test.MSAL.NET.Unit.InstanceTests
         [TestInitialize]
         public void TestInitialize()
         {
-            Authority._validatedAuthorities.Clear();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
         }

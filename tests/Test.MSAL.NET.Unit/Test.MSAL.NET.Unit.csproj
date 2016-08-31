@@ -83,6 +83,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="InstanceTests\AuthorityTests.cs" />
     <Compile Include="HttpTests\MsalHttpRequestTests.cs" />
     <Compile Include="RequestsTests\SilentRequestTests.cs" />
     <Compile Include="TokenCacheTests.cs" />
@@ -121,8 +122,12 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\OpenidConfiguration-MissingFields.txt" />
-    <Content Include="Resources\OpenidConfiguration.txt" />
+    <Content Include="Resources\OpenidConfiguration-MissingFields.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\OpenidConfiguration.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\TestMex.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
