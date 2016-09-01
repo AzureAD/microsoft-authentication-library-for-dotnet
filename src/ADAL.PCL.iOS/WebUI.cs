@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     var navigationController =
                         new AuthenticationAgentUINavigationController(authorizationUri.AbsoluteUri,
-                            redirectUri.OriginalString, CallbackMethod);
+                            redirectUri.OriginalString, CallbackMethod, this.parameters.PreferredStatusBarStyle);
                     this.parameters.CallerViewController.PresentViewController(navigationController, false, null);
                 });
             }
