@@ -46,7 +46,9 @@ namespace Microsoft.Identity.Client.Internal.Instance
     {
         internal static ConcurrentDictionary<string, Authority> _validatedAuthorities = new ConcurrentDictionary<string, Authority>();
         private static readonly string[] TenantlessTenantName = {"common", "organizations", "consumers"};
-        private bool _updatedFromTemplate;  
+        private bool _updatedFromTemplate;
+
+        protected abstract Task<string> Validate(string host, string tenant, CallState callState);
 
         public static Authority CreateAuthority(string authority, bool validateAuthority)
         {
@@ -179,8 +181,6 @@ namespace Microsoft.Identity.Client.Internal.Instance
                     client.ExecuteRequest<TenantDiscoveryResponse>(new Uri(openIdConfigurationEndpoint),
                         HttpMethod.Get, callState).ConfigureAwait(false);
         }
-
-        protected abstract Task<string> Validate(string host, string tenant, CallState callState);
 
         public static bool IsTenantLessAuthority(string authority)
         {

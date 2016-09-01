@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    AuthenticationResultEx resultEx = this.tokenCache.LoadFromCache(this.Authenticator.Authority,
+                    AuthenticationResultEx resultEx = this.tokenCache.LoadFromCache(this.authority.Authority,
                         this.Scope,
                         this.ClientKey.ClientId, this.User,
                         this.Policy, this.CallState);
