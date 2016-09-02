@@ -78,6 +78,11 @@ namespace Microsoft.Identity.Client.Internal
         public const string AuthorityValidationFailed = "authority_validation_failed";
 
         /// <summary>
+        /// Tenant discovery failed.
+        /// </summary>
+        public const string TenantDiscoveryFailed = "tenant_discovery_failed";
+
+        /// <summary>
         /// Loading required assembly failed.
         /// </summary>
         public const string AssemblyLoadFailed = "assembly_load_failed";

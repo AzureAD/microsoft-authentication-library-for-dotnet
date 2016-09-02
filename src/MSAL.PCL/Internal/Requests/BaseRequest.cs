@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -38,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         protected static readonly Task CompletedTask = Task.FromResult(false);
         internal readonly AuthenticationRequestParameters AuthenticationRequestParameters;
-        internal readonly Authenticator Authenticator;
+        internal readonly Authority Authority;
         internal readonly TokenCache TokenCache;
 
         internal CallState CallState { get; set; }
@@ -51,14 +52,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected BaseRequest(AuthenticationRequestParameters authenticationRequestParameters)
         {
-            this.Authenticator = authenticationRequestParameters.Authenticator;
-            this.CallState = CreateCallState(this.Authenticator.CorrelationId);
+            this.Authority = authenticationRequestParameters.Authority;
+            this.CallState = authenticationRequestParameters.CallState;
             this.TokenCache = authenticationRequestParameters.TokenCache;
 
             PlatformPlugin.Logger.Information(this.CallState,
                 string.Format(CultureInfo.InvariantCulture,
                     "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
-                    Authenticator.Authority, authenticationRequestParameters.Scope.AsSingleString(),
+                    Authority.CanonicalAuthority, authenticationRequestParameters.Scope.AsSingleString(),
                     authenticationRequestParameters.ClientKey.ClientId,
                     (TokenCache != null)
                         ? TokenCache.GetType().FullName +
@@ -135,7 +136,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    ResultEx = this.TokenCache.LoadFromCache(this.Authenticator.Authority,
+                    ResultEx = this.TokenCache.LoadFromCache(this.Authority.CanonicalAuthority,
                         AuthenticationRequestParameters.Scope,
                         AuthenticationRequestParameters.ClientKey.ClientId, this.User,
                         AuthenticationRequestParameters.Policy, this.CallState);
@@ -147,7 +148,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         ResultEx = await this.RefreshAccessTokenAsync(ResultEx).ConfigureAwait(false);
                         if (ResultEx != null && ResultEx.Exception == null)
                         {
-                            this.TokenCache.StoreToCache(ResultEx, this.Authenticator.Authority,
+                            this.TokenCache.StoreToCache(ResultEx, this.Authority.CanonicalAuthority,
                                 AuthenticationRequestParameters.ClientKey.ClientId,
                                 AuthenticationRequestParameters.Policy,
                                 AuthenticationRequestParameters.RestrictToSingleUser, this.CallState);
@@ -176,7 +177,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             notifiedBeforeAccessCache = true;
                         }
 
-                        this.TokenCache.StoreToCache(ResultEx, this.Authenticator.Authority,
+                        this.TokenCache.StoreToCache(ResultEx, this.Authority.CanonicalAuthority,
                             AuthenticationRequestParameters.ClientKey.ClientId, AuthenticationRequestParameters.Policy,
                             AuthenticationRequestParameters.RestrictToSingleUser, this.CallState);
                     }
@@ -209,12 +210,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return false;
         }
 
-        public static CallState CreateCallState(Guid correlationId)
-        {
-            correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
-            return new CallState(correlationId);
-        }
-
         protected virtual Task PostRunAsync(AuthenticationResult result)
         {
             LogReturnedToken(result);
@@ -224,7 +219,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 result.User.TokenCache = this.TokenCache;
                 result.User.ClientId = AuthenticationRequestParameters.ClientKey.ClientId;
-                result.User.Authority = this.Authenticator.Authority;
+                result.User.Authority = this.Authority.CanonicalAuthority;
             }
 
             return CompletedTask;
@@ -232,7 +227,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal virtual async Task PreRunAsync()
         {
-            await this.Authenticator.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
+            await this.Authority.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
 
             //pull any user from the cache as they will all have the same uniqueId
             if (this.User == null && this.TokenCache != null && AuthenticationRequestParameters.RestrictToSingleUser)
@@ -248,7 +243,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected virtual void PostTokenRequest(AuthenticationResultEx result)
         {
-            this.Authenticator.UpdateTenantId(result.Result.TenantId);
+            this.Authority.UpdateTenantId(result.Result.TenantId);
         }
 
         protected abstract void SetAdditionalRequestParameters(OAuth2Client client);
@@ -304,7 +299,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     newResultEx =
                         await this.SendTokenRequestByRefreshTokenAsync(result.RefreshToken).ConfigureAwait(false);
-                    this.Authenticator.UpdateTenantId(result.Result.TenantId);
+                    this.Authority.UpdateTenantId(result.Result.TenantId);
 
                     if (newResultEx.Result.IdToken == null)
                     {
@@ -339,7 +334,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             TokenResponse tokenResponse =
-                await client.GetToken(new Uri(this.Authenticator.TokenUri), this.CallState).ConfigureAwait(false);
+                await client.GetToken(new Uri(this.Authority.TokenEndpoint), this.CallState).ConfigureAwait(false);
             AuthenticationResultEx resultEx = tokenResponse.GetResultEx();
 
             if (resultEx.Result.ScopeSet == null || resultEx.Result.ScopeSet.Count == 0)
@@ -424,7 +419,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
 
-                    AuthenticationResultEx resultEx = this.TokenCache.LoadFromCache(this.Authenticator.Authority,
+                    AuthenticationResultEx resultEx = this.TokenCache.LoadFromCache(this.Authority.CanonicalAuthority,
                         AuthenticationRequestParameters.Scope,
                         AuthenticationRequestParameters.ClientKey.ClientId, user,
                         AuthenticationRequestParameters.Policy, this.CallState);

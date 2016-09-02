@@ -68,8 +68,7 @@ namespace Microsoft.Identity.Client.Internal.Http
 
             return requestMessage;
         }
-
-
+        
         private static async Task<HttpResponse> ExecuteWithRetry(Uri endpoint, Dictionary<string, string> headers,
             Dictionary<string, string> bodyParameters, HttpMethod method,
             CallState callstate, bool retry = true)

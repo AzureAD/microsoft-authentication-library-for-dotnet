@@ -35,6 +35,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.Http;
+using Microsoft.Identity.Client.Internal.Instance;
 
 namespace Microsoft.Identity.Client.Internal.OAuth2
 {
@@ -62,22 +63,27 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             _bodyParameters[EncodingHelper.UrlEncode(key)] = EncodingHelper.UrlEncode(value);
         }
 
-        public async Task<InstanceDiscoveryResponse> DoAuthorityValidation(Uri endPoint, CallState callState)
+        public async Task<TenantDiscoveryResponse> GetOpenIdConfiguration(Uri endPoint, CallState callState)
         {
-            return await ExecuteRequest<InstanceDiscoveryResponse>(endPoint, HttpMethod.Post, callState);
+            return await ExecuteRequest<TenantDiscoveryResponse>(endPoint, HttpMethod.Get, callState);
+        }
+
+        public async Task<InstanceDiscoveryResponse> DiscoverAadInstance(Uri endPoint, CallState callState)
+        {
+            return await ExecuteRequest<InstanceDiscoveryResponse>(endPoint, HttpMethod.Get, callState);
         }
 
         public async Task<TokenResponse> GetToken(Uri endPoint, CallState callState)
         {
-            return await ExecuteRequest<TokenResponse>(endPoint, HttpMethod.Get, callState);
+            return await ExecuteRequest<TokenResponse>(endPoint, HttpMethod.Post, callState);
         }
 
-        private async Task<T> ExecuteRequest<T>(Uri endPoint, HttpMethod method, CallState callState)
+        internal async Task<T> ExecuteRequest<T>(Uri endPoint, HttpMethod method, CallState callState)
         {
-            bool addCorrelationId = (callState != null && callState.CorrelationId != Guid.Empty);
+            bool addCorrelationId = (callState != null && !string.IsNullOrEmpty(callState.CorrelationId));
             if (addCorrelationId)
             {
-                _headers.Add(OAuth2Header.CorrelationId, callState.CorrelationId.ToString());
+                _headers.Add(OAuth2Header.CorrelationId, callState.CorrelationId);
                 _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
             }
 
@@ -99,7 +105,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             return CreateResponse<T>(response, callState, addCorrelationId);
         }
 
-        private T CreateResponse<T>(HttpResponse response, CallState callState, bool addCorrelationId)
+        public static T CreateResponse<T>(HttpResponse response, CallState callState, bool addCorrelationId)
         {
             if (response.StatusCode != HttpStatusCode.OK)
             {
@@ -114,7 +120,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             return DeserializeResponse<T>(response.Body);
         }
 
-        private void CreateErrorResponse(HttpResponse response, CallState callState)
+        public static void CreateErrorResponse(HttpResponse response, CallState callState)
         {
             MsalServiceException serviceEx;
             try
@@ -157,7 +163,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             return url;
         }
 
-        private T DeserializeResponse<T>(string response)
+        public static T DeserializeResponse<T>(string response)
         {
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (T));
 
@@ -172,7 +178,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             }
         }
 
-        public Stream GenerateStreamFromString(string s)
+        public static Stream GenerateStreamFromString(string s)
         {
             MemoryStream stream = new MemoryStream();
             StreamWriter writer = new StreamWriter(stream);
@@ -182,22 +188,15 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             return stream;
         }
 
-        private void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers, CallState callState)
+        private static void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers, CallState callState)
         {
             foreach (string reponseHeaderKey in headers.Keys)
             {
                 string trimmedKey = reponseHeaderKey.Trim();
                 if (string.Compare(trimmedKey, OAuth2Header.CorrelationId, StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    string correlationIdHeader = headers[trimmedKey].Trim();
-                    Guid correlationIdInResponse;
-                    if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
-                    {
-                        PlatformPlugin.Logger.Warning(callState,
-                            string.Format(CultureInfo.InvariantCulture,
-                                "Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
-                    }
-                    else if (correlationIdInResponse != callState.CorrelationId)
+                   string correlationIdHeader = headers[trimmedKey].Trim();
+                   if (!string.Equals(correlationIdHeader, callState.CorrelationId))
                     {
                         PlatformPlugin.Logger.Warning(
                             callState,

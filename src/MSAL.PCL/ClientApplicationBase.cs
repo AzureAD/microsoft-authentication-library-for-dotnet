@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client
@@ -81,7 +82,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Will be a default value. Can be overriden by the developer. Once set, application will bind to the client Id.
         /// </summary>
-        public string ClientId { get; set; }
+        public string ClientId { get; }
 
         /// <summary>
         /// Redirect Uri configured in the portal. Will have a default value. Not required, if the developer is using the
@@ -134,10 +135,10 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope)
         {
-            Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenSilentCommonAsync(authenticator, scope, (string) null, this.PlatformParameters,
+                    this.AcquireTokenSilentCommonAsync(authority, scope, (string) null, this.PlatformParameters,
                         null, false).ConfigureAwait(false);
         }
 
@@ -148,10 +149,10 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user)
         {
-            Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenSilentCommonAsync(authenticator, scope, user, this.PlatformParameters, null, false)
+                    this.AcquireTokenSilentCommonAsync(authority, scope, user, this.PlatformParameters, null, false)
                         .ConfigureAwait(false);
         }
 
@@ -162,10 +163,10 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier)
         {
-            Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority,this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenSilentCommonAsync(authenticator, scope, userIdentifier, this.PlatformParameters,
+                    this.AcquireTokenSilentCommonAsync(authority, scope, userIdentifier, this.PlatformParameters,
                         null, false).ConfigureAwait(false);
         }
 
@@ -180,10 +181,10 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier,
             string authority, string policy, bool forceRefresh)
         {
-            Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
+            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority,this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenSilentCommonAsync(authenticator, scope, userIdentifier, this.PlatformParameters,
+                    this.AcquireTokenSilentCommonAsync(authorityInstance, scope, userIdentifier, this.PlatformParameters,
                         policy, forceRefresh).ConfigureAwait(false);
         }
 
@@ -198,14 +199,14 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user,
             string authority, string policy, bool forceRefresh)
         {
-            Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
+            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority,this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenSilentCommonAsync(authenticator, scope, user, this.PlatformParameters, policy,
+                    this.AcquireTokenSilentCommonAsync(authorityInstance, scope, user, this.PlatformParameters, policy,
                         forceRefresh).ConfigureAwait(false);
         }
 
-        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator,
+        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
             string[] scope, string userIdentifier, IPlatformParameters parameters, string policy, bool forceRefresh)
         {
             if (parameters == null)
@@ -213,12 +214,12 @@ namespace Microsoft.Identity.Client
                 parameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var handler = new SilentRequest(this.CreateRequestParameters(authenticator, scope, policy, this.UserTokenCache),
+            var handler = new SilentRequest(this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache),
                 userIdentifier, parameters, forceRefresh);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authenticator authenticator,
+        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
             string[] scope, User user, IPlatformParameters parameters, string policy, bool forceRefresh)
         {
             if (parameters == null)
@@ -226,23 +227,30 @@ namespace Microsoft.Identity.Client
                 parameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var handler = new SilentRequest(this.CreateRequestParameters(authenticator, scope, policy, this.UserTokenCache), user,
+            var handler = new SilentRequest(this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache), user,
                 parameters, forceRefresh);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal virtual AuthenticationRequestParameters CreateRequestParameters(Authenticator authenticator, string[] scope,
+        internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope,
             string policy, TokenCache cache)
         {
             return new AuthenticationRequestParameters
             {
-                Authenticator = authenticator,
-                TokenCache =  cache,
+                Authority = authority,
+                TokenCache = cache,
                 Scope = scope.CreateSetFromArray(),
                 Policy = policy,
                 RestrictToSingleUser = this.RestrictToSingleUser,
-                RedirectUri = new Uri(this.RedirectUri)
+                RedirectUri = new Uri(this.RedirectUri),
+                CallState = CreateCallState(this.CorrelationId)
             };
+        }
+
+        internal CallState CreateCallState(Guid correlationId)
+        {
+            correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
+            return new CallState(correlationId);
         }
     }
 }

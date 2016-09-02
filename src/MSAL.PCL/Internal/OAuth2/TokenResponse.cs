@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -26,16 +26,11 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.IO;
-using System.Net;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using System.Text;
-using Microsoft.Identity.Client.Interfaces;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.OAuth2
 {
-    internal class TokenResponseClaim
+    internal class TokenResponseClaim : OAuth2ResponseBaseClaim
     {
         public const string Code = "code";
         public const string TokenType = "token_type";
@@ -46,14 +41,10 @@ namespace Microsoft.Identity.Client.Internal
         public const string IdToken = "id_token";
         public const string ExpiresIn = "expires_in";
         public const string IdTokenExpiresIn = "id_token_expires_in";
-        public const string Error = "error";
-        public const string ErrorDescription = "error_description";
-        public const string ErrorCodes = "error_codes";
-        public const string CorrelationId = "correlation_id";
     }
 
     [DataContract]
-    internal class TokenResponse
+    internal class TokenResponse : OAuth2ResponseBase
     {
         [DataMember(Name = TokenResponseClaim.TokenType, IsRequired = false)]
         public string TokenType { get; set; }
@@ -78,18 +69,6 @@ namespace Microsoft.Identity.Client.Internal
 
         [DataMember(Name = TokenResponseClaim.IdTokenExpiresIn, IsRequired = false)]
         public long IdTokenExpiresIn { get; set; }
-
-        [DataMember(Name = TokenResponseClaim.Error, IsRequired = false)]
-        public string Error { get; set; }
-
-        [DataMember(Name = TokenResponseClaim.ErrorDescription, IsRequired = false)]
-        public string ErrorDescription { get; set; }
-
-        [DataMember(Name = TokenResponseClaim.ErrorCodes, IsRequired = false)]
-        public string[] ErrorCodes { get; set; }
-
-        [DataMember(Name = TokenResponseClaim.CorrelationId, IsRequired = false)]
-        public string CorrelationId { get; set; }
 
         public AuthenticationResultEx GetResultEx()
         {

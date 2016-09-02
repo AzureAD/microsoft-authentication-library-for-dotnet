@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Http;
+using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.MSAL.NET.Unit.Mocks;
@@ -44,26 +45,22 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestInitialize]
         public void TestInitialize()
         {
+            Authority._validatedAuthorities.Clear();
+            TokenCache.DefaultSharedAppTokenCache = new TokenCache();
+            TokenCache.DefaultSharedUserTokenCache = new TokenCache();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]
         [TestCategory("SilentRequestTests")]
         public void ConstructorTests()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
-                Guid.NewGuid());
+            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
             TokenCache cache = new TokenCache();
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
-                Authenticator = authenticator,
+                Authority = authority,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = true,
@@ -93,12 +90,11 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("SilentRequestTests")]
         public void MapToIdentifierNullInputTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
-                Guid.NewGuid());
+            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
             TokenCache cache = new TokenCache();
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
-                Authenticator = authenticator,
+                Authority = authority,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = true,
@@ -116,12 +112,11 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("SilentRequestTests")]
         public void MapToIdentifierNoItemFoundTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
-                Guid.NewGuid());
+            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
             TokenCache cache = new TokenCache();
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
-                Authenticator = authenticator,
+                Authority = authority,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = true,
@@ -139,12 +134,11 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("SilentRequestTests")]
         public void MapToIdentifierItemFoundTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
-                Guid.NewGuid());
+            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
             TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
-                Authenticator = authenticator,
+                Authority = authority,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
@@ -163,8 +157,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("SilentRequestTests")]
         public void MapToIdentifierMultipleMatchingEntriesTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
-                Guid.NewGuid());
+            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
             TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
@@ -189,7 +182,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
-                Authenticator = authenticator,
+                Authority = authority,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
@@ -208,19 +201,25 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("SilentRequestTests")]
         public void ExpiredTokenRefreshFlowTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
-                Guid.NewGuid());
+            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
             TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
-                Authenticator = authenticator,
+                Authority = authority,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache
             };
+            
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+            });
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
@@ -235,6 +234,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.Token);
             Assert.AreEqual("some-scope1 some-scope2", result.Scope.AsSingleString());
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
 
@@ -242,13 +243,19 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("SilentRequestTests")]
         public void SilentRefreshFailedNoCacheItemFoundTest()
         {
-            Authenticator authenticator = new Authenticator(TestConstants.DefaultAuthorityHomeTenant, false,
-                Guid.NewGuid());
+            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
             TokenCache cache = new TokenCache();
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+            });
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
-                Authenticator = authenticator,
+                Authority = authority,
                 ClientKey = new ClientKey(TestConstants.DefaultClientId),
                 Policy = TestConstants.DefaultPolicy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,

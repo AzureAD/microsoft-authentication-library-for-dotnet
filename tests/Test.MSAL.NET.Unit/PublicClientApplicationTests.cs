@@ -35,6 +35,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Http;
+using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Test.MSAL.NET.Unit.Mocks;
@@ -47,14 +48,11 @@ namespace Test.MSAL.NET.Unit
         [TestInitialize]
         public void TestInitialize()
         {
+            Authority._validatedAuthorities.Clear();
+            TokenCache.DefaultSharedAppTokenCache = new TokenCache();
+            TokenCache.DefaultSharedUserTokenCache = new TokenCache();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]
@@ -154,6 +152,14 @@ namespace Test.MSAL.NET.Unit
             mockFactory.CreateAuthenticationDialog(Arg.Any<IPlatformParameters>()).Returns(webUi);
             PlatformPlugin.WebUIFactory = mockFactory;
 
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+            });
+
+
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
@@ -161,7 +167,11 @@ namespace Test.MSAL.NET.Unit
             });
 
             // this is a flow where we pass client id as a scope
-            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId)
+            {
+                ValidateAuthority = false
+            };
+
             Task<AuthenticationResult> task = app.AcquireTokenAsync(new string[] {TestConstants.DefaultClientId});
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
@@ -186,6 +196,8 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual(1, item.Scope.Count);
                 Assert.AreEqual(TestConstants.DefaultClientId, item.Scope.AsSingleString());
             }
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
 
@@ -193,7 +205,19 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSilentCacheOnlyLookupTest()
         {
-            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultAuthorityHomeTenant,
+                TestConstants.DefaultClientId)
+            {
+                ValidateAuthority = false
+            };
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+            });
+
             app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
             app.UserTokenCache.tokenCacheDictionary.Remove(new TokenCacheKey(TestConstants.DefaultAuthorityGuestTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.DefaultClientId,
@@ -207,13 +231,26 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.DefaultDisplayableId, result.User.DisplayableId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, result.User.UniqueId);
             Assert.AreEqual(TestConstants.DefaultScope.AsSingleString(), result.Scope.AsSingleString());
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSilentForceRefreshTest()
         {
-            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId)
+            {
+                ValidateAuthority = false
+            };
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+            });
+
             app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
@@ -234,13 +271,26 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(
                 TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray().AsSingleString(),
                 result.Scope.AsSingleString());
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSilentServiceErrorTest()
         {
-            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId)
+            {
+                ValidateAuthority = false
+            };
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+            });
+
             app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
 
             MockHttpMessageHandler mockHandler = new MockHttpMessageHandler();
@@ -265,6 +315,8 @@ namespace Test.MSAL.NET.Unit
                 Assert.IsNotNull(msalExc.InnerException, "MsalSilentTokenAcquisitionException inner exception is null");
                 Assert.AreEqual(((MsalException) msalExc.InnerException).ErrorCode, "invalid_grant");
             }
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
 

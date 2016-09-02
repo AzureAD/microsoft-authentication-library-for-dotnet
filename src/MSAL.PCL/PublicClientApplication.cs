@@ -29,6 +29,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client
@@ -69,10 +70,10 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope)
         {
-            Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authenticator, scope, null, (string) null,
+                    this.AcquireTokenCommonAsync(authority, scope, null, (string) null,
                         UiOptions.SelectAccount, null, null).ConfigureAwait(false);
         }
 
@@ -83,10 +84,10 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string loginHint)
         {
-            Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authenticator, scope, null, loginHint,
+                    this.AcquireTokenCommonAsync(authority, scope, null, loginHint,
                         UiOptions.SelectAccount, null, null).ConfigureAwait(false);
         }
 
@@ -100,10 +101,10 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string loginHint,
             UiOptions options, string extraQueryParameters)
         {
-            Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authenticator, scope, null, loginHint,
+                    this.AcquireTokenCommonAsync(authority, scope, null, loginHint,
                         options, extraQueryParameters, null).ConfigureAwait(false);
         }
 
@@ -117,10 +118,10 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User user,
             UiOptions options, string extraQueryParameters)
         {
-            Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authenticator, scope, null, new Uri(this.RedirectUri), user, options,
+                    this.AcquireTokenCommonAsync(authority, scope, null, new Uri(this.RedirectUri), user, options,
                         extraQueryParameters, null).ConfigureAwait(false);
         }
 
@@ -137,10 +138,10 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string loginHint,
             UiOptions options, string extraQueryParameters, string[] additionalScope, string authority, string policy)
         {
-            Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
+            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authenticator, scope, additionalScope,
+                    this.AcquireTokenCommonAsync(authorityInstance, scope, additionalScope,
                         loginHint, options, extraQueryParameters, policy).ConfigureAwait(false);
         }
 
@@ -157,10 +158,10 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User user,
             UiOptions options, string extraQueryParameters, string[] additionalScope, string authority, string policy)
         {
-            Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
+            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authenticator, scope, additionalScope, new Uri(this.RedirectUri), user,
+                    this.AcquireTokenCommonAsync(authorityInstance, scope, additionalScope, new Uri(this.RedirectUri), user,
                         options, extraQueryParameters, policy).ConfigureAwait(false);
         }
 
@@ -177,10 +178,10 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope)
         {
-            Authenticator authenticator = new Authenticator(this.Authority, this.ValidateAuthority, this.CorrelationId);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenUsingIntegratedAuthCommonAsync(authenticator, scope,
+                    this.AcquireTokenUsingIntegratedAuthCommonAsync(authority, scope,
                         new UserCredential(), null).ConfigureAwait(false);
         }
 
@@ -194,17 +195,17 @@ namespace Microsoft.Identity.Client
         internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope,
             string authority, string policy)
         {
-            Authenticator authenticator = new Authenticator(authority, this.ValidateAuthority, this.CorrelationId);
+            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenUsingIntegratedAuthCommonAsync(authenticator, scope,
+                    this.AcquireTokenUsingIntegratedAuthCommonAsync(authorityInstance, scope,
                         new UserCredential(), policy).ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(Authenticator authenticator,
+        private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(Authority authority,
             string[] scope, UserCredential userCredential, string policy)
         {
-/*            var requestParams = this.CreateRequestParameters(authenticator, scope, policy, this.UserTokenCache);
+/*            var requestParams = this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache);
             var handler = new SilentWebUiRequest(requestParams, userCredential);
             return await handler.RunAsync().ConfigureAwait(false);*/
             await Task.Run(() => {
@@ -212,7 +213,7 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope,
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authority authority, string[] scope,
             string[] additionalScope, string loginHint, UiOptions uiOptions,
             string extraQueryParameters, string policy)
         {
@@ -221,7 +222,7 @@ namespace Microsoft.Identity.Client
                 this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var requestParams = this.CreateRequestParameters(authenticator, scope, policy, this.UserTokenCache);
+            var requestParams = this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
@@ -231,7 +232,7 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authenticator authenticator, string[] scope,
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authority authority, string[] scope,
             string[] additionalScope, Uri redirectUri, User user, UiOptions uiOptions, string extraQueryParameters,
             string policy)
         {
@@ -240,7 +241,7 @@ namespace Microsoft.Identity.Client
                 this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var requestParams = this.CreateRequestParameters(authenticator, scope, policy, this.UserTokenCache);
+            var requestParams = this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
@@ -250,11 +251,11 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal override AuthenticationRequestParameters CreateRequestParameters(Authenticator authenticator, string[] scope,
+        internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope,
             string policy,
             TokenCache cache)
         {
-            AuthenticationRequestParameters parameters = base.CreateRequestParameters(authenticator, scope, policy, cache);
+            AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scope, policy, cache);
             parameters.ClientKey = new ClientKey(this.ClientId);
 
             return parameters;
