@@ -29,12 +29,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Foundation;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using SafariServices;
 
 namespace Microsoft.Identity.Client
 {
-    internal class WebUI : IWebUI
+    internal class WebUI : IWebUI, ISFSafariViewControllerDelegate
     {
         private static SemaphoreSlim returnedUriReady;
         private static AuthorizationResult authorizationResult;
@@ -50,10 +52,10 @@ namespace Microsoft.Identity.Client
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            IDictionary<string, string> additionalHeaders, CallState callState)
+            CallState callState)
         {
             returnedUriReady = new SemaphoreSlim(0);
-            Authenticate(authorizationUri, redirectUri, additionalHeaders, callState);
+            Authenticate(authorizationUri, redirectUri, callState);
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
             return authorizationResult;
         }
@@ -64,14 +66,12 @@ namespace Microsoft.Identity.Client
             returnedUriReady.Release();
         }
 
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders,
-            CallState callState)
+        public void Authenticate(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
             try
             {
-                this.parameters.CallerViewController.PresentViewController(
-                    new AuthenticationAgentUINavigationController(authorizationUri.AbsoluteUri,
-                        redirectUri.OriginalString, additionalHeaders, CallbackMethod), false, null);
+                var sfvc = new SFSafariViewController(new NSUrl("http://xamarin.com"), false);
+                this.parameters.CallerViewController.PresentViewController(sfvc, true, null);
             }
             catch (Exception ex)
             {
@@ -80,9 +80,17 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private void CallbackMethod(AuthorizationResult result)
+        [Foundation.Export("safariViewControllerDidFinish:")]
+        public void DidFinish(SFSafariViewController controller)
         {
-            SetAuthorizationResult(result);
+            controller.DismissViewController(true, null);
+            SetAuthorizationResult(new AuthorizationResult(AuthorizationStatus.UserCancel, null));
+        }
+
+        public IntPtr Handle { get; }
+
+        public void Dispose()
+        {
         }
     }
 }

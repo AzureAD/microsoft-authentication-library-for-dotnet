@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             this._authorizationResult =
                 await
                     this._webUi.AcquireAuthorizationAsync(authorizationUri, AuthenticationRequestParameters.RedirectUri,
-                        headers, this.CallState)
+                        this.CallState)
                         .ConfigureAwait(false);
         }
 

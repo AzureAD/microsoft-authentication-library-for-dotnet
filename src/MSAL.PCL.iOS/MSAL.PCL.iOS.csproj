@@ -49,16 +49,12 @@
     <Compile Include="..\MSAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="CustomHeaderHandler.cs" />
-    <Compile Include="MsalCustomUrlProtocol.cs" />
     <Compile Include="MsalInitializer.cs" />
-    <Compile Include="AuthenticationAgentUINavigationController.cs" />
-    <Compile Include="AuthenticationAgentUIViewController.cs" />
     <Compile Include="BrokerConstants.cs" />
     <Compile Include="BrokerHelper.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="DeviceAuthHelper.cs" />
-	<Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="PlatformParameters.cs" />
     <Compile Include="CryptographyHelper.cs" />
     <Compile Include="Logger.cs" />
