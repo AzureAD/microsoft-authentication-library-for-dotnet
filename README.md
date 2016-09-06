@@ -3,13 +3,13 @@
 Active Directory Authentication Library (ADAL) provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.
 Here you can find the source code for the library. You can find the corresponding releases (both stable and prerelease) on the NuGet gallery at [http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/](http://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).
 
-- The latest stable release is available at [nuget.org](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).
-- 
-- The next version of the library in prerelease form is also avialable on the NuGet gallery.
-- 
+The latest stable release is available at [nuget.org](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).
+
+The next version of the library in prerelease form is also avialable on the NuGet gallery.
+
 ## Security Vulnerability in muliptle .Net Versions
 _adal.net_ has a known security vulnerability affecting 2.x and 3.x versions. Please update immediately. For more details, see the [security notice](https://github.com/AzureAD/active-directory-library-for-dotnet/blob/master/SECURITY-NOTICE.MD).
-- 
+
 ## Samples and Documentation
 
 [We provide a full suite of sample applications and documentation on GitHub](https://github.com/AzureADSamples) to help you get started with learning the Azure Identity system. This includes tutorials for native clients such as Windows, Windows Phone, iOS, OSX, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features. 
