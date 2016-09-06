@@ -184,7 +184,8 @@ namespace Microsoft.Identity.Client
                 {(int) NavigateErrorStatusCode.INET_E_CANNOT_INSTANTIATE_OBJECT, "CoCreateInstance failed."},
                 {(int) NavigateErrorStatusCode.INET_E_CANNOT_LOAD_DATA, "The object could not be loaded."},
                 {
-                    (int) NavigateErrorStatusCode.INET_E_CANNOT_LOCK_REQUEST, "The requested resource could not be locked."
+                    (int) NavigateErrorStatusCode.INET_E_CANNOT_LOCK_REQUEST,
+                    "The requested resource could not be locked."
                 },
                 {
                     (int) NavigateErrorStatusCode.INET_E_CANNOT_REPLACE_SFP_FILE,
@@ -225,7 +226,8 @@ namespace Microsoft.Identity.Client
                     "WinInet cannot redirect. This error code might also be returned by a custom protocol handler."
                 },
                 {
-                    (int) NavigateErrorStatusCode.INET_E_REDIRECT_TO_DIR, "The request is being redirected to a directory."
+                    (int) NavigateErrorStatusCode.INET_E_REDIRECT_TO_DIR,
+                    "The request is being redirected to a directory."
                 },
                 {(int) NavigateErrorStatusCode.INET_E_RESOURCE_NOT_FOUND, "The server or proxy was not found."},
                 {

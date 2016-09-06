@@ -28,7 +28,7 @@
 using System;
 using Windows.Foundation.Collections;
 using Windows.Storage;
-using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client

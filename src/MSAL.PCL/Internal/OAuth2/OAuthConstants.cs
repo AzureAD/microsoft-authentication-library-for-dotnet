@@ -45,10 +45,12 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
         public const string Username = "username";
         public const string Password = "password";
         public const string LoginHint = "login_hint"; // login_hint is not standard oauth2 parameter
+        public const string CorrelationId = OAuth2Header.CorrelationId;
+
         public const string CodeChallengeMethod = "code_challenge_method";
         public const string CodeChallenge = "code_challenge";
-        public const string CorrelationId = OAuth2Header.CorrelationId;
-            // correlation id is not standard oauth2 parameter
+        public const string CodeVerifier = "code_verifier";
+        // correlation id is not standard oauth2 parameter
 
         public const string Prompt = "prompt"; // prompt is not standard oauth2 parameter
         public const string RestrictToHint = "restrict_to_hint"; // restrict_to_hint is not standard oauth2 parameter

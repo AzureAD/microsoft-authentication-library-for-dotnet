@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Internal
                         bool assertionNearExpiry = (this.Credential.ValidTo <=
                                                     JsonWebToken.ConvertToTimeT(DateTime.UtcNow +
                                                                                 TimeSpan.FromMinutes(
-                                                                                    Constant.ExpirationMarginInMinutes)));
+                                                                                    Constants.ExpirationMarginInMinutes)));
                         if (assertionNearExpiry)
                         {
                             JsonWebToken jwtToken = new JsonWebToken(this.ClientId,

@@ -30,8 +30,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Foundation;
-using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using SafariServices;
 
 namespace Microsoft.Identity.Client

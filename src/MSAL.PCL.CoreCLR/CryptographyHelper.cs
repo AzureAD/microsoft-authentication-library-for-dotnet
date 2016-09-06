@@ -25,13 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
     internal class CryptographyHelper : ICryptographyHelper
     {
         public string CreateSha256Hash(string input)
+        {
+            return null;
+        }
+
+        public string GenerateCodeVerifier()
         {
             return null;
         }

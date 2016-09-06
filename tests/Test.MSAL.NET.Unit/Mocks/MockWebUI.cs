@@ -28,8 +28,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.MSAL.NET.Unit.Mocks
@@ -38,23 +38,10 @@ namespace Test.MSAL.NET.Unit.Mocks
     {
         internal AuthorizationResult MockResult { get; set; }
 
-        internal IDictionary<string, string> HeadersToValidate { get; set; }
-
         internal IDictionary<string, string> QueryParams { get; set; }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
-            if (HeadersToValidate!=null)
-            {
-                Assert.IsNotNull(additionalHeaders);
-
-                foreach (var key in HeadersToValidate.Keys)
-                {
-                    Assert.IsTrue(additionalHeaders.ContainsKey(key));
-                    Assert.AreEqual(HeadersToValidate[key], additionalHeaders[key]);
-                }
-            }
-            
             //match QP passed in for validation. 
             if (QueryParams != null)
             {

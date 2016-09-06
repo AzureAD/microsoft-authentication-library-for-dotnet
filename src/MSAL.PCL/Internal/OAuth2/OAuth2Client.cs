@@ -98,8 +98,8 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             else
             {
                 response =
-                   await
-                       HttpRequest.SendGet(CreateFullEndpointUri(endPoint), this._headers, callState);
+                    await
+                        HttpRequest.SendGet(CreateFullEndpointUri(endPoint), this._headers, callState);
             }
 
             return CreateResponse<T>(response, callState, addCorrelationId);
@@ -195,8 +195,8 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                 string trimmedKey = reponseHeaderKey.Trim();
                 if (string.Compare(trimmedKey, OAuth2Header.CorrelationId, StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                   string correlationIdHeader = headers[trimmedKey].Trim();
-                   if (!string.Equals(correlationIdHeader, callState.CorrelationId))
+                    string correlationIdHeader = headers[trimmedKey].Trim();
+                    if (!string.Equals(correlationIdHeader, callState.CorrelationId))
                     {
                         PlatformPlugin.Logger.Warning(
                             callState,
@@ -209,7 +209,5 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                 }
             }
         }
-
-
     }
 }

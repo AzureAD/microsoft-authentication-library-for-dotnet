@@ -31,8 +31,8 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
@@ -43,28 +43,12 @@ namespace Microsoft.Identity.Client
         public Object OwnerWindow { get; set; }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            IDictionary<string, string> additionalHeaders, CallState callState)
+            CallState callState)
         {
             AuthorizationResult authorizationResult = null;
-            StringBuilder builder = new StringBuilder();
-
-            if (additionalHeaders != null)
-            {
-                bool isFirst = true;
-                foreach (var key in additionalHeaders.Keys)
-                {
-                    if (!isFirst)
-                    {
-                        builder.Append("\r\n");
-                    }
-
-                    builder.AppendFormat("{0}: {1}", key, additionalHeaders[key]);
-                    isFirst = false;
-                }
-            }
 
             var sendAuthorizeRequest = new Action(
-                delegate { authorizationResult = this.Authenticate(authorizationUri, redirectUri, builder.ToString()); });
+                delegate { authorizationResult = this.Authenticate(authorizationUri, redirectUri); });
 
             // If the thread is MTA, it cannot create or communicate with WebBrowser which is a COM control.
             // In this case, we have to create the browser in an STA thread via StaTaskScheduler object.
@@ -102,13 +86,13 @@ namespace Microsoft.Identity.Client
             return await Task.Factory.StartNew(() => authorizationResult).ConfigureAwait(false);
         }
 
-        internal AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri, string headers)
+        internal AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri)
         {
             this.RequestUri = requestUri;
             this.CallbackUri = callbackUri;
 
             ThrowOnNetworkDown();
-            return this.OnAuthenticate(headers);
+            return this.OnAuthenticate();
         }
 
         private static void ThrowOnNetworkDown()
@@ -119,6 +103,6 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        protected abstract AuthorizationResult OnAuthenticate(string headers);
+        protected abstract AuthorizationResult OnAuthenticate();
     }
 }

@@ -28,7 +28,7 @@
 using System;
 using Android.App;
 using Android.Content;
-using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client

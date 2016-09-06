@@ -31,7 +31,6 @@ using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Instance
 {
-
     internal class AdfsWebFingerResponseClaim : OAuth2ResponseBaseClaim
     {
         public const string Subject = "subject";

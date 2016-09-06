@@ -269,8 +269,18 @@
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2132:DefaultConstructorsMustHaveConsistentTransparencyFxCopRule", Scope = "type",
         Target = "Microsoft.Identity.Client.PlatformInformation")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.Logger.#Error(Microsoft.Identity.Client.Internal.CallState,System.String,System.String)")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.Logger.#Error(Microsoft.Identity.Client.Internal.CallState,System.String,System.String)")]
+[assembly:
+    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
+        "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
+        Target =
+            "Microsoft.Identity.Client.Logger.#Error(Microsoft.Identity.Client.Internal.CallState,System.String,System.String)"
+        )]
+[assembly:
+    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
+        "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
+        Target =
+            "Microsoft.Identity.Client.Logger.#Error(Microsoft.Identity.Client.Internal.CallState,System.String,System.String)"
+        )]
 
 // This file is used by Code Analysis to maintain SuppressMessage 
 // attributes that are applied to this project.

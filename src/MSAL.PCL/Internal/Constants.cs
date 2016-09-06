@@ -50,11 +50,13 @@ namespace Microsoft.Identity.Client.Internal
             "You need to add the value of WebAuthenticationBroker.GetCurrentApplicationCallbackUri() to an application's local setting named CurrentApplicationCallbackUri.";
     }
 
-    internal static class Constant
+    internal static class Constants
     {
         public const string MsAppScheme = "ms-app";
         public static readonly Uri SsoPlaceHolderUri = new Uri("https://sso");
         public static readonly int ExpirationMarginInMinutes = 5;
+        public const int CodeVerifierLength = 128;
+        public const int CodeVerifierByteSize = 32;
     }
 
 

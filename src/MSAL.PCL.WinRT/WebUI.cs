@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Windows.Security.Authentication.Web;
-using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
@@ -50,13 +50,13 @@ namespace Microsoft.Identity.Client
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            IDictionary<string, string> additionalHeaders, CallState callState)
+            CallState callState)
         {
-            bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
+            bool ssoMode = ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri);
 
             WebAuthenticationResult webAuthenticationResult;
             WebAuthenticationOptions options = (this.useCorporateNetwork &&
-                                                (ssoMode || redirectUri.Scheme == Constant.MsAppScheme))
+                                                (ssoMode || redirectUri.Scheme == Constants.MsAppScheme))
                 ? WebAuthenticationOptions.UseCorporateNetwork
                 : WebAuthenticationOptions.None;
 

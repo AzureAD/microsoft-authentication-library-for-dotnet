@@ -62,6 +62,5 @@ namespace Microsoft.Identity.Client
     {
         public const string RequestUrlKey = "";
         public const string RequestId = "";
-
     }
 }

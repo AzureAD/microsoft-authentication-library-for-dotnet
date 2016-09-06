@@ -28,7 +28,8 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
@@ -41,6 +42,17 @@ namespace Microsoft.Identity.Client
                 UTF8Encoding encoding = new UTF8Encoding();
                 return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
             }
+        }
+
+        public string GenerateCodeVerifier()
+        {
+            byte[] buffer = new byte[Internal.Constants.CodeVerifierByteSize];
+            using (RNGCryptoServiceProvider randomSource = new RNGCryptoServiceProvider())
+            {
+                randomSource.GetBytes(buffer);
+            }
+
+            return EncodingHelper.EncodeToBase64Url(buffer);
         }
     }
 }
