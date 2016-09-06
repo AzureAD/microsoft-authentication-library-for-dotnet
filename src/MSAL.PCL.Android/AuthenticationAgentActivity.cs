@@ -41,11 +41,9 @@ namespace Microsoft.Identity.Client
     [CLSCompliant(false)]
     public class AuthenticationAgentActivity : Activity
     {
-        /// <summary>
-        /// </summary>
-        public static IDictionary<string, string> AdditionalHeaders;
-
-        private MsalWebViewClient client;
+        private string requestUrl;
+        private int requestId;
+        private bool restarted;
 
         /// <summary>
         /// </summary>
@@ -53,176 +51,126 @@ namespace Microsoft.Identity.Client
         {
             base.OnCreate(bundle);
 
-            // Create your application here
+            // If activity is killed by the os, savedInstance will be the saved bundle.
+            if (bundle != null)
+            {
+                restarted = true;
+                return;
+            }
+            
+            if (Intent == null)
+            {
+                sendError(MsalErrorAndroidEx.InvalidRequest, "Received null data intent from caller");
+                return;
+            }
 
-            SetContentView(Resource.Layout.WebAuthenticationBroker);
+            requestUrl = Intent.GetStringExtra(Constants.RequestUrlKey);
+            requestId = Intent.GetIntExtra(Constants.RequestId, 0);
+            if (MSALUtils.isEmpty(mRequestUrl))
+            {
+                sendError(MsalErrorAndroidEx.InvalidRequest, "Request url is not set on the intent");
+                return;
+            }
 
-            string url = Intent.GetStringExtra("Url");
-
-            WebView webView = FindViewById<WebView>(Resource.Id.agentWebView);
-            WebSettings webSettings = webView.Settings;
-            string userAgent = webSettings.UserAgentString;
-            webSettings.UserAgentString =
-                userAgent + BrokerConstants.ClientTlsNotSupported;
-            PlatformPlugin.Logger.Verbose(null, "UserAgent:" + webSettings.UserAgentString);
-
-            webSettings.JavaScriptEnabled = true;
-
-            webSettings.LoadWithOverviewMode = true;
-            webSettings.DomStorageEnabled = true;
-            webSettings.UseWideViewPort = true;
-            webSettings.BuiltInZoomControls = true;
-
-            this.client = new MsalWebViewClient(Intent.GetStringExtra("Callback"));
-
-            webView.SetWebViewClient(client);
-            webView.LoadUrl(url, AdditionalHeaders);
+            // We'll use custom tab if the chrome installed on the device comes with custom tab support(on 45 and above it
+            // does). If the chrome package doesn't contain the support, we'll use chrome to launch the UI.
+            if (MSALUtils.getChromePackage(this.getApplicationContext()) == null)
+            {
+                // TODO: log that chrome is not installed, cannot prompt the UI.
+                sendError(Constants.MSALError.CHROME_NOT_INSTLLED, "Chrome is not installed on the device, cannot proceed with auth");
+            }
         }
 
-        /// <summary>
-        /// </summary>
-        public override void Finish()
+        /**
+         * OnNewIntent will be called before onResume.
+         * @param intent
+         */
+
+        void OnNewIntent(Intent intent)
         {
-            if (this.client.ReturnIntent != null)
+            super.onNewIntent(intent);
+            final String url = intent.getStringExtra(Constants.CUSTOM_TAB_REDIRECT);
+
+            final Intent resultIntent = new Intent();
+            resultIntent.putExtra(Constants.AUTHORIZATION_FINAL_URL, url);
+            returnToCaller(Constants.UIResponse.AUTH_CODE_COMPLETE,
+                    resultIntent);
+        }
+
+        @Override
+    protected void onResume()
+        {
+            super.onResume();
+
+            if (mRestarted)
             {
-                this.SetResult(Result.Ok, this.client.ReturnIntent);
+                cancelRequest();
+                return;
+            }
+
+            mRestarted = true;
+
+            final String chromePackageWithCustomTabSupport = MSALUtils.getChromePackageWithCustomTabSupport(
+                    this.getApplicationContext());
+            final boolean isCustomTabDisabled = this.getIntent().getBooleanExtra(InteractiveRequest.DISABLE_CHROMETAB, false);
+            mRequestUrl = this.getIntent().getStringExtra(Constants.REQUEST_URL_KEY);
+
+            // TODO: remove the check for custom tab is disabled.
+            if (chromePackageWithCustomTabSupport != null && !isCustomTabDisabled)
+            {
+                final CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
+                customTabsIntent.intent.setPackage(MSALUtils.getChromePackageWithCustomTabSupport(this));
+                customTabsIntent.launchUrl(this, Uri.parse(mRequestUrl));
             }
             else
             {
-                this.SetResult(Result.Canceled, new Intent("Return"));
+                final Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mRequestUrl));
+                browserIntent.setPackage(MSALUtils.getChromePackage(this.getApplicationContext()));
+                browserIntent.addCategory(Intent.CATEGORY_BROWSABLE);
+                this.startActivity(browserIntent);
             }
-
-            AdditionalHeaders = null;
-            base.Finish();
         }
 
-        private sealed class MsalWebViewClient : WebViewClient
+        @Override
+    public void onSaveInstanceState(final Bundle outState)
         {
-            private readonly string callback;
+            super.onSaveInstanceState(outState);
 
-            public MsalWebViewClient(string callback)
-            {
-                this.callback = callback;
-            }
+            outState.putString(Constants.REQUEST_URL_KEY, mRequestUrl);
+        }
 
-            public Intent ReturnIntent { get; private set; }
+        /**
+         * Cancels the auth request.
+         */
+        void cancelRequest()
+        {
+            returnToCaller(Constants.UIResponse.CANCEL, new Intent());
+        }
 
-            public override void OnLoadResource(WebView view, string url)
-            {
-                base.OnLoadResource(view, url);
+        /**
+         * Return the error back to caller.
+         * @param resultCode The result code to return back.
+         * @param data {@link Intent} contains the detailed result.
+         */
+        private void returnToCaller(final int resultCode, final Intent data)
+        {
+            data.putExtra(Constants.REQUEST_ID, mRequestId);
 
-                if (url.StartsWith(callback))
-                {
-                    base.OnLoadResource(view, url);
-                    this.Finish(view, url);
-                }
-            }
+            setResult(resultCode, data);
+            this.finish();
+        }
 
-            /// <summary>
-            /// </summary>
-            public override bool ShouldOverrideUrlLoading(WebView view, string url)
-            {
-                Uri uri = new Uri(url);
-                if (url.StartsWith(BrokerConstants.BrowserExtPrefix))
-                {
-                    PlatformPlugin.Logger.Verbose(null, "It is browser launch request");
-                    OpenLinkInBrowser(url, ((Activity) view.Context));
-                    view.StopLoading();
-                    ((Activity) view.Context).Finish();
-                    return true;
-                }
-
-                if (url.StartsWith(BrokerConstants.BrowserExtInstallPrefix))
-                {
-                    PlatformPlugin.Logger.Verbose(null, "It is an azure authenticator install request");
-                    view.StopLoading();
-                    this.Finish(view, url);
-                    return true;
-                }
-
-                if (url.StartsWith(BrokerConstants.PKeyAuthRedirect, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    string query = uri.Query;
-                    if (query.StartsWith("?"))
-                    {
-                        query = query.Substring(1);
-                    }
-
-                    Dictionary<string, string> keyPair = EncodingHelper.ParseKeyValueList(query, '&', true, false, null);
-                    string responseHeader =
-                        PlatformPlugin.DeviceAuthHelper.CreateDeviceAuthChallengeResponse(keyPair).Result;
-                    Dictionary<string, string> pkeyAuthEmptyResponse = new Dictionary<string, string>();
-                    pkeyAuthEmptyResponse[BrokerConstants.ChallangeResponseHeader] = responseHeader;
-                    view.LoadUrl(keyPair["SubmitUrl"], pkeyAuthEmptyResponse);
-                    return true;
-                }
-
-                if (url.StartsWith(callback, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    this.Finish(view, url);
-                    return true;
-                }
-
-
-                if (!url.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) &&
-                    !uri.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    UriBuilder errorUri = new UriBuilder(callback);
-                    errorUri.Query = string.Format("error={0}&error_description={1}",
-                        MsalError.NonHttpsRedirectNotSupported, MsalErrorMessage.NonHttpsRedirectNotSupported);
-                    this.Finish(view, errorUri.ToString());
-                    return true;
-                }
-
-
-                return false;
-            }
-
-            private void OpenLinkInBrowser(string url, Activity activity)
-            {
-                string link = url
-                    .Replace(BrokerConstants.BrowserExtPrefix, "https://");
-                Intent intent = new Intent(Intent.ActionView, Android.Net.Uri.Parse(link));
-                activity.StartActivity(intent);
-            }
-
-            /// <summary>
-            /// </summary>
-            public override void OnPageFinished(WebView view, string url)
-            {
-                if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
-                {
-                    base.OnPageFinished(view, url);
-                    this.Finish(view, url);
-                }
-
-                base.OnPageFinished(view, url);
-            }
-
-            /// <summary>
-            /// </summary>
-            public override void OnPageStarted(WebView view, string url, Android.Graphics.Bitmap favicon)
-            {
-                if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
-                {
-                    base.OnPageStarted(view, url, favicon);
-                }
-
-                base.OnPageStarted(view, url, favicon);
-            }
-
-            /// <summary>
-            /// </summary>
-            private void Finish(WebView view, string url)
-            {
-                var activity = ((Activity) view.Context);
-                if (activity != null && !activity.IsFinishing)
-                {
-                    this.ReturnIntent = new Intent("Return");
-                    this.ReturnIntent.PutExtra("ReturnedUrl", url);
-                    ((Activity) view.Context).Finish();
-                }
-            }
+        /**
+         * Send error back to caller with the error description.
+         * @param errorCode The error code to send back.
+         * @param errorDescription The error description to send back.
+         */
+        private void sendError(final String errorCode, final String errorDescription)
+        {
+            final Intent errorIntent = new Intent();
+            errorIntent.putExtra(Constants.UIResponse.ERROR_CODE, errorCode);
+            errorIntent.putExtra(Constants.UIResponse.ERROR_DESCRIPTION, errorDescription);
+            returnToCaller(Constants.UIResponse.AUTH_CODE_ERROR, errorIntent);
         }
     }
 }

@@ -45,7 +45,8 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
         public const string Username = "username";
         public const string Password = "password";
         public const string LoginHint = "login_hint"; // login_hint is not standard oauth2 parameter
-
+        public const string CodeChallengeMethod = "code_challenge_method";
+        public const string CodeChallenge = "code_challenge";
         public const string CorrelationId = OAuth2Header.CorrelationId;
             // correlation id is not standard oauth2 parameter
 
@@ -95,6 +96,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
     internal class OAuth2Value
     {
         public static readonly string[] ReservedScopes = {"openid", "email", "profile", "offline_access"};
+        public const string CodeChallengeMethodValue = "S256";
     }
 
     internal class PromptValue

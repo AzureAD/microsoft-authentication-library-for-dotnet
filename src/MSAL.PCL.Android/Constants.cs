@@ -29,6 +29,7 @@ namespace Microsoft.Identity.Client
 {
     internal static class MsalErrorAndroidEx
     {
+        public const string InvalidRequest = "invalid_request";
         public const string MissingPackagePermission = "missing_package_permission";
         public const string CannotSwitchToBrokerFromThisApp = "cannot_switch_to_broker_from_this_app";
         public const string IncorrectBrokerAccountType = "incorrect_broker_account_type";
@@ -57,9 +58,10 @@ namespace Microsoft.Identity.Client
             "Broker application must be installed to continue authentication";
     }
 
-    internal static class BrokerResponseCode
+    public static class Constants
     {
-        public const int UserCancelled = 2004;
-        public const int ResponseReceived = 2001;
+        public const string RequestUrlKey = "";
+        public const string RequestId = "";
+
     }
 }

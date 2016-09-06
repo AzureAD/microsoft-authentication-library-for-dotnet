@@ -42,6 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly UiOptions? _uiOptions;
         private readonly IWebUI _webUi;
         private AuthorizationResult _authorizationResult;
+        private string codeVerifier;
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
             string[] additionalScope, IPlatformParameters parameters, User user,
@@ -138,6 +139,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async Task AcquireAuthorizationAsync(IDictionary<string, string> headers)
         {
+            
             Uri authorizationUri = this.CreateAuthorizationUri();
             this._authorizationResult =
                 await
@@ -158,6 +160,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.AuthorizationCode);
             client.AddBodyParameter(OAuth2Parameter.Code, this._authorizationResult.Code);
             client.AddBodyParameter(OAuth2Parameter.RedirectUri, AuthenticationRequestParameters.RedirectUri.AbsoluteUri);
+            client.AddBodyParameter(OAuth2Parameter.CodeChallenge, codeVerifier);
         }
 
         protected override void PostTokenRequest(AuthenticationResultEx resultEx)
