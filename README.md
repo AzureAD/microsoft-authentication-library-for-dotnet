@@ -8,7 +8,7 @@ The latest stable release is available at [nuget.org](https://www.nuget.org/pack
 The next version of the library in prerelease form is also avialable on the NuGet gallery.
 
 ## Security Vulnerability in multiptle .Net Versions
-_adal.net_ has a known security vulnerability affecting 2.x and 3.x versions. Please update immediately. For more details, see the [security notice](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/blob/master/SECURITY-NOTICE.MD).
+_adal.net_ has a known security vulnerability affecting 2.x and 3.x versions. Please update immediately. For more details, see the [security notice](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/blob/dev/SECURITY-NOTICE.MD).
 
 ## Samples and Documentation
 
