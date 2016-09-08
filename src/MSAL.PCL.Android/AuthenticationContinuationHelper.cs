@@ -33,11 +33,11 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// </summary>
-    public static class AuthenticationAgentContinuationHelper
+    public static class AuthenticationContinuationHelper
     {
         /// <summary>
         /// </summary>
-        public static void SetAuthenticationAgentContinuationEventArgs(int requestCode, Result resultCode, Intent data)
+        public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
             AuthorizationResult authorizationResult = null;
             switch ((int) resultCode)

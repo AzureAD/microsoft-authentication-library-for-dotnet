@@ -55,8 +55,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            IDictionary<string, string> additionalHeaders, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
             returnedUriReady = new SemaphoreSlim(0);
 
@@ -65,7 +64,6 @@ namespace Microsoft.Identity.Client
                 var agentIntent = new Intent(this.parameters.CallerActivity, typeof (AuthenticationAgentActivity));
                 agentIntent.PutExtra("Url", authorizationUri.AbsoluteUri);
                 agentIntent.PutExtra("Callback", redirectUri.AbsoluteUri);
-                AuthenticationAgentActivity.AdditionalHeaders = additionalHeaders;
 
                 this.parameters.CallerActivity.StartActivityForResult(agentIntent, 0);
             }

@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-
 namespace Microsoft.Identity.Client
 {
     internal class BrokerConstants

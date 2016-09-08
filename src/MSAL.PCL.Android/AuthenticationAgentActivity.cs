@@ -32,11 +32,8 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Support.CustomTabs;
-using Android.Webkit;
-using Java.Lang;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Requests;
-using String = System.String;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client
 {
@@ -76,12 +73,11 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            _requestUrl = Intent.GetStringExtra(Constants.RequestUrlKey);
-            _requestId = Intent.GetIntExtra(Constants.RequestId, 0);
+            _requestUrl = Intent.GetStringExtra(AndroidConstants.RequestUrlKey);
+            _requestId = Intent.GetIntExtra(AndroidConstants.RequestId, 0);
             if (string.IsNullOrEmpty(_requestUrl))
             {
                 SendError(MsalErrorAndroidEx.InvalidRequest, "Request url is not set on the intent");
-                return;
             }
         }
 
@@ -93,11 +89,11 @@ namespace Microsoft.Identity.Client
         protected override void OnNewIntent(Intent intent)
         {
             base.OnNewIntent(intent);
-            string url = intent.getStringExtra(Constants.CUSTOM_TAB_REDIRECT);
+            string url = intent.GetStringExtra(AndroidConstants.CUSTOM_TAB_REDIRECT);
 
             Intent resultIntent = new Intent();
-            resultIntent.PutExtra(Constants.AUTHORIZATION_FINAL_URL, url);
-            ReturnToCaller(Constants.UIResponse.AUTH_CODE_COMPLETE,
+            resultIntent.PutExtra(AndroidConstants.AUTHORIZATION_FINAL_URL, url);
+            ReturnToCaller(AndroidConstants.AuthCodeReceived,
                 resultIntent);
         }
 
@@ -115,7 +111,7 @@ namespace Microsoft.Identity.Client
             _restarted = true;
 
             string chromePackageWithCustomTabSupport = GetChromePackageWithCustomTabSupport(ApplicationContext);
-            _requestUrl = Intent.GetStringExtra(Constants.RequestUrlKey);
+            _requestUrl = Intent.GetStringExtra(AndroidConstants.RequestUrlKey);
 
             if (chromePackageWithCustomTabSupport != null)
             {
@@ -132,7 +128,7 @@ namespace Microsoft.Identity.Client
         protected override void OnSaveInstanceState(Bundle outState)
         {
             base.OnSaveInstanceState(outState);
-            outState.PutString(Constants.RequestUrlKey, _requestUrl);
+            outState.PutString(AndroidConstants.RequestUrlKey, _requestUrl);
         }
 
         /**
@@ -141,7 +137,7 @@ namespace Microsoft.Identity.Client
 
         private void cancelRequest()
         {
-            ReturnToCaller(Constants.UIResponse.CANCEL, new Intent());
+            ReturnToCaller(AndroidConstants.Cancel, new Intent());
         }
 
         /**
@@ -152,7 +148,7 @@ namespace Microsoft.Identity.Client
 
         private void ReturnToCaller(int resultCode, Intent data)
         {
-            data.PutExtra(Constants.RequestId, _requestId);
+            data.PutExtra(AndroidConstants.RequestId, _requestId);
             SetResult(resultCode, data);
             this.Finish();
         }
@@ -166,18 +162,15 @@ namespace Microsoft.Identity.Client
         private void SendError(string errorCode, string errorDescription)
         {
             Intent errorIntent = new Intent();
-            errorIntent.PutExtra(Constants.UIResponse.ERROR_CODE, errorCode);
-            errorIntent.PutExtra(Constants.UIResponse.ERROR_DESCRIPTION, errorDescription);
-            ReturnToCaller(Constants.UIResponse.AUTH_CODE_ERROR, errorIntent);
+            errorIntent.PutExtra(OAuth2ResponseBaseClaim.Error, errorCode);
+            errorIntent.PutExtra(OAuth2ResponseBaseClaim.ErrorDescription, errorDescription);
+            ReturnToCaller(AndroidConstants.AuthCodeError, errorIntent);
         }
 
-        /**
- * Check if the chrome package with custom tab support is available on the device, and return the package name if
- * available.
- * @param context The app {@link Context} to check for the package existence.
- * @return The available package name for chrome. Will return null if no chrome package existed on the device.
- */
-
+        ///<summary>
+        /// Check if the chrome package with custom tab support is available on the device, 
+        /// and return the package name if available.
+        /// </summary>
         private string GetChromePackageWithCustomTabSupport(Context context)
         {
             if (context.PackageManager == null)

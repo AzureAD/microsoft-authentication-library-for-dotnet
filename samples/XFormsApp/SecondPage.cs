@@ -63,13 +63,23 @@ namespace XFormsApp
             };
         }
 
-        public IPlatformParameters Paramters { get; set; }
+        public IPlatformParameters Parameters { get; set; }
 
-        void browseButton_Clicked(object sender, EventArgs e)
+        private async void browseButton_Clicked(object sender, EventArgs e)
         {
+            PublicClientApplication application = new PublicClientApplication("5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
+            application.PlatformParameters = Parameters;
+            application.RedirectUri = "adaliosxformsapp://com.yourcompany.xformsapp";
             this.result.Text = string.Empty;
-            string token = null;//await tokenBroker.GetTokenInteractiveAsync(Paramters);
-            this.result.Text = token;
+            try
+            {
+                AuthenticationResult result = await application.AcquireTokenAsync(new string[] {"User.Read"});
+                this.result.Text = result.Token;
+            }
+            catch (Exception exc)
+            {
+                this.result.Text = exc.Message;
+            }
         }
     }
 }

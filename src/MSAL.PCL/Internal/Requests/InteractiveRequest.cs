@@ -100,7 +100,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task PreTokenRequest()
         {
-            //TODO commented code should be uncommented as per https://github.com/AzureAD/MSAL-Prototype/issues/66
             IDictionary<string, string> headers = new Dictionary<string, string>();
             await base.PreTokenRequest().ConfigureAwait(false);
 
@@ -143,21 +142,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             IDictionary<string, string> requestParameters = this.CreateAuthorizationRequestParameters();
 
+            if (addVerifier)
+            {
+                codeVerifier = PlatformPlugin.CryptographyHelper.GenerateCodeVerifier();
+                string codeVerifierHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(codeVerifier);
+
+                requestParameters[OAuth2Parameter.CodeChallenge] = EncodingHelper.EncodeToBase64Url(codeVerifierHash);
+                requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
+            }
+
             if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.ExtraQueryParameters))
             {
                 // Checks for _extraQueryParameters duplicating standard parameters
                 Dictionary<string, string> kvps =
                     EncodingHelper.ParseKeyValueList(AuthenticationRequestParameters.ExtraQueryParameters, '&', false,
                         this.CallState);
-
-                if (addVerifier)
-                {
-                    codeVerifier = PlatformPlugin.CryptographyHelper.GenerateCodeVerifier();
-                    string codeVerifierHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(codeVerifier);
-
-                    kvps[OAuth2Parameter.CodeChallenge] = EncodingHelper.EncodeToBase64Url(codeVerifierHash);
-                    kvps[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
-                }
 
                 foreach (KeyValuePair<string, string> kvp in kvps)
                 {
@@ -220,6 +219,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void VerifyAuthorizationResult()
         {
+            //TODO - Add State validation
             if (this._authorizationResult.Error == OAuth2Error.LoginRequired)
             {
                 throw new MsalException(MsalError.UserInteractionRequired);

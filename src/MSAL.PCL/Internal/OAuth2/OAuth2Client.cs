@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
 
         public void AddBodyParameter(string key, string value)
         {
-            _bodyParameters[EncodingHelper.UrlEncode(key)] = EncodingHelper.UrlEncode(value);
+            _bodyParameters[key] = value;
         }
 
         public async Task<TenantDiscoveryResponse> GetOpenIdConfiguration(Uri endPoint, CallState callState)

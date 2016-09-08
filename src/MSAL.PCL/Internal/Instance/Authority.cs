@@ -173,8 +173,9 @@ namespace Microsoft.Identity.Client.Internal.Instance
             string host = authorityUri.Authority;
             string path = authorityUri.AbsolutePath.Substring(1);
             string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
+            //TODO handle for ADFS where there is no v2.0
             return string.Format(CultureInfo.InvariantCulture,
-                "https://{0}/{1}/.well-known/openid-configuration", host, tenant);
+                "https://{0}/{1}/v2.0/.well-known/openid-configuration", host, tenant);
         }
 
         private async Task<TenantDiscoveryResponse> DiscoverEndpoints(string openIdConfigurationEndpoint,

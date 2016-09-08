@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,38 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using Foundation;
-using UIKit;
-using Xamarin.Forms.Platform.iOS;
-using Xamarin.Forms;
-using XFormsApp;
-using XFormsApp.iOS;
-using System.Drawing;
-using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 
-[assembly: ExportRenderer(typeof(SecondPage), typeof(SecondPageRenderer))]
-namespace XFormsApp.iOS
+namespace Microsoft.Identity.Client
 {
-    class SecondPageRenderer : PageRenderer
+    public static class AuthenticationContinuationHelper
     {
-        SecondPage page;
-
-        protected override void OnElementChanged (VisualElementChangedEventArgs e)
+        public static void SetAuthenticationContinuationEventArgs(NSUrl url, string sourceApplication)
         {
-            base.OnElementChanged (e);
-
-            page = e.NewElement as SecondPage;
-        }
-
-        public override void ViewDidLoad ()
-        {
-            base.ViewDidLoad ();
-            page.Parameters = new PlatformParameters(this);
+            WebUI.SetAuthorizationResult(new AuthorizationResult(AuthorizationStatus.Success, url.AbsoluteString));
         }
     }
 }
