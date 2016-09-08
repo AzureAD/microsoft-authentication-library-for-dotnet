@@ -7,6 +7,11 @@ The latest stable release is available at [nuget.org](https://www.nuget.org/pack
 
 The next version of the library in prerelease form is also avialable on the NuGet gallery.
 
+## Versions
+Current version - latest one at [nuget.org](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).  
+Minimum  recommended version - 2.28.0  
+You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/blob/master/changelog.txt).
+
 ## Security Issue in Multiple Versions of ADAL .Net ###
 
 A defect in ADAL .Net can result in an elevation of privilege in specific problem scenarios. The problem scenarios involve the On Behalf Of protocol flow and specific use cases of a ClientAssertion/ClientAssertionCertificate/ClientCredential and UserAssertion being passed to the AcquireToken* API. Multiple versions of the library are affected. Affected versions are listed below.
