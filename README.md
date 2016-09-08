@@ -9,7 +9,7 @@ The next version of the library in prerelease form is also avialable on the NuGe
 
 ## Versions
 Current version - latest one at [nuget.org](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).  
-Minimum  recommended version - 2.28.0  
+Minimum recommended version - 2.28.0  
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/blob/master/changelog.txt).
 
 ## Security Issue in Multiple Versions of ADAL .Net ###
