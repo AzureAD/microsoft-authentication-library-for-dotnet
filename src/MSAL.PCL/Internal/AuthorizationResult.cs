@@ -35,6 +35,7 @@ namespace Microsoft.Identity.Client.Internal
     internal enum AuthorizationStatus
     {
         Success,
+        ErrorHttp,
         ProtocolError,
         UserCancel,
         UnknownError
