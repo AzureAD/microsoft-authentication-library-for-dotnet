@@ -130,7 +130,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
                     ResultEx = this.tokenCache.LoadFromCache(CacheQueryData, this.CallState);
-                    this.ValidateResult();
                     extendedLifetimeResultEx = ResultEx;
 
                     if (ResultEx != null && ResultEx.Result != null)
@@ -205,11 +204,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.NotifyAfterAccessCache();
                 }
             }
-        }
-
-
-        protected virtual void ValidateResult()
-        {
         }
 
         protected virtual void UpdateBrokerParameters(IDictionary<string, string> parameters)
@@ -309,7 +303,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             serviceException.ServiceErrorCodes,
                             serviceException);
                     }
-                    newResultEx = new AuthenticationResultEx {Exception = ex};
+                    newResultEx = new AuthenticationResultEx { Exception = ex };
                 }
             }
 
@@ -319,7 +313,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private async Task<AuthenticationResultEx> SendHttpMessageAsync(IRequestParameters requestParameters)
         {
             client = new AdalHttpClient(this.Authenticator.TokenUri, this.CallState)
-            {Client = {BodyParameters = requestParameters}};
+            { Client = { BodyParameters = requestParameters } };
             TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>().ConfigureAwait(false);
             return tokenResponse.GetResult();
         }
