@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -46,34 +47,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.DisplayableId = userAssertion.UserName;
             CacheQueryData.AssertionHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(userAssertion.Assertion);
 
+            PlatformPlugin.Logger.Verbose(CallState,
+                string.Format(CultureInfo.InvariantCulture,
+                    "Username provided in user assertion - " + string.IsNullOrEmpty(this.DisplayableId)));
             this.SupportADFS = true;
         }
-
-        protected override void ValidateResult()
-        {
-            // cache lookup returned a token. no username provided in the assertion. 
-            // cannot deterministicly identify the user. fallback to compare hash. 
-            if (this.ResultEx != null && string.IsNullOrEmpty(userAssertion.UserName))
-            {
-                //if cache result does not contain hash then return null
-                if (!string.IsNullOrEmpty(this.ResultEx.UserAssertionHash))
-                {
-                    //if user assertion hash does not match then return null
-                    if (!this.ResultEx.UserAssertionHash.Equals(CacheQueryData.AssertionHash))
-                    {
-                        this.ResultEx = null;
-                    }
-                }
-                else
-                {
-                    this.ResultEx = null;
-                }
-            }
-
-            //return as is if it is null or provided userAssertion contains username
-           
-        }
-
 
         protected override async Task<AuthenticationResultEx> SendTokenRequestAsync()
         {

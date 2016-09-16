@@ -43,7 +43,9 @@ namespace Test.ADAL.NET.Unit
         public async Task AcquireTokenSilentServiceErrorTestAsync()
         {
             TokenCache cache = new TokenCache();
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User, "unique_id", "displayable@id.com");
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
+                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User, "unique_id",
+                "displayable@id.com");
             cache.tokenCacheDictionary[key] = new AuthenticationResultEx
             {
                 RefreshToken = "something-invalid",
