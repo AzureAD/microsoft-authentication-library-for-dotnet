@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -26,34 +26,23 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Security.Cryptography;
-using System.Text;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
+using Android.App;
+using Android.Content;
+using Android.OS;
 
 namespace Microsoft.Identity.Client
 {
-    [Android.Runtime.Preserve(AllMembers = true)]
-    internal class CryptographyHelper : ICryptographyHelper
+    [Activity(Name = "Microsoft.Identity.Client.BrowserTabActivity")]
+    public class BrowserTabActivity : Activity
     {
-        public string CreateSha256Hash(string input)
+        protected override void OnCreate(Bundle savedInstanceState)
         {
-            using (SHA256Managed sha = new SHA256Managed())
-            {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
-            }
-        }
+            base.OnCreate(savedInstanceState);
 
-        public string GenerateCodeVerifier()
-        {
-            byte[] buffer = new byte[Internal.Constants.CodeVerifierByteSize];
-            using (RNGCryptoServiceProvider randomSource = new RNGCryptoServiceProvider())
-            {
-                randomSource.GetBytes(buffer);
-            }
-
-            return EncodingHelper.EncodeToBase64Url(buffer);
-        }
+            Intent intent = new Intent(this, typeof(AuthenticationActivity));
+            intent.PutExtra(AndroidConstants.CustomTabRedirect, Intent.DataString);
+            intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
+            StartActivity(intent);
     }
+}
 }

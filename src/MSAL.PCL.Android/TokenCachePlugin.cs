@@ -33,6 +33,7 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
+    [Android.Runtime.Preserve(AllMembers = true)]
     internal class TokenCachePlugin : ITokenCachePlugin
     {
         private const string SharedPreferencesName = "ActiveDirectoryAuthenticationLibrary";

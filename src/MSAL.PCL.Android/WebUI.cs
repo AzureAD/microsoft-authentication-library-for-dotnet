@@ -29,12 +29,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
+    [Android.Runtime.Preserve(AllMembers = true)]
     internal class WebUI : IWebUI
     {
         private static SemaphoreSlim returnedUriReady;
@@ -61,9 +63,9 @@ namespace Microsoft.Identity.Client
 
             try
             {
-                var agentIntent = new Intent(this.parameters.CallerActivity, typeof (AuthenticationAgentActivity));
-                agentIntent.PutExtra("Url", authorizationUri.AbsoluteUri);
-                agentIntent.PutExtra("Callback", redirectUri.AbsoluteUri);
+                var agentIntent = new Intent(this.parameters.CallerActivity, typeof (AuthenticationActivity));
+                agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
+                agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.AbsoluteUri);
 
                 this.parameters.CallerActivity.StartActivityForResult(agentIntent, 0);
             }

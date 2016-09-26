@@ -30,8 +30,16 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class AuthenticationContinuationHelper
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="sourceApplication"></param>
         public static void SetAuthenticationContinuationEventArgs(NSUrl url, string sourceApplication)
         {
             WebUI.SetAuthorizationResult(new AuthorizationResult(AuthorizationStatus.Success, url.AbsoluteString));

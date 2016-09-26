@@ -41,7 +41,8 @@ namespace Microsoft.Identity.Client
     /// </summary>
     [Activity(Label = "Sign In")]
     [CLSCompliant(false)]
-    public class AuthenticationAgentActivity : Activity
+    [Android.Runtime.Preserve(AllMembers = true)]
+    public class AuthenticationActivity : Activity
     {
         private readonly ISet<string> _chromePackages = new string[]
         {
@@ -89,10 +90,10 @@ namespace Microsoft.Identity.Client
         protected override void OnNewIntent(Intent intent)
         {
             base.OnNewIntent(intent);
-            string url = intent.GetStringExtra(AndroidConstants.CUSTOM_TAB_REDIRECT);
+            string url = intent.GetStringExtra(AndroidConstants.CustomTabRedirect);
 
             Intent resultIntent = new Intent();
-            resultIntent.PutExtra(AndroidConstants.AUTHORIZATION_FINAL_URL, url);
+            resultIntent.PutExtra(AndroidConstants.AuthorizationFinalUrl, url);
             ReturnToCaller(AndroidConstants.AuthCodeReceived,
                 resultIntent);
         }
@@ -110,16 +111,12 @@ namespace Microsoft.Identity.Client
 
             _restarted = true;
 
-            string chromePackageWithCustomTabSupport = GetChromePackageWithCustomTabSupport(ApplicationContext);
-            _requestUrl = Intent.GetStringExtra(AndroidConstants.RequestUrlKey);
+            var mgr = new CustomTabsActivityManager(this);
+            mgr.CustomTabsServiceConnected += delegate {
+                mgr.LaunchUrl(_requestUrl);
+            };
 
-            if (chromePackageWithCustomTabSupport != null)
-            {
-                CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().Build();
-                customTabsIntent.Intent.SetPackage(GetChromePackageWithCustomTabSupport(this));
-                customTabsIntent.LaunchUrl(this, Android.Net.Uri.Parse(_requestUrl));
-            }
-            else
+            if (!mgr.BindService())
             {
                 //TODO throw chrome tab missing exception
             }
@@ -149,7 +146,7 @@ namespace Microsoft.Identity.Client
         private void ReturnToCaller(int resultCode, Intent data)
         {
             data.PutExtra(AndroidConstants.RequestId, _requestId);
-            SetResult(resultCode, data);
+            SetResult((Result)resultCode, data);
             this.Finish();
         }
 

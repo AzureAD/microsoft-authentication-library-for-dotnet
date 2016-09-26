@@ -31,6 +31,7 @@ using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
+    [Android.Runtime.Preserve(AllMembers = true)]
     internal class DeviceAuthHelper : IDeviceAuthHelper
     {
         public bool CanHandleDeviceAuthChallenge

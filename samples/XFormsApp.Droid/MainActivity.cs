@@ -32,8 +32,9 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Microsoft.Identity.Client;
+using XFormsApp;
 
-namespace XFormsApp.Droid
+namespace xFormsApp.Droid
 {
     [Activity(Label = "XFormsApp", Icon = "@drawable/icon", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsApplicationActivity
@@ -44,6 +45,12 @@ namespace XFormsApp.Droid
 
             global::Xamarin.Forms.Forms.Init(this, bundle);
             LoadApplication(new App());
+        }
+
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        {
+            base.OnActivityResult(requestCode, resultCode, data);
+            AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(requestCode, resultCode, data);
         }
     }
 }
