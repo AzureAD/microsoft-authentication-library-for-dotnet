@@ -25,14 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using Android.App;
 using Android.Content;
 using Android.OS;
 
 namespace Microsoft.Identity.Client
 {
-    [Activity(Name = "Microsoft.Identity.Client.BrowserTabActivity")]
+    [Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
     public class BrowserTabActivity : Activity
     {
         protected override void OnCreate(Bundle savedInstanceState)

@@ -60,10 +60,10 @@ namespace AndroidTestApp
             this.accessTokenTextView = FindViewById<TextView>(Resource.Id.accessTokenTextView);
 
             sts.Authority = "https://login.microsoftonline.com/common";
-            sts.ValidClientId = "b92e0ba5-f86e-4411-8e18-6b5f928d968a";
-            sts.ValidScope = new [] { "https://msdevex-my.sharepoint.com"};
+            sts.ValidClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
+            sts.ValidScope = new [] { "User.Read"};
             sts.ValidUserName = "mam@msdevex.onmicrosoft.com";
-
+            
             EditText email = FindViewById<EditText>(Resource.Id.email);
             email.Text = sts.ValidUserName;
         }
@@ -93,8 +93,10 @@ namespace AndroidTestApp
 
         }
 
-        private void acquireTokenInteractiveButton_Click(object sender, EventArgs e)
+        private async void acquireTokenInteractiveButton_Click(object sender, EventArgs e)
         {
+            PublicClientApplication application = new PublicClientApplication("5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
+            application.RedirectUri = "adaliosxformsapp://com.yourcompany.xformsapp";
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
             tokenBroker.Sts = sts;
@@ -103,7 +105,9 @@ namespace AndroidTestApp
             string value = null;
             try
             {
-                //value = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this)).ConfigureAwait(false);
+                application.PlatformParameters = new PlatformParameters(this);
+                var result = await application.AcquireTokenAsync(new string[] { "User.Read" });
+                value = result.Token;
             }
             catch (Java.Lang.Exception ex)
             {

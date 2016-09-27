@@ -25,16 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Microsoft.Identity.Client;
-using XFormsApp;
 
-namespace xFormsApp.Droid
+namespace XFormsApp.Droid
 {
     [Activity(Label = "XFormsApp", Icon = "@drawable/icon", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsApplicationActivity

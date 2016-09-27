@@ -69,7 +69,7 @@ namespace XFormsApp
         {
             PublicClientApplication application = new PublicClientApplication("5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
             application.PlatformParameters = Parameters;
-            application.RedirectUri = "adaliosxformsapp://com.yourcompany.xformsapp";
+            application.RedirectUri = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
             this.result.Text = string.Empty;
             try
             {
