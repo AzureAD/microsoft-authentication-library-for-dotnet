@@ -31,6 +31,9 @@ using Android.OS;
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
     public class BrowserTabActivity : Activity
     {
@@ -38,10 +41,10 @@ namespace Microsoft.Identity.Client
         {
             base.OnCreate(savedInstanceState);
 
-            Intent intent = new Intent(this, typeof(AuthenticationActivity));
+            Intent intent = new Intent(this, typeof (AuthenticationActivity));
             intent.PutExtra(AndroidConstants.CustomTabRedirect, Intent.DataString);
             intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
             StartActivity(intent);
+        }
     }
-}
 }

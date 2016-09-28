@@ -100,15 +100,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task PreTokenRequest()
         {
-            IDictionary<string, string> headers = new Dictionary<string, string>();
             await base.PreTokenRequest().ConfigureAwait(false);
 
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
-            await this.AcquireAuthorizationAsync(headers).ConfigureAwait(false);
+            await this.AcquireAuthorizationAsync().ConfigureAwait(false);
             this.VerifyAuthorizationResult();
         }
 
-        internal async Task AcquireAuthorizationAsync(IDictionary<string, string> headers)
+        internal async Task AcquireAuthorizationAsync()
         {
             Uri authorizationUri = this.CreateAuthorizationUri(true);
             this._authorizationResult =
@@ -120,6 +119,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async Task<Uri> CreateAuthorizationUriAsync(CallState callState)
         {
+            //this method is used in confidential clients to create authorization URLs.
             this.CallState = callState;
             await this.Authority.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
             return this.CreateAuthorizationUri();

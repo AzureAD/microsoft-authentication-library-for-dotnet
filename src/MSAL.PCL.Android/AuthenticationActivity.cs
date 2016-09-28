@@ -34,6 +34,7 @@ using Android.OS;
 using Android.Support.CustomTabs;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.OAuth2;
+using Uri = Android.Net.Uri;
 
 namespace Microsoft.Identity.Client
 {
@@ -44,16 +45,15 @@ namespace Microsoft.Identity.Client
     [Android.Runtime.Preserve(AllMembers = true)]
     public class AuthenticationActivity : Activity
     {
-        private readonly ISet<string> _chromePackages = new string[]
-        {
-            "com.android.chrome",
-            "com.chrome.beta",
-            "com.chrome.dev"
-        }.CreateSetFromArray();
+        private readonly string _customTabsServiceAction =
+            "android.support.customtabs.action.CustomTabsService";
+        private readonly string[] _chromePackages =
+        {"com.android.chrome", "com.chrome.beta", "com.chrome.dev"};
 
         private string _requestUrl;
         private int _requestId;
         private bool _restarted;
+       // private CustomTabsActivityManager _customTabsActivityManager;
 
         /// <summary>
         /// </summary>
@@ -111,14 +111,30 @@ namespace Microsoft.Identity.Client
 
             _restarted = true;
 
-            var mgr = new CustomTabsActivityManager(this);
-            mgr.CustomTabsServiceConnected += delegate {
-                mgr.LaunchUrl(_requestUrl);
-            };
+            /*_customTabsActivityManager = new CustomTabsActivityManager(this);
+            _customTabsActivityManager.CustomTabsServiceConnected += delegate { _customTabsActivityManager.LaunchUrl(_requestUrl); };*/
+            string chromePackageWithCustomTabSupport = GetChromePackageWithCustomTabSupport(ApplicationContext);
 
-            if (!mgr.BindService())
+            if (string.IsNullOrEmpty(chromePackageWithCustomTabSupport))
             {
-                //TODO throw chrome tab missing exception
+                string chromePackage = GetChromePackage();
+                if (string.IsNullOrEmpty(chromePackage))
+                {
+                    throw new MsalException(MsalErrorAndroidEx.ChromeNotInstalled,
+                        "Chrome is not installed on the device, cannot proceed with auth");
+                }
+
+                Intent browserIntent = new Intent(Intent.ActionView);
+                browserIntent.SetData(Uri.Parse(_requestUrl));
+                browserIntent.SetPackage(chromePackage);
+                browserIntent.AddCategory(Intent.CategoryBrowsable);
+                StartActivity(browserIntent);
+            }
+            else
+            {
+                CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().Build();
+                customTabsIntent.Intent.SetPackage(chromePackageWithCustomTabSupport);
+                customTabsIntent.LaunchUrl(this, Uri.Parse(_requestUrl));
             }
         }
 
@@ -146,7 +162,7 @@ namespace Microsoft.Identity.Client
         private void ReturnToCaller(int resultCode, Intent data)
         {
             data.PutExtra(AndroidConstants.RequestId, _requestId);
-            SetResult((Result)resultCode, data);
+            SetResult((Result) resultCode, data);
             this.Finish();
         }
 
@@ -164,10 +180,6 @@ namespace Microsoft.Identity.Client
             ReturnToCaller(AndroidConstants.AuthCodeError, errorIntent);
         }
 
-        ///<summary>
-        /// Check if the chrome package with custom tab support is available on the device, 
-        /// and return the package name if available.
-        /// </summary>
         private string GetChromePackageWithCustomTabSupport(Context context)
         {
             if (context.PackageManager == null)
@@ -175,27 +187,55 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            Intent customTabServiceIntent = new Intent("android.support.customtabs.action.CustomTabsService");
-            IList<ResolveInfo> resolveInfoList = context.PackageManager.QueryIntentServices(
-                customTabServiceIntent, 0);
+            Intent customTabServiceIntent = new Intent(_customTabsServiceAction);
+            IList< ResolveInfo > resolveInfoList = context.PackageManager.QueryIntentServices(
+                    customTabServiceIntent, 0);
 
             // queryIntentServices could return null or an empty list if no matching service existed.
             if (resolveInfoList == null || resolveInfoList.Count == 0)
             {
-                // TODO: add logs
                 return null;
             }
 
+            ISet<string> chromePackage = new HashSet<string>(_chromePackages.CreateSetFromArray());
             foreach (ResolveInfo resolveInfo in resolveInfoList)
             {
                 ServiceInfo serviceInfo = resolveInfo.ServiceInfo;
-                if (serviceInfo != null && _chromePackages.Contains(serviceInfo.PackageName))
+                if (serviceInfo != null && chromePackage.Contains(serviceInfo.PackageName))
                 {
                     return serviceInfo.PackageName;
                 }
             }
 
             return null;
+        }
+
+
+        private string GetChromePackage()
+        {
+            PackageManager packageManager = ApplicationContext.PackageManager;
+            if (packageManager == null)
+            {
+                return null;
+            }
+
+            string installedChromePackage = null;
+            for (int i = 0; i < _chromePackages.Length; i++)
+            {
+                try
+                {
+                    packageManager.GetPackageInfo(_chromePackages[i], PackageInfoFlags.Activities);
+                    installedChromePackage = _chromePackages[i];
+                    break;
+                }
+                catch (PackageManager.NameNotFoundException exc)
+                {
+                    PlatformPlugin.Logger.Error(null, exc);
+                    // swallow this exception. If the package does not exist then exception will be thrown.
+                }
+            }
+
+            return installedChromePackage;
         }
     }
 }
