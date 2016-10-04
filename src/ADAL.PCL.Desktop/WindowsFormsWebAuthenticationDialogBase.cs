@@ -224,7 +224,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             // and url scheme is not https then fail to load.
             if (!canClose && !whiteListedSchemes.Contains(url.Scheme.ToLower(CultureInfo.CurrentCulture)) &&
                 !url.AbsoluteUri.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase)
-                && !url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
+                && !url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase) 
+                && !url.Scheme.Equals("javascript", StringComparison.CurrentCultureIgnoreCase))
             {
                 this.Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
                 this.Result.Error = AdalError.NonHttpsRedirectNotSupported;
