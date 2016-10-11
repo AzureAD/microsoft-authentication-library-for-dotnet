@@ -116,7 +116,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     result = new AuthorizationResult(AuthorizationStatus.Success, webAuthenticationResult.ResponseData);
                     break;
                 case WebAuthenticationStatus.ErrorHttp:
-                    result = new AuthorizationResult(AuthorizationStatus.ErrorHttp, webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.CurrentCulture));
+                    result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
+                    {
+                        Error = AdalError.Unknown,
+                        ErrorDescription =
+                            webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture)
+                    };
                     break;
                 case WebAuthenticationStatus.UserCancel:
                     result = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
