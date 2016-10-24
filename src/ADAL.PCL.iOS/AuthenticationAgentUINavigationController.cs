@@ -62,11 +62,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod;
 
-        public AuthenticationAgentUINavigationController(string url, string callback, AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod)
+        private UIStatusBarStyle preferredStatusBarStyle;
+
+        public AuthenticationAgentUINavigationController(string url, string callback, AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod, UIStatusBarStyle preferredStatusBarStyle)
         {
             this.url = url;
             this.callback = callback;
             this.callbackMethod = callbackMethod;
+            this.preferredStatusBarStyle = preferredStatusBarStyle;
         }
 
         public override void DidReceiveMemoryWarning()
@@ -83,6 +86,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             // Perform any additional setup after loading the view
             this.PushViewController(new AuthenticationAgentUIViewController(this.url, this.callback, this.callbackMethod), true);
+        }
+
+        public override UIStatusBarStyle PreferredStatusBarStyle()
+        {
+            return this.preferredStatusBarStyle;
         }
     }
 }

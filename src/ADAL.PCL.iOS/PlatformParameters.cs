@@ -72,5 +72,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Skips calling to broker if broker is present. false, by default
         /// </summary>
         public bool UseBroker { get; set; }
+
+        /// <summary>
+        /// Sets the preferred status bar style for the login form view controller presented
+        /// </summary>
+        /// <value>The preferred status bar style.</value>
+        public UIStatusBarStyle PreferredStatusBarStyle { get; set; }
     }
 }
