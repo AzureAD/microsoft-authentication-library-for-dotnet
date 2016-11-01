@@ -1,3 +1,11 @@
+Version 3.13.6
+==============
+This release includes
+- Fix where UWP apps were ErrorHttp was causing unhandled exception.
+- Fix .NET webview to add javascript:// to whitelist.
+- Fix .NET webview to ensure if redirect_uri is hit, ignore errors raised by webview after that event.
+- Add support for UIStatusBarStyle in Xamarin.iOS.
+
 Version 3.13.5
 ==============
 This release includes
