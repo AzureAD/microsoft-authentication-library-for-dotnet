@@ -26,7 +26,8 @@ Affected 3.x versions: 3.11.305310302-alpha, 3.10.305231913, 3.10.305161347, 3.1
 
 ## Samples and Documentation
 
-We provide a full suite of [sample applications](https://github.com/Azure-Samples?utf8=%E2%9C%93&query=active-directory) and [documentation](https://docs.microsoft.com/active-directory/adal/microsoft.identitymodel.clients.activedirectory) to help you get started with learning the Azure Identity system. This includes tutorials for native clients such as Windows, Windows Phone, iOS, OSX, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features. 
+
+[We provide a full suite of sample applications and documentation on GitHub](https://github.com/Azure-Samples) to help you get started with learning the Azure Identity system. This includes tutorials for native clients such as Windows, Windows Phone, iOS, OSX, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features. 
 
 ## Community Help and Support
 
@@ -40,7 +41,7 @@ If you find a security issue with our libraries or services please report it to 
 
 ## Contributing
 
-All code is licensed under the Apache 2.0 license and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now, but check [this document](./contributing.md) first.
+All code is licensed under the MIT license and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now, but check [this document](./contributing.md) first.
 
 ## Diagnostics
 
@@ -191,7 +192,7 @@ NOTE: Traces generated in this way may contain highly privileged information suc
 
 ## License
 
-Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the "License"); 
+Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the "License");
 
 ## We Value and Adhere to the Microsoft Open Source Code of Conduct
 
