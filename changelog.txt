@@ -1,3 +1,13 @@
+Version 3.13.8
+==============
+This release inclues
+- update to nuget package to fix casing of NETStandard.Library nuget dependency
+- Add serialization packages to netstandard1.4 target as they are not part of netstandard.
+
+Version 3.13.7
+==============
+This release contains update to nuget package to use meta package and explicitly define target frameworks for the library.
+
 Version 3.13.6
 ==============
 This release includes
