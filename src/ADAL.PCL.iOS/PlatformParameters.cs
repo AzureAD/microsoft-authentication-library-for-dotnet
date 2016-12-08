@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public UIStatusBarStyle PreferredStatusBarStyle { get; set; }
 
         /// <summary>
-        /// Set ths transition style used when the login form view is presented
+        /// Set the transition style used when the login form view is presented
         /// </summary>
         /// <value>The modal transition style.</value>
         public UIModalTransitionStyle ModalTransitionStyle { get; set; }
@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
 
         /// <summary>
-        /// Sets a custom tranistioning delage to the login form view controller
+        /// Sets a custom transitioning delegate to the login form view controller
         /// </summary>
         /// <value>The transitioning delegate.</value>
         public UIViewControllerTransitioningDelegate TransitioningDelegate { get; set; }
