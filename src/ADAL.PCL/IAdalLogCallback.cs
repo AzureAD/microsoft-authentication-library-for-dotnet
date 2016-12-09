@@ -75,6 +75,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static IAdalLogCallback _localCallback;
 
+        public static bool DefaultLogging = true;
+
         /// <summary>
         /// Callback implementation
         /// </summary>
