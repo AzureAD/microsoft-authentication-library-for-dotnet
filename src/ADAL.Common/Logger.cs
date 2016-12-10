@@ -42,28 +42,44 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         internal override void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
             string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), ex.ToString());
-            AdalEventSource.Error(log);
+            if (LoggerCallbackHandler.UseDefaultLogging)
+            {
+                AdalEventSource.Error(log);
+            }
+
             LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, log);
         }
 
         internal override void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
             string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            AdalEventSource.Verbose(log);
+            if (LoggerCallbackHandler.UseDefaultLogging)
+            {
+                AdalEventSource.Verbose(log);
+            }
+
             LoggerCallbackHandler.ExecuteCallback(LogLevel.Verbose, log);
         }
 
         internal override void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
             string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            AdalEventSource.Information(log);
+            if (LoggerCallbackHandler.UseDefaultLogging)
+            {
+                AdalEventSource.Information(log);
+            }
+
             LoggerCallbackHandler.ExecuteCallback(LogLevel.Information, log);
         }
 
         internal override void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
             string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            AdalEventSource.Warning(log);
+            if (LoggerCallbackHandler.UseDefaultLogging)
+            {
+                AdalEventSource.Warning(log);
+            }
+
             LoggerCallbackHandler.ExecuteCallback(LogLevel.Warning, log);
         }
     }
