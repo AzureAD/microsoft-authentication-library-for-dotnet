@@ -567,7 +567,7 @@ namespace Test.MSAL.Common.Unit
         public void ReadItemsTest()
         {
             TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
-            IEnumerable<TokenCacheItem> items = cache.ReadItems(TestConstants.DefaultClientId);
+            IEnumerable<BaseTokenCacheItem> items = cache.ReadItems(TestConstants.DefaultClientId);
             Assert.AreEqual(2, items.Count());
             Assert.AreEqual(TestConstants.DefaultUniqueId,
                 items.Where(item => item.Authority.Equals(TestConstants.DefaultAuthorityHomeTenant)).First().UniqueId);
@@ -622,11 +622,11 @@ namespace Test.MSAL.Common.Unit
                     TestConstants.DefaultUser,
                     TestConstants.DefaultPolicy, null);
 
-            TokenCacheItem item = new TokenCacheItem(kvp.Value.Key, kvp.Value.Value.Result);
+            BaseTokenCacheItem item = new BaseTokenCacheItem(kvp.Value.Key, kvp.Value.Value.Result);
             tokenCache.DeleteItem(item);
             Assert.AreEqual(1, tokenCache.Count);
 
-            IEnumerable<TokenCacheItem> items = tokenCache.ReadItems(TestConstants.DefaultClientId);
+            IEnumerable<BaseTokenCacheItem> items = tokenCache.ReadItems(TestConstants.DefaultClientId);
             Assert.AreEqual(TestConstants.DefaultUniqueId + "more",
                 items.Where(entry => entry.Authority.Equals(TestConstants.DefaultAuthorityGuestTenant)).First().UniqueId);
         }
@@ -911,7 +911,7 @@ namespace Test.MSAL.Common.Unit
             return EncodingHelper.Base64Encode(GenerateRandomString(len)).Substring(0, len);
         }
 
-        private static bool AreEqual(TokenCacheItem item, TokenCacheKey key)
+        private static bool AreEqual(BaseTokenCacheItem item, TokenCacheKey key)
         {
             return item.Match(key);
         }

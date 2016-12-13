@@ -28,18 +28,19 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Token cache item
     /// </summary>
-    public sealed class TokenCacheItem
+    internal class BaseTokenCacheItem
     {
         /// <summary>
         /// Default constructor.
         /// </summary>
-        internal TokenCacheItem(TokenCacheKey key, AuthenticationResult result)
+        internal BaseTokenCacheItem(string authority, string clientId, string policy, TokenResponse response)
         {
             this.Authority = key.Authority;
             this.Scope = key.Scope;

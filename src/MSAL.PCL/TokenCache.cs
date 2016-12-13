@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// </summary>
-    public class TokenCache
+    public sealed class TokenCache
     {
         /// <summary>
         /// Notification for certain token cache interactions during token acquisition.
@@ -47,26 +47,9 @@ namespace Microsoft.Identity.Client
         public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
 
         private const int SchemaVersion = 1;
-        private const string Delimiter = ":::";
         private readonly object lockObject = new object();
         internal readonly IDictionary<TokenCacheKey, AuthenticationResultEx> tokenCacheDictionary;
         private volatile bool hasStateChanged;
-
-        static TokenCache()
-        {
-            DefaultSharedUserTokenCache = new TokenCache
-            {
-                BeforeAccess = PlatformPlugin.TokenCachePlugin.BeforeAccess,
-                AfterAccess = PlatformPlugin.TokenCachePlugin.AfterAccess
-            };
-
-
-            DefaultSharedAppTokenCache = new TokenCache
-            {
-                BeforeAccess = PlatformPlugin.TokenCachePlugin.BeforeAccess,
-                AfterAccess = PlatformPlugin.TokenCachePlugin.AfterAccess
-            };
-        }
 
         /// <summary>
         /// Default constructor.
@@ -86,34 +69,21 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Static user token cache shared by all instances of application which do not explicitly pass a cache instance
-        /// during construction.
-        /// </summary>
-        public static TokenCache DefaultSharedUserTokenCache { get; internal set; }
-
-        /// <summary>
-        /// Static client token cache shared by all instances of ConfidentialClientApplication which do not explicitly pass a
-        /// cache instance
-        /// during construction.
-        /// </summary>
-        public static TokenCache DefaultSharedAppTokenCache { get; internal set; }
-
-        /// <summary>
         /// Notification method called before any library method accesses the cache.
         /// </summary>
-        public TokenCacheNotification BeforeAccess { get; set; }
+        internal TokenCacheNotification BeforeAccess { get; set; }
 
         /// <summary>
         /// Notification method called before any library method writes to the cache. This notification can be used to reload
         /// the cache state from a row in database and lock that row. That database row can then be unlocked in
         /// <see cref="AfterAccess" /> notification.
         /// </summary>
-        public TokenCacheNotification BeforeWrite { get; set; }
+        internal TokenCacheNotification BeforeWrite { get; set; }
 
         /// <summary>
         /// Notification method called after any library method accesses the cache.
         /// </summary>
-        public TokenCacheNotification AfterAccess { get; set; }
+        internal TokenCacheNotification AfterAccess { get; set; }
 
         /// <summary>
         /// Gets or sets the flag indicating whether cache state has changed. ADAL methods set this flag after any change.
@@ -224,14 +194,14 @@ namespace Microsoft.Identity.Client
         /// Reads a copy of the list of all items in the cache.
         /// </summary>
         /// <returns>The items in the cache</returns>
-        public IEnumerable<TokenCacheItem> ReadItems(string clientId)
+        public IEnumerable<BaseTokenCacheItem> ReadItems(string clientId)
         {
             lock (lockObject)
             {
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs {TokenCache = this};
                 this.OnBeforeAccess(args);
 
-                List<TokenCacheItem> items = ReadItemsFromCache(clientId);
+                List<BaseTokenCacheItem> items = ReadItemsFromCache(clientId);
 
                 this.OnAfterAccess(args);
 
@@ -243,7 +213,7 @@ namespace Microsoft.Identity.Client
         /// Deletes an item from the cache.
         /// </summary>
         /// <param name="item">The item to delete from the cache</param>
-        internal void DeleteItem(TokenCacheItem item)
+        internal void DeleteItem(BaseTokenCacheItem item)
         {
             lock (lockObject)
             {
@@ -257,10 +227,8 @@ namespace Microsoft.Identity.Client
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,
-                    Scope = item.Scope.AsArray(),
                     ClientId = item.ClientId,
-                    User = item.User,
-                    Policy = item.Policy
+                    User = item.User
                 };
 
                 this.OnBeforeAccess(args);
@@ -277,7 +245,7 @@ namespace Microsoft.Identity.Client
         /// Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
         /// impact all the instances of <see cref="PublicClientApplication" /> which share that cache.
         /// </summary>
-        public virtual void Clear(string clientId)
+        public void Clear(string clientId)
         {
             lock (lockObject)
             {
@@ -297,13 +265,13 @@ namespace Microsoft.Identity.Client
 
         internal IEnumerable<string> GetUniqueIdsFromCache(string clientId)
         {
-            IEnumerable<TokenCacheItem> allItems = this.ReadItems(clientId);
+            IEnumerable<BaseTokenCacheItem> allItems = this.ReadItems(clientId);
             return allItems.Select(item => item.UniqueId).Distinct();
         }
 
         internal IEnumerable<string> GetHomeObjectIdsFromCache(string clientId)
         {
-            IEnumerable<TokenCacheItem> allItems = this.ReadItems(clientId);
+            IEnumerable<BaseTokenCacheItem> allItems = this.ReadItems(clientId);
             return allItems.Select(item => item.HomeObjectId).Distinct();
         }
 
@@ -359,7 +327,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal virtual AuthenticationResultEx LoadFromCache(string authority, HashSet<string> scope, string clientId,
+        internal AuthenticationResultEx LoadFromCache(string authority, HashSet<string> scope, string clientId,
             User user, string policy, CallState callState)
         {
             lock (lockObject)
@@ -466,10 +434,8 @@ namespace Microsoft.Identity.Client
 
                 this.OnBeforeWrite(new TokenCacheNotificationArgs
                 {
-                    Scope = resultEx.Result.Scope,
                     ClientId = clientId,
-                    User = resultEx.Result.User,
-                    Policy = policy
+                    User = resultEx.Result.User
                 });
 
                 TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resultEx.Result.ScopeSet, clientId,
@@ -661,14 +627,14 @@ namespace Microsoft.Identity.Client
                     && (string.IsNullOrWhiteSpace(policy) || p.Key.Equals(p.Key.Policy, policy))).ToList();
         }
 
-        private List<TokenCacheItem> ReadItemsFromCache(string clientId)
+        private List<BaseTokenCacheItem> ReadItemsFromCache(string clientId)
         {
             return this.tokenCacheDictionary.Where(kvp => kvp.Key.ClientId.Equals(clientId))
-                .Select(kvp => new TokenCacheItem(kvp.Key, kvp.Value.Result))
+                .Select(kvp => new BaseTokenCacheItem(kvp.Key, kvp.Value.Result))
                 .ToList();
         }
 
-        private void DeleteItemFromCache(TokenCacheItem item)
+        private void DeleteItemFromCache(BaseTokenCacheItem item)
         {
             TokenCacheKey toRemoveKey = this.tokenCacheDictionary.Keys.FirstOrDefault(item.Match);
             if (toRemoveKey != null)

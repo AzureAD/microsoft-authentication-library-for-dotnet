@@ -121,7 +121,7 @@
     <Compile Include="Internal\PlatformPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TokenCache.cs" />
-    <Compile Include="TokenCacheItem.cs" />
+    <Compile Include="BaseTokenCacheItem.cs" />
     <Compile Include="Internal\TokenCacheKey.cs" />
     <Compile Include="TokenCacheNotificationArgs.cs" />
     <Compile Include="UIOptions.cs" />

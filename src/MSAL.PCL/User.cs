@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            IEnumerable<TokenCacheItem> items =
+            IEnumerable<BaseTokenCacheItem> items =
                 this.TokenCache.ReadItems(this.ClientId).Where(item => item.HomeObjectId.Equals(this.HomeObjectId));
             foreach (var item in items)
             {
