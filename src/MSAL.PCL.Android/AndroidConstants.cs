@@ -29,6 +29,8 @@ namespace Microsoft.Identity.Client
 {
     internal static class MsalErrorAndroidEx
     {
+        public const string ChromeNotInstalled = "chrome_not_installed";
+        public const string InvalidRequest = "invalid_request";
         public const string MissingPackagePermission = "missing_package_permission";
         public const string CannotSwitchToBrokerFromThisApp = "cannot_switch_to_broker_from_this_app";
         public const string IncorrectBrokerAccountType = "incorrect_broker_account_type";
@@ -57,9 +59,14 @@ namespace Microsoft.Identity.Client
             "Broker application must be installed to continue authentication";
     }
 
-    internal static class BrokerResponseCode
+    public static class AndroidConstants
     {
-        public const int UserCancelled = 2004;
-        public const int ResponseReceived = 2001;
+        public const string RequestUrlKey = "com.microsoft.identity.request.url.key";
+        public const string RequestId = "com.microsoft.identity.request.id";
+        public const string CustomTabRedirect = "com.microsoft.identity.customtab.redirect";
+        public const string AuthorizationFinalUrl = "com.microsoft.identity.client.finalUrl";
+        public const int Cancel = 2001;
+        public const int AuthCodeError = 2002;
+        public const int AuthCodeReceived = 2003;
     }
 }

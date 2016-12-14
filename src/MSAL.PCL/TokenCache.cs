@@ -376,7 +376,7 @@ namespace Microsoft.Identity.Client
                     cacheKey = kvp.Value.Key;
                     resultEx = kvp.Value.Value;
                     bool tokenNearExpiry = (resultEx.Result.ExpiresOn <=
-                                            DateTime.UtcNow + TimeSpan.FromMinutes(Constant.ExpirationMarginInMinutes));
+                                            DateTime.UtcNow + TimeSpan.FromMinutes(Constants.ExpirationMarginInMinutes));
                     if (!cacheKey.ScopeContains(scope) ||
                         (!Authority.IsTenantLessAuthority(authority) && !authority.Equals(cacheKey.Authority)) ||
                         !clientId.Equals(cacheKey.ClientId))

@@ -30,7 +30,6 @@ using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Instance
 {
-
     [DataContract]
     internal sealed class InstanceDiscoveryResponse : OAuth2ResponseBase
     {

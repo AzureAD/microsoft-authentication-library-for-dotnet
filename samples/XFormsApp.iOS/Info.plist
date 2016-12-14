@@ -20,6 +20,19 @@
       <string>UIInterfaceOrientationLandscapeLeft</string>
       <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLName</key>
+        <string>com.yourcompany.XFormsApp</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc</string>
+        </array>
+      </dict>
+    </array>
     <key>MinimumOSVersion</key>
     <string>6.0</string>
     <key>CFBundleDisplayName</key>

@@ -30,11 +30,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Interfaces
+namespace Microsoft.Identity.Client.Internal.Interfaces
 {
     internal interface IWebUI
     {
-        Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            IDictionary<string, string> additionalHeaders, CallState callState);
+        Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState);
     }
 }

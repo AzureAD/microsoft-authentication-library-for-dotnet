@@ -27,7 +27,7 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -161,7 +161,8 @@ namespace Microsoft.Identity.Client
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authorityInstance, scope, additionalScope, new Uri(this.RedirectUri), user,
+                    this.AcquireTokenCommonAsync(authorityInstance, scope, additionalScope, new Uri(this.RedirectUri),
+                        user,
                         options, extraQueryParameters, policy).ConfigureAwait(false);
         }
 
@@ -208,8 +209,7 @@ namespace Microsoft.Identity.Client
 /*            var requestParams = this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache);
             var handler = new SilentWebUiRequest(requestParams, userCredential);
             return await handler.RunAsync().ConfigureAwait(false);*/
-            await Task.Run(() => {
-                                     throw new NotImplementedException(); });
+            await Task.Run(() => { throw new NotImplementedException(); });
             return null;
         }
 
@@ -226,7 +226,7 @@ namespace Microsoft.Identity.Client
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
-                new InteractiveRequest(requestParams, additionalScope, 
+                new InteractiveRequest(requestParams, additionalScope,
                     this.PlatformParameters, loginHint, uiOptions,
                     this.CreateWebAuthenticationDialog(this.PlatformParameters));
             return await handler.RunAsync().ConfigureAwait(false);

@@ -33,20 +33,21 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// </summary>
-    public static class AuthenticationAgentContinuationHelper
+    public static class AuthenticationContinuationHelper
     {
         /// <summary>
         /// </summary>
-        public static void SetAuthenticationAgentContinuationEventArgs(int requestCode, Result resultCode, Intent data)
+        public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
             AuthorizationResult authorizationResult = null;
+
             switch ((int) resultCode)
             {
-                case (int) Result.Ok:
-                    authorizationResult = CreateResultForOkResponse(data.GetStringExtra("ReturnedUrl"));
+                case AndroidConstants.AuthCodeReceived:
+                    authorizationResult = CreateResultForOkResponse(data.GetStringExtra("com.microsoft.identity.client.finalUrl"));
                     break;
 
-                case (int) Result.Canceled:
+                case AndroidConstants.Cancel:
                     authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
                     break;
 

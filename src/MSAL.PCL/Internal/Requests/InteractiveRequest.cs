@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -42,6 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly UiOptions? _uiOptions;
         private readonly IWebUI _webUi;
         private AuthorizationResult _authorizationResult;
+        private string codeVerifier;
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
             string[] additionalScope, IPlatformParameters parameters, User user,
@@ -77,11 +78,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
 
             authenticationRequestParameters.LoginHint = loginHint;
-            if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ExtraQueryParameters) && authenticationRequestParameters.ExtraQueryParameters[0] == '&')
+            if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ExtraQueryParameters) &&
+                authenticationRequestParameters.ExtraQueryParameters[0] == '&')
             {
-                authenticationRequestParameters.ExtraQueryParameters = authenticationRequestParameters.ExtraQueryParameters.Substring(1);
+                authenticationRequestParameters.ExtraQueryParameters =
+                    authenticationRequestParameters.ExtraQueryParameters.Substring(1);
             }
-            
+
             this._webUi = webUI;
             this._uiOptions = uiOptions;
             this.LoadFromCache = false; //no cache lookup and refresh for interactive.
@@ -97,57 +100,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task PreTokenRequest()
         {
-            //TODO commented code should be uncommented as per https://github.com/AzureAD/MSAL-Prototype/issues/66
-            IDictionary<string, string> headers = new Dictionary<string, string>();
-            //headers["x-ms-sso-Ignore-SSO"] = "1";
-
             await base.PreTokenRequest().ConfigureAwait(false);
 
-/*            if (this.tokenCache!=null && this.User!=null  && _uiOptions == UiOptions.ActAsCurrentUser)
-
-            {
-                bool notifiedBeforeAccessCache = false;
-                try
-                {
-                    this.NotifyBeforeAccessCache();
-                    notifiedBeforeAccessCache = true;
-
-                    AuthenticationResultEx resultEx = this.tokenCache.LoadFromCache(this.authority.Authority,
-                        this.Scope,
-                        this.ClientKey.ClientId, this.User,
-                        this.Policy, this.CallState);
-                    if (resultEx != null && !string.IsNullOrWhiteSpace(resultEx.RefreshToken))
-                    {
-                        headers["x-ms-sso-RefreshToken"] = resultEx.RefreshToken;
-                    }
-                }
-                finally
-                {
-                    if (notifiedBeforeAccessCache)
-                    {
-                        this.NotifyAfterAccessCache();
-                    }
-
-                }
-            }*/
-
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
-            await this.AcquireAuthorizationAsync(headers).ConfigureAwait(false);
+            await this.AcquireAuthorizationAsync().ConfigureAwait(false);
             this.VerifyAuthorizationResult();
         }
 
-        internal async Task AcquireAuthorizationAsync(IDictionary<string, string> headers)
+        internal async Task AcquireAuthorizationAsync()
         {
-            Uri authorizationUri = this.CreateAuthorizationUri();
+            Uri authorizationUri = this.CreateAuthorizationUri(true);
             this._authorizationResult =
                 await
                     this._webUi.AcquireAuthorizationAsync(authorizationUri, AuthenticationRequestParameters.RedirectUri,
-                        headers, this.CallState)
+                        this.CallState)
                         .ConfigureAwait(false);
         }
 
         internal async Task<Uri> CreateAuthorizationUriAsync(CallState callState)
         {
+            //this method is used in confidential clients to create authorization URLs.
             this.CallState = callState;
             await this.Authority.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
             return this.CreateAuthorizationUri();
@@ -158,6 +130,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.AuthorizationCode);
             client.AddBodyParameter(OAuth2Parameter.Code, this._authorizationResult.Code);
             client.AddBodyParameter(OAuth2Parameter.RedirectUri, AuthenticationRequestParameters.RedirectUri.AbsoluteUri);
+            client.AddBodyParameter(OAuth2Parameter.CodeVerifier, codeVerifier);
         }
 
         protected override void PostTokenRequest(AuthenticationResultEx resultEx)
@@ -165,9 +138,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             base.PostTokenRequest(resultEx);
         }
 
-        private Uri CreateAuthorizationUri()
+        private Uri CreateAuthorizationUri(bool addVerifier = false)
         {
             IDictionary<string, string> requestParameters = this.CreateAuthorizationRequestParameters();
+
+            if (addVerifier)
+            {
+                codeVerifier = PlatformPlugin.CryptographyHelper.GenerateCodeVerifier();
+                string codeVerifierHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(codeVerifier);
+
+                requestParameters[OAuth2Parameter.CodeChallenge] = EncodingHelper.EncodeToBase64Url(codeVerifierHash);
+                requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
+            }
 
             if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.ExtraQueryParameters))
             {
@@ -175,6 +157,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 Dictionary<string, string> kvps =
                     EncodingHelper.ParseKeyValueList(AuthenticationRequestParameters.ExtraQueryParameters, '&', false,
                         this.CallState);
+
                 foreach (KeyValuePair<string, string> kvp in kvps)
                 {
                     if (requestParameters.ContainsKey(kvp.Key))
@@ -236,6 +219,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void VerifyAuthorizationResult()
         {
+            //TODO - Add State validation
             if (this._authorizationResult.Error == OAuth2Error.LoginRequired)
             {
                 throw new MsalException(MsalError.UserInteractionRequired);

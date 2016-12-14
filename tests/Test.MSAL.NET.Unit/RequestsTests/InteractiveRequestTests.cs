@@ -31,7 +31,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Http;
 using Microsoft.Identity.Client.Internal.Instance;
@@ -83,8 +83,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             IWebUI ui = Substitute.For<IWebUI>();
             AuthorizationResult ar = new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
-            ui.AcquireAuthorizationAsync(Arg.Any<Uri>(), Arg.Any<Uri>(), Arg.Any<IDictionary<string, string>>(),
-                Arg.Any<CallState>())
+            ui.AcquireAuthorizationAsync(Arg.Any<Uri>(), Arg.Any<Uri>(), Arg.Any<CallState>())
                 .Returns(ar);
 
             //add mock response for tenant endpoint discovery

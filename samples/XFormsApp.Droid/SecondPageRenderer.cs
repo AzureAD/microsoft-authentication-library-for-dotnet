@@ -55,7 +55,7 @@ namespace XFormsApp.Droid
 
             var activity = this.Context as Activity;
             
-            page.Paramters = new PlatformParameters(activity);
+            page.Parameters = new PlatformParameters(activity);
         }
     }
 }

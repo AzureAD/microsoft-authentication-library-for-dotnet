@@ -56,5 +56,14 @@ namespace XFormsApp.iOS
 
             return base.FinishedLaunching(app, options);
         }
+
+        //This method must be overriden by the developer to consume token from the Broker and continue authentication
+        public override bool OpenUrl(UIApplication application, NSUrl url, string sourceApplication, NSObject annotation)
+        {
+            // you can make decisions here from the different parts of the url
+            AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(url, sourceApplication);
+
+            return true;
+        }
     }
 }

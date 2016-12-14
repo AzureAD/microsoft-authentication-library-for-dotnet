@@ -27,8 +27,8 @@
 
 using System;
 using Foundation;
-using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Security;
 
 namespace Microsoft.Identity.Client

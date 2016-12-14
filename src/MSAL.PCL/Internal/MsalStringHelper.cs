@@ -124,5 +124,10 @@ namespace Microsoft.Identity.Client.Internal
         {
             return input == null || input.Length == 0;
         }
+
+        internal static string ByteArrayToString(byte[] input)
+        {
+            return Encoding.UTF8.GetString(input, 0, input.Length);
+        }
     }
 }

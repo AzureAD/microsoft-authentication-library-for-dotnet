@@ -30,6 +30,7 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
+    [Android.Runtime.Preserve(AllMembers = true)]
     internal class PlatformInformation : PlatformInformationBase
     {
         public override string GetProductName()

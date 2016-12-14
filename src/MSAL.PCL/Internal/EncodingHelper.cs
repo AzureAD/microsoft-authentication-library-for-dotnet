@@ -197,6 +197,35 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
+        public static string EncodeToBase64Url(string input)
+        {
+            return EncodeToBase64Url(EncodingHelper.ToByteArray(input));
+        }
+
+        public static string EncodeToBase64Url(byte[] input)
+        {
+            return Convert.ToBase64String(input)
+                .TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        }
+
+        public static string DecodeFromBase64Url(string returnValue)
+        {
+            string incoming = returnValue
+                .Replace('_', '/').Replace('-', '+');
+            switch (returnValue.Length%4)
+            {
+                case 2:
+                    incoming += "==";
+                    break;
+                case 3:
+                    incoming += "=";
+                    break;
+            }
+            byte[] bytes = Convert.FromBase64String(incoming);
+            return Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+        }
+
+
         internal static string Base64Encode(string input)
         {
             string encodedString = String.Empty;
@@ -208,46 +237,6 @@ namespace Microsoft.Identity.Client.Internal
             return encodedString;
         }
 
-        internal static string Base64Decode(string encodedString)
-        {
-            string output = null;
-            if (!String.IsNullOrEmpty(encodedString))
-            {
-                byte[] outputBytes = Convert.FromBase64String(encodedString);
-                output = Encoding.UTF8.GetString(outputBytes, 0, outputBytes.Length);
-            }
-
-            return output;
-        }
-
-        internal static char[] UrlEncode(char[] message)
-        {
-            if (message == null)
-            {
-                return null;
-            }
-
-            var encodedMessage = new char[message.Length*2];
-            int length = 0;
-            var singleChar = new char[1];
-            foreach (char ch in message)
-            {
-                singleChar[0] = ch;
-                var str = new string(singleChar);
-                string encodedStr = UrlEncode(str);
-                char[] encodedSingleChar = encodedStr.ToCharArray();
-                encodedSingleChar.CopyTo(encodedMessage, length);
-                if (length + encodedSingleChar.Length > encodedMessage.Length)
-                {
-                    Array.Resize(ref encodedMessage, message.Length*2);
-                }
-
-                length += encodedSingleChar.Length;
-            }
-
-            Array.Resize(ref encodedMessage, length);
-            return encodedMessage;
-        }
 
         internal static List<string> SplitWithQuotes(string input, char delimiter)
         {
@@ -293,13 +282,6 @@ namespace Microsoft.Identity.Client.Internal
             string delimiter = (messageBuilder.Length == 0) ? string.Empty : "&";
             messageBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}=", delimiter, key);
             messageBuilder.Append(value);
-        }
-
-        internal static string GetString(byte[] bytes)
-        {
-            char[] chars = new char[bytes.Length/sizeof (char)];
-            System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
-            return new string(chars);
         }
     }
 }

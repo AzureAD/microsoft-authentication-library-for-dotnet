@@ -29,16 +29,19 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Interfaces;
+using Foundation;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Interfaces;
+using SafariServices;
 
 namespace Microsoft.Identity.Client
 {
-    internal class WebUI : IWebUI
+    internal class WebUI : NSObject, IWebUI, ISFSafariViewControllerDelegate
     {
         private static SemaphoreSlim returnedUriReady;
         private static AuthorizationResult authorizationResult;
         private readonly PlatformParameters parameters;
+        private SFSafariViewController safariViewController;
 
         public WebUI(IPlatformParameters parameters)
         {
@@ -50,28 +53,39 @@ namespace Microsoft.Identity.Client
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            IDictionary<string, string> additionalHeaders, CallState callState)
+            CallState callState)
         {
             returnedUriReady = new SemaphoreSlim(0);
-            Authenticate(authorizationUri, redirectUri, additionalHeaders, callState);
+            Authenticate(authorizationUri, redirectUri, callState);
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
+
+            //dismiss safariviewcontroller
+            this.parameters.CallerViewController.InvokeOnMainThread(() =>
+            { safariViewController.DismissViewController(false, null);
+            });
+
             return authorizationResult;
         }
 
         public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
         {
-            authorizationResult = authorizationResultInput;
-            returnedUriReady.Release();
+            if (returnedUriReady != null)
+            {
+                authorizationResult = authorizationResultInput;
+                returnedUriReady.Release();
+            }
         }
 
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, IDictionary<string, string> additionalHeaders,
-            CallState callState)
+        public void Authenticate(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
             try
             {
-                this.parameters.CallerViewController.PresentViewController(
-                    new AuthenticationAgentUINavigationController(authorizationUri.AbsoluteUri,
-                        redirectUri.OriginalString, additionalHeaders, CallbackMethod), false, null);
+                safariViewController = new SFSafariViewController(new NSUrl(authorizationUri.AbsoluteUri), false);
+                safariViewController.Delegate = this;
+                this.parameters.CallerViewController.InvokeOnMainThread(() =>
+                {
+                    this.parameters.CallerViewController.PresentViewController(safariViewController, false, null);
+                });
             }
             catch (Exception ex)
             {
@@ -80,9 +94,11 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private void CallbackMethod(AuthorizationResult result)
+        [Foundation.Export("safariViewControllerDidFinish:")]
+        public void DidFinish(SFSafariViewController controller)
         {
-            SetAuthorizationResult(result);
+            controller.DismissViewController(true, null);
+            SetAuthorizationResult(new AuthorizationResult(AuthorizationStatus.UserCancel, null));
         }
     }
 }

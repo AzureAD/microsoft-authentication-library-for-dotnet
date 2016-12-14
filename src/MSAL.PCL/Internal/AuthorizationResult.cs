@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal
         UnknownError
     }
 
-    [DataContract]
+
     internal class AuthorizationResult
     {
         internal AuthorizationResult(AuthorizationStatus status, string returnedUriInput) : this(status)
@@ -68,15 +68,14 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         public AuthorizationStatus Status { get; private set; }
-
-        [DataMember]
+        
         public string Code { get; private set; }
-
-        [DataMember]
+        
         public string Error { get; set; }
-
-        [DataMember]
+        
         public string ErrorDescription { get; set; }
+        
+        public string State { get; set; }
 
         public void ParseAuthorizeResponse(string webAuthenticationResult)
         {
@@ -91,13 +90,14 @@ namespace Microsoft.Identity.Client.Internal
                 Dictionary<string, string> response = EncodingHelper.ParseKeyValueList(resultData.Substring(1), '&',
                     true, null);
 
+                if (response.ContainsKey(TokenResponseClaim.State))
+                {
+                    State = response[TokenResponseClaim.State];
+                }
+
                 if (response.ContainsKey(TokenResponseClaim.Code))
                 {
                     this.Code = response[TokenResponseClaim.Code];
-                }
-                else if (webAuthenticationResult.StartsWith("msauth://", StringComparison.OrdinalIgnoreCase))
-                {
-                    this.Code = webAuthenticationResult;
                 }
                 else if (response.ContainsKey(TokenResponseClaim.Error))
                 {
