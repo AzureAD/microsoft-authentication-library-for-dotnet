@@ -67,13 +67,13 @@ namespace XFormsApp
 
         private async void browseButton_Clicked(object sender, EventArgs e)
         {
-            PublicClientApplication application = new PublicClientApplication("5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
+            PublicClientApplication application = new PublicClientApplication("<client_id>");
             application.PlatformParameters = Parameters;
-            application.RedirectUri = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
+            application.RedirectUri = "<redirect_uri>";
             this.result.Text = string.Empty;
             try
             {
-                AuthenticationResult result = await application.AcquireTokenAsync(new string[] {"User.Read"});
+                AuthenticationResult result = await application.AcquireTokenAsync(new string[] {"Mail.Read"});
                 this.result.Text = result.Token;
             }
             catch (Exception exc)

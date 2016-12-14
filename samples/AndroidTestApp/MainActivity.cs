@@ -60,9 +60,9 @@ namespace AndroidTestApp
             this.accessTokenTextView = FindViewById<TextView>(Resource.Id.accessTokenTextView);
 
             sts.Authority = "https://login.microsoftonline.com/common";
-            sts.ValidClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
+            sts.ValidClientId = "<client_id>";
             sts.ValidScope = new [] { "User.Read"};
-            sts.ValidUserName = "mam@msdevex.onmicrosoft.com";
+            sts.ValidUserName = "<username>";
             
             EditText email = FindViewById<EditText>(Resource.Id.email);
             email.Text = sts.ValidUserName;
@@ -95,8 +95,8 @@ namespace AndroidTestApp
 
         private async void acquireTokenInteractiveButton_Click(object sender, EventArgs e)
         {
-            PublicClientApplication application = new PublicClientApplication("5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
-            application.RedirectUri = "adaliosxformsapp://com.yourcompany.xformsapp";
+            PublicClientApplication application = new PublicClientApplication("<client_id>");
+            application.RedirectUri = "<redirect_uri>";
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
             tokenBroker.Sts = sts;

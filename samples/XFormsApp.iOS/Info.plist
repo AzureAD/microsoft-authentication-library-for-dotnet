@@ -29,7 +29,7 @@
         <string>com.yourcompany.XFormsApp</string>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>AdaliOSXformsApp</string>
+          <string>msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc</string>
         </array>
       </dict>
     </array>
