@@ -74,7 +74,7 @@ namespace DesktopTestApp
         {
             TokenBroker brkr = new TokenBroker();
             PublicClientApplication app =
-                new PublicClientApplication("7c7a2f70-caef-45c8-9a6c-091633501de4");
+                new PublicClientApplication("<client_id>");
             try
             {
                 return await app.AcquireTokenSilentAsync(brkr.Sts.ValidScope);
@@ -94,7 +94,7 @@ namespace DesktopTestApp
             {
                 TokenBroker brkr = new TokenBroker();
                 PublicClientApplication app =
-                    new PublicClientApplication("7c7a2f70-caef-45c8-9a6c-091633501de4");
+                    new PublicClientApplication("<client_id>");
                 await app.AcquireTokenAsync(brkr.Sts.ValidScope);
 
                 return await app.AcquireTokenAsync(brkr.Sts.ValidScope);
@@ -112,7 +112,7 @@ namespace DesktopTestApp
         {
             try
             {
-                PublicClientApplication app = new PublicClientApplication(Sts.Authority, "7c7a2f70-caef-45c8-9a6c-091633501de4");
+                PublicClientApplication app = new PublicClientApplication(Sts.Authority, "<client_id>");
                 var result = await app.AcquireTokenWithIntegratedAuthAsync(Sts.ValidScope);
                 return result.Token;
             }
