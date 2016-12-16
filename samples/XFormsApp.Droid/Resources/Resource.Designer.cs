@@ -29,7 +29,6 @@ namespace XFormsApp.Droid
 			global::Microsoft.Identity.Client.Resource.Id.agentWebView = global::XFormsApp.Droid.Resource.Id.agentWebView;
 			global::Microsoft.Identity.Client.Resource.Layout.WebAuthenticationBroker = global::XFormsApp.Droid.Resource.Layout.WebAuthenticationBroker;
 			global::Microsoft.Identity.Client.Resource.String.ApplicationName = global::XFormsApp.Droid.Resource.String.ApplicationName;
-			global::Xamarin.Forms.Platform.Android.Resource.Attribute.actionBarSize = global::XFormsApp.Droid.Resource.Attribute.actionBarSize;
 		}
 		
 		public partial class Animation
