@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
             "Broker application must be installed to continue authentication";
     }
 
-    public static class AndroidConstants
+    internal static class AndroidConstants
     {
         public const string RequestUrlKey = "com.microsoft.identity.request.url.key";
         public const string RequestId = "com.microsoft.identity.request.id";

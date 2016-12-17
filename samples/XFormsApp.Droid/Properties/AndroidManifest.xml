@@ -2,17 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto">
 	<uses-sdk />
 	<application>
-    <activity
-    android:name="microsoft.identity.client.BrowserTabActivity">
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <data android:scheme="msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
-              android:host="com.microsoft.identity.client.sample" />
-      </intent-filter>
-    </activity>
-  </application>
+		<activity android:name="microsoft.identity.client.BrowserTabActivity">
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:scheme="msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc" android:host="com.microsoft.identity.client.sample" />
+			</intent-filter>
+		</activity>
+	</application>
 	<uses-permission android:name="android.permission.GET_ACCOUNTS" />
 	<uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
 	<uses-permission android:name="android.permission.USE_CREDENTIALS" />

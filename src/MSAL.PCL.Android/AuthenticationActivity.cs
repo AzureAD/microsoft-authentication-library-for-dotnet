@@ -82,11 +82,10 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        /**
-         * OnNewIntent will be called before onResume.
-         * @param intent
-         */
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="intent"></param>
         protected override void OnNewIntent(Intent intent)
         {
             base.OnNewIntent(intent);
@@ -98,7 +97,9 @@ namespace Microsoft.Identity.Client
                 resultIntent);
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void OnResume()
         {
             base.OnResume();
@@ -138,6 +139,10 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="outState"></param>
         protected override void OnSaveInstanceState(Bundle outState)
         {
             base.OnSaveInstanceState(outState);

@@ -37,6 +37,10 @@ namespace Microsoft.Identity.Client
     [Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
     public class BrowserTabActivity : Activity
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="savedInstanceState"></param>
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
