@@ -22,79 +22,77 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-using System;
+using System.Collections.Generic;
 using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 
 namespace Microsoft.Identity.Client
 {
     internal class TokenCachePlugin : ITokenCachePlugin
     {
-        private const string SharedPreferencesName = "ActiveDirectoryAuthenticationLibrary";
-        private const string SharedPreferencesKey = "cache";
+        private const string AccessTokenSharedPreferenceName = "com.microsoft.identity.client.token";
+        private const string RefreshTokenSharedPreferenceName = "com.microsoft.identity.client.refreshToken";
+        private readonly ISharedPreferences _accessTokenSharedPreference;
+        private readonly ISharedPreferences _refreshTokenSharedPreference;
 
-        public IntPtr Handle
+        public TokenCachePlugin()
         {
-            get { return IntPtr.Zero; }
+
+            _accessTokenSharedPreference = Application.Context.GetSharedPreferences(AccessTokenSharedPreferenceName,
+                    FileCreationMode.Private);
+            _refreshTokenSharedPreference = Application.Context.GetSharedPreferences(RefreshTokenSharedPreferenceName,
+                    FileCreationMode.Private);
+
+            if (_accessTokenSharedPreference == null || _refreshTokenSharedPreference == null)
+            {
+                throw new MsalException("Fail to create SharedPreference");
+            }
+        }
+
+        public ICollection<string> AllAccessAndIdTokens()
+        {
+            return _accessTokenSharedPreference.All.Values as ICollection<string>;
+        }
+
+        public ICollection<string> AllRefreshTokens()
+        {
+            return _refreshTokenSharedPreference.All.Values as ICollection<string>;
+        }
+
+        public void SaveAccessToken(TokenCacheItem accessTokenItem)
+        {
+            TokenCacheKey key = TokenCacheKey.ExtractKeyForAT(accessTokenItem);
+            ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
+            editor.PutString(key.ToString(), JsonHelper.SerializeToJson(accessTokenItem));
+            editor.Apply();
+        }
+
+        public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        {
+            TokenCacheKey key = TokenCacheKey.ExtractKeyForRT(refreshTokenItem);
+            ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
+            editor.PutString(key.ToString(), JsonHelper.SerializeToJson(refreshTokenItem));
+            editor.Apply();
+        }
+
+        public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
+        {
+            string key = TokenCacheKey.ExtractKeyForRT(refreshToken‪Item).ToString();
+            ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
+            editor.Remove(key);
+            editor.Apply();
         }
 
         public void BeforeAccess(TokenCacheNotificationArgs args)
         {
-            if (args.TokenCache.Count > 0)
-            {
-                // We assume that the cache has not changed since last write
-                return;
-            }
-
-            try
-            {
-                ISharedPreferences preferences = Application.Context.GetSharedPreferences(SharedPreferencesName,
-                    FileCreationMode.Private);
-                string stateString = preferences.GetString(SharedPreferencesKey, null);
-                if (stateString != null)
-                {
-                    byte[] state = Convert.FromBase64String(stateString);
-                    args.TokenCache.Deserialize(state);
-                }
-            }
-            catch (Exception ex)
-            {
-                PlatformPlugin.Logger.Warning(null, "Failed to load cache: " + ex);
-                // Ignore as the cache seems to be corrupt
-            }
         }
 
         public void AfterAccess(TokenCacheNotificationArgs args)
         {
-            if (args.TokenCache.HasStateChanged)
-            {
-                try
-                {
-                    ISharedPreferences preferences = Application.Context.GetSharedPreferences(SharedPreferencesName,
-                        FileCreationMode.Private);
-                    ISharedPreferencesEditor editor = preferences.Edit();
-                    editor.Remove(SharedPreferencesKey);
-
-                    if (args.TokenCache.Count > 0)
-                    {
-                        byte[] state = args.TokenCache.Serialize();
-                        string stateString = Convert.ToBase64String(state);
-                        editor.PutString(SharedPreferencesKey, stateString);
-                    }
-
-                    editor.Apply();
-                    args.TokenCache.HasStateChanged = false;
-                }
-                catch (Exception ex)
-                {
-                    PlatformPlugin.Logger.Warning(null, "Failed to save cache: " + ex);
-                }
-            }
         }
     }
 }

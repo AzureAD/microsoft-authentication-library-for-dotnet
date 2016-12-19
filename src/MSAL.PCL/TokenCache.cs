@@ -32,6 +32,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.Instance;
 
 namespace Microsoft.Identity.Client
@@ -40,6 +41,9 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed class TokenCache
     {
+        private const int DefaultExpirationBuffer = 300;
+        private readonly TokenCacheAccessor _tokenCacheAccessor = new TokenCacheAccessor();
+
         /// <summary>
         /// Notification for certain token cache interactions during token acquisition.
         /// </summary>

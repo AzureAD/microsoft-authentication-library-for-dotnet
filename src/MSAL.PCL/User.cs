@@ -28,6 +28,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 
 namespace Microsoft.Identity.Client
 {
@@ -50,6 +52,25 @@ namespace Microsoft.Identity.Client
             this.Name = other.Name;
             this.ClientId = other.ClientId;
             this.TokenCache = other.TokenCache;
+        }
+
+
+        internal User(IdToken idToken)
+        {
+            if (idToken.ObjectId != null)
+            {
+                UniqueId = idToken.ObjectId;
+            }
+            else
+            {
+                UniqueId = idToken.Subject;
+            }
+
+            DisplayableId = idToken.PreferredUsername;
+            // TODO: home object id is returned in client info.
+            HomeObjectId = idToken.HomeObjectId ?? UniqueId;
+            Name = idToken.Name;
+            IdentityProvider = idToken.Issuer;
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,34 +25,37 @@
 //
 //------------------------------------------------------------------------------
 
-using System.IO;
-using System.Runtime.Serialization.Json;
-using System.Text;
+using System;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.Cache
 {
-    internal static class JsonHelper
+    internal class TokenCacheItem : BaseTokenCacheItem
     {
-        internal static string SerializeToJson<T>(T toEncode)
-        {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof (T));
-                ser.WriteObject(stream, toEncode);
-                return Encoding.UTF8.GetString(stream.ToArray(), 0, (int) stream.Position);
-            }
-        }
+        /// <summary>
+        /// Gets the Access Token requested.
+        /// </summary>
+        public string Token { get; internal set; }
 
-        internal static T DeserializeFromJson<T>(string json)
-        {
-            T response;
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (T));
-            using (MemoryStream stream = new MemoryStream(new StringBuilder(json).ToByteArray()))
-            {
-                response = ((T) serializer.ReadObject(stream));
-            }
+        public DateTimeOffset ExpiresOn { get; internal set; }
 
-            return response;
+        /**
+         * Constructor for creating the {@link TokenCacheItem}.
+         */
+
+        public TokenCacheItem(string authority, string clientId, string policy, TokenResponse response)
+            : base(authority, clientId, policy, response)
+        {
+            if (response.AccessToken != null)
+            {
+                Token = response.AccessToken;
+                ExpiresOn = response.AccessTokenExpiresOn;
+            }
+            else if (response.IdToken != null)
+            {
+                Token = response.IdToken;
+                ExpiresOn = response.IdTokenExpiresOn;
+            }
         }
     }
 }

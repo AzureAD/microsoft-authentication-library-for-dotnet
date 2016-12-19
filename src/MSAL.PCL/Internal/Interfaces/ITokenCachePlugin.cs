@@ -25,11 +25,25 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using Microsoft.Identity.Client.Internal.Cache;
+
 namespace Microsoft.Identity.Client.Interfaces
 {
     internal interface ITokenCachePlugin
     {
         void BeforeAccess(TokenCacheNotificationArgs args);
+
         void AfterAccess(TokenCacheNotificationArgs args);
+
+        ICollection<string> AllAccessAndIdTokens();
+
+        ICollection<string> AllRefreshTokens();
+
+        void SaveAccessToken(TokenCacheItem accessTokenItem);
+
+        void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem);
+
+        void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item);
     }
 }

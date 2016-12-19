@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.Cache
 {
     /// <summary>
     /// <see cref="TokenCacheKey" /> can be used with Linq to access items from the TokenCache dictionary.
@@ -204,6 +204,16 @@ namespace Microsoft.Identity.Client.Internal
         internal bool Equals(string string1, string string2)
         {
             return (string.Compare(string2, string1, StringComparison.OrdinalIgnoreCase) == 0);
+        }
+
+        public static TokenCacheKey ExtractKeyForAT(TokenCacheItem accessTokenItem)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static TokenCacheKey ExtractKeyForRT(RefreshTokenCacheItem refreshTokenItem)
+        {
+            throw new NotImplementedException();
         }
     }
 }

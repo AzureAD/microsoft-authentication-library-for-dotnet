@@ -30,34 +30,34 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal.Cache
 {
     /// <summary>
     /// Token cache item
     /// </summary>
-    internal class BaseTokenCacheItem
+    internal abstract class BaseTokenCacheItem
     {
+        private readonly User _user;
+
         /// <summary>
         /// Default constructor.
         /// </summary>
         internal BaseTokenCacheItem(string authority, string clientId, string policy, TokenResponse response)
         {
-            this.Authority = key.Authority;
-            this.Scope = key.Scope;
-            this.ClientId = key.ClientId;
-            this.UniqueId = key.UniqueId;
-            this.DisplayableId = key.DisplayableId;
-            this.HomeObjectId = key.HomeObjectId;
-            this.TenantId = result.TenantId;
-            this.ExpiresOn = result.ExpiresOn;
-            this.Token = result.Token;
-            this.User = result.User;
-            this.Policy = key.Policy;
 
-            if (result.User != null)
+            if (response.IdToken!=null)
             {
-                this.Name = result.User.Name;
+                RawIdToken = response.IdToken;
+                IdToken idToken = IdToken.Parse(response.IdToken);
+                TenantId = idToken.TenantId;
+                _user = new User(idToken);
             }
+
+            this.Authority = authority;
+            this.ClientId = clientId;
+            this.Policy = policy;
+            Scope = response.Scope.AsSet();
+            
         }
 
         /// <summary>
@@ -69,22 +69,7 @@ namespace Microsoft.Identity.Client
         /// Gets the ClientId.
         /// </summary>
         public string ClientId { get; internal set; }
-
-        /// <summary>
-        /// Gets the Expiration.
-        /// </summary>
-        public DateTimeOffset ExpiresOn { get; internal set; }
-
-        /// <summary>
-        /// Gets the Version.
-        /// </summary>
-        public string FamilyName { get; internal set; }
-
-        /// <summary>
-        /// Gets the Name.
-        /// </summary>
-        public string Name { get; internal set; }
-
+        
         /// <summary>
         /// Gets the IdentityProviderName.
         /// </summary>
@@ -108,33 +93,21 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the user's unique Id.
         /// </summary>
-        public string UniqueId { get; internal set; }
+        public string UniqueId { get { return _user?.UniqueId; } }
 
         /// <summary>
         /// Gets the user's displayable Id.
         /// </summary>
-        public string DisplayableId { get; internal set; }
+        public string DisplayableId { get { return _user?.DisplayableId; } }
 
-        internal string HomeObjectId { get; set; }
+        public string HomeObjectId { get { return _user?.HomeObjectId; } }
 
-        /// <summary>
-        /// Gets the Access Token requested.
-        /// </summary>
-        public string Token { get; internal set; }
+
+        public string RawIdToken { get; }
 
         /// <summary>
         /// Gets the entire Profile Info if returned by the service or null if no Id Token is returned.
         /// </summary>
         public User User { get; internal set; }
-
-        internal bool Match(TokenCacheKey key)
-        {
-            return key != null &&
-                   (key.Authority == this.Authority && key.ScopeEquals(this.Scope) &&
-                    key.Equals(key.ClientId, this.ClientId)
-                    && key.UniqueId == this.UniqueId &&
-                    key.Equals(key.DisplayableId, this.DisplayableId) && (key.HomeObjectId == this.HomeObjectId) &&
-                    key.Equals(key.Policy, this.Policy));
-        }
     }
 }

@@ -70,6 +70,11 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
         [DataMember(Name = TokenResponseClaim.IdTokenExpiresIn, IsRequired = false)]
         public long IdTokenExpiresIn { get; set; }
 
+        public DateTimeOffset AccessTokenExpiresOn { get { return DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn); } }
+
+        public DateTimeOffset IdTokenExpiresOn { get { return DateTime.UtcNow + TimeSpan.FromSeconds(this.IdTokenExpiresIn); } }
+
+
         public AuthenticationResultEx GetResultEx()
         {
             AuthenticationResultEx resultEx = null;

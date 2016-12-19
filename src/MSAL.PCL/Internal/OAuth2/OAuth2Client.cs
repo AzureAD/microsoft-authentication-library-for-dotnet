@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                 VerifyCorrelationIdHeaderInReponse(response.Headers, callState);
             }
 
-            return DeserializeResponse<T>(response.Body);
+            return JsonHelper.DeserializeFromJson<T>(response.Body);
         }
 
         public static void CreateErrorResponse(HttpResponse response, CallState callState)
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             MsalServiceException serviceEx;
             try
             {
-                TokenResponse tokenResponse = DeserializeResponse<TokenResponse>(response.Body);
+                TokenResponse tokenResponse = JsonHelper.DeserializeFromJson<TokenResponse>(response.Body);
                 serviceEx = new MsalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription);
             }
             catch (SerializationException)
@@ -163,31 +163,6 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             return url;
         }
 
-        public static T DeserializeResponse<T>(string response)
-        {
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (T));
-
-            if (response == null)
-            {
-                return default(T);
-            }
-
-            using (Stream stream = GenerateStreamFromString(response))
-            {
-                return ((T) serializer.ReadObject(stream));
-            }
-        }
-
-        public static Stream GenerateStreamFromString(string s)
-        {
-            MemoryStream stream = new MemoryStream();
-            StreamWriter writer = new StreamWriter(stream);
-            writer.Write(s);
-            writer.Flush();
-            stream.Position = 0;
-            return stream;
-        }
-
         private static void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers, CallState callState)
         {
             foreach (string reponseHeaderKey in headers.Keys)
@@ -209,7 +184,5 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                 }
             }
         }
-
-
     }
 }

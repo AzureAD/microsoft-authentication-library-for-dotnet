@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.Internal
         private static string EncodeHeaderToJson(IClientAssertionCertificate credential)
         {
             JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(credential);
-            return JsonHelper.EncodeToJson(header);
+            return JsonHelper.SerializeToJson(header);
         }
 
         internal static long ConvertToTimeT(DateTime time)
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Internal
             string encodedHeader = EncodeSegment(jsonHeader);
 
             // Payload segment
-            string jsonPayload = JsonHelper.EncodeToJson(this.Payload);
+            string jsonPayload = JsonHelper.SerializeToJson(this.Payload);
 
             string encodedPayload = EncodeSegment(jsonPayload);
 

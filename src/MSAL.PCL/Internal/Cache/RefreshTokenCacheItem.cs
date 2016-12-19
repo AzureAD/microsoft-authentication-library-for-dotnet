@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,34 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-using System.IO;
-using System.Runtime.Serialization.Json;
-using System.Text;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.Cache
 {
-    internal static class JsonHelper
+    internal class RefreshTokenCacheItem : BaseTokenCacheItem
     {
-        internal static string SerializeToJson<T>(T toEncode)
+        public RefreshTokenCacheItem(string authority, string clientId, string policy, TokenResponse response) : base(authority, clientId, policy, response)
         {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof (T));
-                ser.WriteObject(stream, toEncode);
-                return Encoding.UTF8.GetString(stream.ToArray(), 0, (int) stream.Position);
-            }
+            RefreshToken = response.RefreshToken;
         }
 
-        internal static T DeserializeFromJson<T>(string json)
-        {
-            T response;
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (T));
-            using (MemoryStream stream = new MemoryStream(new StringBuilder(json).ToByteArray()))
-            {
-                response = ((T) serializer.ReadObject(stream));
-            }
-
-            return response;
-        }
+        public string RefreshToken { get; private set; }
     }
 }
