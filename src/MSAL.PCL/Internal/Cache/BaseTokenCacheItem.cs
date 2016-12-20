@@ -25,9 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Cache
@@ -78,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// <summary>
         /// Gets the Scope.
         /// </summary>
-        public HashSet<string> Scope { get; internal set; }
+        public SortedSet<string> Scope { get; internal set; }
 
         /// <summary>
         /// Gets the Policy.
@@ -109,5 +107,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// Gets the entire Profile Info if returned by the service or null if no Id Token is returned.
         /// </summary>
         public User User { get; internal set; }
+
+        public abstract TokenCacheKey GetTokenCacheKey();
+
     }
 }

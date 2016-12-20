@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 
 namespace Microsoft.Identity.Client.Internal.Cache
 {
@@ -37,27 +38,27 @@ namespace Microsoft.Identity.Client.Internal.Cache
     /// </summary>
     internal sealed class TokenCacheKey
     {
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, User user, string policy)
+        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, User user, string policy)
             : this(
                 authority, scope, clientId, (user != null) ? user.UniqueId : null,
                 (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null, policy)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, User user)
+        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, User user)
             : this(
                 authority, scope, clientId, (user != null) ? user.UniqueId : null,
                 (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null, null)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId,
+        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, string uniqueId,
             string displayableId, string homeObjectId)
             : this(authority, scope, clientId, uniqueId, displayableId, homeObjectId, null)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId,
+        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, string uniqueId,
             string displayableId, string homeObjectId, string policy)
         {
             this.Authority = authority;
@@ -70,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         }
 
         public string Authority { get; }
-        public HashSet<string> Scope { get; }
+        public SortedSet<string> Scope { get; }
         public string ClientId { get; }
         public string UniqueId { get; }
         public string DisplayableId { get; }
@@ -82,11 +83,15 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// <returns></returns>
         public override string ToString()
         {
-            return
-                string.Format(CultureInfo.InvariantCulture,
-                    "Authority:{0}, Scope:{1}, ClientId:{2}, UniqueId:{3}, DisplayableId:{4}, HomeObjectId:{5}, Policy:{6}",
-                    this.Authority, MsalStringHelper.AsSingleString(this.Scope.ToArray()), this.ClientId,
-                    this.UniqueId, this.DisplayableId, this.HomeObjectId, this.Policy);
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.Append(EncodingHelper.Base64Encode(mAuthority) + "$");
+            stringBuilder.Append(MSALUtils.Base64Encode(mClientId) + "$");
+            // scope is treeSet to guarantee the order of the scopes when converting to string.
+            stringBuilder.Append(MSALUtils.Base64Encode(Scope.AsSingleString()) + "$");
+            stringBuilder.Append(MSALUtils.Base64Encode(mDisplayableId) + "$");
+            stringBuilder.Append(MSALUtils.Base64Encode(mUniqueId) + "$");
+            stringBuilder.Append(MSALUtils.Base64Encode(mHomeObjectId) + "$");
+            stringBuilder.Append(MSALUtils.Base64Encode(mPolicy));
         }
 
         /// <summary>
@@ -142,31 +147,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
                     + ((this.Policy != null) ? this.Policy.ToLower() : null)).GetHashCode();
         }
 
-        internal bool ScopeContains(HashSet<string> otherScope)
-        {
-            if (this.Scope == null)
-            {
-                return otherScope == null;
-            }
-
-            if (otherScope == null)
-            {
-                return true;
-            }
-
-
-            foreach (string otherString in otherScope)
-            {
-                if (!this.Scope.ToLower().Contains(otherString.ToLower()))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        internal bool ScopeEquals(HashSet<string> otherScope)
+        internal bool ScopeEquals(SortedSet<string> otherScope)
         {
             if (this.Scope == null)
             {
@@ -186,21 +167,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return false;
         }
 
-        public bool ScopeIntersects(HashSet<string> otherScope)
-        {
-            if (this.Scope == null)
-            {
-                return otherScope == null;
-            }
-
-            if (otherScope == null)
-            {
-                return this.Scope == null;
-            }
-
-            return this.Scope.ToLower().Intersect(otherScope.ToLower()).ToArray().Length > 0;
-        }
-
         internal bool Equals(string string1, string string2)
         {
             return (string.Compare(string2, string1, StringComparison.OrdinalIgnoreCase) == 0);
@@ -208,12 +174,17 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public static TokenCacheKey ExtractKeyForAT(TokenCacheItem accessTokenItem)
         {
-            throw new NotImplementedException();
+            return new TokenCacheKey(accessTokenItem.Authority, accessTokenItem.Scope, accessTokenItem.ClientId,
+                accessTokenItem.UniqueId,
+                accessTokenItem.DisplayableId, accessTokenItem.HomeObjectId, accessTokenItem.Policy);
         }
 
         public static TokenCacheKey ExtractKeyForRT(RefreshTokenCacheItem refreshTokenItem)
         {
-            throw new NotImplementedException();
+            //TODO - consider removing policy from refresh token cache
+
+            return new TokenCacheKey(null, null, refreshTokenItem.ClientId, refreshTokenItem.UniqueId,
+                refreshTokenItem.DisplayableId, refreshTokenItem.HomeObjectId, refreshTokenItem.Policy);
         }
     }
 }

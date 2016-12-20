@@ -25,7 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Interfaces;
+using System.Collections.Generic;
+using Microsoft.Identity.Client.Internal.Cache;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
@@ -37,6 +39,31 @@ namespace Microsoft.Identity.Client
 
         public void AfterAccess(TokenCacheNotificationArgs args)
         {
+        }
+
+        public ICollection<string> AllAccessAndIdTokens()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public ICollection<string> AllRefreshTokens()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void SaveToken(TokenCacheItem tokenItem)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

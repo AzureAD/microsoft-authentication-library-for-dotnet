@@ -130,7 +130,7 @@ namespace Test.MSAL.Common.Unit
         public void LoadFromCacheIntersectingScopeDifferentAuthorities()
         {
             TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
-            HashSet<string> scope = new HashSet<string>(new[] {"r1/scope1"});
+            SortedSet<string> scope = new SortedSet<string>(new[] {"r1/scope1"});
 
             AuthenticationResultEx resultEx = cache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
                 scope, TestConstants.DefaultClientId,
@@ -166,7 +166,7 @@ namespace Test.MSAL.Common.Unit
 
             AuthenticationResultEx resultEx =
                 cache.LoadFromCache(TestConstants.DefaultAuthorityGuestTenant + "non-existant",
-                    new HashSet<string>(new[] {"r1/scope1"}),
+                    new SortedSet<string>(new[] {"r1/scope1"}),
                     TestConstants.DefaultClientId, user, TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(resultEx);
             Assert.IsNotNull(resultEx.Result);
@@ -254,7 +254,7 @@ namespace Test.MSAL.Common.Unit
 
             AuthenticationResultEx resultEx =
                 tokenCache.LoadFromCache(TestConstants.DefaultAuthorityGuestTenant + "more",
-                    new HashSet<string>(new[] {"r1/scope1", "random-scope"}),
+                    new SortedSet<string>(new[] {"r1/scope1", "random-scope"}),
                     TestConstants.DefaultClientId + "more", user, TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(resultEx);
             Assert.IsNotNull(resultEx.Result);
@@ -418,7 +418,7 @@ namespace Test.MSAL.Common.Unit
         public void LoadSingleItemFromCacheNonExistantScopeDifferentAuthorities()
         {
             TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
-            HashSet<string> scope = new HashSet<string>(new[] {"nonexistant-scope"});
+            SortedSet<string> scope = new SortedSet<string>(new[] {"nonexistant-scope"});
 
             User user = TestConstants.DefaultUser;
             user.DisplayableId = null;
@@ -448,7 +448,7 @@ namespace Test.MSAL.Common.Unit
         public void LoadSingleItemFromCacheIntersectingScopeDifferentAuthorities()
         {
             TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
-            HashSet<string> scope = new HashSet<string>(new[] {"r1/scope1"});
+            SortedSet<string> scope = new SortedSet<string>(new[] {"r1/scope1"});
 
             KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item =
                 cache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityHomeTenant,
@@ -546,7 +546,7 @@ namespace Test.MSAL.Common.Unit
             //using root id. Code will find multiple results with the same root id. it can return any.
             KeyValuePair<TokenCacheKey, AuthenticationResultEx>? item =
                 tokenCache.LoadSingleItemFromCache(TestConstants.DefaultAuthorityGuestTenant + "non-existant",
-                    new HashSet<string>(new[] {"scope1", "random-scope"}),
+                    new SortedSet<string>(new[] {"scope1", "random-scope"}),
                     TestConstants.DefaultClientId, user, TestConstants.DefaultPolicy, null);
             Assert.IsNotNull(item);
             key = item.Value.Key;
@@ -700,7 +700,7 @@ namespace Test.MSAL.Common.Unit
                         UniqueId = TestConstants.DefaultUniqueId,
                         DisplayableId = TestConstants.DefaultDisplayableId
                     },
-                    ScopeSet = new HashSet<string>(new string[] { "r1/scope1", "r1/scope5" })
+                    ScopeSet = new SortedSet<string>(new string[] { "r1/scope1", "r1/scope5" })
             };
 
             AuthenticationResultEx resultEx = new AuthenticationResultEx
@@ -715,7 +715,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(2, tokenCache.Count);
             AuthenticationResultEx resultExOut =
                 tokenCache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
-                    new HashSet<string>(new string[] {"r1/scope5"}), TestConstants.DefaultClientId,
+                    new SortedSet<string>(new string[] {"r1/scope5"}), TestConstants.DefaultClientId,
                     null, TestConstants.DefaultPolicy, null);
 
             Assert.AreEqual(resultEx.RefreshToken, resultExOut.RefreshToken);
@@ -737,7 +737,7 @@ namespace Test.MSAL.Common.Unit
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
             {
                 User = null,
-                ScopeSet = new HashSet<string>(new string[] { "r1/scope1" })
+                ScopeSet = new SortedSet<string>(new string[] { "r1/scope1" })
             };
 
             AuthenticationResultEx resultEx = new AuthenticationResultEx
@@ -779,7 +779,7 @@ namespace Test.MSAL.Common.Unit
                         UniqueId = TestConstants.DefaultUniqueId+"more",
                         DisplayableId = TestConstants.DefaultDisplayableId
                     },
-                ScopeSet = new HashSet<string>(new string[] { "r1/scope5", "r1/scope7" })
+                ScopeSet = new SortedSet<string>(new string[] { "r1/scope5", "r1/scope7" })
             };
 
             AuthenticationResultEx resultEx = new AuthenticationResultEx
@@ -820,7 +820,7 @@ namespace Test.MSAL.Common.Unit
                         UniqueId = TestConstants.DefaultUniqueId,
                         DisplayableId = TestConstants.DefaultDisplayableId
                     },
-                ScopeSet = new HashSet<string>(new string[] { "r1/scope5", "r1/scope7" })
+                ScopeSet = new SortedSet<string>(new string[] { "r1/scope5", "r1/scope7" })
             };
 
             AuthenticationResultEx resultEx = new AuthenticationResultEx
@@ -835,7 +835,7 @@ namespace Test.MSAL.Common.Unit
             Assert.AreEqual(3, tokenCache.Count);
             AuthenticationResultEx resultExOut =
                 tokenCache.LoadFromCache(TestConstants.DefaultAuthorityHomeTenant,
-                    new HashSet<string>(new string[] {"r1/scope5"}), TestConstants.DefaultClientId,
+                    new SortedSet<string>(new string[] {"r1/scope5"}), TestConstants.DefaultClientId,
                     null, TestConstants.DefaultPolicy, null);
 
             Assert.AreEqual(resultEx.RefreshToken, resultExOut.RefreshToken);

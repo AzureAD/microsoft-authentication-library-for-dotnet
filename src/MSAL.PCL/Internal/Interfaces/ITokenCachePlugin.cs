@@ -28,7 +28,7 @@
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal.Cache;
 
-namespace Microsoft.Identity.Client.Interfaces
+namespace Microsoft.Identity.Client.Internal.Interfaces
 {
     internal interface ITokenCachePlugin
     {
@@ -40,10 +40,14 @@ namespace Microsoft.Identity.Client.Interfaces
 
         ICollection<string> AllRefreshTokens();
 
-        void SaveAccessToken(TokenCacheItem accessTokenItem);
+        void SaveToken(TokenCacheItem tokenItem);
 
         void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem);
 
-        void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item);
+        void DeleteToken(TokenCacheKey key);
+
+        void DeleteRefreshToken(TokenCacheKey key);
+
+        void DeleteAll(string clientId);
     }
 }

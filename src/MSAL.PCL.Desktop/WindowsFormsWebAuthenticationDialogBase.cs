@@ -167,9 +167,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected virtual void WebBrowserNavigateErrorHandler(object sender, WebBrowserNavigateErrorEventArgs e)
         {
-            // e.StatusCode - Contains error code which we are able to translate this error to text
-            // ADAL.Native contains a code for translation.
-
             if (this.webBrowser.IsDisposed)
             {
                 // we cancel all flow in disposed object.

@@ -113,7 +113,7 @@ namespace Test.MSAL.NET.Unit
             Assert.IsFalse(key1.Equals(key2));
 
             //different case scope
-            HashSet<string> uppercaseScope = new HashSet<string>();
+            SortedSet<string> uppercaseScope = new SortedSet<string>();
             foreach (var item in TestConstants.DefaultScope)
             {
                 uppercaseScope.Add(item.ToUpper(CultureInfo.InvariantCulture));
@@ -221,10 +221,10 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
 
-            HashSet<string> otherScope = null;
+            SortedSet<string> otherScope = null;
             Assert.IsFalse(key.ScopeEquals(otherScope));
 
-            otherScope = new HashSet<string>(TestConstants.DefaultScope.ToArray());
+            otherScope = new SortedSet<string>(TestConstants.DefaultScope.ToArray());
             Assert.IsTrue(key.ScopeEquals(otherScope));
 
             otherScope.Add("anotherscope");
@@ -245,7 +245,7 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DefaultPolicy);
 
             //null will intersect with null
-            HashSet<string> otherScope = null;
+            SortedSet<string> otherScope = null;
             Assert.IsTrue(key.ScopeIntersects(otherScope));
 
             //put scope value
@@ -255,7 +255,7 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DefaultPolicy);
             Assert.IsFalse(key.ScopeIntersects(otherScope));
 
-            otherScope = new HashSet<string>(TestConstants.DefaultScope.ToArray());
+            otherScope = new SortedSet<string>(TestConstants.DefaultScope.ToArray());
             Assert.IsTrue(key.ScopeIntersects(otherScope));
 
             otherScope.Add("anotherscope");
@@ -281,9 +281,9 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DefaultPolicy);
 
             //null will contain null
-            HashSet<string> otherScope = null;
+            SortedSet<string> otherScope = null;
             Assert.IsTrue(key.ScopeContains(otherScope));
-            Assert.IsFalse(key.ScopeContains(new HashSet<string>()));
+            Assert.IsFalse(key.ScopeContains(new SortedSet<string>()));
 
             //put scope value
             key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
@@ -291,9 +291,9 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
                 TestConstants.DefaultPolicy);
             Assert.IsTrue(key.ScopeContains(otherScope));
-            Assert.IsTrue(key.ScopeContains(new HashSet<string>()));
+            Assert.IsTrue(key.ScopeContains(new SortedSet<string>()));
 
-            otherScope = new HashSet<string>(TestConstants.DefaultScope.ToArray());
+            otherScope = new SortedSet<string>(TestConstants.DefaultScope.ToArray());
             Assert.IsTrue(key.ScopeContains(otherScope));
 
             // other scope has more

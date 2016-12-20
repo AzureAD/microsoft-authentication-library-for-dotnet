@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public bool RestrictToSingleUser { get; set; }
 
-        public HashSet<string> Scope { get; set; }
+        public SortedSet<string> Scope { get; set; }
 
         public ClientKey ClientKey { get; set; }
 

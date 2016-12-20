@@ -88,9 +88,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        protected virtual HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
+        protected virtual SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
         {
-            HashSet<string> set = new HashSet<string>(inputScope.ToArray());
+            SortedSet<string> set = new SortedSet<string>(inputScope.ToArray());
             set.UnionWith(OAuth2Value.ReservedScopes.CreateSetFromArray());
             set.Remove(AuthenticationRequestParameters.ClientKey.ClientId);
 
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return set;
         }
 
-        protected void ValidateScopeInput(HashSet<string> scopesToValidate)
+        protected void ValidateScopeInput(SortedSet<string> scopesToValidate)
         {
             //check if scope or additional scope contains client ID.
             if (scopesToValidate.Intersect(OAuth2Value.ReservedScopes.CreateSetFromArray()).Any())

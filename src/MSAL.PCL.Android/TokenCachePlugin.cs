@@ -26,9 +26,9 @@
 using System.Collections.Generic;
 using Android.App;
 using Android.Content;
-using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
@@ -63,11 +63,11 @@ namespace Microsoft.Identity.Client
             return _refreshTokenSharedPreference.All.Values as ICollection<string>;
         }
 
-        public void SaveAccessToken(TokenCacheItem accessTokenItem)
+        public void SaveToken(TokenCacheItem tokenItem)
         {
-            TokenCacheKey key = TokenCacheKey.ExtractKeyForAT(accessTokenItem);
+            TokenCacheKey key = TokenCacheKey.ExtractKeyForAT(tokenItem);
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(key.ToString(), JsonHelper.SerializeToJson(accessTokenItem));
+            editor.PutString(key.ToString(), JsonHelper.SerializeToJson(tokenItem));
             editor.Apply();
         }
 
@@ -79,10 +79,18 @@ namespace Microsoft.Identity.Client
             editor.Apply();
         }
 
-        public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
+        public void DeleteToken(TokenCacheKey key)
         {
-            string key = TokenCacheKey.ExtractKeyForRT(refreshToken‪Item).ToString();
-            ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
+            Delete(key.ToString(), _accessTokenSharedPreference.Edit());
+        }
+
+        public void DeleteRefreshToken(TokenCacheKey key)
+        {
+            Delete(key.ToString(), _refreshTokenSharedPreference.Edit());
+        }
+
+        private void Delete(string key, ISharedPreferencesEditor editor)
+        {
             editor.Remove(key);
             editor.Apply();
         }

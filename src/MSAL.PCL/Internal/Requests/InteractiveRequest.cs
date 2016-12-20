@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class InteractiveRequest : BaseRequest
     {
-        private readonly HashSet<string> _additionalScope;
+        private readonly SortedSet<string> _additionalScope;
         private readonly IPlatformParameters _authorizationParameters;
         private readonly UiOptions? _uiOptions;
         private readonly IWebUI _webUi;
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
 
-            _additionalScope = new HashSet<string>();
+            _additionalScope = new SortedSet<string>();
             if (!MsalStringHelper.IsNullOrEmpty(additionalScope))
             {
                 this._additionalScope = additionalScope.CreateSetFromArray();
@@ -197,9 +197,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private Dictionary<string, string> CreateAuthorizationRequestParameters()
         {
-            HashSet<string> unionScope =
+            SortedSet<string> unionScope =
                 this.GetDecoratedScope(
-                    new HashSet<string>(AuthenticationRequestParameters.Scope.Union(this._additionalScope)));
+                    new SortedSet<string>(AuthenticationRequestParameters.Scope.Union(this._additionalScope)));
 
             Dictionary<string, string> authorizationRequestParameters =
                 new Dictionary<string, string>(AuthenticationRequestParameters.ClientKey.ToParameters());

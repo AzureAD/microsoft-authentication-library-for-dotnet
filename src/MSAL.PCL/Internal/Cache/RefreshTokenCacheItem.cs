@@ -37,5 +37,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
         }
 
         public string RefreshToken { get; private set; }
+
+        public override TokenCacheKey GetTokenCacheKey()
+        {
+            return new TokenCacheKey(null, null, ClientId, User, Policy);
+        }
     }
 }

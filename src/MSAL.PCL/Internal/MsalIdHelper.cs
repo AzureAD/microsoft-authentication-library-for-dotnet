@@ -35,12 +35,12 @@ namespace Microsoft.Identity.Client.Internal
     internal static class MsalIdParameter
     {
         /// <summary>
-        /// ADAL Flavor: .NET or WinRT
+        /// MSAL Flavor: .NET or WinRT
         /// </summary>
         public const string Product = "x-client-SKU";
 
         /// <summary>
-        /// ADAL assembly version
+        /// MSAL assembly version
         /// </summary>
         public const string Version = "x-client-Ver";
 

@@ -26,10 +26,13 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
@@ -80,6 +83,31 @@ namespace Microsoft.Identity.Client
                     PlatformPlugin.Logger.Warning(null, "Failed to save cache: " + ex);
                 }
             }
+        }
+
+        public ICollection<string> AllAccessAndIdTokens()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICollection<string> AllRefreshTokens()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SaveToken(TokenCacheItem tokenItem)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
+        {
+            throw new NotImplementedException();
         }
 
         internal static void SetCacheValue(IPropertySet containerValues, byte[] value)

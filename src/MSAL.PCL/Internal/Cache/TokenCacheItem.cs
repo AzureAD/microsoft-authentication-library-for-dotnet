@@ -57,5 +57,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 ExpiresOn = response.IdTokenExpiresOn;
             }
         }
+
+        public override TokenCacheKey GetTokenCacheKey()
+        {
+            return new TokenCacheKey(Authority, Scope, ClientId, User, Policy);
+        }
     }
 }

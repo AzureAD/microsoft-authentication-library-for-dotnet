@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
     {
         public void SaveAccessToken(TokenCacheItem accessTokenItem)
         {
-            PlatformPlugin.TokenCachePlugin.SaveAccessToken(accessTokenItem);
+            PlatformPlugin.TokenCachePlugin.SaveToken(accessTokenItem);
         }
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             PlatformPlugin.TokenCachePlugin.SaveRefreshToken(refreshTokenItem);
         }
 
-        private IList<TokenCacheItem> GetTokens(TokenCacheKey tokenCacheKey)
+        public IList<TokenCacheItem> GetTokens(TokenCacheKey tokenCacheKey)
         {
             //TODO: check android implementation
             ICollection<string> allAccessTokens = PlatformPlugin.TokenCachePlugin.AllAccessAndIdTokens();
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return matchedTokens;
         }
         
-        private IList<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
+        public IList<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
         {
             ICollection<string> allRefreshTokens = PlatformPlugin.TokenCachePlugin.AllRefreshTokens();
             IList<RefreshTokenCacheItem> matchedRefreshTokens = new List<RefreshTokenCacheItem>();
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
         {
-            PlatformPlugin.TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item);
+            PlatformPlugin.TokenCachePlugin.Delete(refreshToken‪Item);
         }
 
         public IList<TokenCacheItem> GetAllAccessTokens()
@@ -107,6 +107,11 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public List<RefreshTokenCacheItem> GetAllRefreshTokensForGivenClientId(string clientId)
         {
             return this.GetAllRefreshTokens().Where(t => t.ClientId.Equals(clientId)).ToList();
+        }
+
+        public void DeleteAll(string clientId)
+        {
+
         }
     }
 }

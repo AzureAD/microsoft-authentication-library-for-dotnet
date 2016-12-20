@@ -34,14 +34,14 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal static class MsalStringHelper
     {
-        internal static HashSet<string> ToLower(this HashSet<string> setOfStrings)
+        internal static SortedSet<string> ToLower(this SortedSet<string> setOfStrings)
         {
             if (setOfStrings == null)
             {
                 return null;
             }
 
-            HashSet<string> set = new HashSet<string>();
+            SortedSet<string> set = new SortedSet<string>();
             foreach (var item in setOfStrings)
             {
                 set.Add(item.ToLower());
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal
             return set;
         }
 
-        internal static string[] AsArray(this HashSet<string> setOfStrings)
+        internal static string[] AsArray(this SortedSet<string> setOfStrings)
         {
             if (setOfStrings == null)
             {
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal
             return setOfStrings.ToArray();
         }
 
-        internal static string AsSingleString(this HashSet<string> setOfStrings)
+        internal static string AsSingleString(this SortedSet<string> setOfStrings)
         {
             return AsSingleString(setOfStrings.ToArray());
         }
@@ -84,14 +84,14 @@ namespace Microsoft.Identity.Client.Internal
             return sb.ToString();
         }
 
-        internal static HashSet<string> AsSet(this string singleString)
+        internal static SortedSet<string> AsSet(this string singleString)
         {
             if (string.IsNullOrEmpty(singleString))
             {
-                return new HashSet<string>();
+                return new SortedSet<string>();
             }
 
-            return new HashSet<string>(singleString.Split(new[] {" "}, StringSplitOptions.None));
+            return new SortedSet<string>(singleString.Split(new[] {" "}, StringSplitOptions.None));
         }
 
         internal static string[] AsArray(this string singleString)
@@ -104,9 +104,9 @@ namespace Microsoft.Identity.Client.Internal
             return singleString.Split(new[] {" "}, StringSplitOptions.None);
         }
 
-        internal static HashSet<string> CreateSetFromArray(this string[] arrayStrings)
+        internal static SortedSet<string> CreateSetFromArray(this string[] arrayStrings)
         {
-            HashSet<string> set = new HashSet<string>();
+            SortedSet<string> set = new SortedSet<string>();
             if (arrayStrings == null || arrayStrings.Length == 0)
             {
                 return set;
