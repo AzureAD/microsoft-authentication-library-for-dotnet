@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.OAuth2;
@@ -46,9 +47,8 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="args">Arguments related to the cache item impacted</param>
         public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
-
-        private const int SchemaVersion = 1;
-        private readonly object lockObject = new object();
+        
+        internal readonly object lockObject = new object();
         private volatile bool hasStateChanged;
         private readonly string _clientId;
 
@@ -204,6 +204,13 @@ namespace Microsoft.Identity.Client
                 // Access token lookup needs to be a strict match. In the JSON response from token endpoint, server only returns the scope
                 // the developer requires the token for. We store the token separately for considerations i.e. MFA.
                 TokenCacheItem tokenCacheItem = tokenCacheItems[0];
+
+                if (requestParam.UserAssertion != null &&
+                    !tokenCacheItem.UserAssertionHash.Equals(requestParam.UserAssertion.AssertionHash))
+                {
+                    return null;
+                }
+
                 if (tokenCacheItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
                 {
                     return tokenCacheItem;
@@ -247,7 +254,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void DeleteRrefreshToken(RefreshTokenCacheItem rtItem)
+        internal void DeleteRefreshToken(RefreshTokenCacheItem rtItem)
         {
             lock (lockObject)
             {
@@ -282,7 +289,7 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                List<RefreshTokenCacheItem> allRefreshTokens =
+                IList<RefreshTokenCacheItem> allRefreshTokens =
                     _tokenCacheAccessor.GetAllRefreshTokensForGivenClientId(clientId);
                 OnAfterAccess(args);
 
@@ -299,20 +306,41 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        public void Deserialize(byte[] state)
+        internal void SignOut(User user)
         {
             lock (lockObject)
             {
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                {
+                    TokenCache = this,
+                    ClientId = _clientId,
+                    User = null
+                };
 
-            }
-        }
+                OnBeforeAccess(args);
+                OnBeforeWrite(args);
+                IList<RefreshTokenCacheItem> allRefreshTokens =
+                    _tokenCacheAccessor.GetAllRefreshTokensForGivenClientId(user.ClientId)
+                        .Where(item => item.HomeObjectId.Equals(user.HomeObjectId))
+                        .ToList();
+                foreach (var rtItem in allRefreshTokens)
+                {
+                    _tokenCacheAccessor.DeleteRefreshToken(rtItem);
+                }
 
-        public byte[] Serialize()
-        {
-            lock (lockObject)
-            {
+                IList<TokenCacheItem> allAccessTokens =
+                    _tokenCacheAccessor.GetAllAccessTokens()
+                        .Where(
+                            item => item.ClientId.Equals(user.ClientId) && item.HomeObjectId.Equals(user.HomeObjectId))
+                        .ToList();
 
-                return null;
+                foreach (var atItem in allAccessTokens)
+                {
+                    _tokenCacheAccessor.DeleteToken(atItem);
+                }
+
+                OnAfterAccess(args);
+                
             }
         }
     }

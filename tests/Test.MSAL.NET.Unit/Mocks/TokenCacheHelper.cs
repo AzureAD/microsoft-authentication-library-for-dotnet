@@ -42,37 +42,37 @@ namespace Test.MSAL.NET.Unit.Mocks
         public static TokenCache CreateCacheWithItems()
         {
             TokenCache cache = new TokenCache();
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
-                TestConstants.DefaultPolicy);
+            TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                TestConstants.Scope, TestConstants.ClientId,
+                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
+                TestConstants.Policy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
             ex.Result.User = new User
             {
-                DisplayableId = TestConstants.DefaultDisplayableId,
-                UniqueId = TestConstants.DefaultUniqueId,
-                HomeObjectId = TestConstants.DefaultHomeObjectId
+                DisplayableId = TestConstants.DisplayableId,
+                UniqueId = TestConstants.UniqueId,
+                HomeObjectId = TestConstants.HomeObjectId
             };
-            ex.Result.ScopeSet = TestConstants.DefaultScope;
+            ex.Result.ScopeSet = TestConstants.Scope;
 
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
             cache.tokenCacheDictionary[key] = ex;
 
-            key = new TokenCacheKey(TestConstants.DefaultAuthorityGuestTenant,
-                TestConstants.ScopeForAnotherResource, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
-                TestConstants.DefaultPolicy);
+            key = new TokenCacheKey(TestConstants.AuthorityGuestTenant,
+                TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
+                TestConstants.UniqueId + "more", TestConstants.DisplayableId, TestConstants.HomeObjectId,
+                TestConstants.Policy);
             ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
             ex.Result.User = new User
             {
-                DisplayableId = TestConstants.DefaultDisplayableId,
-                UniqueId = TestConstants.DefaultUniqueId + "more",
-                HomeObjectId = TestConstants.DefaultHomeObjectId
+                DisplayableId = TestConstants.DisplayableId,
+                UniqueId = TestConstants.UniqueId + "more",
+                HomeObjectId = TestConstants.HomeObjectId
             };
             ex.Result.ScopeSet = TestConstants.ScopeForAnotherResource;
             ex.RefreshToken = "someRT";

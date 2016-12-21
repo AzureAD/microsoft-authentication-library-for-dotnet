@@ -79,5 +79,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
         {
             get { return DateTime.UtcNow + TimeSpan.FromSeconds(this.IdTokenExpiresIn); }
         }
+        
+        public string UserAssertionHash { get; set; }
     }
 }

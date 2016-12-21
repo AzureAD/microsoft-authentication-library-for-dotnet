@@ -33,55 +33,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class OnBehalfOfRequest : BaseRequest
     {
-        private readonly string assertionHash;
-
         public OnBehalfOfRequest(AuthenticationRequestParameters authenticationRequestParameters)
             : base(authenticationRequestParameters)
         {
             if (authenticationRequestParameters.UserAssertion == null)
             {
-                throw new ArgumentNullException("userAssertion");
+                throw new ArgumentNullException(nameof(authenticationRequestParameters.UserAssertion));
             }
 
-            this.User = new User {DisplayableId = authenticationRequestParameters.UserAssertion.UserName};
-            this.assertionHash =
-                PlatformPlugin.CryptographyHelper.CreateSha256Hash(
-                    authenticationRequestParameters.UserAssertion.Assertion);
-            this.SupportADFS = false;
+            User = new User {DisplayableId = authenticationRequestParameters.UserAssertion.UserName};
+            SupportADFS = false;
         }
 
-        protected override void ValidateResult()
+        protected override async Task SendTokenRequestAsync()
         {
-            // cache lookup returned a token. no username provided in the assertion. 
-            // cannot deterministicly identify the user. fallback to compare hash. 
-            if (ResultEx != null && string.IsNullOrEmpty(this.User.DisplayableId))
+            await base.SendTokenRequestAsync();
+            if (Response != null)
             {
-                //if cache result does not contain hash then return null
-                if (!string.IsNullOrEmpty(ResultEx.UserAssertionHash))
-                {
-                    //if user assertion hash does not match then return null
-                    if (!ResultEx.UserAssertionHash.Equals(assertionHash))
-                    {
-                        ResultEx = null;
-                    }
-                }
-                else
-                {
-                    ResultEx = null;
-                }
+                Response.UserAssertionHash = AuthenticationRequestParameters.UserAssertion.AssertionHash;
             }
-            //leave resultEx as is if it is null or provided userAssertion contains username
-        }
-
-        protected override async Task<AuthenticationResultEx> SendTokenRequestAsync()
-        {
-            AuthenticationResultEx resultEx = await base.SendTokenRequestAsync();
-            if (resultEx != null)
-            {
-                resultEx.UserAssertionHash = this.assertionHash;
-            }
-
-            return resultEx;
         }
 
         protected override void SetAdditionalRequestParameters(OAuth2Client client)

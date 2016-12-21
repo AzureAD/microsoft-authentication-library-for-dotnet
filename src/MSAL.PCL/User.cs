@@ -119,12 +119,7 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            IEnumerable<BaseTokenCacheItem> items =
-                this.TokenCache.ReadItems(this.ClientId).Where(item => item.HomeObjectId.Equals(this.HomeObjectId));
-            foreach (var item in items)
-            {
-                this.TokenCache.DeleteItem(item);
-            }
+            TokenCache.SignOut(this);
         }
     }
 }

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client
@@ -76,6 +77,8 @@ namespace Microsoft.Identity.Client
             this.AssertionType = assertionType;
             this.Assertion = assertion;
             this.UserName = userName;
+            AssertionHash =
+                PlatformPlugin.CryptographyHelper.CreateSha256Hash(Assertion);
         }
 
         /// <summary>
@@ -92,5 +95,7 @@ namespace Microsoft.Identity.Client
         /// Gets name of the user.
         /// </summary>
         public string UserName { get; internal set; }
+
+        internal string AssertionHash { get; set; }
     }
 }

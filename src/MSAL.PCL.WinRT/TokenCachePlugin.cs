@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
                     byte[] state = GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
                     if (state != null)
                     {
-                        args.TokenCache.Deserialize(state);
+                        //args.TokenCache.Deserialize(state);
                     }
                 }
                 catch (Exception ex)
@@ -74,8 +74,8 @@ namespace Microsoft.Identity.Client
                 {
                     var localSettings = ApplicationData.Current.LocalSettings;
                     localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-                    SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values,
-                        args.TokenCache.Serialize());
+/*                    SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values,
+                        args.TokenCache.Serialize());*/
                     args.TokenCache.HasStateChanged = false;
                 }
                 catch (Exception ex)

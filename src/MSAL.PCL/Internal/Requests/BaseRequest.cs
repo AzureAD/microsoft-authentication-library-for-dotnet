@@ -69,7 +69,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     Authority.CanonicalAuthority, authenticationRequestParameters.Scope.AsSingleString(),
                     authenticationRequestParameters.ClientKey.ClientId,
                     (TokenCache != null)
-                        ? TokenCache.GetType().FullName:null));
+                        ? TokenCache.GetType().FullName
+                        : null));
 
             this.AuthenticationRequestParameters = authenticationRequestParameters;
 
@@ -159,7 +160,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (Response == null || Exception != null)
                 {
                     await this.PreTokenRequest().ConfigureAwait(false);
-                    Response = await this.SendTokenRequestAsync().ConfigureAwait(false);
+                    await this.SendTokenRequestAsync().ConfigureAwait(false);
 
                     if (Exception != null)
                     {
@@ -193,8 +194,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             return new TokenCacheItem(this.Authority.CanonicalAuthority,
-                    AuthenticationRequestParameters.ClientKey.ClientId,
-                    AuthenticationRequestParameters.Policy, Response);
+                AuthenticationRequestParameters.ClientKey.ClientId,
+                AuthenticationRequestParameters.Policy, Response);
         }
 
         protected virtual bool BrokerInvocationRequired()
@@ -234,7 +235,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected abstract void SetAdditionalRequestParameters(OAuth2Client client);
 
-        protected virtual async Task<TokenResponse> SendTokenRequestAsync()
+        protected virtual async Task SendTokenRequestAsync()
         {
             OAuth2Client client = new OAuth2Client();
             foreach (var entry in AuthenticationRequestParameters.ClientKey.ToParameters())
@@ -245,10 +246,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.Scope,
                 this.GetDecoratedScope(AuthenticationRequestParameters.Scope).AsSingleString());
             this.SetAdditionalRequestParameters(client);
-            return await this.SendHttpMessageAsync(client).ConfigureAwait(false);
+            await this.SendHttpMessageAsync(client).ConfigureAwait(false);
         }
 
-        internal async Task<TokenResponse> SendTokenRequestByRefreshTokenAsync(string refreshToken)
+        internal async Task SendTokenRequestByRefreshTokenAsync(string refreshToken)
         {
             OAuth2Client client = new OAuth2Client();
             foreach (var entry in AuthenticationRequestParameters.ClientKey.ToParameters())
@@ -261,16 +262,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken);
             client.AddBodyParameter(OAuth2Parameter.RefreshToken, refreshToken);
 
-            TokenResponse response = await this.SendHttpMessageAsync(client).ConfigureAwait(false);
+            Response = await this.SendHttpMessageAsync(client).ConfigureAwait(false);
 
-            if (response.RefreshToken == null)
+            if (Response.RefreshToken == null)
             {
-                response.RefreshToken = refreshToken;
+                Response.RefreshToken = refreshToken;
                 PlatformPlugin.Logger.Information(this.CallState,
                     "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
             }
-
-            return response;
         }
 
         internal async Task RefreshAccessTokenAsync(RefreshTokenCacheItem item)
@@ -281,8 +280,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 try
                 {
-                    Response =
-                        await this.SendTokenRequestByRefreshTokenAsync(item.RefreshToken).ConfigureAwait(false);
+                    await this.SendTokenRequestByRefreshTokenAsync(item.RefreshToken).ConfigureAwait(false);
 
                     if (Response.IdToken == null)
                     {
@@ -316,7 +314,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             TokenResponse tokenResponse =
                 await client.GetToken(new Uri(this.Authority.TokenEndpoint), this.CallState).ConfigureAwait(false);
-            
+
             if (string.IsNullOrEmpty(tokenResponse.Scope))
             {
                 tokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();

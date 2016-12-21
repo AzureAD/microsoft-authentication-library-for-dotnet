@@ -75,6 +75,11 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return matchedRefreshTokens;
         }
 
+        public void DeleteToken(TokenCacheItem token‪Item)
+        {
+            PlatformPlugin.TokenCachePlugin.DeleteToken(token‪Item.GetTokenCacheKey());
+        }
+
         public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
         {
             PlatformPlugin.TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item.GetTokenCacheKey());
@@ -104,7 +109,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return returnList;
         }
         
-        public List<RefreshTokenCacheItem> GetAllRefreshTokensForGivenClientId(string clientId)
+        public IList<RefreshTokenCacheItem> GetAllRefreshTokensForGivenClientId(string clientId)
         {
             return this.GetAllRefreshTokens().Where(t => t.ClientId.Equals(clientId)).ToList();
         }

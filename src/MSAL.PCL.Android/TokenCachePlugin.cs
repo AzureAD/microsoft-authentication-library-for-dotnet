@@ -99,13 +99,5 @@ namespace Microsoft.Identity.Client
             editor.Remove(key);
             editor.Apply();
         }
-
-        public void BeforeAccess(TokenCacheNotificationArgs args)
-        {
-        }
-
-        public void AfterAccess(TokenCacheNotificationArgs args)
-        {
-        }
     }
 }

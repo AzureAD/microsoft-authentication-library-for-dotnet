@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             throw new System.NotImplementedException();
         }
 
-        protected override Task<TokenResponse> SendTokenRequestAsync()
+        protected override Task SendTokenRequestAsync()
         {
             if (Response == null)
             {

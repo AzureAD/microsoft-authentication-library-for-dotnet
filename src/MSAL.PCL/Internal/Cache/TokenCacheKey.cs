@@ -84,14 +84,16 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append(EncodingHelper.Base64Encode(mAuthority) + "$");
-            stringBuilder.Append(MSALUtils.Base64Encode(mClientId) + "$");
+            stringBuilder.Append(EncodingHelper.Base64Encode(Authority) + "$");
+            stringBuilder.Append(EncodingHelper.Base64Encode(ClientId) + "$");
             // scope is treeSet to guarantee the order of the scopes when converting to string.
-            stringBuilder.Append(MSALUtils.Base64Encode(Scope.AsSingleString()) + "$");
-            stringBuilder.Append(MSALUtils.Base64Encode(mDisplayableId) + "$");
-            stringBuilder.Append(MSALUtils.Base64Encode(mUniqueId) + "$");
-            stringBuilder.Append(MSALUtils.Base64Encode(mHomeObjectId) + "$");
-            stringBuilder.Append(MSALUtils.Base64Encode(mPolicy));
+            stringBuilder.Append(EncodingHelper.Base64Encode(Scope.AsSingleString()) + "$");
+            stringBuilder.Append(EncodingHelper.Base64Encode(DisplayableId) + "$");
+            stringBuilder.Append(EncodingHelper.Base64Encode(UniqueId) + "$");
+            stringBuilder.Append(EncodingHelper.Base64Encode(HomeObjectId) + "$");
+            stringBuilder.Append(EncodingHelper.Base64Encode(Policy));
+
+            return stringBuilder.ToString();
         }
 
         /// <summary>

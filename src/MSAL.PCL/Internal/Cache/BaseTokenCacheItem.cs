@@ -51,6 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 _user = new User(idToken);
             }
 
+            this.UserAssertionHash = response.UserAssertionHash;
             this.Authority = authority;
             this.ClientId = clientId;
             this.Policy = policy;

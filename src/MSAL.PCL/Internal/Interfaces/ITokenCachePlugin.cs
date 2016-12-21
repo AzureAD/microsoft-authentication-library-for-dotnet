@@ -32,10 +32,6 @@ namespace Microsoft.Identity.Client.Internal.Interfaces
 {
     internal interface ITokenCachePlugin
     {
-        void BeforeAccess(TokenCacheNotificationArgs args);
-
-        void AfterAccess(TokenCacheNotificationArgs args);
-
         ICollection<string> AllAccessAndIdTokens();
 
         ICollection<string> AllRefreshTokens();

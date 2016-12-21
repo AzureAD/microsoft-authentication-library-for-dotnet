@@ -59,17 +59,17 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("PublicClientApplicationTests")]
         public void ConstructorsTest()
         {
-            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
             Assert.IsNotNull(app);
             Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
-            Assert.AreEqual(TestConstants.DefaultClientId, app.ClientId);
+            Assert.AreEqual(TestConstants.ClientId, app.ClientId);
             Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.RedirectUri);
             Assert.IsTrue(app.ValidateAuthority);
 
-            app = new PublicClientApplication(TestConstants.DefaultAuthorityGuestTenant, TestConstants.DefaultClientId);
+            app = new PublicClientApplication(TestConstants.AuthorityGuestTenant, TestConstants.ClientId);
             Assert.IsNotNull(app);
-            Assert.AreEqual(TestConstants.DefaultAuthorityGuestTenant, app.Authority);
-            Assert.AreEqual(TestConstants.DefaultClientId, app.ClientId);
+            Assert.AreEqual(TestConstants.AuthorityGuestTenant, app.Authority);
+            Assert.AreEqual(TestConstants.ClientId, app.ClientId);
             Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.RedirectUri);
             Assert.IsTrue(app.ValidateAuthority);
         }
@@ -78,7 +78,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("PublicClientApplicationTests")]
         public void GetUsersTest()
         {
-            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
             IEnumerable<User> users = app.Users;
             Assert.IsNotNull(users);
             Assert.IsFalse(users.Any());
@@ -88,26 +88,26 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(1, users.Count());
             foreach (var user in users)
             {
-                Assert.AreEqual(TestConstants.DefaultClientId, user.ClientId);
+                Assert.AreEqual(TestConstants.ClientId, user.ClientId);
                 Assert.IsNotNull(user.TokenCache);
             }
 
             // another cache entry for different home object id. user count should be 2.
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.ScopeForAnotherResource, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId,
-                TestConstants.DefaultHomeObjectId + "more",
-                TestConstants.DefaultPolicy);
+            TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
+                TestConstants.UniqueId, TestConstants.DisplayableId,
+                TestConstants.HomeObjectId + "more",
+                TestConstants.Policy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)));
             ex.Result.User = new User
             {
-                DisplayableId = TestConstants.DefaultDisplayableId,
-                UniqueId = TestConstants.DefaultUniqueId,
-                HomeObjectId = TestConstants.DefaultHomeObjectId
+                DisplayableId = TestConstants.DisplayableId,
+                UniqueId = TestConstants.UniqueId,
+                HomeObjectId = TestConstants.HomeObjectId
             };
-            ex.Result.ScopeSet = TestConstants.DefaultScope;
+            ex.Result.ScopeSet = TestConstants.Scope;
 
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -118,7 +118,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(2, users.Count());
             foreach (var user in users)
             {
-                Assert.AreEqual(TestConstants.DefaultClientId, user.ClientId);
+                Assert.AreEqual(TestConstants.ClientId, user.ClientId);
                 Assert.IsNotNull(user.TokenCache);
             }
         }
@@ -128,7 +128,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("PublicClientApplicationTests")]
         public void GetUsersAndSignThemOutTest()
         {
-            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
             app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
 
             foreach (var user in app.Users)
@@ -146,7 +146,7 @@ namespace Test.MSAL.NET.Unit
             MockWebUI webUi = new MockWebUI();
             webUi.HeadersToValidate = new Dictionary<string, string>();
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
-                TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
+                TestConstants.AuthorityHomeTenant + "?code=some-code");
 
             IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
             mockFactory.CreateAuthenticationDialog(Arg.Any<IPlatformParameters>()).Returns(webUi);
@@ -156,7 +156,7 @@ namespace Test.MSAL.NET.Unit
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
                 Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
 
 
@@ -167,23 +167,23 @@ namespace Test.MSAL.NET.Unit
             });
 
             // this is a flow where we pass client id as a scope
-            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId)
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId)
             {
                 ValidateAuthority = false
             };
 
-            Task<AuthenticationResult> task = app.AcquireTokenAsync(new string[] {TestConstants.DefaultClientId});
+            Task<AuthenticationResult> task = app.AcquireTokenAsync(new string[] {TestConstants.ClientId});
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Token, result.IdToken);
             Assert.AreEqual(1, app.UserTokenCache.Count);
-            foreach (var item in app.UserTokenCache.ReadItems(TestConstants.DefaultClientId))
+            foreach (var item in app.UserTokenCache.ReadItems(TestConstants.ClientId))
             {
                 Assert.AreEqual(1, item.Scope.Count);
-                Assert.AreEqual(TestConstants.DefaultClientId, item.Scope.AsSingleString());
+                Assert.AreEqual(TestConstants.ClientId, item.Scope.AsSingleString());
             }
 
-            task = app.AcquireTokenSilentAsync(new string[] {TestConstants.DefaultClientId});
+            task = app.AcquireTokenSilentAsync(new string[] {TestConstants.ClientId});
 
             AuthenticationResult result1 = task.Result;
             Assert.IsNotNull(result1);
@@ -191,10 +191,10 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(result.Token, result1.Token);
             Assert.AreEqual(result.IdToken, result1.IdToken);
             Assert.AreEqual(1, app.UserTokenCache.Count);
-            foreach (var item in app.UserTokenCache.ReadItems(TestConstants.DefaultClientId))
+            foreach (var item in app.UserTokenCache.ReadItems(TestConstants.ClientId))
             {
                 Assert.AreEqual(1, item.Scope.Count);
-                Assert.AreEqual(TestConstants.DefaultClientId, item.Scope.AsSingleString());
+                Assert.AreEqual(TestConstants.ClientId, item.Scope.AsSingleString());
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -205,8 +205,8 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSilentCacheOnlyLookupTest()
         {
-            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultClientId)
+            PublicClientApplication app = new PublicClientApplication(TestConstants.AuthorityHomeTenant,
+                TestConstants.ClientId)
             {
                 ValidateAuthority = false
             };
@@ -215,22 +215,22 @@ namespace Test.MSAL.NET.Unit
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
                 Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
 
             app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
-            app.UserTokenCache.tokenCacheDictionary.Remove(new TokenCacheKey(TestConstants.DefaultAuthorityGuestTenant,
-                TestConstants.ScopeForAnotherResource, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId + "more", TestConstants.DefaultDisplayableId,
-                TestConstants.DefaultHomeObjectId,
-                TestConstants.DefaultPolicy));
+            app.UserTokenCache.tokenCacheDictionary.Remove(new TokenCacheKey(TestConstants.AuthorityGuestTenant,
+                TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
+                TestConstants.UniqueId + "more", TestConstants.DisplayableId,
+                TestConstants.HomeObjectId,
+                TestConstants.Policy));
 
-            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.DefaultScope.ToArray());
+            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray());
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
-            Assert.AreEqual(TestConstants.DefaultDisplayableId, result.User.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultUniqueId, result.User.UniqueId);
-            Assert.AreEqual(TestConstants.DefaultScope.AsSingleString(), result.Scope.AsSingleString());
+            Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
+            Assert.AreEqual(TestConstants.UniqueId, result.User.UniqueId);
+            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
@@ -239,7 +239,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSilentForceRefreshTest()
         {
-            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId)
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId)
             {
                 ValidateAuthority = false
             };
@@ -248,7 +248,7 @@ namespace Test.MSAL.NET.Unit
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
                 Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
 
             app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
@@ -257,19 +257,19 @@ namespace Test.MSAL.NET.Unit
             {
                 Method = HttpMethod.Post,
                 ResponseMessage =
-                    MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.DefaultUniqueId,
-                        TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
-                        TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray())
+                    MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.UniqueId,
+                        TestConstants.DisplayableId, TestConstants.HomeObjectId,
+                        TestConstants.Scope.Union(TestConstants.ScopeForAnotherResource).ToArray())
             });
 
-            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.DefaultScope.ToArray(),
-                TestConstants.DefaultUniqueId, app.Authority, null, true);
+            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(),
+                TestConstants.UniqueId, app.Authority, null, true);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
-            Assert.AreEqual(TestConstants.DefaultDisplayableId, result.User.DisplayableId);
-            Assert.AreEqual(TestConstants.DefaultUniqueId, result.User.UniqueId);
+            Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
+            Assert.AreEqual(TestConstants.UniqueId, result.User.UniqueId);
             Assert.AreEqual(
-                TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray().AsSingleString(),
+                TestConstants.Scope.Union(TestConstants.ScopeForAnotherResource).ToArray().AsSingleString(),
                 result.Scope.AsSingleString());
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -279,7 +279,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSilentServiceErrorTest()
         {
-            PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId)
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId)
             {
                 ValidateAuthority = false
             };
@@ -288,7 +288,7 @@ namespace Test.MSAL.NET.Unit
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
                 Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
 
             app.UserTokenCache = TokenCacheHelper.CreateCacheWithItems();
@@ -301,7 +301,7 @@ namespace Test.MSAL.NET.Unit
             {
                 Task<AuthenticationResult> task =
                     app.AcquireTokenSilentAsync(TestConstants.ScopeForAnotherResource.ToArray(),
-                        TestConstants.DefaultUniqueId);
+                        TestConstants.UniqueId);
                 AuthenticationResult result = task.Result;
                 Assert.Fail("AdalSilentTokenAcquisitionException was expected");
             }
@@ -324,14 +324,14 @@ namespace Test.MSAL.NET.Unit
                     [TestCategory("PublicClientApplicationTests")]
                     public void AcquireTokenMoreScopesTest()
                     {
-                        PublicClientApplication app = new PublicClientApplication(TestConstants.DefaultClientId);
+                        PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
                         app.UserTokenCache = TokenCacheTests.CreateCacheWithItems();
-                        string[] scope = TestConstants.DefaultScope.Union(TestConstants.ScopeForAnotherResource).ToArray();
+                        string[] scope = TestConstants.Scope.Union(TestConstants.ScopeForAnotherResource).ToArray();
 
                         MockWebUI webUi
 
                         //ask for scopes that already exist in the cache. Interactive call will ignore the cache lookup.
-                        Task<AuthenticationResult> task = app.AcquireTokenAsync(scope, TestConstants.DefaultDisplayableId);
+                        Task<AuthenticationResult> task = app.AcquireTokenAsync(scope, TestConstants.DisplayableId);
                         task.Wait();
                         AuthenticationResult result = task.Result;
                         Assert.IsNotNull(result);

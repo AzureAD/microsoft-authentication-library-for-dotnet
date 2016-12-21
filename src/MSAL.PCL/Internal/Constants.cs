@@ -54,6 +54,7 @@ namespace Microsoft.Identity.Client.Internal
     {
         public const string MsAppScheme = "ms-app";
         public static readonly Uri SsoPlaceHolderUri = new Uri("https://sso");
+        public const int ExpirationMarginInMinutes = 5;
     }
 
 

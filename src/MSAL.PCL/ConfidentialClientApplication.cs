@@ -44,9 +44,10 @@ namespace Microsoft.Identity.Client
         /// <param name="redirectUri"></param>
         /// <param name="clientCredential"></param>
         /// <param name="userTokenCache"></param>
+        /// <param name="appTokenCache"></param>
         public ConfidentialClientApplication(string clientId, string redirectUri,
-            ClientCredential clientCredential, TokenCache userTokenCache)
-            : this(DefaultAuthority, clientId, redirectUri, clientCredential, userTokenCache)
+            ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
+            : this(DefaultAuthority, clientId, redirectUri, clientCredential, userTokenCache, appTokenCache)
         {
         }
 
@@ -57,12 +58,13 @@ namespace Microsoft.Identity.Client
         /// <param name="redirectUri"></param>
         /// <param name="clientCredential"></param>
         /// <param name="userTokenCache"></param>
+        /// <param name="appTokenCache"></param>
         public ConfidentialClientApplication(string authority, string clientId, string redirectUri,
-            ClientCredential clientCredential, TokenCache userTokenCache) : base(authority, clientId, redirectUri, true)
+            ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache) : base(authority, clientId, redirectUri, true)
         {
             this.ClientCredential = clientCredential;
             this.UserTokenCache = userTokenCache;
-            this.AppTokenCache = TokenCache.DefaultSharedAppTokenCache;
+            this.AppTokenCache = appTokenCache;
         }
 
         /// <summary>
@@ -127,7 +129,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// AcquireTokenForClient
         /// </summary>
-        public async Task<AuthenticationResult> AcquireTokenForClient(string[] scope, string policy)
+        public async Task<AuthenticationResult> AcquireTokenForClientAsync(string[] scope, string policy)
         {
             return
                 await
@@ -139,9 +141,8 @@ namespace Microsoft.Identity.Client
             Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority,this.ValidateAuthority);
             AuthenticationRequestParameters parameters = this.CreateRequestParameters(authority, scope, policy,
                 this.AppTokenCache);
-            parameters.RestrictToSingleUser = false;
             var handler = new ClientCredentialRequest(parameters);
-            return await handler.RunAsync();
+            return await handler.RunAsync().ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(Authority authority,
@@ -150,7 +151,7 @@ namespace Microsoft.Identity.Client
             var requestParams = this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache);
             requestParams.UserAssertion = userAssertion;
             var handler = new OnBehalfOfRequest(requestParams);
-            return await handler.RunAsync();
+            return await handler.RunAsync().ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode,
@@ -162,7 +163,7 @@ namespace Microsoft.Identity.Client
             requestParams.RedirectUri = redirectUri;
             var handler =
                 new AuthorizationCodeRequest(requestParams);
-            return await handler.RunAsync();
+            return await handler.RunAsync().ConfigureAwait(false);
         }
 
         /// <summary>

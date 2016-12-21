@@ -61,20 +61,20 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void NoCacheLookup()
         {
-            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
             TokenCache cache = new TokenCache();
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
-                TestConstants.DefaultPolicy);
+            TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                TestConstants.Scope, TestConstants.ClientId,
+                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
+                TestConstants.Policy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)));
             ex.Result.User = new User
             {
-                DisplayableId = TestConstants.DefaultDisplayableId,
-                UniqueId = TestConstants.DefaultUniqueId,
-                HomeObjectId = TestConstants.DefaultHomeObjectId
+                DisplayableId = TestConstants.DisplayableId,
+                UniqueId = TestConstants.UniqueId,
+                HomeObjectId = TestConstants.HomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -82,7 +82,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             IWebUI ui = Substitute.For<IWebUI>();
             AuthorizationResult ar = new AuthorizationResult(AuthorizationStatus.Success,
-                TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
+                TestConstants.AuthorityHomeTenant + "?code=some-code");
             ui.AcquireAuthorizationAsync(Arg.Any<Uri>(), Arg.Any<Uri>(), Arg.Any<IDictionary<string, string>>(),
                 Arg.Any<CallState>())
                 .Returns(ar);
@@ -91,7 +91,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
                 Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
 
             MockHttpMessageHandler mockHandler = new MockHttpMessageHandler();
@@ -104,10 +104,10 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
-                ClientKey = new ClientKey(TestConstants.DefaultClientId),
+                ClientKey = new ClientKey(TestConstants.ClientId),
                 Policy = "some-policy",
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = TestConstants.DefaultScope,
+                Scope = TestConstants.Scope,
                 TokenCache = cache
             };
 
@@ -116,7 +116,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
-                new PlatformParameters(), TestConstants.DefaultDisplayableId,
+                new PlatformParameters(), TestConstants.DisplayableId,
                 UiOptions.SelectAccount, ui);
             Task<AuthenticationResult> task = request.RunAsync();
             task.Wait();
@@ -125,10 +125,10 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Assert.AreEqual(2, cache.Count);
             Assert.AreEqual(result.Token, "some-access-token");
 
-            //both cache entry authorities are TestConstants.DefaultAuthorityHomeTenant
-            foreach (var item in cache.ReadItems(TestConstants.DefaultClientId))
+            //both cache entry authorities are TestConstants.AuthorityHomeTenant
+            foreach (var item in cache.ReadItems(TestConstants.ClientId))
             {
-                Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, item.Authority);
+                Assert.AreEqual(TestConstants.AuthorityHomeTenant, item.Authority);
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -139,20 +139,20 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 [TestCategory("InteractiveRequestTests")]
                 public void SsoRrefreshTokenInHeaderTest()
                 {
-                    authority authority = new authority(TestConstants.DefaultAuthorityHomeTenant, false, Guid.NewGuid());
+                    authority authority = new authority(TestConstants.AuthorityHomeTenant, false, Guid.NewGuid());
                     TokenCache cache = new TokenCache();
-                    TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                        TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                        TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
-                        TestConstants.DefaultPolicy);
+                    TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                        TestConstants.Scope, TestConstants.ClientId,
+                        TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
+                        TestConstants.Policy);
                     AuthenticationResultEx ex = new AuthenticationResultEx();
                     ex.Result = new AuthenticationResult("Bearer", key.ToString(),
                         new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)));
                     ex.Result.User = new User
                     {
-                        DisplayableId = TestConstants.DefaultDisplayableId,
-                        UniqueId = TestConstants.DefaultUniqueId,
-                        HomeObjectId = TestConstants.DefaultHomeObjectId
+                        DisplayableId = TestConstants.DisplayableId,
+                        UniqueId = TestConstants.UniqueId,
+                        HomeObjectId = TestConstants.HomeObjectId
                     };
                     ex.Result.FamilyId = "1";
                     ex.RefreshToken = "someRT";
@@ -162,15 +162,15 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     webUi.HeadersToValidate = new Dictionary<string, string>();
                     webUi.HeadersToValidate["x-ms-sso-RefreshToken"] = "someRT";
                     webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
-                        TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
+                        TestConstants.AuthorityHomeTenant + "?code=some-code");
 
                     AuthenticationRequestParameters data = new AuthenticationRequestParameters()
                     {
                         authority = authority,
-                        ClientKey = new ClientKey(TestConstants.DefaultClientId),
-                        Policy = TestConstants.DefaultPolicy,
+                        ClientKey = new ClientKey(TestConstants.ClientId),
+                        Policy = TestConstants.Policy,
                         RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                        Scope = TestConstants.DefaultScope,
+                        Scope = TestConstants.Scope,
                         TokenCache = cache
                     };
 
@@ -187,20 +187,20 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         public void ActAsCurrentUserNoSsoHeaderForLoginHintOnlyTest()
         {
             //this test validates that no SSO header is added when developer passes only login hint and UiOption.ActAsCurrentUser
-            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
             TokenCache cache = new TokenCache();
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultScope, TestConstants.DefaultClientId,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId, TestConstants.DefaultHomeObjectId,
-                TestConstants.DefaultPolicy);
+            TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                TestConstants.Scope, TestConstants.ClientId,
+                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
+                TestConstants.Policy);
             AuthenticationResultEx ex = new AuthenticationResultEx();
             ex.Result = new AuthenticationResult("Bearer", key.ToString(),
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)));
             ex.Result.User = new User
             {
-                DisplayableId = TestConstants.DefaultDisplayableId,
-                UniqueId = TestConstants.DefaultUniqueId,
-                HomeObjectId = TestConstants.DefaultHomeObjectId
+                DisplayableId = TestConstants.DisplayableId,
+                UniqueId = TestConstants.UniqueId,
+                HomeObjectId = TestConstants.HomeObjectId
             };
             ex.Result.FamilyId = "1";
             ex.RefreshToken = "someRT";
@@ -208,15 +208,15 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             MockWebUI webUi = new MockWebUI();
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.Success,
-                TestConstants.DefaultAuthorityHomeTenant + "?code=some-code");
+                TestConstants.AuthorityHomeTenant + "?code=some-code");
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
-                ClientKey = new ClientKey(TestConstants.DefaultClientId),
-                Policy = TestConstants.DefaultPolicy,
+                ClientKey = new ClientKey(TestConstants.ClientId),
+                Policy = TestConstants.Policy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = TestConstants.DefaultScope,
+                Scope = TestConstants.Scope,
                 TokenCache = cache
             };
 
@@ -227,7 +227,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
                 Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
 
             InteractiveRequest request = new InteractiveRequest(parameters,
@@ -245,16 +245,16 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void RedirectUriContainsFragmentErrorTest()
         {
-            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
             try
             {
                 AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authority = authority,
-                    ClientKey = new ClientKey(TestConstants.DefaultClientId),
-                    Policy = TestConstants.DefaultPolicy,
+                    ClientKey = new ClientKey(TestConstants.ClientId),
+                    Policy = TestConstants.Policy,
                     RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                    Scope = TestConstants.DefaultScope,
+                    Scope = TestConstants.Scope,
                     TokenCache = null
                 };
 
@@ -277,7 +277,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void CacheWithMultipleUsersAndRestrictToSingleUserTrueTest()
         {
-            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
             TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
 
             try
@@ -285,10 +285,10 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authority = authority,
-                    ClientKey = new ClientKey(TestConstants.DefaultClientId),
-                    Policy = TestConstants.DefaultPolicy,
+                    ClientKey = new ClientKey(TestConstants.ClientId),
+                    Policy = TestConstants.Policy,
                     RestrictToSingleUser = true,
-                    Scope = TestConstants.DefaultScope,
+                    Scope = TestConstants.Scope,
                     TokenCache = cache
                 };
 
@@ -298,7 +298,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 new InteractiveRequest(parameters,
                     TestConstants.ScopeForAnotherResource.ToArray(),
                     new PlatformParameters(),
-                    new User {UniqueId = TestConstants.DefaultUniqueId}, UiOptions.ForceLogin,
+                    new User {UniqueId = TestConstants.UniqueId}, UiOptions.ForceLogin,
                     new MockWebUI());
                 Assert.Fail("ArgumentException should be thrown here");
             }
@@ -314,26 +314,26 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void VerifyAuthorizationResultTest()
         {
-            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
 
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
                 Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
 
             MockWebUI webUi = new MockWebUI();
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
-                TestConstants.DefaultAuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired);
+                TestConstants.AuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired);
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
-                ClientKey = new ClientKey(TestConstants.DefaultClientId),
-                Policy = TestConstants.DefaultPolicy,
+                ClientKey = new ClientKey(TestConstants.ClientId),
+                Policy = TestConstants.Policy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = TestConstants.DefaultScope,
+                Scope = TestConstants.Scope,
                 TokenCache = null
             };
 
@@ -358,7 +358,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             webUi = new MockWebUI();
             webUi.MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
-                TestConstants.DefaultAuthorityHomeTenant +
+                TestConstants.AuthorityHomeTenant +
                 "?error=invalid_request&error_description=some error description");
 
             request = new InteractiveRequest(parameters,
@@ -385,16 +385,16 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void NullLoginHintForActAsCurrentUserTest()
         {
-            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
             try
             {
                 AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authority = authority,
-                    ClientKey = new ClientKey(TestConstants.DefaultClientId),
-                    Policy = TestConstants.DefaultPolicy,
+                    ClientKey = new ClientKey(TestConstants.ClientId),
+                    Policy = TestConstants.Policy,
                     RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                    Scope = TestConstants.DefaultScope,
+                    Scope = TestConstants.Scope,
                     TokenCache = null
                 };
 
@@ -416,16 +416,16 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void NullUserForActAsCurrentUserTest()
         {
-            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
             try
             {
                 AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authority = authority,
-                    ClientKey = new ClientKey(TestConstants.DefaultClientId),
-                    Policy = TestConstants.DefaultPolicy,
+                    ClientKey = new ClientKey(TestConstants.ClientId),
+                    Policy = TestConstants.Policy,
                     RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                    Scope = TestConstants.DefaultScope,
+                    Scope = TestConstants.Scope,
                     TokenCache = null
                 };
 
@@ -447,15 +447,15 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void DuplicateQueryParameterErrorTest()
         {
-            Authority authority = Authority.CreateAuthority(TestConstants.DefaultAuthorityHomeTenant, false);
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
-                ClientKey = new ClientKey(TestConstants.DefaultClientId),
-                Policy = TestConstants.DefaultPolicy,
+                ClientKey = new ClientKey(TestConstants.ClientId),
+                Policy = TestConstants.Policy,
                 RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = TestConstants.DefaultScope,
+                Scope = TestConstants.Scope,
                 TokenCache = null
             };
 
@@ -466,7 +466,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
                 Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.DefaultAuthorityHomeTenant)
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
 
             InteractiveRequest request = new InteractiveRequest(parameters,

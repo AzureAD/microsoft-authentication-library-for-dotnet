@@ -160,11 +160,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.RedirectUri, AuthenticationRequestParameters.RedirectUri.AbsoluteUri);
         }
 
-        protected override void PostTokenRequest(AuthenticationResultEx resultEx)
-        {
-            base.PostTokenRequest(resultEx);
-        }
-
         private Uri CreateAuthorizationUri()
         {
             IDictionary<string, string> requestParameters = this.CreateAuthorizationRequestParameters();

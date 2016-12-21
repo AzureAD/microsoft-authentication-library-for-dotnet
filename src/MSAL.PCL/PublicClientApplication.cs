@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
         public PublicClientApplication(string authority, string clientId)
             : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
         {
-            this.UserTokenCache = TokenCache.DefaultSharedUserTokenCache;
+            this.UserTokenCache = new TokenCache(clientId);
         }
 
         /// <summary>

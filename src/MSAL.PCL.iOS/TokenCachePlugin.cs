@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client
 {
     internal class TokenCachePlugin : ITokenCachePlugin
     {
-        private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
+        private const string LocalSettingsContainerName = "MicrosoftAuthenticationLibrary";
 
         public void BeforeAccess(TokenCacheNotificationArgs args)
         {
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
                     byte[] dataBytes = match.ValueData.ToArray();
                     if (dataBytes != null)
                     {
-                        args.TokenCache.Deserialize(dataBytes);
+                       // args.TokenCache.Deserialize(dataBytes);
                     }
                 }
             }
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client
 
                     var err = SecKeyChain.Remove(s);
 
-                        s.ValueData = NSData.FromArray(args.TokenCache.Serialize());
+                       // s.ValueData = NSData.FromArray(args.TokenCache.Serialize());
                         err = SecKeyChain.Add(s);
                     
 

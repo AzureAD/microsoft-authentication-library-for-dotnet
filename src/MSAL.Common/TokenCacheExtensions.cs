@@ -40,5 +40,32 @@ namespace Microsoft.Identity.Client
         {
             tokencache.BeforeWrite = beforeWrite;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tokencache"></param>
+        /// <param name="state"></param>
+        public static void Deserialize(this TokenCache tokencache, byte[] state)
+        {
+            lock (tokencache.lockObject)
+            {
+
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tokencache"></param>
+        /// <returns></returns>
+        public static byte[] Serialize(this TokenCache tokencache)
+        {
+            lock (tokencache.lockObject)
+            {
+
+                return null;
+            }
+        }
     }
 }
