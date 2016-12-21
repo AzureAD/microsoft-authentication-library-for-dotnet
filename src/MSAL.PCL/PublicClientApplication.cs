@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Client
             Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authority, scope, null, new Uri(this.RedirectUri), user, options,
+                    this.AcquireTokenCommonAsync(authority, scope, null, user, options,
                         extraQueryParameters, null).ConfigureAwait(false);
         }
 
@@ -161,8 +161,7 @@ namespace Microsoft.Identity.Client
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authorityInstance, scope, additionalScope, new Uri(this.RedirectUri),
-                        user,
+                    this.AcquireTokenCommonAsync(authorityInstance, scope, additionalScope, user,
                         options, extraQueryParameters, policy).ConfigureAwait(false);
         }
 
@@ -222,7 +221,7 @@ namespace Microsoft.Identity.Client
                 this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var requestParams = this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache);
+            var requestParams = this.CreateRequestParameters(authority, scope, policy, null, this.UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
@@ -233,7 +232,7 @@ namespace Microsoft.Identity.Client
         }
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authority authority, string[] scope,
-            string[] additionalScope, Uri redirectUri, User user, UiOptions uiOptions, string extraQueryParameters,
+            string[] additionalScope, User user, UiOptions uiOptions, string extraQueryParameters,
             string policy)
         {
             if (this.PlatformParameters == null)
@@ -241,21 +240,20 @@ namespace Microsoft.Identity.Client
                 this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
-            var requestParams = this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache);
+            var requestParams = this.CreateRequestParameters(authority, scope, policy, user, this.UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
                 new InteractiveRequest(requestParams, additionalScope,
-                    this.PlatformParameters, user, uiOptions,
+                    this.PlatformParameters, uiOptions,
                     this.CreateWebAuthenticationDialog(this.PlatformParameters));
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
         internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope,
-            string policy,
-            TokenCache cache)
+            string policy, User user, TokenCache cache)
         {
-            AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scope, policy, cache);
+            AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scope, policy, user, cache);
             parameters.ClientKey = new ClientKey(this.ClientId);
 
             return parameters;

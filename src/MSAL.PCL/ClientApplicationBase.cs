@@ -210,18 +210,19 @@ namespace Microsoft.Identity.Client
             }
 
             var handler = new SilentRequest(
-                this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache), user,
+                this.CreateRequestParameters(authority, scope, policy, user, this.UserTokenCache),
                 parameters, forceRefresh);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
         internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope,
-            string policy, TokenCache cache)
+            string policy, User user, TokenCache cache)
         {
             return new AuthenticationRequestParameters
             {
                 Authority = authority,
                 TokenCache = cache,
+                User = user,
                 Scope = scope.CreateSetFromArray(),
                 Policy = policy,
                 RedirectUri = new Uri(this.RedirectUri),

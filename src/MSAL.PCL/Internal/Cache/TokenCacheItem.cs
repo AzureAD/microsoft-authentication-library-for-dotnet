@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Cache
@@ -33,15 +35,29 @@ namespace Microsoft.Identity.Client.Internal.Cache
     internal class TokenCacheItem : BaseTokenCacheItem
     {
         /// <summary>
+        /// Gets the Token Type.
+        /// </summary>
+        [DataMember(Name = "token_type")]
+        public string TokenType { get; internal set; }
+
+        /// <summary>
         /// Gets the Access Token requested.
         /// </summary>
+        [DataMember(Name = "token")]
         public string Token { get; internal set; }
 
+        [DataMember(Name = "expires_on")]
         public DateTimeOffset ExpiresOn { get; internal set; }
 
-        /**
-         * Constructor for creating the {@link TokenCacheItem}.
-         */
+        /// <summary>
+        /// Gets the Scope.
+        /// </summary>
+        [DataMember(Name = "scope")]
+        public SortedSet<string> Scope { get; internal set; }
+
+        internal TokenCacheItem()
+        {
+        }
 
         public TokenCacheItem(string authority, string clientId, string policy, TokenResponse response)
             : base(authority, clientId, policy, response)
@@ -56,6 +72,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 Token = response.IdToken;
                 ExpiresOn = response.IdTokenExpiresOn;
             }
+
+            Scope = response.Scope.AsSet();
         }
 
         public override TokenCacheKey GetTokenCacheKey()

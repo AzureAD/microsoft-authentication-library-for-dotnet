@@ -32,8 +32,8 @@ using System.Reflection;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCulture("")]
-[assembly: AssemblyCompany("Microsoft Open Technologies")]
-[assembly: AssemblyCopyright("Copyright (c) Microsoft Open Technologies. All rights reserved.")]
+[assembly: AssemblyCompany("Microsoft Corp.")]
+[assembly: AssemblyCopyright("Copyright (c) Microsoft Corp. All rights reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyVersion("1.0.0.0")]
 

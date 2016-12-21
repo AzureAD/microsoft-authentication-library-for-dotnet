@@ -27,23 +27,20 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class SilentRequest : BaseRequest
     {
-        public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, User user,
-            IPlatformParameters parameters, bool forceRefresh)
+        public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, IPlatformParameters parameters, bool forceRefresh)
             : base(authenticationRequestParameters)
         {
-            if (user == null)
+            if (authenticationRequestParameters.User == null)
             {
-                throw new ArgumentNullException(nameof(user));
+                throw new ArgumentNullException(nameof(authenticationRequestParameters.User));
             }
-
-            this.User = user;
+            
             PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
             this.SupportADFS = false;
             this.ForceRefresh = forceRefresh;

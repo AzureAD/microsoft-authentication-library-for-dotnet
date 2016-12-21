@@ -50,9 +50,9 @@ namespace Microsoft.Identity.Client
         public string GenerateCodeVerifier()
         {
             byte[] buffer = new byte[Constants.CodeVerifierByteSize];
-            using (RNGCryptoServiceProvider RandomSource = new RNGCryptoServiceProvider())
+            using (RNGCryptoServiceProvider randomSource = new RNGCryptoServiceProvider())
             {
-                RandomSource.GetBytes(buffer);
+                randomSource.GetBytes(buffer);
             }
 
             return EncodingHelper.EncodeToBase64Url(buffer);

@@ -30,6 +30,7 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.MSAL.NET.Unit
@@ -232,73 +233,6 @@ namespace Test.MSAL.NET.Unit
 
             otherScope.Clear();
             Assert.IsFalse(key.ScopeEquals(otherScope));
-        }
-
-        [TestMethod]
-        [TestCategory("TokenCacheKeyTests")]
-        public void TestScopeIntersects()
-        {
-            //null scope
-            TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-                null, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
-                TestConstants.Policy);
-
-            //null will intersect with null
-            SortedSet<string> otherScope = null;
-            Assert.IsTrue(key.ScopeIntersects(otherScope));
-
-            //put scope value
-            key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
-                TestConstants.Policy);
-            Assert.IsFalse(key.ScopeIntersects(otherScope));
-
-            otherScope = new SortedSet<string>(TestConstants.Scope.ToArray());
-            Assert.IsTrue(key.ScopeIntersects(otherScope));
-
-            otherScope.Add("anotherscope");
-            Assert.IsTrue(key.ScopeIntersects(otherScope));
-
-            //put values in scope for the key
-            key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-                otherScope, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
-                TestConstants.Policy);
-
-            Assert.IsTrue(key.ScopeIntersects(TestConstants.Scope));
-        }
-
-        [TestMethod]
-        [TestCategory("TokenCacheKeyTests")]
-        public void TestScopeContains()
-        {
-            //null scope
-            TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-                null, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
-                TestConstants.Policy);
-
-            //null will contain null
-            SortedSet<string> otherScope = null;
-            Assert.IsTrue(key.ScopeContains(otherScope));
-            Assert.IsFalse(key.ScopeContains(new SortedSet<string>()));
-
-            //put scope value
-            key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
-                TestConstants.Policy);
-            Assert.IsTrue(key.ScopeContains(otherScope));
-            Assert.IsTrue(key.ScopeContains(new SortedSet<string>()));
-
-            otherScope = new SortedSet<string>(TestConstants.Scope.ToArray());
-            Assert.IsTrue(key.ScopeContains(otherScope));
-
-            // other scope has more
-            otherScope.Add("anotherscope");
-            Assert.IsFalse(key.ScopeContains(otherScope));
         }
     }
 }

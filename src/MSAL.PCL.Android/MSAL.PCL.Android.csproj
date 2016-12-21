@@ -95,8 +95,6 @@
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AuthenticationContinuationHelper.cs" />
-    <Compile Include="AuthenticationRequest.cs" />
-    <Compile Include="BrokerConstants.cs" />
     <Compile Include="BrokerHelper.cs" />
     <Compile Include="AndroidConstants.cs" />
     <Compile Include="BrowserTabActivity.cs" />

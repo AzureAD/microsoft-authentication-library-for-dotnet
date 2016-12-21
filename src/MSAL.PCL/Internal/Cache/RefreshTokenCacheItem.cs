@@ -25,18 +25,25 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Cache
 {
+    [DataContract]
     internal class RefreshTokenCacheItem : BaseTokenCacheItem
     {
+        internal RefreshTokenCacheItem()
+        {
+        }
+
         public RefreshTokenCacheItem(string authority, string clientId, string policy, TokenResponse response) : base(authority, clientId, policy, response)
         {
             RefreshToken = response.RefreshToken;
         }
 
-        public string RefreshToken { get; private set; }
+        [DataMember (Name = "refresh_token")]
+        public string RefreshToken { get; set; }
 
         public override TokenCacheKey GetTokenCacheKey()
         {

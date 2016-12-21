@@ -123,6 +123,46 @@ namespace Microsoft.Identity.Client
             BeforeWrite?.Invoke(args);
         }
 
+        internal int TokenCount
+        {
+            get
+            {
+                lock (lockObject)
+                {
+                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                    {
+                        TokenCache = this,
+                        ClientId = _clientId
+                    };
+
+                    OnBeforeAccess(args);
+                    IList<TokenCacheItem> tokenCacheItems = _tokenCacheAccessor.GetAllAccessTokens();
+                    OnAfterAccess(args);
+                    return tokenCacheItems.Count;
+                }
+            }
+        }
+        
+        internal int RefreshTokenCount
+        {
+            get
+            {
+                lock (lockObject)
+                {
+                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                    {
+                        TokenCache = this,
+                        ClientId = _clientId
+                    };
+
+                    OnBeforeAccess(args);
+                    IList<RefreshTokenCacheItem> tokenCacheItems = _tokenCacheAccessor.GetAllRefreshTokens();
+                    OnAfterAccess(args);
+                    return tokenCacheItems.Count;
+                }
+            };
+        }
+
         internal TokenCacheItem SaveAccessToken(string authority, string clientId, string policy, TokenResponse response)
         {
             lock (lockObject)
@@ -170,17 +210,17 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal TokenCacheItem FindAccessToken(AuthenticationRequestParameters requestParam, User user)
+        internal TokenCacheItem FindAccessToken(AuthenticationRequestParameters requestParam)
         {
             lock (lockObject)
             {
                 TokenCacheKey key = new TokenCacheKey(requestParam.Authority.CanonicalAuthority,
-                    requestParam.Scope, requestParam.ClientKey.ClientId, user, requestParam.Policy);
+                    requestParam.Scope, _clientId, requestParam.User, requestParam.Policy);
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,
                     ClientId = _clientId,
-                    User = user
+                    User = requestParam.User
                 };
 
                 OnBeforeAccess(args);
@@ -221,17 +261,17 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal RefreshTokenCacheItem FindRefreshToken(AuthenticationRequestParameters requestParam, User user)
+        internal RefreshTokenCacheItem FindRefreshToken(AuthenticationRequestParameters requestParam)
         {
             lock (lockObject)
             {
-                TokenCacheKey key = new TokenCacheKey(null, null, requestParam.ClientKey.ClientId, user,
+                TokenCacheKey key = new TokenCacheKey(null, null, requestParam.ClientKey.ClientId, requestParam.User,
                     requestParam.Policy);
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,
                     ClientId = _clientId,
-                    User = user
+                    User = requestParam.User
                 };
 
                 OnBeforeAccess(args);

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Cache
@@ -55,43 +56,47 @@ namespace Microsoft.Identity.Client.Internal.Cache
             this.Authority = authority;
             this.ClientId = clientId;
             this.Policy = policy;
-            Scope = response.Scope.AsSet();
             
+        }
+
+        internal BaseTokenCacheItem()
+        {
         }
 
         /// <summary>
         /// Gets the Authority.
         /// </summary>
-        public string Authority { get; }
+        [DataMember(Name = "authority")]
+        public string Authority { get; internal set; }
 
         /// <summary>
         /// Gets the ClientId.
         /// </summary>
+        [DataMember(Name = "client_id")]
         public string ClientId { get; internal set; }
-        
+
         /// <summary>
         /// Gets the IdentityProviderName.
         /// </summary>
+        [DataMember(Name = "identity_provider")]
         public string IdentityProvider { get; internal set; }
-
-        /// <summary>
-        /// Gets the Scope.
-        /// </summary>
-        public SortedSet<string> Scope { get; internal set; }
 
         /// <summary>
         /// Gets the Policy.
         /// </summary>
+        [DataMember(Name = "policy")]
         public string Policy { get; internal set; }
 
         /// <summary>
         /// Gets the TenantId.
         /// </summary>
+        [DataMember(Name = "tid")]
         public string TenantId { get; internal set; }
 
         /// <summary>
         /// Gets the user's unique Id.
         /// </summary>
+        [DataMember(Name = "unique_id")]
         public string UniqueId { get { return _user?.UniqueId; } }
 
         /// <summary>
@@ -100,15 +105,17 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public string DisplayableId { get { return _user?.DisplayableId; } }
 
         public string HomeObjectId { get { return _user?.HomeObjectId; } }
-
-
+        
+        [DataMember(Name = "id_token")]
         public string RawIdToken { get; }
 
         /// <summary>
         /// Gets the entire Profile Info if returned by the service or null if no Id Token is returned.
         /// </summary>
+        [DataMember(Name = "user")]
         public User User { get; internal set; }
 
+        [DataMember(Name = "user_assertion_hash")]
         public string UserAssertionHash { get; internal set; }
 
         public abstract TokenCacheKey GetTokenCacheKey();

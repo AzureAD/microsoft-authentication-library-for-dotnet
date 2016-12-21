@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client
 {
     internal class TokenCachePlugin : ITokenCachePlugin
     {
-        private readonly IDictionary<string, string> _tokenCacheDictionary =
+        internal readonly IDictionary<string, string> TokenCacheDictionary =
             new ConcurrentDictionary<string, string>();
 
         public void BeforeAccess(TokenCacheNotificationArgs args)
@@ -52,42 +52,42 @@ namespace Microsoft.Identity.Client
         {
             return
                 new ReadOnlyCollection<string>(
-                    _tokenCacheDictionary.Values.Where(
-                        v => (JsonHelper.DeserializeFromJson<BaseTokenCacheItem>(v).Scope.Count > 0)).ToList());
+                    TokenCacheDictionary.Values.Where(
+                        v => (JsonHelper.DeserializeFromJson<TokenCacheItem>(v).Scope.Count > 0)).ToList());
         }
 
         public ICollection<string> AllRefreshTokens()
         {
             return
                 new ReadOnlyCollection<string>(
-                    _tokenCacheDictionary.Values.Where(
-                        v => (JsonHelper.DeserializeFromJson<BaseTokenCacheItem>(v).Scope.Count == 0)).ToList());
+                    TokenCacheDictionary.Values.Where(
+                        v => !string.IsNullOrEmpty(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(v).RefreshToken)).ToList());
         }
 
         public void SaveToken(TokenCacheItem tokenItem)
         {
-            _tokenCacheDictionary[tokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(tokenItem);
+            TokenCacheDictionary[tokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(tokenItem);
         }
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
         {
-            _tokenCacheDictionary[refreshTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(refreshTokenItem);
+            TokenCacheDictionary[refreshTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(refreshTokenItem);
         }
 
         public void DeleteToken(TokenCacheKey key)
         {
-            _tokenCacheDictionary.Remove(key.ToString());
+            TokenCacheDictionary.Remove(key.ToString());
         }
 
         public void DeleteRefreshToken(TokenCacheKey key)
         {
-            _tokenCacheDictionary.Remove(key.ToString());
+            TokenCacheDictionary.Remove(key.ToString());
         }
 
         public void DeleteAll(string clientId)
         {
-            _tokenCacheDictionary.Clear();
-            _tokenCacheDictionary.Clear();
+            TokenCacheDictionary.Clear();
+            TokenCacheDictionary.Clear();
         }
     }
 }

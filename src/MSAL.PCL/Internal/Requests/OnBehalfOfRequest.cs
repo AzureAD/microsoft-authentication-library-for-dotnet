@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.UserAssertion));
             }
 
-            User = new User {DisplayableId = authenticationRequestParameters.UserAssertion.UserName};
+            authenticationRequestParameters.User = new User {DisplayableId = authenticationRequestParameters.UserAssertion.UserName};
             SupportADFS = false;
         }
 

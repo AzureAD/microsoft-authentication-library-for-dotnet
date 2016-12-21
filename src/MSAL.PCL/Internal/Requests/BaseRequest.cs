@@ -49,8 +49,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected bool SupportADFS { get; set; }
 
-        protected User User { get; set; }
-
         protected bool LoadFromCache { get; set; }
 
         protected bool ForceRefresh { get; set; }
@@ -134,16 +132,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     //force refresh is not 
                     if (!ForceRefresh)
                     {
-                        accessTokenItem = TokenCache.FindAccessToken(AuthenticationRequestParameters,
-                            User);
+                        accessTokenItem = TokenCache.FindAccessToken(AuthenticationRequestParameters);
                     }
 
                     // no matching access token in the cache
                     if (accessTokenItem == null)
                     {
                         RefreshTokenCacheItem refreshTokenItem =
-                            TokenCache.FindRefreshToken(AuthenticationRequestParameters,
-                                User);
+                            TokenCache.FindRefreshToken(AuthenticationRequestParameters);
 
                         if (refreshTokenItem != null)
                         {

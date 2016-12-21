@@ -46,8 +46,6 @@ namespace Test.MSAL.NET.Unit.HttpTests
         public void TestInitialize()
         {
             Authority._validatedAuthorities.Clear();
-            TokenCache.DefaultSharedAppTokenCache = new TokenCache();
-            TokenCache.DefaultSharedUserTokenCache = new TokenCache();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
         }

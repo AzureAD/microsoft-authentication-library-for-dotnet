@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class InteractiveRequest : BaseRequest
     {
-        private readonly HashSet<string> _additionalScope;
+        private readonly SortedSet<string> _additionalScope;
         private readonly IPlatformParameters _authorizationParameters;
         private readonly UiOptions? _uiOptions;
         private readonly IWebUI _webUi;
@@ -45,13 +45,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private string codeVerifier;
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            string[] additionalScope, IPlatformParameters parameters, User user,
+            string[] additionalScope, IPlatformParameters parameters,
             UiOptions uiOptions, IWebUI webUI)
             : this(
-                authenticationRequestParameters, additionalScope, parameters, user?.DisplayableId,
+                authenticationRequestParameters, additionalScope, parameters, authenticationRequestParameters.User?.DisplayableId,
                 uiOptions, webUI)
         {
-            this.User = user;
         }
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
@@ -66,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, "redirectUri");
             }
 
-            _additionalScope = new HashSet<string>();
+            _additionalScope = new SortedSet<string>();
             if (!MsalStringHelper.IsNullOrEmpty(additionalScope))
             {
                 this._additionalScope = additionalScope.CreateSetFromArray();
@@ -133,11 +132,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.CodeVerifier, codeVerifier);
         }
 
-        protected override void PostTokenRequest(AuthenticationResultEx resultEx)
-        {
-            base.PostTokenRequest(resultEx);
-        }
-
         private Uri CreateAuthorizationUri(bool addVerifier = false)
         {
             IDictionary<string, string> requestParameters = this.CreateAuthorizationRequestParameters();
@@ -180,9 +174,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private Dictionary<string, string> CreateAuthorizationRequestParameters()
         {
-            HashSet<string> unionScope =
+            SortedSet<string> unionScope =
                 this.GetDecoratedScope(
-                    new HashSet<string>(AuthenticationRequestParameters.Scope.Union(this._additionalScope)));
+                    new SortedSet<string>(AuthenticationRequestParameters.Scope.Union(this._additionalScope)));
 
             Dictionary<string, string> authorizationRequestParameters =
                 new Dictionary<string, string>(AuthenticationRequestParameters.ClientKey.ToParameters());

@@ -31,6 +31,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.Http;
 using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -42,14 +43,21 @@ namespace Test.MSAL.NET.Unit.RequestsTests
     [TestClass]
     public class SilentRequestTests
     {
+        private TokenCachePlugin _tokenCachePlugin;
+
         [TestInitialize]
         public void TestInitialize()
         {
+            _tokenCachePlugin = (TokenCachePlugin)PlatformPlugin.TokenCachePlugin;
             Authority._validatedAuthorities.Clear();
-            TokenCache.DefaultSharedAppTokenCache = new TokenCache();
-            TokenCache.DefaultSharedUserTokenCache = new TokenCache();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            _tokenCachePlugin.TokenCacheDictionary.Clear();
         }
 
         [TestMethod]
@@ -57,144 +65,40 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         public void ConstructorTests()
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = new TokenCache();
+            TokenCache cache = new TokenCache(TestConstants.ClientId);
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
                 ClientKey = new ClientKey(TestConstants.ClientId),
                 Policy = TestConstants.Policy,
-                RestrictToSingleUser = true,
                 Scope = TestConstants.Scope,
                 TokenCache = cache
             };
 
-            SilentRequest request = new SilentRequest(parameters, (string) null,
+            parameters.User = null;
+            SilentRequest request = new SilentRequest(parameters,
                 new PlatformParameters(), false);
             Assert.IsNotNull(request);
 
-            request = new SilentRequest(parameters, (User) null, new PlatformParameters(), false);
+            request = new SilentRequest(parameters, new PlatformParameters(), false);
             Assert.IsNotNull(request);
 
-            request = new SilentRequest(parameters, TestConstants.DisplayableId, new PlatformParameters(), false);
+            parameters.User = new User()
+            {
+                DisplayableId = TestConstants.DisplayableId
+            };
+            request = new SilentRequest(parameters, new PlatformParameters(), false);
             Assert.IsNotNull(request);
 
-            request = new SilentRequest(parameters, TestConstants.UniqueId, new PlatformParameters(), false);
+            parameters.User = new User()
+            {
+                UniqueId = TestConstants.UniqueId
+            };
+            request = new SilentRequest(parameters, new PlatformParameters(), false);
             Assert.IsNotNull(request);
 
-            request = new SilentRequest(parameters, TestConstants.User, new PlatformParameters(), false);
+            request = new SilentRequest(parameters, new PlatformParameters(), false);
             Assert.IsNotNull(request);
-        }
-
-
-        [TestMethod]
-        [TestCategory("SilentRequestTests")]
-        public void MapToIdentifierNullInputTest()
-        {
-            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = new TokenCache();
-            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
-            {
-                Authority = authority,
-                ClientKey = new ClientKey(TestConstants.ClientId),
-                Policy = TestConstants.Policy,
-                RestrictToSingleUser = true,
-                Scope = TestConstants.Scope,
-                TokenCache = cache
-            };
-
-            SilentRequest request = new SilentRequest(parameters, (string)null,
-                new PlatformParameters(), false);
-            User user = request.MapIdentifierToUser(null);
-            Assert.IsNull(user);
-        }
-
-        [TestMethod]
-        [TestCategory("SilentRequestTests")]
-        public void MapToIdentifierNoItemFoundTest()
-        {
-            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = new TokenCache();
-            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
-            {
-                Authority = authority,
-                ClientKey = new ClientKey(TestConstants.ClientId),
-                Policy = TestConstants.Policy,
-                RestrictToSingleUser = true,
-                Scope = TestConstants.Scope,
-                TokenCache = cache
-            };
-
-            SilentRequest request = new SilentRequest(parameters, (string) null,
-                new PlatformParameters(), false);
-            User user = request.MapIdentifierToUser(TestConstants.UniqueId);
-            Assert.IsNull(user);
-        }
-
-        [TestMethod]
-        [TestCategory("SilentRequestTests")]
-        public void MapToIdentifierItemFoundTest()
-        {
-            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
-            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
-            {
-                Authority = authority,
-                ClientKey = new ClientKey(TestConstants.ClientId),
-                Policy = TestConstants.Policy,
-                RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = TestConstants.Scope,
-                TokenCache = cache
-            };
-
-            SilentRequest request = new SilentRequest(parameters, (string)null,
-                new PlatformParameters(), false);
-            User user = request.MapIdentifierToUser(TestConstants.UniqueId);
-            Assert.IsNotNull(user);
-            Assert.AreEqual(TestConstants.UniqueId, user.UniqueId);
-        }
-
-        [TestMethod]
-        [TestCategory("SilentRequestTests")]
-        public void MapToIdentifierMultipleMatchingEntriesTest()
-        {
-            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
-
-            TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
-                TestConstants.Policy);
-            AuthenticationResultEx ex = new AuthenticationResultEx();
-            ex.Result = new AuthenticationResult("Bearer", key.ToString(),
-                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)));
-            ex.Result.User = new User
-            {
-                DisplayableId = TestConstants.DisplayableId,
-                UniqueId = TestConstants.UniqueId,
-                HomeObjectId = TestConstants.HomeObjectId
-            };
-            ex.Result.ScopeSet = TestConstants.Scope;
-
-            ex.Result.FamilyId = "1";
-            ex.RefreshToken = "someRT";
-            cache.tokenCacheDictionary[key] = ex;
-
-
-            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
-            {
-                Authority = authority,
-                ClientKey = new ClientKey(TestConstants.ClientId),
-                Policy = TestConstants.Policy,
-                RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
-                Scope = new[] { "something" }.CreateSetFromArray(),
-                TokenCache = cache
-            };
-
-            SilentRequest request = new SilentRequest(parameters, (string) null,
-                new PlatformParameters(), false);
-            User user = request.MapIdentifierToUser(TestConstants.UniqueId);
-            Assert.IsNotNull(user);
-            Assert.AreEqual(TestConstants.UniqueId, user.UniqueId);
         }
 
         [TestMethod]
@@ -202,14 +106,14 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         public void ExpiredTokenRefreshFlowTest()
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
+            TokenCache cache = new TokenCache(TestConstants.ClientId);
+            TokenCacheHelper.PopulateCache(_tokenCachePlugin);
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
                 ClientKey = new ClientKey(TestConstants.ClientId),
                 Policy = TestConstants.Policy,
-                RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache
             };
@@ -227,8 +131,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
             });
 
-            SilentRequest request = new SilentRequest(parameters, (string)null,
-                new PlatformParameters(), false);
+            SilentRequest request = new SilentRequest(parameters, new PlatformParameters(), false);
             Task<AuthenticationResult> task = request.RunAsync();
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
@@ -244,7 +147,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         public void SilentRefreshFailedNoCacheItemFoundTest()
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = new TokenCache();
+            TokenCache cache = new TokenCache(TestConstants.ClientId);
 
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
@@ -258,15 +161,13 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Authority = authority,
                 ClientKey = new ClientKey(TestConstants.ClientId),
                 Policy = TestConstants.Policy,
-                RestrictToSingleUser = TestConstants.DefaultRestrictToSingleUser,
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache
             };
             
             try
             {
-                SilentRequest request = new SilentRequest(parameters, (string) null,
-                    new PlatformParameters(), false);
+                SilentRequest request = new SilentRequest(parameters, new PlatformParameters(), false);
                 Task<AuthenticationResult> task = request.RunAsync();
                 var authenticationResult = task.Result;
                 Assert.Fail("MsalSilentTokenAcquisitionException should be thrown here");

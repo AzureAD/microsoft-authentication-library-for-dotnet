@@ -32,7 +32,6 @@ using Windows.Storage;
 using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
-using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {

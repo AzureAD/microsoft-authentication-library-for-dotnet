@@ -36,6 +36,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.MSAL.NET.Unit.Mocks;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.Http;
 using Microsoft.Identity.Client.Internal.Instance;
 
@@ -54,18 +55,17 @@ namespace Test.MSAL.NET.Unit
         public void TestInitialize()
         {
             Authority._validatedAuthorities.Clear();
-            TokenCache.DefaultSharedAppTokenCache = new TokenCache();
-            TokenCache.DefaultSharedUserTokenCache = new TokenCache();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
         }
-        
+
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
         public void ConstructorsTest()
         {
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
-                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret), new TokenCache());
+                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
+                new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId));
             Assert.IsNotNull(app);
             Assert.IsNotNull(app.UserTokenCache);
             Assert.IsNotNull(app.AppTokenCache);
@@ -82,7 +82,8 @@ namespace Test.MSAL.NET.Unit
 
             app = new ConfidentialClientApplication(TestConstants.AuthorityGuestTenant,
                 TestConstants.ClientId,
-                TestConstants.RedirectUri, new ClientCredential("secret"), new TokenCache());
+                TestConstants.RedirectUri, new ClientCredential("secret"), new TokenCache(TestConstants.ClientId),
+                new TokenCache(TestConstants.ClientId));
             Assert.AreEqual(TestConstants.AuthorityGuestTenant, app.Authority);
         }
 
@@ -91,13 +92,14 @@ namespace Test.MSAL.NET.Unit
         public void ConfidentialClientUsingSecretTest()
         {
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
-                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret), new TokenCache())
+                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
+                new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId))
             {
                 ValidateAuthority = false
             };
 
-            app.AppTokenCache = new TokenCache();
-            app.UserTokenCache = new TokenCache();
+            app.AppTokenCache = new TokenCache(TestConstants.ClientId);
+            app.UserTokenCache = new TokenCache(TestConstants.ClientId);
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
@@ -111,23 +113,20 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
             });
 
-            Task<AuthenticationResult> task = app.AcquireTokenForClient(TestConstants.Scope.ToArray(),
+            Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray(),
                 TestConstants.Policy);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull("header.payload.signature", result.Token);
-            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.ScopeSet.AsSingleString());
+            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
 
             //make sure user token cache is empty
-            Assert.AreEqual(0, app.UserTokenCache.Count);
+            Assert.AreEqual(0, app.UserTokenCache.TokenCount);
+            Assert.AreEqual(0, app.UserTokenCache.RefreshTokenCount);
 
             //check app token cache count to be 1
-            Assert.AreEqual(1, app.AppTokenCache.Count);
-            //make sure refresh token is null
-            foreach (var value in app.AppTokenCache.tokenCacheDictionary.Values)
-            {
-                Assert.IsNull(value.RefreshToken);
-            }
+            Assert.AreEqual(1, app.AppTokenCache.TokenCount);
+            Assert.AreEqual(0, app.AppTokenCache.RefreshTokenCount); //no refresh tokens are returned
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
@@ -136,14 +135,16 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("ConfidentialClientApplicationTests")]
         public void ConfidentialClientUsingCertificateTest()
         {
-            ClientCredential cc = new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid_cert.pfx", "password")));
+            ClientCredential cc =
+                new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid_cert.pfx", "password")));
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
-                TestConstants.RedirectUri, cc, new TokenCache())
+                TestConstants.RedirectUri, cc, new TokenCache(TestConstants.ClientId),
+                new TokenCache(TestConstants.ClientId))
             {
                 ValidateAuthority = false
             };
 
-            app.AppTokenCache = new TokenCache();
+            app.AppTokenCache = new TokenCache(TestConstants.ClientId);
 
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
@@ -164,23 +165,20 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
             });
 
-            Task<AuthenticationResult> task = app.AcquireTokenForClient(TestConstants.Scope.ToArray(),
+            Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray(),
                 TestConstants.Policy);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull("header.payload.signature", result.Token);
-            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.ScopeSet.AsSingleString());
+            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
 
             //make sure user token cache is empty
-            Assert.AreEqual(0, app.UserTokenCache.Count);
+            Assert.AreEqual(0, app.UserTokenCache.TokenCount);
+            Assert.AreEqual(0, app.UserTokenCache.RefreshTokenCount);
 
             //check app token cache count to be 1
-            Assert.AreEqual(1, app.AppTokenCache.Count);
-            //make sure refresh token is null
-            foreach (var value in app.AppTokenCache.tokenCacheDictionary.Values)
-            {
-                Assert.IsNull(value.RefreshToken);
-            }
+            Assert.AreEqual(1, app.AppTokenCache.TokenCount);
+            Assert.AreEqual(0, app.AppTokenCache.RefreshTokenCount); //no refresh tokens are returned
 
             //assert client credential
             Assert.IsNotNull(cc.ClientAssertion);
@@ -190,7 +188,7 @@ namespace Test.MSAL.NET.Unit
             string cachedAssertion = cc.ClientAssertion.Assertion;
             long cacheValidTo = cc.ValidTo;
 
-            task = app.AcquireTokenForClient(TestConstants.ScopeForAnotherResource.ToArray(),
+            task = app.AcquireTokenForClientAsync(TestConstants.ScopeForAnotherResource.ToArray(),
                 TestConstants.Policy);
             result = task.Result;
             Assert.IsNotNull(result);
@@ -202,140 +200,11 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
-        public void OBOUserAssertionHashNotFoundTest()
-        {
-            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
-            string someAssertion = "some-assertion-passed-by-developer";
-            TokenCacheKey key = cache.tokenCacheDictionary.Keys.First();
-
-            //update cache entry with hash of an assertion that will not match
-            cache.tokenCacheDictionary[key].UserAssertionHash =
-                new CryptographyHelper().CreateSha256Hash(someAssertion + "-but-not-in-cache");
-
-            ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
-                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret), new TokenCache())
-            {
-                ValidateAuthority = false
-            };
-
-            //add mock response for tenant endpoint discovery
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
-            {
-                Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(app.Authority)
-            });
-
-            app.UserTokenCache = cache;
-
-            string[] scope = {"mail.read"};
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage =
-                    MockHelpers.CreateSuccessTokenResponseMessage("unique_id_3", "displayable@id3.com", "root_id_3",
-                        scope)
-            });
-
-            UserAssertion assertion = new UserAssertion(someAssertion, AssertionType);
-            Task<AuthenticationResult> task = app.AcquireTokenOnBehalfOfAsync(key.Scope.AsArray(),
-                assertion, key.Authority, TestConstants.Policy);
-            AuthenticationResult result = task.Result;
-            Assert.IsNotNull(result);
-            Assert.AreEqual("unique_id_3", result.User.UniqueId);
-            Assert.AreEqual("displayable@id3.com", result.User.DisplayableId);
-
-            //check for new assertion Hash
-            AuthenticationResultEx resultEx =
-                cache.tokenCacheDictionary.Values.First(r => r.Result.User.UniqueId.Equals("unique_id_3"));
-            Assert.AreEqual(HashAccessToken, resultEx.UserAssertionHash);
-
-            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
-        }
-
-        [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
-        public void OBOUserAssertionHashFoundTest()
-        {
-            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
-            string someAssertion = "some-assertion-passed-by-developer";
-            TokenCacheKey key = cache.tokenCacheDictionary.Keys.First();
-
-            //update cache entry with hash of an assertion that will not match
-            cache.tokenCacheDictionary[key].UserAssertionHash =
-                new CryptographyHelper().CreateSha256Hash(someAssertion);
-
-            ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
-                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret), new TokenCache())
-            {
-                ValidateAuthority = false
-            };
-
-            //add mock response for tenant endpoint discovery
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
-            {
-                Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(app.Authority)
-            });
-
-            app.UserTokenCache = cache;
-
-            UserAssertion assertion = new UserAssertion(someAssertion, AssertionType);
-            Task<AuthenticationResult> task = app.AcquireTokenOnBehalfOfAsync(key.Scope.AsArray(),
-                assertion, key.Authority, TestConstants.Policy);
-            AuthenticationResult result = task.Result;
-            Assert.IsNotNull(result);
-            Assert.AreEqual(key.UniqueId, result.User.UniqueId);
-            Assert.AreEqual(key.DisplayableId, result.User.DisplayableId);
-            Assert.AreEqual(HashAccessToken,
-                cache.tokenCacheDictionary[key].UserAssertionHash);
-
-            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
-        }
-
-        [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
-        public void OBOUserAssertionHashUsernamePassedTest()
-        {
-            TokenCache cache = TokenCacheHelper.CreateCacheWithItems();
-            string someAssertion = "some-assertion-passed-by-developer";
-            TokenCacheKey key = cache.tokenCacheDictionary.Keys.First();
-
-            //update cache entry with hash of an assertion that will not match
-            cache.tokenCacheDictionary[key].UserAssertionHash =
-                new CryptographyHelper().CreateSha256Hash(someAssertion);
-
-            ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
-                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret), new TokenCache())
-            {
-                ValidateAuthority = false
-            };
-
-            //add mock response for tenant endpoint discovery
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
-            {
-                Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(app.Authority)
-            });
-
-            app.UserTokenCache = cache;
-            
-            UserAssertion assertion = new UserAssertion(someAssertion, AssertionType, key.DisplayableId);
-            Task<AuthenticationResult> task = app.AcquireTokenOnBehalfOfAsync(key.Scope.AsArray(),
-                assertion, key.Authority, TestConstants.Policy);
-            AuthenticationResult result = task.Result;
-            Assert.IsNotNull(result);
-            Assert.AreEqual(key.UniqueId, result.User.UniqueId);
-            Assert.AreEqual(key.DisplayableId, result.User.DisplayableId);
-            Assert.AreEqual(HashAccessToken,
-                cache.tokenCacheDictionary[key].UserAssertionHash);
-        }
-
-        [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public void GetAuthorizationRequestUrlNoRedirectUriTest()
         {
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
-                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret), new TokenCache())
+                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
+                new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId))
             {
                 ValidateAuthority = false
             };
@@ -347,10 +216,11 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(app.Authority)
             });
 
-            Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(), TestConstants.DisplayableId, null);
+            Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(),
+                TestConstants.DisplayableId, null);
             Uri uri = task.Result;
             Assert.IsNotNull(uri);
-            Dictionary<string, string> qp = EncodingHelper.ParseKeyValueList(uri.Query.Substring(1),'&', true, null);
+            Dictionary<string, string> qp = EncodingHelper.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
             Assert.IsNotNull(qp);
             Assert.AreEqual(10, qp.Count);
             Assert.IsTrue(qp.ContainsKey("client-request-id"));
@@ -366,12 +236,14 @@ namespace Test.MSAL.NET.Unit
 
 
             app = new ConfidentialClientApplication(TestConstants.ClientId,
-                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret), new TokenCache())
+                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
+                new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId))
             {
                 ValidateAuthority = false
             };
 
-            task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(), TestConstants.DisplayableId, "extra=qp&prompt=none");
+            task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(), TestConstants.DisplayableId,
+                "extra=qp&prompt=none");
             uri = task.Result;
             Assert.IsNotNull(uri);
             Assert.IsTrue(uri.AbsoluteUri.StartsWith(app.Authority, StringComparison.CurrentCulture));
@@ -399,10 +271,9 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("ConfidentialClientApplicationTests")]
         public void GetAuthorizationRequestUrlDuplicateParamsTest()
         {
-
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
                 TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
-                new TokenCache())
+                new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId))
             {
                 ValidateAuthority = false
             };
@@ -424,9 +295,9 @@ namespace Test.MSAL.NET.Unit
             catch (Exception exc)
             {
                 Assert.IsTrue(exc.InnerException is MsalException);
-                Assert.AreEqual("duplicate_query_parameter", ((MsalException)exc.InnerException).ErrorCode);
-                Assert.AreEqual("Duplicate query parameter 'login_hint' in extraQueryParameters", ((MsalException)exc.InnerException).Message);
-
+                Assert.AreEqual("duplicate_query_parameter", ((MsalException) exc.InnerException).ErrorCode);
+                Assert.AreEqual("Duplicate query parameter 'login_hint' in extraQueryParameters",
+                    ((MsalException) exc.InnerException).Message);
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -441,7 +312,7 @@ namespace Test.MSAL.NET.Unit
                 new ConfidentialClientApplication(TestConstants.AuthorityGuestTenant,
                     TestConstants.ClientId,
                     TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
-                    new TokenCache())
+                    new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId))
                 {ValidateAuthority = false};
 
             //add mock response for tenant endpoint discovery

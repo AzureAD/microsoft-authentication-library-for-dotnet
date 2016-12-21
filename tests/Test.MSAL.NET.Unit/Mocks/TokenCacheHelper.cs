@@ -32,6 +32,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 
 namespace Test.MSAL.NET.Unit.Mocks
 {
@@ -39,54 +40,62 @@ namespace Test.MSAL.NET.Unit.Mocks
     {
         public static long ValidExpiresIn = 28800;
         
-        public static TokenCache CreateCacheWithItems()
+        public static void PopulateCache(TokenCachePlugin cachePlugin)
         {
-            TokenCache cache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
                 TestConstants.Scope, TestConstants.ClientId,
                 TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
                 TestConstants.Policy);
-            AuthenticationResultEx ex = new AuthenticationResultEx();
-            ex.Result = new AuthenticationResult("Bearer", key.ToString(),
-                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
-            ex.Result.User = new User
+            TokenCacheItem item = new TokenCacheItem()
             {
-                DisplayableId = TestConstants.DisplayableId,
-                UniqueId = TestConstants.UniqueId,
-                HomeObjectId = TestConstants.HomeObjectId
+                Token = key.ToString(),
+                TokenType = "Bearer",
+                ExpiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                User = new User
+                {
+                    DisplayableId = TestConstants.DisplayableId,
+                    UniqueId = TestConstants.UniqueId,
+                    HomeObjectId = TestConstants.HomeObjectId
+                },
+                Scope = TestConstants.Scope
             };
-            ex.Result.ScopeSet = TestConstants.Scope;
+            cachePlugin.TokenCacheDictionary[key.ToString()] = JsonHelper.SerializeToJson(item);
 
-            ex.Result.FamilyId = "1";
-            ex.RefreshToken = "someRT";
-            cache.tokenCacheDictionary[key] = ex;
 
             key = new TokenCacheKey(TestConstants.AuthorityGuestTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
                 TestConstants.UniqueId + "more", TestConstants.DisplayableId, TestConstants.HomeObjectId,
                 TestConstants.Policy);
-            ex = new AuthenticationResultEx();
-            ex.Result = new AuthenticationResult("Bearer", key.ToString(),
-                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)));
-            ex.Result.User = new User
+
+            item = new TokenCacheItem()
             {
-                DisplayableId = TestConstants.DisplayableId,
-                UniqueId = TestConstants.UniqueId + "more",
-                HomeObjectId = TestConstants.HomeObjectId
+                Token = key.ToString(),
+                TokenType = "Bearer",
+                ExpiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                User = new User
+                {
+                    DisplayableId = TestConstants.DisplayableId,
+                    UniqueId = TestConstants.UniqueId+"more",
+                    HomeObjectId = TestConstants.HomeObjectId
+                },
+                Scope = TestConstants.ScopeForAnotherResource
             };
-            ex.Result.ScopeSet = TestConstants.ScopeForAnotherResource;
-            ex.RefreshToken = "someRT";
-            cache.tokenCacheDictionary[key] = ex;
+            cachePlugin.TokenCacheDictionary[key.ToString()] = JsonHelper.SerializeToJson(item);
 
-            return cache;
-        }
-
-        public static void ExpireCacheItems(TokenCache cache)
-        {
-            foreach (var value in cache.tokenCacheDictionary.Values)
+            TokenCacheKey rtKey = new TokenCacheKey(null, null, TestConstants.ClientId,
+                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
+                TestConstants.Policy);
+            RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
             {
-                value.Result.ExpiresOn = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc);
-            }
+                RefreshToken = "someRT",
+                User = new User
+                {
+                    DisplayableId = TestConstants.DisplayableId,
+                    UniqueId = TestConstants.UniqueId,
+                    HomeObjectId = TestConstants.HomeObjectId
+                }
+            };
+            cachePlugin.TokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
         }
     }
 }
