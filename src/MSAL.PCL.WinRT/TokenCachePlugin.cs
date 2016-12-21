@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
 {
     internal class TokenCachePlugin : ITokenCachePlugin
     {
-        private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
+        private const string LocalSettingsContainerName = "MicrosoftAuthenticationLibrary";
         private const string CacheValue = "CacheValue";
         private const string CacheValueSegmentCount = "CacheValueSegmentCount";
         private const string CacheValueLength = "CacheValueLength";
@@ -101,6 +101,21 @@ namespace Microsoft.Identity.Client
         }
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteToken(TokenCacheKey key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteRefreshToken(TokenCacheKey key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteAll(string clientId)
         {
             throw new NotImplementedException();
         }

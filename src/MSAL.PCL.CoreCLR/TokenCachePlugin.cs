@@ -61,6 +61,21 @@ namespace Microsoft.Identity.Client
             throw new System.NotImplementedException();
         }
 
+        public void DeleteToken(TokenCacheKey key)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void DeleteRefreshToken(TokenCacheKey key)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void DeleteAll(string clientId)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
         {
             throw new System.NotImplementedException();

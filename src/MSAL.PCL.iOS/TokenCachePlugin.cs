@@ -41,12 +41,6 @@ namespace Microsoft.Identity.Client
 
         public void BeforeAccess(TokenCacheNotificationArgs args)
         {
-            if (args.TokenCache.Count > 0)
-            {
-                // We assume that the cache has not changed since last write
-                return;
-            }
-
             try
             {
                 SecStatusCode res;
@@ -96,11 +90,10 @@ namespace Microsoft.Identity.Client
                     };
 
                     var err = SecKeyChain.Remove(s);
-                    if (args.TokenCache.Count > 0)
-                    {
+
                         s.ValueData = NSData.FromArray(args.TokenCache.Serialize());
                         err = SecKeyChain.Add(s);
-                    }
+                    
 
                     args.TokenCache.HasStateChanged = false;
                 }
@@ -127,6 +120,21 @@ namespace Microsoft.Identity.Client
         }
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteToken(TokenCacheKey key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteRefreshToken(TokenCacheKey key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteAll(string clientId)
         {
             throw new NotImplementedException();
         }

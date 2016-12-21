@@ -58,11 +58,5 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.RedirectUri,
                 AuthenticationRequestParameters.RedirectUri.OriginalString);
         }
-
-        protected override void PostTokenRequest(AuthenticationResultEx resultEx)
-        {
-            base.PostTokenRequest(resultEx);
-            this.User = resultEx.Result.User;
-        }
     }
 }

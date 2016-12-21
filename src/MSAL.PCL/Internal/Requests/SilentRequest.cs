@@ -25,31 +25,25 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class SilentRequest : BaseRequest
     {
-        public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, string userIdentifer,
-            IPlatformParameters parameters, bool forceRefresh)
-            : this(authenticationRequestParameters, (User) null, parameters, forceRefresh)
-        {
-            this.User = this.MapIdentifierToUser(userIdentifer);
-            PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
-            this.SupportADFS = false;
-        }
-
         public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, User user,
             IPlatformParameters parameters, bool forceRefresh)
             : base(authenticationRequestParameters)
         {
-            if (user != null)
+            if (user == null)
             {
-                this.User = user;
+                throw new ArgumentNullException(nameof(user));
             }
 
+            this.User = user;
             PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
             this.SupportADFS = false;
             this.ForceRefresh = forceRefresh;
@@ -60,15 +54,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
             throw new System.NotImplementedException();
         }
 
-        protected override Task<AuthenticationResultEx> SendTokenRequestAsync()
+        protected override Task<TokenResponse> SendTokenRequestAsync()
         {
-            if (ResultEx == null)
+            if (Response == null)
             {
                 PlatformPlugin.Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
                 throw new MsalSilentTokenAcquisitionException();
             }
 
-            throw new MsalSilentTokenAcquisitionException(ResultEx.Exception);
+            throw new MsalSilentTokenAcquisitionException(Exception);
         }
     }
 }

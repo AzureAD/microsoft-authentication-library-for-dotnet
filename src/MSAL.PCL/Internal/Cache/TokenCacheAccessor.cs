@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
         {
-            PlatformPlugin.TokenCachePlugin.Delete(refreshToken‪Item);
+            PlatformPlugin.TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item.GetTokenCacheKey());
         }
 
         public IList<TokenCacheItem> GetAllAccessTokens()

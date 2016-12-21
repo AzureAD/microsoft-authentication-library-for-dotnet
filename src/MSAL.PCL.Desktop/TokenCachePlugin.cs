@@ -40,9 +40,6 @@ namespace Microsoft.Identity.Client
         private readonly IDictionary<string, string> _tokenCacheDictionary =
             new ConcurrentDictionary<string, string>();
 
-        private readonly IDictionary<string, string> _refreshTokenCacheDictionary =
-            new ConcurrentDictionary<string, string>();
-
         public void BeforeAccess(TokenCacheNotificationArgs args)
         {
         }
@@ -53,12 +50,18 @@ namespace Microsoft.Identity.Client
 
         public ICollection<string> AllAccessAndIdTokens()
         {
-            return new ReadOnlyCollection<string>(_tokenCacheDictionary.Values.ToList());
+            return
+                new ReadOnlyCollection<string>(
+                    _tokenCacheDictionary.Values.Where(
+                        v => (JsonHelper.DeserializeFromJson<BaseTokenCacheItem>(v).Scope.Count > 0)).ToList());
         }
 
         public ICollection<string> AllRefreshTokens()
         {
-            return new ReadOnlyCollection<string>(_refreshTokenCacheDictionary.Values.ToList());
+            return
+                new ReadOnlyCollection<string>(
+                    _tokenCacheDictionary.Values.Where(
+                        v => (JsonHelper.DeserializeFromJson<BaseTokenCacheItem>(v).Scope.Count == 0)).ToList());
         }
 
         public void SaveToken(TokenCacheItem tokenItem)
@@ -68,7 +71,7 @@ namespace Microsoft.Identity.Client
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
         {
-            _refreshTokenCacheDictionary[refreshTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(refreshTokenItem);
+            _tokenCacheDictionary[refreshTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(refreshTokenItem);
         }
 
         public void DeleteToken(TokenCacheKey key)
@@ -78,7 +81,7 @@ namespace Microsoft.Identity.Client
 
         public void DeleteRefreshToken(TokenCacheKey key)
         {
-            _refreshTokenCacheDictionary.Remove(key.ToString());
+            _tokenCacheDictionary.Remove(key.ToString());
         }
 
         public void DeleteAll(string clientId)

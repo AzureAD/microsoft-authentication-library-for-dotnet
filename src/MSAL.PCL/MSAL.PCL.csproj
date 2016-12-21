@@ -113,7 +113,6 @@
     <Compile Include="Internal\JsonHelper.cs" />
     <Compile Include="Internal\JsonWebToken.cs" />
     <Compile Include="Internal\LoggerBase.cs" />
-    <Compile Include="Internal\AuthenticationResultEx.cs" />
     <Compile Include="PublicClientApplication.cs" />
     <Compile Include="Internal\OAuth2\TokenResponse.cs" />
     <Compile Include="Internal\OAuth2\OAuthConstants.cs" />

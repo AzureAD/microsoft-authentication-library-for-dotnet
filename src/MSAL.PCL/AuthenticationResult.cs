@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
         private const string Oauth2AuthorizationHeader = "Bearer ";
         private readonly TokenCacheItem _tokenCacheItem;
 
-        private AuthenticationResult(TokenCacheItem tokenCacheItem)
+        internal AuthenticationResult(TokenCacheItem tokenCacheItem)
         {
             _tokenCacheItem = tokenCacheItem;
             User = new User(Internal.IdToken.Parse(tokenCacheItem.RawIdToken));
@@ -86,16 +86,6 @@ namespace Microsoft.Identity.Client
         public string CreateAuthorizationHeader()
         {
             return Oauth2AuthorizationHeader + Token;
-        }
-
-        internal void UpdateTenantAndUser(string tenantId, string idToken, User otherUser)
-        {
-/*            this.TenantId = tenantId;
-            this.IdToken = idToken;
-            if (otherUser != null)
-            {
-                this.User = new User(otherUser);
-            }*/
         }
     }
 }

@@ -108,6 +108,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// </summary>
         public User User { get; internal set; }
 
+        public string UserAssertionHash { get; internal set; }
+
         public abstract TokenCacheKey GetTokenCacheKey();
 
     }

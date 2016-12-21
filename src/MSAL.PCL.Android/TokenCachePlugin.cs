@@ -89,6 +89,11 @@ namespace Microsoft.Identity.Client
             Delete(key.ToString(), _refreshTokenSharedPreference.Edit());
         }
 
+        public void DeleteAll(string clientId)
+        {
+            throw new System.NotImplementedException();
+        }
+
         private void Delete(string key, ISharedPreferencesEditor editor)
         {
             editor.Remove(key);
