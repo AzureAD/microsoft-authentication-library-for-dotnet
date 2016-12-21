@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 using Windows.Foundation.Collections;
 using Windows.Storage;
-using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.Interfaces;

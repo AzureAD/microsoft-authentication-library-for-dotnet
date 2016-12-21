@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34FFBC9F-C270-4B10-98C8-F6882606DDFE}"
 EndProject
@@ -63,8 +63,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{A3C8
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		samples\UniversalTestApp\UniversalTestApp.Shared\UniversalTestApp.Shared.projitems*{cb027bbb-6c86-46ec-ba55-b0ada0365f82}*SharedItemsImports = 13
 		samples\UniversalTestApp\UniversalTestApp.Shared\UniversalTestApp.Shared.projitems*{14ab06a8-4000-4ea7-84d6-6c5454a62c99}*SharedItemsImports = 4
+		samples\UniversalTestApp\UniversalTestApp.Shared\UniversalTestApp.Shared.projitems*{cb027bbb-6c86-46ec-ba55-b0ada0365f82}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Ad-Hoc|Any CPU = Ad-Hoc|Any CPU

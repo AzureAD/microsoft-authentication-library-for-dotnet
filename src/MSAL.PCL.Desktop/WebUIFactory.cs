@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
 
             if (parameters.UseHiddenBrowser)
             {
-                return new SilentWebUI { OwnerWindow = this.parameters.OwnerWindow };
+                return new SilentWebUI {OwnerWindow = this.parameters.OwnerWindow};
             }
 
             return new InteractiveWebUI {OwnerWindow = this.parameters.OwnerWindow};

@@ -28,12 +28,14 @@
 using System;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Windows.Foundation.Metadata;
 using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
 using Windows.Security.Cryptography.DataProtection;
 using Windows.Storage.Streams;
-using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Interfaces;
+using Platform = Windows.Security.Cryptography;
 
 namespace Microsoft.Identity.Client
 {
@@ -50,6 +52,15 @@ namespace Microsoft.Identity.Client
             IBuffer hashed = hasher.HashData(inputBuffer);
 
             return CryptographicBuffer.EncodeToBase64String(hashed);
+        }
+
+        public string GenerateCodeVerifier()
+        {
+            byte[] buffer = new byte[Constants.CodeVerifierByteSize];
+            var windowsBuffer = CryptographicBuffer.GenerateRandom((uint) buffer.Length);
+            Array.Copy(windowsBuffer.ToArray(), buffer, buffer.Length);
+
+            return EncodingHelper.EncodeToBase64Url(buffer);
         }
 
         public static string Encrypt(string message)

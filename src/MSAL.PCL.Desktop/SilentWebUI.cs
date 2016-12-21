@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private Thread StartUIThread(string headers)
+        private Thread StartUIThread()
         {
             // Start a new UI thread to run the browser dialog on so that we can block this one and present
             // a synchronous interface to callers.
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client
 
                         this.threadInitializedEvent.Set();
 
-                        this.dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri, headers);
+                        this.dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri);
 
                         // Start and turn control over to the message loop.
                         Application.Run();
@@ -151,14 +151,14 @@ namespace Microsoft.Identity.Client
         /// UI thread completes.
         /// </summary>
         /// <returns></returns>
-        protected override AuthorizationResult OnAuthenticate(string headers)
+        protected override AuthorizationResult OnAuthenticate()
         {
             if (null == this.CallbackUri)
             {
                 throw new InvalidOperationException("CallbackUri cannot be null");
             }
 
-            Thread uiSubThread = this.StartUIThread(headers);
+            Thread uiSubThread = this.StartUIThread();
 
             // Block until the uiSubThread is complete indicating that the invisible dialog has completed
             this.WaitForCompletionOrTimeout(uiSubThread);

@@ -31,8 +31,8 @@ using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Microsoft.Identity.Client.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
@@ -45,6 +45,17 @@ namespace Microsoft.Identity.Client
                 UTF8Encoding encoding = new UTF8Encoding();
                 return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
             }
+        }
+
+        public string GenerateCodeVerifier()
+        {
+            byte[] buffer = new byte[Constants.CodeVerifierByteSize];
+            using (RNGCryptoServiceProvider RandomSource = new RNGCryptoServiceProvider())
+            {
+                RandomSource.GetBytes(buffer);
+            }
+
+            return EncodingHelper.EncodeToBase64Url(buffer);
         }
 
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
@@ -83,7 +94,7 @@ namespace Microsoft.Identity.Client
         private static RSACryptoServiceProvider GetCryptoProviderForSha256(RSACryptoServiceProvider rsaProvider)
         {
             const int PROV_RSA_AES = 24;
-                // CryptoApi provider type for an RSA provider supporting sha-256 digital signatures
+            // CryptoApi provider type for an RSA provider supporting sha-256 digital signatures
             if (rsaProvider.CspKeyContainerInfo.ProviderType == PROV_RSA_AES)
             {
                 return rsaProvider;

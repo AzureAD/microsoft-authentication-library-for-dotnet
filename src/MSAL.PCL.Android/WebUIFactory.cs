@@ -25,10 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
+    [Android.Runtime.Preserve(AllMembers = true)]
     internal class WebUIFactory : IWebUIFactory
     {
         public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)

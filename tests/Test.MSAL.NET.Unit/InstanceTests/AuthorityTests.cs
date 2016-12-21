@@ -107,7 +107,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
                 Method = HttpMethod.Get,
-                Url = "https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration",
+                Url = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
                 ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration.txt"))
             });
 
@@ -216,7 +216,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
                 Method = HttpMethod.Get,
-                Url = "https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration",
+                Url = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
                 ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration-MissingFields.txt"))
             });
 

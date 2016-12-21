@@ -45,7 +45,10 @@ namespace Microsoft.Identity.Client.Internal.Http
         public static async Task<HttpResponse> SendPost(Uri endpoint, Dictionary<string, string> headers,
             Dictionary<string, string> bodyParameters, CallState callstate)
         {
-            return await ExecuteWithRetry(endpoint, headers, bodyParameters, HttpMethod.Post, callstate).ConfigureAwait(false);
+            return
+                await
+                    ExecuteWithRetry(endpoint, headers, bodyParameters, HttpMethod.Post, callstate)
+                        .ConfigureAwait(false);
         }
 
         public static async Task<HttpResponse> SendGet(Uri endpoint, Dictionary<string, string> headers,
@@ -56,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Http
 
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, Dictionary<string, string> headers)
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage { RequestUri = endpoint };
+            HttpRequestMessage requestMessage = new HttpRequestMessage {RequestUri = endpoint};
             requestMessage.Headers.Accept.Clear();
             if (headers != null)
             {
@@ -68,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal.Http
 
             return requestMessage;
         }
-        
+
         private static async Task<HttpResponse> ExecuteWithRetry(Uri endpoint, Dictionary<string, string> headers,
             Dictionary<string, string> bodyParameters, HttpMethod method,
             CallState callstate, bool retry = true)
@@ -83,11 +86,11 @@ namespace Microsoft.Identity.Client.Internal.Http
                 {
                     return response;
                 }
-                
+
                 PlatformPlugin.Logger.Error(callstate,
                     string.Format(CultureInfo.InvariantCulture,
                         "Response status code does not indicate success: {0} ({1}).",
-                        (int)response.StatusCode, response.StatusCode));
+                        (int) response.StatusCode, response.StatusCode));
 
                 if ((response.StatusCode.Equals(HttpStatusCode.InternalServerError)) ||
                     (response.StatusCode).Equals(HttpStatusCode.GatewayTimeout) ||
@@ -95,7 +98,6 @@ namespace Microsoft.Identity.Client.Internal.Http
                 {
                     isRetryable = true;
                 }
-
             }
             catch (TaskCanceledException exception)
             {
@@ -133,7 +135,7 @@ namespace Microsoft.Identity.Client.Internal.Http
                     requestMessage.Content = new FormUrlEncodedContent(bodyParameters);
                 }
 
-                using(HttpResponseMessage responseMessage =
+                using (HttpResponseMessage responseMessage =
                     await client.SendAsync(requestMessage).ConfigureAwait(false))
                 {
                     return await CreateResponseAsync(responseMessage).ConfigureAwait(false);

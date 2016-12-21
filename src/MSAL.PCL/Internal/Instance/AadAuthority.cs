@@ -37,15 +37,19 @@ namespace Microsoft.Identity.Client.Internal.Instance
     internal class AadAuthority : Authority
     {
         private const string AadInstanceDiscoveryEndpoint = "https://login.windows.net/common/discovery/instance";
-        private static readonly SortedSet<string> TrustedHostList = new SortedSet<string>()
+
+        private static readonly HashSet<string> TrustedHostList = new HashSet<string>()
         {
-                "login.windows.net", "login.chinacloudapi.cn", "login.cloudgovapi.us",
-                "login.microsoftonline.com", "login.microsoftonline.de"
+            "login.windows.net",
+            "login.chinacloudapi.cn",
+            "login.cloudgovapi.us",
+            "login.microsoftonline.com",
+            "login.microsoftonline.de"
         };
-        
+
         public AadAuthority(string authority) : base(authority)
         {
-            this.AuthorityType = AuthorityType.Aad; 
+            this.AuthorityType = AuthorityType.Aad;
         }
 
         protected override async Task<string> Validate(string host, string tenant, CallState callState)
@@ -60,7 +64,9 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 try
                 {
                     InstanceDiscoveryResponse discoveryResponse =
-                        await client.DiscoverAadInstance(new Uri(AadInstanceDiscoveryEndpoint), callState).ConfigureAwait(false);
+                        await
+                            client.DiscoverAadInstance(new Uri(AadInstanceDiscoveryEndpoint), callState)
+                                .ConfigureAwait(false);
                     if (discoveryResponse.TenantDiscoveryEndpoint == null)
                     {
                         throw new MsalServiceException(discoveryResponse.Error, discoveryResponse.ErrorDescription);

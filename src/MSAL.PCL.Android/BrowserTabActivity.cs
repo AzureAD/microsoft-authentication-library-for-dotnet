@@ -27,47 +27,28 @@
 
 using Android.App;
 using Android.Content;
-using Microsoft.Identity.Client.Internal;
+using Android.OS;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
+    /// 
     /// </summary>
-    public static class AuthenticationAgentContinuationHelper
+    [Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
+    public class BrowserTabActivity : Activity
     {
         /// <summary>
+        /// 
         /// </summary>
-        public static void SetAuthenticationAgentContinuationEventArgs(int requestCode, Result resultCode, Intent data)
+        /// <param name="savedInstanceState"></param>
+        protected override void OnCreate(Bundle savedInstanceState)
         {
-            AuthorizationResult authorizationResult = null;
-            switch ((int) resultCode)
-            {
-                case (int) Result.Ok:
-                    authorizationResult = CreateResultForOkResponse(data.GetStringExtra("ReturnedUrl"));
-                    break;
+            base.OnCreate(savedInstanceState);
 
-                case (int) Result.Canceled:
-                    authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
-                    break;
-
-                default:
-                    authorizationResult = new AuthorizationResult(AuthorizationStatus.UnknownError, null);
-                    break;
-            }
-
-            WebUI.SetAuthorizationResult(authorizationResult);
-        }
-
-        private static AuthorizationResult CreateResultForOkResponse(string url)
-        {
-            AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.Success);
-
-            if (!string.IsNullOrEmpty(url))
-            {
-                result.ParseAuthorizeResponse(url);
-            }
-
-            return result;
+            Intent intent = new Intent(this, typeof (AuthenticationActivity));
+            intent.PutExtra(AndroidConstants.CustomTabRedirect, Intent.DataString);
+            intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
+            StartActivity(intent);
         }
     }
 }

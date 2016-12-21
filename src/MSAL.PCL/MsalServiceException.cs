@@ -29,7 +29,7 @@ using System;
 using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {

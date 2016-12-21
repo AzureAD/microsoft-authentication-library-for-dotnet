@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 string resource = string.Format(CultureInfo.InvariantCulture, "https://{0}", host);
                 string webfingerUrl = string.Format(CultureInfo.InvariantCulture,
                     "https://{0}/adfs/.well-known/webfinger?rel={1}&resource={2}", host, DefaultRealm, resource);
-                
+
                 HttpResponse httpResponse =
                     await HttpRequest.SendGet(new Uri(webfingerUrl), null, callState).ConfigureAwait(false);
 
@@ -69,7 +69,11 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
                 AdfsWebFingerResponse wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, callState,
                     false);
-                if (wfr.Links.FirstOrDefault(a => (a.Rel.Equals(DefaultRealm, StringComparison.OrdinalIgnoreCase) && a.Href.Equals(resource, StringComparison.OrdinalIgnoreCase))) == null)
+                if (
+                    wfr.Links.FirstOrDefault(
+                        a =>
+                            (a.Rel.Equals(DefaultRealm, StringComparison.OrdinalIgnoreCase) &&
+                             a.Href.Equals(resource, StringComparison.OrdinalIgnoreCase))) == null)
                 {
                     throw new MsalException("invalid_authority");
                 }
@@ -97,7 +101,8 @@ namespace Microsoft.Identity.Client.Internal.Instance
         {
             try
             {
-                return await client.ExecuteRequest<T>(new Uri(endpoint), HttpMethod.Get, callState).ConfigureAwait(false);
+                return
+                    await client.ExecuteRequest<T>(new Uri(endpoint), HttpMethod.Get, callState).ConfigureAwait(false);
             }
             catch (RetryableRequestException exc)
             {

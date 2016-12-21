@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,35 +25,50 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Security.Cryptography;
-using System.Text;
+using Android.App;
+using Android.Content;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
-    [Android.Runtime.Preserve(AllMembers = true)]
-    internal class CryptographyHelper : ICryptographyHelper
+    /// <summary>
+    /// </summary>
+    public static class AuthenticationContinuationHelper
     {
-        public string CreateSha256Hash(string input)
+        /// <summary>
+        /// </summary>
+        public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
-            using (SHA256Managed sha = new SHA256Managed())
+            AuthorizationResult authorizationResult = null;
+
+            switch ((int) resultCode)
             {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
+                case AndroidConstants.AuthCodeReceived:
+                    authorizationResult = CreateResultForOkResponse(data.GetStringExtra("com.microsoft.identity.client.finalUrl"));
+                    break;
+
+                case AndroidConstants.Cancel:
+                    authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+                    break;
+
+                default:
+                    authorizationResult = new AuthorizationResult(AuthorizationStatus.UnknownError, null);
+                    break;
             }
+
+            WebUI.SetAuthorizationResult(authorizationResult);
         }
 
-        public string GenerateCodeVerifier()
+        private static AuthorizationResult CreateResultForOkResponse(string url)
         {
-            byte[] buffer = new byte[Internal.Constants.CodeVerifierByteSize];
-            using (RNGCryptoServiceProvider randomSource = new RNGCryptoServiceProvider())
+            AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.Success);
+
+            if (!string.IsNullOrEmpty(url))
             {
-                randomSource.GetBytes(buffer);
+                result.ParseAuthorizeResponse(url);
             }
 
-            return EncodingHelper.EncodeToBase64Url(buffer);
+            return result;
         }
     }
 }

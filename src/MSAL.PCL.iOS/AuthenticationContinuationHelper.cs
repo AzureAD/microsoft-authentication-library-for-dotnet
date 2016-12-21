@@ -25,31 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
 using Foundation;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-    internal class CustomHeaderHandler
+    /// <summary>
+    /// 
+    /// </summary>
+    public static class AuthenticationContinuationHelper
     {
-        public static IDictionary<string, string> AdditionalHeaders;
-
-        public static void ApplyHeadersTo(NSMutableUrlRequest mutableRequest)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="sourceApplication"></param>
+        public static void SetAuthenticationContinuationEventArgs(NSUrl url, string sourceApplication)
         {
-            if (!mutableRequest.Headers.ContainsKey(new NSString(BrokerConstants.ChallengeHeaderKey)))
-            {
-                mutableRequest[BrokerConstants.ChallengeHeaderKey] = BrokerConstants.ChallengeHeaderValue;
-            }
-
-            if (AdditionalHeaders != null)
-            {
-                foreach (var key in AdditionalHeaders.Keys)
-                {
-                    mutableRequest.Headers[new NSString(key)] = new NSString(AdditionalHeaders[key]);
-                }
-
-                AdditionalHeaders = null;
-            }
+            WebUI.SetAuthorizationResult(new AuthorizationResult(AuthorizationStatus.Success, url.AbsoluteString));
         }
     }
 }

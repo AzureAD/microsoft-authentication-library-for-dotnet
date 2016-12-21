@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client
         {
             if (redirectUri == null)
             {
-                redirectUri = Constant.SsoPlaceHolderUri;
+                redirectUri = Constants.SsoPlaceHolderUri;
                 PlatformPlugin.Logger.Verbose(callState, "ms-app redirect Uri is used");
             }
 
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetRedirectUriAsString(Uri redirectUri, CallState callState)
         {
-            return ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri)
+            return ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri)
                 ? WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString
                 : redirectUri.OriginalString;
         }

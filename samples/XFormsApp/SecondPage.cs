@@ -63,13 +63,23 @@ namespace XFormsApp
             };
         }
 
-        public IPlatformParameters Paramters { get; set; }
+        public IPlatformParameters Parameters { get; set; }
 
-        void browseButton_Clicked(object sender, EventArgs e)
+        private async void browseButton_Clicked(object sender, EventArgs e)
         {
+            PublicClientApplication application = new PublicClientApplication("<client_id>");
+            application.PlatformParameters = Parameters;
+            application.RedirectUri = "<redirect_uri>";
             this.result.Text = string.Empty;
-            string token = null;//await tokenBroker.GetTokenInteractiveAsync(Paramters);
-            this.result.Text = token;
+            try
+            {
+                AuthenticationResult result = await application.AcquireTokenAsync(new string[] {"Mail.Read"});
+                this.result.Text = result.Token;
+            }
+            catch (Exception exc)
+            {
+                this.result.Text = exc.Message;
+            }
         }
     }
 }

@@ -31,6 +31,7 @@ using Android.App;
 using Android.Content;
 using Android.Widget;
 using Android.OS;
+using Android.Views;
 using Microsoft.Identity.Client;
 using TestApp.PCL;
 
@@ -44,28 +45,65 @@ namespace AndroidTestApp
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
+            // creating LinearLayout
+            var linLayout = new LinearLayout(this)
+            {
+                Orientation = Orientation.Vertical,
+                LayoutParameters =
+                           new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent)
 
-            // Set our view from the "main" layout resource
-            SetContentView(Resource.Layout.Main);
+            };
 
-            Button acquireTokenInteractiveButton = FindViewById<Button>(Resource.Id.acquireTokenInteractiveButton);
+            EditText email = new EditText(this)
+            {
+                Id = 1
+            };
+            linLayout.AddView(email);
+
+            Button acquireTokenInteractiveButton = new Button(this)
+            {
+                Id = 2,
+                Text = "Acquire Token Interactive"
+            };
+
             acquireTokenInteractiveButton.Click += acquireTokenInteractiveButton_Click;
+            linLayout.AddView(acquireTokenInteractiveButton);
 
-            Button acquireTokenSilentButton = FindViewById<Button>(Resource.Id.acquireTokenSilentButton);
+
+            Button acquireTokenSilentButton = new Button(this)
+            {
+                Id = 3,
+                Text = "Acquire Token Silent"
+            };
+
             acquireTokenSilentButton.Click += acquireTokenSilentButton_Click;
+            linLayout.AddView(acquireTokenSilentButton);
 
-            Button clearCacheButton = FindViewById<Button>(Resource.Id.clearCacheButton);
+
+            Button clearCacheButton = new Button(this)
+            {
+                Id = 4,
+                Text = "Clear Cache"
+            };
+
             clearCacheButton.Click += clearCacheButton_Click;
+            linLayout.AddView(clearCacheButton);
 
-            this.accessTokenTextView = FindViewById<TextView>(Resource.Id.accessTokenTextView);
+
+            this.accessTokenTextView = new TextView(this)
+            {
+                Id = 5
+            };
+
+            linLayout.AddView(accessTokenTextView);
 
             sts.Authority = "https://login.microsoftonline.com/common";
-            sts.ValidClientId = "b92e0ba5-f86e-4411-8e18-6b5f928d968a";
-            sts.ValidScope = new [] { "https://msdevex-my.sharepoint.com"};
-            sts.ValidUserName = "mam@msdevex.onmicrosoft.com";
-
-            EditText email = FindViewById<EditText>(Resource.Id.email);
+            sts.ValidClientId = "<client_id>";
+            sts.ValidScope = new [] { "User.Read"};
+            sts.ValidUserName = "<username>";
             email.Text = sts.ValidUserName;
+
+            SetContentView(linLayout);
         }
         
         private async void acquireTokenSilentButton_Click(object sender, EventArgs e)
@@ -73,7 +111,7 @@ namespace AndroidTestApp
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
             tokenBroker.Sts = sts;
-            EditText email = FindViewById<EditText>(Resource.Id.email);
+            EditText email = FindViewById<EditText>(1);
             tokenBroker.Sts.ValidUserName = email.Text;
             string value = null;
             try
@@ -93,17 +131,21 @@ namespace AndroidTestApp
 
         }
 
-        private void acquireTokenInteractiveButton_Click(object sender, EventArgs e)
+        private async void acquireTokenInteractiveButton_Click(object sender, EventArgs e)
         {
+            PublicClientApplication application = new PublicClientApplication("<client_id>");
+            application.RedirectUri = "<redirect_uri>";
             this.accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
             tokenBroker.Sts = sts;
-            EditText email = FindViewById<EditText>(Resource.Id.email);
+            EditText email = FindViewById<EditText>(1);
             tokenBroker.Sts.ValidUserName = email.Text;
             string value = null;
             try
             {
-                //value = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this)).ConfigureAwait(false);
+                application.PlatformParameters = new PlatformParameters(this);
+                var result = await application.AcquireTokenAsync(new string[] { "User.Read" });
+                value = result.Token;
             }
             catch (Java.Lang.Exception ex)
             {

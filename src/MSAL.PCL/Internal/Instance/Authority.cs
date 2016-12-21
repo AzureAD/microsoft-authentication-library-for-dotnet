@@ -44,7 +44,9 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
     internal abstract class Authority
     {
-        internal static ConcurrentDictionary<string, Authority> _validatedAuthorities = new ConcurrentDictionary<string, Authority>();
+        internal static ConcurrentDictionary<string, Authority> _validatedAuthorities =
+            new ConcurrentDictionary<string, Authority>();
+
         private static readonly string[] TenantlessTenantName = {"common", "organizations", "consumers"};
         private bool _updatedFromTemplate;
 
@@ -124,7 +126,9 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 string host = authorityUri.Authority;
                 string path = authorityUri.AbsolutePath.Substring(1);
                 string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-                this.IsTenantless = TenantlessTenantName.Any(name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
+                this.IsTenantless =
+                    TenantlessTenantName.Any(
+                        name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
 
                 string openIdConfigurationEndpoint = await this.Validate(host, tenant, callState);
 
@@ -155,7 +159,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 this.AuthorizationEndpoint = edr.AuthorizationEndpoint.Replace("{tenant}", tenant);
                 this.TokenEndpoint = edr.TokenEndpoint.Replace("{tenant}", tenant);
                 this.SelfSignedJwtAudience = edr.Issuer.Replace("{tenant}", tenant);
-                
+
                 this._updatedFromTemplate = true;
 
                 // add to the list of validated authorities so that we don't do openid configuration
@@ -169,11 +173,13 @@ namespace Microsoft.Identity.Client.Internal.Instance
             string host = authorityUri.Authority;
             string path = authorityUri.AbsolutePath.Substring(1);
             string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
+            //TODO handle for ADFS where there is no v2.0
             return string.Format(CultureInfo.InvariantCulture,
-                       "https://{0}/{1}/.well-known/openid-configuration", host, tenant);
+                "https://{0}/{1}/v2.0/.well-known/openid-configuration", host, tenant);
         }
 
-        private async Task<TenantDiscoveryResponse> DiscoverEndpoints(string openIdConfigurationEndpoint, CallState callState)
+        private async Task<TenantDiscoveryResponse> DiscoverEndpoints(string openIdConfigurationEndpoint,
+            CallState callState)
         {
             OAuth2Client client = new OAuth2Client();
             return
@@ -187,7 +193,8 @@ namespace Microsoft.Identity.Client.Internal.Instance
             var authorityUri = new Uri(authority);
             string path = authorityUri.AbsolutePath.Substring(1);
             string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-            return TenantlessTenantName.Any(name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
+            return
+                TenantlessTenantName.Any(name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         public void UpdateTenantId(string tenantId)
