@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
@@ -160,7 +161,7 @@ namespace Microsoft.Identity.Client
                     OnAfterAccess(args);
                     return tokenCacheItems.Count;
                 }
-            };
+            }
         }
 
         internal TokenCacheItem SaveAccessToken(string authority, string clientId, string policy, TokenResponse response)
@@ -345,6 +346,47 @@ namespace Microsoft.Identity.Client
                 return allUsers.Values;
             }
         }
+
+        internal ICollection<RefreshTokenCacheItem> GetAllRefreshTokens()
+        {
+            lock (lockObject)
+            {
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                {
+                    TokenCache = this,
+                    ClientId = _clientId,
+                    User = null
+                };
+
+                OnBeforeAccess(args);
+                IList<RefreshTokenCacheItem> allRefreshTokens =
+                    _tokenCacheAccessor.GetAllRefreshTokens();
+                OnAfterAccess(args);
+
+                return new ReadOnlyCollection<RefreshTokenCacheItem>(allRefreshTokens);
+            }
+        }
+
+        internal ICollection<TokenCacheItem> GetAllTokens()
+        {
+            lock (lockObject)
+            {
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                {
+                    TokenCache = this,
+                    ClientId = _clientId,
+                    User = null
+                };
+
+                OnBeforeAccess(args);
+                IList<TokenCacheItem> allTokens =
+                    _tokenCacheAccessor.GetAllAccessTokens();
+                OnAfterAccess(args);
+
+                return new ReadOnlyCollection<TokenCacheItem>(allTokens);
+            }
+        }
+
 
         internal void SignOut(User user)
         {

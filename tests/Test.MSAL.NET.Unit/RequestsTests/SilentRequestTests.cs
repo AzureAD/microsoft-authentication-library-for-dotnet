@@ -162,7 +162,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.ClientId),
                 Policy = TestConstants.Policy,
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
-                TokenCache = cache
+                TokenCache = cache,
+                User = new User() { UniqueId = ""}
             };
             
             try

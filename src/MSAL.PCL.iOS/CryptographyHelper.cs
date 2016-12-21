@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client
 
         public string GenerateCodeVerifier()
         {
-            byte[] buffer = new byte[System.Security.Cryptography.Constants.CodeVerifierByteSize];
+            byte[] buffer = new byte[Constants.CodeVerifierByteSize];
             using (RNGCryptoServiceProvider randomSource = new RNGCryptoServiceProvider())
             {
                 randomSource.GetBytes(buffer);

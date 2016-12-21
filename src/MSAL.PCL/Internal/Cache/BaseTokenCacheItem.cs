@@ -34,6 +34,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
     /// <summary>
     /// Token cache item
     /// </summary>
+    [DataContract]
     internal abstract class BaseTokenCacheItem
     {
         private readonly User _user;
@@ -67,36 +68,29 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// Gets the Authority.
         /// </summary>
         [DataMember(Name = "authority")]
-        public string Authority { get; internal set; }
+        public string Authority { get; set; }
 
         /// <summary>
         /// Gets the ClientId.
         /// </summary>
         [DataMember(Name = "client_id")]
-        public string ClientId { get; internal set; }
-
-        /// <summary>
-        /// Gets the IdentityProviderName.
-        /// </summary>
-        [DataMember(Name = "identity_provider")]
-        public string IdentityProvider { get; internal set; }
+        public string ClientId { get; set; }
 
         /// <summary>
         /// Gets the Policy.
         /// </summary>
         [DataMember(Name = "policy")]
-        public string Policy { get; internal set; }
+        public string Policy { get; set; }
 
         /// <summary>
         /// Gets the TenantId.
         /// </summary>
         [DataMember(Name = "tid")]
-        public string TenantId { get; internal set; }
+        public string TenantId { get; set; }
 
         /// <summary>
         /// Gets the user's unique Id.
         /// </summary>
-        [DataMember(Name = "unique_id")]
         public string UniqueId { get { return _user?.UniqueId; } }
 
         /// <summary>
@@ -107,16 +101,16 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public string HomeObjectId { get { return _user?.HomeObjectId; } }
         
         [DataMember(Name = "id_token")]
-        public string RawIdToken { get; }
+        public string RawIdToken { get; set; }
 
         /// <summary>
         /// Gets the entire Profile Info if returned by the service or null if no Id Token is returned.
         /// </summary>
         [DataMember(Name = "user")]
-        public User User { get; internal set; }
+        public User User { get; set; }
 
         [DataMember(Name = "user_assertion_hash")]
-        public string UserAssertionHash { get; internal set; }
+        public string UserAssertionHash { get; set; }
 
         public abstract TokenCacheKey GetTokenCacheKey();
 

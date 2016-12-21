@@ -32,6 +32,7 @@ using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Cache
 {
+    [DataContract]
     internal class TokenCacheItem : BaseTokenCacheItem
     {
         /// <summary>

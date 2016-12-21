@@ -180,7 +180,6 @@ namespace Microsoft.Identity.Client
             var requestParameters =
                 this.CreateRequestParameters(authority, scope, null, null, this.UserTokenCache);
             requestParameters.ClientKey = new ClientKey(this.ClientId);
-            requestParameters.ClientKey = new ClientKey(this.ClientId);
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
