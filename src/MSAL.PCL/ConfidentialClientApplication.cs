@@ -65,6 +65,7 @@ namespace Microsoft.Identity.Client
             this.ClientCredential = clientCredential;
             this.UserTokenCache = userTokenCache;
             this.AppTokenCache = appTokenCache;
+            this.AppTokenCache.TokenCacheAccessor.TokenCachePlugin = PlatformPlugin.NewTokenCachePluginInstance;
         }
 
         /// <summary>
@@ -75,7 +76,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// AppTokenCache
         /// </summary>
-        public TokenCache AppTokenCache { get; set; }
+        public TokenCache AppTokenCache { get; }
 
         /// <summary>
         /// AcquireTokenOnBehalfOfAsync

@@ -63,6 +63,11 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
             this.Authority = authority;
             this.Scope = scope;
+            if (this.Scope == null)
+            {
+                this.Scope = new SortedSet<string>();
+            }
+
             this.ClientId = clientId;
             this.UniqueId = uniqueId;
             this.DisplayableId = displayableId;
@@ -185,8 +190,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
             //TODO - consider removing policy from refresh token cache
 
-            return new TokenCacheKey(null, null, refreshTokenItem.ClientId, refreshTokenItem.UniqueId,
-                refreshTokenItem.DisplayableId, refreshTokenItem.HomeObjectId, refreshTokenItem.Policy);
+            return new TokenCacheKey(null, null, refreshTokenItem.ClientId, null,
+                null, refreshTokenItem.HomeObjectId, refreshTokenItem.Policy);
         }
     }
 }

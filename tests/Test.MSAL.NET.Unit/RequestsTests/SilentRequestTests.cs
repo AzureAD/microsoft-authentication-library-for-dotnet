@@ -76,18 +76,21 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             };
 
             parameters.User = null;
-            SilentRequest request = new SilentRequest(parameters,
-                new PlatformParameters(), false);
-            Assert.IsNotNull(request);
-
-            request = new SilentRequest(parameters, new PlatformParameters(), false);
-            Assert.IsNotNull(request);
+            try
+            {
+                new SilentRequest(parameters, new PlatformParameters(), false);
+                Assert.Fail("ArgumentNullException should have been thrown here");
+            }
+            catch (ArgumentNullException exc)
+            {
+                Assert.AreEqual(exc.ParamName, "User");
+            }
 
             parameters.User = new User()
             {
                 DisplayableId = TestConstants.DisplayableId
             };
-            request = new SilentRequest(parameters, new PlatformParameters(), false);
+            SilentRequest request = new SilentRequest(parameters, new PlatformParameters(), false);
             Assert.IsNotNull(request);
 
             parameters.User = new User()
@@ -115,7 +118,13 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.ClientId),
                 Policy = TestConstants.Policy,
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
-                TokenCache = cache
+                TokenCache = cache,
+                User = new User()
+                {
+                    HomeObjectId = TestConstants.HomeObjectId,
+                    UniqueId = TestConstants.UniqueId,
+                    DisplayableId = TestConstants.DisplayableId
+                }
             };
             
             //add mock response for tenant endpoint discovery

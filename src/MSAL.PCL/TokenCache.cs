@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client
     public sealed class TokenCache
     {
         private const int DefaultExpirationBufferInMinutes = 5;
-        private readonly TokenCacheAccessor _tokenCacheAccessor = new TokenCacheAccessor();
+        internal readonly TokenCacheAccessor TokenCacheAccessor = new TokenCacheAccessor();
 
         /// <summary>
         /// Notification for certain token cache interactions during token acquisition.
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client
         /// Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
         /// impact all the instances of <see cref="PublicClientApplication" /> which share that cache.
         /// </summary>
-        public void Clear()
+        internal void Clear()
         {
             lock (lockObject)
             {
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client
 
                 OnBeforeAccess(args);
                 OnBeforeWrite(args);
-                _tokenCacheAccessor.DeleteAll(_clientId);
+                //_tokenCacheAccessor.DeleteAll(_clientId);
                 OnAfterAccess(args);
             }
         }
@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client
                     };
 
                     OnBeforeAccess(args);
-                    IList<TokenCacheItem> tokenCacheItems = _tokenCacheAccessor.GetAllAccessTokens();
+                    IList<TokenCacheItem> tokenCacheItems = TokenCacheAccessor.GetAllAccessTokens();
                     OnAfterAccess(args);
                     return tokenCacheItems.Count;
                 }
@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Client
                     };
 
                     OnBeforeAccess(args);
-                    IList<RefreshTokenCacheItem> tokenCacheItems = _tokenCacheAccessor.GetAllRefreshTokens();
+                    IList<RefreshTokenCacheItem> tokenCacheItems = TokenCacheAccessor.GetAllRefreshTokens();
                     OnAfterAccess(args);
                     return tokenCacheItems.Count;
                 }
@@ -179,7 +179,7 @@ namespace Microsoft.Identity.Client
 
                 OnBeforeAccess(args);
                 OnBeforeWrite(args);
-                _tokenCacheAccessor.SaveAccessToken(tokenCacheItem);
+                TokenCacheAccessor.SaveAccessToken(tokenCacheItem);
                 OnAfterAccess(args);
 
                 return tokenCacheItem;
@@ -205,7 +205,7 @@ namespace Microsoft.Identity.Client
 
                     OnBeforeAccess(args);
                     OnBeforeWrite(args);
-                    _tokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem);
+                    TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem);
                     OnAfterAccess(args);
                 }
             }
@@ -225,7 +225,7 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                IList<TokenCacheItem> tokenCacheItems = _tokenCacheAccessor.GetTokens(key);
+                IList<TokenCacheItem> tokenCacheItems = TokenCacheAccessor.GetTokens(key);
 
                 OnAfterAccess(args);
 
@@ -266,7 +266,8 @@ namespace Microsoft.Identity.Client
         {
             lock (lockObject)
             {
-                TokenCacheKey key = new TokenCacheKey(null, null, requestParam.ClientKey.ClientId, requestParam.User,
+                TokenCacheKey key = new TokenCacheKey(null, null, requestParam.ClientKey.ClientId, null, null,
+                    requestParam.User?.HomeObjectId,
                     requestParam.Policy);
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
@@ -276,7 +277,7 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                IList<RefreshTokenCacheItem> refreshTokenCacheItems = _tokenCacheAccessor.GetRefreshTokens(key);
+                IList<RefreshTokenCacheItem> refreshTokenCacheItems = TokenCacheAccessor.GetRefreshTokens(key);
                 OnAfterAccess(args);
                 if (refreshTokenCacheItems.Count == 0)
                 {
@@ -308,7 +309,7 @@ namespace Microsoft.Identity.Client
 
                 OnBeforeAccess(args);
                 OnBeforeWrite(args);
-                _tokenCacheAccessor.DeleteRefreshToken(rtItem);
+                TokenCacheAccessor.DeleteRefreshToken(rtItem);
                 OnAfterAccess(args);
             }
         }
@@ -331,7 +332,7 @@ namespace Microsoft.Identity.Client
 
                 OnBeforeAccess(args);
                 IList<RefreshTokenCacheItem> allRefreshTokens =
-                    _tokenCacheAccessor.GetAllRefreshTokensForGivenClientId(clientId);
+                    TokenCacheAccessor.GetAllRefreshTokensForGivenClientId(clientId);
                 OnAfterAccess(args);
 
                 IDictionary<string, User> allUsers = new Dictionary<string, User>();
@@ -360,7 +361,7 @@ namespace Microsoft.Identity.Client
 
                 OnBeforeAccess(args);
                 IList<RefreshTokenCacheItem> allRefreshTokens =
-                    _tokenCacheAccessor.GetAllRefreshTokens();
+                    TokenCacheAccessor.GetAllRefreshTokens();
                 OnAfterAccess(args);
 
                 return new ReadOnlyCollection<RefreshTokenCacheItem>(allRefreshTokens);
@@ -380,7 +381,7 @@ namespace Microsoft.Identity.Client
 
                 OnBeforeAccess(args);
                 IList<TokenCacheItem> allTokens =
-                    _tokenCacheAccessor.GetAllAccessTokens();
+                    TokenCacheAccessor.GetAllAccessTokens();
                 OnAfterAccess(args);
 
                 return new ReadOnlyCollection<TokenCacheItem>(allTokens);
@@ -402,23 +403,23 @@ namespace Microsoft.Identity.Client
                 OnBeforeAccess(args);
                 OnBeforeWrite(args);
                 IList<RefreshTokenCacheItem> allRefreshTokens =
-                    _tokenCacheAccessor.GetAllRefreshTokensForGivenClientId(user.ClientId)
+                    TokenCacheAccessor.GetAllRefreshTokensForGivenClientId(user.ClientId)
                         .Where(item => item.HomeObjectId.Equals(user.HomeObjectId))
                         .ToList();
                 foreach (var rtItem in allRefreshTokens)
                 {
-                    _tokenCacheAccessor.DeleteRefreshToken(rtItem);
+                    TokenCacheAccessor.DeleteRefreshToken(rtItem);
                 }
 
                 IList<TokenCacheItem> allAccessTokens =
-                    _tokenCacheAccessor.GetAllAccessTokens()
+                    TokenCacheAccessor.GetAllAccessTokens()
                         .Where(
                             item => item.ClientId.Equals(user.ClientId) && item.HomeObjectId.Equals(user.HomeObjectId))
                         .ToList();
 
                 foreach (var atItem in allAccessTokens)
                 {
-                    _tokenCacheAccessor.DeleteToken(atItem);
+                    TokenCacheAccessor.DeleteToken(atItem);
                 }
 
                 OnAfterAccess(args);

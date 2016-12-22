@@ -25,30 +25,33 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client.Internal.Cache
 {
     internal class TokenCacheAccessor
     {
+        public ITokenCachePlugin TokenCachePlugin = PlatformPlugin.TokenCachePlugin;
+
         public void SaveAccessToken(TokenCacheItem accessTokenItem)
         {
-            PlatformPlugin.TokenCachePlugin.SaveToken(accessTokenItem);
+            TokenCachePlugin.SaveToken(accessTokenItem);
         }
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
         {
-            PlatformPlugin.TokenCachePlugin.SaveRefreshToken(refreshTokenItem);
+            TokenCachePlugin.SaveRefreshToken(refreshTokenItem);
         }
 
         public IList<TokenCacheItem> GetTokens(TokenCacheKey tokenCacheKey)
         {
             //TODO: check android implementation
-            ICollection<string> allAccessTokens = PlatformPlugin.TokenCachePlugin.AllAccessAndIdTokens();
+            ICollection<string> allAccessTokens = TokenCachePlugin.AllAccessAndIdTokens();
             IList<TokenCacheItem> matchedTokens = new List<TokenCacheItem>();
             foreach (string accessTokenItemJson in allAccessTokens)
             {
                 TokenCacheItem tokenCacheItem = JsonHelper.DeserializeFromJson<TokenCacheItem>(accessTokenItemJson);
-                if (tokenCacheKey.ScopeEquals(tokenCacheItem.Scope))
+                if (tokenCacheKey.Equals(tokenCacheItem.GetTokenCacheKey()))
                 {
                     matchedTokens.Add(tokenCacheItem);
                 }
@@ -59,14 +62,14 @@ namespace Microsoft.Identity.Client.Internal.Cache
         
         public IList<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
         {
-            ICollection<string> allRefreshTokens = PlatformPlugin.TokenCachePlugin.AllRefreshTokens();
+            ICollection<string> allRefreshTokens = TokenCachePlugin.AllRefreshTokens();
             IList<RefreshTokenCacheItem> matchedRefreshTokens = new List<RefreshTokenCacheItem>();
             foreach (string refreshTokenValue in allRefreshTokens)
             {
                 RefreshTokenCacheItem refreshTokenCacheItem =
                     JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(refreshTokenValue);
 
-                if (tokenCacheKey.Equals(TokenCacheKey.ExtractKeyForRT(refreshTokenCacheItem)))
+                if (tokenCacheKey.Equals(refreshTokenCacheItem.GetTokenCacheKey()))
                 {
                     matchedRefreshTokens.Add(refreshTokenCacheItem);
                 }
@@ -77,17 +80,17 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public void DeleteToken(TokenCacheItem token‪Item)
         {
-            PlatformPlugin.TokenCachePlugin.DeleteToken(token‪Item.GetTokenCacheKey());
+            TokenCachePlugin.DeleteToken(token‪Item.GetTokenCacheKey());
         }
 
         public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
         {
-            PlatformPlugin.TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item.GetTokenCacheKey());
+            TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item.GetTokenCacheKey());
         }
 
         public IList<TokenCacheItem> GetAllAccessTokens()
         {
-            ICollection<string> allTokensAsString = PlatformPlugin.TokenCachePlugin.AllAccessAndIdTokens();
+            ICollection<string> allTokensAsString = TokenCachePlugin.AllAccessAndIdTokens();
             IList<TokenCacheItem> returnList = new List<TokenCacheItem>();
             foreach (var token in allTokensAsString)
             {
@@ -99,7 +102,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         
         public IList<RefreshTokenCacheItem> GetAllRefreshTokens()
         {
-            ICollection<string> allTokensAsString = PlatformPlugin.TokenCachePlugin.AllRefreshTokens();
+            ICollection<string> allTokensAsString = TokenCachePlugin.AllRefreshTokens();
             IList<RefreshTokenCacheItem> returnList = new List<RefreshTokenCacheItem>();
             foreach (var token in allTokensAsString)
             {
@@ -112,11 +115,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public IList<RefreshTokenCacheItem> GetAllRefreshTokensForGivenClientId(string clientId)
         {
             return this.GetAllRefreshTokens().Where(t => t.ClientId.Equals(clientId)).ToList();
-        }
-
-        public void DeleteAll(string clientId)
-        {
-
         }
     }
 }

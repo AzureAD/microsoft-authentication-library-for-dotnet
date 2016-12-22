@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override Task SendTokenRequestAsync()
         {
-            if (Response == null)
+            if (Exception == null)
             {
                 PlatformPlugin.Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
                 throw new MsalSilentTokenAcquisitionException();

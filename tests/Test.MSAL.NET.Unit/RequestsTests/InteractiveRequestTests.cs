@@ -77,7 +77,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 TokenType = "Bearer",
                 Token = atKey.ToString(),
-                ExpiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599))
+                ExpiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
+                Scope = TestConstants.Scope
             };
             _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
 
@@ -121,7 +122,9 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             task.Wait();
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
-            Assert.AreEqual(2, _tokenCachePlugin.TokenCacheDictionary.Count);
+            Assert.AreEqual(3, _tokenCachePlugin.TokenCacheDictionary.Count);
+            Assert.AreEqual(1, cache.RefreshTokenCount);
+            Assert.AreEqual(2, cache.TokenCount);
             Assert.AreEqual(result.Token, "some-access-token");
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");

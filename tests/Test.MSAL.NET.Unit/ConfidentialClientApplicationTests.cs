@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -36,7 +35,6 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.MSAL.NET.Unit.Mocks;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.Http;
 using Microsoft.Identity.Client.Internal.Instance;
 
@@ -97,9 +95,7 @@ namespace Test.MSAL.NET.Unit
             {
                 ValidateAuthority = false
             };
-
-            app.AppTokenCache = new TokenCache(TestConstants.ClientId);
-            app.UserTokenCache = new TokenCache(TestConstants.ClientId);
+            
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
@@ -143,8 +139,6 @@ namespace Test.MSAL.NET.Unit
             {
                 ValidateAuthority = false
             };
-
-            app.AppTokenCache = new TokenCache(TestConstants.ClientId);
 
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
@@ -224,7 +218,7 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(qp);
             Assert.AreEqual(10, qp.Count);
             Assert.IsTrue(qp.ContainsKey("client-request-id"));
-            Assert.AreEqual("r1/scope1 r1/scope2 openid email profile offline_access", qp["scope"]);
+            Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2", qp["scope"]);
             Assert.AreEqual(TestConstants.ClientId, qp["client_id"]);
             Assert.AreEqual("code", qp["response_type"]);
             Assert.AreEqual(TestConstants.RedirectUri, qp["redirect_uri"]);
@@ -251,7 +245,7 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(qp);
             Assert.AreEqual(12, qp.Count);
             Assert.IsTrue(qp.ContainsKey("client-request-id"));
-            Assert.AreEqual("r1/scope1 r1/scope2 openid email profile offline_access", qp["scope"]);
+            Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2", qp["scope"]);
             Assert.AreEqual(TestConstants.ClientId, qp["client_id"]);
             Assert.AreEqual("code", qp["response_type"]);
             Assert.AreEqual(TestConstants.RedirectUri, qp["redirect_uri"]);
@@ -334,7 +328,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(13, qp.Count);
             Assert.IsTrue(qp.ContainsKey("client-request-id"));
             Assert.IsFalse(qp.ContainsKey("client_secret"));
-            Assert.AreEqual("r1/scope1 r1/scope2 r2/scope1 r2/scope2 openid offline_access", qp["scope"]);
+            Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2 r2/scope1 r2/scope2", qp["scope"]);
             Assert.AreEqual(TestConstants.ClientId, qp["client_id"]);
             Assert.AreEqual("code", qp["response_type"]);
             Assert.AreEqual("custom://redirect-uri/", qp["redirect_uri"]);

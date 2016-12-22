@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
@@ -37,8 +36,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
     [DataContract]
     internal abstract class BaseTokenCacheItem
     {
-        private readonly User _user;
-
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -50,7 +47,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 RawIdToken = response.IdToken;
                 IdToken idToken = IdToken.Parse(response.IdToken);
                 TenantId = idToken.TenantId;
-                _user = new User(idToken);
+                User = new User(idToken);
             }
 
             this.UserAssertionHash = response.UserAssertionHash;
@@ -85,20 +82,19 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// <summary>
         /// Gets the TenantId.
         /// </summary>
-        [DataMember(Name = "tid")]
         public string TenantId { get; set; }
 
         /// <summary>
         /// Gets the user's unique Id.
         /// </summary>
-        public string UniqueId { get { return _user?.UniqueId; } }
+        public string UniqueId { get { return User?.UniqueId; } }
 
         /// <summary>
         /// Gets the user's displayable Id.
         /// </summary>
-        public string DisplayableId { get { return _user?.DisplayableId; } }
+        public string DisplayableId { get { return User?.DisplayableId; } }
 
-        public string HomeObjectId { get { return _user?.HomeObjectId; } }
+        public string HomeObjectId { get { return User?.HomeObjectId; } }
         
         [DataMember(Name = "id_token")]
         public string RawIdToken { get; set; }
@@ -106,7 +102,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// <summary>
         /// Gets the entire Profile Info if returned by the service or null if no Id Token is returned.
         /// </summary>
-        [DataMember(Name = "user")]
         public User User { get; set; }
 
         [DataMember(Name = "user_assertion_hash")]
@@ -114,5 +109,19 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public abstract TokenCacheKey GetTokenCacheKey();
 
+
+        // This method is called after the object 
+        // is completely deserialized. Use it instead of the
+        // constructror.
+        [OnDeserialized]
+        void OnDeserialized(StreamingContext context)
+        {
+            if (RawIdToken != null)
+            {
+                IdToken idToken = IdToken.Parse(RawIdToken);
+                TenantId = idToken.TenantId;
+                User = new User(idToken);
+            }
+        }
     }
 }

@@ -53,7 +53,9 @@ namespace Microsoft.Identity.Client
             return
                 new ReadOnlyCollection<string>(
                     TokenCacheDictionary.Values.Where(
-                        v => (JsonHelper.DeserializeFromJson<TokenCacheItem>(v).Scope.Count > 0)).ToList());
+                        v =>
+                            (JsonHelper.DeserializeFromJson<TokenCacheItem>(v).Scope != null) &&
+                            (JsonHelper.DeserializeFromJson<TokenCacheItem>(v).Scope.Count > 0)).ToList());
         }
 
         public ICollection<string> AllRefreshTokens()

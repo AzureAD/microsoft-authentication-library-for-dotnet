@@ -89,14 +89,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             SortedSet<string> set = new SortedSet<string>(inputScope.ToArray());
             set.UnionWith(OAuth2Value.ReservedScopes.CreateSetFromArray());
             set.Remove(AuthenticationRequestParameters.ClientKey.ClientId);
-
-            //special case b2c scenarios to not send email and profile as scopes for BUILD 
-            if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Policy))
-            {
-                set.Remove("email");
-                set.Remove("profile");
-            }
-
             return set;
         }
 
@@ -152,8 +144,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     }
                 }
 
-                //silent request did not succeed
-                if (Response == null || Exception != null)
+                //no access token item found AND (either response is null or request failed with exception)
+                if (accessTokenItem == null && (Response == null || Exception != null))
                 {
                     await this.PreTokenRequest().ConfigureAwait(false);
                     await this.SendTokenRequestAsync().ConfigureAwait(false);
@@ -163,7 +155,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         throw Exception;
                     }
 
-                    SaveTokenResponseToCache();
+                    accessTokenItem = SaveTokenResponseToCache();
                 }
 
                 result = PostTokenRequest(accessTokenItem);
@@ -258,8 +250,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken);
             client.AddBodyParameter(OAuth2Parameter.RefreshToken, refreshToken);
 
-            Response = await this.SendHttpMessageAsync(client).ConfigureAwait(false);
-
+            await this.SendHttpMessageAsync(client).ConfigureAwait(false);
             if (Response.RefreshToken == null)
             {
                 Response.RefreshToken = refreshToken;
@@ -301,24 +292,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private async Task<TokenResponse> SendHttpMessageAsync(OAuth2Client client)
+        private async Task SendHttpMessageAsync(OAuth2Client client)
         {
             if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.Policy))
             {
                 client.AddQueryParameter("p", AuthenticationRequestParameters.Policy);
             }
 
-            TokenResponse tokenResponse =
+            Response =
                 await client.GetToken(new Uri(this.Authority.TokenEndpoint), this.CallState).ConfigureAwait(false);
 
-            if (string.IsNullOrEmpty(tokenResponse.Scope))
+            if (string.IsNullOrEmpty(Response.Scope))
             {
-                tokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
+                Response.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
                 PlatformPlugin.Logger.Information(this.CallState,
                     "Scope was missing from the token response, so using developer provided scopes in the result");
             }
-
-            return tokenResponse;
         }
 
         private void LogReturnedToken(AuthenticationResult result)

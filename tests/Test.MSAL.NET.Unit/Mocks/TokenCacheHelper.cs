@@ -26,10 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
@@ -42,15 +38,14 @@ namespace Test.MSAL.NET.Unit.Mocks
         
         public static void PopulateCache(TokenCachePlugin cachePlugin)
         {
-            TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
-                TestConstants.Policy);
             TokenCacheItem item = new TokenCacheItem()
             {
-                Token = key.ToString(),
+                Authority = TestConstants.AuthorityHomeTenant,
+                ClientId = TestConstants.ClientId,
+                Policy = TestConstants.Policy,
                 TokenType = "Bearer",
                 ExpiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                RawIdToken = MockHelpers.DefaultIdToken,
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
@@ -59,35 +54,37 @@ namespace Test.MSAL.NET.Unit.Mocks
                 },
                 Scope = TestConstants.Scope
             };
-            cachePlugin.TokenCacheDictionary[key.ToString()] = JsonHelper.SerializeToJson(item);
-
-
-            key = new TokenCacheKey(TestConstants.AuthorityGuestTenant,
-                TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
-                TestConstants.UniqueId + "more", TestConstants.DisplayableId, TestConstants.HomeObjectId,
-                TestConstants.Policy);
+            item.Token = item.GetTokenCacheKey().ToString();
+            //add access token
+            cachePlugin.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
 
             item = new TokenCacheItem()
             {
-                Token = key.ToString(),
+                Authority = TestConstants.AuthorityGuestTenant,
+                ClientId = TestConstants.ClientId,
+                Policy = TestConstants.Policy,
                 TokenType = "Bearer",
                 ExpiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId, TestConstants.HomeObjectId),
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    UniqueId = TestConstants.UniqueId+"more",
+                    UniqueId = TestConstants.UniqueId + "more",
                     HomeObjectId = TestConstants.HomeObjectId
                 },
                 Scope = TestConstants.ScopeForAnotherResource
             };
-            cachePlugin.TokenCacheDictionary[key.ToString()] = JsonHelper.SerializeToJson(item);
-
-            TokenCacheKey rtKey = new TokenCacheKey(null, null, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
-                TestConstants.Policy);
+            item.Token = item.GetTokenCacheKey().ToString();
+            //add another access token
+            cachePlugin.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
+            
             RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
             {
+                Authority = TestConstants.AuthorityHomeTenant,
+                ClientId = TestConstants.ClientId,
+                Policy = TestConstants.Policy,
                 RefreshToken = "someRT",
+                RawIdToken = MockHelpers.DefaultIdToken,
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
@@ -95,7 +92,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                     HomeObjectId = TestConstants.HomeObjectId
                 }
             };
-            cachePlugin.TokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
+            cachePlugin.TokenCacheDictionary[rtItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
         }
     }
 }

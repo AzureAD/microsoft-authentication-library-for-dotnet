@@ -57,6 +57,11 @@ namespace Microsoft.Identity.Client
 
         internal User(IdToken idToken)
         {
+            if (idToken == null)
+            {
+                return;
+            }
+
             if (idToken.ObjectId != null)
             {
                 UniqueId = idToken.ObjectId;

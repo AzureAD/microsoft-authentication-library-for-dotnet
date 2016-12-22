@@ -105,12 +105,21 @@ namespace Test.MSAL.NET.Unit
 
             RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
             {
-                RefreshToken = "someRT"
+                ClientId = TestConstants.ClientId,
+                RefreshToken = "someRT",
+                RawIdToken = MockHelpers.DefaultIdToken,
+                User = new User
+                {
+                    DisplayableId = TestConstants.DisplayableId,
+                    UniqueId = TestConstants.UniqueId,
+                    HomeObjectId = TestConstants.HomeObjectId
+                }
             };
             _tokenCachePlugin.TokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
 
             Assert.IsNull(cache.FindRefreshToken(new AuthenticationRequestParameters()
             {
+                ClientKey = new ClientKey(TestConstants.ClientId),
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 Scope = TestConstants.Scope,
                 Policy = TestConstants.Policy,
@@ -124,11 +133,10 @@ namespace Test.MSAL.NET.Unit
             }));
         }
         
-        [TestMethod]
+/*        [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void ClearCacheTest()
         {
-
             TokenCacheHelper.PopulateCache(_tokenCachePlugin);
             TokenCache tokenCache = new TokenCache(TestConstants.ClientId);
 
@@ -140,34 +148,38 @@ namespace Test.MSAL.NET.Unit
             tokenCache.Clear();
             Assert.AreEqual(1, _tokenCachePlugin.TokenCacheDictionary.Count);
             Assert.AreEqual(key, _tokenCachePlugin.TokenCacheDictionary.ContainsKey(key.ToString()));
-        }
+        }*/
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void GetAppTokenFromCacheTest()
         {
             TokenCache tokenCache = new TokenCache(TestConstants.ClientId);
-
-            TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-    TestConstants.Scope, TestConstants.ClientId,
-    null, null, null, null);
             TokenCacheItem item = new TokenCacheItem()
             {
-                Token = key.ToString(),
+                Authority = TestConstants.AuthorityHomeTenant,
+                ClientId = TestConstants.ClientId,
+                Policy = TestConstants.Policy,
                 TokenType = "Bearer",
                 ExpiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                RawIdToken = null,
+                User = null,
                 Scope = TestConstants.Scope
             };
-            _tokenCachePlugin.TokenCacheDictionary[key.ToString()] = JsonHelper.SerializeToJson(item);
+            item.Token = item.GetTokenCacheKey().ToString();
+            _tokenCachePlugin.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
 
-            Assert.AreEqual(key.ToString(),
-                tokenCache.FindAccessToken(new AuthenticationRequestParameters()
-                {
-                    Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
-                    Scope = TestConstants.Scope
-                }).Token);
+            TokenCacheItem cacheItem = tokenCache.FindAccessToken(new AuthenticationRequestParameters()
+            {
+                Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
+                ClientKey = new ClientKey(TestConstants.ClientId),
+                Policy = TestConstants.Policy,
+                Scope = TestConstants.Scope
+            });
+
+            Assert.IsNotNull(cacheItem);
+            Assert.AreEqual(item.GetTokenCacheKey(), cacheItem.GetTokenCacheKey());
         }
-
 
         public static bool AreDateTimeOffsetsEqual(DateTimeOffset time1, DateTimeOffset time2)
         {

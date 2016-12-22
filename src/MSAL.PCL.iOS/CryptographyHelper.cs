@@ -37,6 +37,11 @@ namespace Microsoft.Identity.Client
     {
         public string CreateSha256Hash(string input)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return null;
+            }
+
             using (SHA256Managed sha = new SHA256Managed())
             {
                 UTF8Encoding encoding = new UTF8Encoding();
