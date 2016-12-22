@@ -28,30 +28,10 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
-    /// </summary>
-    public enum NotificationType
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        RefreshTokenCache,
-        /// <summary>
-        /// 
-        /// </summary>
-        TokenCache
-    }
-
-    /// <summary>
     /// Contains parameters used by the MSAL call accessing the cache.
     /// </summary>
     public sealed class TokenCacheNotificationArgs
     {
-        /// <summary>
-        /// Gets the ClientId.
-        /// </summary>
-        public NotificationType NotificationType { get; internal set; }
-
         /// <summary>
         /// Gets the TokenCache
         /// </summary>

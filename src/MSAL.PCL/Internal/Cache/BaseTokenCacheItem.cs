@@ -54,7 +54,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
             this.Authority = authority;
             this.ClientId = clientId;
             this.Policy = policy;
-            
         }
 
         internal BaseTokenCacheItem()
@@ -108,11 +107,9 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public string UserAssertionHash { get; set; }
 
         public abstract TokenCacheKey GetTokenCacheKey();
-
-
+        
         // This method is called after the object 
-        // is completely deserialized. Use it instead of the
-        // constructror.
+        // is completely deserialized.
         [OnDeserialized]
         void OnDeserialized(StreamingContext context)
         {

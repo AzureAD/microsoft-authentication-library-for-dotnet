@@ -230,8 +230,7 @@ namespace Microsoft.Identity.Client.Internal
             byte[] bytes = Convert.FromBase64String(incoming);
             return CreateString(bytes);
         }
-
-
+        
         internal static string Base64Decode(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -253,8 +252,7 @@ namespace Microsoft.Identity.Client.Internal
 
             return encodedString;
         }
-
-
+        
         internal static List<string> SplitWithQuotes(string input, char delimiter)
         {
             List<string> items = new List<string>();
