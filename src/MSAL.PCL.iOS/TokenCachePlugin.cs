@@ -133,15 +133,5 @@ namespace Microsoft.Identity.Client
         {
             throw new NotImplementedException();
         }
-
-        public void DeleteAll(string clientId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

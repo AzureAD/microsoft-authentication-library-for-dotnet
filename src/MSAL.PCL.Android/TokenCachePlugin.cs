@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
 
         public void SaveToken(TokenCacheItem tokenItem)
         {
-            TokenCacheKey key = TokenCacheKey.ExtractKeyForAT(tokenItem);
+            TokenCacheKey key = tokenItem.GetTokenCacheKey();
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
             editor.PutString(key.ToString(), JsonHelper.SerializeToJson(tokenItem));
             editor.Apply();
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
         {
-            TokenCacheKey key = TokenCacheKey.ExtractKeyForRT(refreshTokenItem);
+            TokenCacheKey key = refreshTokenItem.GetTokenCacheKey();
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
             editor.PutString(key.ToString(), JsonHelper.SerializeToJson(refreshTokenItem));
             editor.Apply();
@@ -87,11 +87,6 @@ namespace Microsoft.Identity.Client
         public void DeleteRefreshToken(TokenCacheKey key)
         {
             Delete(key.ToString(), _refreshTokenSharedPreference.Edit());
-        }
-
-        public void DeleteAll(string clientId)
-        {
-            throw new System.NotImplementedException();
         }
 
         private void Delete(string key, ISharedPreferencesEditor editor)

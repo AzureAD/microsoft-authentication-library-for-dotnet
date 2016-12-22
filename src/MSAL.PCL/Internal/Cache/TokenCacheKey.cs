@@ -101,6 +101,24 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return stringBuilder.ToString();
         }
 
+/*        public static TokenCacheKey Deserialize(string serializedKey)
+        {
+            var sentences = new List<string>();
+            int position = 0;
+            int start = 0;
+            // Extract from the string.
+            do
+            {
+                position = serializedKey.IndexOf('$', start);
+                if (position >= 0)
+                {
+                    sentences.Add(serializedKey.Substring(start, position - start + 1));
+                    start = position + 1;
+                }
+            } while (position > 0);
+
+        }*/
+
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
         /// </summary>
@@ -177,21 +195,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
         internal bool Equals(string string1, string string2)
         {
             return (string.Compare(string2, string1, StringComparison.OrdinalIgnoreCase) == 0);
-        }
-
-        public static TokenCacheKey ExtractKeyForAT(TokenCacheItem accessTokenItem)
-        {
-            return new TokenCacheKey(accessTokenItem.Authority, accessTokenItem.Scope, accessTokenItem.ClientId,
-                accessTokenItem.UniqueId,
-                accessTokenItem.DisplayableId, accessTokenItem.HomeObjectId, accessTokenItem.Policy);
-        }
-
-        public static TokenCacheKey ExtractKeyForRT(RefreshTokenCacheItem refreshTokenItem)
-        {
-            //TODO - consider removing policy from refresh token cache
-
-            return new TokenCacheKey(null, null, refreshTokenItem.ClientId, null,
-                null, refreshTokenItem.HomeObjectId, refreshTokenItem.Policy);
         }
     }
 }

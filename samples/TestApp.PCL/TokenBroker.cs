@@ -77,7 +77,7 @@ namespace TestApp.PCL
             try
             {
                 app = new PublicClientApplication("https://login.windows.net/common", "CLIENT_ID");
-                var result = await app.AcquireTokenSilentAsync(Sts.ValidScope, Sts.ValidUserName);
+                var result = await app.AcquireTokenSilentAsync(Sts.ValidScope, null);
 
                 return result.Token;
             }
@@ -125,7 +125,6 @@ namespace TestApp.PCL
 
         public void ClearTokenCache()
         {
-            TokenCache.DefaultSharedUserTokenCache.Clear("CLIENT_ID");
         }
     }
 }

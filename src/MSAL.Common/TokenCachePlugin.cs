@@ -85,11 +85,5 @@ namespace Microsoft.Identity.Client
         {
             TokenCacheDictionary.Remove(key.ToString());
         }
-
-        public void DeleteAll(string clientId)
-        {
-            TokenCacheDictionary.Clear();
-            TokenCacheDictionary.Clear();
-        }
     }
 }

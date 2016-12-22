@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Internal
@@ -37,6 +38,11 @@ namespace Microsoft.Identity.Client.Internal
     /// </summary>
     internal static class EncodingHelper
     {
+        public static string CreateString(byte[] bytes)
+        {
+            return Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+        }
+
         public static string UrlEncode(string message)
         {
             if (string.IsNullOrEmpty(message))
@@ -222,9 +228,20 @@ namespace Microsoft.Identity.Client.Internal
                     break;
             }
             byte[] bytes = Convert.FromBase64String(incoming);
-            return Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+            return CreateString(bytes);
         }
 
+
+        internal static string Base64Decode(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+
+            byte[] bytes = Convert.FromBase64String(input);
+            return CreateString(bytes);
+        }
 
         internal static string Base64Encode(string input)
         {

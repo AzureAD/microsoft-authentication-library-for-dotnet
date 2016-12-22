@@ -43,7 +43,5 @@ namespace Microsoft.Identity.Client.Internal.Interfaces
         void DeleteToken(TokenCacheKey key);
 
         void DeleteRefreshToken(TokenCacheKey key);
-
-        void DeleteAll(string clientId);
     }
 }

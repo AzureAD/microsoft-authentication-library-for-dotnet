@@ -37,148 +37,64 @@ namespace Microsoft.Identity.Client
 {
     internal class TokenCachePlugin : ITokenCachePlugin
     {
-        private const string LocalSettingsContainerName = "MicrosoftAuthenticationLibrary";
-        private const string CacheValue = "CacheValue";
-        private const string CacheValueSegmentCount = "CacheValueSegmentCount";
-        private const string CacheValueLength = "CacheValueLength";
-        private const int MaxCompositeValueLength = 1024;
+        private const string LocalSettingsTokenContainerName = "MicrosoftAuthenticationLibrary.Tokens";
+        private const string LocalSettingsRefreshTokenContainerName = "MicrosoftAuthenticationLibrary.RefreshTokens";
+        private ApplicationDataContainer _refreshTokenContainer = null;
+        private ApplicationDataContainer _tokenContainer = null;
 
-        public void BeforeAccess(TokenCacheNotificationArgs args)
+        public TokenCachePlugin()
         {
-            if (args != null && args.TokenCache != null)
-            {
-                try
-                {
-                    var localSettings = ApplicationData.Current.LocalSettings;
-                    localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-                    byte[] state = GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
-                    if (state != null)
-                    {
-                        //args.TokenCache.Deserialize(state);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    PlatformPlugin.Logger.Warning(null, "Failed to load cache: " + ex);
-                    // Ignore as the cache seems to be corrupt
-                }
-            }
-        }
-
-        public void AfterAccess(TokenCacheNotificationArgs args)
-        {
-            if (args != null && args.TokenCache != null && args.TokenCache.HasStateChanged)
-            {
-                try
-                {
-                    var localSettings = ApplicationData.Current.LocalSettings;
-                    localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-/*                    SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values,
-                        args.TokenCache.Serialize());*/
-                    args.TokenCache.HasStateChanged = false;
-                }
-                catch (Exception ex)
-                {
-                    PlatformPlugin.Logger.Warning(null, "Failed to save cache: " + ex);
-                }
-            }
+            var localSettings = ApplicationData.Current.LocalSettings;
+            _tokenContainer =
+                    localSettings.CreateContainer(LocalSettingsTokenContainerName, ApplicationDataCreateDisposition.Always);
+            _refreshTokenContainer =
+                    localSettings.CreateContainer(LocalSettingsRefreshTokenContainerName, ApplicationDataCreateDisposition.Always);
         }
 
         public ICollection<string> AllAccessAndIdTokens()
         {
-            throw new NotImplementedException();
+            IList<string> list = new List<string>();
+            foreach(var item in _tokenContainer.Values.Values)
+            {
+                byte[] decryptedEntry = CryptographyHelper.Decrypt((byte[]) item);
+                list.Add(EncodingHelper.CreateString(decryptedEntry));
+            }
+
+            return list;
         }
 
         public ICollection<string> AllRefreshTokens()
         {
-            throw new NotImplementedException();
+            IList<string> list = new List<string>();
+            foreach (var item in _refreshTokenContainer.Values.Values)
+            {
+                byte[] decryptedEntry = CryptographyHelper.Decrypt((byte[])item);
+                list.Add(EncodingHelper.CreateString(decryptedEntry));
+            }
+
+            return list;
         }
 
         public void SaveToken(TokenCacheItem tokenItem)
         {
-            throw new NotImplementedException();
+            _tokenContainer.Values[tokenItem.GetTokenCacheKey().ToString()] =
+                CryptographyHelper.Encrypt(JsonHelper.SerializeToJson(tokenItem));
         }
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
         {
-            throw new NotImplementedException();
+            _tokenContainer.Values[refreshTokenItem.GetTokenCacheKey().ToString()] =
+                CryptographyHelper.Encrypt(JsonHelper.SerializeToJson(refreshTokenItem));
         }
 
         public void DeleteToken(TokenCacheKey key)
         {
-            throw new NotImplementedException();
+            _tokenContainer.Values.Remove(key.ToString());
         }
 
         public void DeleteRefreshToken(TokenCacheKey key)
         {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteAll(string clientId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal static void SetCacheValue(IPropertySet containerValues, byte[] value)
-        {
-            byte[] encryptedValue = CryptographyHelper.Encrypt(value);
-            containerValues[CacheValueLength] = encryptedValue.Length;
-            if (encryptedValue == null)
-            {
-                containerValues[CacheValueSegmentCount] = 1;
-                containerValues[CacheValue + 0] = null;
-            }
-            else
-            {
-                int segmentCount = (encryptedValue.Length/MaxCompositeValueLength) +
-                                   ((encryptedValue.Length%MaxCompositeValueLength == 0) ? 0 : 1);
-                byte[] subValue = new byte[MaxCompositeValueLength];
-                for (int i = 0; i < segmentCount - 1; i++)
-                {
-                    Array.Copy(encryptedValue, i*MaxCompositeValueLength, subValue, 0, MaxCompositeValueLength);
-                    containerValues[CacheValue + i] = subValue;
-                }
-
-                int copiedLength = (segmentCount - 1)*MaxCompositeValueLength;
-                Array.Copy(encryptedValue, copiedLength, subValue, 0, encryptedValue.Length - copiedLength);
-                containerValues[CacheValue + (segmentCount - 1)] = subValue;
-                containerValues[CacheValueSegmentCount] = segmentCount;
-            }
-        }
-
-        internal static byte[] GetCacheValue(IPropertySet containerValues)
-        {
-            if (!containerValues.ContainsKey(CacheValueLength))
-            {
-                return null;
-            }
-
-            int encyptedValueLength = (int) containerValues[CacheValueLength];
-            int segmentCount = (int) containerValues[CacheValueSegmentCount];
-
-            byte[] encryptedValue = new byte[encyptedValueLength];
-            if (segmentCount == 1)
-            {
-                encryptedValue = (byte[]) containerValues[CacheValue + 0];
-            }
-            else
-            {
-                for (int i = 0; i < segmentCount - 1; i++)
-                {
-                    Array.Copy((byte[]) containerValues[CacheValue + i], 0, encryptedValue, i*MaxCompositeValueLength,
-                        MaxCompositeValueLength);
-                }
-            }
-
-            Array.Copy((byte[]) containerValues[CacheValue + (segmentCount - 1)], 0, encryptedValue,
-                (segmentCount - 1)*MaxCompositeValueLength,
-                encyptedValueLength - (segmentCount - 1)*MaxCompositeValueLength);
-            return CryptographyHelper.Decrypt(encryptedValue);
+            _refreshTokenContainer.Values.Remove(key.ToString());
         }
     }
 }

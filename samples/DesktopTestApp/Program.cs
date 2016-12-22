@@ -77,7 +77,7 @@ namespace DesktopTestApp
                 new PublicClientApplication("<client_id>");
             try
             {
-                return await app.AcquireTokenSilentAsync(brkr.Sts.ValidScope);
+                return await app.AcquireTokenSilentAsync(brkr.Sts.ValidScope, null);
             }
             catch (Exception ex)
             {
