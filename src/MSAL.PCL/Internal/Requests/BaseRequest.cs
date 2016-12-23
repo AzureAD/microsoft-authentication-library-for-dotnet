@@ -42,8 +42,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal readonly AuthenticationRequestParameters AuthenticationRequestParameters;
         internal readonly Authority Authority;
         internal readonly TokenCache TokenCache;
-        protected Exception Exception;
         protected TokenResponse Response;
+        protected TokenCacheItem AccessTokenItem;
 
         internal CallState CallState { get; set; }
 
@@ -113,52 +113,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<AuthenticationResult> RunAsync()
         {
-            TokenCacheItem accessTokenItem = null;
             AuthenticationResult result = null;
             try
             {
                 await this.PreRunAsync().ConfigureAwait(false);
-                if (this.LoadFromCache)
+
+                await this.PreTokenRequest().ConfigureAwait(false);
+                await this.SendTokenRequestAsync().ConfigureAwait(false);
+                //save to cache if no access token item found
+                //this means that no cached item was found
+                if (AccessTokenItem == null)
                 {
-                    //look for access token first because
-                    //force refresh is not 
-                    if (!ForceRefresh)
-                    {
-                        accessTokenItem = TokenCache.FindAccessToken(AuthenticationRequestParameters);
-                    }
-
-                    // no matching access token in the cache
-                    if (accessTokenItem == null)
-                    {
-                        RefreshTokenCacheItem refreshTokenItem =
-                            TokenCache.FindRefreshToken(AuthenticationRequestParameters);
-
-                        if (refreshTokenItem != null)
-                        {
-                            await this.RefreshAccessTokenAsync(refreshTokenItem).ConfigureAwait(false);
-                            if (Response != null && Exception == null && StoreToCache)
-                            {
-                                accessTokenItem = SaveTokenResponseToCache();
-                            }
-                        }
-                    }
+                    AccessTokenItem = SaveTokenResponseToCache();
                 }
 
-                //no access token item found AND (either response is null or request failed with exception)
-                if (accessTokenItem == null && (Response == null || Exception != null))
-                {
-                    await this.PreTokenRequest().ConfigureAwait(false);
-                    await this.SendTokenRequestAsync().ConfigureAwait(false);
-
-                    if (Exception != null)
-                    {
-                        throw Exception;
-                    }
-
-                    accessTokenItem = SaveTokenResponseToCache();
-                }
-
-                result = PostTokenRequest(accessTokenItem);
+                result = PostTokenRequest(AccessTokenItem);
                 await this.PostRunAsync(result).ConfigureAwait(false);
                 return result;
             }
@@ -256,39 +225,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 Response.RefreshToken = refreshToken;
                 PlatformPlugin.Logger.Information(this.CallState,
                     "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
-            }
-        }
-
-        internal async Task RefreshAccessTokenAsync(RefreshTokenCacheItem item)
-        {
-            if (AuthenticationRequestParameters.Scope != null)
-            {
-                PlatformPlugin.Logger.Verbose(this.CallState, "Refreshing access token...");
-
-                try
-                {
-                    await this.SendTokenRequestByRefreshTokenAsync(item.RefreshToken).ConfigureAwait(false);
-
-                    if (Response.IdToken == null)
-                    {
-                        // If Id token is not returned by token endpoint when refresh token is redeemed, 
-                        // we should copy tenant and user information from the cached token.
-                        Response.IdToken = item.RawIdToken;
-                    }
-                }
-                catch (MsalException ex)
-                {
-                    MsalServiceException serviceException = ex as MsalServiceException;
-                    if (serviceException != null && serviceException.ErrorCode == "invalid_request")
-                    {
-                        throw new MsalServiceException(
-                            MsalError.FailedToRefreshToken,
-                            MsalErrorMessage.FailedToRefreshToken + ". " + serviceException.Message,
-                            serviceException.InnerException);
-                    }
-
-                    Exception = ex;
-                }
             }
         }
 

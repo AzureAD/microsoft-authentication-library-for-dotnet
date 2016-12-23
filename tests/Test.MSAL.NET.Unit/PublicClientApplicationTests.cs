@@ -363,12 +363,9 @@ namespace Test.MSAL.NET.Unit
             catch (AggregateException ex)
             {
                 Assert.IsNotNull(ex.InnerException);
-
-                Assert.IsTrue(ex.InnerException is MsalSilentTokenAcquisitionException);
-                var msalExc = (MsalSilentTokenAcquisitionException) ex.InnerException;
-                Assert.AreEqual(MsalError.FailedToAcquireTokenSilently, msalExc.ErrorCode);
-                Assert.IsNotNull(msalExc.InnerException, "MsalSilentTokenAcquisitionException inner exception is null");
-                Assert.AreEqual(((MsalException) msalExc.InnerException).ErrorCode, "invalid_grant");
+                Assert.IsTrue(ex.InnerException is MsalServiceException);
+                var msalExc = (MsalServiceException) ex.InnerException;
+                Assert.AreEqual(msalExc.ErrorCode, "invalid_grant");
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
