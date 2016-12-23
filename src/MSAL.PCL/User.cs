@@ -28,6 +28,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 
 namespace Microsoft.Identity.Client
 {
@@ -50,6 +52,30 @@ namespace Microsoft.Identity.Client
             this.Name = other.Name;
             this.ClientId = other.ClientId;
             this.TokenCache = other.TokenCache;
+        }
+
+
+        internal User(IdToken idToken)
+        {
+            if (idToken == null)
+            {
+                return;
+            }
+
+            if (idToken.ObjectId != null)
+            {
+                UniqueId = idToken.ObjectId;
+            }
+            else
+            {
+                UniqueId = idToken.Subject;
+            }
+
+            DisplayableId = idToken.PreferredUsername;
+            // TODO: home object id is returned in client info.
+            HomeObjectId = idToken.HomeObjectId ?? UniqueId;
+            Name = idToken.Name;
+            IdentityProvider = idToken.Issuer;
         }
 
         /// <summary>
@@ -98,12 +124,7 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            IEnumerable<TokenCacheItem> items =
-                this.TokenCache.ReadItems(this.ClientId).Where(item => item.HomeObjectId.Equals(this.HomeObjectId));
-            foreach (var item in items)
-            {
-                this.TokenCache.DeleteItem(item);
-            }
+            TokenCache.SignOut(this);
         }
     }
 }

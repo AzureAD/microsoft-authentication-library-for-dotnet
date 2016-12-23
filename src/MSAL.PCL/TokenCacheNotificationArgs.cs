@@ -28,7 +28,7 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Contains parameters used by the ADAL call accessing the cache.
+    /// Contains parameters used by the MSAL call accessing the cache.
     /// </summary>
     public sealed class TokenCacheNotificationArgs
     {
@@ -43,18 +43,8 @@ namespace Microsoft.Identity.Client
         public string ClientId { get; internal set; }
 
         /// <summary>
-        /// Gets the Scope.
-        /// </summary>
-        public string[] Scope { get; internal set; }
-
-        /// <summary>
         /// Gets the user's unique Id.
         /// </summary>
         public User User { get; set; }
-
-        /// <summary>
-        /// Gets the policy.
-        /// </summary>
-        public string Policy { get; internal set; }
     }
 }

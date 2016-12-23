@@ -32,25 +32,24 @@ namespace Test.MSAL.NET.Unit
 {
     class TestConstants
     {
-        public static readonly HashSet<string> DefaultScope = new HashSet<string>(new[] {"r1/scope1", "r1/scope2"});
-        public static readonly HashSet<string> ScopeForAnotherResource = new HashSet<string>(new[] { "r2/scope1", "r2/scope2" });
-        public static readonly string DefaultAuthorityHomeTenant = "https://login.microsoftonline.com/home/";
-        public static readonly string DefaultAuthorityGuestTenant = "https://login.microsoftonline.com/guest/";
-        public static readonly string DefaultAuthorityCommonTenant = "https://login.microsoftonline.com/common/";
-        public static readonly string DefaultClientId = "client_id";
-        public static readonly string DefaultUniqueId = "unique_id";
-        public static readonly string DefaultDisplayableId = "displayable@id.com";
-        public static readonly string DefaultHomeObjectId = "home_oid";
-        public static readonly string DefaultPolicy = "policy";
-        public static readonly string DefaultRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
-        public static readonly bool DefaultRestrictToSingleUser = false;
-        public static readonly string DefaultClientSecret = "client_secret";
-
-        public static readonly User DefaultUser = new User
+        public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] {"r1/scope1", "r1/scope2"});
+        public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
+        public static readonly string AuthorityHomeTenant = "https://login.microsoftonline.com/home/";
+        public static readonly string AuthorityGuestTenant = "https://login.microsoftonline.com/guest/";
+        public static readonly string AuthorityCommonTenant = "https://login.microsoftonline.com/common/";
+        public static readonly string ClientId = "client_id";
+        public static readonly string UniqueId = "unique_id";
+        public static readonly string DisplayableId = "displayable@id.com";
+        public static readonly string HomeObjectId = "home_oid";
+        public static readonly string Policy = "policy";
+        public static readonly string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
+        public static readonly string ClientSecret = "client_secret";
+        public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
+        public static readonly User User = new User
         {
-            UniqueId = DefaultUniqueId,
-            DisplayableId = DefaultDisplayableId,
-            HomeObjectId = DefaultHomeObjectId
+            UniqueId = UniqueId,
+            DisplayableId = DisplayableId,
+            HomeObjectId = HomeObjectId
         };
     }
 }

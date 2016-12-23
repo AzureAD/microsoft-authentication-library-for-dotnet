@@ -22,10 +22,13 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Android.App;
-using Android.Content;
+using System.Collections.ObjectModel;
+using System.Linq;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.Interfaces;
@@ -34,65 +37,53 @@ namespace Microsoft.Identity.Client
 {
     internal class TokenCachePlugin : ITokenCachePlugin
     {
-        private const string AccessTokenSharedPreferenceName = "com.microsoft.identity.client.token";
-        private const string RefreshTokenSharedPreferenceName = "com.microsoft.identity.client.refreshToken";
-        private readonly ISharedPreferences _accessTokenSharedPreference;
-        private readonly ISharedPreferences _refreshTokenSharedPreference;
+        internal readonly IDictionary<string, string> TokenCacheDictionary =
+            new ConcurrentDictionary<string, string>();
 
-        public TokenCachePlugin()
+        public void BeforeAccess(TokenCacheNotificationArgs args)
         {
+        }
 
-            _accessTokenSharedPreference = Application.Context.GetSharedPreferences(AccessTokenSharedPreferenceName,
-                    FileCreationMode.Private);
-            _refreshTokenSharedPreference = Application.Context.GetSharedPreferences(RefreshTokenSharedPreferenceName,
-                    FileCreationMode.Private);
-
-            if (_accessTokenSharedPreference == null || _refreshTokenSharedPreference == null)
-            {
-                throw new MsalException("Fail to create SharedPreference");
-            }
+        public void AfterAccess(TokenCacheNotificationArgs args)
+        {
         }
 
         public ICollection<string> AllAccessAndIdTokens()
         {
-            return _accessTokenSharedPreference.All.Values as ICollection<string>;
+            return
+                new ReadOnlyCollection<string>(
+                    TokenCacheDictionary.Values.Where(
+                        v =>
+                            (JsonHelper.DeserializeFromJson<TokenCacheItem>(v).Scope != null) &&
+                            (JsonHelper.DeserializeFromJson<TokenCacheItem>(v).Scope.Count > 0)).ToList());
         }
 
         public ICollection<string> AllRefreshTokens()
         {
-            return _refreshTokenSharedPreference.All.Values as ICollection<string>;
+            return
+                new ReadOnlyCollection<string>(
+                    TokenCacheDictionary.Values.Where(
+                        v => !string.IsNullOrEmpty(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(v).RefreshToken)).ToList());
         }
 
         public void SaveToken(TokenCacheItem tokenItem)
         {
-            TokenCacheKey key = tokenItem.GetTokenCacheKey();
-            ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(key.ToString(), JsonHelper.SerializeToJson(tokenItem));
-            editor.Apply();
+            TokenCacheDictionary[tokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(tokenItem);
         }
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
         {
-            TokenCacheKey key = refreshTokenItem.GetTokenCacheKey();
-            ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(key.ToString(), JsonHelper.SerializeToJson(refreshTokenItem));
-            editor.Apply();
+            TokenCacheDictionary[refreshTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(refreshTokenItem);
         }
 
         public void DeleteToken(TokenCacheKey key)
         {
-            Delete(key.ToString(), _accessTokenSharedPreference.Edit());
+            TokenCacheDictionary.Remove(key.ToString());
         }
 
         public void DeleteRefreshToken(TokenCacheKey key)
         {
-            Delete(key.ToString(), _refreshTokenSharedPreference.Edit());
-        }
-
-        private void Delete(string key, ISharedPreferencesEditor editor)
-        {
-            editor.Remove(key);
-            editor.Apply();
+            TokenCacheDictionary.Remove(key.ToString());
         }
     }
 }

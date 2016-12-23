@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client
 {
@@ -42,7 +43,7 @@ namespace Microsoft.Identity.Client
             get { return false; }
         }
 
-        public Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
+        public Task<TokenResponse> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {
             throw new NotImplementedException();
         }

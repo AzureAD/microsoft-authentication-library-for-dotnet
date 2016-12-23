@@ -46,8 +46,6 @@ namespace Test.MSAL.NET.Unit.HttpTests
         public void TestInitialize()
         {
             Authority._validatedAuthorities.Clear();
-            TokenCache.DefaultSharedAppTokenCache = new TokenCache();
-            TokenCache.DefaultSharedUserTokenCache = new TokenCache();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
         }
@@ -62,7 +60,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
             });
 
             HttpResponse response =
-                HttpRequest.SendPost(new Uri(TestConstants.DefaultAuthorityHomeTenant + "oauth2/token"),
+                HttpRequest.SendPost(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                     null, null, null).Result;
 
             Assert.IsNotNull(response);
@@ -88,7 +86,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
 
             HttpResponse response =
-                HttpRequest.SendPost(new Uri(TestConstants.DefaultAuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
+                HttpRequest.SendPost(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
                     queryParams, bodyParameters, null).Result;
 
             Assert.IsNotNull(response);
@@ -110,7 +108,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
             });
 
             HttpResponse response =
-                HttpRequest.SendGet(new Uri(TestConstants.DefaultAuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"), queryParams, null).Result;
+                HttpRequest.SendGet(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"), queryParams, null).Result;
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -136,7 +134,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
             try
             {
-                var msalHttpResponse = HttpRequest.SendGet(new Uri(TestConstants.DefaultAuthorityHomeTenant + "oauth2/token"),
+                var msalHttpResponse = HttpRequest.SendGet(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                     new Dictionary<string, string>(), null).Result;
                 Assert.Fail("request should have failed");
             }
@@ -166,7 +164,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
             try
             {
-                var msalHttpResponse = HttpRequest.SendPost(new Uri(TestConstants.DefaultAuthorityHomeTenant + "oauth2/token"),
+                var msalHttpResponse = HttpRequest.SendPost(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                     new Dictionary<string, string>(), null, null).Result;
                 Assert.Fail("request should have failed");
             }
@@ -198,7 +196,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
             try
             {
-                var msalHttpResponse = HttpRequest.SendGet(new Uri(TestConstants.DefaultAuthorityHomeTenant + "oauth2/token"),
+                var msalHttpResponse = HttpRequest.SendGet(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                     new Dictionary<string, string>(), null).Result;
                 Assert.Fail("request should have failed");
             }
@@ -230,7 +228,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
             try
             {
-                var msalHttpResponse = HttpRequest.SendPost(new Uri(TestConstants.DefaultAuthorityHomeTenant + "oauth2/token"),
+                var msalHttpResponse = HttpRequest.SendPost(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                     new Dictionary<string, string>(), new Dictionary<string, string>(), null).Result;
                 Assert.Fail("request should have failed");
             }

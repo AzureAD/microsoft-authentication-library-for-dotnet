@@ -44,9 +44,10 @@ namespace Microsoft.Identity.Client
         /// <param name="redirectUri"></param>
         /// <param name="clientCredential"></param>
         /// <param name="userTokenCache"></param>
+        /// <param name="appTokenCache"></param>
         public ConfidentialClientApplication(string clientId, string redirectUri,
-            ClientCredential clientCredential, TokenCache userTokenCache)
-            : this(DefaultAuthority, clientId, redirectUri, clientCredential, userTokenCache)
+            ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
+            : this(DefaultAuthority, clientId, redirectUri, clientCredential, userTokenCache, appTokenCache)
         {
         }
 
@@ -57,12 +58,14 @@ namespace Microsoft.Identity.Client
         /// <param name="redirectUri"></param>
         /// <param name="clientCredential"></param>
         /// <param name="userTokenCache"></param>
+        /// <param name="appTokenCache"></param>
         public ConfidentialClientApplication(string authority, string clientId, string redirectUri,
-            ClientCredential clientCredential, TokenCache userTokenCache) : base(authority, clientId, redirectUri, true)
+            ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache) : base(authority, clientId, redirectUri, true)
         {
             this.ClientCredential = clientCredential;
             this.UserTokenCache = userTokenCache;
-            this.AppTokenCache = TokenCache.DefaultSharedAppTokenCache;
+            this.AppTokenCache = appTokenCache;
+            this.AppTokenCache.TokenCacheAccessor.TokenCachePlugin = PlatformPlugin.NewTokenCachePluginInstance;
         }
 
         /// <summary>
@@ -73,7 +76,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// AppTokenCache
         /// </summary>
-        public TokenCache AppTokenCache { get; set; }
+        public TokenCache AppTokenCache { get; }
 
         /// <summary>
         /// AcquireTokenOnBehalfOfAsync
@@ -127,7 +130,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// AcquireTokenForClient
         /// </summary>
-        public async Task<AuthenticationResult> AcquireTokenForClient(string[] scope, string policy)
+        public async Task<AuthenticationResult> AcquireTokenForClientAsync(string[] scope, string policy)
         {
             return
                 await
@@ -137,32 +140,31 @@ namespace Microsoft.Identity.Client
         private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(string[] scope, string policy)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
-            AuthenticationRequestParameters parameters = this.CreateRequestParameters(authority, scope, policy,
+            AuthenticationRequestParameters parameters = this.CreateRequestParameters(authority, scope, policy, null,
                 this.AppTokenCache);
-            parameters.RestrictToSingleUser = false;
             var handler = new ClientCredentialRequest(parameters);
-            return await handler.RunAsync();
+            return await handler.RunAsync().ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(Authority authority,
             string[] scope, UserAssertion userAssertion, string policy)
         {
-            var requestParams = this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache);
+            var requestParams = this.CreateRequestParameters(authority, scope, policy, null, this.UserTokenCache);
             requestParams.UserAssertion = userAssertion;
             var handler = new OnBehalfOfRequest(requestParams);
-            return await handler.RunAsync();
+            return await handler.RunAsync().ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode,
             string[] scope, Uri redirectUri, string policy)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
-            var requestParams = this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache);
+            var requestParams = this.CreateRequestParameters(authority, scope, policy, null, this.UserTokenCache);
             requestParams.AuthorizationCode = authorizationCode;
             requestParams.RedirectUri = redirectUri;
             var handler =
                 new AuthorizationCodeRequest(requestParams);
-            return await handler.RunAsync();
+            return await handler.RunAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -177,8 +179,7 @@ namespace Microsoft.Identity.Client
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
             var requestParameters =
-                this.CreateRequestParameters(authority, scope, null, this.UserTokenCache);
-            requestParameters.ClientKey = new ClientKey(this.ClientId);
+                this.CreateRequestParameters(authority, scope, null, null, this.UserTokenCache);
             requestParameters.ClientKey = new ClientKey(this.ClientId);
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
@@ -202,7 +203,7 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters, string[] additionalScope, string authority, string policy)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
-            var requestParameters = this.CreateRequestParameters(authorityInstance, scope, policy,
+            var requestParameters = this.CreateRequestParameters(authorityInstance, scope, policy, null,
                 this.UserTokenCache);
             requestParameters.RedirectUri = new Uri(redirectUri);
             requestParameters.ClientKey = new ClientKey(this.ClientId);
@@ -215,10 +216,10 @@ namespace Microsoft.Identity.Client
         }
 
         internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope,
-            string policy,
+            string policy, User user,
             TokenCache cache)
         {
-            AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scope, policy, cache);
+            AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scope, policy, user, cache);
             parameters.ClientKey = new ClientKey(this.ClientId, this.ClientCredential, authority);
 
             return parameters;

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,18 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Internal.Interfaces;
+using System.Runtime.Serialization;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal.Cache
 {
-    internal class TokenCachePlugin : ITokenCachePlugin
+    [DataContract]
+    internal class RefreshTokenCacheItem : BaseTokenCacheItem
     {
-        public void BeforeAccess(TokenCacheNotificationArgs args)
+        internal RefreshTokenCacheItem()
         {
         }
 
-        public void AfterAccess(TokenCacheNotificationArgs args)
+        public RefreshTokenCacheItem(string authority, string clientId, string policy, TokenResponse response) : base(authority, clientId, policy, response)
         {
+            RefreshToken = response.RefreshToken;
+        }
+
+        [DataMember (Name = "refresh_token")]
+        public string RefreshToken { get; set; }
+
+        public override TokenCacheKey GetTokenCacheKey()
+        {
+            return new TokenCacheKey(null, null, ClientId, null, null, User.HomeObjectId, Policy);
         }
     }
 }

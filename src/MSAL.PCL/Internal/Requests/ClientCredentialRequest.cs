@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             this.SupportADFS = false;
         }
 
-        protected override HashSet<string> GetDecoratedScope(HashSet<string> inputScope)
+        protected override SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
         {
             return inputScope;
         }

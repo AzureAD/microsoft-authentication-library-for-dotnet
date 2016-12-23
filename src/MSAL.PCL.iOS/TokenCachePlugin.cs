@@ -26,8 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using Foundation;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.Interfaces;
 using Security;
 
@@ -35,16 +37,10 @@ namespace Microsoft.Identity.Client
 {
     internal class TokenCachePlugin : ITokenCachePlugin
     {
-        private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
+        private const string LocalSettingsContainerName = "MicrosoftAuthenticationLibrary";
 
         public void BeforeAccess(TokenCacheNotificationArgs args)
         {
-            if (args.TokenCache.Count > 0)
-            {
-                // We assume that the cache has not changed since last write
-                return;
-            }
-
             try
             {
                 SecStatusCode res;
@@ -65,7 +61,7 @@ namespace Microsoft.Identity.Client
                     byte[] dataBytes = match.ValueData.ToArray();
                     if (dataBytes != null)
                     {
-                        args.TokenCache.Deserialize(dataBytes);
+                       // args.TokenCache.Deserialize(dataBytes);
                     }
                 }
             }
@@ -94,11 +90,10 @@ namespace Microsoft.Identity.Client
                     };
 
                     var err = SecKeyChain.Remove(s);
-                    if (args.TokenCache.Count > 0)
-                    {
-                        s.ValueData = NSData.FromArray(args.TokenCache.Serialize());
+
+                       // s.ValueData = NSData.FromArray(args.TokenCache.Serialize());
                         err = SecKeyChain.Add(s);
-                    }
+                    
 
                     args.TokenCache.HasStateChanged = false;
                 }
@@ -107,6 +102,36 @@ namespace Microsoft.Identity.Client
                     PlatformPlugin.Logger.Warning(null, "Failed to save cache: " + ex);
                 }
             }
+        }
+
+        public ICollection<string> AllAccessAndIdTokens()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICollection<string> AllRefreshTokens()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SaveToken(TokenCacheItem tokenItem)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteToken(TokenCacheKey key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteRefreshToken(TokenCacheKey key)
+        {
+            throw new NotImplementedException();
         }
     }
 }

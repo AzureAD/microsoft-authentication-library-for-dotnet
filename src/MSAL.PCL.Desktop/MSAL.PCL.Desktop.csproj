@@ -25,7 +25,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisRuleSet>Sdl7.0.ruleset</CodeAnalysisRuleSet>
-	<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -39,7 +39,7 @@
     <CodeAnalysisRuleSet>Sdl7.0.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -79,6 +79,12 @@
     <Compile Include="..\MSAL.Common\Logger.cs">
       <Link>Logger.cs</Link>
     </Compile>
+    <Compile Include="..\MSAL.Common\TokenCachePlugin.cs">
+      <Link>TokenCachePlugin.cs</Link>
+    </Compile>
+    <Compile Include="..\MSAL.Common\TokenCacheExtensions.cs">
+      <Link>TokenCacheExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\MSAL.PCL\MsalOption.cs">
       <Link>MsalOption.cs</Link>
     </Compile>
@@ -102,7 +108,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="StaTaskScheduler.cs" />
-    <Compile Include="TokenCachePlugin.cs" />
     <Compile Include="WebBrowserInterfaces.cs" />
     <Compile Include="WebBrowserNavigateErrorEventArgs.cs" />
     <Compile Include="WebUI.cs" />

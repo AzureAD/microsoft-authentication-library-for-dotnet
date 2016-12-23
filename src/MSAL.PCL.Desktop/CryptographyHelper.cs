@@ -40,6 +40,11 @@ namespace Microsoft.Identity.Client
     {
         public string CreateSha256Hash(string input)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return null;
+            }
+
             using (SHA256Cng sha = new SHA256Cng())
             {
                 UTF8Encoding encoding = new UTF8Encoding();
@@ -50,9 +55,9 @@ namespace Microsoft.Identity.Client
         public string GenerateCodeVerifier()
         {
             byte[] buffer = new byte[Constants.CodeVerifierByteSize];
-            using (RNGCryptoServiceProvider RandomSource = new RNGCryptoServiceProvider())
+            using (RNGCryptoServiceProvider randomSource = new RNGCryptoServiceProvider())
             {
-                RandomSource.GetBytes(buffer);
+                randomSource.GetBytes(buffer);
             }
 
             return EncodingHelper.EncodeToBase64Url(buffer);

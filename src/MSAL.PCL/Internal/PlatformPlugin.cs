@@ -45,6 +45,8 @@ namespace Microsoft.Identity.Client.Internal
 
     internal static class PlatformPlugin
     {
+        private const string Namespace = "Microsoft.Identity.Client.";
+
         static PlatformPlugin()
         {
             if (PlatformPluginSwitch.DynamicallyLinkAssembly)
@@ -54,6 +56,16 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         public static IWebUIFactory WebUIFactory { get; set; }
+
+        public static ITokenCachePlugin NewTokenCachePluginInstance
+        {
+            get
+            {
+                Assembly assembly = LoadPlatformSpecificAssembly();
+                return (ITokenCachePlugin) Activator.CreateInstance(assembly.GetType(Namespace + "TokenCachePlugin"));
+            }
+        }
+
         public static ITokenCachePlugin TokenCachePlugin { get; set; }
         public static LoggerBase Logger { get; set; }
         public static PlatformInformationBase PlatformInformation { get; set; }
@@ -65,7 +77,6 @@ namespace Microsoft.Identity.Client.Internal
         public static void InitializeByAssemblyDynamicLinking()
         {
             Assembly assembly = LoadPlatformSpecificAssembly();
-            const string Namespace = "Microsoft.Identity.Client.";
             InjectDependecies(
                 (IWebUIFactory) Activator.CreateInstance(assembly.GetType(Namespace + "WebUIFactory")),
                 (ITokenCachePlugin) Activator.CreateInstance(assembly.GetType(Namespace + "TokenCachePlugin")),

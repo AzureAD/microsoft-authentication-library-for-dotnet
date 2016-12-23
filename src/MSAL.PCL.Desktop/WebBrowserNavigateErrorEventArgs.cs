@@ -65,9 +65,7 @@ namespace Microsoft.Identity.Client
         {
             get { return this.url; }
         }
-
-        // ADAL.Native has code for interpretation of this code to string
-        // we don't do it here, as we need to come consideration should we do it or not.
+        
         /// <summary>
         /// </summary>
         public int StatusCode

@@ -28,6 +28,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Interfaces
 {
@@ -35,6 +36,6 @@ namespace Microsoft.Identity.Client.Internal.Interfaces
     {
         IPlatformParameters PlatformParameters { get; set; }
         bool CanInvokeBroker { get; }
-        Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload);
+        Task<TokenResponse> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload);
     }
 }

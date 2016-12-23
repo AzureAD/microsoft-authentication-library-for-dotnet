@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetDeviceModel()
         {
-            // Since ADAL .NET may be used on servers, for security reasons, we do not emit device type.
+            // Since MSAL .NET may be used on servers, for security reasons, we do not emit device type.
             return null;
         }
 

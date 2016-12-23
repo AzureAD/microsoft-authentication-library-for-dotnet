@@ -29,7 +29,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>Sdl7.0.ruleset</CodeAnalysisRuleSet>
-	<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -42,7 +42,7 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>Sdl7.0.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -72,13 +72,18 @@
     <Compile Include="..\MSAL.PCL\MsalOption.cs">
       <Link>MsalOption.cs</Link>
     </Compile>
+    <Compile Include="..\MSAL.Common\TokenCachePlugin.cs">
+      <Link>TokenCachePlugin.cs</Link>
+    </Compile>
+    <Compile Include="..\MSAL.Common\TokenCacheExtensions.cs">
+      <Link>TokenCacheExtensions.cs</Link>
+    </Compile>
     <Compile Include="BrokerHelper.cs" />
     <Compile Include="DeviceAuthHelper.cs" />
     <Compile Include="PlatformParameters.cs" />
     <Compile Include="CryptographyHelper.cs" />
     <Compile Include="PlatformInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TokenCachePlugin.cs" />
     <Compile Include="WebUIFactory.cs" />
   </ItemGroup>
   <ItemGroup>

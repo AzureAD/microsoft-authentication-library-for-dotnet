@@ -29,39 +29,45 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.Cache
 {
     /// <summary>
     /// <see cref="TokenCacheKey" /> can be used with Linq to access items from the TokenCache dictionary.
     /// </summary>
     internal sealed class TokenCacheKey
     {
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, User user, string policy)
+        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, User user, string policy)
             : this(
                 authority, scope, clientId, (user != null) ? user.UniqueId : null,
                 (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null, policy)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, User user)
+        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, User user)
             : this(
                 authority, scope, clientId, (user != null) ? user.UniqueId : null,
                 (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null, null)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId,
+        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, string uniqueId,
             string displayableId, string homeObjectId)
             : this(authority, scope, clientId, uniqueId, displayableId, homeObjectId, null)
         {
         }
 
-        internal TokenCacheKey(string authority, HashSet<string> scope, string clientId, string uniqueId,
+        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, string uniqueId,
             string displayableId, string homeObjectId, string policy)
         {
             this.Authority = authority;
             this.Scope = scope;
+            if (this.Scope == null)
+            {
+                this.Scope = new SortedSet<string>();
+            }
+
             this.ClientId = clientId;
             this.UniqueId = uniqueId;
             this.DisplayableId = displayableId;
@@ -70,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         public string Authority { get; }
-        public HashSet<string> Scope { get; }
+        public SortedSet<string> Scope { get; }
         public string ClientId { get; }
         public string UniqueId { get; }
         public string DisplayableId { get; }
@@ -82,12 +88,36 @@ namespace Microsoft.Identity.Client.Internal
         /// <returns></returns>
         public override string ToString()
         {
-            return
-                string.Format(CultureInfo.InvariantCulture,
-                    "Authority:{0}, Scope:{1}, ClientId:{2}, UniqueId:{3}, DisplayableId:{4}, HomeObjectId:{5}, Policy:{6}",
-                    this.Authority, MsalStringHelper.AsSingleString(this.Scope.ToArray()), this.ClientId,
-                    this.UniqueId, this.DisplayableId, this.HomeObjectId, this.Policy);
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.Append(EncodingHelper.Base64Encode(Authority) + "$");
+            stringBuilder.Append(EncodingHelper.Base64Encode(ClientId) + "$");
+            // scope is treeSet to guarantee the order of the scopes when converting to string.
+            stringBuilder.Append(EncodingHelper.Base64Encode(Scope.AsSingleString()) + "$");
+            stringBuilder.Append(EncodingHelper.Base64Encode(DisplayableId) + "$");
+            stringBuilder.Append(EncodingHelper.Base64Encode(UniqueId) + "$");
+            stringBuilder.Append(EncodingHelper.Base64Encode(HomeObjectId) + "$");
+            stringBuilder.Append(EncodingHelper.Base64Encode(Policy));
+
+            return stringBuilder.ToString();
         }
+
+/*        public static TokenCacheKey Deserialize(string serializedKey)
+        {
+            var sentences = new List<string>();
+            int position = 0;
+            int start = 0;
+            // Extract from the string.
+            do
+            {
+                position = serializedKey.IndexOf('$', start);
+                if (position >= 0)
+                {
+                    sentences.Add(serializedKey.Substring(start, position - start + 1));
+                    start = position + 1;
+                }
+            } while (position > 0);
+
+        }*/
 
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
@@ -142,31 +172,7 @@ namespace Microsoft.Identity.Client.Internal
                     + ((this.Policy != null) ? this.Policy.ToLower() : null)).GetHashCode();
         }
 
-        internal bool ScopeContains(HashSet<string> otherScope)
-        {
-            if (this.Scope == null)
-            {
-                return otherScope == null;
-            }
-
-            if (otherScope == null)
-            {
-                return true;
-            }
-
-
-            foreach (string otherString in otherScope)
-            {
-                if (!this.Scope.ToLower().Contains(otherString.ToLower()))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        internal bool ScopeEquals(HashSet<string> otherScope)
+        internal bool ScopeEquals(SortedSet<string> otherScope)
         {
             if (this.Scope == null)
             {
@@ -184,21 +190,6 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             return false;
-        }
-
-        public bool ScopeIntersects(HashSet<string> otherScope)
-        {
-            if (this.Scope == null)
-            {
-                return otherScope == null;
-            }
-
-            if (otherScope == null)
-            {
-                return this.Scope == null;
-            }
-
-            return this.Scope.ToLower().Intersect(otherScope.ToLower()).ToArray().Length > 0;
         }
 
         internal bool Equals(string string1, string string2)

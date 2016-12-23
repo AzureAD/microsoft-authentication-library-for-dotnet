@@ -25,31 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.OAuth2;
+using Microsoft.Identity.Client.Internal.Cache;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class SilentRequest : BaseRequest
     {
-        public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, string userIdentifer,
-            IPlatformParameters parameters, bool forceRefresh)
-            : this(authenticationRequestParameters, (User) null, parameters, forceRefresh)
-        {
-            this.User = this.MapIdentifierToUser(userIdentifer);
-            PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
-            this.SupportADFS = false;
-        }
-
-        public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, User user,
-            IPlatformParameters parameters, bool forceRefresh)
+        public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, IPlatformParameters parameters, bool forceRefresh)
             : base(authenticationRequestParameters)
         {
-            if (user != null)
+            if (authenticationRequestParameters.User == null)
             {
-                this.User = user;
+                throw new ArgumentNullException(nameof(authenticationRequestParameters.User));
             }
-
+            
             PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
             this.SupportADFS = false;
             this.ForceRefresh = forceRefresh;
@@ -60,15 +52,50 @@ namespace Microsoft.Identity.Client.Internal.Requests
             throw new System.NotImplementedException();
         }
 
-        protected override Task<AuthenticationResultEx> SendTokenRequestAsync()
+        protected override async Task SendTokenRequestAsync()
         {
-            if (ResultEx == null)
+            if (!this.LoadFromCache)
             {
-                PlatformPlugin.Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
-                throw new MsalSilentTokenAcquisitionException();
+                throw new MsalSilentTokenAcquisitionException(new Exception("Token cache is set to null"));
             }
 
-            throw new MsalSilentTokenAcquisitionException(ResultEx.Exception);
+            //look for access token first because force refresh is not set
+            if (!ForceRefresh)
+            {
+                AccessTokenItem
+                     = TokenCache.FindAccessToken(AuthenticationRequestParameters);
+            }
+
+            if (AccessTokenItem == null)
+            {
+                RefreshTokenCacheItem refreshTokenItem =
+                    TokenCache.FindRefreshToken(AuthenticationRequestParameters);
+
+                if (refreshTokenItem == null)
+                {
+                    PlatformPlugin.Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
+                    throw new MsalSilentTokenAcquisitionException(
+                        new Exception("No token matching arguments found in the cache"));
+                }
+
+                await this.RefreshAccessTokenAsync(refreshTokenItem).ConfigureAwait(false);
+            }
+        }
+
+
+
+        internal async Task RefreshAccessTokenAsync(RefreshTokenCacheItem item)
+        {
+                PlatformPlugin.Logger.Verbose(this.CallState, "Refreshing access token...");
+                
+                    await this.SendTokenRequestByRefreshTokenAsync(item.RefreshToken).ConfigureAwait(false);
+
+                    if (Response.IdToken == null)
+                    {
+                        // If Id token is not returned by token endpoint when refresh token is redeemed, 
+                        // we should copy tenant and user information from the cached token.
+                        Response.IdToken = item.RawIdToken;
+                    }
         }
     }
 }

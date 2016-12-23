@@ -40,9 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public TokenCache TokenCache { get; set; }
 
-        public bool RestrictToSingleUser { get; set; }
-
-        public HashSet<string> Scope { get; set; }
+        public SortedSet<string> Scope { get; set; }
 
         public ClientKey ClientKey { get; set; }
 
@@ -57,6 +55,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string ExtraQueryParameters { get; set; }
 
         public string Prompt { get; set; }
+
+        public User User { get; set; }
 
         public UserAssertion UserAssertion { get; set; }
     }

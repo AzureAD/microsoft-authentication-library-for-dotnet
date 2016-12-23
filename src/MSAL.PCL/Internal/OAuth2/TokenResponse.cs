@@ -71,75 +71,16 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
         [DataMember(Name = TokenResponseClaim.IdTokenExpiresIn, IsRequired = false)]
         public long IdTokenExpiresIn { get; set; }
 
-        public AuthenticationResultEx GetResultEx()
+        public DateTimeOffset AccessTokenExpiresOn
         {
-            AuthenticationResultEx resultEx = null;
-
-            if (!string.IsNullOrEmpty(this.AccessToken) || !string.IsNullOrEmpty(this.IdToken))
-            {
-                DateTimeOffset accessTokenExpiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn);
-                DateTimeOffset idTokenExpiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(this.IdTokenExpiresIn);
-
-                AuthenticationResult result = null;
-                if (!string.IsNullOrEmpty(this.AccessToken))
-                {
-                    result = new AuthenticationResult(this.TokenType, this.AccessToken, accessTokenExpiresOn);
-                }
-                else
-                {
-                    result = new AuthenticationResult(this.TokenType, this.IdToken, idTokenExpiresOn);
-                }
-
-
-                result.FamilyId = FamilyId;
-                IdToken idToken = Internal.IdToken.Parse(this.IdToken);
-                if (idToken != null)
-                {
-                    string tenantId = idToken.TenantId;
-                    string uniqueId = null;
-
-                    if (!string.IsNullOrWhiteSpace(idToken.ObjectId))
-                    {
-                        uniqueId = idToken.ObjectId;
-                    }
-                    else if (!string.IsNullOrWhiteSpace(idToken.Subject))
-                    {
-                        uniqueId = idToken.Subject;
-                    }
-
-                    if (string.IsNullOrWhiteSpace(idToken.HomeObjectId))
-                    {
-                        idToken.HomeObjectId = uniqueId;
-                    }
-
-                    result.UpdateTenantAndUser(tenantId, this.IdToken,
-                        new User
-                        {
-                            UniqueId = uniqueId,
-                            DisplayableId = idToken.PreferredUsername,
-                            HomeObjectId = idToken.HomeObjectId,
-                            Name = idToken.Name,
-                            IdentityProvider = idToken.Issuer
-                        });
-                }
-
-                result.ScopeSet = Scope.AsSet();
-                resultEx = new AuthenticationResultEx
-                {
-                    Result = result,
-                    RefreshToken = this.RefreshToken
-                };
-            }
-            else if (this.Error != null)
-            {
-                throw new MsalServiceException(this.Error, this.ErrorDescription);
-            }
-            else
-            {
-                throw new MsalServiceException(MsalError.Unknown, MsalErrorMessage.Unknown);
-            }
-
-            return resultEx;
+            get { return DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn); }
         }
+
+        public DateTimeOffset IdTokenExpiresOn
+        {
+            get { return DateTime.UtcNow + TimeSpan.FromSeconds(this.IdTokenExpiresIn); }
+        }
+        
+        public string UserAssertionHash { get; set; }
     }
 }

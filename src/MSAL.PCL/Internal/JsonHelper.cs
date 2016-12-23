@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal static class JsonHelper
     {
-        internal static string EncodeToJson<T>(T toEncode)
+        internal static string SerializeToJson<T>(T toEncode)
         {
             using (MemoryStream stream = new MemoryStream())
             {
@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        internal static T DecodeFromJson<T>(string json)
+        internal static T DeserializeFromJson<T>(string json)
         {
             T response;
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (T));

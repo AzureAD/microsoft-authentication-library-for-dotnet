@@ -68,12 +68,7 @@ namespace Microsoft.Identity.Client
             this.RedirectUri = redirectUri;
             this.ValidateAuthority = validateAuthority;
         }
-
-        /// <summary>
-        /// default false.
-        /// </summary>
-        public bool RestrictToSingleUser { get; set; }
-
+        
         /// <Summary>
         /// Authority
         /// </Summary>
@@ -119,7 +114,7 @@ namespace Microsoft.Identity.Client
         {
             get
             {
-                if (this.UserTokenCache == null || this.UserTokenCache.Count == 0)
+                if (this.UserTokenCache == null)
                 {
                     PlatformPlugin.Logger.Information(null, "Token cache is null or empty");
                     return new List<User>();
@@ -129,7 +124,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        /// <summary>
+/*        /// <summary>
         /// </summary>
         /// <param name="scope"></param>
         /// <returns></returns>
@@ -140,7 +135,7 @@ namespace Microsoft.Identity.Client
                 await
                     this.AcquireTokenSilentCommonAsync(authority, scope, (string) null, this.PlatformParameters,
                         null, false).ConfigureAwait(false);
-        }
+        }*/
 
         /// <summary>
         /// </summary>
@@ -156,7 +151,7 @@ namespace Microsoft.Identity.Client
                         .ConfigureAwait(false);
         }
 
-        /// <summary>
+/*        /// <summary>
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="userIdentifier"></param>
@@ -168,9 +163,9 @@ namespace Microsoft.Identity.Client
                 await
                     this.AcquireTokenSilentCommonAsync(authority, scope, userIdentifier, this.PlatformParameters,
                         null, false).ConfigureAwait(false);
-        }
+        }*/
 
-        /// <summary>
+/*        /// <summary>
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="userIdentifier"></param>
@@ -186,7 +181,7 @@ namespace Microsoft.Identity.Client
                 await
                     this.AcquireTokenSilentCommonAsync(authorityInstance, scope, userIdentifier, this.PlatformParameters,
                         policy, forceRefresh).ConfigureAwait(false);
-        }
+        }*/
 
         /// <summary>
         /// </summary>
@@ -205,20 +200,7 @@ namespace Microsoft.Identity.Client
                     this.AcquireTokenSilentCommonAsync(authorityInstance, scope, user, this.PlatformParameters, policy,
                         forceRefresh).ConfigureAwait(false);
         }
-
-        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
-            string[] scope, string userIdentifier, IPlatformParameters parameters, string policy, bool forceRefresh)
-        {
-            if (parameters == null)
-            {
-                parameters = PlatformPlugin.DefaultPlatformParameters;
-            }
-
-            var handler = new SilentRequest(this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache),
-                userIdentifier, parameters, forceRefresh);
-            return await handler.RunAsync().ConfigureAwait(false);
-        }
-
+        
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
             string[] scope, User user, IPlatformParameters parameters, string policy, bool forceRefresh)
         {
@@ -228,21 +210,21 @@ namespace Microsoft.Identity.Client
             }
 
             var handler = new SilentRequest(
-                this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache), user,
+                this.CreateRequestParameters(authority, scope, policy, user, this.UserTokenCache),
                 parameters, forceRefresh);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
         internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope,
-            string policy, TokenCache cache)
+            string policy, User user, TokenCache cache)
         {
             return new AuthenticationRequestParameters
             {
                 Authority = authority,
                 TokenCache = cache,
+                User = user,
                 Scope = scope.CreateSetFromArray(),
                 Policy = policy,
-                RestrictToSingleUser = this.RestrictToSingleUser,
                 RedirectUri = new Uri(this.RedirectUri),
                 CallState = CreateCallState(this.CorrelationId)
             };
