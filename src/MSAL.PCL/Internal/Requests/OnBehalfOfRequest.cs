@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task SendTokenRequestAsync()
         {
-            await base.SendTokenRequestAsync();
+            await base.SendTokenRequestAsync().ConfigureAwait(false);
             if (Response != null)
             {
                 Response.UserAssertionHash = AuthenticationRequestParameters.UserAssertion.AssertionHash;

@@ -47,16 +47,12 @@ namespace Test.MSAL.NET.Unit.RequestsTests
     [TestClass]
     public class InteractiveRequestTests
     {
-        private TokenCache _appTokenCache;
-        private TokenCache _userTokenCache;
         private TokenCachePlugin _tokenCachePlugin;
 
         [TestInitialize]
         public void TestInitialize()
         {
             Authority._validatedAuthorities.Clear();
-            _appTokenCache = new TokenCache(TestConstants.ClientId);
-            _userTokenCache = new TokenCache(TestConstants.ClientId);
             _tokenCachePlugin = (TokenCachePlugin)PlatformPlugin.TokenCachePlugin;
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
