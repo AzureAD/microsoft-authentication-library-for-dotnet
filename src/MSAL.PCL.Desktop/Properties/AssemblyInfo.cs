@@ -36,6 +36,9 @@ using System.Runtime.InteropServices;
 // COM, set the ComVisible attribute to true on that type.
 
 [assembly: ComVisible(false)]
+ 
+// Allow this assembly to be serviced when run on desktop CLR
+[assembly: AssemblyMetadata("Serviceable", "True")]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 

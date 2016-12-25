@@ -37,6 +37,9 @@ using System.Runtime.InteropServices;
 
 [assembly: ComVisible(false)]
 
+// Allow this assembly to be serviced when run on desktop CLR
+[assembly: AssemblyMetadata("Serviceable", "True")]
+
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 
 [assembly: Guid("ff47962a-d498-4c63-b7e9-4db3653ad7db")]

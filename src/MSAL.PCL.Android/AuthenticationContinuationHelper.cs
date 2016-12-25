@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Globalization;
 using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Internal;
@@ -39,6 +40,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
+            PlatformPlugin.Logger.Information(null, string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
             AuthorizationResult authorizationResult = null;
 
             switch ((int) resultCode)
