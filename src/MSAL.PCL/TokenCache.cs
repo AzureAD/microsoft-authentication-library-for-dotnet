@@ -53,6 +53,10 @@ namespace Microsoft.Identity.Client
         private volatile bool hasStateChanged;
         private readonly string _clientId;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientId"></param>
         public TokenCache(string clientId)
         {
             _clientId = clientId;
