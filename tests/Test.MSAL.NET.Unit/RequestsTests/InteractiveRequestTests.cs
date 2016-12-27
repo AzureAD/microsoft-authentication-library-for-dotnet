@@ -73,7 +73,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 TokenType = "Bearer",
                 Token = atKey.ToString(),
-                ExpiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
+                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
                 Scope = TestConstants.Scope
             };
             _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);

@@ -28,16 +28,121 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Net;
+using System.Linq;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    /// <summary>
-    /// The encoding helper.
-    /// </summary>
-    internal static class EncodingHelper
+    internal static class MsalHelpers
     {
+        internal static SortedSet<string> ToLower(this SortedSet<string> setOfStrings)
+        {
+            if (setOfStrings == null)
+            {
+                return null;
+            }
+
+            SortedSet<string> set = new SortedSet<string>();
+            foreach (var item in setOfStrings)
+            {
+                set.Add(item.ToLower());
+            }
+
+            return set;
+        }
+
+        internal static string[] AsArray(this SortedSet<string> setOfStrings)
+        {
+            if (setOfStrings == null)
+            {
+                return null;
+            }
+
+            return setOfStrings.ToArray();
+        }
+
+        internal static string AsSingleString(this SortedSet<string> setOfStrings)
+        {
+            return AsSingleString(setOfStrings.ToArray());
+        }
+
+        internal static string AsSingleString(this string[] arrayOfStrings)
+        {
+            if (IsNullOrEmpty(arrayOfStrings))
+            {
+                return String.Empty;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append(arrayOfStrings[0]);
+
+            for (int i = 1; i < arrayOfStrings.Length; i++)
+            {
+                sb.Append(" ");
+                sb.Append(arrayOfStrings[i]);
+            }
+
+            return sb.ToString();
+        }
+
+        internal static SortedSet<string> AsSet(this string singleString)
+        {
+            if (String.IsNullOrEmpty(singleString))
+            {
+                return new SortedSet<string>();
+            }
+
+            return new SortedSet<string>(singleString.Split(new[] {" "}, StringSplitOptions.None));
+        }
+
+        internal static string[] AsArray(this string singleString)
+        {
+            if (String.IsNullOrWhiteSpace(singleString))
+            {
+                return new string[] {};
+            }
+
+            return singleString.Split(new[] {" "}, StringSplitOptions.None);
+        }
+
+        internal static SortedSet<string> CreateSetFromArray(this string[] arrayStrings)
+        {
+            SortedSet<string> set = new SortedSet<string>();
+            if (arrayStrings == null || arrayStrings.Length == 0)
+            {
+                return set;
+            }
+
+            foreach (string str in arrayStrings)
+            {
+                set.Add(str);
+            }
+
+            return set;
+        }
+
+        internal static bool IsNullOrEmpty(string[] input)
+        {
+            return input == null || input.Length == 0;
+        }
+
+        internal static string ByteArrayToString(byte[] input)
+        {
+            return Encoding.UTF8.GetString(input, 0, input.Length);
+        }
+
+        public static DateTime UnixTimestampToDateTime(double unixTimeStamp)
+        {
+            DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            dtDateTime = dtDateTime.AddSeconds(unixTimeStamp).ToUniversalTime();
+            return dtDateTime;
+        }
+
+        public static long DateTimeToUnixTimestamp(DateTimeOffset dtOffset)
+        {
+            return (long)(dtOffset.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc))).TotalSeconds;
+        }
+
         public static string CreateString(byte[] bytes)
         {
             return Encoding.UTF8.GetString(bytes, 0, bytes.Length);
@@ -120,7 +225,7 @@ namespace Microsoft.Identity.Client.Internal
                         key = key.Trim().ToLower();
                     }
 
-                    value = value.Trim().Trim(new[] {'\"'}).Trim();
+                    value = value.Trim().Trim(new[] { '\"' }).Trim();
 
                     if (response.ContainsKey(key) && callState != null)
                     {
@@ -205,7 +310,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public static string EncodeToBase64Url(string input)
         {
-            return EncodeToBase64Url(EncodingHelper.ToByteArray(input));
+            return EncodeToBase64Url(ToByteArray(input));
         }
 
         public static string EncodeToBase64Url(byte[] input)
@@ -218,7 +323,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             string incoming = returnValue
                 .Replace('_', '/').Replace('-', '+');
-            switch (returnValue.Length%4)
+            switch (returnValue.Length % 4)
             {
                 case 2:
                     incoming += "==";
@@ -230,7 +335,7 @@ namespace Microsoft.Identity.Client.Internal
             byte[] bytes = Convert.FromBase64String(incoming);
             return CreateString(bytes);
         }
-        
+
         internal static string Base64Decode(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -252,7 +357,7 @@ namespace Microsoft.Identity.Client.Internal
 
             return encodedString;
         }
-        
+
         internal static List<string> SplitWithQuotes(string input, char delimiter)
         {
             List<string> items = new List<string>();

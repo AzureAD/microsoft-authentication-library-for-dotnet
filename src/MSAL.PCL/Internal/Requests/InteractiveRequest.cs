@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             _additionalScope = new SortedSet<string>();
-            if (!MsalStringHelper.IsNullOrEmpty(additionalScope))
+            if (!MsalHelpers.IsNullOrEmpty(additionalScope))
             {
                 this._additionalScope = additionalScope.CreateSetFromArray();
             }
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 codeVerifier = PlatformPlugin.CryptographyHelper.GenerateCodeVerifier();
                 string codeVerifierHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(codeVerifier);
 
-                requestParameters[OAuth2Parameter.CodeChallenge] = EncodingHelper.EncodeToBase64Url(codeVerifierHash);
+                requestParameters[OAuth2Parameter.CodeChallenge] = MsalHelpers.EncodeToBase64Url(codeVerifierHash);
                 requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
             }
 
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 // Checks for _extraQueryParameters duplicating standard parameters
                 Dictionary<string, string> kvps =
-                    EncodingHelper.ParseKeyValueList(AuthenticationRequestParameters.ExtraQueryParameters, '&', false,
+                    MsalHelpers.ParseKeyValueList(AuthenticationRequestParameters.ExtraQueryParameters, '&', false,
                         this.CallState);
 
                 foreach (KeyValuePair<string, string> kvp in kvps)

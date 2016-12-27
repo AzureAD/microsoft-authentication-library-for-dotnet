@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
                 randomSource.GetBytes(buffer);
             }
 
-            return EncodingHelper.EncodeToBase64Url(buffer);
+            return MsalHelpers.EncodeToBase64Url(buffer);
         }
     }
 }

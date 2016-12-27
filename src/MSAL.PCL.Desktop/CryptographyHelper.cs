@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
                 randomSource.GetBytes(buffer);
             }
 
-            return EncodingHelper.EncodeToBase64Url(buffer);
+            return MsalHelpers.EncodeToBase64Url(buffer);
         }
 
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)

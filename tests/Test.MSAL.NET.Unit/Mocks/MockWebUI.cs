@@ -46,7 +46,7 @@ namespace Test.MSAL.NET.Unit.Mocks
             if (QueryParams != null)
             {
                 Assert.IsNotNull(authorizationUri.Query);
-                IDictionary<string, string> inputQp = EncodingHelper.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);
+                IDictionary<string, string> inputQp = MsalHelpers.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);
                 foreach (var key in QueryParams.Keys)
                 {
                     Assert.IsTrue(inputQp.ContainsKey(key));

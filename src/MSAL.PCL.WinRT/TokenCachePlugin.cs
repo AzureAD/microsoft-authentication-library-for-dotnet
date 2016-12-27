@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
             foreach(var item in _tokenContainer.Values.Values)
             {
                 byte[] decryptedEntry = CryptographyHelper.Decrypt((byte[]) item);
-                list.Add(EncodingHelper.CreateString(decryptedEntry));
+                list.Add(MsalHelpers.CreateString(decryptedEntry));
             }
 
             return list;
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client
             foreach (var item in _refreshTokenContainer.Values.Values)
             {
                 byte[] decryptedEntry = CryptographyHelper.Decrypt((byte[])item);
-                list.Add(EncodingHelper.CreateString(decryptedEntry));
+                list.Add(MsalHelpers.CreateString(decryptedEntry));
             }
 
             return list;

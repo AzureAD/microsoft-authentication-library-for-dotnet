@@ -47,8 +47,17 @@ namespace Microsoft.Identity.Client.Internal.Cache
         [DataMember(Name = "token")]
         public string Token { get; internal set; }
 
+        public DateTimeOffset ExpiresOn
+        {
+            get
+            {
+                DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+                return dtDateTime.AddSeconds(ExpiresOnUnixTimestamp).ToUniversalTime();
+            }
+        }
+
         [DataMember(Name = "expires_on")]
-        public DateTimeOffset ExpiresOn { get; internal set; }
+        public long ExpiresOnUnixTimestamp { get; internal set; }
 
         /// <summary>
         /// Gets the Scope.
@@ -66,12 +75,12 @@ namespace Microsoft.Identity.Client.Internal.Cache
             if (response.AccessToken != null)
             {
                 Token = response.AccessToken;
-                ExpiresOn = response.AccessTokenExpiresOn;
+                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(response.AccessTokenExpiresOn);
             }
             else if (response.IdToken != null)
             {
                 Token = response.IdToken;
-                ExpiresOn = response.IdTokenExpiresOn;
+                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(response.IdTokenExpiresOn);
             }
 
             Scope = response.Scope.AsSet();

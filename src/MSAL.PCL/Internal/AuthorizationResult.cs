@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Internal
             if (!string.IsNullOrWhiteSpace(resultData))
             {
                 // Remove the leading '?' first
-                Dictionary<string, string> response = EncodingHelper.ParseKeyValueList(resultData.Substring(1), '&',
+                Dictionary<string, string> response = MsalHelpers.ParseKeyValueList(resultData.Substring(1), '&',
                     true, null);
 
                 if (response.ContainsKey(TokenResponseClaim.State))

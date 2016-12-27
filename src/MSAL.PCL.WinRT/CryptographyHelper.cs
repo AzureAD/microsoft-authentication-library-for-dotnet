@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
             var windowsBuffer = CryptographicBuffer.GenerateRandom((uint) buffer.Length);
             Array.Copy(windowsBuffer.ToArray(), buffer, buffer.Length);
 
-            return EncodingHelper.EncodeToBase64Url(buffer);
+            return MsalHelpers.EncodeToBase64Url(buffer);
         }
 
         public static string Encrypt(string message)
