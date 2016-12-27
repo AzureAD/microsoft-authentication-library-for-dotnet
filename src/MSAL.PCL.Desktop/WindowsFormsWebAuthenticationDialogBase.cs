@@ -117,6 +117,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected virtual void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
         {
+            if (this.DialogResult == DialogResult.OK)
+            {
+                e.Cancel = true;
+                return;
+            }
+
             if (this.webBrowser.IsDisposed)
             {
                 // we cancel all flows in disposed object and just do nothing, let object to close.
@@ -167,6 +173,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected virtual void WebBrowserNavigateErrorHandler(object sender, WebBrowserNavigateErrorEventArgs e)
         {
+            if (this.DialogResult == DialogResult.OK)
+            {
+                e.Cancel = true;
+                return;
+            }
+
             if (this.webBrowser.IsDisposed)
             {
                 // we cancel all flow in disposed object.
@@ -204,7 +216,7 @@ namespace Microsoft.Identity.Client
             }
 
             if (!readyToClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) &&
-                !url.AbsoluteUri.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase))
+                !url.AbsoluteUri.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) && !url.AbsoluteUri.Equals("javascript", StringComparison.CurrentCultureIgnoreCase))
             {
                 this.Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
                 this.Result.Error = MsalError.NonHttpsRedirectNotSupported;
