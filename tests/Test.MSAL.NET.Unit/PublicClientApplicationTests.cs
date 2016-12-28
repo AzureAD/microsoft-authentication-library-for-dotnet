@@ -114,7 +114,7 @@ namespace Test.MSAL.NET.Unit
             {
                 Token = key.ToString(),
                 TokenType = "Bearer",
-                ExpiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)),
+                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp((DateTime.UtcNow + TimeSpan.FromSeconds(3600))),
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,

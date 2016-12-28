@@ -89,7 +89,7 @@
     <Compile Include="IClientAssertionCertificate.cs" />
     <Compile Include="LoggerCallbackHandler.cs" />
     <Compile Include="MsalException.cs" />
-    <Compile Include="Internal\MsalStringHelper.cs" />
+    <Compile Include="Internal\MsalHelpers.cs" />
     <Compile Include="Internal\MsalIdHelper.cs" />
     <Compile Include="MsalServiceException.cs" />
     <Compile Include="MsalSilentTokenAcquisitionException.cs" />
@@ -118,7 +118,6 @@
     <Compile Include="Internal\OAuth2\OAuthConstants.cs" />
     <Compile Include="Internal\PlatformInformationBase.cs" />
     <Compile Include="Internal\Interfaces\IWebUI.cs" />
-    <Compile Include="Internal\EncodingHelper.cs" />
     <Compile Include="Internal\Interfaces\IWebUIFactory.cs" />
     <Compile Include="Internal\PlatformPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

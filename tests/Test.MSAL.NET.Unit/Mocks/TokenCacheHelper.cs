@@ -44,7 +44,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                 ClientId = TestConstants.ClientId,
                 Policy = TestConstants.Policy,
                 TokenType = "Bearer",
-                ExpiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
                 RawIdToken = MockHelpers.DefaultIdToken,
                 User = new User
                 {
@@ -64,7 +64,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                 ClientId = TestConstants.ClientId,
                 Policy = TestConstants.Policy,
                 TokenType = "Bearer",
-                ExpiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
                 RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId, TestConstants.HomeObjectId),
                 User = new User
                 {

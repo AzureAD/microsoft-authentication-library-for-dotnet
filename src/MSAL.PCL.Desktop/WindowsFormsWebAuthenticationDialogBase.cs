@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client
             {
                 PlatformPlugin.Logger.Verbose(null,
                     string.Format(CultureInfo.InvariantCulture, "Navigating to '{0}'.",
-                        EncodingHelper.UrlDecode(e.Url.ToString())));
+                        MsalHelpers.UrlDecode(e.Url.ToString())));
             }
         }
 
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Client
             {
                 PlatformPlugin.Logger.Verbose(null,
                     string.Format(CultureInfo.InvariantCulture, "Navigated to '{0}'.",
-                        EncodingHelper.UrlDecode(e.Url.ToString())));
+                        MsalHelpers.UrlDecode(e.Url.ToString())));
             }
         }
 

@@ -41,7 +41,7 @@ namespace Test.MSAL.NET.Unit
     [TestClass]
     public class TokenCacheTests
     {
-        public static long ValidExpiresIn = 28800;
+        public static long ValidExpiresIn = 3600;
         // Passing a seed to make repro possible
         private static readonly Random Rand = new Random(42);
 
@@ -73,7 +73,7 @@ namespace Test.MSAL.NET.Unit
             {
                 TokenType = "Bearer",
                 Token = atKey.ToString(),
-                ExpiresOn = new DateTimeOffset(DateTime.UtcNow)
+                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow)
             };
             _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
 
@@ -161,7 +161,7 @@ namespace Test.MSAL.NET.Unit
                 ClientId = TestConstants.ClientId,
                 Policy = TestConstants.Policy,
                 TokenType = "Bearer",
-                ExpiresOn = new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
                 RawIdToken = null,
                 User = null,
                 Scope = TestConstants.Scope

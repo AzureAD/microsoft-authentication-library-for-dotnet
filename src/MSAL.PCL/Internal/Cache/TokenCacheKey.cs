@@ -89,14 +89,14 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append(EncodingHelper.Base64Encode(Authority) + "$");
-            stringBuilder.Append(EncodingHelper.Base64Encode(ClientId) + "$");
+            stringBuilder.Append(MsalHelpers.Base64Encode(Authority) + "$");
+            stringBuilder.Append(MsalHelpers.Base64Encode(ClientId) + "$");
             // scope is treeSet to guarantee the order of the scopes when converting to string.
-            stringBuilder.Append(EncodingHelper.Base64Encode(Scope.AsSingleString()) + "$");
-            stringBuilder.Append(EncodingHelper.Base64Encode(DisplayableId) + "$");
-            stringBuilder.Append(EncodingHelper.Base64Encode(UniqueId) + "$");
-            stringBuilder.Append(EncodingHelper.Base64Encode(HomeObjectId) + "$");
-            stringBuilder.Append(EncodingHelper.Base64Encode(Policy));
+            stringBuilder.Append(MsalHelpers.Base64Encode(Scope.AsSingleString()) + "$");
+            stringBuilder.Append(MsalHelpers.Base64Encode(DisplayableId) + "$");
+            stringBuilder.Append(MsalHelpers.Base64Encode(UniqueId) + "$");
+            stringBuilder.Append(MsalHelpers.Base64Encode(HomeObjectId) + "$");
+            stringBuilder.Append(MsalHelpers.Base64Encode(Policy));
 
             return stringBuilder.ToString();
         }
@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
             const string Delimiter = ":::";
             return (this.Authority + Delimiter
-                    + MsalStringHelper.AsSingleString(this.Scope) + Delimiter
+                    + MsalHelpers.AsSingleString(this.Scope) + Delimiter
                     + this.ClientId.ToLower() + Delimiter
                     + this.UniqueId + Delimiter
                     + this.HomeObjectId + Delimiter
