@@ -35,28 +35,44 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         internal override void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
             string message = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), ex.ToString());
-            Console.WriteLine(message); //Console.writeline writes to NSLog by default
+            if (LoggerCallbackHandler.UseDefaultLogging)
+            {
+                Console.WriteLine(message); //Console.writeline writes to NSLog by default
+            }
+
             LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, message);
         }
 
         internal override void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
             string updatedMessage = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            Console.WriteLine(updatedMessage); //Console.writeline writes to NSLog by default
+            if (LoggerCallbackHandler.UseDefaultLogging)
+            {
+                Console.WriteLine(updatedMessage); //Console.writeline writes to NSLog by default
+            }
+
             LoggerCallbackHandler.ExecuteCallback(LogLevel.Verbose, updatedMessage);
         }
 
         internal override void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
             string updatedMessage = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            Console.WriteLine(updatedMessage); //Console.writeline writes to NSLog by default
+            if (LoggerCallbackHandler.UseDefaultLogging)
+            {
+                Console.WriteLine(updatedMessage); //Console.writeline writes to NSLog by default
+            }
+
             LoggerCallbackHandler.ExecuteCallback(LogLevel.Information, updatedMessage);
         }
 
         internal override void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
         {
             string updatedMessage = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            Console.WriteLine(updatedMessage); //Console.writeline writes to NSLog by default
+            if (LoggerCallbackHandler.UseDefaultLogging)
+            {
+                Console.WriteLine(updatedMessage); //Console.writeline writes to NSLog by default
+            }
+
             LoggerCallbackHandler.ExecuteCallback(LogLevel.Warning, updatedMessage);
         }
     }
