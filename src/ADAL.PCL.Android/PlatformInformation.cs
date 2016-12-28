@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -62,6 +63,43 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public override string GetDeviceModel()
         {
             return null;
+        }
+
+        public override void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
+        {
+            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
+            if (authorizationParameters == null)
+            {
+                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
+            }
+
+            PromptBehavior promptBehavior = (parameters as PlatformParameters).PromptBehavior;
+
+            switch (promptBehavior)
+            {
+                case PromptBehavior.Always:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
+                    break;
+                case PromptBehavior.RefreshSession:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
+                    break;
+                case PromptBehavior.Never:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
+                    break;
+            }
+        }
+
+        public override bool GetCacheLoadPolicy(IPlatformParameters parameters)
+        {
+            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
+            if (authorizationParameters == null)
+            {
+                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
+            }
+
+            PromptBehavior promptBehavior = (parameters as PlatformParameters).PromptBehavior;
+
+            return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession;
         }
     }
 }
