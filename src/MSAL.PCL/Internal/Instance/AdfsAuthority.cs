@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -39,25 +40,45 @@ namespace Microsoft.Identity.Client.Internal.Instance
     internal class AdfsAuthority : Authority
     {
         private const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
-
+        private readonly HashSet<string> _validForDomainsList = new HashSet<string>();
         public AdfsAuthority(string authority) : base(authority)
         {
-            this.AuthorityType = AuthorityType.Aad;
+            this.AuthorityType = AuthorityType.Adfs;
         }
 
-        protected override async Task<string> Validate(string host, string tenant, CallState callState)
+        protected override bool ExistsInValidatedAuthorityCache(string userPrincipalName)
+        {
+            if (string.IsNullOrEmpty(userPrincipalName))
+            {
+                throw new MsalException("UPN is required for ADFS authority validation.");
+            }
+
+            return ValidatedAuthorities.ContainsKey(this.CanonicalAuthority) &&
+                   ((AdfsAuthority) ValidatedAuthorities[this.CanonicalAuthority])._validForDomainsList.Contains(
+                       GetDomainFromUpn(userPrincipalName));
+        }
+
+        protected override async Task<string> GetOpenIdConfigurationEndpoint(string host, string tenant,
+            string userPrincipalName, CallState callState)
         {
             if (ValidateAuthority)
             {
-                DrsMetadataResponse drsResponse = await GetDrsMetadata(callState);
-                if (drsResponse.WebFingerEndpoint == null)
+                DrsMetadataResponse drsResponse = await GetMetadataFromEnrollmentServer(userPrincipalName, callState);
+                if (!string.IsNullOrEmpty(drsResponse.Error))
                 {
                     throw new MsalServiceException(drsResponse.Error, drsResponse.ErrorDescription);
                 }
 
+                if (drsResponse.IdentityProviderService?.PassiveAuthEndpoint == null)
+                {
+                    throw new MsalServiceException("missing_passive_auth_endpoint", "missing_passive_auth_endpoint");
+                }
+
                 string resource = string.Format(CultureInfo.InvariantCulture, "https://{0}", host);
                 string webfingerUrl = string.Format(CultureInfo.InvariantCulture,
-                    "https://{0}/adfs/.well-known/webfinger?rel={1}&resource={2}", host, DefaultRealm, resource);
+                    "https://{0}/adfs/.well-known/webfinger?rel={1}&resource={2}",
+                    drsResponse.IdentityProviderService.PassiveAuthEndpoint.Host,
+                    DefaultRealm, resource);
 
                 HttpResponse httpResponse =
                     await HttpRequest.SendGet(new Uri(webfingerUrl), null, callState).ConfigureAwait(false);
@@ -82,18 +103,49 @@ namespace Microsoft.Identity.Client.Internal.Instance
             return GetDefaultOpenIdConfigurationEndpoint();
         }
 
-        private async Task<DrsMetadataResponse> GetDrsMetadata(CallState callState)
+        protected override string CreateEndpointForAuthorityType(string host, string tenant)
         {
-            if (string.IsNullOrEmpty(Domain))
+            return string.Format(CultureInfo.InvariantCulture,
+                "https://{0}/{1}/.well-known/openid-configuration", host, tenant);
+        }
+
+        protected override void AddToValidatedAuthorities(string userPrincipalName)
+        {
+            AdfsAuthority authorityInstance = this;
+            if (ValidatedAuthorities.ContainsKey(this.CanonicalAuthority))
             {
-                throw new MsalException("UPN is required for ADFS authority validation.");
+                authorityInstance = (AdfsAuthority) ValidatedAuthorities[this.CanonicalAuthority];
             }
 
+            authorityInstance._validForDomainsList.Add(GetDomainFromUpn(userPrincipalName));
+            ValidatedAuthorities[this.CanonicalAuthority] = authorityInstance;
+        }
+
+        private async Task<DrsMetadataResponse> GetMetadataFromEnrollmentServer(string userPrincipalName,
+            CallState callState)
+        {
+            try
+            {
+                //attempt to connect to on-premise enrollment server first.
+                return await QueryEnrollmentServerEndpoint(string.Format(CultureInfo.InvariantCulture,
+                    "https://enterpriseregistration.{0}/enrollmentserver/contract",
+                    GetDomainFromUpn(userPrincipalName)), callState).ConfigureAwait(false);
+            }
+            catch (Exception exc)
+            {
+                PlatformPlugin.Logger.Information(callState,
+                    "On-Premise ADFS enrollment server endpoint lookup failed. Error - " + exc.Message);
+            }
+
+            return await QueryEnrollmentServerEndpoint(string.Format(CultureInfo.InvariantCulture,
+                "https://enterpriseregistration.windows.net/{0}/enrollmentserver/contract",
+                GetDomainFromUpn(userPrincipalName)), callState).ConfigureAwait(false);
+        }
+
+        private async Task<DrsMetadataResponse> QueryEnrollmentServerEndpoint(string endpoint, CallState callState)
+        {
             OAuth2Client client = new OAuth2Client();
             client.AddQueryParameter("api-version", "1.0");
-            string endpoint = string.Format(CultureInfo.InvariantCulture,
-                "https://enterpriseregistration.windows.net/{0}/EnrollmentServer/Contract", Domain);
-
             return await ExecuteClient<DrsMetadataResponse>(endpoint, client, callState).ConfigureAwait(false);
         }
 
@@ -108,6 +160,16 @@ namespace Microsoft.Identity.Client.Internal.Instance
             {
                 throw exc.InnerException;
             }
+        }
+
+        private string GetDomainFromUpn(string upn)
+        {
+            if (!upn.Contains("@"))
+            {
+                throw new ArgumentException("userPrincipalName does not contain @ character.");
+            }
+
+            return upn.Split('@')[1];
         }
     }
 }

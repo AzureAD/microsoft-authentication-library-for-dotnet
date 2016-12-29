@@ -51,5 +51,22 @@ namespace Test.MSAL.NET.Unit
             DisplayableId = DisplayableId,
             HomeObjectId = HomeObjectId
         };
+        
+        public static readonly string OnPremiseAuthority = "https://fs.contoso.com/adfs/";
+        public static readonly string OnPremiseClientId = "on_premise_client_id";
+        public static readonly string OnPremiseUniqueId = "on_premise_unique_id";
+        public static readonly string OnPremiseDisplayableId = "displayable@contoso.com";
+        public static readonly string FabrikamDisplayableId = "displayable@fabrikam.com";
+        public static readonly string OnPremiseHomeObjectId = OnPremiseUniqueId;
+        public static readonly string OnPremisePolicy = "on_premise_policy";
+        public static readonly string OnPremiseRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
+        public static readonly string OnPremiseClientSecret = "on_premise_client_secret";
+        public static readonly ClientCredential OnPremiseCredentialWithSecret = new ClientCredential(ClientSecret);
+        public static readonly User OnPremiseUser = new User
+        {
+            UniqueId = OnPremiseUniqueId,
+            DisplayableId = OnPremiseDisplayableId,
+            HomeObjectId = OnPremiseHomeObjectId
+        };
     }
 }

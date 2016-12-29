@@ -42,7 +42,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             authenticationRequestParameters.User = new User {DisplayableId = authenticationRequestParameters.UserAssertion.UserName};
-            SupportADFS = false;
         }
 
         protected override async Task SendTokenRequestAsync()

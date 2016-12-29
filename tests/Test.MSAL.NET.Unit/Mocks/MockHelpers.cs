@@ -184,6 +184,21 @@ namespace Test.MSAL.NET.Unit.Mocks
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlEncoder.Encode(id));
         }
 
+        public static HttpResponseMessage CreateSuccessWebFingerResponseMessage(string href)
+        {
+            return
+                CreateSuccessResponseMessage(
+                    "{\"subject\": \"https://fabrikam.com\",\"links\": [{\"rel\": " +
+                    "\"http://schemas.microsoft.com/rel/trusted-realm\"," +
+                    "\"href\": \"" + href + "\"}]}");
+        }
+
+        public static HttpResponseMessage CreateSuccessWebFingerResponseMessage()
+        {
+            return
+                CreateSuccessWebFingerResponseMessage("https://fs.contoso.com");
+        }
+
         public static HttpResponseMessage CreateSuccessResponseMessage(string sucessResponse)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);

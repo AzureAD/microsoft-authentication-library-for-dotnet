@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             this.LoadFromCache = (TokenCache != null);
             this.StoreToCache = (TokenCache != null);
-            this.SupportADFS = false;
+            this.SupportADFS = true;
         }
 
         protected virtual SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal virtual async Task PreRunAsync()
         {
-            await this.Authority.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
+            await this.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, this.CallState).ConfigureAwait(false);
         }
 
         internal virtual Task PreTokenRequest()
@@ -204,28 +204,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 this.GetDecoratedScope(AuthenticationRequestParameters.Scope).AsSingleString());
             this.SetAdditionalRequestParameters(client);
             await this.SendHttpMessageAsync(client).ConfigureAwait(false);
-        }
-
-        internal async Task SendTokenRequestByRefreshTokenAsync(string refreshToken)
-        {
-            OAuth2Client client = new OAuth2Client();
-            foreach (var entry in AuthenticationRequestParameters.ClientKey.ToParameters())
-            {
-                client.AddBodyParameter(entry.Key, entry.Value);
-            }
-
-            client.AddBodyParameter(OAuth2Parameter.Scope,
-                this.GetDecoratedScope(AuthenticationRequestParameters.Scope).AsSingleString());
-            client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken);
-            client.AddBodyParameter(OAuth2Parameter.RefreshToken, refreshToken);
-
-            await this.SendHttpMessageAsync(client).ConfigureAwait(false);
-            if (Response.RefreshToken == null)
-            {
-                Response.RefreshToken = refreshToken;
-                PlatformPlugin.Logger.Information(this.CallState,
-                    "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
-            }
         }
 
         private async Task SendHttpMessageAsync(OAuth2Client client)

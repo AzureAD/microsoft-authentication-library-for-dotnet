@@ -38,6 +38,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
     {
         private const string AadInstanceDiscoveryEndpoint = "https://login.windows.net/common/discovery/instance";
 
+
         private static readonly HashSet<string> TrustedHostList = new HashSet<string>()
         {
             "login.windows.net",
@@ -52,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             this.AuthorityType = AuthorityType.Aad;
         }
 
-        protected override async Task<string> Validate(string host, string tenant, CallState callState)
+        protected override async Task<string> GetOpenIdConfigurationEndpoint(string host, string tenant, string userPrincipalName, CallState callState)
         {
             if (ValidateAuthority && !IsInTrustedHostList(host))
             {
@@ -81,6 +82,23 @@ namespace Microsoft.Identity.Client.Internal.Instance
             }
 
             return GetDefaultOpenIdConfigurationEndpoint();
+        }
+
+        protected override bool ExistsInValidatedAuthorityCache(string userPrincipalName)
+        {
+            return ValidatedAuthorities.ContainsKey(this.CanonicalAuthority);
+        }
+
+        protected override void AddToValidatedAuthorities(string userPrincipalName)
+        {
+            // add to the list of validated authorities so that we don't do openid configuration call
+            ValidatedAuthorities[this.CanonicalAuthority] = this;
+        }
+
+        protected override string CreateEndpointForAuthorityType(string host, string tenant)
+        {
+            return string.Format(CultureInfo.InvariantCulture,
+                "https://{0}/{1}/v2.0/.well-known/openid-configuration", host, tenant);
         }
 
         internal bool IsInTrustedHostList(string host)

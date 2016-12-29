@@ -34,6 +34,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class SilentRequest : BaseRequest
     {
+        private RefreshTokenCacheItem _refreshTokenItem;
+
         public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, IPlatformParameters parameters, bool forceRefresh)
             : base(authenticationRequestParameters)
         {
@@ -43,13 +45,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             
             PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
-            this.SupportADFS = false;
             this.ForceRefresh = forceRefresh;
         }
 
         protected override void SetAdditionalRequestParameters(OAuth2Client client)
         {
-            throw new System.NotImplementedException();
+            client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken);
+            client.AddBodyParameter(OAuth2Parameter.RefreshToken, _refreshTokenItem.RefreshToken);
         }
 
         protected override async Task SendTokenRequestAsync()
@@ -68,34 +70,33 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (AccessTokenItem == null)
             {
-                RefreshTokenCacheItem refreshTokenItem =
+                _refreshTokenItem =
                     TokenCache.FindRefreshToken(AuthenticationRequestParameters);
 
-                if (refreshTokenItem == null)
+                if (_refreshTokenItem == null)
                 {
                     PlatformPlugin.Logger.Verbose(this.CallState, "No token matching arguments found in the cache");
                     throw new MsalSilentTokenAcquisitionException(
                         new Exception("No token matching arguments found in the cache"));
                 }
 
-                await this.RefreshAccessTokenAsync(refreshTokenItem).ConfigureAwait(false);
-            }
-        }
-
-
-
-        internal async Task RefreshAccessTokenAsync(RefreshTokenCacheItem item)
-        {
                 PlatformPlugin.Logger.Verbose(this.CallState, "Refreshing access token...");
-                
-                    await this.SendTokenRequestByRefreshTokenAsync(item.RefreshToken).ConfigureAwait(false);
+                await base.SendTokenRequestAsync().ConfigureAwait(false);
 
-                    if (Response.IdToken == null)
-                    {
-                        // If Id token is not returned by token endpoint when refresh token is redeemed, 
-                        // we should copy tenant and user information from the cached token.
-                        Response.IdToken = item.RawIdToken;
-                    }
+                if (Response.IdToken == null)
+                {
+                    // If Id token is not returned by token endpoint when refresh token is redeemed, 
+                    // we should copy tenant and user information from the cached token.
+                    Response.IdToken = _refreshTokenItem.RawIdToken;
+                }
+
+                if (Response.RefreshToken == null)
+                {
+                    Response.RefreshToken = _refreshTokenItem.RefreshToken;
+                    PlatformPlugin.Logger.Information(this.CallState,
+                        "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+                }
+            }
         }
     }
 }
