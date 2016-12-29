@@ -55,8 +55,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         public static Authority CreateAuthority(string authority, bool validateAuthority)
         {
-            string canonicalAuthority = CanonicalizeUri(authority);
-            Authority instance = CreateInstance(canonicalAuthority);
+            Authority instance = CreateInstance(authority);
             instance.ValidateAuthority = validateAuthority;
             return instance;
         }
@@ -82,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         public string SelfSignedJwtAudience { get; set; }
 
-        private static Authority CreateInstance(string authority)
+        public static void ValidateAsUri(string authority)
         {
             if (string.IsNullOrWhiteSpace(authority))
             {
@@ -93,7 +92,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             {
                 throw new ArgumentException(MsalErrorMessage.AuthorityInvalidUriFormat, "authority");
             }
-
+            
             var authorityUri = new Uri(authority);
             if (authorityUri.Scheme != "https")
             {
@@ -105,7 +104,14 @@ namespace Microsoft.Identity.Client.Internal.Instance
             {
                 throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, "authority");
             }
+        }
 
+        private static Authority CreateInstance(string authority)
+        {
+            authority = CanonicalizeUri(authority);
+            ValidateAsUri(authority);
+            Uri authorityUri = new Uri(authority);
+            string path = authorityUri.AbsolutePath.Substring(1);
             string firstPath = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
             bool isAdfsAuthority = string.Compare(firstPath, "adfs", StringComparison.OrdinalIgnoreCase) == 0;
             string updatedAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Host,
@@ -132,14 +138,15 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
                 if (ExistsInValidatedAuthorityCache(userPrincipalName))
                 {
-                    AuthorityType = ValidatedAuthorities[this.CanonicalAuthority].AuthorityType;
-                    CanonicalAuthority = ValidatedAuthorities[this.CanonicalAuthority].CanonicalAuthority;
-                    ValidateAuthority = ValidatedAuthorities[this.CanonicalAuthority].ValidateAuthority;
-                    IsTenantless = ValidatedAuthorities[this.CanonicalAuthority].IsTenantless;
-                    AuthorizationEndpoint = ValidatedAuthorities[this.CanonicalAuthority].AuthorizationEndpoint;
-                    TokenEndpoint = ValidatedAuthorities[this.CanonicalAuthority].TokenEndpoint;
-                    EndSessionEndpoint = ValidatedAuthorities[this.CanonicalAuthority].EndSessionEndpoint;
-                    SelfSignedJwtAudience = ValidatedAuthorities[this.CanonicalAuthority].SelfSignedJwtAudience;
+                    Authority authority = ValidatedAuthorities[this.CanonicalAuthority];
+                    AuthorityType = authority.AuthorityType;
+                    CanonicalAuthority = authority.CanonicalAuthority;
+                    ValidateAuthority = authority.ValidateAuthority;
+                    IsTenantless = authority.IsTenantless;
+                    AuthorizationEndpoint = authority.AuthorizationEndpoint;
+                    TokenEndpoint = authority.TokenEndpoint;
+                    EndSessionEndpoint = authority.EndSessionEndpoint;
+                    SelfSignedJwtAudience = authority.SelfSignedJwtAudience;
 
                     return;
                 }
@@ -226,7 +233,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             }
         }
 
-        private static string CanonicalizeUri(string uri)
+        public static string CanonicalizeUri(string uri)
         {
             if (!string.IsNullOrWhiteSpace(uri) && !uri.EndsWith("/", StringComparison.OrdinalIgnoreCase))
             {

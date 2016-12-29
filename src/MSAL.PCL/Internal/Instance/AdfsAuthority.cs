@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Client.Internal.Instance
     {
         private const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
         private readonly HashSet<string> _validForDomainsList = new HashSet<string>();
-
         public AdfsAuthority(string authority) : base(authority)
         {
             this.AuthorityType = AuthorityType.Adfs;

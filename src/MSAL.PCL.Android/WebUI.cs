@@ -81,8 +81,15 @@ namespace Microsoft.Identity.Client
 
         public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
         {
-            authorizationResult = authorizationResultInput;
-            returnedUriReady.Release();
+            if (returnedUriReady != null)
+            {
+                authorizationResult = authorizationResultInput;
+                returnedUriReady.Release();
+            }
+            else
+            {
+                PlatformPlugin.Logger.Information(null, "No pending request for response from web ui.");
+            }
         }
     }
 }
