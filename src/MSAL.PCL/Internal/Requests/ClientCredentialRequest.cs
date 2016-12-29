@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public ClientCredentialRequest(AuthenticationRequestParameters authenticationRequestParameters)
             : base(authenticationRequestParameters)
         {
-            this.SupportADFS = false;
         }
 
         protected override SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)

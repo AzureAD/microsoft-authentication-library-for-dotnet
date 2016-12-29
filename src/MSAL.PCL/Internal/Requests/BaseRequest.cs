@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             this.LoadFromCache = (TokenCache != null);
             this.StoreToCache = (TokenCache != null);
-            this.SupportADFS = false;
+            this.SupportADFS = true;
         }
 
         protected virtual SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
