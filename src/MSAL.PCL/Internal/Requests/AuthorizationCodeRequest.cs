@@ -48,7 +48,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             this.LoadFromCache = false;
-            this.SupportADFS = false;
         }
 
         protected override void SetAdditionalRequestParameters(OAuth2Client client)

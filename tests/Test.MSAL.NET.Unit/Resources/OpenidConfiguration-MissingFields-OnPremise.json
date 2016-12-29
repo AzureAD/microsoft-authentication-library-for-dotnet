@@ -1,0 +1,18 @@
+﻿{
+  "issuer": "https://fs.contoso.com/adfs",
+  "token_endpoint": "https://fs.contoso.com/adfs/oauth2/token/",
+  "jwks_uri": "https://fs.contoso.com/adfs/discovery/keys",
+  "token_endpoint_auth_methods_supported": [ "client_secret_post", "client_secret_basic", "private_key_jwt", "windows_client_authentication" ],
+  "response_types_supported": [ "code", "id_token", "code id_token", "id_token token", "code token", "code id_token token" ],
+  "response_modes_supported": [ "query", "fragment", "form_post" ],
+  "grant_types_supported": [ "authorization_code", "refresh_token", "client_credentials", "urn:ietf:params:oauth:grant-type:jwt-bearer", "implicit", "password", "srv_challenge" ],
+  "subject_types_supported": [ "pairwise" ],
+  "scopes_supported": [ "logon_cert", "profile", "email", "openid", "winhello_cert", "user_impersonation", "aza", "vpn_cert" ],
+  "id_token_signing_alg_values_supported": [ "RS256" ],
+  "token_endpoint_auth_signing_alg_values_supported": [ "RS256" ],
+  "access_token_issuer": "http://fs.contoso.com/adfs/services/trust",
+  "claims_supported": [ "aud", "iss", "iat", "exp", "auth_time", "nonce", "at_hash", "c_hash", "sub", "upn", "unique_name", "pwd_url", "pwd_exp" ],
+  "microsoft_multi_refresh_token": true,
+  "userinfo_endpoint": "https://fs.contoso.com/adfs/userinfo",
+  "capabilities": []
+}

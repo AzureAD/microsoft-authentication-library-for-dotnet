@@ -43,7 +43,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             
             PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
-            this.SupportADFS = false;
             this.ForceRefresh = forceRefresh;
         }
 

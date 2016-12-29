@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal virtual async Task PreRunAsync()
         {
-            await this.Authority.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
+            await this.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, this.CallState).ConfigureAwait(false);
         }
 
         internal virtual Task PreTokenRequest()

@@ -87,7 +87,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             this._webUi = webUI;
             this._uiOptions = uiOptions;
             this.LoadFromCache = false; //no cache lookup and refresh for interactive.
-            this.SupportADFS = false;
 
             if (string.IsNullOrWhiteSpace(loginHint) && _uiOptions == UiOptions.ActAsCurrentUser)
             {
@@ -120,7 +119,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             //this method is used in confidential clients to create authorization URLs.
             this.CallState = callState;
-            await this.Authority.UpdateFromTemplateAsync(this.CallState).ConfigureAwait(false);
+            await this.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, this.CallState).ConfigureAwait(false);
             return this.CreateAuthorizationUri();
         }
 

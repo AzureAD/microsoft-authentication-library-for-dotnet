@@ -52,7 +52,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestInitialize]
         public void TestInitialize()
         {
-            Authority._validatedAuthorities.Clear();
+            Authority.ValidatedAuthorities.Clear();
             _tokenCachePlugin = (TokenCachePlugin)PlatformPlugin.TokenCachePlugin;
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();

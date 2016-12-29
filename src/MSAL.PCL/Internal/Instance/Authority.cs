@@ -44,22 +44,18 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
     internal abstract class Authority
     {
-        internal static ConcurrentDictionary<string, Authority> _validatedAuthorities =
+        private static readonly string[] TenantlessTenantName = {"common", "organizations", "consumers"};
+        private bool _resolved;
+
+        internal static readonly ConcurrentDictionary<string, Authority> ValidatedAuthorities =
             new ConcurrentDictionary<string, Authority>();
 
-        private static readonly string[] TenantlessTenantName = {"common", "organizations", "consumers"};
-        private bool _updatedFromTemplate;
-
-        protected abstract Task<string> Validate(string host, string tenant, CallState callState);
+        protected abstract Task<string> GetOpenIdConfigurationEndpoint(string host, string tenant,
+            string userPrincipalName, CallState callState);
 
         public static Authority CreateAuthority(string authority, bool validateAuthority)
         {
             string canonicalAuthority = CanonicalizeUri(authority);
-            if (_validatedAuthorities.ContainsKey(canonicalAuthority))
-            {
-                return _validatedAuthorities[canonicalAuthority];
-            }
-
             Authority instance = CreateInstance(canonicalAuthority);
             instance.ValidateAuthority = validateAuthority;
             return instance;
@@ -71,14 +67,20 @@ namespace Microsoft.Identity.Client.Internal.Instance
         }
 
         public AuthorityType AuthorityType { get; set; }
-        public string Domain { get; set; }
+
         public string CanonicalAuthority { get; set; }
+
         public bool ValidateAuthority { get; set; }
-        public bool IsTenantless { get; private set; }
+
+        public bool IsTenantless { get; set; }
+
         public string AuthorizationEndpoint { get; set; }
-        public string TokenEndpoint { get; private set; }
+
+        public string TokenEndpoint { get; set; }
+
         public string EndSessionEndpoint { get; set; }
-        public string SelfSignedJwtAudience { get; private set; }
+
+        public string SelfSignedJwtAudience { get; set; }
 
         private static Authority CreateInstance(string authority)
         {
@@ -104,23 +106,21 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, "authority");
             }
 
-            //TODO - Enable this check and add tests when DRS metadata contract is clear
-            /* 
             string firstPath = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
+            bool isAdfsAuthority = string.Compare(firstPath, "adfs", StringComparison.OrdinalIgnoreCase) == 0;
+            string updatedAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Host,
+                firstPath);
+            if (isAdfsAuthority)
+            {
+                return new AdfsAuthority(updatedAuthority);
+            }
 
-              bool isAdfsAuthority = string.Compare(firstPath, "adfs", StringComparison.OrdinalIgnoreCase) == 0;
-              if (isAdfsAuthority)
-                        {
-                            return new AdfsAuthority(authority);
-                        }
-            */
-
-            return new AadAuthority(authority);
+            return new AadAuthority(updatedAuthority);
         }
 
-        public async Task UpdateFromTemplateAsync(CallState callState)
+        public async Task ResolveEndpointsAsync(string userPrincipalName, CallState callState)
         {
-            if (!this._updatedFromTemplate)
+            if (!this._resolved)
             {
                 var authorityUri = new Uri(this.CanonicalAuthority);
                 string host = authorityUri.Authority;
@@ -130,15 +130,33 @@ namespace Microsoft.Identity.Client.Internal.Instance
                     TenantlessTenantName.Any(
                         name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
 
-                string openIdConfigurationEndpoint = await this.Validate(host, tenant, callState);
+                if (ExistsInValidatedAuthorityCache(userPrincipalName))
+                {
+                    AuthorityType = ValidatedAuthorities[this.CanonicalAuthority].AuthorityType;
+                    CanonicalAuthority = ValidatedAuthorities[this.CanonicalAuthority].CanonicalAuthority;
+                    ValidateAuthority = ValidatedAuthorities[this.CanonicalAuthority].ValidateAuthority;
+                    IsTenantless = ValidatedAuthorities[this.CanonicalAuthority].IsTenantless;
+                    AuthorizationEndpoint = ValidatedAuthorities[this.CanonicalAuthority].AuthorizationEndpoint;
+                    TokenEndpoint = ValidatedAuthorities[this.CanonicalAuthority].TokenEndpoint;
+                    EndSessionEndpoint = ValidatedAuthorities[this.CanonicalAuthority].EndSessionEndpoint;
+                    SelfSignedJwtAudience = ValidatedAuthorities[this.CanonicalAuthority].SelfSignedJwtAudience;
+
+                    return;
+                }
+
+                string openIdConfigurationEndpoint =
+                    await
+                        this.GetOpenIdConfigurationEndpoint(host, tenant, userPrincipalName, callState)
+                            .ConfigureAwait(false);
 
                 //discover endpoints via openid-configuration
-                TenantDiscoveryResponse edr = await this.DiscoverEndpoints(openIdConfigurationEndpoint, callState);
+                TenantDiscoveryResponse edr =
+                    await this.DiscoverEndpoints(openIdConfigurationEndpoint, callState).ConfigureAwait(false);
 
                 if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
                 {
                     throw new MsalServiceException(MsalError.TenantDiscoveryFailed,
-                        string.Format(CultureInfo.InvariantCulture, "Token endpoint was not found at {0}",
+                        string.Format(CultureInfo.InvariantCulture, "Authorize endpoint was not found at {0}",
                             openIdConfigurationEndpoint));
                 }
 
@@ -160,12 +178,17 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 this.TokenEndpoint = edr.TokenEndpoint.Replace("{tenant}", tenant);
                 this.SelfSignedJwtAudience = edr.Issuer.Replace("{tenant}", tenant);
 
-                this._updatedFromTemplate = true;
+                this._resolved = true;
 
-                // add to the list of validated authorities so that we don't do openid configuration
-                _validatedAuthorities[this.CanonicalAuthority] = this;
+                this.AddToValidatedAuthorities(userPrincipalName);
             }
         }
+
+        protected abstract bool ExistsInValidatedAuthorityCache(string userPrincipalName);
+
+        protected abstract void AddToValidatedAuthorities(string userPrincipalName);
+
+        protected abstract string CreateEndpointForAuthorityType(string host, string tenant);
 
         protected string GetDefaultOpenIdConfigurationEndpoint()
         {
@@ -173,9 +196,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             string host = authorityUri.Authority;
             string path = authorityUri.AbsolutePath.Substring(1);
             string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-            //TODO handle for ADFS where there is no v2.0
-            return string.Format(CultureInfo.InvariantCulture,
-                "https://{0}/{1}/v2.0/.well-known/openid-configuration", host, tenant);
+            return CreateEndpointForAuthorityType(host, tenant);
         }
 
         private async Task<TenantDiscoveryResponse> DiscoverEndpoints(string openIdConfigurationEndpoint,
@@ -212,7 +233,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 uri = uri + "/";
             }
 
-            return uri;
+            return uri.ToLower();
         }
 
         private void ReplaceTenantlessTenant(string tenantId)
