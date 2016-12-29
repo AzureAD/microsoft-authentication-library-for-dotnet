@@ -46,6 +46,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
         public const string Password = "password";
         public const string LoginHint = "login_hint"; // login_hint is not standard oauth2 parameter
         public const string CorrelationId = OAuth2Header.CorrelationId;
+        public const string State = "state";
 
         public const string CodeChallengeMethod = "code_challenge_method";
         public const string CodeChallenge = "code_challenge";

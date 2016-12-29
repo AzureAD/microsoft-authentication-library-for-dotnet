@@ -90,9 +90,9 @@ namespace Microsoft.Identity.Client.Internal
                 Dictionary<string, string> response = MsalHelpers.ParseKeyValueList(resultData.Substring(1), '&',
                     true, null);
 
-                if (response.ContainsKey(TokenResponseClaim.State))
+                if (response.ContainsKey(OAuth2Parameter.State))
                 {
-                    State = response[TokenResponseClaim.State];
+                    State = response[OAuth2Parameter.State];
                 }
 
                 if (response.ContainsKey(TokenResponseClaim.Code))

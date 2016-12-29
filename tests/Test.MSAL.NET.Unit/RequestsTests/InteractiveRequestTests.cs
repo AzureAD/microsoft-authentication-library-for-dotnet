@@ -78,11 +78,11 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             };
             _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
 
-
-            IWebUI ui = Substitute.For<IWebUI>();
-            AuthorizationResult ar = new AuthorizationResult(AuthorizationStatus.Success,
-                TestConstants.AuthorityHomeTenant + "?code=some-code");
-            ui.AcquireAuthorizationAsync(Arg.Any<Uri>(), Arg.Any<Uri>(), Arg.Any<CallState>()).Returns(ar);
+            MockWebUI ui = new MockWebUI()
+            {
+                MockResult = new AuthorizationResult(AuthorizationStatus.Success,
+                    TestConstants.AuthorityHomeTenant + "?code=some-code")
+            };
 
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
