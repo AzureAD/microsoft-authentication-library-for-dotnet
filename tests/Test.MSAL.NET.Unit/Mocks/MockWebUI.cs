@@ -30,23 +30,37 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Interfaces;
+using Microsoft.Identity.Client.Internal.OAuth2;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.MSAL.NET.Unit.Mocks
 {
     internal class MockWebUI : IWebUI 
     {
-        internal AuthorizationResult MockResult { get; set; }
+        public MockWebUI()
+        {
+            AddStateInAuthorizationResult = true;
+        }
 
-        internal IDictionary<string, string> QueryParams { get; set; }
+        public AuthorizationResult MockResult { get; set; }
+
+        public IDictionary<string, string> QueryParams { get; set; }
+
+        public bool AddStateInAuthorizationResult { get; set; }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
+            IDictionary<string, string> inputQp = MsalHelpers.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);
+            Assert.IsNotNull(inputQp[OAuth2Parameter.State]);
+            if (AddStateInAuthorizationResult)
+            {
+                MockResult.State = inputQp[OAuth2Parameter.State];
+            }
+
             //match QP passed in for validation. 
             if (QueryParams != null)
             {
                 Assert.IsNotNull(authorizationUri.Query);
-                IDictionary<string, string> inputQp = MsalHelpers.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);
                 foreach (var key in QueryParams.Keys)
                 {
                     Assert.IsTrue(inputQp.ContainsKey(key));

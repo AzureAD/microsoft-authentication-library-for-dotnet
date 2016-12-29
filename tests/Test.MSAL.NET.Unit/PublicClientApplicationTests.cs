@@ -219,6 +219,7 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual(TestConstants.ClientId, item.Scope.AsSingleString());
             }
 
+            //no network call should be made
             task = app.AcquireTokenSilentAsync(new string[] {TestConstants.ClientId}, new User(result.User));
 
             AuthenticationResult result1 = task.Result;
