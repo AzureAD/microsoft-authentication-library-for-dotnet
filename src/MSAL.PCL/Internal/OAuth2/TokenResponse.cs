@@ -32,7 +32,6 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
 {
     internal class TokenResponseClaim : OAuth2ResponseBaseClaim
     {
-        public const string State = "state";
         public const string Code = "code";
         public const string TokenType = "token_type";
         public const string AccessToken = "access_token";

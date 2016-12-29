@@ -42,7 +42,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly UiOptions? _uiOptions;
         private readonly IWebUI _webUi;
         private AuthorizationResult _authorizationResult;
-        private string codeVerifier;
+        private string _codeVerifier;
+        private string _state;
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
             string[] additionalScope, IPlatformParameters parameters,
@@ -107,7 +108,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async Task AcquireAuthorizationAsync()
         {
-            Uri authorizationUri = this.CreateAuthorizationUri(true);
+            Uri authorizationUri = this.CreateAuthorizationUri(true, true);
             this._authorizationResult =
                 await
                     this._webUi.AcquireAuthorizationAsync(authorizationUri, AuthenticationRequestParameters.RedirectUri,
@@ -128,20 +129,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.AuthorizationCode);
             client.AddBodyParameter(OAuth2Parameter.Code, this._authorizationResult.Code);
             client.AddBodyParameter(OAuth2Parameter.RedirectUri, AuthenticationRequestParameters.RedirectUri.AbsoluteUri);
-            client.AddBodyParameter(OAuth2Parameter.CodeVerifier, codeVerifier);
+            client.AddBodyParameter(OAuth2Parameter.CodeVerifier, _codeVerifier);
         }
 
-        private Uri CreateAuthorizationUri(bool addVerifier = false)
+        private Uri CreateAuthorizationUri(bool addVerifier = false, bool addState = false)
         {
             IDictionary<string, string> requestParameters = this.CreateAuthorizationRequestParameters();
 
             if (addVerifier)
             {
-                codeVerifier = PlatformPlugin.CryptographyHelper.GenerateCodeVerifier();
-                string codeVerifierHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(codeVerifier);
+                _codeVerifier = PlatformPlugin.CryptographyHelper.GenerateCodeVerifier();
+                string codeVerifierHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(_codeVerifier);
 
                 requestParameters[OAuth2Parameter.CodeChallenge] = MsalHelpers.EncodeToBase64Url(codeVerifierHash);
                 requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
+            }
+
+            if (addState)
+            {
+                _state = Guid.NewGuid().ToString();
+                requestParameters[OAuth2Parameter.State] = _state;
             }
 
             if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.ExtraQueryParameters))
@@ -212,7 +219,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void VerifyAuthorizationResult()
         {
-            //TODO - Add State validation
             if (this._authorizationResult.Error == OAuth2Error.LoginRequired)
             {
                 throw new MsalException(MsalError.UserInteractionRequired);
@@ -222,6 +228,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new MsalServiceException(this._authorizationResult.Error,
                     this._authorizationResult.ErrorDescription);
+            }
+
+            if (!_state.Equals(_authorizationResult.State))
+            {
+                throw new MsalServiceException("state_mismatch_error",
+                    string.Format(CultureInfo.InvariantCulture, "Returned state({0}) from authorize endpoint is not the same as the one sent({1})", _state, _authorizationResult.State));
             }
         }
 
