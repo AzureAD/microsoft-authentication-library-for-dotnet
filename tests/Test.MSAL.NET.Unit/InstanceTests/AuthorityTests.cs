@@ -304,6 +304,23 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             Assert.AreEqual("https://fs.contoso.com/adfs",
                 instance.SelfSignedJwtAudience);
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockCount);
+            Assert.AreEqual(1, Authority.ValidatedAuthorities.Count);
+
+            //attempt to do authority validation again. NO network call should be made
+            instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, true);
+            Assert.IsNotNull(instance);
+            Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
+            Task.Run(async () =>
+            {
+                await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new CallState(Guid.NewGuid()));
+            }).GetAwaiter().GetResult();
+
+            Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/",
+                instance.AuthorizationEndpoint);
+            Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/",
+                instance.TokenEndpoint);
+            Assert.AreEqual("https://fs.contoso.com/adfs",
+                instance.SelfSignedJwtAudience);
         }
 
         [TestMethod]
