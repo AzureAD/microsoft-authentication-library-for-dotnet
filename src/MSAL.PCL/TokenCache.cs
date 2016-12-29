@@ -249,13 +249,6 @@ namespace Microsoft.Identity.Client
                 // Access token lookup needs to be a strict match. In the JSON response from token endpoint, server only returns the scope
                 // the developer requires the token for. We store the token separately for considerations i.e. MFA.
                 TokenCacheItem tokenCacheItem = tokenCacheItems[0];
-
-                if (requestParam.UserAssertion != null &&
-                    !tokenCacheItem.UserAssertionHash.Equals(requestParam.UserAssertion.AssertionHash))
-                {
-                    return null;
-                }
-
                 if (tokenCacheItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
                 {
                     return tokenCacheItem;

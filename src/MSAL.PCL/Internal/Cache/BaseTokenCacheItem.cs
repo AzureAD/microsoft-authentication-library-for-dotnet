@@ -49,8 +49,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 TenantId = idToken.TenantId;
                 User = new User(idToken);
             }
-
-            this.UserAssertionHash = response.UserAssertionHash;
+            
             this.Authority = authority;
             this.ClientId = clientId;
             this.Policy = policy;
@@ -102,9 +101,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// Gets the entire Profile Info if returned by the service or null if no Id Token is returned.
         /// </summary>
         public User User { get; set; }
-
-        [DataMember(Name = "user_assertion_hash")]
-        public string UserAssertionHash { get; set; }
 
         public abstract TokenCacheKey GetTokenCacheKey();
         
