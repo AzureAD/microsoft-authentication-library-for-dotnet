@@ -48,10 +48,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected override async Task SendTokenRequestAsync()
         {
             await base.SendTokenRequestAsync().ConfigureAwait(false);
-            if (Response != null)
-            {
-                Response.UserAssertionHash = AuthenticationRequestParameters.UserAssertion.AssertionHash;
-            }
         }
 
         protected override void SetAdditionalRequestParameters(OAuth2Client client)
