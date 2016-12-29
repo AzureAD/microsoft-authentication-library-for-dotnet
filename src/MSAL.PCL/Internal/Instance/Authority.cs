@@ -138,14 +138,15 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
                 if (ExistsInValidatedAuthorityCache(userPrincipalName))
                 {
-                    AuthorityType = ValidatedAuthorities[this.CanonicalAuthority].AuthorityType;
-                    CanonicalAuthority = ValidatedAuthorities[this.CanonicalAuthority].CanonicalAuthority;
-                    ValidateAuthority = ValidatedAuthorities[this.CanonicalAuthority].ValidateAuthority;
-                    IsTenantless = ValidatedAuthorities[this.CanonicalAuthority].IsTenantless;
-                    AuthorizationEndpoint = ValidatedAuthorities[this.CanonicalAuthority].AuthorizationEndpoint;
-                    TokenEndpoint = ValidatedAuthorities[this.CanonicalAuthority].TokenEndpoint;
-                    EndSessionEndpoint = ValidatedAuthorities[this.CanonicalAuthority].EndSessionEndpoint;
-                    SelfSignedJwtAudience = ValidatedAuthorities[this.CanonicalAuthority].SelfSignedJwtAudience;
+                    Authority authority = ValidatedAuthorities[this.CanonicalAuthority];
+                    AuthorityType = authority.AuthorityType;
+                    CanonicalAuthority = authority.CanonicalAuthority;
+                    ValidateAuthority = authority.ValidateAuthority;
+                    IsTenantless = authority.IsTenantless;
+                    AuthorizationEndpoint = authority.AuthorizationEndpoint;
+                    TokenEndpoint = authority.TokenEndpoint;
+                    EndSessionEndpoint = authority.EndSessionEndpoint;
+                    SelfSignedJwtAudience = authority.SelfSignedJwtAudience;
 
                     return;
                 }
