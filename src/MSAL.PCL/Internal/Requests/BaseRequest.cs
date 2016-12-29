@@ -206,28 +206,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await this.SendHttpMessageAsync(client).ConfigureAwait(false);
         }
 
-        internal async Task SendTokenRequestByRefreshTokenAsync(string refreshToken)
-        {
-            OAuth2Client client = new OAuth2Client();
-            foreach (var entry in AuthenticationRequestParameters.ClientKey.ToParameters())
-            {
-                client.AddBodyParameter(entry.Key, entry.Value);
-            }
-
-            client.AddBodyParameter(OAuth2Parameter.Scope,
-                this.GetDecoratedScope(AuthenticationRequestParameters.Scope).AsSingleString());
-            client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken);
-            client.AddBodyParameter(OAuth2Parameter.RefreshToken, refreshToken);
-
-            await this.SendHttpMessageAsync(client).ConfigureAwait(false);
-            if (Response.RefreshToken == null)
-            {
-                Response.RefreshToken = refreshToken;
-                PlatformPlugin.Logger.Information(this.CallState,
-                    "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
-            }
-        }
-
         private async Task SendHttpMessageAsync(OAuth2Client client)
         {
             if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.Policy))
