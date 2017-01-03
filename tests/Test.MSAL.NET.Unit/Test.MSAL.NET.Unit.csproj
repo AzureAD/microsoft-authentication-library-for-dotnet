@@ -29,8 +29,8 @@
     <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>..\..\build\Sdl7.0.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>Sdl7.0.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
   </PropertyGroup>
@@ -41,8 +41,8 @@
     <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>..\..\build\Sdl7.0.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>Sdl7.0.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
   </PropertyGroup>
@@ -50,7 +50,10 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\build\MSAL.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>true</DelaySign>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NSubstitute, Version=1.9.1.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca, processorArchitecture=MSIL">
@@ -80,9 +83,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="HttpTests\HttpClientFactoryTests.cs" />
     <Compile Include="InstanceTests\AuthorityTests.cs" />
-    <Compile Include="HttpTests\HttpRequestTests.cs" />
+    <Compile Include="HttpTests\MsalHttpRequestTests.cs" />
     <Compile Include="RequestsTests\OboFlowTests.cs" />
     <Compile Include="RequestsTests\SilentRequestTests.cs" />
     <Compile Include="TokenCacheTests.cs" />
@@ -98,16 +100,6 @@
     <Compile Include="PublicClientApplicationTests.cs" />
     <Compile Include="ConfidentialClientApplicationTests.cs" />
     <Compile Include="LoggerCallbackTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\MSAL.PCL.Desktop\MSAL.PCL.Desktop.csproj">
-      <Project>{fa2c7f08-3ccb-47c2-b359-627cc96c04a3}</Project>
-      <Name>MSAL.PCL.Desktop</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\MSAL.PCL\MSAL.PCL.csproj">
-      <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
-      <Name>MSAL.PCL</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="MSHTML">
@@ -156,6 +148,12 @@
     <None Include="Resources\drs-response.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
+      <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
+      <Name>Microsoft.Identity.Client</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
