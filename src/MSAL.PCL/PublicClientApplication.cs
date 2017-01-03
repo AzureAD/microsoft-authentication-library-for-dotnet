@@ -52,13 +52,13 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Default consutructor of the application.
         /// </summary>
-        public PublicClientApplication(string clientId) : this(DefaultAuthority, clientId)
+        public PublicClientApplication(string clientId) : this(clientId, DefaultAuthority)
         {
         }
 
         /// <summary>
         /// </summary>
-        public PublicClientApplication(string authority, string clientId)
+        public PublicClientApplication(string clientId, string authority)
             : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
         {
             this.UserTokenCache = new TokenCache(clientId);

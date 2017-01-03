@@ -75,7 +75,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.RedirectUri);
             Assert.IsTrue(app.ValidateAuthority);
 
-            app = new PublicClientApplication(TestConstants.AuthorityGuestTenant, TestConstants.ClientId);
+            app = new PublicClientApplication(TestConstants.ClientId, TestConstants.AuthorityGuestTenant);
             Assert.IsNotNull(app);
             Assert.AreEqual(TestConstants.AuthorityGuestTenant, app.Authority);
             Assert.AreEqual(TestConstants.ClientId, app.ClientId);
@@ -242,8 +242,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSilentCacheOnlyLookupTest()
         {
-            PublicClientApplication app = new PublicClientApplication(TestConstants.AuthorityHomeTenant,
-                TestConstants.ClientId)
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId, TestConstants.AuthorityHomeTenant)
             {
                 ValidateAuthority = false
             };
