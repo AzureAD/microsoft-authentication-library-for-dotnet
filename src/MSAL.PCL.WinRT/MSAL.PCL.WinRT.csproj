@@ -94,7 +94,7 @@
     <Prefer32Bit>true</Prefer32Bit>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RunCodeAnalysis>true</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>Sdl7.0.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\build\Sdl7.0.ruleset</CodeAnalysisRuleSet>
 	<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
@@ -107,7 +107,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
-    <CodeAnalysisRuleSet>Sdl7.0.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\build\Sdl7.0.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
