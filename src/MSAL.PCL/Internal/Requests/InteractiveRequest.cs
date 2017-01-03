@@ -38,7 +38,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class InteractiveRequest : BaseRequest
     {
         private readonly SortedSet<string> _additionalScope;
-        private readonly IPlatformParameters _authorizationParameters;
         private readonly UiOptions? _uiOptions;
         private readonly IWebUI _webUi;
         private AuthorizationResult _authorizationResult;
@@ -46,16 +45,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private string _state;
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            string[] additionalScope, IPlatformParameters parameters,
-            UiOptions uiOptions, IWebUI webUI)
+            string[] additionalScope, UiOptions uiOptions, IWebUI webUI)
             : this(
-                authenticationRequestParameters, additionalScope, parameters, authenticationRequestParameters.User?.DisplayableId,
+                authenticationRequestParameters, additionalScope, authenticationRequestParameters.User?.DisplayableId,
                 uiOptions, webUI)
         {
         }
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            string[] additionalScope, IPlatformParameters parameters, string loginHint,
+            string[] additionalScope, string loginHint,
             UiOptions? uiOptions, IWebUI webUI)
             : base(authenticationRequestParameters)
         {
@@ -73,10 +71,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             ValidateScopeInput(this._additionalScope);
-
-            this._authorizationParameters = parameters;
-
-
+            
             authenticationRequestParameters.LoginHint = loginHint;
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ExtraQueryParameters) &&
                 authenticationRequestParameters.ExtraQueryParameters[0] == '&')
@@ -94,7 +89,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new ArgumentException(MsalErrorMessage.LoginHintNullForUiOption, "loginHint");
             }
 
-            PlatformPlugin.BrokerHelper.PlatformParameters = _authorizationParameters;
+            PlatformPlugin.BrokerHelper.PlatformParameters = authenticationRequestParameters.PlatformParameters;
         }
 
         internal override async Task PreTokenRequest()

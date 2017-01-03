@@ -59,5 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public User User { get; set; }
 
         public UserAssertion UserAssertion { get; set; }
+
+        public IPlatformParameters PlatformParameters { get; set; }
     }
 }

@@ -78,8 +78,8 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNull(app.ClientCredential.ClientAssertion);
             Assert.AreEqual(0, app.ClientCredential.ValidTo);
 
-            app = new ConfidentialClientApplication(TestConstants.AuthorityGuestTenant,
-                TestConstants.ClientId,
+            app = new ConfidentialClientApplication(TestConstants.ClientId,
+                TestConstants.AuthorityGuestTenant,
                 TestConstants.RedirectUri, new ClientCredential("secret"), new TokenCache(TestConstants.ClientId),
                 new TokenCache(TestConstants.ClientId));
             Assert.AreEqual(TestConstants.AuthorityGuestTenant, app.Authority);
@@ -303,8 +303,7 @@ namespace Test.MSAL.NET.Unit
         public void GetAuthorizationRequestUrlCustomRedirectUriTest()
         {
             ConfidentialClientApplication app =
-                new ConfidentialClientApplication(TestConstants.AuthorityGuestTenant,
-                    TestConstants.ClientId,
+                new ConfidentialClientApplication(TestConstants.ClientId, TestConstants.AuthorityGuestTenant,
                     TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
                     new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId))
                 {ValidateAuthority = false};
