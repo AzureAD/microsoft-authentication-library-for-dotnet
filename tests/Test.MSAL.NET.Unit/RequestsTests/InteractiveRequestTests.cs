@@ -112,7 +112,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
-                new PlatformParameters(), TestConstants.DisplayableId,
+                 TestConstants.DisplayableId,
                 UiOptions.SelectAccount, ui);
             Task<AuthenticationResult> task = request.RunAsync();
             task.Wait();
@@ -146,7 +146,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 parameters.ExtraQueryParameters = "extra=qp";
 
                 new InteractiveRequest(parameters, TestConstants.ScopeForAnotherResource.ToArray(),
-                    new PlatformParameters(),
                     (string) null, UiOptions.ForceLogin, new MockWebUI()
                     );
                 Assert.Fail("ArgumentException should be thrown here");
@@ -187,7 +186,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             parameters.ExtraQueryParameters = "extra=qp";
 
             InteractiveRequest request = new InteractiveRequest(parameters,
-                TestConstants.ScopeForAnotherResource.ToArray(), new PlatformParameters(),
+                TestConstants.ScopeForAnotherResource.ToArray(), 
                 (string) null, UiOptions.ForceLogin, webUi);
             request.PreRunAsync().Wait();
             try
@@ -208,7 +207,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 "?error=invalid_request&error_description=some error description");
 
             request = new InteractiveRequest(parameters,
-                TestConstants.ScopeForAnotherResource.ToArray(), new PlatformParameters(),
+                TestConstants.ScopeForAnotherResource.ToArray(),
                 (string) null, UiOptions.ForceLogin, webUi);
             request.PreRunAsync().Wait();
 
@@ -247,7 +246,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 parameters.ExtraQueryParameters = "extra=qp";
 
                 InteractiveRequest request = new InteractiveRequest(parameters,
-                    TestConstants.ScopeForAnotherResource.ToArray(), new PlatformParameters(),
+                    TestConstants.ScopeForAnotherResource.ToArray(),
                     (string) null, UiOptions.ActAsCurrentUser, new MockWebUI());
                 Assert.Fail("ArgumentException should be thrown here");
             }
@@ -277,7 +276,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 parameters.ExtraQueryParameters = "extra=qp";
 
                 new InteractiveRequest(parameters,
-                    TestConstants.ScopeForAnotherResource.ToArray(), new PlatformParameters(),
+                    TestConstants.ScopeForAnotherResource.ToArray(),
                     null, UiOptions.ActAsCurrentUser, new MockWebUI());
                 Assert.Fail("ArgumentException should be thrown here");
             }
@@ -314,7 +313,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
-                new PlatformParameters(),
                 null, UiOptions.ForceLogin, new MockWebUI());
             request.PreRunAsync().Wait();
 

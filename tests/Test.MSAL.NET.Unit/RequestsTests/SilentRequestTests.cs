@@ -78,7 +78,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             parameters.User = null;
             try
             {
-                new SilentRequest(parameters, new PlatformParameters(), false);
+                new SilentRequest(parameters, false);
                 Assert.Fail("ArgumentNullException should have been thrown here");
             }
             catch (ArgumentNullException exc)
@@ -90,17 +90,17 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 DisplayableId = TestConstants.DisplayableId
             };
-            SilentRequest request = new SilentRequest(parameters, new PlatformParameters(), false);
+            SilentRequest request = new SilentRequest(parameters, false);
             Assert.IsNotNull(request);
 
             parameters.User = new User()
             {
                 UniqueId = TestConstants.UniqueId
             };
-            request = new SilentRequest(parameters, new PlatformParameters(), false);
+            request = new SilentRequest(parameters, false);
             Assert.IsNotNull(request);
 
-            request = new SilentRequest(parameters, new PlatformParameters(), false);
+            request = new SilentRequest(parameters, false);
             Assert.IsNotNull(request);
         }
 
@@ -140,7 +140,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
             });
 
-            SilentRequest request = new SilentRequest(parameters, new PlatformParameters(), false);
+            SilentRequest request = new SilentRequest(parameters, false);
             Task<AuthenticationResult> task = request.RunAsync();
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
@@ -177,7 +177,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             
             try
             {
-                SilentRequest request = new SilentRequest(parameters, new PlatformParameters(), false);
+                SilentRequest request = new SilentRequest(parameters, false);
                 Task<AuthenticationResult> task = request.RunAsync();
                 var authenticationResult = task.Result;
                 Assert.Fail("MsalSilentTokenAcquisitionException should be thrown here");

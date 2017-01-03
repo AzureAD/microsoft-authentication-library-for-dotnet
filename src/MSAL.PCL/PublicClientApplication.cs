@@ -40,25 +40,23 @@ namespace Microsoft.Identity.Client
     public sealed class PublicClientApplication : ClientApplicationBase
     {
         private const string DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
-        /*
-                /// <summary>
-                /// Default consutructor of the application.
-                /// </summary>
-                public PublicClientApplication():this(DefaultAuthority)
-                {
-                }
-        */
+
+        /// <summary>
+        /// .NET specific property that allows configuration of platform specific properties. For example, in iOS/Android it
+        /// would include the flag to enable/disable broker.
+        /// </summary>
+        public IPlatformParameters PlatformParameters { get; set; }
 
         /// <summary>
         /// Default consutructor of the application.
         /// </summary>
-        public PublicClientApplication(string clientId) : this(DefaultAuthority, clientId)
+        public PublicClientApplication(string clientId) : this(clientId, DefaultAuthority)
         {
         }
 
         /// <summary>
         /// </summary>
-        public PublicClientApplication(string authority, string clientId)
+        public PublicClientApplication(string clientId, string authority)
             : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
         {
             this.UserTokenCache = new TokenCache(clientId);
@@ -216,17 +214,11 @@ namespace Microsoft.Identity.Client
             string[] additionalScope, string loginHint, UiOptions uiOptions,
             string extraQueryParameters, string policy)
         {
-            if (this.PlatformParameters == null)
-            {
-                this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
-            }
-
             var requestParams = this.CreateRequestParameters(authority, scope, policy, null, this.UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
-
+            
             var handler =
-                new InteractiveRequest(requestParams, additionalScope,
-                    this.PlatformParameters, loginHint, uiOptions,
+                new InteractiveRequest(requestParams, additionalScope, loginHint, uiOptions,
                     this.CreateWebAuthenticationDialog(this.PlatformParameters));
             return await handler.RunAsync().ConfigureAwait(false);
         }
@@ -235,17 +227,12 @@ namespace Microsoft.Identity.Client
             string[] additionalScope, User user, UiOptions uiOptions, string extraQueryParameters,
             string policy)
         {
-            if (this.PlatformParameters == null)
-            {
-                this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
-            }
 
             var requestParams = this.CreateRequestParameters(authority, scope, policy, user, this.UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
-                new InteractiveRequest(requestParams, additionalScope,
-                    this.PlatformParameters, uiOptions,
+                new InteractiveRequest(requestParams, additionalScope, uiOptions,
                     this.CreateWebAuthenticationDialog(this.PlatformParameters));
             return await handler.RunAsync().ConfigureAwait(false);
         }
@@ -255,6 +242,10 @@ namespace Microsoft.Identity.Client
         {
             AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scope, policy, user, cache);
             parameters.ClientKey = new ClientKey(this.ClientId);
+            if (this.PlatformParameters == null)
+            {
+                this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
+            }
 
             return parameters;
         }

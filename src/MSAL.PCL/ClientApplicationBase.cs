@@ -104,12 +104,6 @@ namespace Microsoft.Identity.Client
         public bool ValidateAuthority { get; set; }
 
         /// <summary>
-        /// .NET specific property that allows configuration of platform specific properties. For example, in iOS/Android it
-        /// would include the flag to enable/disable broker.
-        /// </summary>
-        public IPlatformParameters PlatformParameters { get; set; }
-
-        /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the signed in users.
         /// </summary>
         public IEnumerable<User> Users
@@ -149,7 +143,7 @@ namespace Microsoft.Identity.Client
             Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenSilentCommonAsync(authority, scope, user, this.PlatformParameters, null, false)
+                    this.AcquireTokenSilentCommonAsync(authority, scope, user, null, false)
                         .ConfigureAwait(false);
         }
 
@@ -199,21 +193,16 @@ namespace Microsoft.Identity.Client
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenSilentCommonAsync(authorityInstance, scope, user, this.PlatformParameters, policy,
+                    this.AcquireTokenSilentCommonAsync(authorityInstance, scope, user, policy,
                         forceRefresh).ConfigureAwait(false);
         }
         
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
-            string[] scope, User user, IPlatformParameters parameters, string policy, bool forceRefresh)
+            string[] scope, User user, string policy, bool forceRefresh)
         {
-            if (parameters == null)
-            {
-                parameters = PlatformPlugin.DefaultPlatformParameters;
-            }
-
             var handler = new SilentRequest(
                 this.CreateRequestParameters(authority, scope, policy, user, this.UserTokenCache),
-                parameters, forceRefresh);
+                forceRefresh);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

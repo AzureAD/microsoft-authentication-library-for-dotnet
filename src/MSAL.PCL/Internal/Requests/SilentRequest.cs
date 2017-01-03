@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private RefreshTokenCacheItem _refreshTokenItem;
 
-        public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, IPlatformParameters parameters, bool forceRefresh)
+        public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, bool forceRefresh)
             : base(authenticationRequestParameters)
         {
             if (authenticationRequestParameters.User == null)
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.User));
             }
             
-            PlatformPlugin.BrokerHelper.PlatformParameters = parameters;
+            PlatformPlugin.BrokerHelper.PlatformParameters = authenticationRequestParameters.PlatformParameters;
             this.ForceRefresh = forceRefresh;
         }
 

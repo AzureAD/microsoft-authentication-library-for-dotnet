@@ -47,19 +47,19 @@ namespace Microsoft.Identity.Client
         /// <param name="appTokenCache"></param>
         public ConfidentialClientApplication(string clientId, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
-            : this(DefaultAuthority, clientId, redirectUri, clientCredential, userTokenCache, appTokenCache)
+            : this(clientId, DefaultAuthority, redirectUri, clientCredential, userTokenCache, appTokenCache)
         {
         }
 
         /// <summary>
         /// </summary>
-        /// <param name="authority"></param>
         /// <param name="clientId"></param>
+        /// <param name="authority"></param>
         /// <param name="redirectUri"></param>
         /// <param name="clientCredential"></param>
         /// <param name="userTokenCache"></param>
         /// <param name="appTokenCache"></param>
-        public ConfidentialClientApplication(string authority, string clientId, string redirectUri,
+        public ConfidentialClientApplication(string clientId, string authority, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache) : base(authority, clientId, redirectUri, true)
         {
             this.ClientCredential = clientCredential;
@@ -106,8 +106,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// AcquireTokenByAuthorizationCodeAsync
         /// </summary>
-        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string[] scope,
-            string authorizationCode)
+        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, string[] scope)
         {
             return
                 await
@@ -118,8 +117,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// AcquireTokenByAuthorizationCodeAsync
         /// </summary>
-        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string[] scope,
-            string authorizationCode, string policy)
+        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, string[] scope,
+            string policy)
         {
             return
                 await
@@ -184,7 +183,7 @@ namespace Microsoft.Identity.Client
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
-                new InteractiveRequest(requestParameters, null, null, loginHint, null, null);
+                new InteractiveRequest(requestParameters, null, loginHint, null, null);
             return await handler.CreateAuthorizationUriAsync(CreateCallState(CorrelationId)).ConfigureAwait(false);
         }
 
@@ -210,8 +209,7 @@ namespace Microsoft.Identity.Client
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
-                new InteractiveRequest(requestParameters, additionalScope,
-                    this.PlatformParameters, loginHint, null, null);
+                new InteractiveRequest(requestParameters, additionalScope, loginHint, null, null);
             return await handler.CreateAuthorizationUriAsync(CreateCallState(CorrelationId)).ConfigureAwait(false);
         }
 
