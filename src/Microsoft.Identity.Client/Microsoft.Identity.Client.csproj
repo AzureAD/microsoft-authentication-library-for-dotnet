@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid70;Xamarin.iOS10</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid403;Xamarin.iOS10</TargetFrameworks>
     <DefaultLanguage>en-US</DefaultLanguage>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
     <Version>1.0.0-alpha-001</Version>
@@ -48,12 +48,12 @@
     <DebugType>full</DebugType>
     <LanguageTargets>$(MSBuildProgramFiles32)\MSBuild\Xamarin\iOS\Xamarin.iOS.CSharp.targets</LanguageTargets>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid70'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid403'">
     <TargetFrameworkIdentifier>MonoAndroid</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v7.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0.3</TargetFrameworkVersion>
     <AndroidUseLatestPlatformSdk>False</AndroidUseLatestPlatformSdk>
     <DebugType>full</DebugType>
-    <DefineConstants>$(DefineConstants);MONOANDROID7_0</DefineConstants>
+    <DefineConstants>$(DefineConstants);MONOANDROID4_0_3</DefineConstants>
     <AndroidResgenFile>..\MSAL.PCL.Android\Resources\Resource.Designer.cs</AndroidResgenFile>
     <LanguageTargets>$(MSBuildProgramFiles32)\MSBuild\Xamarin\Android\Xamarin.Android.CSharp.targets</LanguageTargets>
   </PropertyGroup>
@@ -131,7 +131,7 @@
     <Compile Include="Platforms\iOS\**\*.cs" />
     <Compile Include="..\MSAL.PCL.iOS\*.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid70' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid403' ">
     <Reference Include="Mono.Android" />
     <Reference Include="System" />
     <Reference Include="System.Collections" />
