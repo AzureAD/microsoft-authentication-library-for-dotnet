@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.2;netstandard1.3;win81;wpa81;MonoAndroid70;Xamarin.iOS10</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.2;netstandard1.3;win81;MonoAndroid70;Xamarin.iOS10</TargetFrameworks>
     <DefaultLanguage>en-US</DefaultLanguage>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
     <Version>1.0.0-alpha-001</Version>
@@ -22,18 +22,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.2'">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
+    <BuildOutputTargetFolder>ref</BuildOutputTargetFolder>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'win81'">
     <NugetTargetMoniker>Windows,Version=v8.1</NugetTargetMoniker>
     <TargetFrameworkIdentifier>.NETCore</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <DefineConstants>$(DefineConstants);WIN8_1</DefineConstants>
-    <LanguageTargets>$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets</LanguageTargets>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'wpa81'">
-    <TargetFrameworkIdentifier>WindowsPhoneApp</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
-    <DefineConstants>$(DefineConstants);WPA8_1</DefineConstants>
     <LanguageTargets>$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets</LanguageTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'uap10.0'">
@@ -102,7 +97,7 @@
     <Compile Include="..\MSAL.Common\TokenCacheExtensions.cs" />
     <Compile Include="..\MSAL.PCL\MsalOption.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'wpa81' or '$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
     <Compile Include="Platforms\winrt\**\*.cs" />
     <Compile Include="..\MSAL.PCL.WinRT\*.cs" />
     <Compile Include="..\MSAL.Common\MsalEventSource.cs" />
