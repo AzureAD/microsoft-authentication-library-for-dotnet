@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.2;netstandard1.3;win81;MonoAndroid70;Xamarin.iOS10</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid70;Xamarin.iOS10</TargetFrameworks>
     <DefaultLanguage>en-US</DefaultLanguage>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
     <Version>1.0.0-alpha-001</Version>
@@ -20,9 +20,8 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.2'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
-    <BuildOutputTargetFolder>ref</BuildOutputTargetFolder>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'win81'">
     <NugetTargetMoniker>Windows,Version=v8.1</NugetTargetMoniker>
@@ -153,6 +152,6 @@
     <AndroidResource Include="..\MSAL.PCL.Android\Resources\**\*.axml" />
     <AndroidResource Include="..\MSAL.PCL.Android\Resources\**\*.xml" />
     <Compile Include="Resources\**\*.cs" />
-    <PackageReference Include="Xamarin.Android.Support.CustomTabs " Version="24.2.1" />
+    <PackageReference Include="Xamarin.Android.Support.CustomTabs " Version="23.3.0" />
   </ItemGroup>
 </Project>
