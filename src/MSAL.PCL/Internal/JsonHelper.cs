@@ -54,5 +54,17 @@ namespace Microsoft.Identity.Client.Internal
 
             return response;
         }
+
+        internal static T DeserializeFromJson<T>(byte[] jsonByteArray)
+        {
+            T response;
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
+            using (MemoryStream stream = new MemoryStream(jsonByteArray))
+            {
+                response = ((T)serializer.ReadObject(stream));
+            }
+
+            return response;
+        }
     }
 }
