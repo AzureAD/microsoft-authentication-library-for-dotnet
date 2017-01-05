@@ -50,15 +50,16 @@ namespace Microsoft.Identity.Client
         {
             var localSettings = ApplicationData.Current.LocalSettings;
             _tokenContainer =
-                    localSettings.CreateContainer(LocalSettingsTokenContainerName, ApplicationDataCreateDisposition.Always);
+                localSettings.CreateContainer(LocalSettingsTokenContainerName, ApplicationDataCreateDisposition.Always);
             _refreshTokenContainer =
-                    localSettings.CreateContainer(LocalSettingsRefreshTokenContainerName, ApplicationDataCreateDisposition.Always);
+                localSettings.CreateContainer(LocalSettingsRefreshTokenContainerName,
+                    ApplicationDataCreateDisposition.Always);
         }
 
         public ICollection<string> AllAccessAndIdTokens()
         {
             IList<string> list = new List<string>();
-            foreach(ApplicationDataCompositeValue item in _tokenContainer.Values.Values)
+            foreach (ApplicationDataCompositeValue item in _tokenContainer.Values.Values)
             {
                 list.Add(MsalHelpers.CreateString(GetCacheValue(item)));
             }
@@ -110,23 +111,25 @@ namespace Microsoft.Identity.Client
             string hashed = helper.CreateSha256Hash(key.ToString());
             _refreshTokenContainer.Values.Remove(hashed);
         }
+
         internal static void SetCacheValue(ApplicationDataCompositeValue composite, string stringValue)
         {
             byte[] encryptedValue = CryptographyHelper.Encrypt(stringValue.ToByteArray());
             composite[CacheValueLength] = encryptedValue.Length;
 
-                int segmentCount = (encryptedValue.Length / MaxCompositeValueLength) + ((encryptedValue.Length % MaxCompositeValueLength == 0) ? 0 : 1);
-                byte[] subValue = new byte[MaxCompositeValueLength];
-                for (int i = 0; i < segmentCount - 1; i++)
-                {
-                    Array.Copy(encryptedValue, i * MaxCompositeValueLength, subValue, 0, MaxCompositeValueLength);
-                    composite[CacheValue + i] = subValue;
-                }
+            int segmentCount = (encryptedValue.Length/MaxCompositeValueLength) +
+                               ((encryptedValue.Length%MaxCompositeValueLength == 0) ? 0 : 1);
+            byte[] subValue = new byte[MaxCompositeValueLength];
+            for (int i = 0; i < segmentCount - 1; i++)
+            {
+                Array.Copy(encryptedValue, i*MaxCompositeValueLength, subValue, 0, MaxCompositeValueLength);
+                composite[CacheValue + i] = subValue;
+            }
 
-                int copiedLength = (segmentCount - 1) * MaxCompositeValueLength;
-                Array.Copy(encryptedValue, copiedLength, subValue, 0, encryptedValue.Length - copiedLength);
-                composite[CacheValue + (segmentCount - 1)] = subValue;
-                composite[CacheValueSegmentCount] = segmentCount;
+            int copiedLength = (segmentCount - 1)*MaxCompositeValueLength;
+            Array.Copy(encryptedValue, copiedLength, subValue, 0, encryptedValue.Length - copiedLength);
+            composite[CacheValue + (segmentCount - 1)] = subValue;
+            composite[CacheValueSegmentCount] = segmentCount;
         }
 
         internal static byte[] GetCacheValue(ApplicationDataCompositeValue composite)
@@ -136,23 +139,27 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            int encyptedValueLength = (int)composite[CacheValueLength];
-            int segmentCount = (int)composite[CacheValueSegmentCount];
+            int encyptedValueLength = (int) composite[CacheValueLength];
+            int segmentCount = (int) composite[CacheValueSegmentCount];
 
             byte[] encryptedValue = new byte[encyptedValueLength];
             if (segmentCount == 1)
             {
-                encryptedValue = (byte[])composite[CacheValue + 0];
+                encryptedValue = (byte[]) composite[CacheValue + 0];
             }
             else
             {
                 for (int i = 0; i < segmentCount - 1; i++)
                 {
-                    Array.Copy((byte[])composite[CacheValue + i], 0, encryptedValue, i * MaxCompositeValueLength, MaxCompositeValueLength);
+                    Array.Copy((byte[]) composite[CacheValue + i], 0, encryptedValue, i*MaxCompositeValueLength,
+                        MaxCompositeValueLength);
                 }
             }
 
-            Array.Copy((byte[])composite[CacheValue + (segmentCount - 1)], 0, encryptedValue, (segmentCount - 1) * MaxCompositeValueLength, encyptedValueLength - (segmentCount - 1) * MaxCompositeValueLength);
+            Array.Copy((byte[]) composite[CacheValue + (segmentCount - 1)], 0, encryptedValue,
+                (segmentCount - 1)*MaxCompositeValueLength,
+                encyptedValueLength - (segmentCount - 1)*MaxCompositeValueLength);
+
             return CryptographyHelper.Decrypt(encryptedValue);
         }
     }
