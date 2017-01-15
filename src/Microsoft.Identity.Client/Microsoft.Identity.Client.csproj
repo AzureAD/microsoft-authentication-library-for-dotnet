@@ -63,7 +63,7 @@
   <ItemGroup>
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
     <None Include="..\**\*.cs;..\**\*.xml;..\**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
-    <Compile Include="**\*.cs" Exclude="Platforms\**\*.*;Resources\**\*.cs" />
+    <Compile Remove="Platforms\**\*.*;Resources\**\*.cs" />
     <EmbeddedResource Include="Properties\Microsoft.Identity.Client.rd.xml" />
     <Compile Include="..\MSAL.PCL\**\*.cs" Exclude="..\MSAL.PCL\Properties\**\*.cs;..\MSAL.PCL\MsalOption.cs" />
   </ItemGroup>
