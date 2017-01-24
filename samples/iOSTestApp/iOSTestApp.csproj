@@ -124,18 +124,13 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
-    <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MSAL.PCL.iOS\MSAL.PCL.iOS.csproj">
-      <Project>{2f80e14c-b186-4aee-92bc-0de3b6fdb107}</Project>
-      <Name>MSAL.PCL.iOS</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\MSAL.PCL\MSAL.PCL.csproj">
-      <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
-      <Name>MSAL.PCL</Name>
+    <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
+      <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
+      <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
     <ProjectReference Include="..\TestApp.PCL\TestApp.PCL.csproj">
       <Project>{c09ee601-3f07-4e8b-b12f-473b2bfbef95}</Project>
