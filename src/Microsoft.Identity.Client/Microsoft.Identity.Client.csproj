@@ -69,7 +69,6 @@
     <Compile Include="..\MSAL.PCL\**\*.cs" Exclude="..\MSAL.PCL\Properties\**\*.cs;..\MSAL.PCL\MsalOption.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NETStandard.Library" Condition="'$(TargetFramework)' != 'net45'" Version="1.6.1" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Condition="'$(TargetFramework)' != 'net45'" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Condition="'$(TargetFramework)' != 'net45'" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Condition="'$(TargetFramework)' != 'net45'" Version="4.3.0" />
