@@ -96,21 +96,8 @@ namespace Test.ADAL.NET.Unit.Mocks
             HttpResponseMessage responseMessage = null;
             HttpContent content = null;
 
-            switch ((int)statusCode)
-            {
-                case 500:
-                    responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-                    content = new StringContent("Internal Server Error");
-                    break;
-                case 503:
-                    responseMessage = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
-                    content = new StringContent("Service Unavailable");
-                    break;
-                case 504:
-                    responseMessage = new HttpResponseMessage(HttpStatusCode.GatewayTimeout);
-                    content = new StringContent("Gateway Timeout");
-                    break;
-            }
+            responseMessage = new HttpResponseMessage(statusCode);
+            content = new StringContent("Server Error 500-599");
 
             if (responseMessage != null)
             {
