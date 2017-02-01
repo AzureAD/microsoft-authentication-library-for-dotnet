@@ -90,6 +90,14 @@
     <Content Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
+      <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
+      <Name>Microsoft.Identity.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TestApp.PCL\TestApp.PCL.csproj">
+      <Project>{c09ee601-3f07-4e8b-b12f-473b2bfbef95}</Project>
+      <Name>TestApp.PCL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\XFormsApp\XFormsApp.csproj">
       <Project>{856ea096-2283-49b6-b2cd-5c603551d150}</Project>
       <Name>XFormsApp</Name>
