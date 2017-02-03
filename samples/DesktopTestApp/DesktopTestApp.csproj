@@ -65,6 +65,9 @@
       <Project>{c09ee601-3f07-4e8b-b12f-473b2bfbef95}</Project>
       <Name>TestApp.PCL</Name>
     </ProjectReference>
+    <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
