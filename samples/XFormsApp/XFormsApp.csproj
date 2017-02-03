@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard1.1</TargetFramework>
-    <PackageTargetFallback>portable-net45+win8+wpa81</PackageTargetFallback>
+    <PackageTargetFallback>portable-net45+win8+wpa81+wp8</PackageTargetFallback>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\..\build\Sdl7.0.ruleset</CodeAnalysisRuleSet>
