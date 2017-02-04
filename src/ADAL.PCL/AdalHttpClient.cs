@@ -101,13 +101,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (ex.WebResponse != null)
                     {
                         TokenResponse tokenResponse = TokenResponse.CreateFromErrorResponse(ex.WebResponse);
-                        string[] errorCodes = tokenResponse.ErrorCodes ?? new[] {ex.WebResponse.StatusCode.ToString()};
+                        string[] errorCodes = tokenResponse.ErrorCodes ?? new[] { ex.WebResponse.StatusCode.ToString() };
                         serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
                             errorCodes, ex);
 
-                        if ((ex.WebResponse.StatusCode.Equals(HttpStatusCode.InternalServerError)) ||
-                            (ex.WebResponse.StatusCode).Equals(HttpStatusCode.GatewayTimeout) ||
-                            (ex.WebResponse.StatusCode).Equals(HttpStatusCode.ServiceUnavailable))
+                        if ((int)ex.WebResponse.StatusCode >= 500 && (int)ex.WebResponse.StatusCode < 600)
                         {
                             PlatformPlugin.Logger.Information(this.CallState, "HttpStatus code: " + ex.WebResponse.StatusCode + " - " + ex.InnerException.Message);
                             Resiliency = true;
@@ -166,7 +164,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             foreach (string pair in headerPairs)
             {
                 List<string> keyValue = EncodingHelper.SplitWithQuotes(pair, '=');
-                data.Add(keyValue[0].Trim(),keyValue[1].Trim().Replace("\"",""));
+                data.Add(keyValue[0].Trim(), keyValue[1].Trim().Replace("\"", ""));
             }
 
             return data;
