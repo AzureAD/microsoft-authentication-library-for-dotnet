@@ -40,7 +40,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal class HttpClientWrapper : IHttpClient
     {
         private readonly string uri;
-        private int timeoutInMilliSeconds = 30000;
+        private int _timeoutInMilliSeconds = 30000;
+        private long _maxResponseSizeInBytes = 1048576;
 
         public HttpClientWrapper(string uri, CallState callState)
         {
@@ -65,7 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             set
             {
-                this.timeoutInMilliSeconds = value;
+                this._timeoutInMilliSeconds = value;
             }
         }
 
@@ -73,6 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             using (HttpClient client = new HttpClient(HttpMessageHandlerFactory.GetMessageHandler(this.UseDefaultCredentials)))
             {
+                client.MaxResponseContentBufferSize = _maxResponseSizeInBytes;
                 client.DefaultRequestHeaders.Accept.Clear();
                 HttpRequestMessage requestMessage = new HttpRequestMessage();
                 requestMessage.RequestUri = new Uri(uri);
@@ -91,7 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     requestMessage.Headers.Add(OAuthHeader.RequestCorrelationIdInResponse, "true");
                 }
 
-                client.Timeout = TimeSpan.FromMilliseconds(this.timeoutInMilliSeconds);
+                client.Timeout = TimeSpan.FromMilliseconds(this._timeoutInMilliSeconds);
 
                 HttpResponseMessage responseMessage;
 
