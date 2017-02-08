@@ -61,8 +61,11 @@ namespace Microsoft.Identity.Client.Internal
         {
             get
             {
-                Assembly assembly = LoadPlatformSpecificAssembly();
-                return (ITokenCachePlugin) Activator.CreateInstance(assembly.GetType(Namespace + "TokenCachePlugin"));
+#if !NETSTANDARD1_1
+                return (ITokenCachePlugin) new TokenCachePlugin();
+#else
+                return null;
+#endif
             }
         }
 
@@ -76,17 +79,17 @@ namespace Microsoft.Identity.Client.Internal
 
         public static void InitializeByAssemblyDynamicLinking()
         {
-            Assembly assembly = LoadPlatformSpecificAssembly();
+#if !NETSTANDARD1_1
             InjectDependecies(
-                (IWebUIFactory) Activator.CreateInstance(assembly.GetType(Namespace + "WebUIFactory")),
-                (ITokenCachePlugin) Activator.CreateInstance(assembly.GetType(Namespace + "TokenCachePlugin")),
-                (LoggerBase) Activator.CreateInstance(assembly.GetType(Namespace + "Logger")),
-                (PlatformInformationBase) Activator.CreateInstance(assembly.GetType(Namespace + "PlatformInformation")),
-                (ICryptographyHelper) Activator.CreateInstance(assembly.GetType(Namespace + "CryptographyHelper")),
-                (IDeviceAuthHelper) Activator.CreateInstance(assembly.GetType(Namespace + "DeviceAuthHelper")),
-                (IBrokerHelper) Activator.CreateInstance(assembly.GetType(Namespace + "BrokerHelper")),
-                (IPlatformParameters) Activator.CreateInstance(assembly.GetType(Namespace + "PlatformParameters"))
-                );
+                (IWebUIFactory) new WebUIFactory(),
+                (ITokenCachePlugin) new TokenCachePlugin(),
+                (LoggerBase) new Logger(),
+                (PlatformInformationBase) new PlatformInformation(),
+                (ICryptographyHelper) new CryptographyHelper(),
+                (IDeviceAuthHelper) new DeviceAuthHelper(),
+                (IBrokerHelper) new BrokerHelper(),
+                (IPlatformParameters) new PlatformParameters());
+#endif
         }
 
         public static void InjectDependecies(IWebUIFactory webUIFactory, ITokenCachePlugin tokenCachePlugin,
@@ -102,35 +105,6 @@ namespace Microsoft.Identity.Client.Internal
             DeviceAuthHelper = deviceAuthHelper;
             BrokerHelper = brokerHelper;
             DefaultPlatformParameters = platformParameters;
-        }
-
-        private static Assembly LoadPlatformSpecificAssembly()
-        {
-            // For security reasons, it is important to have PublicKeyToken mentioned referencing the assembly.
-            const string PlatformSpecificAssemblyNameTemplate =
-                "Microsoft.Identity.Client.Platform, Version={0}, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae";
-
-            string platformSpecificAssemblyName = string.Format(CultureInfo.InvariantCulture,
-                PlatformSpecificAssemblyNameTemplate, MsalIdHelper.GetMsalVersion());
-
-            try
-            {
-                return Assembly.Load(new AssemblyName(platformSpecificAssemblyName));
-            }
-            catch (FileNotFoundException ex)
-            {
-                PlatformPlugin.Logger.Error(null, ex);
-                throw new MsalException(MsalError.AssemblyNotFound,
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.AssemblyNotFoundTemplate,
-                        platformSpecificAssemblyName), ex);
-            }
-            catch (Exception ex) // FileLoadException is missing from PCL
-            {
-                PlatformPlugin.Logger.Error(null, ex);
-                throw new MsalException(MsalError.AssemblyLoadFailed,
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.AssemblyLoadFailedTemplate,
-                        platformSpecificAssemblyName), ex);
-            }
         }
     }
 }
