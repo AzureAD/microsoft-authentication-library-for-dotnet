@@ -66,10 +66,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
               </s:Body>
               </s:Envelope>";
 
-        // We currently send this for all requests. We may need to change it in the future.
-        private const string DefaultAppliesTo = "urn:federation:MicrosoftOnline";
+        private const string defaultAppliesTo = "urn:federation:MicrosoftOnline";
 
-        public static async Task<WsTrustResponse> SendRequestAsync(WsTrustAddress wsTrustAddress, UserCredential credential, CallState callState)
+        public static async Task<WsTrustResponse> SendRequestAsync(WsTrustAddress wsTrustAddress, UserCredential credential, CallState callState, string cloudAudience)
         {
             IHttpClient request = PlatformPlugin.HttpClientFactory.Create(wsTrustAddress.Uri.AbsoluteUri, callState);
             request.ContentType = "application/soap+xml";
@@ -78,7 +77,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 SetKerberosOption(request);
             }
 
-            StringBuilder messageBuilder = BuildMessage(DefaultAppliesTo, wsTrustAddress, credential);
+            if (string.IsNullOrEmpty(cloudAudience))
+            {
+                cloudAudience = defaultAppliesTo;
+            }
+
+            StringBuilder messageBuilder = BuildMessage(cloudAudience, wsTrustAddress, credential);
             string soapAction = XmlNamespace.Issue.ToString();
             if (wsTrustAddress.Version == WsTrustVersion.WsTrust2005)
             {

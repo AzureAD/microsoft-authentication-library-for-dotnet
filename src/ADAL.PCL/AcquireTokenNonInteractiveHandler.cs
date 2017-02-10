@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private readonly UserCredential userCredential;
 
         private UserAssertion userAssertion;
-        
+
         public AcquireTokenNonInteractiveHandler(RequestData requestData, UserCredential userCredential)
             : base(requestData)
         {
@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else if (this.userAssertion != null)
             {
-                this.DisplayableId = userAssertion.UserName;                
+                this.DisplayableId = userAssertion.UserName;
             }
         }
 
@@ -111,11 +111,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     {
                         throw new AdalException(AdalError.MissingFederationMetadataUrl);
                     }
-
+                    
                     WsTrustAddress wsTrustAddress = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, this.userCredential.UserAuthType, this.CallState).ConfigureAwait(false);
                     PlatformPlugin.Logger.Information(this.CallState, string.Format(CultureInfo.CurrentCulture, " WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustAddress.Uri, userRealmResponse.FederationMetadataUrl));
 
-                    WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, this.userCredential, this.CallState).ConfigureAwait(false);
+                    WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, this.userCredential, this.CallState, userRealmResponse.CloudAudienceUrn).ConfigureAwait(false);
                     PlatformPlugin.Logger.Information(this.CallState, string.Format(CultureInfo.CurrentCulture, " Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType));
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
@@ -151,7 +151,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // To request id_token in response
             requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
         }
-        
+
         private bool PerformUserRealmDiscovery()
         {
             // To decide whether user realm discovery is needed or not

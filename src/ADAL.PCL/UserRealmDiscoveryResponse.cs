@@ -49,6 +49,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = "federation_active_auth_url")]
         public string FederationActiveAuthUrl { get; set; }
 
+        [DataMember(Name = "cloud_audience_urn")]
+        public string CloudAudienceUrn { get; set; }
+             
         internal static async Task<UserRealmDiscoveryResponse> CreateByDiscoveryAsync(string userRealmUri, string userName, CallState callState)
         {
             string userRealmEndpoint = userRealmUri;
