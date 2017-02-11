@@ -14,7 +14,7 @@
     <FileAlignment>512</FileAlignment>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
+    <AndroidUseLatestPlatformSdk>False</AndroidUseLatestPlatformSdk>
     <TargetFrameworkVersion>v7.0</TargetFrameworkVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -111,8 +111,8 @@
     <Compile Include="WebUIFactory.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\build\35MSSharedLib1024.snk">
-      <Link>35MSSharedLib1024.snk</Link>
+    <None Include="..\..\build\MSAL.snk">
+      <Link>MSAL.snk</Link>
     </None>
     <None Include="packages.config" />
     <None Include="Resources\AboutResources.txt" />
