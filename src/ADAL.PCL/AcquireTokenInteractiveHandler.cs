@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             this.brokerParameters["username_type"] = userId.Type.ToString();
 
-            this.brokerParameters["redirect_uri"] = redirectUri.AbsoluteUri;
+            this.brokerParameters["redirect_uri"] = this.redirectUri.AbsoluteUri;
             this.brokerParameters["extra_qp"] = extraQueryParameters;
             PlatformPlugin.BrokerHelper.PlatformParameters = authorizationParameters;
         }
