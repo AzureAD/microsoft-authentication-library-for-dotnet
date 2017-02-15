@@ -19,46 +19,11 @@
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <!-- Workaround until Xamarin supports PPDB -->
+    <DebugType>full</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'win81'">
-    <NugetTargetMoniker>Windows,Version=v8.1</NugetTargetMoniker>
-    <TargetFrameworkIdentifier>.NETCore</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
-    <DefineConstants>$(DefineConstants);WIN8_1</DefineConstants>
-    <LanguageTargets>$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets</LanguageTargets>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'uap10.0'">
-    <NugetTargetMoniker>UAP,Version=v10.0</NugetTargetMoniker>
-    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
-    <TargetFrameworkIdentifier>.NETCore</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-    <DefineConstants>$(DefineConstants);WINDOWS_UWP;UAP10_0</DefineConstants>
-    <LanguageTargets>$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets</LanguageTargets>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS10'">
-    <TargetFrameworkIdentifier>Xamarin.iOS</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
-    <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <DefineConstants>$(DefineConstants);IOS1_0</DefineConstants>
-    <DebugType>full</DebugType>
-    <LanguageTargets>$(MSBuildProgramFiles32)\MSBuild\Xamarin\iOS\Xamarin.iOS.CSharp.targets</LanguageTargets>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid403'">
-    <TargetFrameworkIdentifier>MonoAndroid</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v4.0.3</TargetFrameworkVersion>
-    <AndroidUseLatestPlatformSdk>False</AndroidUseLatestPlatformSdk>
-    <DebugType>full</DebugType>
-    <DefineConstants>$(DefineConstants);MONOANDROID4_0_3</DefineConstants>
-    <AndroidResgenFile>..\MSAL.PCL.Android\Resources\Resource.Designer.cs</AndroidResgenFile>
-    <LanguageTargets>$(MSBuildProgramFiles32)\MSBuild\Xamarin\Android\Xamarin.Android.CSharp.targets</LanguageTargets>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
-    <DefineConstants>$(DefineConstants);NET4_5</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <ProjectCapability Include="ShowFilesOutsideOfProject" />
@@ -69,10 +34,13 @@
     <Compile Include="..\MSAL.PCL\**\*.cs" Exclude="..\MSAL.PCL\Properties\**\*.cs;..\MSAL.PCL\MsalOption.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Condition="'$(TargetFramework)' != 'net45'" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Serialization.Json" Condition="'$(TargetFramework)' != 'net45'" Version="4.3.0" />
-    <PackageReference Include="System.Xml.XDocument" Condition="'$(TargetFramework)' != 'net45'" Version="4.3.0" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" Condition="'$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'MonoAndroid70' or '$(TargetFramework)' == 'Xamarin.iOS10' or '$(TargetFramework)' == 'uap10.0' " Version="4.3.0" />
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.0-rc4.*">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Condition="'$(TargetFramework)' != 'net45'" Version="4.1.1" />
+    <PackageReference Include="System.Runtime.Serialization.Json" Condition="'$(TargetFramework)' != 'net45'" Version="4.0.2" />
+    <PackageReference Include="System.Xml.XDocument" Condition="'$(TargetFramework)' != 'net45'" Version="4.1.0" />
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" Condition="'$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'MonoAndroid70' or '$(TargetFramework)' == 'Xamarin.iOS10' or '$(TargetFramework)' == 'uap10.0' " Version="4.1.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System" />
@@ -154,4 +122,6 @@
     <Compile Include="Resources\**\*.cs" />
     <PackageReference Include="Xamarin.Android.Support.CustomTabs " Version="23.3.0" />
   </ItemGroup>
+  
+    <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
 </Project>
