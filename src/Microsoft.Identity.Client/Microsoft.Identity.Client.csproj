@@ -25,6 +25,10 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
+    <!-- Explicitly Use Latest Build Tools -->
+    <AndroidSdkBuildToolsVersion>25.0.2</AndroidSdkBuildToolsVersion>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectCapability Include="ShowFilesOutsideOfProject" />
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
