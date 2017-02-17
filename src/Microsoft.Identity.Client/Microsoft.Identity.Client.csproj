@@ -120,7 +120,8 @@
     <AndroidResource Include="..\MSAL.PCL.Android\Resources\**\*.axml" />
     <AndroidResource Include="..\MSAL.PCL.Android\Resources\**\*.xml" />
     <Compile Include="Resources\**\*.cs" />
-    <PackageReference Include="Xamarin.Android.Support.CustomTabs " Version="23.3.0" />
+    <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="23.3.0" />
+    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="23.3.0" />    
   </ItemGroup>
   
     <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
