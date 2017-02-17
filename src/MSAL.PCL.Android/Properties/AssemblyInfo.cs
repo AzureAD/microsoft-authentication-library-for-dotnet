@@ -42,5 +42,4 @@ using System.Runtime.InteropServices;
 
 // Assembly version information is in file MSAL.Common\CommonAssemblyInfo.cs
 
-[assembly: AssemblyDelaySign(true)]
-[assembly: AssemblyKeyFile(@"..\..\build\35MSSharedLib1024.snk")]
+[assembly: AssemblyKeyFile(@"..\..\build\MSAL.snk")]
