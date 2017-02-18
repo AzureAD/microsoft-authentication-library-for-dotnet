@@ -1,15 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid7;Xamarin.iOS10</TargetFrameworks>
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid7;Xamarin.iOS10</TargetFrameworks>    
     <Version>1.0.0-alpha-001</Version>
     <Authors>Microsoft Corp.</Authors>
     <PackageTitle>Microsoft Authentication Library</PackageTitle>
     <PackageLicenseUrl>http://go.microsoft.com/fwlink/?LinkId=317295</PackageLicenseUrl>
     <PackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=258232</PackageProjectUrl>
     <MinClientVersion>2.12</MinClientVersion>
-    <Description>This package contains the binaries of the Microsoft Authentication Library (MSAL). MSAL provides a Portable Class Library with easy to use authentication functionality for your .NET client on various platforms including Windows desktop, Windows Store, Xamarin iOS and Xamarin Android by taking advantage of Azure Active Directory and MSA.</Description>
+    <Description>This package contains the binaries of the Microsoft Authentication Library (MSAL).</Description>
+    <Summary>MSAL provides a library with easy to use authentication functionality for your .NET client on various platforms including Windows desktop, Windows Store, Xamarin iOS and Xamarin Android by taking advantage of Azure Active Directory and MSA.</Summary>
     <Copyright>(C) Microsoft Corporation. All rights reserved.</Copyright>
     <PackageTags>Microsoft Authentication Library;MSA;MSAL;Azure Active Directory;AAD;Identity;Authentication;.NET;Windows Store;Xamarin iOS;Android</PackageTags>
     <Product>Microsoft.Identity.Client ($(TargetFramework))</Product>
@@ -28,6 +27,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
     <!-- Explicitly Use Latest Build Tools -->
     <AndroidSdkBuildToolsVersion>25.0.2</AndroidSdkBuildToolsVersion>
+    <NoWarn>$(NoWarn);8002</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <ProjectCapability Include="ShowFilesOutsideOfProject" />
@@ -38,13 +38,15 @@
     <Compile Include="..\MSAL.PCL\**\*.cs" Exclude="..\MSAL.PCL\Properties\**\*.cs;..\MSAL.PCL\MsalOption.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.0-rc4.*">
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.0-rc4-*">
       <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Condition="'$(TargetFramework)' != 'net45'" Version="4.1.1" />
-    <PackageReference Include="System.Runtime.Serialization.Json" Condition="'$(TargetFramework)' != 'net45'" Version="4.0.2" />
-    <PackageReference Include="System.Xml.XDocument" Condition="'$(TargetFramework)' != 'net45'" Version="4.1.0" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" Condition="'$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'MonoAndroid70' or '$(TargetFramework)' == 'Xamarin.iOS10' or '$(TargetFramework)' == 'uap10.0' " Version="4.1.0" />
+    </PackageReference>    
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'uap10.0' ">
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
+    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.0.2" />
+    <PackageReference Include="System.Xml.XDocument" Version="4.0.11" />
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.1.0" Condition="'$(TargetFramework)' != 'netstandard1.1'" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System" />
@@ -86,7 +88,7 @@
     <Compile Include="..\MSAL.PCL\MsalOption.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform " Version="5.2.2" />
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform " Version="5.3.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
     <Reference Include="System" />
@@ -128,5 +130,5 @@
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="23.3.0" />    
   </ItemGroup>
   
-    <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
+  <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
 </Project>
