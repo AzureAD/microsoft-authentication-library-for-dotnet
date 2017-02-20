@@ -157,8 +157,8 @@ namespace Microsoft.Identity.Client
             Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenSilentCommonAsync(authority, userIdentifier, this.PlatformParameters,
-                        null, false).ConfigureAwait(false);
+                    this.AcquireTokenSilentCommonAsync(authority, scope, userIdentifier, this.PlatformParameters,
+                        false).ConfigureAwait(false);
         }*/
 
 /*        /// <summary>
@@ -166,7 +166,6 @@ namespace Microsoft.Identity.Client
         /// <param name="scope"></param>
         /// <param name="userIdentifier"></param>
         /// <param name="authority"></param>
-        /// <param name="policy"></param>
         /// <param name="forceRefresh"></param>
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier,
@@ -175,8 +174,8 @@ namespace Microsoft.Identity.Client
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
             return
                 await
-                    this.AcquireTokenSilentCommonAsync(authorityInstance, userIdentifier, this.PlatformParameters,
-                        policy, forceRefresh).ConfigureAwait(false);
+                    this.AcquireTokenSilentCommonAsync(authorityInstance, scope, userIdentifier, this.PlatformParameters,
+                        forceRefresh).ConfigureAwait(false);
         }*/
 
         /// <summary>
