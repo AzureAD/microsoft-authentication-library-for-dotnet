@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
         }
 
-        public RefreshTokenCacheItem(string authority, string clientId, string policy, TokenResponse response) : base(authority, clientId, policy, response)
+        public RefreshTokenCacheItem(string authority, string clientId, TokenResponse response) : base(authority, clientId, response)
         {
             RefreshToken = response.RefreshToken;
         }
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public override TokenCacheKey GetTokenCacheKey()
         {
-            return new TokenCacheKey(null, null, ClientId, null, null, User.HomeObjectId, Policy);
+            return new TokenCacheKey(null, null, ClientId, null, null, User.HomeObjectId);
         }
     }
 }

@@ -184,11 +184,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             authorizationRequestParameters[OAuth2Parameter.Scope] = unionScope.AsSingleString();
             authorizationRequestParameters[OAuth2Parameter.ResponseType] = OAuth2ResponseType.Code;
 
-            if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.Policy))
-            {
-                authorizationRequestParameters[OAuth2Parameter.Policy] = AuthenticationRequestParameters.Policy;
-            }
-
             authorizationRequestParameters[OAuth2Parameter.RedirectUri] =
                 AuthenticationRequestParameters.RedirectUri.AbsoluteUri;
 

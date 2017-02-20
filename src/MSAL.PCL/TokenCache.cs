@@ -168,12 +168,12 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal TokenCacheItem SaveAccessToken(string authority, string clientId, string policy, TokenResponse response)
+        internal TokenCacheItem SaveAccessToken(string authority, string clientId, TokenResponse response)
         {
             lock (lockObject)
             {
                 // create the access token cache item
-                TokenCacheItem tokenCacheItem = new TokenCacheItem(authority, clientId, policy, response);
+                TokenCacheItem tokenCacheItem = new TokenCacheItem(authority, clientId, response);
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,
@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void SaveRefreshToken(string clientId, string policy, TokenResponse response)
+        internal void SaveRefreshToken(string clientId, TokenResponse response)
         {
             lock (lockObject)
             {
@@ -198,8 +198,7 @@ namespace Microsoft.Identity.Client
                 if (response.RefreshToken != null)
                 {
                     // create the refresh token cache item
-                    RefreshTokenCacheItem refreshTokenCacheItem = new RefreshTokenCacheItem(null, clientId, policy,
-                        response);
+                    RefreshTokenCacheItem refreshTokenCacheItem = new RefreshTokenCacheItem(null, clientId, response);
                     TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                     {
                         TokenCache = this,
@@ -220,7 +219,7 @@ namespace Microsoft.Identity.Client
             lock (lockObject)
             {
                 TokenCacheKey key = new TokenCacheKey(requestParam.Authority.CanonicalAuthority,
-                    requestParam.Scope, _clientId, requestParam.User, requestParam.Policy);
+                    requestParam.Scope, _clientId, requestParam.User);
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,
@@ -264,8 +263,7 @@ namespace Microsoft.Identity.Client
             lock (lockObject)
             {
                 TokenCacheKey key = new TokenCacheKey(null, null, requestParam.ClientKey.ClientId, null, null,
-                    requestParam.User?.HomeObjectId,
-                    requestParam.Policy);
+                    requestParam.User?.HomeObjectId);
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,

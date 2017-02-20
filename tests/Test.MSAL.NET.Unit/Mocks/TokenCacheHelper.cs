@@ -42,7 +42,6 @@ namespace Test.MSAL.NET.Unit.Mocks
             {
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
-                Policy = TestConstants.Policy,
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
                 RawIdToken = MockHelpers.DefaultIdToken,
@@ -62,7 +61,6 @@ namespace Test.MSAL.NET.Unit.Mocks
             {
                 Authority = TestConstants.AuthorityGuestTenant,
                 ClientId = TestConstants.ClientId,
-                Policy = TestConstants.Policy,
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
                 RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId, TestConstants.HomeObjectId),
@@ -82,7 +80,6 @@ namespace Test.MSAL.NET.Unit.Mocks
             {
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
-                Policy = TestConstants.Policy,
                 RefreshToken = "someRT",
                 RawIdToken = MockHelpers.DefaultIdToken,
                 User = new User

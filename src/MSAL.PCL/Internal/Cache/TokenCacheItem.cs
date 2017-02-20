@@ -69,8 +69,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
         }
 
-        public TokenCacheItem(string authority, string clientId, string policy, TokenResponse response)
-            : base(authority, clientId, policy, response)
+        public TokenCacheItem(string authority, string clientId, TokenResponse response)
+            : base(authority, clientId, response)
         {
             if (response.AccessToken != null)
             {
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public override TokenCacheKey GetTokenCacheKey()
         {
-            return new TokenCacheKey(Authority, Scope, ClientId, User, Policy);
+            return new TokenCacheKey(Authority, Scope, ClientId, User);
         }
     }
 }

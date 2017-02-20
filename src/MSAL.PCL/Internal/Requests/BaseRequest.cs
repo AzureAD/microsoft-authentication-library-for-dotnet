@@ -143,16 +143,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (StoreToCache)
             {
                 this.TokenCache.SaveAccessToken(this.Authority.CanonicalAuthority,
-                    AuthenticationRequestParameters.ClientKey.ClientId,
-                    AuthenticationRequestParameters.Policy, Response);
+                    AuthenticationRequestParameters.ClientKey.ClientId, Response);
 
-                this.TokenCache.SaveRefreshToken(AuthenticationRequestParameters.ClientKey.ClientId,
-                    AuthenticationRequestParameters.Policy, Response);
+                this.TokenCache.SaveRefreshToken(AuthenticationRequestParameters.ClientKey.ClientId, Response);
             }
 
             return new TokenCacheItem(this.Authority.CanonicalAuthority,
-                AuthenticationRequestParameters.ClientKey.ClientId,
-                AuthenticationRequestParameters.Policy, Response);
+                AuthenticationRequestParameters.ClientKey.ClientId, Response);
         }
 
         protected virtual bool BrokerInvocationRequired()
@@ -208,11 +205,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task SendHttpMessageAsync(OAuth2Client client)
         {
-            if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.Policy))
-            {
-                client.AddQueryParameter("p", AuthenticationRequestParameters.Policy);
-            }
-
             Response =
                 await client.GetToken(new Uri(this.Authority.TokenEndpoint), this.CallState).ConfigureAwait(false);
 

@@ -109,8 +109,7 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
             });
 
-            Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray(),
-                TestConstants.Policy);
+            Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull("header.payload.signature", result.Token);
@@ -159,8 +158,7 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
             });
 
-            Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray(),
-                TestConstants.Policy);
+            Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull("header.payload.signature", result.Token);
@@ -182,8 +180,7 @@ namespace Test.MSAL.NET.Unit
             string cachedAssertion = cc.ClientAssertion.Assertion;
             long cacheValidTo = cc.ValidTo;
 
-            task = app.AcquireTokenForClientAsync(TestConstants.ScopeForAnotherResource.ToArray(),
-                TestConstants.Policy);
+            task = app.AcquireTokenForClientAsync(TestConstants.ScopeForAnotherResource.ToArray());
             result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(cacheValidTo, cc.ValidTo);
@@ -317,14 +314,13 @@ namespace Test.MSAL.NET.Unit
 
             Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(),
                 "custom://redirect-uri", TestConstants.DisplayableId, "extra=qp&prompt=none",
-                TestConstants.ScopeForAnotherResource.AsArray(), TestConstants.AuthorityGuestTenant,
-                TestConstants.Policy);
+                TestConstants.ScopeForAnotherResource.AsArray(), TestConstants.AuthorityGuestTenant);
             Uri uri = task.Result;
             Assert.IsNotNull(uri);
             Assert.IsTrue(uri.AbsoluteUri.StartsWith(TestConstants.AuthorityGuestTenant, StringComparison.CurrentCulture));
             Dictionary<string, string> qp = MsalHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
             Assert.IsNotNull(qp);
-            Assert.AreEqual(13, qp.Count);
+            Assert.AreEqual(12, qp.Count);
             Assert.IsTrue(qp.ContainsKey("client-request-id"));
             Assert.IsFalse(qp.ContainsKey("client_secret"));
             Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2 r2/scope1 r2/scope2", qp["scope"]);
@@ -338,7 +334,6 @@ namespace Test.MSAL.NET.Unit
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
             Assert.AreEqual("qp", qp["extra"]);
             Assert.AreEqual("none", qp["prompt"]);
-            Assert.AreEqual(TestConstants.Policy, qp["p"]);
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }

@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// <summary>
         /// Default constructor.
         /// </summary>
-        internal BaseTokenCacheItem(string authority, string clientId, string policy, TokenResponse response)
+        internal BaseTokenCacheItem(string authority, string clientId, TokenResponse response)
         {
 
             if (response.IdToken!=null)
@@ -52,7 +52,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
             
             this.Authority = authority;
             this.ClientId = clientId;
-            this.Policy = policy;
         }
 
         internal BaseTokenCacheItem()
@@ -70,12 +69,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// </summary>
         [DataMember(Name = "client_id")]
         public string ClientId { get; set; }
-
-        /// <summary>
-        /// Gets the Policy.
-        /// </summary>
-        [DataMember(Name = "policy")]
-        public string Policy { get; set; }
 
         /// <summary>
         /// Gets the TenantId.

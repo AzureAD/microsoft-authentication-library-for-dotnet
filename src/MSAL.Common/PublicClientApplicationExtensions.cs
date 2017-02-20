@@ -54,15 +54,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scope"></param>
         /// <param name="authority"></param>
-        /// <param name="policy"></param>
         /// <param name="app"></param>
         /// <returns></returns>
         public static async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthAsync(
-            this PublicClientApplication app, string[] scope, string authority, string policy)
+            this PublicClientApplication app, string[] scope, string authority)
         {
             return
                 await
-                    app.AcquireTokenWithIntegratedAuthInternalAsync(scope, authority, policy).ConfigureAwait(false);
+                    app.AcquireTokenWithIntegratedAuthInternalAsync(scope, authority).ConfigureAwait(false);
         }
     }
 }

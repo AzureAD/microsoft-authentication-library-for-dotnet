@@ -106,8 +106,7 @@ namespace Test.MSAL.NET.Unit
             TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
                 TestConstants.UniqueId, TestConstants.DisplayableId,
-                TestConstants.HomeObjectId + "more",
-                TestConstants.Policy);
+                TestConstants.HomeObjectId + "more");
 
 
             TokenCacheItem item = new TokenCacheItem()
@@ -129,8 +128,7 @@ namespace Test.MSAL.NET.Unit
             // another cache entry for different home object id. user count should be 2.
             TokenCacheKey rtKey = new TokenCacheKey(null, null, TestConstants.ClientId,
                 TestConstants.UniqueId + "more", TestConstants.DisplayableId,
-                TestConstants.HomeObjectId + "more",
-                TestConstants.Policy);
+                TestConstants.HomeObjectId + "more");
             
             RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
             {
@@ -259,15 +257,14 @@ namespace Test.MSAL.NET.Unit
             _tokenCachePlugin.TokenCacheDictionary.Remove(new TokenCacheKey(TestConstants.AuthorityGuestTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
                 TestConstants.UniqueId + "more", TestConstants.DisplayableId,
-                TestConstants.HomeObjectId,
-                TestConstants.Policy).ToString());
+                TestConstants.HomeObjectId).ToString());
 
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), new User()
             {
                 UniqueId = TestConstants.UniqueId,
                 DisplayableId = TestConstants.DisplayableId,
                 HomeObjectId = TestConstants.HomeObjectId,
-            }, app.Authority, TestConstants.Policy, false);
+            }, app.Authority, false);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
@@ -311,7 +308,7 @@ namespace Test.MSAL.NET.Unit
                     UniqueId = TestConstants.UniqueId,
                     DisplayableId = TestConstants.DisplayableId,
                     HomeObjectId = TestConstants.HomeObjectId,
-                }, app.Authority, TestConstants.Policy, true);
+                }, app.Authority, true);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
@@ -356,7 +353,7 @@ namespace Test.MSAL.NET.Unit
                             UniqueId = TestConstants.UniqueId,
                             DisplayableId = TestConstants.DisplayableId,
                             HomeObjectId = TestConstants.HomeObjectId,
-                        }, app.Authority, TestConstants.Policy, false);
+                        }, app.Authority, false);
                 AuthenticationResult result = task.Result;
                 Assert.Fail("AdalSilentTokenAcquisitionException was expected");
             }

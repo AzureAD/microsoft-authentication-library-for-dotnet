@@ -66,8 +66,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             TokenCache cache = new TokenCache(TestConstants.ClientId);
             TokenCacheKey atKey = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
                 TestConstants.Scope, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
-                TestConstants.Policy);
+                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId);
 
             TokenCacheItem atItem = new TokenCacheItem()
             {
@@ -93,7 +92,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             MockHttpMessageHandler mockHandler = new MockHttpMessageHandler();
             mockHandler.Method = HttpMethod.Post;
-            mockHandler.QueryParams = new Dictionary<string, string>() {{"p", "some-policy"}};
 
             mockHandler.ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage();
             HttpMessageHandlerFactory.AddMockHandler(mockHandler);
@@ -102,7 +100,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 Authority = authority,
                 ClientKey = new ClientKey(TestConstants.ClientId),
-                Policy = "some-policy",
                 Scope = TestConstants.Scope,
                 TokenCache = cache
             };
@@ -137,7 +134,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 {
                     Authority = authority,
                     ClientKey = new ClientKey(TestConstants.ClientId),
-                    Policy = TestConstants.Policy,
                     Scope = TestConstants.Scope,
                     TokenCache = null
                 };
@@ -177,7 +173,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 Authority = authority,
                 ClientKey = new ClientKey(TestConstants.ClientId),
-                Policy = TestConstants.Policy,
                 Scope = TestConstants.Scope,
                 TokenCache = null
             };
@@ -237,7 +232,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 {
                     Authority = authority,
                     ClientKey = new ClientKey(TestConstants.ClientId),
-                    Policy = TestConstants.Policy,
                     Scope = TestConstants.Scope,
                     TokenCache = null
                 };
@@ -267,7 +261,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 {
                     Authority = authority,
                     ClientKey = new ClientKey(TestConstants.ClientId),
-                    Policy = TestConstants.Policy,
                     Scope = TestConstants.Scope,
                     TokenCache = null
                 };
@@ -296,7 +289,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 Authority = authority,
                 ClientKey = new ClientKey(TestConstants.ClientId),
-                Policy = TestConstants.Policy,
                 Scope = TestConstants.Scope,
                 TokenCache = null
             };

@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -38,28 +37,15 @@ namespace Microsoft.Identity.Client.Internal.Cache
     /// </summary>
     internal sealed class TokenCacheKey
     {
-        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, User user, string policy)
-            : this(
-                authority, scope, clientId, (user != null) ? user.UniqueId : null,
-                (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null, policy)
-        {
-        }
-
         internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, User user)
             : this(
                 authority, scope, clientId, (user != null) ? user.UniqueId : null,
-                (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null, null)
+                (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null)
         {
         }
 
         internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, string uniqueId,
             string displayableId, string homeObjectId)
-            : this(authority, scope, clientId, uniqueId, displayableId, homeObjectId, null)
-        {
-        }
-
-        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, string uniqueId,
-            string displayableId, string homeObjectId, string policy)
         {
             this.Authority = authority;
             this.Scope = scope;
@@ -72,7 +58,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
             this.UniqueId = uniqueId;
             this.DisplayableId = displayableId;
             this.HomeObjectId = homeObjectId;
-            this.Policy = policy;
         }
 
         public string Authority { get; }
@@ -81,7 +66,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public string UniqueId { get; }
         public string DisplayableId { get; }
         public string HomeObjectId { get; }
-        public string Policy { get; }
 
         /// <summary>
         /// </summary>
@@ -96,7 +80,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
             stringBuilder.Append(MsalHelpers.Base64Encode(DisplayableId) + "$");
             stringBuilder.Append(MsalHelpers.Base64Encode(UniqueId) + "$");
             stringBuilder.Append(MsalHelpers.Base64Encode(HomeObjectId) + "$");
-            stringBuilder.Append(MsalHelpers.Base64Encode(Policy));
 
             return stringBuilder.ToString();
         }
@@ -150,8 +133,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
                     && this.Equals(this.ClientId, other.ClientId)
                     && (other.UniqueId == this.UniqueId)
                     && this.Equals(this.DisplayableId, other.DisplayableId)
-                    && (this.HomeObjectId == other.HomeObjectId)
-                    && this.Equals(this.Policy, other.Policy));
+                    && (this.HomeObjectId == other.HomeObjectId));
         }
 
         /// <summary>
@@ -168,8 +150,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
                     + this.ClientId.ToLower() + Delimiter
                     + this.UniqueId + Delimiter
                     + this.HomeObjectId + Delimiter
-                    + ((this.DisplayableId != null) ? this.DisplayableId.ToLower() : null) + Delimiter
-                    + ((this.Policy != null) ? this.Policy.ToLower() : null)).GetHashCode();
+                    + ((this.DisplayableId != null) ? this.DisplayableId.ToLower() : null)).GetHashCode();
         }
 
         internal bool ScopeEquals(SortedSet<string> otherScope)

@@ -70,7 +70,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 Authority = authority,
                 ClientKey = new ClientKey(TestConstants.ClientId),
-                Policy = TestConstants.Policy,
                 Scope = TestConstants.Scope,
                 TokenCache = cache
             };
@@ -116,7 +115,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 Authority = authority,
                 ClientKey = new ClientKey(TestConstants.ClientId),
-                Policy = TestConstants.Policy,
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache,
                 User = new User()
@@ -169,7 +167,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 Authority = authority,
                 ClientKey = new ClientKey(TestConstants.ClientId),
-                Policy = TestConstants.Policy,
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache,
                 User = new User() { UniqueId = ""}
