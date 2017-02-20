@@ -101,6 +101,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         // The behavior of this value is identical to prompt=none for managed users; However, for federated users, AAD
         // redirects to ADFS as it cannot determine in advance whether ADFS can login user silently (e.g. via WIA) or not.
-        public const string AttemptNone = "attempt_none";        
+        public const string AttemptNone = "attempt_none";
     }
 }

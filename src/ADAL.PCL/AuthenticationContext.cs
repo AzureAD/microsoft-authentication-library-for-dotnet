@@ -131,16 +131,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Property to provide ADAL's token cache. Depending on the platform, TokenCache may have a default persistent cache or not. 
-        /// Library will automatically save tokens in default TokenCache whenever you obtain them. Cached tokens will be available only to the application that saved them. 
+        /// Property to provide ADAL's token cache. Depending on the platform, TokenCache may have a default persistent cache or not.
+        /// Library will automatically save tokens in default TokenCache whenever you obtain them. Cached tokens will be available only to the application that saved them.
         /// If the cache is persistent, the tokens stored in it will outlive the application's execution, and will be available in subsequent runs.
-        /// To turn OFF token caching, set TokenCache to null. 
+        /// To turn OFF token caching, set TokenCache to null.
         /// </summary>
         public TokenCache TokenCache { get; private set; }
 
         /// <summary>
-        /// Gets or sets correlation Id which would be sent to the service with the next request. 
-        /// Correlation Id is to be used for diagnostics purposes. 
+        /// Gets or sets correlation Id which would be sent to the service with the next request.
+        /// Correlation Id is to be used for diagnostics purposes.
         /// </summary>
         public Guid CorrelationId
         {
@@ -151,10 +151,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             set
             {
-                this.Authenticator.CorrelationId = value;                
+                this.Authenticator.CorrelationId = value;
             }
         }
-             
+
         /// <summary>
         /// Acquires device code from the authority.
         /// </summary>
@@ -222,7 +222,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientCredential">The client credential to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>        
+        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientCredential clientCredential)
         {
             return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCredential)).ConfigureAwait(false);
@@ -482,7 +482,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         /// <param name="parameters">An object of type PlatformParameters which may pass additional parameters used for authorization.</param>
-        /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
+        /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user.
         /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId)
@@ -496,7 +496,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user. 
+        /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user.
         /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <param name="parameters">Parameters needed for interactive flow requesting authorization code. Pass an instance of PlatformParameters.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
@@ -508,7 +508,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode, Uri redirectUri, ClientKey clientKey, string resource)
         {
-            
+
             const string nullResource = "null_resource_as_optional";
             RequestData requestData = new RequestData
             {
@@ -588,7 +588,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             var handler = new AcquireTokenNonInteractiveHandler(requestData, userAssertion);
             return await handler.RunAsync().ConfigureAwait(false);
         }
-        
+
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters = null)
         {
             RequestData requestData = new RequestData
