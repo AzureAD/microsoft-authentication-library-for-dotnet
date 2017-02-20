@@ -68,10 +68,10 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 TestConstants.Scope, TestConstants.ClientId,
                 TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId);
 
-            TokenCacheItem atItem = new TokenCacheItem()
+            AccessTokenCacheItem atItem = new AccessTokenCacheItem()
             {
                 TokenType = "Bearer",
-                Token = atKey.ToString(),
+                AccessToken = atKey.ToString(),
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
                 Scope = TestConstants.Scope
             };

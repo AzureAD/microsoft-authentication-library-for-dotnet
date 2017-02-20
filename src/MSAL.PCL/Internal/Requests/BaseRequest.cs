@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal readonly Authority Authority;
         internal readonly TokenCache TokenCache;
         protected TokenResponse Response;
-        protected TokenCacheItem AccessTokenItem;
+        protected AccessTokenCacheItem AccessTokenItem;
 
         internal CallState CallState { get; set; }
 
@@ -138,17 +138,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private TokenCacheItem SaveTokenResponseToCache()
+        private AccessTokenCacheItem SaveTokenResponseToCache()
         {
             if (StoreToCache)
             {
-                this.TokenCache.SaveAccessToken(this.Authority.CanonicalAuthority,
+                this.TokenCache.SaveAccessAndRefreshToken(this.Authority.CanonicalAuthority,
                     AuthenticationRequestParameters.ClientKey.ClientId, Response);
-
-                this.TokenCache.SaveRefreshToken(AuthenticationRequestParameters.ClientKey.ClientId, Response);
             }
 
-            return new TokenCacheItem(this.Authority.CanonicalAuthority,
+            return new AccessTokenCacheItem(this.Authority.CanonicalAuthority,
                 AuthenticationRequestParameters.ClientKey.ClientId, Response);
         }
 
@@ -173,7 +171,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return CompletedTask;
         }
 
-        protected virtual AuthenticationResult PostTokenRequest(TokenCacheItem item)
+        protected virtual AuthenticationResult PostTokenRequest(AccessTokenCacheItem item)
         {
             AuthenticationResult result = new AuthenticationResult(item);
             //add client id, token cache and authority to User object

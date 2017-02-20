@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
                     ApplicationDataCreateDisposition.Always);
         }
 
-        public ICollection<string> AllAccessAndIdTokens()
+        public ICollection<string> GetAllAccessTokens()
         {
             IList<string> list = new List<string>();
             foreach (ApplicationDataCompositeValue item in _tokenContainer.Values.Values)
@@ -78,12 +78,12 @@ namespace Microsoft.Identity.Client
             return list;
         }
 
-        public void SaveToken(TokenCacheItem tokenItem)
+        public void SaveToken(AccessTokenCacheItem accessTokenItem)
         {
             CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(tokenItem.GetTokenCacheKey().ToString());
+            string hashed = helper.CreateSha256Hash(accessTokenItem.GetTokenCacheKey().ToString());
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
-            string serializedToken = JsonHelper.SerializeToJson(tokenItem);
+            string serializedToken = JsonHelper.SerializeToJson(accessTokenItem);
             SetCacheValue(composite, serializedToken);
             _tokenContainer.Values[hashed] = composite;
         }

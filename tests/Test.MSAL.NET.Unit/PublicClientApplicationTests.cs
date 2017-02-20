@@ -109,9 +109,9 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.HomeObjectId + "more");
 
 
-            TokenCacheItem item = new TokenCacheItem()
+            AccessTokenCacheItem item = new AccessTokenCacheItem()
             {
-                Token = key.ToString(),
+                AccessToken = key.ToString(),
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp((DateTime.UtcNow + TimeSpan.FromSeconds(3600))),
                 User = new User

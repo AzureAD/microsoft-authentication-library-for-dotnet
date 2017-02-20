@@ -68,10 +68,10 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.Scope, TestConstants.ClientId,
                 TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId);
 
-            TokenCacheItem atItem = new TokenCacheItem()
+            AccessTokenCacheItem atItem = new AccessTokenCacheItem()
             {
                 TokenType = "Bearer",
-                Token = atKey.ToString(),
+                AccessToken = atKey.ToString(),
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow)
             };
             _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
@@ -148,7 +148,7 @@ namespace Test.MSAL.NET.Unit
         public void GetAppTokenFromCacheTest()
         {
             TokenCache tokenCache = new TokenCache(TestConstants.ClientId);
-            TokenCacheItem item = new TokenCacheItem()
+            AccessTokenCacheItem item = new AccessTokenCacheItem()
             {
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
@@ -159,10 +159,10 @@ namespace Test.MSAL.NET.Unit
                 User = null,
                 Scope = TestConstants.Scope
             };
-            item.Token = item.GetTokenCacheKey().ToString();
+            item.AccessToken = item.GetTokenCacheKey().ToString();
             _tokenCachePlugin.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
 
-            TokenCacheItem cacheItem = tokenCache.FindAccessToken(new AuthenticationRequestParameters()
+            AccessTokenCacheItem cacheItem = tokenCache.FindAccessToken(new AuthenticationRequestParameters()
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 ClientKey = new ClientKey(TestConstants.ClientId),

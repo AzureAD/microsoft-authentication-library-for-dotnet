@@ -38,7 +38,7 @@ namespace Test.MSAL.NET.Unit.Mocks
         
         public static void PopulateCache(TokenCachePlugin cachePlugin)
         {
-            TokenCacheItem item = new TokenCacheItem()
+            AccessTokenCacheItem item = new AccessTokenCacheItem()
             {
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
@@ -53,11 +53,11 @@ namespace Test.MSAL.NET.Unit.Mocks
                 },
                 Scope = TestConstants.Scope
             };
-            item.Token = item.GetTokenCacheKey().ToString();
+            item.AccessToken = item.GetTokenCacheKey().ToString();
             //add access token
             cachePlugin.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
 
-            item = new TokenCacheItem()
+            item = new AccessTokenCacheItem()
             {
                 Authority = TestConstants.AuthorityGuestTenant,
                 ClientId = TestConstants.ClientId,
@@ -72,7 +72,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                 },
                 Scope = TestConstants.ScopeForAnotherResource
             };
-            item.Token = item.GetTokenCacheKey().ToString();
+            item.AccessToken = item.GetTokenCacheKey().ToString();
             //add another access token
             cachePlugin.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
             

@@ -173,6 +173,24 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return false;
         }
 
+        internal bool ScopeContains(SortedSet<string> otherScope)
+        {
+            foreach (string otherString in otherScope)
+            {
+                if (!Scope.Contains(otherString))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool ScopeIntersects(SortedSet<string> otherScope)
+        {
+            return this.Scope.Intersect(otherScope).ToArray().Length > 0;
+        }
+
         internal bool Equals(string string1, string string2)
         {
             return (string.Compare(string2, string1, StringComparison.OrdinalIgnoreCase) == 0);

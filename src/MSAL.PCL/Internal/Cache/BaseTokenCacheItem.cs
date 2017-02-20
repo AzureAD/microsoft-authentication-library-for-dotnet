@@ -75,16 +75,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// </summary>
         public string TenantId { get; set; }
 
-        /// <summary>
-        /// Gets the user's unique Id.
-        /// </summary>
-        public string UniqueId { get { return User?.UniqueId; } }
-
-        /// <summary>
-        /// Gets the user's displayable Id.
-        /// </summary>
-        public string DisplayableId { get { return User?.DisplayableId; } }
-
         public string HomeObjectId { get { return User?.HomeObjectId; } }
         
         [DataMember(Name = "id_token")]
