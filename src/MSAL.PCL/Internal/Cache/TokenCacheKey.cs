@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public bool ScopeIntersects(SortedSet<string> otherScope)
         {
-            return this.Scope.Intersect(otherScope).ToArray().Length > 0;
+            return this.Scope.Overlaps(otherScope);
         }
 
         internal bool Equals(string string1, string string2)
