@@ -40,7 +40,6 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
         public const string FamilyId = "foci";
         public const string IdToken = "id_token";
         public const string ExpiresIn = "expires_in";
-        public const string IdTokenExpiresIn = "id_token_expires_in";
     }
 
     [DataContract]
@@ -67,17 +66,9 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
         [DataMember(Name = TokenResponseClaim.ExpiresIn, IsRequired = false)]
         public long ExpiresIn { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.IdTokenExpiresIn, IsRequired = false)]
-        public long IdTokenExpiresIn { get; set; }
-
         public DateTimeOffset AccessTokenExpiresOn
         {
             get { return DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn); }
-        }
-
-        public DateTimeOffset IdTokenExpiresOn
-        {
-            get { return DateTime.UtcNow + TimeSpan.FromSeconds(this.IdTokenExpiresIn); }
         }
     }
 }

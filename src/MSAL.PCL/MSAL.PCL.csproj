@@ -60,7 +60,7 @@
     </Compile>
     <Compile Include="Internal\Cache\RefreshTokenCacheItem.cs" />
     <Compile Include="Internal\Cache\TokenCacheAccessor.cs" />
-    <Compile Include="Internal\Cache\TokenCacheItem.cs" />
+    <Compile Include="Internal\Cache\AccessTokenCacheItem.cs" />
     <Compile Include="Internal\Instance\AadAuthority.cs" />
     <Compile Include="Internal\Instance\AdfsAuthority.cs" />
     <Compile Include="Internal\Instance\AdfsWebFingerResponse.cs" />

@@ -41,7 +41,6 @@ namespace Test.MSAL.NET.Unit
         public static readonly string UniqueId = "unique_id";
         public static readonly string DisplayableId = "displayable@id.com";
         public static readonly string HomeObjectId = "home_oid";
-        public static readonly string Policy = "policy";
         public static readonly string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public static readonly string ClientSecret = "client_secret";
         public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);

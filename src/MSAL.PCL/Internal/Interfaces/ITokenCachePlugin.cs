@@ -32,11 +32,11 @@ namespace Microsoft.Identity.Client.Internal.Interfaces
 {
     internal interface ITokenCachePlugin
     {
-        ICollection<string> AllAccessAndIdTokens();
+        ICollection<string> GetAllAccessTokens();
 
         ICollection<string> AllRefreshTokens();
 
-        void SaveToken(TokenCacheItem tokenItem);
+        void SaveToken(AccessTokenCacheItem accessTokenItem);
 
         void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem);
 

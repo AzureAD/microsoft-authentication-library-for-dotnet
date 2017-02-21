@@ -40,6 +40,7 @@ using System.Reflection;
 // Build and revision numbers are replaced on build machine for official builds.
 
 [assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.1.0")]
 
 // On official build, attribute AssemblyInformationalVersionAttribute is added as well
 // with its value equal to the hash of the last commit to the git branch.

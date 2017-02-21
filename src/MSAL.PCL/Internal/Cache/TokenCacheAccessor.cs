@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
     {
         public ITokenCachePlugin TokenCachePlugin = PlatformPlugin.TokenCachePlugin;
 
-        public void SaveAccessToken(TokenCacheItem accessTokenItem)
+        public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
         {
             TokenCachePlugin.SaveToken(accessTokenItem);
         }
@@ -43,17 +43,16 @@ namespace Microsoft.Identity.Client.Internal.Cache
             TokenCachePlugin.SaveRefreshToken(refreshTokenItem);
         }
 
-        public IList<TokenCacheItem> GetTokens(TokenCacheKey tokenCacheKey)
+        public IList<AccessTokenCacheItem> GetTokens(TokenCacheKey tokenCacheKey)
         {
-            //TODO: check android implementation
-            ICollection<string> allAccessTokens = TokenCachePlugin.AllAccessAndIdTokens();
-            IList<TokenCacheItem> matchedTokens = new List<TokenCacheItem>();
+            ICollection<string> allAccessTokens = TokenCachePlugin.GetAllAccessTokens();
+            IList<AccessTokenCacheItem> matchedTokens = new List<AccessTokenCacheItem>();
             foreach (string accessTokenItemJson in allAccessTokens)
             {
-                TokenCacheItem tokenCacheItem = JsonHelper.DeserializeFromJson<TokenCacheItem>(accessTokenItemJson);
-                if (tokenCacheKey.Equals(tokenCacheItem.GetTokenCacheKey()))
+                AccessTokenCacheItem accessTokenCacheItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessTokenItemJson);
+                if (tokenCacheKey.Equals(accessTokenCacheItem.GetTokenCacheKey()))
                 {
-                    matchedTokens.Add(tokenCacheItem);
+                    matchedTokens.Add(accessTokenCacheItem);
                 }
             }
 
@@ -78,9 +77,9 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return matchedRefreshTokens;
         }
 
-        public void DeleteToken(TokenCacheItem token‪Item)
+        public void DeleteToken(AccessTokenCacheItem accessToken‪Item)
         {
-            TokenCachePlugin.DeleteToken(token‪Item.GetTokenCacheKey());
+            TokenCachePlugin.DeleteToken(accessToken‪Item.GetTokenCacheKey());
         }
 
         public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
@@ -88,13 +87,13 @@ namespace Microsoft.Identity.Client.Internal.Cache
             TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item.GetTokenCacheKey());
         }
 
-        public IList<TokenCacheItem> GetAllAccessTokens()
+        public IList<AccessTokenCacheItem> GetAllAccessTokens()
         {
-            ICollection<string> allTokensAsString = TokenCachePlugin.AllAccessAndIdTokens();
-            IList<TokenCacheItem> returnList = new List<TokenCacheItem>();
+            ICollection<string> allTokensAsString = TokenCachePlugin.GetAllAccessTokens();
+            IList<AccessTokenCacheItem> returnList = new List<AccessTokenCacheItem>();
             foreach (var token in allTokensAsString)
             {
-                returnList.Add(JsonHelper.DeserializeFromJson<TokenCacheItem>(token));
+                returnList.Add(JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(token));
             }
 
             return returnList;

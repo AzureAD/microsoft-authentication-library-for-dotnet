@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        public ICollection<string> AllAccessAndIdTokens()
+        public ICollection<string> GetAllAccessTokens()
         {
             return _accessTokenSharedPreference.All.Values as ICollection<string>;
         }
@@ -63,11 +63,11 @@ namespace Microsoft.Identity.Client
             return _refreshTokenSharedPreference.All.Values as ICollection<string>;
         }
 
-        public void SaveToken(TokenCacheItem tokenItem)
+        public void SaveToken(AccessTokenCacheItem accessTokenItem)
         {
-            TokenCacheKey key = tokenItem.GetTokenCacheKey();
+            TokenCacheKey key = accessTokenItem.GetTokenCacheKey();
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(key.ToString(), JsonHelper.SerializeToJson(tokenItem));
+            editor.PutString(key.ToString(), JsonHelper.SerializeToJson(accessTokenItem));
             editor.Apply();
         }
 

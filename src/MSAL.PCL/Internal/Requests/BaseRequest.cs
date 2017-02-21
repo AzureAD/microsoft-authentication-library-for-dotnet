@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal readonly Authority Authority;
         internal readonly TokenCache TokenCache;
         protected TokenResponse Response;
-        protected TokenCacheItem AccessTokenItem;
+        protected AccessTokenCacheItem AccessTokenItem;
 
         internal CallState CallState { get; set; }
 
@@ -138,21 +138,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private TokenCacheItem SaveTokenResponseToCache()
+        private AccessTokenCacheItem SaveTokenResponseToCache()
         {
             if (StoreToCache)
             {
-                this.TokenCache.SaveAccessToken(this.Authority.CanonicalAuthority,
-                    AuthenticationRequestParameters.ClientKey.ClientId,
-                    AuthenticationRequestParameters.Policy, Response);
-
-                this.TokenCache.SaveRefreshToken(AuthenticationRequestParameters.ClientKey.ClientId,
-                    AuthenticationRequestParameters.Policy, Response);
+                this.TokenCache.SaveAccessAndRefreshToken(this.Authority.CanonicalAuthority,
+                    AuthenticationRequestParameters.ClientKey.ClientId, Response);
             }
 
-            return new TokenCacheItem(this.Authority.CanonicalAuthority,
-                AuthenticationRequestParameters.ClientKey.ClientId,
-                AuthenticationRequestParameters.Policy, Response);
+            return new AccessTokenCacheItem(this.Authority.CanonicalAuthority,
+                AuthenticationRequestParameters.ClientKey.ClientId, Response);
         }
 
         protected virtual bool BrokerInvocationRequired()
@@ -176,7 +171,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return CompletedTask;
         }
 
-        protected virtual AuthenticationResult PostTokenRequest(TokenCacheItem item)
+        protected virtual AuthenticationResult PostTokenRequest(AccessTokenCacheItem item)
         {
             AuthenticationResult result = new AuthenticationResult(item);
             //add client id, token cache and authority to User object
@@ -208,11 +203,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task SendHttpMessageAsync(OAuth2Client client)
         {
-            if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.Policy))
-            {
-                client.AddQueryParameter("p", AuthenticationRequestParameters.Policy);
-            }
-
             Response =
                 await client.GetToken(new Uri(this.Authority.TokenEndpoint), this.CallState).ConfigureAwait(false);
 

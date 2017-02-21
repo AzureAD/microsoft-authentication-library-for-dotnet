@@ -33,10 +33,10 @@ using Microsoft.Identity.Client.Internal.OAuth2;
 namespace Microsoft.Identity.Client.Internal.Cache
 {
     [DataContract]
-    internal class TokenCacheItem : BaseTokenCacheItem
+    internal class AccessTokenCacheItem : BaseTokenCacheItem
     {
         /// <summary>
-        /// Gets the Token Type.
+        /// Gets the AccessToken Type.
         /// </summary>
         [DataMember(Name = "token_type")]
         public string TokenType { get; internal set; }
@@ -44,8 +44,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// <summary>
         /// Gets the Access Token requested.
         /// </summary>
-        [DataMember(Name = "token")]
-        public string Token { get; internal set; }
+        [DataMember(Name = "access_token")]
+        public string AccessToken { get; internal set; }
 
         public DateTimeOffset ExpiresOn
         {
@@ -65,22 +65,32 @@ namespace Microsoft.Identity.Client.Internal.Cache
         [DataMember(Name = "scope")]
         public SortedSet<string> Scope { get; internal set; }
 
-        internal TokenCacheItem()
+        /// <summary>
+        /// Gets the user's unique Id.
+        /// </summary>
+        public string UniqueId { get { return User?.UniqueId; } }
+
+        /// <summary>
+        /// Gets the user's displayable Id.
+        /// </summary>
+        public string DisplayableId { get { return User?.DisplayableId; } }
+
+        internal AccessTokenCacheItem()
         {
         }
 
-        public TokenCacheItem(string authority, string clientId, string policy, TokenResponse response)
-            : base(authority, clientId, policy, response)
+        public AccessTokenCacheItem(string authority, string clientId, TokenResponse response)
+            : base(authority, clientId, response)
         {
             if (response.AccessToken != null)
             {
-                Token = response.AccessToken;
+                AccessToken = response.AccessToken;
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(response.AccessTokenExpiresOn);
             }
-            else if (response.IdToken != null)
+            
+            IdToken idToken = IdToken.Parse(response.IdToken);
+            if (idToken != null)
             {
-                Token = response.IdToken;
-                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(response.IdTokenExpiresOn);
             }
 
             Scope = response.Scope.AsSet();
@@ -88,7 +98,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public override TokenCacheKey GetTokenCacheKey()
         {
-            return new TokenCacheKey(Authority, Scope, ClientId, User, Policy);
+            return new TokenCacheKey(Authority, Scope, ClientId, User);
         }
+        
     }
 }

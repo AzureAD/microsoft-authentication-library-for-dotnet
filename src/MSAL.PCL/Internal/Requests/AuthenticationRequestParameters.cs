@@ -44,8 +44,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public ClientKey ClientKey { get; set; }
 
-        public string Policy { get; set; }
-
         public string AuthorizationCode { get; set; }
 
         public Uri RedirectUri { get; set; }

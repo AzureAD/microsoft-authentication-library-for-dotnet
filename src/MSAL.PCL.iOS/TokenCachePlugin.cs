@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        public ICollection<string> AllAccessAndIdTokens()
+        public ICollection<string> GetAllAccessTokens()
         {
             throw new NotImplementedException();
         }
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Client
             throw new NotImplementedException();
         }
 
-        public void SaveToken(TokenCacheItem tokenItem)
+        public void SaveToken(AccessTokenCacheItem accessTokenItem)
         {
             throw new NotImplementedException();
         }

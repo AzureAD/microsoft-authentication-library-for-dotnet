@@ -48,14 +48,14 @@ namespace Microsoft.Identity.Client
         {
         }
 
-        public ICollection<string> AllAccessAndIdTokens()
+        public ICollection<string> GetAllAccessTokens()
         {
             return
                 new ReadOnlyCollection<string>(
                     TokenCacheDictionary.Values.Where(
                         v =>
-                            (JsonHelper.DeserializeFromJson<TokenCacheItem>(v).Scope != null) &&
-                            (JsonHelper.DeserializeFromJson<TokenCacheItem>(v).Scope.Count > 0)).ToList());
+                            (JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(v).Scope != null) &&
+                            (JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(v).Scope.Count > 0)).ToList());
         }
 
         public ICollection<string> AllRefreshTokens()
@@ -66,9 +66,9 @@ namespace Microsoft.Identity.Client
                         v => !string.IsNullOrEmpty(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(v).RefreshToken)).ToList());
         }
 
-        public void SaveToken(TokenCacheItem tokenItem)
+        public void SaveToken(AccessTokenCacheItem accessTokenItem)
         {
-            TokenCacheDictionary[tokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(tokenItem);
+            TokenCacheDictionary[accessTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(accessTokenItem);
         }
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)

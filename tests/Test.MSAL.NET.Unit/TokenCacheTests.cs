@@ -50,7 +50,7 @@ namespace Test.MSAL.NET.Unit
         [TestInitialize]
         public void TestInitialize()
         {
-            _tokenCachePlugin = (TokenCachePlugin)PlatformPlugin.TokenCachePlugin;
+            _tokenCachePlugin = (TokenCachePlugin) PlatformPlugin.TokenCachePlugin;
         }
 
         [TestCleanup]
@@ -66,13 +66,12 @@ namespace Test.MSAL.NET.Unit
             TokenCache cache = new TokenCache(TestConstants.ClientId);
             TokenCacheKey atKey = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
                 TestConstants.Scope, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
-                TestConstants.Policy);
+                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId);
 
-            TokenCacheItem atItem = new TokenCacheItem()
+            AccessTokenCacheItem atItem = new AccessTokenCacheItem()
             {
                 TokenType = "Bearer",
-                Token = atKey.ToString(),
+                AccessToken = atKey.ToString(),
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow)
             };
             _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
@@ -81,7 +80,6 @@ namespace Test.MSAL.NET.Unit
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 Scope = TestConstants.Scope,
-                Policy = TestConstants.Policy,
                 User =
                     new User()
                     {
@@ -91,20 +89,15 @@ namespace Test.MSAL.NET.Unit
                     }
             }));
         }
-        
+
         [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void GetRefreshTokenTest()
         {
-
             TokenCache cache = new TokenCache(TestConstants.ClientId);
-            TokenCacheKey rtKey = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
-                TestConstants.Policy);
-
             RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
             {
+                Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
                 RefreshToken = "someRT",
                 RawIdToken = MockHelpers.DefaultIdToken,
@@ -115,14 +108,14 @@ namespace Test.MSAL.NET.Unit
                     HomeObjectId = TestConstants.HomeObjectId
                 }
             };
-            _tokenCachePlugin.TokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
 
-            Assert.IsNull(cache.FindRefreshToken(new AuthenticationRequestParameters()
+            TokenCacheKey rtKey = rtItem.GetTokenCacheKey();
+            _tokenCachePlugin.TokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
+            Assert.IsNotNull(cache.FindRefreshToken(new AuthenticationRequestParameters()
             {
                 ClientKey = new ClientKey(TestConstants.ClientId),
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 Scope = TestConstants.Scope,
-                Policy = TestConstants.Policy,
                 User =
                     new User()
                     {
@@ -131,49 +124,48 @@ namespace Test.MSAL.NET.Unit
                         HomeObjectId = TestConstants.HomeObjectId
                     }
             }));
-        }
-        
-/*        [TestMethod]
-        [TestCategory("TokenCacheTests")]
-        public void ClearCacheTest()
-        {
-            TokenCacheHelper.PopulateCache(_tokenCachePlugin);
-            TokenCache tokenCache = new TokenCache(TestConstants.ClientId);
 
-            TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId + "more",
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId,
-                TestConstants.Policy);
-            _tokenCachePlugin.TokenCacheDictionary[key.ToString()] = JsonHelper.SerializeToJson(new TokenCacheItem());
-            tokenCache.Clear();
-            Assert.AreEqual(1, _tokenCachePlugin.TokenCacheDictionary.Count);
-            Assert.AreEqual(key, _tokenCachePlugin.TokenCacheDictionary.ContainsKey(key.ToString()));
-        }*/
+            // RT is stored only by client id and home object id as index.
+            // any change to authority, uniqueid and displyableid will not 
+            // outcome of cache look up.
+            Assert.IsNotNull(cache.FindRefreshToken(new AuthenticationRequestParameters()
+            {
+                ClientKey = new ClientKey(TestConstants.ClientId),
+                Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant + "more", false),
+                Scope = TestConstants.Scope,
+                User =
+                    new User()
+                    {
+                        UniqueId = TestConstants.UniqueId + "more",
+                        DisplayableId = TestConstants.DisplayableId + "more",
+                        HomeObjectId = TestConstants.HomeObjectId
+                    }
+            }));
+        }
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void GetAppTokenFromCacheTest()
         {
             TokenCache tokenCache = new TokenCache(TestConstants.ClientId);
-            TokenCacheItem item = new TokenCacheItem()
+            AccessTokenCacheItem item = new AccessTokenCacheItem()
             {
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
-                Policy = TestConstants.Policy,
                 TokenType = "Bearer",
-                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                ExpiresOnUnixTimestamp =
+                    MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
                 RawIdToken = null,
                 User = null,
                 Scope = TestConstants.Scope
             };
-            item.Token = item.GetTokenCacheKey().ToString();
+            item.AccessToken = item.GetTokenCacheKey().ToString();
             _tokenCachePlugin.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
 
-            TokenCacheItem cacheItem = tokenCache.FindAccessToken(new AuthenticationRequestParameters()
+            AccessTokenCacheItem cacheItem = tokenCache.FindAccessToken(new AuthenticationRequestParameters()
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 ClientKey = new ClientKey(TestConstants.ClientId),
-                Policy = TestConstants.Policy,
                 Scope = TestConstants.Scope
             });
 
