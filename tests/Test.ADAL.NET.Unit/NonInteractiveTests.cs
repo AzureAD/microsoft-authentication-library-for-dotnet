@@ -25,19 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Security;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.ADAL.Common;
 using System.Xml;
+using System.Xml.Linq;
+using Test.ADAL.Common;
 using Test.ADAL.NET.Unit.Mocks;
 
 namespace Test.ADAL.NET.Unit
@@ -113,15 +112,10 @@ namespace Test.ADAL.NET.Unit
             userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, null);
             VerifyUserRealmResponse(userRealmResponse, "Unknown");
 
-            try
-            {
-                await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, null, null);
-                Assert.Fail("Exception expected");
-            }
-            catch (AdalException ex)
-            {
-                Assert.IsNotNull(ex.ErrorCode, AdalError.UnknownUser);
-            }
+
+            var ex = AssertException.TaskThrows<AdalException>(() =>
+                UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, null, null));
+            Assert.IsNotNull(ex.ErrorCode, AdalError.UnknownUser);
         }
 
         [TestMethod]
@@ -294,23 +288,15 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("WS-Trust Request Xml Format Test")]
-        public async Task WsTrustRequestXmlFormatTest()
+        public void WsTrustRequestXmlFormatTest()
         {
-            await Task.Factory.StartNew(() =>
-            {
-                UserCredential cred = new UserPasswordCredential("user", "pass&<>\"'");
-                StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto",
-                    new WsTrustAddress { Uri = new Uri("some://resource") }, cred);
-                try
-                {
-                    XmlDocument doc = new XmlDocument();
-                    doc.LoadXml("<?xml version=\"1.0\"?>" + sb.ToString());
-                }
-                catch (Exception ex)
-                {
-                    Assert.Fail("Not expected -- " + ex.Message);
-                }
-            });
+            UserCredential cred = new UserPasswordCredential("user", "pass&<>\"'");
+            StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto",
+                new WsTrustAddress { Uri = new Uri("some://resource") }, cred);
+
+            // Expecting XML to be valid
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml("<?xml version=\"1.0\"?>" + sb.ToString());
         }
 
         private static void VerifyUserRealmResponse(UserRealmDiscoveryResponse userRealmResponse, string expectedAccountType)

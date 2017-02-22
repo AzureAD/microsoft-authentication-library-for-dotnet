@@ -91,6 +91,7 @@
     <Compile Include="AcquireTokenSilentTests.cs" />
     <Compile Include="AdalDotNetTests.cs" />
     <Compile Include="AuthenticationParametersTests.cs" />
+    <Compile Include="Common\AssertException.cs" />
     <Compile Include="LoggerCallbackTests.cs" />
     <Compile Include="Mocks\MockHelpers.cs" />
     <Compile Include="Mocks\MockHttpMessageHandler.cs" />
