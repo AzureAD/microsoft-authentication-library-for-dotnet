@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode,
             bool lowercaseKeys,
-            CallState callState)
+            RequestContext requestContext)
         {
             var response = new Dictionary<string, string>();
 
@@ -227,9 +227,9 @@ namespace Microsoft.Identity.Client.Internal
 
                     value = value.Trim().Trim(new[] { '\"' }).Trim();
 
-                    if (response.ContainsKey(key) && callState != null)
+                    if (response.ContainsKey(key) && requestContext != null)
                     {
-                        PlatformPlugin.Logger.Warning(callState,
+                        PlatformPlugin.Logger.Warning(requestContext,
                             string.Format(CultureInfo.InvariantCulture,
                                 "Key/value pair list contains redundant key '{0}'.", key));
                     }
@@ -242,9 +242,9 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode,
-            CallState callState)
+            RequestContext requestContext)
         {
-            return ParseKeyValueList(input, delimiter, urlDecode, true, callState);
+            return ParseKeyValueList(input, delimiter, urlDecode, true, requestContext);
         }
 
         public static byte[] ToByteArray(this String stringInput)

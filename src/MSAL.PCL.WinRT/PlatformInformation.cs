@@ -89,14 +89,14 @@ namespace Microsoft.Identity.Client
             return deviceInformation.SystemProductName;
         }
 
-        public override async Task<bool> IsUserLocalAsync(CallState callState)
+        public override async Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             if (!UserInformation.NameAccessAllowed)
             {
                 // The access is not allowed and we cannot determine whether this is a local user or not. So, we do NOT add form auth parameter.
                 // This is the case where we can advise customers to add extra query parameter if they want.
 
-                PlatformPlugin.Logger.Information(callState,
+                PlatformPlugin.Logger.Information(requestContext,
                     "Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.");
                 return false;
             }
@@ -107,8 +107,8 @@ namespace Microsoft.Identity.Client
             }
             catch (UnauthorizedAccessException ae)
             {
-                PlatformPlugin.Logger.Warning(callState, ae.Message);
-                PlatformPlugin.Logger.Information(callState,
+                PlatformPlugin.Logger.Warning(requestContext, ae.Message);
+                PlatformPlugin.Logger.Information(requestContext,
                     "Cannot try Windows Integrated Auth due to lack of Enterprise capability.");
                 // This mostly means Enterprise capability is missing, so WIA cannot be used and
                 // we return true to add form auth parameter in the caller.
@@ -121,18 +121,18 @@ namespace Microsoft.Identity.Client
             return NetworkInformation.GetHostNames().Any(entry => entry.Type == HostNameType.DomainName);
         }
 
-        public override Uri ValidateRedirectUri(Uri redirectUri, CallState callState)
+        public override Uri ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
         {
             if (redirectUri == null)
             {
                 redirectUri = Constants.SsoPlaceHolderUri;
-                PlatformPlugin.Logger.Verbose(callState, "ms-app redirect Uri is used");
+                PlatformPlugin.Logger.Verbose(requestContext, "ms-app redirect Uri is used");
             }
 
             return redirectUri;
         }
 
-        public override string GetRedirectUriAsString(Uri redirectUri, CallState callState)
+        public override string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
         {
             return ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri)
                 ? WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString

@@ -29,9 +29,9 @@ using System;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    internal class CallState
+    internal class RequestContext
     {
-        public CallState(Guid correlationId)
+        public RequestContext(Guid correlationId)
         {
             this.CorrelationId = correlationId.ToString();
         }

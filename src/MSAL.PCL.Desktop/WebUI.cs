@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
         public Object OwnerWindow { get; set; }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            CallState callState)
+            RequestContext requestContext)
         {
             AuthorizationResult authorizationResult = null;
 
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
                     }
                     catch (AggregateException ae)
                     {
-                        PlatformPlugin.Logger.Error(callState, ae.InnerException);
+                        PlatformPlugin.Logger.Error(requestContext, ae.InnerException);
                         // Any exception thrown as a result of running task will cause AggregateException to be thrown with 
                         // actual exception as inner.
                         Exception innerException = ae.InnerExceptions[0];

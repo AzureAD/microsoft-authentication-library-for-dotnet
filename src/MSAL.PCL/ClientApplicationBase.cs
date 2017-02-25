@@ -213,14 +213,14 @@ namespace Microsoft.Identity.Client
                 User = user,
                 Scope = scope.CreateSetFromArray(),
                 RedirectUri = new Uri(this.RedirectUri),
-                CallState = CreateCallState(this.CorrelationId)
+                RequestContext = CreateCallState(this.CorrelationId)
             };
         }
 
-        internal CallState CreateCallState(Guid correlationId)
+        internal RequestContext CreateCallState(Guid correlationId)
         {
             correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
-            return new CallState(correlationId);
+            return new RequestContext(correlationId);
         }
     }
 }

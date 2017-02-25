@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected TokenResponse Response;
         protected AccessTokenCacheItem AccessTokenItem;
 
-        internal CallState CallState { get; set; }
+        internal RequestContext RequestContext { get; set; }
 
         protected bool SupportADFS { get; set; }
 
@@ -58,10 +58,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected BaseRequest(AuthenticationRequestParameters authenticationRequestParameters)
         {
             this.Authority = authenticationRequestParameters.Authority;
-            this.CallState = authenticationRequestParameters.CallState;
+            this.RequestContext = authenticationRequestParameters.RequestContext;
             this.TokenCache = authenticationRequestParameters.TokenCache;
 
-            PlatformPlugin.Logger.Information(this.CallState,
+            PlatformPlugin.Logger.Information(this.RequestContext,
                 string.Format(CultureInfo.InvariantCulture,
                     "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
                     Authority.CanonicalAuthority, authenticationRequestParameters.Scope.AsSingleString(),
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             catch (Exception ex)
             {
-                PlatformPlugin.Logger.Error(this.CallState, ex);
+                PlatformPlugin.Logger.Error(this.RequestContext, ex);
                 throw;
             }
         }
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal virtual async Task PreRunAsync()
         {
-            await this.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, this.CallState).ConfigureAwait(false);
+            await this.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, this.RequestContext).ConfigureAwait(false);
         }
 
         internal virtual Task PreTokenRequest()
@@ -204,12 +204,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task SendHttpMessageAsync(OAuth2Client client)
         {
             Response =
-                await client.GetToken(new Uri(this.Authority.TokenEndpoint), this.CallState).ConfigureAwait(false);
+                await client.GetToken(new Uri(this.Authority.TokenEndpoint), this.RequestContext).ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(Response.Scope))
             {
                 Response.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
-                PlatformPlugin.Logger.Information(this.CallState,
+                PlatformPlugin.Logger.Information(this.RequestContext,
                     "Scope was missing from the token response, so using developer provided scopes in the result");
             }
         }
@@ -220,7 +220,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.Token);
 
-                PlatformPlugin.Logger.Information(this.CallState,
+                PlatformPlugin.Logger.Information(this.RequestContext,
                     string.Format(CultureInfo.InvariantCulture,
                         "=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tExpiration Time: {1}\n\tUser Hash: {2}\n\t",
                         accessTokenHash,

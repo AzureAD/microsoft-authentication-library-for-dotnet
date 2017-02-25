@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            CallState callState)
+            RequestContext requestContext)
         {
             bool ssoMode = ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri);
 
@@ -81,17 +81,17 @@ namespace Microsoft.Identity.Client
 
             catch (Exception ex)
             {
-                PlatformPlugin.Logger.Error(callState, ex);
+                PlatformPlugin.Logger.Error(requestContext, ex);
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
 
-            AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult, callState);
+            AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult, requestContext);
 
             return result;
         }
 
         private static AuthorizationResult ProcessAuthorizationResult(WebAuthenticationResult webAuthenticationResult,
-            CallState callState)
+            RequestContext requestContext)
         {
             AuthorizationResult result;
             switch (webAuthenticationResult.ResponseStatus)
