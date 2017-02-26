@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             new ConcurrentDictionary<string, Authority>();
 
         protected abstract Task<string> GetOpenIdConfigurationEndpoint(string host, string tenant,
-            string userPrincipalName, CallState callState);
+            string userPrincipalName, RequestContext requestContext);
 
         public static Authority CreateAuthority(string authority, bool validateAuthority)
         {
@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             return new AadAuthority(updatedAuthority);
         }
 
-        public async Task ResolveEndpointsAsync(string userPrincipalName, CallState callState)
+        public async Task ResolveEndpointsAsync(string userPrincipalName, RequestContext requestContext)
         {
             if (!this._resolved)
             {
@@ -153,12 +153,12 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
                 string openIdConfigurationEndpoint =
                     await
-                        this.GetOpenIdConfigurationEndpoint(host, tenant, userPrincipalName, callState)
+                        this.GetOpenIdConfigurationEndpoint(host, tenant, userPrincipalName, requestContext)
                             .ConfigureAwait(false);
 
                 //discover endpoints via openid-configuration
                 TenantDiscoveryResponse edr =
-                    await this.DiscoverEndpoints(openIdConfigurationEndpoint, callState).ConfigureAwait(false);
+                    await this.DiscoverEndpoints(openIdConfigurationEndpoint, requestContext).ConfigureAwait(false);
 
                 if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
                 {
@@ -207,13 +207,13 @@ namespace Microsoft.Identity.Client.Internal.Instance
         }
 
         private async Task<TenantDiscoveryResponse> DiscoverEndpoints(string openIdConfigurationEndpoint,
-            CallState callState)
+            RequestContext requestContext)
         {
             OAuth2Client client = new OAuth2Client();
             return
                 await
                     client.ExecuteRequest<TenantDiscoveryResponse>(new Uri(openIdConfigurationEndpoint),
-                        HttpMethod.Get, callState).ConfigureAwait(false);
+                        HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
         public static bool IsTenantLessAuthority(string authority)

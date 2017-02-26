@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             returnedUriReady = new SemaphoreSlim(0);
 
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                PlatformPlugin.Logger.Error(callState, ex);
+                PlatformPlugin.Logger.Error(requestContext, ex);
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
 

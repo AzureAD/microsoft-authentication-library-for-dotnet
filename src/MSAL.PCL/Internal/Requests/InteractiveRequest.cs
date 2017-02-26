@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             : base(authenticationRequestParameters)
         {
             PlatformPlugin.PlatformInformation.ValidateRedirectUri(authenticationRequestParameters.RedirectUri,
-                this.CallState);
+                this.RequestContext);
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))
             {
                 throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, "redirectUri");
@@ -107,15 +107,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
             this._authorizationResult =
                 await
                     this._webUi.AcquireAuthorizationAsync(authorizationUri, AuthenticationRequestParameters.RedirectUri,
-                        this.CallState)
+                        this.RequestContext)
                         .ConfigureAwait(false);
         }
 
-        internal async Task<Uri> CreateAuthorizationUriAsync(CallState callState)
+        internal async Task<Uri> CreateAuthorizationUriAsync(RequestContext requestContext)
         {
             //this method is used in confidential clients to create authorization URLs.
-            this.CallState = callState;
-            await this.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, this.CallState).ConfigureAwait(false);
+            this.RequestContext = requestContext;
+            await this.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, this.RequestContext).ConfigureAwait(false);
             return this.CreateAuthorizationUri();
         }
 
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // Checks for _extraQueryParameters duplicating standard parameters
                 Dictionary<string, string> kvps =
                     MsalHelpers.ParseKeyValueList(AuthenticationRequestParameters.ExtraQueryParameters, '&', false,
-                        this.CallState);
+                        this.RequestContext);
 
                 foreach (KeyValuePair<string, string> kvp in kvps)
                 {
@@ -192,9 +192,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.LoginHint;
             }
 
-            if (this.CallState != null && !string.IsNullOrEmpty(CallState.CorrelationId))
+            if (this.RequestContext != null && !string.IsNullOrEmpty(RequestContext.CorrelationId))
             {
-                authorizationRequestParameters[OAuth2Parameter.CorrelationId] = this.CallState.CorrelationId;
+                authorizationRequestParameters[OAuth2Parameter.CorrelationId] = this.RequestContext.CorrelationId;
             }
 
             IDictionary<string, string> adalIdParameters = MsalIdHelper.GetMsalIdParameters();

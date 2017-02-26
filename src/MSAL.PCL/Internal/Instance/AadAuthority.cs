@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             this.AuthorityType = AuthorityType.Aad;
         }
 
-        protected override async Task<string> GetOpenIdConfigurationEndpoint(string host, string tenant, string userPrincipalName, CallState callState)
+        protected override async Task<string> GetOpenIdConfigurationEndpoint(string host, string tenant, string userPrincipalName, RequestContext requestContext)
         {
             if (ValidateAuthority && !IsInTrustedHostList(host))
             {
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 {
                     InstanceDiscoveryResponse discoveryResponse =
                         await
-                            client.DiscoverAadInstance(new Uri(AadInstanceDiscoveryEndpoint), callState)
+                            client.DiscoverAadInstance(new Uri(AadInstanceDiscoveryEndpoint), requestContext)
                                 .ConfigureAwait(false);
                     if (discoveryResponse.TenantDiscoveryEndpoint == null)
                     {

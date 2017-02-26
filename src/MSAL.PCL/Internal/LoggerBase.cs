@@ -32,19 +32,19 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal abstract class LoggerBase
     {
-        internal abstract void Verbose(CallState callState, string message,
+        internal abstract void Verbose(RequestContext requestContext, string message,
             [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
 
-        internal abstract void Information(CallState callState, string message,
+        internal abstract void Information(RequestContext requestContext, string message,
             [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
 
-        internal abstract void Warning(CallState callState, string message,
+        internal abstract void Warning(RequestContext requestContext, string message,
             [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
 
-        internal abstract void Error(CallState callState, string errorMessage,
+        internal abstract void Error(RequestContext requestContext, string errorMessage,
             [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
 
-        internal abstract void Error(CallState callState, Exception ex,
+        internal abstract void Error(RequestContext requestContext, Exception ex,
             [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
 
         internal static string GetCallerFilename(string callerFilePath)
@@ -52,9 +52,9 @@ namespace Microsoft.Identity.Client.Internal
             return callerFilePath.Substring(callerFilePath.LastIndexOf("\\", StringComparison.Ordinal) + 1);
         }
 
-        internal static string PrepareLogMessage(CallState callState, string classOrComponent, string message)
+        internal static string PrepareLogMessage(RequestContext requestContext, string classOrComponent, string message)
         {
-            string correlationId = (callState != null) ? callState.CorrelationId.ToString() : string.Empty;
+            string correlationId = (requestContext != null) ? requestContext.CorrelationId.ToString() : string.Empty;
             return string.Format(CultureInfo.CurrentCulture, "{0}: {1} - {2}: {3}", DateTime.UtcNow, correlationId,
                 classOrComponent, message);
         }

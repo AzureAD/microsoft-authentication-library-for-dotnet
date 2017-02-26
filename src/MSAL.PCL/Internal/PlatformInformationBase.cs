@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Internal
                 typeof (MsalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
         }
 
-        public virtual async Task<bool> IsUserLocalAsync(CallState callState)
+        public virtual async Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
         }
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal
             return false;
         }
 
-        public virtual Uri ValidateRedirectUri(Uri redirectUri, CallState callState)
+        public virtual Uri ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
         {
             if (redirectUri == null)
             {
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Internal
             return redirectUri;
         }
 
-        public virtual string GetRedirectUriAsString(Uri redirectUri, CallState callState)
+        public virtual string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
         {
             return redirectUri.OriginalString;
         }

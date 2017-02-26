@@ -59,11 +59,11 @@ namespace Microsoft.Identity.Client.Internal.Instance
         }
 
         protected override async Task<string> GetOpenIdConfigurationEndpoint(string host, string tenant,
-            string userPrincipalName, CallState callState)
+            string userPrincipalName, RequestContext requestContext)
         {
             if (ValidateAuthority)
             {
-                DrsMetadataResponse drsResponse = await GetMetadataFromEnrollmentServer(userPrincipalName, callState);
+                DrsMetadataResponse drsResponse = await GetMetadataFromEnrollmentServer(userPrincipalName, requestContext);
                 if (!string.IsNullOrEmpty(drsResponse.Error))
                 {
                     throw new MsalServiceException(drsResponse.Error, drsResponse.ErrorDescription);
@@ -81,14 +81,14 @@ namespace Microsoft.Identity.Client.Internal.Instance
                     DefaultRealm, resource);
 
                 HttpResponse httpResponse =
-                    await HttpRequest.SendGet(new Uri(webfingerUrl), null, callState).ConfigureAwait(false);
+                    await HttpRequest.SendGet(new Uri(webfingerUrl), null, requestContext).ConfigureAwait(false);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
                     throw new MsalServiceException("invalid_authority", "authority validation failed.");
                 }
 
-                AdfsWebFingerResponse wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, callState,
+                AdfsWebFingerResponse wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, requestContext,
                     false);
                 if (
                     wfr.Links.FirstOrDefault(
@@ -122,39 +122,39 @@ namespace Microsoft.Identity.Client.Internal.Instance
         }
 
         private async Task<DrsMetadataResponse> GetMetadataFromEnrollmentServer(string userPrincipalName,
-            CallState callState)
+            RequestContext requestContext)
         {
             try
             {
                 //attempt to connect to on-premise enrollment server first.
                 return await QueryEnrollmentServerEndpoint(string.Format(CultureInfo.InvariantCulture,
                     "https://enterpriseregistration.{0}/enrollmentserver/contract",
-                    GetDomainFromUpn(userPrincipalName)), callState).ConfigureAwait(false);
+                    GetDomainFromUpn(userPrincipalName)), requestContext).ConfigureAwait(false);
             }
             catch (Exception exc)
             {
-                PlatformPlugin.Logger.Information(callState,
+                PlatformPlugin.Logger.Information(requestContext,
                     "On-Premise ADFS enrollment server endpoint lookup failed. Error - " + exc.Message);
             }
 
             return await QueryEnrollmentServerEndpoint(string.Format(CultureInfo.InvariantCulture,
                 "https://enterpriseregistration.windows.net/{0}/enrollmentserver/contract",
-                GetDomainFromUpn(userPrincipalName)), callState).ConfigureAwait(false);
+                GetDomainFromUpn(userPrincipalName)), requestContext).ConfigureAwait(false);
         }
 
-        private async Task<DrsMetadataResponse> QueryEnrollmentServerEndpoint(string endpoint, CallState callState)
+        private async Task<DrsMetadataResponse> QueryEnrollmentServerEndpoint(string endpoint, RequestContext requestContext)
         {
             OAuth2Client client = new OAuth2Client();
             client.AddQueryParameter("api-version", "1.0");
-            return await ExecuteClient<DrsMetadataResponse>(endpoint, client, callState).ConfigureAwait(false);
+            return await ExecuteClient<DrsMetadataResponse>(endpoint, client, requestContext).ConfigureAwait(false);
         }
 
-        private async Task<T> ExecuteClient<T>(string endpoint, OAuth2Client client, CallState callState)
+        private async Task<T> ExecuteClient<T>(string endpoint, OAuth2Client client, RequestContext requestContext)
         {
             try
             {
                 return
-                    await client.ExecuteRequest<T>(new Uri(endpoint), HttpMethod.Get, callState).ConfigureAwait(false);
+                    await client.ExecuteRequest<T>(new Uri(endpoint), HttpMethod.Get, requestContext).ConfigureAwait(false);
             }
             catch (RetryableRequestException exc)
             {

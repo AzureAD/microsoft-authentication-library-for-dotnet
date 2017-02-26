@@ -95,7 +95,7 @@
     <Compile Include="Internal\Instance\Authority.cs" />
     <Compile Include="Internal\AuthorizationResult.cs" />
     <Compile Include="Internal\Base64UrlEncoder.cs" />
-    <Compile Include="Internal\CallState.cs" />
+    <Compile Include="Internal\RequestContext.cs" />
     <Compile Include="ClientAssertion.cs" />
     <Compile Include="ClientCredential.cs" />
     <Compile Include="Internal\ClientKey.cs" />

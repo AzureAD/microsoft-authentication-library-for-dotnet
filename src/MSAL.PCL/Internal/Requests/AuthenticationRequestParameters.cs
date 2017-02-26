@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class AuthenticationRequestParameters
     {
-        public CallState CallState { get; set; }
+        public RequestContext RequestContext { get; set; }
 
         public Authority Authority { get; set; }
 

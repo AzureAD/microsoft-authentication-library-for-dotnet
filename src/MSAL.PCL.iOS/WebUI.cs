@@ -53,10 +53,10 @@ namespace Microsoft.Identity.Client
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            CallState callState)
+            RequestContext requestContext)
         {
             returnedUriReady = new SemaphoreSlim(0);
-            Authenticate(authorizationUri, redirectUri, callState);
+            Authenticate(authorizationUri, redirectUri, requestContext);
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
 
             //dismiss safariviewcontroller
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public void Authenticate(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             try
             {
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                PlatformPlugin.Logger.Error(callState, ex);
+                PlatformPlugin.Logger.Error(requestContext, ex);
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
         }

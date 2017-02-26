@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Http
         }
 
         public static async Task<HttpResponse> SendPost(Uri endpoint, Dictionary<string, string> headers,
-            Dictionary<string, string> bodyParameters, CallState callstate)
+            Dictionary<string, string> bodyParameters, RequestContext callstate)
         {
             return
                 await
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Internal.Http
         }
 
         public static async Task<HttpResponse> SendGet(Uri endpoint, Dictionary<string, string> headers,
-            CallState callstate)
+            RequestContext callstate)
         {
             return await ExecuteWithRetry(endpoint, headers, null, HttpMethod.Get, callstate).ConfigureAwait(false);
         }
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Internal.Http
 
         private static async Task<HttpResponse> ExecuteWithRetry(Uri endpoint, Dictionary<string, string> headers,
             Dictionary<string, string> bodyParameters, HttpMethod method,
-            CallState callstate, bool retry = true)
+            RequestContext callstate, bool retry = true)
         {
             bool isRetryable = false;
             HttpResponse response = null;

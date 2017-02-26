@@ -42,7 +42,7 @@ namespace Test.MSAL.NET.Unit
         {
             var counter = 0;
             Logger logger = new Logger();
-            CallState state = new CallState(Guid.NewGuid());
+            RequestContext state = new RequestContext(Guid.NewGuid());
             IMsalLogCallback callback = Substitute.For<IMsalLogCallback>();
             callback.When(x => x.Log(LogLevel.Error, Arg.Any<string>())).Do(x=>counter++);
             LoggerCallbackHandler.Callback = callback;

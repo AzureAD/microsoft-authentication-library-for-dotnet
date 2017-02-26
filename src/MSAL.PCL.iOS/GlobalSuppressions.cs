@@ -80,25 +80,25 @@
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
         Target =
-            "Microsoft.Identity.Client.Logger.#Error(Microsoft.Identity.Client.Internal.CallState,System.Exception,System.String)"
+            "Microsoft.Identity.Client.Logger.#Error(Microsoft.Identity.Client.Internal.RequestContext,System.Exception,System.String)"
         )]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
         Target =
-            "Microsoft.Identity.Client.Logger.#Verbose(Microsoft.Identity.Client.Internal.CallState,System.String,System.String)"
+            "Microsoft.Identity.Client.Logger.#Verbose(Microsoft.Identity.Client.Internal.RequestContext,System.String,System.String)"
         )]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
         Target =
-            "Microsoft.Identity.Client.Logger.#Information(Microsoft.Identity.Client.Internal.CallState,System.String,System.String)"
+            "Microsoft.Identity.Client.Logger.#Information(Microsoft.Identity.Client.Internal.RequestContext,System.String,System.String)"
         )]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
         Target =
-            "Microsoft.Identity.Client.Logger.#Warning(Microsoft.Identity.Client.Internal.CallState,System.String,System.String)"
+            "Microsoft.Identity.Client.Logger.#Warning(Microsoft.Identity.Client.Internal.RequestContext,System.String,System.String)"
         )]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
@@ -128,7 +128,7 @@
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
         Target =
-            "Microsoft.Identity.Client.WebUI.#AcquireAuthorizationAsync(System.Uri,System.Uri,System.Collections.Generic.IDictionary`2<System.String,System.String>,Microsoft.Identity.Client.Internal.CallState)"
+            "Microsoft.Identity.Client.WebUI.#AcquireAuthorizationAsync(System.Uri,System.Uri,System.Collections.Generic.IDictionary`2<System.String,System.String>,Microsoft.Identity.Client.Internal.RequestContext)"
         )]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
@@ -140,7 +140,7 @@
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
         Target =
-            "Microsoft.Identity.Client.WebUI.#Authenticate(System.Uri,System.Uri,System.Collections.Generic.IDictionary`2<System.String,System.String>,Microsoft.Identity.Client.Internal.CallState)"
+            "Microsoft.Identity.Client.WebUI.#Authenticate(System.Uri,System.Uri,System.Collections.Generic.IDictionary`2<System.String,System.String>,Microsoft.Identity.Client.Internal.RequestContext)"
         )]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
@@ -189,25 +189,25 @@
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
         Target =
-            "Microsoft.Identity.Client.Logger.#Error(Microsoft.Identity.Client.Internal.CallState,System.Exception,System.String)"
+            "Microsoft.Identity.Client.Logger.#Error(Microsoft.Identity.Client.Internal.RequestContext,System.Exception,System.String)"
         )]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
         Target =
-            "Microsoft.Identity.Client.Logger.#Verbose(Microsoft.Identity.Client.Internal.CallState,System.String,System.String)"
+            "Microsoft.Identity.Client.Logger.#Verbose(Microsoft.Identity.Client.Internal.RequestContext,System.String,System.String)"
         )]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
         Target =
-            "Microsoft.Identity.Client.Logger.#Information(Microsoft.Identity.Client.Internal.CallState,System.String,System.String)"
+            "Microsoft.Identity.Client.Logger.#Information(Microsoft.Identity.Client.Internal.RequestContext,System.String,System.String)"
         )]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
         Target =
-            "Microsoft.Identity.Client.Logger.#Warning(Microsoft.Identity.Client.Internal.CallState,System.String,System.String)"
+            "Microsoft.Identity.Client.Logger.#Warning(Microsoft.Identity.Client.Internal.RequestContext,System.String,System.String)"
         )]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
@@ -253,7 +253,7 @@
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
         Target =
-            "Microsoft.Identity.Client.WebUI.#AcquireAuthorizationAsync(System.Uri,System.Uri,System.Collections.Generic.IDictionary`2<System.String,System.String>,Microsoft.Identity.Client.Internal.CallState)"
+            "Microsoft.Identity.Client.WebUI.#AcquireAuthorizationAsync(System.Uri,System.Uri,System.Collections.Generic.IDictionary`2<System.String,System.String>,Microsoft.Identity.Client.Internal.RequestContext)"
         )]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
@@ -273,19 +273,19 @@
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
         Target =
-            "Microsoft.Identity.Client.Logger.#Error(Microsoft.Identity.Client.Internal.CallState,System.String,System.String)"
+            "Microsoft.Identity.Client.Logger.#Error(Microsoft.Identity.Client.Internal.RequestContext,System.String,System.String)"
         )]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
         Target =
-            "Microsoft.Identity.Client.Logger.#Error(Microsoft.Identity.Client.Internal.CallState,System.String,System.String)"
+            "Microsoft.Identity.Client.Logger.#Error(Microsoft.Identity.Client.Internal.RequestContext,System.String,System.String)"
         )]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.CryptographyHelper.#GenerateCodeVerifier()")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.CryptographyHelper.#GenerateCodeVerifier()")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.WebUI.#AcquireAuthorizationAsync(System.Uri,System.Uri,Microsoft.Identity.Client.Internal.CallState)")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.WebUI.#AcquireAuthorizationAsync(System.Uri,System.Uri,Microsoft.Identity.Client.Internal.CallState)")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.WebUI.#Authenticate(System.Uri,System.Uri,Microsoft.Identity.Client.Internal.CallState)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.WebUI.#AcquireAuthorizationAsync(System.Uri,System.Uri,Microsoft.Identity.Client.Internal.RequestContext)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.WebUI.#AcquireAuthorizationAsync(System.Uri,System.Uri,Microsoft.Identity.Client.Internal.RequestContext)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.WebUI.#Authenticate(System.Uri,System.Uri,Microsoft.Identity.Client.Internal.RequestContext)")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.WebUI.#DidFinish(SafariServices.SFSafariViewController)")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.AuthenticationContinuationHelper.#SetAuthenticationContinuationEventArgs(Foundation.NSUrl,System.String)")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.TokenCachePlugin.#SaveToken(Microsoft.Identity.Client.Internal.Cache.TokenCacheItem)")]

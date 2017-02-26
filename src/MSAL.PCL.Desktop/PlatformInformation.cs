@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
-        public override async Task<bool> IsUserLocalAsync(CallState callState)
+        public override async Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             return await Task.Factory.StartNew(() =>
             {
