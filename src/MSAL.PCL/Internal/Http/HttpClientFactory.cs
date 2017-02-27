@@ -35,7 +35,17 @@ namespace Microsoft.Identity.Client.Internal.Http
         private static HttpClient _client;
         private static readonly object LockObj = new object();
         public static bool ReturnHttpClientForMocks { set; get; }
+        public const long MaxResponseContentBufferSizeInBytes = 1024*1024;
 
+        private static HttpClient CreateHttpClient()
+        {
+            var httpClient = new HttpClient(HttpMessageHandlerFactory.GetMessageHandler(ReturnHttpClientForMocks))
+            {
+                MaxResponseContentBufferSize = MaxResponseContentBufferSizeInBytes
+            };
+
+            return httpClient;
+        }
         public static HttpClient GetHttpClient()
         {
             // we return a new instanceof httpclient beacause there
@@ -45,7 +55,7 @@ namespace Microsoft.Identity.Client.Internal.Http
             // for mocking purposes.
             if (ReturnHttpClientForMocks)
             {
-                return new HttpClient(HttpMessageHandlerFactory.GetMessageHandler(ReturnHttpClientForMocks));
+                return CreateHttpClient();
             }
 
             if (_client == null)
@@ -54,7 +64,7 @@ namespace Microsoft.Identity.Client.Internal.Http
                 {
                     if (_client == null)
                     {
-                        _client = new HttpClient(HttpMessageHandlerFactory.GetMessageHandler(ReturnHttpClientForMocks));
+                        _client = CreateHttpClient();
                     }
                 }
             }
