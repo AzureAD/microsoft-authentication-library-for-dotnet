@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     }
 
     /// <summary>
-    /// This class is responsible for managing the callback state and its execution. 
+    /// This class is responsible for managing the callback state and its execution.
     /// </summary>
     public sealed class LoggerCallbackHandler
     {
@@ -75,6 +75,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static IAdalLogCallback _localCallback;
 
+        /// <summary>
+        /// Flag to control whether default logging should be performed in addition to calling
+        /// the <see cref="Callback"/> handler (if any)
+        /// </summary>
         public static bool UseDefaultLogging = true;
 
         /// <summary>
