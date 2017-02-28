@@ -40,7 +40,7 @@
     <CodeAnalysisRuleSet>Sdl7.0.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\Test.ADAL.Common\Sts.cs">
+    <Compile Include="..\..\Tests\Test.ADAL.Common\Sts.cs">
       <Link>Sts.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
