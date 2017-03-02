@@ -39,14 +39,54 @@ namespace Test.MSAL.NET.Unit
     {
         [TestMethod]
         [TestCategory("LoggerCallbackTests")]
-        public void CallbackTest()
+        public void CallbackTestError()
         {
             var counter = 0;
+            MsalLogger.ApplicationLogLevel = LogLevel.Error;
             IMsalLogCallback callback = Substitute.For<IMsalLogCallback>();
-            callback.When(x => x.Log(LogLevel.Error, Arg.Any<string>())).Do(x=>counter++);
+
+            callback.When(x => x.Log(LogLevel.Error, Arg.Any<string>())).Do(x => counter++);
             LoggerCallbackHandler.Callback = callback;
             MsalLogger.Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
+
+            callback = Substitute.For<IMsalLogCallback>();
+            callback.When(x => x.Log(LogLevel.Warning, Arg.Any<string>())).Do(x => counter++);
+            LoggerCallbackHandler.Callback = callback;
+            MsalLogger.Warning("test message");
+            Assert.AreEqual(1, counter);
+
+            callback = Substitute.For<IMsalLogCallback>();
+            callback.When(x => x.Log(LogLevel.Info, Arg.Any<string>())).Do(x => counter++);
+            LoggerCallbackHandler.Callback = callback;
+            MsalLogger.Info("test message");
+            Assert.AreEqual(1, counter);
+
+            callback = Substitute.For<IMsalLogCallback>();
+            callback.When(x => x.Log(LogLevel.Verbose, Arg.Any<string>())).Do(x => counter++);
+            LoggerCallbackHandler.Callback = callback;
+            MsalLogger.Verbose("test message");
+            Assert.AreEqual(1, counter);
+        }
+
+        [TestMethod]
+        [TestCategory("LoggerCallbackTests")]
+        public void CallbackTestWarning()
+        {
+            var counter = 0;
+            MsalLogger.ApplicationLogLevel = LogLevel.Warning;
+            IMsalLogCallback callback = Substitute.For<IMsalLogCallback>();
+
+            callback.When(x => x.Log(LogLevel.Error, Arg.Any<string>())).Do(x => counter++);
+            LoggerCallbackHandler.Callback = callback;
+            MsalLogger.Error(new Exception("test message"));
+            Assert.AreEqual(1, counter);
+
+            callback = Substitute.For<IMsalLogCallback>();
+            callback.When(x => x.Log(LogLevel.Warning, Arg.Any<string>())).Do(x => counter++);
+            LoggerCallbackHandler.Callback = callback;
+            MsalLogger.Warning("test message");
+            Assert.AreEqual(2, counter);
 
             callback = Substitute.For<IMsalLogCallback>();
             callback.When(x => x.Log(LogLevel.Info, Arg.Any<string>())).Do(x => counter++);
@@ -57,13 +97,72 @@ namespace Test.MSAL.NET.Unit
             callback = Substitute.For<IMsalLogCallback>();
             callback.When(x => x.Log(LogLevel.Verbose, Arg.Any<string>())).Do(x => counter++);
             LoggerCallbackHandler.Callback = callback;
-            MsalLogger.Verbose( "test message");
-            Assert.AreEqual(3, counter);
+            MsalLogger.Verbose("test message");
+            Assert.AreEqual(2, counter);
+        }
+
+        [TestMethod]
+        [TestCategory("LoggerCallbackTests")]
+        public void CallbackTestInfo()
+        {
+            var counter = 0;
+            MsalLogger.ApplicationLogLevel = LogLevel.Info;
+            IMsalLogCallback callback = Substitute.For<IMsalLogCallback>();
+
+            callback.When(x => x.Log(LogLevel.Error, Arg.Any<string>())).Do(x => counter++);
+            LoggerCallbackHandler.Callback = callback;
+            MsalLogger.Error(new Exception("test message"));
+            Assert.AreEqual(1, counter);
 
             callback = Substitute.For<IMsalLogCallback>();
             callback.When(x => x.Log(LogLevel.Warning, Arg.Any<string>())).Do(x => counter++);
             LoggerCallbackHandler.Callback = callback;
             MsalLogger.Warning("test message");
+            Assert.AreEqual(2, counter);
+
+            callback = Substitute.For<IMsalLogCallback>();
+            callback.When(x => x.Log(LogLevel.Info, Arg.Any<string>())).Do(x => counter++);
+            LoggerCallbackHandler.Callback = callback;
+            MsalLogger.Info("test message");
+            Assert.AreEqual(3, counter);
+
+            callback = Substitute.For<IMsalLogCallback>();
+            callback.When(x => x.Log(LogLevel.Verbose, Arg.Any<string>())).Do(x => counter++);
+            LoggerCallbackHandler.Callback = callback;
+            MsalLogger.Verbose("test message");
+            Assert.AreEqual(3, counter);
+
+        }
+
+        [TestMethod]
+        [TestCategory("LoggerCallbackTests")]
+        public void CallbackTestVerbose()
+        {
+            var counter = 0;
+            MsalLogger.ApplicationLogLevel = LogLevel.Verbose;
+            IMsalLogCallback callback = Substitute.For<IMsalLogCallback>();
+
+            callback.When(x => x.Log(LogLevel.Error, Arg.Any<string>())).Do(x => counter++);
+            LoggerCallbackHandler.Callback = callback;
+            MsalLogger.Error(new Exception("test message"));
+            Assert.AreEqual(1, counter);
+
+            callback = Substitute.For<IMsalLogCallback>();
+            callback.When(x => x.Log(LogLevel.Warning, Arg.Any<string>())).Do(x => counter++);
+            LoggerCallbackHandler.Callback = callback;
+            MsalLogger.Warning("test message");
+            Assert.AreEqual(2, counter);
+
+            callback = Substitute.For<IMsalLogCallback>();
+            callback.When(x => x.Log(LogLevel.Info, Arg.Any<string>())).Do(x => counter++);
+            LoggerCallbackHandler.Callback = callback;
+            MsalLogger.Info("test message");
+            Assert.AreEqual(3, counter);
+
+            callback = Substitute.For<IMsalLogCallback>();
+            callback.When(x => x.Log(LogLevel.Verbose, Arg.Any<string>())).Do(x => counter++);
+            LoggerCallbackHandler.Callback = callback;
+            MsalLogger.Verbose("test message");
             Assert.AreEqual(4, counter);
         }
     }
