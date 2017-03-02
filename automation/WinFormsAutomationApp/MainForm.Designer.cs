@@ -38,8 +38,8 @@
             this.acquireTokenSilent = new System.Windows.Forms.Button();
             this.acquireToken = new System.Windows.Forms.Button();
             this.dataInputPage = new System.Windows.Forms.TabPage();
-            this.go = new System.Windows.Forms.Button();
-            this.dataInput = new System.Windows.Forms.TextBox();
+            this.requestGo = new System.Windows.Forms.Button();
+            this.requestInfo = new System.Windows.Forms.TextBox();
             this.resultPage = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
             this.adalLogs = new System.Windows.Forms.TextBox();
@@ -158,8 +158,8 @@
             // 
             // dataInputPage
             // 
-            this.dataInputPage.Controls.Add(this.go);
-            this.dataInputPage.Controls.Add(this.dataInput);
+            this.dataInputPage.Controls.Add(this.requestGo);
+            this.dataInputPage.Controls.Add(this.requestInfo);
             this.dataInputPage.Location = new System.Drawing.Point(4, 22);
             this.dataInputPage.Name = "dataInputPage";
             this.dataInputPage.Padding = new System.Windows.Forms.Padding(3);
@@ -168,25 +168,25 @@
             this.dataInputPage.Text = "dataInputPage";
             this.dataInputPage.UseVisualStyleBackColor = true;
             // 
-            // go
+            // requestGo
             // 
-            this.go.AccessibleName = "requestGo";
-            this.go.Location = new System.Drawing.Point(36, 439);
-            this.go.Name = "go";
-            this.go.Size = new System.Drawing.Size(515, 41);
-            this.go.TabIndex = 1;
-            this.go.Text = "GO!";
-            this.go.UseVisualStyleBackColor = true;
-            this.go.Click += new System.EventHandler(this.go_Click);
+            this.requestGo.AccessibleName = "requestGo";
+            this.requestGo.Location = new System.Drawing.Point(36, 439);
+            this.requestGo.Name = "requestGo";
+            this.requestGo.Size = new System.Drawing.Size(515, 41);
+            this.requestGo.TabIndex = 1;
+            this.requestGo.Text = "GO!";
+            this.requestGo.UseVisualStyleBackColor = true;
+            this.requestGo.Click += new System.EventHandler(this.requestGo_Click);
             // 
-            // dataInput
+            // requestInfo
             // 
-            this.dataInput.AccessibleName = "requestInfo";
-            this.dataInput.Location = new System.Drawing.Point(36, 23);
-            this.dataInput.Multiline = true;
-            this.dataInput.Name = "dataInput";
-            this.dataInput.Size = new System.Drawing.Size(515, 410);
-            this.dataInput.TabIndex = 0;
+            this.requestInfo.AccessibleName = "requestInfo";
+            this.requestInfo.Location = new System.Drawing.Point(36, 23);
+            this.requestInfo.Multiline = true;
+            this.requestInfo.Name = "requestInfo";
+            this.requestInfo.Size = new System.Drawing.Size(515, 410);
+            this.requestInfo.TabIndex = 0;
             // 
             // resultPage
             // 
@@ -230,7 +230,7 @@
             this.resultDone.TabIndex = 1;
             this.resultDone.Text = "Done";
             this.resultDone.UseVisualStyleBackColor = true;
-            this.resultDone.Click += new System.EventHandler(this.done_Click);
+            this.resultDone.Click += new System.EventHandler(this.resultDone_Click);
             // 
             // resultInfo
             // 
@@ -269,8 +269,8 @@
         private System.Windows.Forms.TabPage dataInputPage;
         private System.Windows.Forms.TabPage resultPage;
         private System.Windows.Forms.Button acquireToken;
-        private System.Windows.Forms.Button go;
-        private System.Windows.Forms.TextBox dataInput;
+        private System.Windows.Forms.Button requestGo;
+        private System.Windows.Forms.TextBox requestInfo;
         private System.Windows.Forms.Button resultDone;
         private System.Windows.Forms.TextBox resultInfo;
         private System.Windows.Forms.Button acquireTokenSilent;
