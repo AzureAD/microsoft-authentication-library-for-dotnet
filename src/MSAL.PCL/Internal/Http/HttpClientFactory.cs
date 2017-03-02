@@ -46,6 +46,7 @@ namespace Microsoft.Identity.Client.Internal.Http
 
             return httpClient;
         }
+
         public static HttpClient GetHttpClient()
         {
             // we return a new instanceof httpclient beacause there
