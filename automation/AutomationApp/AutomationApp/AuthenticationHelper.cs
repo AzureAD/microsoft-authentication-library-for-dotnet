@@ -11,18 +11,18 @@ namespace AutomationApp
 {
     internal static class AuthenticationHelper
     {
-        public static async Task<string> AcquireToken(Dictionary<string, string> input)
+        public static string AcquireToken(Dictionary<string, string> input)
         {
             return null;
         }
 
-        public static async Task<string> AcquireTokenSilent(Dictionary<string, string> input)
+        public static string AcquireTokenSilent(Dictionary<string, string> input)
         {
             AuthenticationContext ctx = new AuthenticationContext("");
             string output = string.Empty;
             try
             {
-                AuthenticationResult result = await ctx.AcquireTokenSilentAsync("", "");
+                AuthenticationResult result = ctx.AcquireTokenSilentAsync("", "").Result;
                 output = result.ToJson();
             }
             catch (Exception exc)
