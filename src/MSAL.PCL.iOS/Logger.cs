@@ -30,45 +30,46 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-    internal class Logger : LoggerBase
+    internal class Logger : ILogger
     {
-        internal override void Error(RequestContext requestContext, string errorMessage, string callerFilePath = "")
+        public void Error(string errorMessage)
         {
-            string message = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), errorMessage);
-            Console.WriteLine(message); //Console.writeline writes to NSLog by default
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, message);
+            Console.WriteLine(errorMessage); //Console.writeline writes to NSLog by default
         }
 
-        internal override void Error(RequestContext requestContext, Exception ex,
-            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        public void Verbose(string verboseMessage)
         {
-            string message = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), ex.ToString());
-            Console.WriteLine(message); //Console.writeline writes to NSLog by default
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, message);
+            Console.WriteLine(verboseMessage); //Console.writeline writes to NSLog by default
         }
 
-        internal override void Verbose(RequestContext requestContext, string message,
-            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
-        {
-            string updatedMessage = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), message);
-            Console.WriteLine(updatedMessage); //Console.writeline writes to NSLog by default
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Verbose, updatedMessage);
+        public void Information(string infoMessage)
+        { 
+            Console.WriteLine(infoMessage); //Console.writeline writes to NSLog by default
         }
 
-        internal override void Information(RequestContext requestContext, string message,
-            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        public void Warning(string warningMessage)
         {
-            string updatedMessage = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), message);
-            Console.WriteLine(updatedMessage); //Console.writeline writes to NSLog by default
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Information, updatedMessage);
+            Console.WriteLine(warningMessage); //Console.writeline writes to NSLog by default
         }
 
-        internal override void Warning(RequestContext requestContext, string message,
-            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        public void Error(Exception ex)
         {
-            string updatedMessage = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), message);
-            Console.WriteLine(updatedMessage); //Console.writeline writes to NSLog by default
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Warning, updatedMessage);
+            Error(ex.ToString());
+        }
+
+        public void Warning(Exception ex)
+        {
+            Warning(ex.ToString());
+        }
+
+        public void Information(Exception ex)
+        {
+            Information(ex.ToString());
+        }
+
+        public void Verbose(Exception ex)
+        {
+            Verbose(ex.ToString());
         }
     }
 }

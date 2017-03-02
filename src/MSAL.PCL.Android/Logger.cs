@@ -31,45 +31,46 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-    internal class Logger : LoggerBase
+    internal class Logger : ILogger
     {
-        internal override void Error(RequestContext requestContext, string errorMessage, string callerFilePath = "")
+        public void Error(string errorMessage)
         {
-            string log = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), errorMessage);
-            Log.Error(null, log);
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, log);
+            Log.Error(null, errorMessage);
         }
 
-        internal override void Error(RequestContext requestContext, Exception ex,
-            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        public void Warning(string message)
         {
-            string log = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), ex.ToString());
-            Log.Error(null, log);
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, log);
+            Log.Warn(null, message);
         }
 
-        internal override void Verbose(RequestContext requestContext, string message,
-            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        public void Verbose(string message)
         {
-            string log = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), message);
-            Log.Verbose(null, log);
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Verbose, log);
+            Log.Verbose(null, message);
         }
 
-        internal override void Information(RequestContext requestContext, string message,
-            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+       public void Information(string message)
         {
-            string log = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), message);
-            Log.Info(null, log);
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Information, log);
+            Log.Info(null, message);
         }
 
-        internal override void Warning(RequestContext requestContext, string message,
-            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        public void Error(Exception ex)
         {
-            string log = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), message);
-            Log.Warn(null, log);
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Warning, log);
+            Error(ex.ToString());
+        }
+
+        public void Warning(Exception ex)
+        {
+            Warning(ex.ToString());
+        }
+
+        public void Information(Exception ex)
+        {
+            Information(ex.ToString());
+        }
+
+        public void Verbose(Exception ex)
+        {
+            Verbose(ex.ToString());
         }
     }
 }

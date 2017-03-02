@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client
                 bool completedNormally = uiThread.Join(navigationOverallTimeout > 0 ? (int) navigationOverallTimeout : 0);
                 if (!completedNormally)
                 {
-                    PlatformPlugin.Logger.Information(null, "Silent login thread did not complete on time.");
+                    MsalLogger.Info("Silent login thread did not complete on time.");
 
                     // The invisible dialog has failed to complete in the allotted time.
                     // Attempt a graceful shutdown.
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client
                     }
                     catch (Exception e)
                     {
-                        PlatformPlugin.Logger.Error(null, e);
+                        MsalLogger.Error(e);
                         // Catch all exceptions to transfer them to the original calling thread.
                         this.uiException = e;
                     }

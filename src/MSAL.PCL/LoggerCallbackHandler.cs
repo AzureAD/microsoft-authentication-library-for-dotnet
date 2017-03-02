@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// LogLevel
     /// </summary>
-    public enum LogLevel
+    /*public enum LogLevel
     {
         /// <summary>
         /// </summary>
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// </summary>
         Error
-    }
+    }*/
 
     /// <summary>
     /// </summary>
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
     {
         /// <summary>
         /// </summary>
-        void Log(LogLevel level, string message);
+        void Log(MsalLogger.LogLevel level, string message);
     }
 
     /// <summary>
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal static void ExecuteCallback(LogLevel level, string message)
+        internal static void ExecuteCallback(MsalLogger.LogLevel level, string message)
         {
             lock (LockObj)
             {

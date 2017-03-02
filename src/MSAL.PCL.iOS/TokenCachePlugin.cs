@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                PlatformPlugin.Logger.Warning(null, "Failed to load cache: " + ex);
+                MsalLogger.Warning("Failed to load cache: " + ex);
                 // Ignore as the cache seems to be corrupt
             }
         }
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client
                 }
                 catch (Exception ex)
                 {
-                    PlatformPlugin.Logger.Warning(null, "Failed to save cache: " + ex);
+                    MsalLogger.Warning("Failed to save cache: " + ex);
                 }
             }
         }

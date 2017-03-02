@@ -40,6 +40,8 @@ namespace Microsoft.Identity.Client
     /// </Summary>
     public abstract class ClientApplicationBase
     {
+        private Guid _correlationId;
+
         /// <Summary>
         /// DefaultAuthority
         /// </Summary>
@@ -50,10 +52,10 @@ namespace Microsoft.Identity.Client
         /// </Summary>
         static ClientApplicationBase()
         {
-            PlatformPlugin.Logger.LogMessage(null, string.Format(CultureInfo.InvariantCulture,
+            MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
                 "MSAL {0} with assembly version '{1}', file version '{2}' and information version '{3}'" +
                 "is running...", PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
-                MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()), Logger.EventType.Info);
+                MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
         }
 
         /// <Summary>
@@ -95,7 +97,15 @@ namespace Microsoft.Identity.Client
         /// Gets or sets correlation Id which would be sent to the service with the next request.
         /// Correlation Id is to be used for diagnostics purposes.
         /// </summary>
-        public Guid CorrelationId { get; set; }
+        public Guid CorrelationId
+        {
+            get { return _correlationId; }
+            set
+            {
+                _correlationId = value;
+                MsalLogger.CorrelationId = value;
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether address validation is ON or OFF.
@@ -111,7 +121,7 @@ namespace Microsoft.Identity.Client
             {
                 if (this.UserTokenCache == null)
                 {
-                    PlatformPlugin.Logger.LogMessage(null, "Token cache is null or empty", Logger.EventType.Info);
+                    MsalLogger.Info("Token cache is null or empty");
                     return new List<User>();
                 }
 
@@ -212,11 +222,11 @@ namespace Microsoft.Identity.Client
                 User = user,
                 Scope = scope.CreateSetFromArray(),
                 RedirectUri = new Uri(this.RedirectUri),
-                RequestContext = CreateCallState(this.CorrelationId)
+                RequestContext = CreateRequestContext(this.CorrelationId)
             };
         }
 
-        internal RequestContext CreateCallState(Guid correlationId)
+        internal RequestContext CreateRequestContext(Guid correlationId)
         {
             correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
             return new RequestContext(correlationId);

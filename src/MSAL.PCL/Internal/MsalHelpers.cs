@@ -229,8 +229,7 @@ namespace Microsoft.Identity.Client.Internal
 
                     if (response.ContainsKey(key) && requestContext != null)
                     {
-                        PlatformPlugin.Logger.Warning(requestContext,
-                            string.Format(CultureInfo.InvariantCulture,
+                        MsalLogger.Warning(string.Format(CultureInfo.InvariantCulture,
                                 "Key/value pair list contains redundant key '{0}'.", key));
                     }
 

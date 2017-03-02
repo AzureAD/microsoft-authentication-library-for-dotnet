@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                PlatformPlugin.Logger.Error(requestContext, ex);
+                MsalLogger.Error(ex);
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
 
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                PlatformPlugin.Logger.Information(null, "No pending request for response from web ui.");
+                MsalLogger.Info("No pending request for response from web ui.");
             }
         }
     }

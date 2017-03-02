@@ -87,8 +87,7 @@ namespace Microsoft.Identity.Client.Internal.Http
                     return response;
                 }
 
-                PlatformPlugin.Logger.Error(callstate,
-                    string.Format(CultureInfo.InvariantCulture,
+                MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
                         "Response status code does not indicate success: {0} ({1}).",
                         (int) response.StatusCode, response.StatusCode));
 
@@ -101,7 +100,7 @@ namespace Microsoft.Identity.Client.Internal.Http
             }
             catch (TaskCanceledException exception)
             {
-                PlatformPlugin.Logger.Error(callstate, exception);
+                MsalLogger.Error(exception);
                 isRetryable = true;
             }
 
@@ -109,11 +108,11 @@ namespace Microsoft.Identity.Client.Internal.Http
             {
                 if (retry)
                 {
-                    PlatformPlugin.Logger.Information(callstate, "Retrying one more time..");
+                    MsalLogger.Info("Retrying one more time..");
                     return await ExecuteWithRetry(endpoint, headers, bodyParameters, method, callstate, false);
                 }
 
-                PlatformPlugin.Logger.Information(callstate, "Request retry failed.");
+                MsalLogger.Info("Request retry failed.");
                 throw new RetryableRequestException();
             }
 

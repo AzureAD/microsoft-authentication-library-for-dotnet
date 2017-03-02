@@ -61,14 +61,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             this.RequestContext = authenticationRequestParameters.RequestContext;
             this.TokenCache = authenticationRequestParameters.TokenCache;
 
-            PlatformPlugin.Logger.Information(this.RequestContext,
-                string.Format(CultureInfo.InvariantCulture,
+            MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
                     "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
                     Authority.CanonicalAuthority, authenticationRequestParameters.Scope.AsSingleString(),
                     authenticationRequestParameters.ClientKey.ClientId,
-                    (TokenCache != null)
-                        ? TokenCache.GetType().FullName
-                        : null));
+                    TokenCache?.GetType().FullName));
 
             this.AuthenticationRequestParameters = authenticationRequestParameters;
 
@@ -133,7 +130,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             catch (Exception ex)
             {
-                PlatformPlugin.Logger.Error(this.RequestContext, ex);
+                MsalLogger.Error(ex);
                 throw;
             }
         }
@@ -209,8 +206,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (string.IsNullOrEmpty(Response.Scope))
             {
                 Response.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
-                PlatformPlugin.Logger.Information(this.RequestContext,
-                    "Scope was missing from the token response, so using developer provided scopes in the result");
+                MsalLogger.Info("Scope was missing from the token response, so using developer provided scopes in the result");
             }
         }
 
@@ -220,8 +216,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.Token);
 
-                PlatformPlugin.Logger.Information(this.RequestContext,
-                    string.Format(CultureInfo.InvariantCulture,
+                MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
                         "=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tExpiration Time: {1}\n\tUser Hash: {2}\n\t",
                         accessTokenHash,
                         result.ExpiresOn,
