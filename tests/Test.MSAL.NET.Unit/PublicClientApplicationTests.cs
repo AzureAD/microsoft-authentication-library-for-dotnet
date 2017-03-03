@@ -105,7 +105,6 @@ namespace Test.MSAL.NET.Unit
             // another cache entry for different home object id. user count should be 2.
             TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId,
                 TestConstants.HomeObjectId + "more");
 
 
@@ -127,7 +126,6 @@ namespace Test.MSAL.NET.Unit
 
             // another cache entry for different home object id. user count should be 2.
             TokenCacheKey rtKey = new TokenCacheKey(null, null, TestConstants.ClientId,
-                TestConstants.UniqueId + "more", TestConstants.DisplayableId,
                 TestConstants.HomeObjectId + "more");
             
             RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
@@ -193,7 +191,6 @@ namespace Test.MSAL.NET.Unit
             TokenCacheHelper.PopulateCache(_tokenCachePlugin);
             _tokenCachePlugin.TokenCacheDictionary.Remove(new TokenCacheKey(TestConstants.AuthorityGuestTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
-                TestConstants.UniqueId + "more", TestConstants.DisplayableId,
                 TestConstants.HomeObjectId).ToString());
 
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), new User()

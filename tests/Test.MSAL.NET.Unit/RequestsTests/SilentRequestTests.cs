@@ -69,7 +69,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
-                ClientKey = new ClientKey(TestConstants.ClientId),
+                ClientId = TestConstants.ClientId,
                 Scope = TestConstants.Scope,
                 TokenCache = cache
             };
@@ -114,7 +114,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
-                ClientKey = new ClientKey(TestConstants.ClientId),
+                ClientId = TestConstants.ClientId,
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache,
                 User = new User()
@@ -166,7 +166,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
-                ClientKey = new ClientKey(TestConstants.ClientId),
+                ClientId = TestConstants.ClientId,
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache,
                 User = new User() { UniqueId = ""}

@@ -236,7 +236,7 @@ namespace Microsoft.Identity.Client
         internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope, User user, TokenCache cache)
         {
             AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scope, user, cache);
-            parameters.ClientKey = new ClientKey(this.ClientId);
+            parameters.ClientId = this.ClientId;
             if (this.PlatformParameters == null)
             {
                 this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;

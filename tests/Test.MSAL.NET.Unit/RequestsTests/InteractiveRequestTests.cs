@@ -58,6 +58,12 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             HttpMessageHandlerFactory.ClearMockHandlers();
         }
 
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            _tokenCachePlugin.TokenCacheDictionary.Clear();
+        }
+
         [TestMethod]
         [TestCategory("InteractiveRequestTests")]
         public void NoCacheLookup()
@@ -65,8 +71,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
             TokenCache cache = new TokenCache(TestConstants.ClientId);
             TokenCacheKey atKey = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId);
+                TestConstants.Scope, TestConstants.ClientId, TestConstants.HomeObjectId);
 
             AccessTokenCacheItem atItem = new AccessTokenCacheItem()
             {
@@ -99,7 +104,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
-                ClientKey = new ClientKey(TestConstants.ClientId),
+                ClientId = TestConstants.ClientId,
                 Scope = TestConstants.Scope,
                 TokenCache = cache
             };
@@ -133,7 +138,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authority = authority,
-                    ClientKey = new ClientKey(TestConstants.ClientId),
+                    ClientId = TestConstants.ClientId,
                     Scope = TestConstants.Scope,
                     TokenCache = null
                 };
@@ -172,7 +177,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
-                ClientKey = new ClientKey(TestConstants.ClientId),
+                ClientId = TestConstants.ClientId,
                 Scope = TestConstants.Scope,
                 TokenCache = null
             };
@@ -231,7 +236,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authority = authority,
-                    ClientKey = new ClientKey(TestConstants.ClientId),
+                    ClientId = TestConstants.ClientId,
                     Scope = TestConstants.Scope,
                     TokenCache = null
                 };
@@ -260,7 +265,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authority = authority,
-                    ClientKey = new ClientKey(TestConstants.ClientId),
+                    ClientId = TestConstants.ClientId,
                     Scope = TestConstants.Scope,
                     TokenCache = null
                 };
@@ -288,7 +293,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
-                ClientKey = new ClientKey(TestConstants.ClientId),
+                ClientId = TestConstants.ClientId,
                 Scope = TestConstants.Scope,
                 TokenCache = null
             };

@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Client
             Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
             var requestParameters =
                 this.CreateRequestParameters(authority, scope, null, this.UserTokenCache);
-            requestParameters.ClientKey = new ClientKey(this.ClientId);
+            requestParameters.ClientId = this.ClientId;
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client
             var requestParameters = this.CreateRequestParameters(authorityInstance, scope, null,
                 this.UserTokenCache);
             requestParameters.RedirectUri = new Uri(redirectUri);
-            requestParameters.ClientKey = new ClientKey(this.ClientId);
+            requestParameters.ClientId = this.ClientId;
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
@@ -202,7 +202,8 @@ namespace Microsoft.Identity.Client
         internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope, User user, TokenCache cache)
         {
             AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scope, user, cache);
-            parameters.ClientKey = new ClientKey(this.ClientId, this.ClientCredential, authority);
+            parameters.ClientId = this.ClientId;
+            parameters.ClientCredential = this.ClientCredential;
 
             return parameters;
         }

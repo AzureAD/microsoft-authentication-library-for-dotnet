@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             TokenCachePlugin.SaveRefreshToken(refreshTokenItem);
         }
 
-        public IList<AccessTokenCacheItem> GetTokens(TokenCacheKey tokenCacheKey)
+        public IList<AccessTokenCacheItem> GetAccessToken(TokenCacheKey tokenCacheKey)
         {
             ICollection<string> allAccessTokens = TokenCachePlugin.GetAllAccessTokens();
             IList<AccessTokenCacheItem> matchedTokens = new List<AccessTokenCacheItem>();

@@ -75,7 +75,7 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(app.ClientCredential.Secret);
             Assert.AreEqual(TestConstants.ClientSecret, app.ClientCredential.Secret);
             Assert.IsNull(app.ClientCredential.Certificate);
-            Assert.IsNull(app.ClientCredential.ClientAssertion);
+            Assert.IsNull(app.ClientCredential.Assertion);
             Assert.AreEqual(0, app.ClientCredential.ValidTo);
 
             app = new ConfidentialClientApplication(TestConstants.ClientId,
@@ -173,18 +173,18 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(0, app.AppTokenCache.RefreshTokenCount); //no refresh tokens are returned
 
             //assert client credential
-            Assert.IsNotNull(cc.ClientAssertion);
+            Assert.IsNotNull(cc.Assertion);
             Assert.AreNotEqual(0, cc.ValidTo);
 
             //save client assertion.
-            string cachedAssertion = cc.ClientAssertion.Assertion;
+            string cachedAssertion = cc.Assertion;
             long cacheValidTo = cc.ValidTo;
 
             task = app.AcquireTokenForClientAsync(TestConstants.ScopeForAnotherResource.ToArray());
             result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(cacheValidTo, cc.ValidTo);
-            Assert.AreEqual(cachedAssertion, cc.ClientAssertion.Assertion);
+            Assert.AreEqual(cachedAssertion, cc.Assertion);
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }

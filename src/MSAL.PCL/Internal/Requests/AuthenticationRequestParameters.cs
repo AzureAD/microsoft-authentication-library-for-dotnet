@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal.Instance;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -42,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public SortedSet<string> Scope { get; set; }
 
-        public ClientKey ClientKey { get; set; }
+        public string ClientId { get; set; }
 
         public string AuthorizationCode { get; set; }
 
@@ -59,5 +60,45 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public UserAssertion UserAssertion { get; set; }
 
         public IPlatformParameters PlatformParameters { get; set; }
+
+        public ClientCredential ClientCredential { get; set; }
+
+        public bool HasCredential => (ClientCredential != null);
+
+        public IDictionary<string, string> ToParameters()
+        {
+            IDictionary<string, string> parameters = new Dictionary<string, string>();
+
+            if (ClientCredential != null)
+            {
+                if (!string.IsNullOrEmpty(ClientCredential.Secret))
+                {
+                    parameters[OAuth2Parameter.ClientSecret] = ClientCredential.Secret;
+                }
+                else
+                {
+                    if (ClientCredential.Assertion == null || ClientCredential.ValidTo != 0)
+                    {
+                        bool assertionNearExpiry = (ClientCredential.ValidTo <=
+                                                    JsonWebToken.ConvertToTimeT(DateTime.UtcNow +
+                                                                                TimeSpan.FromMinutes(
+                                                                                    Constants.ExpirationMarginInMinutes)));
+                        if (assertionNearExpiry)
+                        {
+                            JsonWebToken jwtToken = new JsonWebToken(this.ClientId,
+                                this.Authority.SelfSignedJwtAudience);
+                            ClientCredential.Assertion = jwtToken.Sign(ClientCredential.Certificate);
+                            ClientCredential.ValidTo = jwtToken.Payload.ValidTo;
+                        }
+                    }
+
+                    parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
+                    parameters[OAuth2Parameter.ClientAssertion] = ClientCredential.Assertion;
+                }
+            }
+
+            return parameters;
+        }
+
     }
 }

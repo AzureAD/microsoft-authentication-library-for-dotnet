@@ -65,8 +65,7 @@ namespace Test.MSAL.NET.Unit
         {
             TokenCache cache = new TokenCache(TestConstants.ClientId);
             TokenCacheKey atKey = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId);
+                TestConstants.Scope, TestConstants.ClientId, TestConstants.HomeObjectId);
 
             AccessTokenCacheItem atItem = new AccessTokenCacheItem()
             {
@@ -78,6 +77,7 @@ namespace Test.MSAL.NET.Unit
 
             Assert.IsNull(cache.FindAccessToken(new AuthenticationRequestParameters()
             {
+                ClientId = TestConstants.ClientId,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 Scope = TestConstants.Scope,
                 User =
@@ -113,7 +113,7 @@ namespace Test.MSAL.NET.Unit
             _tokenCachePlugin.TokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
             Assert.IsNotNull(cache.FindRefreshToken(new AuthenticationRequestParameters()
             {
-                ClientKey = new ClientKey(TestConstants.ClientId),
+                ClientId = TestConstants.ClientId,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 Scope = TestConstants.Scope,
                 User =
@@ -130,7 +130,7 @@ namespace Test.MSAL.NET.Unit
             // outcome of cache look up.
             Assert.IsNotNull(cache.FindRefreshToken(new AuthenticationRequestParameters()
             {
-                ClientKey = new ClientKey(TestConstants.ClientId),
+                ClientId = TestConstants.ClientId,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant + "more", false),
                 Scope = TestConstants.Scope,
                 User =
@@ -165,7 +165,8 @@ namespace Test.MSAL.NET.Unit
             AccessTokenCacheItem cacheItem = tokenCache.FindAccessToken(new AuthenticationRequestParameters()
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
-                ClientKey = new ClientKey(TestConstants.ClientId),
+                ClientId = TestConstants.ClientId,
+                ClientCredential= TestConstants.CredentialWithSecret,
                 Scope = TestConstants.Scope
             });
 
