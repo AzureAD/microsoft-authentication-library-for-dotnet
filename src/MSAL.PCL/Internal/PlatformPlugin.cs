@@ -56,7 +56,6 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         public static IWebUIFactory WebUIFactory { get; set; }
-
         public static ITokenCachePlugin NewTokenCachePluginInstance
         {
             get
@@ -65,9 +64,7 @@ namespace Microsoft.Identity.Client.Internal
                 return (ITokenCachePlugin)Activator.CreateInstance(assembly.GetType(Namespace + "TokenCachePlugin"));
             }
         }
-
         public static ITokenCachePlugin TokenCachePlugin { get; set; }
-
         public static ILogger Logger { get; set; }
         public static PlatformInformationBase PlatformInformation { get; set; }
         public static ICryptographyHelper CryptographyHelper { get; set; }
@@ -104,6 +101,29 @@ namespace Microsoft.Identity.Client.Internal
             DefaultPlatformParameters = platformParameters;
         }
 
+        public static void LogMessage(MsalLogger.LogLevel logLevel, string formattedMessage)
+        {
+            switch (logLevel)
+            {
+                case MsalLogger.LogLevel.Error:
+                    if (logLevel == MsalLogger.LogLevel.Error)
+                        Logger.Error(formattedMessage);
+                    break;
+                case MsalLogger.LogLevel.Warning:
+                    if (logLevel == MsalLogger.LogLevel.Warning)
+                        Logger.Warning(formattedMessage);
+                    break;
+                case MsalLogger.LogLevel.Info:
+                    if (logLevel == MsalLogger.LogLevel.Info)
+                        Logger.Information(formattedMessage);
+                    break;
+                case MsalLogger.LogLevel.Verbose:
+                    if (logLevel == MsalLogger.LogLevel.Verbose)
+                        Logger.Verbose(formattedMessage);
+                    break;
+            }
+        }
+
         private static Assembly LoadPlatformSpecificAssembly()
         {
             // For security reasons, it is important to have PublicKeyToken mentioned referencing the assembly.
@@ -130,6 +150,5 @@ namespace Microsoft.Identity.Client.Internal
                         platformSpecificAssemblyName), ex);
             }
         }
-
     }
 }

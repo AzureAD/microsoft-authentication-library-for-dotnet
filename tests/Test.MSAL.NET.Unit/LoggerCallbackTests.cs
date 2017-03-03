@@ -47,25 +47,25 @@ namespace Test.MSAL.NET.Unit
 
             callback.When(x => x.Log(LogLevel.Error, Arg.Any<string>())).Do(x => counter++);
             LoggerCallbackHandler.Callback = callback;
-            MsalLogger.Error(new Exception("test message"));
+            Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             callback = Substitute.For<IMsalLogCallback>();
             callback.When(x => x.Log(LogLevel.Warning, Arg.Any<string>())).Do(x => counter++);
             LoggerCallbackHandler.Callback = callback;
-            MsalLogger.Warning("test message");
+            Warning("test message");
             Assert.AreEqual(1, counter);
 
             callback = Substitute.For<IMsalLogCallback>();
             callback.When(x => x.Log(LogLevel.Info, Arg.Any<string>())).Do(x => counter++);
             LoggerCallbackHandler.Callback = callback;
-            MsalLogger.Info("test message");
+            Info("test message");
             Assert.AreEqual(1, counter);
 
             callback = Substitute.For<IMsalLogCallback>();
             callback.When(x => x.Log(LogLevel.Verbose, Arg.Any<string>())).Do(x => counter++);
             LoggerCallbackHandler.Callback = callback;
-            MsalLogger.Verbose("test message");
+            Verbose("test message");
             Assert.AreEqual(1, counter);
         }
 
@@ -79,7 +79,7 @@ namespace Test.MSAL.NET.Unit
 
             callback.When(x => x.Log(LogLevel.Error, Arg.Any<string>())).Do(x => counter++);
             LoggerCallbackHandler.Callback = callback;
-            MsalLogger.Error(new Exception("test message"));
+            Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             callback = Substitute.For<IMsalLogCallback>();
@@ -111,7 +111,7 @@ namespace Test.MSAL.NET.Unit
 
             callback.When(x => x.Log(LogLevel.Error, Arg.Any<string>())).Do(x => counter++);
             LoggerCallbackHandler.Callback = callback;
-            MsalLogger.Error(new Exception("test message"));
+            Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             callback = Substitute.For<IMsalLogCallback>();
@@ -144,7 +144,7 @@ namespace Test.MSAL.NET.Unit
 
             callback.When(x => x.Log(LogLevel.Error, Arg.Any<string>())).Do(x => counter++);
             LoggerCallbackHandler.Callback = callback;
-            MsalLogger.Error(new Exception("test message"));
+            Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             callback = Substitute.For<IMsalLogCallback>();

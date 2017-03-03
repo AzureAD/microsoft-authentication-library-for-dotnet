@@ -2,7 +2,7 @@ using System;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    public interface ILogger
+    internal interface ILogger
     {
         void Error(string message);
         void Warning(string message);
