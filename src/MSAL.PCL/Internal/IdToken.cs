@@ -70,6 +70,8 @@ namespace Microsoft.Identity.Client.Internal
 
         [DataMember(Name = IdTokenClaim.HomeObjectId, IsRequired = false)]
         public string HomeObjectId { get; set; }
+        
+        private static readonly MsalLogger MsalLogger = new MsalLogger();
 
         public static IdToken Parse(string idToken)
         {

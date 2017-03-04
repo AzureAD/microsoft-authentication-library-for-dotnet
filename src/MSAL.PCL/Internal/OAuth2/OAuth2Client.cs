@@ -28,11 +28,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.Http;
 using Microsoft.Identity.Client.Internal.Instance;
@@ -133,7 +131,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                 serviceEx = new MsalServiceException(MsalError.Unknown, response.Body);
             }
 
-            MsalLogger.Error(serviceEx);
+            new MsalLogger(requestContext).Error(serviceEx);
             throw serviceEx;
         }
 
@@ -173,7 +171,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                     string correlationIdHeader = headers[trimmedKey].Trim();
                     if (!string.Equals(correlationIdHeader, requestContext.CorrelationId))
                     {
-                        MsalLogger.Warning(string.Format(CultureInfo.InvariantCulture,
+                        new MsalLogger(requestContext).Warning(string.Format(CultureInfo.InvariantCulture,
                                 "Returned correlation id '{0}' does not match the sent correlation id '{1}'",
                                 correlationIdHeader, requestContext.CorrelationId));
                     }

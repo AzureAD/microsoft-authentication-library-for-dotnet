@@ -36,6 +36,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private RefreshTokenCacheItem _refreshTokenItem;
 
+        private static readonly MsalLogger MsalLogger = new MsalLogger();
+
         public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, bool forceRefresh)
             : base(authenticationRequestParameters)
         {

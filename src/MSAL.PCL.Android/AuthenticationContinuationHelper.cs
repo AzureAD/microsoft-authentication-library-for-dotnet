@@ -36,11 +36,13 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public static class AuthenticationContinuationHelper
     {
+        private static readonly MsalLogger Logger = new MsalLogger();
+
         /// <summary>
         /// </summary>
         public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
-            MsalLogger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
+            Logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
             AuthorizationResult authorizationResult = null;
 
             switch ((int) resultCode)

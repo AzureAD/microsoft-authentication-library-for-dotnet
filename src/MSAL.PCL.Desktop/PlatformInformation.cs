@@ -37,6 +37,8 @@ namespace Microsoft.Identity.Client
 {
     internal class PlatformInformation : PlatformInformationBase
     {
+        private static readonly MsalLogger Logger = new MsalLogger();
+
         public override string GetProductName()
         {
             return "MSAL.Desktop";
@@ -104,6 +106,7 @@ namespace Microsoft.Identity.Client
         public override bool IsDomainJoined()
         {
             bool returnValue = false;
+
             try
             {
                 NativeMethods.NetJoinStatus status;
@@ -119,7 +122,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                MsalLogger.Warning(ex.Message);
+                Logger.Warning(ex.Message);
                 // ignore the exception as the result is already set to false;
             }
 
@@ -169,7 +172,7 @@ namespace Microsoft.Identity.Client
                 }
                 catch (Exception ex)
                 {
-                    MsalLogger.Warning(ex.Message);
+                    Logger.Warning(ex.Message);
                     return "Unknown";
                 }
             }

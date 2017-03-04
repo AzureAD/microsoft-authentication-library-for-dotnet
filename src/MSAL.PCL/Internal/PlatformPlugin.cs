@@ -105,16 +105,16 @@ namespace Microsoft.Identity.Client.Internal
         {
             switch (logLevel)
             {
-                case MsalLogger.LogLevel.Error:
+                case Client.MsalLogger.LogLevel.Error:
                     Logger.Error(formattedMessage);
                     break;
-                case MsalLogger.LogLevel.Warning:
+                case Client.MsalLogger.LogLevel.Warning:
                     Logger.Warning(formattedMessage);
                     break;
-                case MsalLogger.LogLevel.Info:
+                case Client.MsalLogger.LogLevel.Info:
                     Logger.Information(formattedMessage);
                     break;
-                case MsalLogger.LogLevel.Verbose:
+                case Client.MsalLogger.LogLevel.Verbose:
                     Logger.Verbose(formattedMessage);
                     break;
             }

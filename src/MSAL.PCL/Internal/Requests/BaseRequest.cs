@@ -55,12 +55,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected bool StoreToCache { get; set; }
 
+        private MsalLogger MsalLogger { get; set; }
+
         protected BaseRequest(AuthenticationRequestParameters authenticationRequestParameters)
         {
             this.Authority = authenticationRequestParameters.Authority;
             this.RequestContext = authenticationRequestParameters.RequestContext;
             this.TokenCache = authenticationRequestParameters.TokenCache;
-
+            this.MsalLogger = new MsalLogger(RequestContext);
+           
             MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
                     "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
                     Authority.CanonicalAuthority, authenticationRequestParameters.Scope.AsSingleString(),

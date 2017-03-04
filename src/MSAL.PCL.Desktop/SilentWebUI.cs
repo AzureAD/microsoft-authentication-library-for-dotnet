@@ -34,6 +34,8 @@ namespace Microsoft.Identity.Client
 {
     internal class SilentWebUI : WebUI, IDisposable
     {
+        private static readonly MsalLogger Logger = new MsalLogger();
+
         /// <summary>
         /// This is how long we allow between completed navigations.
         /// </summary>
@@ -91,7 +93,7 @@ namespace Microsoft.Identity.Client
                 bool completedNormally = uiThread.Join(navigationOverallTimeout > 0 ? (int) navigationOverallTimeout : 0);
                 if (!completedNormally)
                 {
-                    MsalLogger.Info("Silent login thread did not complete on time.");
+                    Logger.Info("Silent login thread did not complete on time.");
 
                     // The invisible dialog has failed to complete in the allotted time.
                     // Attempt a graceful shutdown.
@@ -129,7 +131,7 @@ namespace Microsoft.Identity.Client
                     }
                     catch (Exception e)
                     {
-                        MsalLogger.Error(e);
+                        Logger.Error(e);
                         // Catch all exceptions to transfer them to the original calling thread.
                         this.uiException = e;
                     }

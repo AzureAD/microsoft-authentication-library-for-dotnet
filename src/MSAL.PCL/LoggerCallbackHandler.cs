@@ -28,28 +28,6 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// LogLevel
-    /// </summary>
-    /*public enum LogLevel
-    {
-        /// <summary>
-        /// </summary>
-        Information,
-
-        /// <summary>
-        /// </summary>
-        Verbose,
-
-        /// <summary>
-        /// </summary>
-        Warning,
-
-        /// <summary>
-        /// </summary>
-        Error
-    }*/
-
-    /// <summary>
     /// </summary>
     public interface IMsalLogCallback
     {

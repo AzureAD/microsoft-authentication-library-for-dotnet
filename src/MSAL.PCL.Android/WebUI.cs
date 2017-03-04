@@ -39,6 +39,7 @@ namespace Microsoft.Identity.Client
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class WebUI : IWebUI
     {
+        private static readonly MsalLogger Logger = new MsalLogger();
         private static SemaphoreSlim returnedUriReady;
         private static AuthorizationResult authorizationResult;
         private readonly PlatformParameters parameters;
@@ -60,6 +61,8 @@ namespace Microsoft.Identity.Client
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             returnedUriReady = new SemaphoreSlim(0);
+            
+            MsalLogger logger = new MsalLogger(requestContext);
 
             try
             {
@@ -71,7 +74,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                MsalLogger.Error(ex);
+                logger.Error(ex);
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
 
@@ -88,7 +91,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                MsalLogger.Info("No pending request for response from web ui.");
+                Logger.Info("No pending request for response from web ui.");
             }
         }
     }

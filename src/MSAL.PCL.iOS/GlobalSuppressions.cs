@@ -311,6 +311,9 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.Logger.#Verbose(System.String)")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.Logger.#Error(System.String)")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.Logger.#Verbose(System.Exception)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.TokenCachePlugin.#.cctor()")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2151:FieldsWithCriticalTypesShouldBeCriticalFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.TokenCachePlugin.#MsalLogger")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2151:FieldsWithCriticalTypesShouldBeCriticalFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.TokenCachePlugin.#Logger")]
 
 // This file is used by Code Analysis to maintain SuppressMessage 
 // attributes that are applied to this project.

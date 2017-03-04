@@ -40,8 +40,6 @@ namespace Microsoft.Identity.Client
     /// </Summary>
     public abstract class ClientApplicationBase
     {
-        private Guid _correlationId;
-
         /// <Summary>
         /// DefaultAuthority
         /// </Summary>
@@ -52,10 +50,10 @@ namespace Microsoft.Identity.Client
         /// </Summary>
         static ClientApplicationBase()
         {
-            MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
-                "MSAL {0} with assembly version '{1}', file version '{2}' and information version '{3}'" +
-                "is running...", PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
-                MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
+            new MsalLogger().Info(string.Format(CultureInfo.InvariantCulture,
+                   "MSAL {0} with assembly version '{1}', file version '{2}' and information version '{3}'" +
+                   "is running...", PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
+                   MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
         }
 
         /// <Summary>
@@ -97,20 +95,17 @@ namespace Microsoft.Identity.Client
         /// Gets or sets correlation Id which would be sent to the service with the next request.
         /// Correlation Id is to be used for diagnostics purposes.
         /// </summary>
-        public Guid CorrelationId
-        {
-            get { return _correlationId; }
-            set
-            {
-                _correlationId = value;
-                MsalLogger.CorrelationId = value;
-            }
-        }
+        public Guid CorrelationId { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether address validation is ON or OFF.
         /// </summary>
         public bool ValidateAuthority { get; set; }
+
+        /// <summary>
+        /// Logging object.
+        /// </summary>
+        private MsalLogger MsalLogger { get; } = new MsalLogger();
 
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the signed in users.

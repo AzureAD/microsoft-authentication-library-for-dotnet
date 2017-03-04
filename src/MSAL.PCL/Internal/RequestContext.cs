@@ -34,8 +34,10 @@ namespace Microsoft.Identity.Client.Internal
         public RequestContext(Guid correlationId)
         {
             this.CorrelationId = correlationId.ToString();
+            this.MsalLogger = new MsalLogger(correlationId);
         }
 
         public string CorrelationId { get; }
+        public MsalLogger MsalLogger { get; set; }
     }
 }

@@ -40,6 +40,8 @@ namespace Microsoft.Identity.Client
 {
     internal class PlatformInformation : PlatformInformationBase
     {
+        private static readonly MsalLogger Logger = new MsalLogger();
+
         public override string GetProductName()
         {
             return "MSAL.WinRT";
@@ -65,7 +67,7 @@ namespace Microsoft.Identity.Client
             }
             catch (UnauthorizedAccessException ex)
             {
-                MsalLogger.Error(ex);
+                Logger.Error(ex);
                 throw new MsalException(MsalErrorEx.UnauthorizedUserInformationAccess,
                     MsalErrorMessageEx.UnauthorizedUserInformationAccess, ex);
             }
@@ -91,12 +93,14 @@ namespace Microsoft.Identity.Client
 
         public override async Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
+            MsalLogger logger = new MsalLogger(requestContext);
+
             if (!UserInformation.NameAccessAllowed)
             {
                 // The access is not allowed and we cannot determine whether this is a local user or not. So, we do NOT add form auth parameter.
                 // This is the case where we can advise customers to add extra query parameter if they want.
 
-                MsalLogger.Info("Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.");
+                logger.Info("Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.");
                 return false;
             }
 
@@ -106,8 +110,8 @@ namespace Microsoft.Identity.Client
             }
             catch (UnauthorizedAccessException ae)
             {
-                MsalLogger.Warning(ae.Message);
-                MsalLogger.Info("Cannot try Windows Integrated Auth due to lack of Enterprise capability.");
+                logger.Warning(ae.Message);
+                logger.Info("Cannot try Windows Integrated Auth due to lack of Enterprise capability.");
                 // This mostly means Enterprise capability is missing, so WIA cannot be used and
                 // we return true to add form auth parameter in the caller.
                 return true;
@@ -121,10 +125,12 @@ namespace Microsoft.Identity.Client
 
         public override Uri ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
         {
+            MsalLogger logger = new MsalLogger(requestContext);
+
             if (redirectUri == null)
             {
                 redirectUri = Constants.SsoPlaceHolderUri;
-                MsalLogger.Verbose("ms-app redirect Uri is used");
+                logger.Verbose("ms-app redirect Uri is used");
             }
 
             return redirectUri;
@@ -171,7 +177,7 @@ namespace Microsoft.Identity.Client
                 }
                 catch (Exception ex)
                 {
-                    MsalLogger.Warning(ex.Message);
+                    Logger.Warning(ex.Message);
                     return "Unknown";
                 }
             }

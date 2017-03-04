@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Foundation;
@@ -61,7 +60,8 @@ namespace Microsoft.Identity.Client
 
             //dismiss safariviewcontroller
             this.parameters.CallerViewController.InvokeOnMainThread(() =>
-            { safariViewController.DismissViewController(false, null);
+            {
+                safariViewController.DismissViewController(false, null);
             });
 
             return authorizationResult;
@@ -78,6 +78,8 @@ namespace Microsoft.Identity.Client
 
         public void Authenticate(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
+            MsalLogger logger = new MsalLogger(requestContext);
+
             try
             {
                 safariViewController = new SFSafariViewController(new NSUrl(authorizationUri.AbsoluteUri), false);
@@ -89,7 +91,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                MsalLogger.Error(ex);
+                logger.Error(ex);
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
         }
