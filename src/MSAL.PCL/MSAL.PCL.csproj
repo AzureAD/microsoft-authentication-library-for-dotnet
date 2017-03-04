@@ -53,8 +53,6 @@
     <None Include="..\..\build\MSAL.snk">
       <Link>MSAL.snk</Link>
     </None>
-    <None Include="ClassDiagram1.cd" />
-    <None Include="ClassDiagram2.cd" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\MSAL.Common\CommonAssemblyInfo.cs">
