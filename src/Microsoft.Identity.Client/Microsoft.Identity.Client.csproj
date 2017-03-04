@@ -24,11 +24,6 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
-    <!-- Explicitly Use Latest Build Tools -->
-    <AndroidSdkBuildToolsVersion>25.0.2</AndroidSdkBuildToolsVersion>
-    <NoWarn>$(NoWarn);8002</NoWarn>
-  </PropertyGroup>
   <ItemGroup>
     <ProjectCapability Include="ShowFilesOutsideOfProject" />
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
@@ -38,15 +33,13 @@
     <Compile Include="..\MSAL.PCL\**\*.cs" Exclude="..\MSAL.PCL\Properties\**\*.cs;..\MSAL.PCL\MsalOption.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.0-rc4-*">
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>    
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.0-rc4-*" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'uap10.0' ">
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
-    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.0.2" />
-    <PackageReference Include="System.Xml.XDocument" Version="4.0.11" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.1.0" Condition="'$(TargetFramework)' != 'netstandard1.1'" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
+    <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.0" Condition="'$(TargetFramework)' != 'netstandard1.1'" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System" />
