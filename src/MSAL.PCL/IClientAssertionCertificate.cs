@@ -28,7 +28,7 @@
 namespace Microsoft.Identity.Client
 {
     /// <Summary>
-    /// IClientAssertionCertificate
+    /// Interface for platform specific implementation to consume x509 certificate.
     /// </Summary>
     public interface IClientAssertionCertificate
     {

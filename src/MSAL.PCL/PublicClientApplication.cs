@@ -35,7 +35,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Native applications (desktop/phone/iOS/Android).
+    /// Class to be used for native applications (Desktop/UWP/iOS/Android).
     /// </summary>
     public sealed class PublicClientApplication : ClientApplicationBase
     {
@@ -48,14 +48,18 @@ namespace Microsoft.Identity.Client
         public IPlatformParameters PlatformParameters { get; set; }
 
         /// <summary>
-        /// Default consutructor of the application.
+        /// Default consutructor of the application. It will use https://login.microsoftonline.com/common as the default authority.
         /// </summary>
+        /// <param name="clientId">Client id of the application</param>
         public PublicClientApplication(string clientId) : this(clientId, DefaultAuthority)
         {
         }
 
         /// <summary>
+        /// Default consutructor of the application.
         /// </summary>
+        /// <param name="clientId">Client id of the application</param>
+        /// <param name="authority">Default authority to be used for the application</param>
         public PublicClientApplication(string clientId, string authority)
             : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
         {
@@ -63,9 +67,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope"></param>
-        /// <returns></returns>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
@@ -76,10 +81,11 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="loginHint"></param>
-        /// <returns></returns>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
+        /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string loginHint)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
@@ -90,12 +96,13 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="loginHint"></param>
-        /// <param name="extraQueryParameters"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
+        /// <param name="options">Enumeration to control UI behavior.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string loginHint,
             UiOptions options, string extraQueryParameters)
         {
@@ -107,12 +114,13 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="user"></param>
-        /// <param name="options"></param>
-        /// <param name="extraQueryParameters"></param>
-        /// <returns></returns>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
+        /// <param name="options">Enumeration to control UI behavior.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User user,
             UiOptions options, string extraQueryParameters)
         {
@@ -124,14 +132,15 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="loginHint"></param>
-        /// <param name="extraQueryParameters"></param>
-        /// <param name="options"></param>
-        /// <param name="additionalScope"></param>
-        /// <param name="authority"></param>
-        /// <returns></returns>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
+        /// <param name="options">Enumeration to control UI behavior.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
+        /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string loginHint,
             UiOptions options, string extraQueryParameters, string[] additionalScope, string authority)
         {
@@ -143,14 +152,15 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="user"></param>
-        /// <param name="options"></param>
-        /// <param name="extraQueryParameters"></param>
-        /// <param name="additionalScope"></param>
-        /// <param name="authority"></param>
-        /// <returns></returns>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
+        /// <param name="options">Enumeration to control UI behavior.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
+        /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User user,
             UiOptions options, string extraQueryParameters, string[] additionalScope, string authority)
         {
@@ -167,8 +177,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// .NET specific method for intergrated auth. To support Xamarin, we would need to move these to platform specific
-        /// libraries.
+        /// .NET specific method for intergrated auth.
         /// </summary>
         /// <param name="scope"></param>
         /// <returns></returns>

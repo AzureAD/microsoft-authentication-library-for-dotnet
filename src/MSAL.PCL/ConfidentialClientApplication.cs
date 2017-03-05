@@ -34,17 +34,18 @@ using Microsoft.Identity.Client.Internal.Requests;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// ConfidentialClientApplication
+    /// Class to be used for confidential client applications like Web Apps/API.
     /// </summary>
     public sealed class ConfidentialClientApplication : ClientApplicationBase
     {
         /// <summary>
+        /// Constructor to create instance of the class
         /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="redirectUri"></param>
-        /// <param name="clientCredential"></param>
-        /// <param name="userTokenCache"></param>
-        /// <param name="appTokenCache"></param>
+        /// <param name="clientId">Client Id of the application. REQUIRED.</param>
+        /// <param name="redirectUri">Redirect URI of the application. REQUIRED.</param>
+        /// <param name="clientCredential">Client dredential for the application. Could be a certificate or a secret. REQUIRED.</param>
+        /// <param name="userTokenCache">Token cache for saving user tokens. OPTIONAL.</param>
+        /// <param name="appTokenCache">Token cache for saving application/client tokens. OPTIONAL.</param>
         public ConfidentialClientApplication(string clientId, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(clientId, DefaultAuthority, redirectUri, clientCredential, userTokenCache, appTokenCache)
@@ -52,13 +53,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Constructor to create instance of the class
         /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="authority"></param>
-        /// <param name="redirectUri"></param>
-        /// <param name="clientCredential"></param>
-        /// <param name="userTokenCache"></param>
-        /// <param name="appTokenCache"></param>
+        /// <param name="clientId">Client Id of the application. REQUIRED.</param>
+        /// <param name="authority">Authority to be used for the client application. REQUIRED.</param>
+        /// <param name="redirectUri">Redirect URI of the application. REQUIRED.</param>
+        /// <param name="clientCredential">Client dredential for the application. Could be a certificate or a secret. REQUIRED.</param>
+        /// <param name="userTokenCache">Token cache for saving user tokens. OPTIONAL.</param>
+        /// <param name="appTokenCache">Token cache for saving application/client tokens. OPTIONAL.</param>
         public ConfidentialClientApplication(string clientId, string authority, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache) : base(authority, clientId, redirectUri, true)
         {
@@ -69,18 +71,11 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// ClientCredential
+        /// Acquires token using On-Behalf-Of flow.
         /// </summary>
-        public ClientCredential ClientCredential { get; }
-
-        /// <summary>
-        /// AppTokenCache
-        /// </summary>
-        public TokenCache AppTokenCache { get; }
-
-        /// <summary>
-        /// AcquireTokenOnBehalfOfAsync
-        /// </summary>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
+        /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(string[] scope, UserAssertion userAssertion)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
@@ -91,8 +86,12 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// AcquireTokenOnBehalfOfAsync
+        /// Acquires token using On-Behalf-Of flow.
         /// </summary>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
+        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
+        /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(string[] scope, UserAssertion userAssertion,
             string authority)
         {
@@ -104,8 +103,12 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// AcquireTokenByAuthorizationCodeAsync
+        /// Acquires security token from the authority using authorization code previously received.
+        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="ClientApplicationBase.AcquireTokenSilentAsync(string[], Microsoft.Identity.Client.User)"/>.
         /// </summary>
+        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, string[] scope)
         {
             return
@@ -114,14 +117,79 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// AcquireTokenForClient
+        /// Acquires token from the service for the confidential client. This method attempts to look up valid access token in the cache.
         /// </summary>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <returns>Authentication result containing application token for the requested scopes</returns>
         public async Task<AuthenticationResult> AcquireTokenForClientAsync(string[] scope)
         {
             return
                 await
                     this.AcquireTokenForClientCommonAsync(scope).ConfigureAwait(false);
         }
+
+        /// <summary>
+        /// Acquires token from the service for the confidential client. This method attempts to look up valid access token in the cache.
+        /// </summary>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using client credentials</param>
+        /// <returns>Authentication result containing application token for the requested scopes</returns>
+        public async Task<AuthenticationResult> AcquireTokenForClientAsync(string[] scope, bool forceRefresh)
+        {
+            return
+                await
+                    this.AcquireTokenForClientCommonAsync(scope).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Gets URL of the authorize endpoint including the query parameters.
+        /// </summary>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
+        public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string loginHint,
+            string extraQueryParameters)
+        {
+            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
+            var requestParameters =
+                this.CreateRequestParameters(authority, scope, null, this.UserTokenCache);
+            requestParameters.ClientKey = new ClientKey(this.ClientId);
+            requestParameters.ExtraQueryParameters = extraQueryParameters;
+
+            var handler =
+                new InteractiveRequest(requestParameters, null, loginHint, null, null);
+            return await handler.CreateAuthorizationUriAsync(CreateCallState(CorrelationId)).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Gets URL of the authorize endpoint including the query parameters.
+        /// </summary>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
+        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
+        public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string redirectUri, string loginHint,
+            string extraQueryParameters, string[] additionalScope, string authority)
+        {
+            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
+            var requestParameters = this.CreateRequestParameters(authorityInstance, scope, null,
+                this.UserTokenCache);
+            requestParameters.RedirectUri = new Uri(redirectUri);
+            requestParameters.ClientKey = new ClientKey(this.ClientId);
+            requestParameters.ExtraQueryParameters = extraQueryParameters;
+
+            var handler =
+                new InteractiveRequest(requestParameters, additionalScope, loginHint, null, null);
+            return await handler.CreateAuthorizationUriAsync(CreateCallState(CorrelationId)).ConfigureAwait(false);
+        }
+
+        internal ClientCredential ClientCredential { get; }
+
+        internal TokenCache AppTokenCache { get; }
 
         private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(string[] scope)
         {
@@ -151,52 +219,6 @@ namespace Microsoft.Identity.Client
             var handler =
                 new AuthorizationCodeRequest(requestParams);
             return await handler.RunAsync().ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Gets URL of the authorize endpoint including the query parameters.
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="loginHint"></param>
-        /// <param name="extraQueryParameters"></param>
-        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string loginHint,
-            string extraQueryParameters)
-        {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
-            var requestParameters =
-                this.CreateRequestParameters(authority, scope, null, this.UserTokenCache);
-            requestParameters.ClientKey = new ClientKey(this.ClientId);
-            requestParameters.ExtraQueryParameters = extraQueryParameters;
-
-            var handler =
-                new InteractiveRequest(requestParameters, null, loginHint, null, null);
-            return await handler.CreateAuthorizationUriAsync(CreateCallState(CorrelationId)).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Gets URL of the authorize endpoint including the query parameters.
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="redirectUri"></param>
-        /// <param name="loginHint"></param>
-        /// <param name="extraQueryParameters"></param>
-        /// <param name="additionalScope"></param>
-        /// <param name="authority"></param>
-        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string redirectUri, string loginHint,
-            string extraQueryParameters, string[] additionalScope, string authority)
-        {
-            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
-            var requestParameters = this.CreateRequestParameters(authorityInstance, scope, null,
-                this.UserTokenCache);
-            requestParameters.RedirectUri = new Uri(redirectUri);
-            requestParameters.ClientKey = new ClientKey(this.ClientId);
-            requestParameters.ExtraQueryParameters = extraQueryParameters;
-
-            var handler =
-                new InteractiveRequest(requestParameters, additionalScope, loginHint, null, null);
-            return await handler.CreateAuthorizationUriAsync(CreateCallState(CorrelationId)).ConfigureAwait(false);
         }
 
         internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope, User user, TokenCache cache)

@@ -30,21 +30,22 @@ using System;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Secret including client id and secret.
+    /// Meant to be used in confidential client applications. Allows developers to 
+    /// pass either client secret or client assertion certificate of their application.
     /// </summary>
     public sealed class ClientCredential
     {
         /// <summary>
-        /// Constructor to create Secret with client id and secret
+        /// Constructor provide client assertion certificate
         /// </summary>
-        /// <param name="certificate">Secret of the client requesting the token.</param>
+        /// <param name="certificate">certificate of the client requesting the token.</param>
         public ClientCredential(IClientAssertionCertificate certificate)
         {
             this.Certificate = certificate;
         }
 
         /// <summary>
-        /// Constructor to create Secret with client id and secret
+        /// Constructor to provide client secret
         /// </summary>
         /// <param name="secret">Secret of the client requesting the token.</param>
         public ClientCredential(string secret)

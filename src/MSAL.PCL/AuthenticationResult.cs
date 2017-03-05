@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Gets the AccessToken requested.
+        /// Gets the Access Token requested.
         /// </summary>
         public string Token => _accessTokenCacheItem.AccessToken;
 
@@ -64,8 +64,8 @@ namespace Microsoft.Identity.Client
         public string TenantId => _accessTokenCacheItem.TenantId;
 
         /// <summary>
-        /// Gets otherUser information including otherUser Id. Some elements in User might be null if not returned by the
-        /// service.
+        /// Gets User object. Some elements in User might be null if not returned by the
+        /// service. It can be passed back in some API overloads to identify which user should be used.
         /// </summary>
         public User User { get; internal set; }
 

@@ -34,8 +34,7 @@ using Microsoft.Identity.Client.Internal.Cache;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Contains information of a single user. This information is used for token cache lookup. Also if created with
-    /// userId, userId is sent to the service when login_hint is accepted.
+    /// Contains information of a single user. This information is used for token cache lookup and enforcing the user session on STS authorize endpont.
     /// </summary>
     [DataContract]
     public sealed class User
