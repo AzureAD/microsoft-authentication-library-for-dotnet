@@ -71,7 +71,6 @@ namespace Microsoft.Identity.Client
             }
 
             DisplayableId = idToken.PreferredUsername;
-            // TODO: home object id is returned in client info.
             HomeObjectId = idToken.HomeObjectId ?? UniqueId;
             Name = idToken.Name;
             IdentityProvider = idToken.Issuer;
