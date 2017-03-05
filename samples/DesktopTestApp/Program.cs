@@ -43,13 +43,13 @@ namespace DesktopTestApp
                 var task = GetTokenInteractiveAsync();
                 Task.WaitAll(task);
                 var result = task.Result;
-                Console.WriteLine(result.Token);
+                Console.WriteLine(result.AccessToken);
 
                 task = GetTokenSilentAsync(result.User);
                 Task.WaitAll(task);
                 result = task.Result;
 
-                Console.WriteLine(result.Token);
+                Console.WriteLine(result.AccessToken);
             }
             catch (AggregateException ae)
             {
@@ -114,7 +114,7 @@ namespace DesktopTestApp
             {
                 PublicClientApplication app = new PublicClientApplication(Sts.Authority, "<client_id>");
                 var result = await app.AcquireTokenWithIntegratedAuthAsync(Sts.ValidScope);
-                return result.Token;
+                return result.AccessToken;
             }
             catch (Exception ex)
             {

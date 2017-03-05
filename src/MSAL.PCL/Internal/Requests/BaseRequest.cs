@@ -147,8 +147,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (StoreToCache)
             {
-                this.TokenCache.SaveAccessAndRefreshToken(this.Authority.CanonicalAuthority,
-                    AuthenticationRequestParameters.ClientId, AuthenticationRequestParameters.UserAssertion?.AssertionHash, Response);
+                this.TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
             }
 
             return new AccessTokenCacheItem(this.Authority.CanonicalAuthority,
@@ -217,9 +216,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogReturnedToken(AuthenticationResult result)
         {
-            if (result.Token != null)
+            if (result.AccessToken != null)
             {
-                string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.Token);
+                string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.AccessToken);
 
                 PlatformPlugin.Logger.Information(this.RequestContext,
                     string.Format(CultureInfo.InvariantCulture,

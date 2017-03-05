@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client
             throw new NotImplementedException();
         }
 
-        public void DeleteToken(TokenCacheKey key)
+        public void DeleteAccessToken(TokenCacheKey key)
         {
             throw new NotImplementedException();
         }

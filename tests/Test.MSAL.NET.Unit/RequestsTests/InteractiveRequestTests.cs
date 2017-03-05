@@ -69,17 +69,23 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         public void NoCacheLookup()
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = new TokenCache(TestConstants.ClientId);
-            TokenCacheKey atKey = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId, TestConstants.HomeObjectId);
+            TokenCache cache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
 
             AccessTokenCacheItem atItem = new AccessTokenCacheItem()
             {
+                Authority = TestConstants.AuthorityHomeTenant,
+                ClientId = TestConstants.ClientId,
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId),
                 TokenType = "Bearer",
-                AccessToken = atKey.ToString(),
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
                 Scope = TestConstants.Scope
             };
+
+            TokenCacheKey atKey = atItem.GetTokenCacheKey();
+            atItem.AccessToken = atKey.ToString();
             _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
 
             MockWebUI ui = new MockWebUI()
@@ -122,8 +128,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Assert.IsNotNull(result);
             Assert.AreEqual(3, _tokenCachePlugin.TokenCacheDictionary.Count);
             Assert.AreEqual(1, cache.RefreshTokenCount);
-            Assert.AreEqual(2, cache.TokenCount);
-            Assert.AreEqual(result.Token, "some-access-token");
+            Assert.AreEqual(2, cache.AccessTokenCount);
+            Assert.AreEqual(result.AccessToken, "some-access-token");
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }

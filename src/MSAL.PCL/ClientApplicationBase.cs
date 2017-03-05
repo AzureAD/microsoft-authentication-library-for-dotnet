@@ -69,6 +69,10 @@ namespace Microsoft.Identity.Client
             this.ClientId = clientId;
             this.RedirectUri = redirectUri;
             this.ValidateAuthority = validateAuthority;
+            if (UserTokenCache != null)
+            {
+                this.UserTokenCache.ClientId = clientId;
+            }
         }
         
         /// <Summary>

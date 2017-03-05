@@ -65,7 +65,10 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         public void ConstructorTests()
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = new TokenCache(TestConstants.ClientId);
+            TokenCache cache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
@@ -108,7 +111,10 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         public void ExpiredTokenRefreshFlowTest()
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = new TokenCache(TestConstants.ClientId);
+            TokenCache cache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
             TokenCacheHelper.PopulateCache(_tokenCachePlugin);
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
@@ -142,7 +148,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Task<AuthenticationResult> task = request.RunAsync();
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
-            Assert.AreEqual("some-access-token", result.Token);
+            Assert.AreEqual("some-access-token", result.AccessToken);
             Assert.AreEqual("some-scope1 some-scope2", result.Scope.AsSingleString());
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -154,7 +160,10 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         public void SilentRefreshFailedNoCacheItemFoundTest()
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = new TokenCache(TestConstants.ClientId);
+            TokenCache cache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
 
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler

@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client
             TokenCacheDictionary[refreshTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(refreshTokenItem);
         }
 
-        public void DeleteToken(TokenCacheKey key)
+        public void DeleteAccessToken(TokenCacheKey key)
         {
             TokenCacheDictionary.Remove(key.ToString());
         }

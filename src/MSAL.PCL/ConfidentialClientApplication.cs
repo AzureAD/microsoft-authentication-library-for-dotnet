@@ -60,12 +60,17 @@ namespace Microsoft.Identity.Client
         /// <param name="userTokenCache"></param>
         /// <param name="appTokenCache"></param>
         public ConfidentialClientApplication(string clientId, string authority, string redirectUri,
-            ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache) : base(authority, clientId, redirectUri, true)
+            ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
+            : base(authority, clientId, redirectUri, true)
         {
             this.ClientCredential = clientCredential;
             this.UserTokenCache = userTokenCache;
             this.AppTokenCache = appTokenCache;
-            this.AppTokenCache.TokenCacheAccessor.TokenCachePlugin = PlatformPlugin.NewTokenCachePluginInstance;
+            if (AppTokenCache != null)
+            {
+                this.AppTokenCache.ClientId = clientId;
+                this.AppTokenCache.TokenCacheAccessor.TokenCachePlugin = PlatformPlugin.NewTokenCachePluginInstance;
+            }
         }
 
         /// <summary>

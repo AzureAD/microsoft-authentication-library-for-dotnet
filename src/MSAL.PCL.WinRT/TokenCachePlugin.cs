@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client
             _refreshTokenContainer.Values[hashed] = composite;
         }
 
-        public void DeleteToken(TokenCacheKey key)
+        public void DeleteAccessToken(TokenCacheKey key)
         {
             CryptographyHelper helper = new CryptographyHelper();
             string hashed = helper.CreateSha256Hash(key.ToString());

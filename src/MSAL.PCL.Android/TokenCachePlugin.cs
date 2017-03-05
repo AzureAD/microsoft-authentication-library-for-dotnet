@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client
             editor.Apply();
         }
 
-        public void DeleteToken(TokenCacheKey key)
+        public void DeleteAccessToken(TokenCacheKey key)
         {
             Delete(key.ToString(), _accessTokenSharedPreference.Edit());
         }

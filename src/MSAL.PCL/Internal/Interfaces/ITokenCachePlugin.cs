@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Interfaces
 
         void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem);
 
-        void DeleteToken(TokenCacheKey key);
+        void DeleteAccessToken(TokenCacheKey key);
 
         void DeleteRefreshToken(TokenCacheKey key);
     }

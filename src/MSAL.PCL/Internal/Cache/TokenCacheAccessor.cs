@@ -77,9 +77,9 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return matchedRefreshTokens;
         }
 
-        public void DeleteToken(AccessTokenCacheItem accessToken‪Item)
+        public void DeleteAccessToken(AccessTokenCacheItem accessToken‪Item)
         {
-            TokenCachePlugin.DeleteToken(accessToken‪Item.GetTokenCacheKey());
+            TokenCachePlugin.DeleteAccessToken(accessToken‪Item.GetTokenCacheKey());
         }
 
         public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item.GetTokenCacheKey());
         }
 
-        public IList<AccessTokenCacheItem> GetAllAccessTokens()
+        public IList<AccessTokenCacheItem> GetAllAccessTokens(string clientId)
         {
             ICollection<string> allTokensAsString = TokenCachePlugin.GetAllAccessTokens();
             IList<AccessTokenCacheItem> returnList = new List<AccessTokenCacheItem>();
@@ -96,10 +96,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 returnList.Add(JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(token));
             }
 
-            return returnList;
+            return returnList.Where(t => t.ClientId.Equals(clientId)).ToList();
         }
         
-        public IList<RefreshTokenCacheItem> GetAllRefreshTokens()
+        public IList<RefreshTokenCacheItem> GetAllRefreshTokens(string clientId)
         {
             ICollection<string> allTokensAsString = TokenCachePlugin.AllRefreshTokens();
             IList<RefreshTokenCacheItem> returnList = new List<RefreshTokenCacheItem>();
@@ -108,12 +108,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 returnList.Add(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(token));
             }
 
-            return returnList;
-        }
-        
-        public IList<RefreshTokenCacheItem> GetAllRefreshTokensForGivenClientId(string clientId)
-        {
-            return this.GetAllRefreshTokens().Where(t => t.ClientId.Equals(clientId)).ToList();
+            return returnList.Where(t => t.ClientId.Equals(clientId)).ToList();
         }
     }
 }

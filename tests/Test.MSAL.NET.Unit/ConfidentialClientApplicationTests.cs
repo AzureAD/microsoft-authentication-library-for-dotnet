@@ -63,7 +63,7 @@ namespace Test.MSAL.NET.Unit
         {
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
                 TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
-                new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId));
+                new TokenCache(), new TokenCache());
             Assert.IsNotNull(app);
             Assert.IsNotNull(app.UserTokenCache);
             Assert.IsNotNull(app.AppTokenCache);
@@ -80,8 +80,8 @@ namespace Test.MSAL.NET.Unit
 
             app = new ConfidentialClientApplication(TestConstants.ClientId,
                 TestConstants.AuthorityGuestTenant,
-                TestConstants.RedirectUri, new ClientCredential("secret"), new TokenCache(TestConstants.ClientId),
-                new TokenCache(TestConstants.ClientId));
+                TestConstants.RedirectUri, new ClientCredential("secret"), new TokenCache(),
+                new TokenCache());
             Assert.AreEqual(TestConstants.AuthorityGuestTenant, app.Authority);
         }
 
@@ -91,7 +91,7 @@ namespace Test.MSAL.NET.Unit
         {
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
                 TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
-                new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId))
+                new TokenCache(), new TokenCache())
             {
                 ValidateAuthority = false
             };
@@ -112,15 +112,15 @@ namespace Test.MSAL.NET.Unit
             Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
-            Assert.IsNotNull("header.payload.signature", result.Token);
+            Assert.IsNotNull("header.payload.signature", result.AccessToken);
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
 
             //make sure user token cache is empty
-            Assert.AreEqual(0, app.UserTokenCache.TokenCount);
+            Assert.AreEqual(0, app.UserTokenCache.AccessTokenCount);
             Assert.AreEqual(0, app.UserTokenCache.RefreshTokenCount);
 
             //check app token cache count to be 1
-            Assert.AreEqual(1, app.AppTokenCache.TokenCount);
+            Assert.AreEqual(1, app.AppTokenCache.AccessTokenCount);
             Assert.AreEqual(0, app.AppTokenCache.RefreshTokenCount); //no refresh tokens are returned
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -133,8 +133,8 @@ namespace Test.MSAL.NET.Unit
             ClientCredential cc =
                 new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid_cert.pfx", "password")));
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
-                TestConstants.RedirectUri, cc, new TokenCache(TestConstants.ClientId),
-                new TokenCache(TestConstants.ClientId))
+                TestConstants.RedirectUri, cc, new TokenCache(),
+                new TokenCache())
             {
                 ValidateAuthority = false
             };
@@ -161,15 +161,15 @@ namespace Test.MSAL.NET.Unit
             Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
-            Assert.IsNotNull("header.payload.signature", result.Token);
+            Assert.IsNotNull("header.payload.signature", result.AccessToken);
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
 
             //make sure user token cache is empty
-            Assert.AreEqual(0, app.UserTokenCache.TokenCount);
+            Assert.AreEqual(0, app.UserTokenCache.AccessTokenCount);
             Assert.AreEqual(0, app.UserTokenCache.RefreshTokenCount);
 
             //check app token cache count to be 1
-            Assert.AreEqual(1, app.AppTokenCache.TokenCount);
+            Assert.AreEqual(1, app.AppTokenCache.AccessTokenCount);
             Assert.AreEqual(0, app.AppTokenCache.RefreshTokenCount); //no refresh tokens are returned
 
             //assert client credential
@@ -195,7 +195,7 @@ namespace Test.MSAL.NET.Unit
         {
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
                 TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
-                new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId))
+                new TokenCache(), new TokenCache())
             {
                 ValidateAuthority = false
             };
@@ -228,7 +228,7 @@ namespace Test.MSAL.NET.Unit
 
             app = new ConfidentialClientApplication(TestConstants.ClientId,
                 TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
-                new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId))
+                new TokenCache(), new TokenCache())
             {
                 ValidateAuthority = false
             };
@@ -264,7 +264,7 @@ namespace Test.MSAL.NET.Unit
         {
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
                 TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
-                new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId))
+                new TokenCache(), new TokenCache())
             {
                 ValidateAuthority = false
             };
@@ -302,7 +302,7 @@ namespace Test.MSAL.NET.Unit
             ConfidentialClientApplication app =
                 new ConfidentialClientApplication(TestConstants.ClientId, TestConstants.AuthorityGuestTenant,
                     TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
-                    new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId))
+                    new TokenCache(), new TokenCache())
                 {ValidateAuthority = false};
 
             //add mock response for tenant endpoint discovery
