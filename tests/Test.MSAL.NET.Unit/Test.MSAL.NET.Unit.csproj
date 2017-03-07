@@ -80,6 +80,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="HttpTests\HttpClientFactoryTests.cs" />
     <Compile Include="InstanceTests\AuthorityTests.cs" />
     <Compile Include="HttpTests\MsalHttpRequestTests.cs" />
     <Compile Include="RequestsTests\OboFlowTests.cs" />

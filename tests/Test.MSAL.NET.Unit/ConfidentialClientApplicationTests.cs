@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -336,6 +337,32 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual("none", qp["prompt"]);
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        [ExpectedException(typeof(HttpRequestException), "Cannot write more bytes to the buffer than the configured maximum buffer size: 1048576.")]
+        public async Task HttpRequestExceptionIsNotSuppressed()
+        {
+            var app = new ConfidentialClientApplication(TestConstants.ClientId,
+                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
+                new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId))
+            {
+                ValidateAuthority = false
+            };
+
+            // add mock response bigger than 1MB for Http Client
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(new string(new char[1048577]))
+                }
+            });
+
+            await app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
         }
     }
 }
