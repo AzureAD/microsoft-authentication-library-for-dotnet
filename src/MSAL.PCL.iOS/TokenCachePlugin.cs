@@ -114,22 +114,22 @@ namespace Microsoft.Identity.Client
             throw new NotImplementedException();
         }
 
-        public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
+        public void SaveAccessToken(string cacheKey, string accessTokenItem)
         {
             throw new NotImplementedException();
         }
 
-        public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        public void SaveRefreshToken(string cacheKey, string refreshTokenItem)
         {
             throw new NotImplementedException();
         }
 
-        public void DeleteAccessToken(TokenCacheKey key)
+        public void DeleteAccessToken(string cacheKey)
         {
             throw new NotImplementedException();
         }
 
-        public void DeleteRefreshToken(TokenCacheKey key)
+        public void DeleteRefreshToken(string cacheKey)
         {
             throw new NotImplementedException();
         }

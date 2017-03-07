@@ -35,12 +35,12 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
         {
-            TokenCachePlugin.SaveAccessToken(accessTokenItem);
+            TokenCachePlugin.SaveAccessToken(accessTokenItem.GetTokenCacheKey().ToString(), JsonHelper.SerializeToJson(accessTokenItem));
         }
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
         {
-            TokenCachePlugin.SaveRefreshToken(refreshTokenItem);
+            TokenCachePlugin.SaveRefreshToken(refreshTokenItem.GetTokenCacheKey().ToString(), JsonHelper.SerializeToJson(refreshTokenItem));
         }
         
         public IList<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
@@ -63,12 +63,12 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public void DeleteAccessToken(AccessTokenCacheItem accessToken‪Item)
         {
-            TokenCachePlugin.DeleteAccessToken(accessToken‪Item.GetTokenCacheKey());
+            TokenCachePlugin.DeleteAccessToken(accessToken‪Item.GetTokenCacheKey().ToString());
         }
 
         public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
         {
-            TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item.GetTokenCacheKey());
+            TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item.GetTokenCacheKey().ToString());
         }
 
         public IList<AccessTokenCacheItem> GetAllAccessTokens(string clientId)

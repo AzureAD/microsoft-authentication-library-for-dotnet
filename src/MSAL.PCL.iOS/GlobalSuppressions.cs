@@ -300,6 +300,10 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.TokenCachePlugin.#DeleteRefreshToken(Microsoft.Identity.Client.Internal.Cache.TokenCacheKey)")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.TokenCachePlugin.#SaveAccessToken(Microsoft.Identity.Client.Internal.Cache.AccessTokenCacheItem)")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.TokenCachePlugin.#SaveAccessToken(Microsoft.Identity.Client.Internal.Cache.AccessTokenCacheItem)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.TokenCachePlugin.#SaveAccessToken(System.String,System.String)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.TokenCachePlugin.#SaveRefreshToken(System.String,System.String)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.TokenCachePlugin.#DeleteAccessToken(System.String)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member", Target = "Microsoft.Identity.Client.TokenCachePlugin.#DeleteRefreshToken(System.String)")]
 
 // This file is used by Code Analysis to maintain SuppressMessage 
 // attributes that are applied to this project.
