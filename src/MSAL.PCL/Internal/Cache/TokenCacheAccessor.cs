@@ -87,9 +87,14 @@ namespace Microsoft.Identity.Client.Internal.Cache
             TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item.GetTokenCacheKey());
         }
 
+        public ICollection<string> GetAllAccessTokensAsString()
+        {
+            return TokenCachePlugin.GetAllAccessTokens();
+        }
+
         public IList<AccessTokenCacheItem> GetAllAccessTokens()
         {
-            ICollection<string> allTokensAsString = TokenCachePlugin.GetAllAccessTokens();
+            ICollection<string> allTokensAsString = this.GetAllAccessTokensAsString();
             IList<AccessTokenCacheItem> returnList = new List<AccessTokenCacheItem>();
             foreach (var token in allTokensAsString)
             {
@@ -98,10 +103,15 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
             return returnList;
         }
-        
+
+        public ICollection<string> GetAllRefreshTokensAsString()
+        {
+            return TokenCachePlugin.AllRefreshTokens();
+        }
+
         public IList<RefreshTokenCacheItem> GetAllRefreshTokens()
         {
-            ICollection<string> allTokensAsString = TokenCachePlugin.AllRefreshTokens();
+            ICollection<string> allTokensAsString = GetAllRefreshTokensAsString();
             IList<RefreshTokenCacheItem> returnList = new List<RefreshTokenCacheItem>();
             foreach (var token in allTokensAsString)
             {

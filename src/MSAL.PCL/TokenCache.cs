@@ -348,27 +348,6 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal ICollection<AccessTokenCacheItem> GetAllTokens()
-        {
-            lock (lockObject)
-            {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-                {
-                    TokenCache = this,
-                    ClientId = _clientId,
-                    User = null
-                };
-
-                OnBeforeAccess(args);
-                IList<AccessTokenCacheItem> allTokens =
-                    TokenCacheAccessor.GetAllAccessTokens();
-                OnAfterAccess(args);
-
-                return new ReadOnlyCollection<AccessTokenCacheItem>(allTokens);
-            }
-        }
-
-
         internal void SignOut(User user)
         {
             lock (lockObject)
@@ -403,7 +382,30 @@ namespace Microsoft.Identity.Client
                 }
 
                 OnAfterAccess(args);
-                
+            }
+        }
+
+        internal ICollection<string> GetAllAccessTokenCacheItems()
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (lockObject)
+            {
+                ICollection<string> allTokens =
+                    TokenCacheAccessor.GetAllAccessTokensAsString();
+                return allTokens;
+            }
+        }
+
+        internal ICollection<string> GetAllRefreshTokenCacheItems()
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (lockObject)
+            {
+                ICollection<string> allTokens =
+                    TokenCacheAccessor.GetAllRefreshTokensAsString();
+                return allTokens;
             }
         }
     }

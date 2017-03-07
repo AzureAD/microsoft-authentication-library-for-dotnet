@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -44,27 +45,44 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="tokencache"></param>
+        /// <param name="tokenCache"></param>
         /// <param name="state"></param>
-        public static void Deserialize(this TokenCache tokencache, byte[] state)
+        public static void Deserialize(this TokenCache tokenCache, byte[] state)
         {
-            lock (tokencache.lockObject)
+            lock (tokenCache.lockObject)
             {
+                Dictionary<string, ICollection<string>> cacheDict = JsonHelper
+                    .DeserializeFromJson<Dictionary<string, ICollection<string>>>(state);
+                if (cacheDict == null || cacheDict.Count == 0)
+                {
+                    //TODO log about empty cache
+                    return;
+                }
 
+                if (cacheDict.ContainsKey("access_tokens"))
+                {
+                    foreach (var atItem in cacheDict["access_tokens"])
+                    {
+
+                    }
+                }
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="tokencache"></param>
+        /// <param name="tokenCache"></param>
         /// <returns></returns>
-        public static byte[] Serialize(this TokenCache tokencache)
+        public static byte[] Serialize(this TokenCache tokenCache)
         {
-            lock (tokencache.lockObject)
+            // reads the underlying in-memory dictionary and dumps out the content as a JSON
+            lock (tokenCache.lockObject)
             {
-
-                return null;
+                Dictionary<string, ICollection<string>> cacheDict = new Dictionary<string, ICollection<string>>();
+                cacheDict["access_tokens"] = tokenCache.GetAllAccessTokenCacheItems();
+                cacheDict["refresh_tokens"] = tokenCache.GetAllRefreshTokenCacheItems();
+                return JsonHelper.SerializeToJson(cacheDict).ToByteArray();
             }
         }
     }
