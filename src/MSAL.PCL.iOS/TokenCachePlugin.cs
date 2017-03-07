@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Client
             throw new NotImplementedException();
         }
 
-        public void SaveToken(AccessTokenCacheItem accessTokenItem)
+        public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
         {
             throw new NotImplementedException();
         }

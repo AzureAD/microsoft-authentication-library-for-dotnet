@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client
             return list;
         }
 
-        public void SaveToken(AccessTokenCacheItem accessTokenItem)
+        public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
         {
             CryptographyHelper helper = new CryptographyHelper();
             string hashed = helper.CreateSha256Hash(accessTokenItem.GetTokenCacheKey().ToString());

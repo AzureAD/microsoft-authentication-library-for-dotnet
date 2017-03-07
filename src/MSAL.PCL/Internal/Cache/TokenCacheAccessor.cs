@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
         {
-            TokenCachePlugin.SaveToken(accessTokenItem);
+            TokenCachePlugin.SaveAccessToken(accessTokenItem);
         }
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)

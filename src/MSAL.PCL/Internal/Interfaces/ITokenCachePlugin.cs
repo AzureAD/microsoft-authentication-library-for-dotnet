@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Internal.Interfaces
 
         ICollection<string> AllRefreshTokens();
 
-        void SaveToken(AccessTokenCacheItem accessTokenItem);
+        void SaveAccessToken(AccessTokenCacheItem accessTokenItem);
 
         void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem);
 

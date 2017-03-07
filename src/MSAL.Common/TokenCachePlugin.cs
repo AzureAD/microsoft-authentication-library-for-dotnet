@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
                         v => !string.IsNullOrEmpty(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(v).RefreshToken)).ToList());
         }
 
-        public void SaveToken(AccessTokenCacheItem accessTokenItem)
+        public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
         {
             TokenCacheDictionary[accessTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(accessTokenItem);
         }

@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
             return _refreshTokenSharedPreference.All.Values as ICollection<string>;
         }
 
-        public void SaveToken(AccessTokenCacheItem accessTokenItem)
+        public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
         {
             TokenCacheKey key = accessTokenItem.GetTokenCacheKey();
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
