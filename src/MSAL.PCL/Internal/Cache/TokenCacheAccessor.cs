@@ -42,22 +42,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
             TokenCachePlugin.SaveRefreshToken(refreshTokenItem);
         }
-
-        public IList<AccessTokenCacheItem> GetAccessToken(TokenCacheKey tokenCacheKey)
-        {
-            ICollection<string> allAccessTokens = TokenCachePlugin.GetAllAccessTokens();
-            IList<AccessTokenCacheItem> matchedTokens = new List<AccessTokenCacheItem>();
-            foreach (string accessTokenItemJson in allAccessTokens)
-            {
-                AccessTokenCacheItem accessTokenCacheItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessTokenItemJson);
-                if (tokenCacheKey.Equals(accessTokenCacheItem.GetTokenCacheKey()))
-                {
-                    matchedTokens.Add(accessTokenCacheItem);
-                }
-            }
-
-            return matchedTokens;
-        }
         
         public IList<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
         {
