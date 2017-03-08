@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client
         public const string ChallengeResponseHeader = "Authorization";
         public const string ChallengeResponseType = "PKeyAuth";
         public const string ChallengeResponseToken = "AuthToken";
-        public const string ChallengeResponseContext = "Context";
+        public const string ChallengeResponseContext = "ApplicationRequestContext";
         public const string ChallengeResponseVersion = "Version";
         public const string BrowserExtPrefix = "browser://";
         public const string BrowserExtInstallPrefix = "msauth://";

@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Globalization;
 using Android.App;
 using Android.Content;
@@ -40,7 +41,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
-            PlatformPlugin.Logger.Information(null, string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
+            RequestContext requestContext = new RequestContext(Guid.Empty);
+
+            requestContext.MsalLogger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
             AuthorizationResult authorizationResult = null;
 
             switch ((int) resultCode)
@@ -58,7 +61,7 @@ namespace Microsoft.Identity.Client
                     break;
             }
 
-            WebUI.SetAuthorizationResult(authorizationResult);
+            WebUI.SetAuthorizationResult(authorizationResult, requestContext);
         }
 
         private static AuthorizationResult CreateResultForOkResponse(string url)

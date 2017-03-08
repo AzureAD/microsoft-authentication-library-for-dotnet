@@ -50,11 +50,12 @@ namespace Microsoft.Identity.Client
         /// </Summary>
         static ClientApplicationBase()
         {
-            PlatformPlugin.Logger.Information(null,
-                string.Format(CultureInfo.InvariantCulture,
-                    "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
-                    PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
-                    MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
+            RequestContext requestContext = new RequestContext(Guid.Empty);
+
+            requestContext.MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
+                   "MSAL {0} with assembly version '{1}', file version '{2}' and information version '{3}'" +
+                   "is running...", PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
+                   MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
         }
 
         /// <Summary>
@@ -70,7 +71,7 @@ namespace Microsoft.Identity.Client
             this.RedirectUri = redirectUri;
             this.ValidateAuthority = validateAuthority;
         }
-        
+
         /// <Summary>
         /// Authority
         /// </Summary>
@@ -96,12 +97,42 @@ namespace Microsoft.Identity.Client
         /// Gets or sets correlation Id which would be sent to the service with the next request.
         /// Correlation Id is to be used for diagnostics purposes.
         /// </summary>
-        public Guid CorrelationId { get; set; }
+        private Guid _correlationId;
+        public Guid CorrelationId
+        {
+            get
+            {
+                return _correlationId;
+            }
+            set
+            {
+                _correlationId = value;
+                _requestContext = this.CreateRequestContext(value);
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether address validation is ON or OFF.
         /// </summary>
         public bool ValidateAuthority { get; set; }
+
+        private RequestContext _requestContext;
+
+        private RequestContext RequestContext
+        {
+            get
+            {
+                if (_requestContext == null)
+                {
+                    _requestContext = this.CreateRequestContext(this.CorrelationId);
+                }
+                return _requestContext;
+            }
+            set
+            {
+                _requestContext = value;
+            }
+        }
 
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the signed in users.
@@ -112,7 +143,7 @@ namespace Microsoft.Identity.Client
             {
                 if (this.UserTokenCache == null)
                 {
-                    PlatformPlugin.Logger.Information(null, "Token cache is null or empty");
+                    _requestContext.MsalLogger.Info("Token cache is null or empty");
                     return new List<User>();
                 }
 
@@ -120,18 +151,18 @@ namespace Microsoft.Identity.Client
             }
         }
 
-/*        /// <summary>
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope)
-        {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
-            return
-                await
-                    this.AcquireTokenSilentCommonAsync(authority, scope, (string) null, this.PlatformParameters,
-                        null, false).ConfigureAwait(false);
-        }*/
+        /*        /// <summary>
+                /// </summary>
+                /// <param name="scope"></param>
+                /// <returns></returns>
+                public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope)
+                {
+                    Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
+                    return
+                        await
+                            this.AcquireTokenSilentCommonAsync(authority, scope, (string) null, this.PlatformParameters,
+                                null, false).ConfigureAwait(false);
+                }*/
 
         /// <summary>
         /// </summary>
@@ -147,36 +178,36 @@ namespace Microsoft.Identity.Client
                         .ConfigureAwait(false);
         }
 
-/*        /// <summary>
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="userIdentifier"></param>
-        /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier)
-        {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
-            return
-                await
-                    this.AcquireTokenSilentCommonAsync(authority, scope, userIdentifier, this.PlatformParameters,
-                        false).ConfigureAwait(false);
-        }*/
+        /*        /// <summary>
+                /// </summary>
+                /// <param name="scope"></param>
+                /// <param name="userIdentifier"></param>
+                /// <returns></returns>
+                public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier)
+                {
+                    Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
+                    return
+                        await
+                            this.AcquireTokenSilentCommonAsync(authority, scope, userIdentifier, this.PlatformParameters,
+                                false).ConfigureAwait(false);
+                }*/
 
-/*        /// <summary>
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="userIdentifier"></param>
-        /// <param name="authority"></param>
-        /// <param name="forceRefresh"></param>
-        /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier,
-            string authority, bool forceRefresh)
-        {
-            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
-            return
-                await
-                    this.AcquireTokenSilentCommonAsync(authorityInstance, scope, userIdentifier, this.PlatformParameters,
-                        forceRefresh).ConfigureAwait(false);
-        }*/
+        /*        /// <summary>
+                /// </summary>
+                /// <param name="scope"></param>
+                /// <param name="userIdentifier"></param>
+                /// <param name="authority"></param>
+                /// <param name="forceRefresh"></param>
+                /// <returns></returns>
+                public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier,
+                    string authority, bool forceRefresh)
+                {
+                    Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
+                    return
+                        await
+                            this.AcquireTokenSilentCommonAsync(authorityInstance, scope, userIdentifier, this.PlatformParameters,
+                                forceRefresh).ConfigureAwait(false);
+                }*/
 
         /// <summary>
         /// </summary>
@@ -194,7 +225,7 @@ namespace Microsoft.Identity.Client
                     this.AcquireTokenSilentCommonAsync(authorityInstance, scope, user,
                         forceRefresh).ConfigureAwait(false);
         }
-        
+
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
             string[] scope, User user, bool forceRefresh)
         {
@@ -213,11 +244,11 @@ namespace Microsoft.Identity.Client
                 User = user,
                 Scope = scope.CreateSetFromArray(),
                 RedirectUri = new Uri(this.RedirectUri),
-                RequestContext = CreateCallState(this.CorrelationId)
+                RequestContext = CreateRequestContext(this.CorrelationId)
             };
         }
 
-        internal RequestContext CreateCallState(Guid correlationId)
+        internal RequestContext CreateRequestContext(Guid correlationId)
         {
             correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
             return new RequestContext(correlationId);

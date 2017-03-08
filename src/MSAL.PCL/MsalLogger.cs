@@ -26,51 +26,84 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Android.Util;
+using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-    internal class Logger : ILogger
+    public class MsalLogger
     {
-        public void Error(string errorMessage)
+        public enum LogLevel
         {
-            Log.Error(null, errorMessage);
+            Error = 0,
+            Warning = 1,
+            Info = 2,
+            Verbose = 3
         }
 
+        internal MsalLogger(Guid correlationId)
+        {
+            this.CorrelationId = correlationId;
+        }
+
+        internal Guid CorrelationId { get; set; }
+
+        internal LogLevel ApplicationLogLevel { get; set; } = LogLevel.Info;
+
+        #region LogMessages
+
+        public void Error(string message)
+        {
+            LogMessage(message, LogLevel.Error);
+        }
         public void Warning(string message)
         {
-            Log.Warn(null, message);
+            LogMessage(message, LogLevel.Warning);
         }
-
+        public void Info(string message)
+        {
+            LogMessage(message, LogLevel.Info);
+        }
         public void Verbose(string message)
         {
-            Log.Verbose(null, message);
-        }
-
-       public void Information(string message)
-        {
-            Log.Info(null, message);
+            LogMessage(message, LogLevel.Verbose);
         }
 
         public void Error(Exception ex)
         {
             Error(ex.ToString());
         }
-
         public void Warning(Exception ex)
         {
             Warning(ex.ToString());
         }
-
-        public void Information(Exception ex)
+        public void Info(Exception ex)
         {
-            Information(ex.ToString());
+            Info(ex.ToString());
         }
-
         public void Verbose(Exception ex)
         {
             Verbose(ex.ToString());
+        }
+
+        #endregion
+
+        private void LogMessage(string logMessage, LogLevel logLevel)
+        {
+            if (logLevel > ApplicationLogLevel) return;
+
+            //format log message;
+            string correlationId = (CorrelationId.Equals(Guid.Empty))
+                ? "No CorrelationId"
+                : CorrelationId.ToString();
+            string log = string.Format(CultureInfo.CurrentCulture, "{0}: {1}: {2}", DateTime.UtcNow, correlationId,
+                logMessage);
+
+            //platformPlugin
+            PlatformPlugin.LogMessage(logLevel, log);
+
+            //callback();
+            LoggerCallbackHandler.ExecuteCallback(logLevel, log);
         }
     }
 }

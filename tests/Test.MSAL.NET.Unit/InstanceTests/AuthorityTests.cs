@@ -177,7 +177,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             catch (Exception exc)
             {
                 Assert.IsNotNull(exc is MsalServiceException);
-                Assert.AreEqual(((MsalServiceException) exc).ErrorCode, "invalid_instance");
+                Assert.AreEqual(((MsalServiceException)exc).ErrorCode, "invalid_instance");
             }
 
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockCount);

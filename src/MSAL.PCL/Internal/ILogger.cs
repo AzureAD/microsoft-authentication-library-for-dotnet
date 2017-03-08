@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -26,21 +26,19 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal
 {
-    internal static class MsalInitializer
+    internal interface ILogger
     {
-        public static void Initialize()
-        {
-            PlatformPluginSwitch.DynamicallyLinkAssembly = false;
+        void Error(string message);
+        void Warning(string message);
+        void Information(string message);
+        void Verbose(string message);
 
-            RequestContext requestContext = new RequestContext(Guid.Empty);
-
-            PlatformPlugin.InjectDependecies(new WebUIFactory(), new TokenCachePlugin(requestContext), new Logger(),
-                new PlatformInformation(requestContext), new CryptographyHelper(), new DeviceAuthHelper(), new BrokerHelper(),
-                new PlatformParameters());
-        }
+        void Error(Exception ex);
+        void Warning(Exception ex);
+        void Information(Exception ex);
+        void Verbose(Exception ex);
     }
 }

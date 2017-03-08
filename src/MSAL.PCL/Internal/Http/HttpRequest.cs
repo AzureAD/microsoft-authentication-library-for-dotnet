@@ -38,28 +38,24 @@ namespace Microsoft.Identity.Client.Internal.Http
 {
     internal class HttpRequest
     {
-        private HttpRequest()
-        {
-        }
-
         public static async Task<HttpResponse> SendPost(Uri endpoint, Dictionary<string, string> headers,
-            Dictionary<string, string> bodyParameters, RequestContext callstate)
+            Dictionary<string, string> bodyParameters, RequestContext requestContext)
         {
             return
                 await
-                    ExecuteWithRetry(endpoint, headers, bodyParameters, HttpMethod.Post, callstate)
+                    ExecuteWithRetry(endpoint, headers, bodyParameters, HttpMethod.Post, requestContext)
                         .ConfigureAwait(false);
         }
 
         public static async Task<HttpResponse> SendGet(Uri endpoint, Dictionary<string, string> headers,
-            RequestContext callstate)
+            RequestContext requestContext)
         {
-            return await ExecuteWithRetry(endpoint, headers, null, HttpMethod.Get, callstate).ConfigureAwait(false);
+            return await ExecuteWithRetry(endpoint, headers, null, HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, Dictionary<string, string> headers)
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage {RequestUri = endpoint};
+            HttpRequestMessage requestMessage = new HttpRequestMessage { RequestUri = endpoint };
             requestMessage.Headers.Accept.Clear();
             if (headers != null)
             {
@@ -74,10 +70,11 @@ namespace Microsoft.Identity.Client.Internal.Http
 
         private static async Task<HttpResponse> ExecuteWithRetry(Uri endpoint, Dictionary<string, string> headers,
             Dictionary<string, string> bodyParameters, HttpMethod method,
-            RequestContext callstate, bool retry = true)
+            RequestContext requestContext, bool retry = true)
         {
             bool isRetryable = false;
             HttpResponse response = null;
+           
             try
             {
                 response = await Execute(endpoint, headers, bodyParameters, method);
@@ -87,10 +84,9 @@ namespace Microsoft.Identity.Client.Internal.Http
                     return response;
                 }
 
-                PlatformPlugin.Logger.Error(callstate,
-                    string.Format(CultureInfo.InvariantCulture,
+                requestContext.MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
                         "Response status code does not indicate success: {0} ({1}).",
-                        (int) response.StatusCode, response.StatusCode));
+                        (int)response.StatusCode, response.StatusCode));
 
                 if ((response.StatusCode.Equals(HttpStatusCode.InternalServerError)) ||
                     (response.StatusCode).Equals(HttpStatusCode.GatewayTimeout) ||
@@ -101,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal.Http
             }
             catch (TaskCanceledException exception)
             {
-                PlatformPlugin.Logger.Error(callstate, exception);
+                requestContext.MsalLogger.Error(exception);
                 isRetryable = true;
             }
 
@@ -109,11 +105,11 @@ namespace Microsoft.Identity.Client.Internal.Http
             {
                 if (retry)
                 {
-                    PlatformPlugin.Logger.Information(callstate, "Retrying one more time..");
-                    return await ExecuteWithRetry(endpoint, headers, bodyParameters, method, callstate, false);
+                    requestContext.MsalLogger.Info("Retrying one more time..");
+                    return await ExecuteWithRetry(endpoint, headers, bodyParameters, method, requestContext, false);
                 }
 
-                PlatformPlugin.Logger.Information(callstate, "Request retry failed.");
+                requestContext.MsalLogger.Info("Request retry failed.");
                 throw new RetryableRequestException();
             }
 

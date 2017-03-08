@@ -26,10 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
@@ -39,56 +37,57 @@ namespace Microsoft.Identity.Client
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class WebUI : IWebUI
     {
-        private static SemaphoreSlim returnedUriReady;
-        private static AuthorizationResult authorizationResult;
-        private readonly PlatformParameters parameters;
+        private static SemaphoreSlim _returnedUriReady;
+        private static AuthorizationResult _authorizationResult;
+        private readonly PlatformParameters _parameters;
 
         public WebUI(IPlatformParameters parameters)
         {
-            this.parameters = parameters as PlatformParameters;
-            if (this.parameters == null)
+            this._parameters = parameters as PlatformParameters;
+            if (this._parameters == null)
             {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
+                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(parameters));
             }
 
-            if (this.parameters.CallerActivity == null)
+            if (this._parameters.CallerActivity == null)
             {
-                throw new ArgumentException("CallerActivity should be set in PlatformParameters", "CallerActivity");
+                throw new ArgumentException("CallerActivity should be set in PlatformParameters", nameof(this._parameters.CallerActivity));
             }
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
-            returnedUriReady = new SemaphoreSlim(0);
-
+            _returnedUriReady = new SemaphoreSlim(0);
+        
             try
             {
-                var agentIntent = new Intent(this.parameters.CallerActivity, typeof (AuthenticationActivity));
+                var agentIntent = new Intent(this._parameters.CallerActivity, typeof (AuthenticationActivity));
                 agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
                 agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.AbsoluteUri);
 
-                this.parameters.CallerActivity.StartActivityForResult(agentIntent, 0);
+                this._parameters.CallerActivity.StartActivityForResult(agentIntent, 0);
             }
             catch (Exception ex)
             {
-                PlatformPlugin.Logger.Error(requestContext, ex);
+                requestContext.MsalLogger.Error(ex);
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
 
-            await returnedUriReady.WaitAsync().ConfigureAwait(false);
-            return authorizationResult;
+            await _returnedUriReady.WaitAsync().ConfigureAwait(false);
+            return _authorizationResult;
         }
 
-        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
+        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput, RequestContext requestContext)
         {
-            if (returnedUriReady != null)
+            if (_returnedUriReady != null)
             {
-                authorizationResult = authorizationResultInput;
-                returnedUriReady.Release();
+                _authorizationResult = authorizationResultInput;
+                _returnedUriReady.Release();
             }
             else
             {
-                PlatformPlugin.Logger.Information(null, "No pending request for response from web ui.");
+                requestContext.MsalLogger.Info("No pending request for response from web ui.");
+
             }
         }
     }

@@ -67,6 +67,7 @@
     <Compile Include="Internal\Instance\DrsMetadataResponse.cs" />
     <Compile Include="Internal\Instance\TenantDiscoveryResponse.cs" />
     <Compile Include="Internal\Instance\InstanceDiscoveryResponse.cs" />
+    <Compile Include="Internal\ILogger.cs" />
     <Compile Include="Internal\OAuth2\OAuth2ResponseBase.cs" />
     <Compile Include="Internal\Requests\AuthenticationRequestParameters.cs" />
     <Compile Include="Internal\Http\HttpClientFactory.cs" />
@@ -84,6 +85,7 @@
     <Compile Include="Internal\Requests\OnBehalfOfRequest.cs" />
     <Compile Include="Internal\Requests\SilentRequest.cs" />
     <Compile Include="IClientAssertionCertificate.cs" />
+    <Compile Include="MsalLogger.cs" />
     <Compile Include="LoggerCallbackHandler.cs" />
     <Compile Include="MsalException.cs" />
     <Compile Include="Internal\MsalHelpers.cs" />
@@ -109,7 +111,6 @@
     <Compile Include="Internal\Interfaces\ITokenCachePlugin.cs" />
     <Compile Include="Internal\JsonHelper.cs" />
     <Compile Include="Internal\JsonWebToken.cs" />
-    <Compile Include="Internal\LoggerBase.cs" />
     <Compile Include="PublicClientApplication.cs" />
     <Compile Include="Internal\OAuth2\TokenResponse.cs" />
     <Compile Include="Internal\OAuth2\OAuthConstants.cs" />

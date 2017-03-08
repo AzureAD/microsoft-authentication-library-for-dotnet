@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client
 
             var handler =
                 new InteractiveRequest(requestParameters, null, loginHint, null, null);
-            return await handler.CreateAuthorizationUriAsync(CreateCallState(CorrelationId)).ConfigureAwait(false);
+            return await handler.CreateAuthorizationUriAsync(CreateRequestContext(CorrelationId)).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client
 
             var handler =
                 new InteractiveRequest(requestParameters, additionalScope, loginHint, null, null);
-            return await handler.CreateAuthorizationUriAsync(CreateCallState(CorrelationId)).ConfigureAwait(false);
+            return await handler.CreateAuthorizationUriAsync(CreateRequestContext(CorrelationId)).ConfigureAwait(false);
         }
 
         internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope, User user, TokenCache cache)

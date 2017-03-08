@@ -45,16 +45,19 @@ namespace Microsoft.Identity.Client
         /// </summary>
         private const int NavigationOverallTimeout = 2000;
 
-        private SilentWindowsFormsAuthenticationDialog dialog;
-        private bool disposed;
-        private WindowsFormsSynchronizationContext formsSyncContext;
-        private AuthorizationResult result;
-        private ManualResetEvent threadInitializedEvent;
-        private Exception uiException;
+        private SilentWindowsFormsAuthenticationDialog _dialog;
+        private bool _disposed;
+        private WindowsFormsSynchronizationContext _formsSyncContext;
+        private AuthorizationResult _result;
+        private ManualResetEvent _threadInitializedEvent;
+        private Exception _uiException;
 
-        public SilentWebUI()
+        public RequestContext RequestContext { get; set; }
+
+        public SilentWebUI(RequestContext requestContext)
         {
-            this.threadInitializedEvent = new ManualResetEvent(false);
+            this._threadInitializedEvent = new ManualResetEvent(false);
+            RequestContext = requestContext;
         }
 
         public void Dispose()
@@ -80,7 +83,7 @@ namespace Microsoft.Identity.Client
             long navigationOverallTimeout = NavigationOverallTimeout;
             long navigationStartTime = DateTime.Now.Ticks;
 
-            bool initialized = this.threadInitializedEvent.WaitOne((int) navigationOverallTimeout);
+            bool initialized = this._threadInitializedEvent.WaitOne((int) navigationOverallTimeout);
             if (initialized)
             {
                 // Calculate time remaining after time spend on initialization.
@@ -91,11 +94,11 @@ namespace Microsoft.Identity.Client
                 bool completedNormally = uiThread.Join(navigationOverallTimeout > 0 ? (int) navigationOverallTimeout : 0);
                 if (!completedNormally)
                 {
-                    PlatformPlugin.Logger.Information(null, "Silent login thread did not complete on time.");
+                    RequestContext.MsalLogger.Info("Silent login thread did not complete on time.");
 
                     // The invisible dialog has failed to complete in the allotted time.
                     // Attempt a graceful shutdown.
-                    this.formsSyncContext.Post(state => this.dialog.CloseBrowser(), null);
+                    this._formsSyncContext.Post(state => this._dialog.CloseBrowser(), null);
                 }
             }
         }
@@ -109,29 +112,29 @@ namespace Microsoft.Identity.Client
                 {
                     try
                     {
-                        this.formsSyncContext = new WindowsFormsSynchronizationContext();
+                        this._formsSyncContext = new WindowsFormsSynchronizationContext();
 
-                        this.dialog = new SilentWindowsFormsAuthenticationDialog(this.OwnerWindow)
+                        this._dialog = new SilentWindowsFormsAuthenticationDialog(this.OwnerWindow)
                         {
                             NavigationWaitMiliSecs = NavigationWaitMiliSecs
                         };
 
-                        this.dialog.Done += this.UIDoneHandler;
+                        this._dialog.Done += this.UIDoneHandler;
 
-                        this.threadInitializedEvent.Set();
+                        this._threadInitializedEvent.Set();
 
-                        this.dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri);
+                        this._dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri);
 
                         // Start and turn control over to the message loop.
                         Application.Run();
 
-                        this.result = this.dialog.Result;
+                        this._result = this._dialog.Result;
                     }
                     catch (Exception e)
                     {
-                        PlatformPlugin.Logger.Error(null, e);
+                        RequestContext.MsalLogger.Error(e);
                         // Catch all exceptions to transfer them to the original calling thread.
-                        this.uiException = e;
+                        this._uiException = e;
                     }
                 });
 
@@ -166,56 +169,56 @@ namespace Microsoft.Identity.Client
 
             this.ThrowIfTransferredException();
 
-            if (this.result == null)
+            if (this._result == null)
             {
                 throw new MsalException(MsalError.UserInteractionRequired);
             }
 
-            return this.result;
+            return this._result;
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (!_disposed)
             {
                 if (disposing)
                 {
-                    if (this.threadInitializedEvent != null)
+                    if (this._threadInitializedEvent != null)
                     {
-                        this.threadInitializedEvent.Dispose();
-                        this.threadInitializedEvent = null;
+                        this._threadInitializedEvent.Dispose();
+                        this._threadInitializedEvent = null;
                     }
 
-                    if (this.formsSyncContext != null)
+                    if (this._formsSyncContext != null)
                     {
-                        this.formsSyncContext.Dispose();
-                        this.formsSyncContext = null;
+                        this._formsSyncContext.Dispose();
+                        this._formsSyncContext = null;
                     }
                 }
 
-                disposed = true;
+                _disposed = true;
             }
         }
 
         private void Cleanup()
         {
-            this.threadInitializedEvent.Dispose();
-            this.threadInitializedEvent = null;
+            this._threadInitializedEvent.Dispose();
+            this._threadInitializedEvent = null;
         }
 
         private void ThrowIfTransferredException()
         {
-            if (null != this.uiException)
+            if (null != this._uiException)
             {
-                throw this.uiException;
+                throw this._uiException;
             }
         }
 
         private void UIDoneHandler(object sender, SilentWebUIDoneEventArgs e)
         {
-            if (this.uiException == null)
+            if (this._uiException == null)
             {
-                this.uiException = e.TransferedException;
+                this._uiException = e.TransferedException;
             }
 
             // We need call dispose, while message loop is running.

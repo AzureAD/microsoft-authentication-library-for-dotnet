@@ -30,52 +30,48 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-    internal class Logger : LoggerBase
+    internal class Logger : ILogger
     {
-        static Logger()
+        internal static MsalEventSource MsalEventSource { get; } = new MsalEventSource();
+
+        public void Error(string errorMessage)
         {
-            MsalEventSource = new MsalEventSource();
+            MsalEventSource.Error(errorMessage);
         }
 
-        internal static MsalEventSource MsalEventSource { get; }
-
-        internal override void Error(RequestContext requestContext, string errorMessage, string callerFilePath = "")
+        public void Warning(string warningMessage)
         {
-            string message = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), errorMessage);
-            MsalEventSource.Error(message);
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, message);
+            MsalEventSource.Warning(warningMessage);
         }
 
-        internal override void Error(RequestContext requestContext, Exception ex,
-            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        public void Information(string infoMessage)
         {
-            string log = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), ex.ToString());
-            MsalEventSource.Error(log);
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, log);
+            MsalEventSource.Information(infoMessage);
         }
 
-        internal override void Verbose(RequestContext requestContext, string message,
-            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        public void Verbose(string verboseMessage)
         {
-            string log = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), message);
-            MsalEventSource.Verbose(log);
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Verbose, log);
+            MsalEventSource.Verbose(verboseMessage);
         }
 
-        internal override void Information(RequestContext requestContext, string message,
-            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        public void Error(Exception ex)
         {
-            string log = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), message);
-            MsalEventSource.Information(log);
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Information, log);
+            Error(ex.ToString());
         }
 
-        internal override void Warning(RequestContext requestContext, string message,
-            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        public void Warning(Exception ex)
         {
-            string log = PrepareLogMessage(requestContext, GetCallerFilename(callerFilePath), message);
-            MsalEventSource.Warning(log);
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Warning, log);
+            Warning(ex.ToString());
+        }
+
+        public void Information(Exception ex)
+        {
+            Information(ex.ToString());
+        }
+
+        public void Verbose(Exception ex)
+        {
+            Verbose(ex.ToString());
         }
     }
 }
