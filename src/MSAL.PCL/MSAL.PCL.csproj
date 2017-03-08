@@ -96,9 +96,7 @@
     <Compile Include="Internal\AuthorizationResult.cs" />
     <Compile Include="Internal\Base64UrlEncoder.cs" />
     <Compile Include="Internal\RequestContext.cs" />
-    <Compile Include="ClientAssertion.cs" />
     <Compile Include="ClientCredential.cs" />
-    <Compile Include="Internal\ClientKey.cs" />
     <Compile Include="ConfidentialClientApplication.cs" />
     <Compile Include="Internal\Constants.cs" />
     <Compile Include="Internal\Interfaces\IBrokerHelper.cs" />

@@ -35,6 +35,24 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal static class MsalHelpers
     {
+        public static bool ScopeContains(this SortedSet<string> scope, SortedSet<string> otherScope)
+        {
+            foreach (string otherString in otherScope)
+            {
+                if (!scope.Contains(otherString))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool ScopeIntersects(this SortedSet<string> scope, SortedSet<string> otherScope)
+        {
+            return scope.Overlaps(otherScope);
+        }
+
         internal static SortedSet<string> ToLower(this SortedSet<string> setOfStrings)
         {
             if (setOfStrings == null)
@@ -120,7 +138,7 @@ namespace Microsoft.Identity.Client.Internal
 
             return set;
         }
-
+        
         internal static bool IsNullOrEmpty(string[] input)
         {
             return input == null || input.Length == 0;

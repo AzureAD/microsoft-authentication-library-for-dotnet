@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
 
         internal string Secret { get; private set; }
         internal IClientAssertionCertificate Certificate { get; private set; }
-        internal ClientAssertion ClientAssertion { get; set; }
+        internal string Assertion { get; set; }
         internal long ValidTo { get; set; }
     }
 }

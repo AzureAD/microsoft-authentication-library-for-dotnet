@@ -75,6 +75,9 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// </summary>
         public string DisplayableId { get { return User?.DisplayableId; } }
 
+        [DataMember(Name = "user_assertion_hash")]
+        internal string UserAssertionHash { get; set; }
+
         internal AccessTokenCacheItem()
         {
         }

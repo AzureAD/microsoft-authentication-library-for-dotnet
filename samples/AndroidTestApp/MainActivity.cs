@@ -145,7 +145,7 @@ namespace AndroidTestApp
             {
                 application.PlatformParameters = new PlatformParameters(this);
                 var result = await application.AcquireTokenAsync(new string[] { "User.Read" });
-                value = result.Token;
+                value = result.AccessToken;
             }
             catch (Java.Lang.Exception ex)
             {

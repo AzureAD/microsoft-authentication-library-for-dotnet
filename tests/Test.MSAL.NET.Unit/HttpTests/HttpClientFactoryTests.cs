@@ -26,38 +26,25 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using System.Text;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal.Http;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Test.MSAL.NET.Unit.Mocks;
 
-namespace Microsoft.Identity.Client
+namespace Test.MSAL.NET.Unit.HttpTests
 {
-    /// <summary>
-    /// Secret type containing an assertion of type "urn:ietf:params:oauth:token-type:jwt".
-    /// </summary>
-    public sealed class ClientAssertion
+    [TestClass]
+    public class HttpClientFactoryTests
     {
-        /// <summary>
-        /// Constructor to create credential with a jwt token encoded as a base64 url encoded string.
-        /// </summary>
-        /// <param name="assertion">The jwt used as credential.</param>
-        public ClientAssertion(string assertion)
+        [TestMethod]
+        public void GetHttpClient_MaxRespContentBuffSizeSetTo1Mb()
         {
-            if (string.IsNullOrWhiteSpace(assertion))
-            {
-                throw new ArgumentNullException("assertion");
-            }
-
-            this.AssertionType = OAuth2AssertionType.JwtBearer;
-            this.Assertion = assertion;
+            HttpClientFactory.ReturnHttpClientForMocks = false;
+            Assert.AreEqual(1024 * 1024, HttpClientFactory.GetHttpClient().MaxResponseContentBufferSize);
         }
-
-        /// <summary>
-        /// Gets the assertion.
-        /// </summary>
-        public string Assertion { get; private set; }
-
-        /// <summary>
-        /// Gets the assertion type.
-        /// </summary>
-        public string AssertionType { get; private set; }
     }
 }

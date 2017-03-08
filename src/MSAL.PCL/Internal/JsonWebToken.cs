@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal
             };
         }
 
-        public ClientAssertion Sign(IClientAssertionCertificate credential)
+        public string Sign(IClientAssertionCertificate credential)
         {
             // Base64Url encoded header and claims
             string token = this.Encode(credential);
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.Internal
                 throw new MsalException(MsalError.EncodedTokenTooLong);
             }
 
-            return new ClientAssertion(string.Concat(token, ".", UrlEncodeSegment(credential.Sign(token))));
+            return string.Concat(token, ".", UrlEncodeSegment(credential.Sign(token)));
         }
 
         private static string EncodeSegment(string segment)

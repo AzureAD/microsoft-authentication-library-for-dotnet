@@ -30,7 +30,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Http;
 using Microsoft.Identity.Client.Internal.Instance;
@@ -40,7 +39,7 @@ using Test.MSAL.NET.Unit.Mocks;
 namespace Test.MSAL.NET.Unit.HttpTests
 {
     [TestClass]
-    public class MsalHttpRequestTests
+    public class HttpRequestTests
     {
         [TestInitialize]
         public void TestInitialize()
@@ -51,6 +50,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
         }
 
         [TestMethod]
+        [TestCategory("HttpRequestTests")]
         public void TestSendPostNullHeaderNullBody()
         {
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
@@ -71,6 +71,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
         }
 
         [TestMethod]
+        [TestCategory("HttpRequestTests")]
         public void TestSendPostNoFailure()
         {
             Dictionary<string, string> bodyParameters = new Dictionary<string, string> { ["key1"] = "some value1", ["key2"] = "some value2" };
@@ -97,6 +98,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
         }
 
         [TestMethod]
+        [TestCategory("HttpRequestTests")]
         public void TestSendGetNoFailure()
         {
             Dictionary<string, string> queryParams = new Dictionary<string, string> { ["key1"] = "qp1", ["key2"] = "qp2" };
@@ -118,6 +120,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
         }
         
         [TestMethod]
+        [TestCategory("HttpRequestTests")]
         public void TestSendGetWithHttp500TypeFailure()
         {
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
@@ -148,6 +151,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
         }
 
         [TestMethod]
+        [TestCategory("HttpRequestTests")]
         public void TestSendPostWithHttp500TypeFailure()
         {
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
@@ -178,6 +182,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
         }
 
         [TestMethod]
+        [TestCategory("HttpRequestTests")]
         public void TestSendGetWithRetryOnTimeoutFailure()
         {
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
@@ -210,6 +215,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
         }
 
         [TestMethod]
+        [TestCategory("HttpRequestTests")]
         public void TestSendPostWithRetryOnTimeoutFailure()
         {
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()

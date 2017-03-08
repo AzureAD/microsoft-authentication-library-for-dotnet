@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client
         /// <param name="state"></param>
         public static void Deserialize(this TokenCache tokenCache, byte[] state)
         {
-            lock (tokenCache.lockObject)
+            lock (tokenCache.LockObject)
             {
                 Dictionary<string, ICollection<string>> cacheDict = JsonHelper
                     .DeserializeFromJson<Dictionary<string, ICollection<string>>>(state);
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client
         public static byte[] Serialize(this TokenCache tokenCache)
         {
             // reads the underlying in-memory dictionary and dumps out the content as a JSON
-            lock (tokenCache.lockObject)
+            lock (tokenCache.LockObject)
             {
                 Dictionary<string, ICollection<string>> cacheDict = new Dictionary<string, ICollection<string>>();
                 cacheDict["access_tokens"] = tokenCache.GetAllAccessTokenCacheItems();

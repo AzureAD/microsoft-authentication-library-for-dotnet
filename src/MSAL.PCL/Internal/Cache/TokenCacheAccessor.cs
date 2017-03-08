@@ -35,28 +35,12 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
         {
-            TokenCachePlugin.SaveToken(accessTokenItem);
+            TokenCachePlugin.SaveAccessToken(accessTokenItem.GetTokenCacheKey().ToString(), JsonHelper.SerializeToJson(accessTokenItem));
         }
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
         {
-            TokenCachePlugin.SaveRefreshToken(refreshTokenItem);
-        }
-
-        public IList<AccessTokenCacheItem> GetTokens(TokenCacheKey tokenCacheKey)
-        {
-            ICollection<string> allAccessTokens = TokenCachePlugin.GetAllAccessTokens();
-            IList<AccessTokenCacheItem> matchedTokens = new List<AccessTokenCacheItem>();
-            foreach (string accessTokenItemJson in allAccessTokens)
-            {
-                AccessTokenCacheItem accessTokenCacheItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessTokenItemJson);
-                if (tokenCacheKey.Equals(accessTokenCacheItem.GetTokenCacheKey()))
-                {
-                    matchedTokens.Add(accessTokenCacheItem);
-                }
-            }
-
-            return matchedTokens;
+            TokenCachePlugin.SaveRefreshToken(refreshTokenItem.GetTokenCacheKey().ToString(), JsonHelper.SerializeToJson(refreshTokenItem));
         }
         
         public IList<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
@@ -77,22 +61,22 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return matchedRefreshTokens;
         }
 
-        public void DeleteToken(AccessTokenCacheItem accessToken‪Item)
+        public void DeleteAccessToken(AccessTokenCacheItem accessToken‪Item)
         {
-            TokenCachePlugin.DeleteToken(accessToken‪Item.GetTokenCacheKey());
+            TokenCachePlugin.DeleteAccessToken(accessToken‪Item.GetTokenCacheKey().ToString());
         }
 
         public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
         {
-            TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item.GetTokenCacheKey());
+            TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item.GetTokenCacheKey().ToString());
         }
-
+        
         public ICollection<string> GetAllAccessTokensAsString()
         {
             return TokenCachePlugin.GetAllAccessTokens();
         }
 
-        public IList<AccessTokenCacheItem> GetAllAccessTokens()
+        public IList<AccessTokenCacheItem> GetAllAccessTokens(string clientId)
         {
             ICollection<string> allTokensAsString = this.GetAllAccessTokensAsString();
             IList<AccessTokenCacheItem> returnList = new List<AccessTokenCacheItem>();
@@ -101,15 +85,15 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 returnList.Add(JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(token));
             }
 
-            return returnList;
+            return returnList.Where(t => t.ClientId.Equals(clientId)).ToList();
         }
 
         public ICollection<string> GetAllRefreshTokensAsString()
         {
             return TokenCachePlugin.AllRefreshTokens();
         }
-
-        public IList<RefreshTokenCacheItem> GetAllRefreshTokens()
+        
+        public IList<RefreshTokenCacheItem> GetAllRefreshTokens(string clientId)
         {
             ICollection<string> allTokensAsString = GetAllRefreshTokensAsString();
             IList<RefreshTokenCacheItem> returnList = new List<RefreshTokenCacheItem>();
@@ -118,12 +102,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 returnList.Add(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(token));
             }
 
-            return returnList;
-        }
-        
-        public IList<RefreshTokenCacheItem> GetAllRefreshTokensForGivenClientId(string clientId)
-        {
-            return this.GetAllRefreshTokens().Where(t => t.ClientId.Equals(clientId)).ToList();
+            return returnList.Where(t => t.ClientId.Equals(clientId)).ToList();
         }
     }
 }

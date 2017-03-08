@@ -39,13 +39,11 @@ namespace Microsoft.Identity.Client.Internal.Cache
     {
         internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, User user)
             : this(
-                authority, scope, clientId, (user != null) ? user.UniqueId : null,
-                (user != null) ? user.DisplayableId : null, (user != null) ? user.HomeObjectId : null)
+                authority, scope, clientId, (user != null) ? user.HomeObjectId : null)
         {
         }
 
-        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, string uniqueId,
-            string displayableId, string homeObjectId)
+        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, string homeObjectId)
         {
             this.Authority = authority;
             this.Scope = scope;
@@ -55,16 +53,12 @@ namespace Microsoft.Identity.Client.Internal.Cache
             }
 
             this.ClientId = clientId;
-            this.UniqueId = uniqueId;
-            this.DisplayableId = displayableId;
             this.HomeObjectId = homeObjectId;
         }
 
         public string Authority { get; }
         public SortedSet<string> Scope { get; }
         public string ClientId { get; }
-        public string UniqueId { get; }
-        public string DisplayableId { get; }
         public string HomeObjectId { get; }
 
         /// <summary>
@@ -77,8 +71,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
             stringBuilder.Append(MsalHelpers.Base64Encode(ClientId) + "$");
             // scope is treeSet to guarantee the order of the scopes when converting to string.
             stringBuilder.Append(MsalHelpers.Base64Encode(Scope.AsSingleString()) + "$");
-            stringBuilder.Append(MsalHelpers.Base64Encode(DisplayableId) + "$");
-            stringBuilder.Append(MsalHelpers.Base64Encode(UniqueId) + "$");
             stringBuilder.Append(MsalHelpers.Base64Encode(HomeObjectId) + "$");
 
             return stringBuilder.ToString();
@@ -131,8 +123,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
                     && (other.Authority == this.Authority)
                     && this.ScopeEquals(other.Scope)
                     && this.Equals(this.ClientId, other.ClientId)
-                    && (other.UniqueId == this.UniqueId)
-                    && this.Equals(this.DisplayableId, other.DisplayableId)
                     && (this.HomeObjectId == other.HomeObjectId));
         }
 
@@ -148,9 +138,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return (this.Authority + Delimiter
                     + MsalHelpers.AsSingleString(this.Scope) + Delimiter
                     + this.ClientId.ToLower() + Delimiter
-                    + this.UniqueId + Delimiter
-                    + this.HomeObjectId + Delimiter
-                    + ((this.DisplayableId != null) ? this.DisplayableId.ToLower() : null)).GetHashCode();
+                    + this.HomeObjectId + Delimiter).GetHashCode();
         }
 
         internal bool ScopeEquals(SortedSet<string> otherScope)
@@ -171,24 +159,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
             }
 
             return false;
-        }
-
-        internal bool ScopeContains(SortedSet<string> otherScope)
-        {
-            foreach (string otherString in otherScope)
-            {
-                if (!Scope.Contains(otherString))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public bool ScopeIntersects(SortedSet<string> otherScope)
-        {
-            return this.Scope.Overlaps(otherScope);
         }
 
         internal bool Equals(string string1, string string2)

@@ -79,7 +79,7 @@ namespace TestApp.PCL
                 app = new PublicClientApplication("CLIENT_ID");
                 var result = await app.AcquireTokenSilentAsync(Sts.ValidScope, null);
 
-                return result.Token;
+                return result.AccessToken;
             }
             catch (Exception ex)
             {
