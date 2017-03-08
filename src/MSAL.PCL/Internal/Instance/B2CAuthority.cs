@@ -1,0 +1,59 @@
+﻿//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted free of charge to any person obtaining a copy
+// of this software and associated documentation files(the "Software") to deal
+// in the Software without restriction including without limitation the rights
+// to use copy modify merge publish distribute sublicense and / or sell
+// copies of the Software and to permit persons to whom the Software is
+// furnished to do so subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND EXPRESS OR
+// IMPLIED INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM DAMAGES OR OTHER
+// LIABILITY WHETHER IN AN ACTION OF CONTRACT TORT OR OTHERWISE ARISING FROM
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
+
+using System.Threading.Tasks;
+
+namespace Microsoft.Identity.Client.Internal.Instance
+{
+    internal class B2CAuthority : Authority
+    {
+        public B2CAuthority(string authority) : base(authority)
+        {
+        }
+
+        protected override Task<string> GetOpenIdConfigurationEndpoint(string host, string tenant, string userPrincipalName,
+            RequestContext requestContext)
+        {
+            return GetDefaultOpenIdConfigurationEndpoint();
+        }
+
+        protected override bool ExistsInValidatedAuthorityCache(string userPrincipalName)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        protected override void AddToValidatedAuthorities(string userPrincipalName)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        protected override string CreateEndpointForAuthorityType(string host, string tenant)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+}

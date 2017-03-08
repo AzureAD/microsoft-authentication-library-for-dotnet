@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
 {
     internal class AadAuthority : Authority
     {
-        private const string AadInstanceDiscoveryEndpoint = "https://login.windows.net/common/discovery/instance";
+        private const string AadInstanceDiscoveryEndpoint = "https://login.microsoftonline.com/common/discovery/instance";
 
 
         private static readonly HashSet<string> TrustedHostList = new HashSet<string>()

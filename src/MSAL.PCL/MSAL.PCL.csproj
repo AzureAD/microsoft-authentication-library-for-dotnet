@@ -64,6 +64,7 @@
     <Compile Include="Internal\Instance\AadAuthority.cs" />
     <Compile Include="Internal\Instance\AdfsAuthority.cs" />
     <Compile Include="Internal\Instance\AdfsWebFingerResponse.cs" />
+    <Compile Include="Internal\Instance\B2CAuthority.cs" />
     <Compile Include="Internal\Instance\DrsMetadataResponse.cs" />
     <Compile Include="Internal\Instance\TenantDiscoveryResponse.cs" />
     <Compile Include="Internal\Instance\InstanceDiscoveryResponse.cs" />

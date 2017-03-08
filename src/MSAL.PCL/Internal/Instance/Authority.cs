@@ -39,7 +39,8 @@ namespace Microsoft.Identity.Client.Internal.Instance
     internal enum AuthorityType
     {
         Aad,
-        Adfs
+        Adfs,
+        B2C
     }
 
     internal abstract class Authority
@@ -111,14 +112,27 @@ namespace Microsoft.Identity.Client.Internal.Instance
             authority = CanonicalizeUri(authority);
             ValidateAsUri(authority);
             Uri authorityUri = new Uri(authority);
-            string path = authorityUri.AbsolutePath.Substring(1);
-            string firstPath = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-            bool isAdfsAuthority = string.Compare(firstPath, "adfs", StringComparison.OrdinalIgnoreCase) == 0;
+            string[] pathSegments = authorityUri.Segments;
+            if (pathSegments == null || pathSegments.Length == 0)
+            {
+                throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath);    
+            }
+
+            bool isAdfsAuthority = string.Compare(pathSegments[0], "adfs", StringComparison.OrdinalIgnoreCase) == 0;
+            bool isB2cAuthority = string.Compare(pathSegments[0], "tfp", StringComparison.OrdinalIgnoreCase) == 0;
             string updatedAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Host,
-                firstPath);
+                pathSegments[0]);
+            
             if (isAdfsAuthority)
             {
-                return new AdfsAuthority(updatedAuthority);
+                throw new MsalException(MsalError.InvalidAuthorityType, "ADFS is not a supported authority");
+            }
+
+            if (isB2cAuthority)
+            {
+                updatedAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/{2}/{3}/", authorityUri.Host,
+                    pathSegments[0], pathSegments[1], pathSegments[2]);
+                return new B2CAuthority(updatedAuthority);
             }
 
             return new AadAuthority(updatedAuthority);
