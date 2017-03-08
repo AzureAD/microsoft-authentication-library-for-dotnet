@@ -14,10 +14,8 @@
     <Product>Microsoft.Identity.Client ($(TargetFramework))</Product>
     <IncludeSymbols>true</IncludeSymbols>
     <GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
-    <DelaySign>true</DelaySign>
-    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\build\MSAL.snk</AssemblyOriginatorKeyFile>
     <!-- Workaround until Xamarin supports PPDB -->
     <DebugType>full</DebugType>
   </PropertyGroup>
@@ -33,7 +31,7 @@
     <Compile Include="..\MSAL.PCL\**\*.cs" Exclude="..\MSAL.PCL\Properties\**\*.cs;..\MSAL.PCL\MsalOption.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.0-rc4-*" PrivateAssets="All" />
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'uap10.0' ">
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
