@@ -408,5 +408,25 @@ namespace Microsoft.Identity.Client
                 return allTokens;
             }
         }
+
+        internal void AddAccessTokenCacheItem(AccessTokenCacheItem accessTokenCacheItem)
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (lockObject)
+            {
+                TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem);
+            }
+        }
+
+        internal void AddRefreshTokenCacheItem(RefreshTokenCacheItem refreshTokenCacheItem)
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (lockObject)
+            {
+                TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem);
+            }
+        }
     }
 }

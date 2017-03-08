@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 
 namespace Microsoft.Identity.Client
 {
@@ -63,7 +64,15 @@ namespace Microsoft.Identity.Client
                 {
                     foreach (var atItem in cacheDict["access_tokens"])
                     {
+                        tokenCache.AddAccessTokenCacheItem(JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(atItem));
+                    }
+                }
 
+                if (cacheDict.ContainsKey("refresh_tokens"))
+                {
+                    foreach (var rtItem in cacheDict["refresh_tokens"])
+                    {
+                        tokenCache.AddRefreshTokenCacheItem(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(rtItem));
                     }
                 }
             }
