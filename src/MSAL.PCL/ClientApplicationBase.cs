@@ -151,19 +151,6 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        /*        /// <summary>
-                /// </summary>
-                /// <param name="scope"></param>
-                /// <returns></returns>
-                public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope)
-                {
-                    Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
-                    return
-                        await
-                            this.AcquireTokenSilentCommonAsync(authority, scope, (string) null, this.PlatformParameters,
-                                null, false).ConfigureAwait(false);
-                }*/
-
         /// <summary>
         /// </summary>
         /// <param name="scope"></param>
@@ -177,37 +164,6 @@ namespace Microsoft.Identity.Client
                     this.AcquireTokenSilentCommonAsync(authority, scope, user, false)
                         .ConfigureAwait(false);
         }
-
-        /*        /// <summary>
-                /// </summary>
-                /// <param name="scope"></param>
-                /// <param name="userIdentifier"></param>
-                /// <returns></returns>
-                public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier)
-                {
-                    Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
-                    return
-                        await
-                            this.AcquireTokenSilentCommonAsync(authority, scope, userIdentifier, this.PlatformParameters,
-                                false).ConfigureAwait(false);
-                }*/
-
-        /*        /// <summary>
-                /// </summary>
-                /// <param name="scope"></param>
-                /// <param name="userIdentifier"></param>
-                /// <param name="authority"></param>
-                /// <param name="forceRefresh"></param>
-                /// <returns></returns>
-                public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier,
-                    string authority, bool forceRefresh)
-                {
-                    Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
-                    return
-                        await
-                            this.AcquireTokenSilentCommonAsync(authorityInstance, scope, userIdentifier, this.PlatformParameters,
-                                forceRefresh).ConfigureAwait(false);
-                }*/
 
         /// <summary>
         /// </summary>

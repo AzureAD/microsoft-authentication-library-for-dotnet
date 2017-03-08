@@ -30,7 +30,7 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-    internal class Logger : ILogger
+    internal class Logger : IMsalLogger
     {
         internal static MsalEventSource MsalEventSource { get; } = new MsalEventSource();
 

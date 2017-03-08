@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client
             }
             else if (ownerWindow is IWin32Window)
             {
-                this.ownerWindow = (IWin32Window)ownerWindow;
+                this.ownerWindow = (IWin32Window) ownerWindow;
             }
             else if (ownerWindow is IntPtr)
             {
@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Client
             {
                 string url = MsalHelpers.UrlDecode(e.Url.ToString());
                 string msg = string.Format(CultureInfo.InvariantCulture, "Navigating to '{0}'.", url);
-                PlatformPlugin.Logger.Verbose(msg);
+                PlatformPlugin.MsalLogger.Verbose(msg);
             }
         }
 
@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Client
             {
                 string url = MsalHelpers.UrlDecode(e.Url.ToString());
                 string msg = string.Format(CultureInfo.InvariantCulture, "Navigated to '{0}'.", url);
-                PlatformPlugin.Logger.Verbose(msg);
+                PlatformPlugin.MsalLogger.Verbose(msg);
             }
         }
 
@@ -241,13 +241,13 @@ namespace Microsoft.Identity.Client
             {
                 if (this.webBrowser.IsBusy)
                 {
-                    PlatformPlugin.Logger.Verbose(
+                    PlatformPlugin.MsalLogger.Verbose(
                         string.Format(CultureInfo.InvariantCulture,
                             "WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                             this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
                             this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
                     this.webBrowser.Stop();
-                    PlatformPlugin.Logger.Verbose(
+                    PlatformPlugin.MsalLogger.Verbose(
                         string.Format(CultureInfo.InvariantCulture,
                             "WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                             this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,

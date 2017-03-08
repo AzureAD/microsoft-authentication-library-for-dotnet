@@ -67,7 +67,7 @@
     <Compile Include="Internal\Instance\DrsMetadataResponse.cs" />
     <Compile Include="Internal\Instance\TenantDiscoveryResponse.cs" />
     <Compile Include="Internal\Instance\InstanceDiscoveryResponse.cs" />
-    <Compile Include="Internal\ILogger.cs" />
+    <Compile Include="Internal\IMsalLogger.cs" />
     <Compile Include="Internal\OAuth2\OAuth2ResponseBase.cs" />
     <Compile Include="Internal\Requests\AuthenticationRequestParameters.cs" />
     <Compile Include="Internal\Http\HttpClientFactory.cs" />

@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
         public static ITokenCachePlugin TokenCachePlugin { get; set; }
-        public static ILogger Logger { get; set; }
+        public static IMsalLogger MsalLogger { get; set; }
         public static PlatformInformationBase PlatformInformation { get; set; }
         public static ICryptographyHelper CryptographyHelper { get; set; }
         public static IDeviceAuthHelper DeviceAuthHelper { get; set; }
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Internal
             InjectDependecies(
                 (IWebUIFactory)Activator.CreateInstance(assembly.GetType(Namespace + "WebUIFactory"), new RequestContext(Guid.Empty)),
                 (ITokenCachePlugin)Activator.CreateInstance(assembly.GetType(Namespace + "TokenCachePlugin")),
-                (ILogger)Activator.CreateInstance(assembly.GetType(Namespace + "Logger")),
+                (IMsalLogger)Activator.CreateInstance(assembly.GetType(Namespace + "Logger")),
                 (PlatformInformationBase)Activator.CreateInstance(assembly.GetType(Namespace + "PlatformInformation"), new RequestContext(Guid.Empty)),
                 (ICryptographyHelper)Activator.CreateInstance(assembly.GetType(Namespace + "CryptographyHelper")),
                 (IDeviceAuthHelper)Activator.CreateInstance(assembly.GetType(Namespace + "DeviceAuthHelper")),
@@ -87,13 +87,13 @@ namespace Microsoft.Identity.Client.Internal
                 );
         }
 
-        public static void InjectDependecies(IWebUIFactory webUIFactory, ITokenCachePlugin tokenCachePlugin, ILogger logger,
+        public static void InjectDependecies(IWebUIFactory webUIFactory, ITokenCachePlugin tokenCachePlugin, IMsalLogger logger,
             PlatformInformationBase platformInformation, ICryptographyHelper cryptographyHelper,
             IDeviceAuthHelper deviceAuthHelper, IBrokerHelper brokerHelper, IPlatformParameters platformParameters)
         {
             WebUIFactory = webUIFactory;
             TokenCachePlugin = tokenCachePlugin;
-            Logger = logger;
+            MsalLogger = logger;
             PlatformInformation = platformInformation;
             CryptographyHelper = cryptographyHelper;
             DeviceAuthHelper = deviceAuthHelper;
@@ -106,16 +106,16 @@ namespace Microsoft.Identity.Client.Internal
             switch (logLevel)
             {
                 case Client.MsalLogger.LogLevel.Error:
-                    Logger.Error(formattedMessage);
+                    MsalLogger.Error(formattedMessage);
                     break;
                 case Client.MsalLogger.LogLevel.Warning:
-                    Logger.Warning(formattedMessage);
+                    MsalLogger.Warning(formattedMessage);
                     break;
                 case Client.MsalLogger.LogLevel.Info:
-                    Logger.Information(formattedMessage);
+                    MsalLogger.Information(formattedMessage);
                     break;
                 case Client.MsalLogger.LogLevel.Verbose:
-                    Logger.Verbose(formattedMessage);
+                    MsalLogger.Verbose(formattedMessage);
                     break;
             }
         }

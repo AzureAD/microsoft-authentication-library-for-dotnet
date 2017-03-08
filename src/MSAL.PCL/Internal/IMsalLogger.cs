@@ -29,7 +29,7 @@ using System;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    internal interface ILogger
+    internal interface IMsalLogger
     {
         void Error(string message);
         void Warning(string message);

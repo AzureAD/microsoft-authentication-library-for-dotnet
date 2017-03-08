@@ -235,7 +235,7 @@ namespace Microsoft.Identity.Client
                 }
                 catch (PackageManager.NameNotFoundException exc)
                 {
-                    PlatformPlugin.Logger.Error(exc);
+                    PlatformPlugin.MsalLogger.Error(exc);
                     // swallow this exception. If the package does not exist then exception will be thrown.
                 }
             }
