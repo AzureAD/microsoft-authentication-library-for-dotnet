@@ -91,7 +91,11 @@ namespace Test.MSAL.NET.Unit
             IEnumerable<User> users = app.Users;
             Assert.IsNotNull(users);
             Assert.IsFalse(users.Any());
-            app.UserTokenCache = new TokenCache(TestConstants.ClientId);
+            app.UserTokenCache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
+
             TokenCacheHelper.PopulateCache(_tokenCachePlugin);
             users = app.Users;
             Assert.IsNotNull(users);
@@ -105,7 +109,6 @@ namespace Test.MSAL.NET.Unit
             // another cache entry for different home object id. user count should be 2.
             TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
-                TestConstants.UniqueId, TestConstants.DisplayableId,
                 TestConstants.HomeObjectId + "more");
 
 
@@ -127,7 +130,6 @@ namespace Test.MSAL.NET.Unit
 
             // another cache entry for different home object id. user count should be 2.
             TokenCacheKey rtKey = new TokenCacheKey(null, null, TestConstants.ClientId,
-                TestConstants.UniqueId + "more", TestConstants.DisplayableId,
                 TestConstants.HomeObjectId + "more");
             
             RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
@@ -161,7 +163,10 @@ namespace Test.MSAL.NET.Unit
         public void GetUsersAndSignThemOutTest()
         {
             PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
-            app.UserTokenCache = new TokenCache(TestConstants.ClientId);
+            app.UserTokenCache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
             TokenCacheHelper.PopulateCache(_tokenCachePlugin);
 
             foreach (var user in app.Users)
@@ -169,7 +174,7 @@ namespace Test.MSAL.NET.Unit
                 user.SignOut();
             }
 
-            Assert.AreEqual(0, app.UserTokenCache.TokenCount);
+            Assert.AreEqual(0, app.UserTokenCache.AccessTokenCount);
             Assert.AreEqual(0, app.UserTokenCache.RefreshTokenCount);
         }
 
@@ -189,11 +194,13 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
 
-            app.UserTokenCache = new TokenCache(TestConstants.ClientId);
+            app.UserTokenCache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
             TokenCacheHelper.PopulateCache(_tokenCachePlugin);
             _tokenCachePlugin.TokenCacheDictionary.Remove(new TokenCacheKey(TestConstants.AuthorityGuestTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
-                TestConstants.UniqueId + "more", TestConstants.DisplayableId,
                 TestConstants.HomeObjectId).ToString());
 
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), new User()
@@ -210,7 +217,7 @@ namespace Test.MSAL.NET.Unit
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
-
+        
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSilentForceRefreshTest()
@@ -227,7 +234,10 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
 
-            app.UserTokenCache = new TokenCache(TestConstants.ClientId);
+            app.UserTokenCache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
             TokenCacheHelper.PopulateCache(_tokenCachePlugin);
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
@@ -274,7 +284,10 @@ namespace Test.MSAL.NET.Unit
             });
 
             //populate cache
-            app.UserTokenCache = new TokenCache(TestConstants.ClientId);
+            app.UserTokenCache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
             TokenCacheHelper.PopulateCache(_tokenCachePlugin);
 
             MockHttpMessageHandler mockHandler = new MockHttpMessageHandler();

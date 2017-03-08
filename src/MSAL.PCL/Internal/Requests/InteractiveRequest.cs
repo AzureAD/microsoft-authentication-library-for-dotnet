@@ -179,11 +179,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 this.GetDecoratedScope(
                     new SortedSet<string>(AuthenticationRequestParameters.Scope.Union(this._additionalScope)));
 
-            Dictionary<string, string> authorizationRequestParameters =
-                new Dictionary<string, string>(AuthenticationRequestParameters.ClientKey.ToParameters());
+            Dictionary<string, string> authorizationRequestParameters = new Dictionary<string, string>();
             authorizationRequestParameters[OAuth2Parameter.Scope] = unionScope.AsSingleString();
             authorizationRequestParameters[OAuth2Parameter.ResponseType] = OAuth2ResponseType.Code;
 
+            authorizationRequestParameters[OAuth2Parameter.ClientId] = AuthenticationRequestParameters.ClientId;
             authorizationRequestParameters[OAuth2Parameter.RedirectUri] =
                 AuthenticationRequestParameters.RedirectUri.AbsoluteUri;
 

@@ -78,37 +78,35 @@ namespace Microsoft.Identity.Client
             return list;
         }
 
-        public void SaveToken(AccessTokenCacheItem accessTokenItem)
+        public void SaveAccessToken(string cacheKey, string accessTokenItem)
         {
             CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(accessTokenItem.GetTokenCacheKey().ToString());
+            string hashed = helper.CreateSha256Hash(cacheKey);
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
-            string serializedToken = JsonHelper.SerializeToJson(accessTokenItem);
-            SetCacheValue(composite, serializedToken);
+            SetCacheValue(composite, accessTokenItem);
             _tokenContainer.Values[hashed] = composite;
         }
 
-        public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        public void SaveRefreshToken(string cacheKey, string refreshTokenItem)
         {
             CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(refreshTokenItem.GetTokenCacheKey().ToString());
+            string hashed = helper.CreateSha256Hash(cacheKey);
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
-            string serializedToken = JsonHelper.SerializeToJson(refreshTokenItem);
-            SetCacheValue(composite, serializedToken);
+            SetCacheValue(composite, refreshTokenItem);
             _refreshTokenContainer.Values[hashed] = composite;
         }
 
-        public void DeleteToken(TokenCacheKey key)
+        public void DeleteAccessToken(string cacheKey)
         {
             CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(key.ToString());
+            string hashed = helper.CreateSha256Hash(cacheKey);
             _tokenContainer.Values.Remove(hashed);
         }
 
-        public void DeleteRefreshToken(TokenCacheKey key)
+        public void DeleteRefreshToken(string cacheKey)
         {
             CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(key.ToString());
+            string hashed = helper.CreateSha256Hash(cacheKey);
             _refreshTokenContainer.Values.Remove(hashed);
         }
 

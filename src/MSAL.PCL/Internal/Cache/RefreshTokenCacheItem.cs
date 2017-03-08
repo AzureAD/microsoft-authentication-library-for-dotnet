@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public override TokenCacheKey GetTokenCacheKey()
         {
-            return new TokenCacheKey(null, null, ClientId, null, null, User.HomeObjectId);
+            return new TokenCacheKey(null, null, ClientId, User.HomeObjectId);
         }
     }
 }

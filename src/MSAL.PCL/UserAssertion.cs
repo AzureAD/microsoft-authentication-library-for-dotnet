@@ -47,22 +47,11 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Constructor to create credential with client id, assertion and assertionType
+        /// Constructor to create credential with assertion and assertionType
         /// </summary>
         /// <param name="assertion">Assertion representing the user.</param>
         /// <param name="assertionType">Type of the assertion representing the user.</param>
         public UserAssertion(string assertion, string assertionType)
-            : this(assertion, assertionType, null)
-        {
-        }
-
-        /// <summary>
-        /// Constructor to create credential with client id, assertion, assertionType and userId
-        /// </summary>
-        /// <param name="assertion">Assertion representing the user.</param>
-        /// <param name="assertionType">Type of the assertion representing the user.</param>
-        /// <param name="userName">Identity of the user token is requested for. This parameter can be null.</param>
-        public UserAssertion(string assertion, string assertionType, string userName)
         {
             if (string.IsNullOrWhiteSpace(assertion))
             {
@@ -76,7 +65,6 @@ namespace Microsoft.Identity.Client
 
             this.AssertionType = assertionType;
             this.Assertion = assertion;
-            this.UserName = userName;
             AssertionHash =
                 PlatformPlugin.CryptographyHelper.CreateSha256Hash(Assertion);
         }
@@ -90,11 +78,6 @@ namespace Microsoft.Identity.Client
         /// Gets the assertion type.
         /// </summary>
         public string AssertionType { get; private set; }
-
-        /// <summary>
-        /// Gets name of the user.
-        /// </summary>
-        public string UserName { get; internal set; }
 
         internal string AssertionHash { get; set; }
     }

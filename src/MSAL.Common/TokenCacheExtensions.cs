@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
         /// <param name="state"></param>
         public static void Deserialize(this TokenCache tokencache, byte[] state)
         {
-            lock (tokencache.lockObject)
+            lock (tokencache.LockObject)
             {
 
             }
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public static byte[] Serialize(this TokenCache tokencache)
         {
-            lock (tokencache.lockObject)
+            lock (tokencache.LockObject)
             {
 
                 return null;

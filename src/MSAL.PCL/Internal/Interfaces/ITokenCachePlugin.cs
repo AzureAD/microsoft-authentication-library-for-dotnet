@@ -36,12 +36,12 @@ namespace Microsoft.Identity.Client.Internal.Interfaces
 
         ICollection<string> AllRefreshTokens();
 
-        void SaveToken(AccessTokenCacheItem accessTokenItem);
+        void SaveAccessToken(string cacheKey, string accessTokenItem);
 
-        void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem);
+        void SaveRefreshToken(string cacheKey, string refreshTokenItem);
 
-        void DeleteToken(TokenCacheKey key);
+        void DeleteAccessToken(string cacheKey);
 
-        void DeleteRefreshToken(TokenCacheKey key);
+        void DeleteRefreshToken(string cacheKey);
     }
 }

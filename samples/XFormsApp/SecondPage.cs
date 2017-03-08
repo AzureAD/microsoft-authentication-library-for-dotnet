@@ -74,7 +74,7 @@ namespace XFormsApp
             try
             {
                 AuthenticationResult result = await application.AcquireTokenAsync(new string[] {"Mail.Read"});
-                this.result.Text = result.Token;
+                this.result.Text = result.AccessToken;
             }
             catch (Exception exc)
             {

@@ -63,30 +63,28 @@ namespace Microsoft.Identity.Client
             return _refreshTokenSharedPreference.All.Values as ICollection<string>;
         }
 
-        public void SaveToken(AccessTokenCacheItem accessTokenItem)
+        public void SaveAccessToken(string cacheKey, string accessTokenItem)
         {
-            TokenCacheKey key = accessTokenItem.GetTokenCacheKey();
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(key.ToString(), JsonHelper.SerializeToJson(accessTokenItem));
+            editor.PutString(cacheKey, accessTokenItem);
             editor.Apply();
         }
 
-        public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        public void SaveRefreshToken(string cacheKey, string refreshTokenItem)
         {
-            TokenCacheKey key = refreshTokenItem.GetTokenCacheKey();
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(key.ToString(), JsonHelper.SerializeToJson(refreshTokenItem));
+            editor.PutString(cacheKey, refreshTokenItem);
             editor.Apply();
         }
 
-        public void DeleteToken(TokenCacheKey key)
+        public void DeleteAccessToken(string cacheKey)
         {
-            Delete(key.ToString(), _accessTokenSharedPreference.Edit());
+            Delete(cacheKey, _accessTokenSharedPreference.Edit());
         }
 
-        public void DeleteRefreshToken(TokenCacheKey key)
+        public void DeleteRefreshToken(string cacheKey)
         {
-            Delete(key.ToString(), _refreshTokenSharedPreference.Edit());
+            Delete(cacheKey, _refreshTokenSharedPreference.Edit());
         }
 
         private void Delete(string key, ISharedPreferencesEditor editor)

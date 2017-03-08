@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 string.Format(CultureInfo.InvariantCulture,
                     "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
                     Authority.CanonicalAuthority, authenticationRequestParameters.Scope.AsSingleString(),
-                    authenticationRequestParameters.ClientKey.ClientId,
+                    authenticationRequestParameters.ClientId,
                     (TokenCache != null)
                         ? TokenCache.GetType().FullName
                         : null));
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             SortedSet<string> set = new SortedSet<string>(inputScope.ToArray());
             set.UnionWith(OAuth2Value.ReservedScopes.CreateSetFromArray());
-            set.Remove(AuthenticationRequestParameters.ClientKey.ClientId);
+            set.Remove(AuthenticationRequestParameters.ClientId);
             return set;
         }
 
@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     OAuth2Value.ReservedScopes.AsSingleString()));
             }
 
-            if (scopesToValidate.Contains(AuthenticationRequestParameters.ClientKey.ClientId))
+            if (scopesToValidate.Contains(AuthenticationRequestParameters.ClientId))
             {
                 if (scopesToValidate.Count > 1)
                 {
@@ -116,8 +116,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult result = null;
             try
             {
+                //authority endpoints resolution and validation 
                 await this.PreRunAsync().ConfigureAwait(false);
-
                 await this.PreTokenRequest().ConfigureAwait(false);
                 await this.SendTokenRequestAsync().ConfigureAwait(false);
                 //save to cache if no access token item found
@@ -138,16 +138,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
+        internal virtual async Task PreRunAsync()
+        {
+            await this.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, this.RequestContext).ConfigureAwait(false);
+        }
+
         private AccessTokenCacheItem SaveTokenResponseToCache()
         {
             if (StoreToCache)
             {
-                this.TokenCache.SaveAccessAndRefreshToken(this.Authority.CanonicalAuthority,
-                    AuthenticationRequestParameters.ClientKey.ClientId, Response);
+                this.TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
             }
 
             return new AccessTokenCacheItem(this.Authority.CanonicalAuthority,
-                AuthenticationRequestParameters.ClientKey.ClientId, Response);
+                AuthenticationRequestParameters.ClientId, Response);
         }
 
         protected virtual bool BrokerInvocationRequired()
@@ -159,11 +163,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             LogReturnedToken(result);
             return CompletedTask;
-        }
-
-        internal virtual async Task PreRunAsync()
-        {
-            await this.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, this.RequestContext).ConfigureAwait(false);
         }
 
         internal virtual Task PreTokenRequest()
@@ -178,7 +177,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (result.User != null)
             {
                 result.User.TokenCache = this.TokenCache;
-                result.User.ClientId = AuthenticationRequestParameters.ClientKey.ClientId;
+                result.User.ClientId = AuthenticationRequestParameters.ClientId;
                 result.User.Authority = this.Authority.CanonicalAuthority;
             }
 
@@ -190,7 +189,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected virtual async Task SendTokenRequestAsync()
         {
             OAuth2Client client = new OAuth2Client();
-            foreach (var entry in AuthenticationRequestParameters.ClientKey.ToParameters())
+            client.AddBodyParameter(OAuth2Parameter.ClientId, AuthenticationRequestParameters.ClientId);
+            foreach (var entry in AuthenticationRequestParameters.ToParameters())
             {
                 client.AddBodyParameter(entry.Key, entry.Value);
             }
@@ -216,9 +216,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogReturnedToken(AuthenticationResult result)
         {
-            if (result.Token != null)
+            if (result.AccessToken != null)
             {
-                string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.Token);
+                string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.AccessToken);
 
                 PlatformPlugin.Logger.Information(this.RequestContext,
                     string.Format(CultureInfo.InvariantCulture,

@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the AccessToken requested.
         /// </summary>
-        public string Token => _accessTokenCacheItem.AccessToken;
+        public string AccessToken => _accessTokenCacheItem.AccessToken;
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the Token property ceases to be valid.
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Created authorization header</returns>
         public string CreateAuthorizationHeader()
         {
-            return Oauth2AuthorizationHeader + Token;
+            return Oauth2AuthorizationHeader + AccessToken;
         }
     }
 }

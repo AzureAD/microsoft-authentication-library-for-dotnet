@@ -66,24 +66,24 @@ namespace Microsoft.Identity.Client
                         v => !string.IsNullOrEmpty(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(v).RefreshToken)).ToList());
         }
 
-        public void SaveToken(AccessTokenCacheItem accessTokenItem)
+        public void SaveAccessToken(string cacheKey, string accessTokenItem)
         {
-            TokenCacheDictionary[accessTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(accessTokenItem);
+            TokenCacheDictionary[cacheKey] = accessTokenItem;
         }
 
-        public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        public void SaveRefreshToken(string cacheKey, string refreshTokenItem)
         {
-            TokenCacheDictionary[refreshTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(refreshTokenItem);
+            TokenCacheDictionary[cacheKey] = refreshTokenItem;
         }
 
-        public void DeleteToken(TokenCacheKey key)
+        public void DeleteAccessToken(string cacheKey)
         {
-            TokenCacheDictionary.Remove(key.ToString());
+            TokenCacheDictionary.Remove(cacheKey);
         }
 
-        public void DeleteRefreshToken(TokenCacheKey key)
+        public void DeleteRefreshToken(string cacheKey)
         {
-            TokenCacheDictionary.Remove(key.ToString());
+            TokenCacheDictionary.Remove(cacheKey);
         }
     }
 }

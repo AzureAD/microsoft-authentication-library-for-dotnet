@@ -40,13 +40,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.UserAssertion));
             }
-
-            authenticationRequestParameters.User = new User {DisplayableId = authenticationRequestParameters.UserAssertion.UserName};
         }
 
         protected override async Task SendTokenRequestAsync()
         {
-            await base.SendTokenRequestAsync().ConfigureAwait(false);
+            // look for access token in the cache first.
+            // no access token is found, then it means token does not exist
+            // or new assertion has been passed. We should not use Refresh Token
+            // for the user because the new incoming token may have updated claims
+            // like mfa etc.
+            AccessTokenItem
+                 = TokenCache.FindAccessToken(AuthenticationRequestParameters);
+            if (AccessTokenItem == null)
+            {
+                await base.SendTokenRequestAsync().ConfigureAwait(false);
+            }
         }
 
         protected override void SetAdditionalRequestParameters(OAuth2Client client)
@@ -55,9 +63,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.UserAssertion.AssertionType);
             client.AddBodyParameter(OAuth2Parameter.Assertion, AuthenticationRequestParameters.UserAssertion.Assertion);
             client.AddBodyParameter(OAuth2Parameter.RequestedTokenUse, OAuth2RequestedTokenUse.OnBehalfOf);
-
-            //TODO To request id_token in response
-            //requestParameters[OAuth2Parameter.Scope] = OAuth2Value.ScopeOpenId;
         }
     }
 }
