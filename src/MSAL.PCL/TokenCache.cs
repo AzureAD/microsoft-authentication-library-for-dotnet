@@ -83,29 +83,7 @@ namespace Microsoft.Identity.Client
 
             set { this.hasStateChanged = value; }
         }
-
-        /// <summary>
-        /// Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
-        /// impact all the instances of <see cref="PublicClientApplication" /> which share that cache.
-        /// </summary>
-        internal void Clear()
-        {
-            lock (LockObject)
-            {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-                {
-                    TokenCache = this,
-                    ClientId = ClientId,
-                    User = null
-                };
-
-                OnBeforeAccess(args);
-                OnBeforeWrite(args);
-                //_tokenCacheAccessor.DeleteAll(_clientId);
-                OnAfterAccess(args);
-            }
-        }
-
+        
         internal void OnAfterAccess(TokenCacheNotificationArgs args)
         {
             AfterAccess?.Invoke(args);
