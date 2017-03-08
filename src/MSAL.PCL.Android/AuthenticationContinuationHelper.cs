@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
                     break;
             }
 
-            WebUI.SetAuthorizationResult(authorizationResult);
+            WebUI.SetAuthorizationResult(authorizationResult, requestContext);
         }
 
         private static AuthorizationResult CreateResultForOkResponse(string url)

@@ -31,13 +31,13 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal class RequestContext
     {
+        public string CorrelationId { get; }
+        public MsalLogger MsalLogger { get; set; }
+
         public RequestContext(Guid correlationId)
         {
             this.CorrelationId = correlationId.ToString();
             this.MsalLogger = new MsalLogger(correlationId);
         }
-
-        public string CorrelationId { get; }
-        public MsalLogger MsalLogger { get; set; }
     }
 }

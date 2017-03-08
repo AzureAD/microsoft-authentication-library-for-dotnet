@@ -51,9 +51,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext)
         {
-            MsalLogger logger = new MsalLogger(requestContext);
-
-            bool ssoMode = ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri);
+           bool ssoMode = ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri);
 
             WebAuthenticationResult webAuthenticationResult;
             WebAuthenticationOptions options = (this.useCorporateNetwork &&
@@ -83,7 +81,7 @@ namespace Microsoft.Identity.Client
 
             catch (Exception ex)
             {
-                logger.Error(ex);
+                requestContext.MsalLogger.Error(ex);
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
 

@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             Assembly assembly = LoadPlatformSpecificAssembly();
             InjectDependecies(
-                (IWebUIFactory)Activator.CreateInstance(assembly.GetType(Namespace + "WebUIFactory")),
+                (IWebUIFactory)Activator.CreateInstance(assembly.GetType(Namespace + "WebUIFactory"), new RequestContext(Guid.Empty)),
                 (ITokenCachePlugin)Activator.CreateInstance(assembly.GetType(Namespace + "TokenCachePlugin")),
                 (ILogger)Activator.CreateInstance(assembly.GetType(Namespace + "Logger")),
                 (PlatformInformationBase)Activator.CreateInstance(assembly.GetType(Namespace + "PlatformInformation"), new RequestContext(Guid.Empty)),

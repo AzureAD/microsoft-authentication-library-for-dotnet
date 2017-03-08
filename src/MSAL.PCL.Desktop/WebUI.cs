@@ -43,9 +43,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext)
         {
-            MsalLogger logger = new MsalLogger(requestContext);
-
-            AuthorizationResult authorizationResult = null;
+           AuthorizationResult authorizationResult = null;
 
             var sendAuthorizeRequest = new Action(
                 delegate { authorizationResult = this.Authenticate(authorizationUri, redirectUri); });
@@ -63,7 +61,7 @@ namespace Microsoft.Identity.Client
                     }
                     catch (AggregateException ae)
                     {
-                        logger.Error(ae.InnerException);
+                        requestContext.MsalLogger.Error(ae.InnerException);
                         // Any exception thrown as a result of running task will cause AggregateException to be thrown with 
                         // actual exception as inner.
                         Exception innerException = ae.InnerExceptions[0];

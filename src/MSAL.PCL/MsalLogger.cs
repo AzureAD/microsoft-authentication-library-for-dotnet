@@ -46,20 +46,6 @@ namespace Microsoft.Identity.Client
             this.CorrelationId = correlationId;
         }
 
-        internal MsalLogger()
-        {
-
-        }
-
-        internal MsalLogger(RequestContext requestContext)
-        {
-            if (requestContext != null)
-            {
-                this.CorrelationId = Guid.Parse(requestContext.CorrelationId);
-            }
-        }
-
-        // CorrelationId on the logger is set when the correlationId on the client application is set.
         internal Guid CorrelationId { get; set; }
 
         internal LogLevel ApplicationLogLevel { get; set; } = LogLevel.Info;

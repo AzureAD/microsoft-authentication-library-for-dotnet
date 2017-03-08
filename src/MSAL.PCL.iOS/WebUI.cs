@@ -78,8 +78,6 @@ namespace Microsoft.Identity.Client
 
         public void Authenticate(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
-            MsalLogger logger = new MsalLogger(requestContext);
-
             try
             {
                 safariViewController = new SFSafariViewController(new NSUrl(authorizationUri.AbsoluteUri), false);
@@ -91,7 +89,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                logger.Error(ex);
+                requestContext.MsalLogger.Error(ex);
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
         }

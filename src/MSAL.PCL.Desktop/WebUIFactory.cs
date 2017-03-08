@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
@@ -33,18 +34,25 @@ namespace Microsoft.Identity.Client
     internal class WebUIFactory : IWebUIFactory
     {
         private PlatformParameters parameters;
+        
+        protected RequestContext RequestContext { get; set; }
+
+        public WebUIFactory(RequestContext requestContext)
+        {
+            RequestContext = requestContext;
+        }
 
         public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters)
         {
             this.parameters = inputParameters as PlatformParameters;
             if (this.parameters == null)
             {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
+                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(inputParameters));
             }
 
             if (parameters.UseHiddenBrowser)
             {
-                return new SilentWebUI {OwnerWindow = this.parameters.OwnerWindow};
+                return new SilentWebUI(RequestContext) {OwnerWindow = this.parameters.OwnerWindow};
             }
 
             return new InteractiveWebUI {OwnerWindow = this.parameters.OwnerWindow};
