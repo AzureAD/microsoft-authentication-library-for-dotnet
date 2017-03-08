@@ -52,8 +52,8 @@ namespace Microsoft.Identity.Client
         {
             lock (tokenCache.LockObject)
             {
-                Dictionary<string, ICollection<string>> cacheDict = JsonHelper
-                    .DeserializeFromJson<Dictionary<string, ICollection<string>>>(state);
+                Dictionary<string, IEnumerable<string>> cacheDict = JsonHelper
+                    .DeserializeFromJson<Dictionary<string, IEnumerable<string>>>(state);
                 if (cacheDict == null || cacheDict.Count == 0)
                 {
                     //TODO log about empty cache
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client
             // reads the underlying in-memory dictionary and dumps out the content as a JSON
             lock (tokenCache.LockObject)
             {
-                Dictionary<string, ICollection<string>> cacheDict = new Dictionary<string, ICollection<string>>();
+                Dictionary<string, IEnumerable<string>> cacheDict = new Dictionary<string, IEnumerable<string>>();
                 cacheDict["access_tokens"] = tokenCache.GetAllAccessTokenCacheItems();
                 cacheDict["refresh_tokens"] = tokenCache.GetAllRefreshTokenCacheItems();
                 return JsonHelper.SerializeToJson(cacheDict).ToByteArray();

@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             TokenCachePlugin.SaveRefreshToken(refreshTokenItem.GetTokenCacheKey().ToString(), JsonHelper.SerializeToJson(refreshTokenItem));
         }
         
-        public IList<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
+        public ICollection<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
         {
             ICollection<string> allRefreshTokens = TokenCachePlugin.AllRefreshTokens();
             IList<RefreshTokenCacheItem> matchedRefreshTokens = new List<RefreshTokenCacheItem>();
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return TokenCachePlugin.GetAllAccessTokens();
         }
 
-        public IList<AccessTokenCacheItem> GetAllAccessTokens(string clientId)
+        public ICollection<AccessTokenCacheItem> GetAllAccessTokens(string clientId)
         {
             ICollection<string> allTokensAsString = this.GetAllAccessTokensAsString();
             IList<AccessTokenCacheItem> returnList = new List<AccessTokenCacheItem>();
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return TokenCachePlugin.AllRefreshTokens();
         }
         
-        public IList<RefreshTokenCacheItem> GetAllRefreshTokens(string clientId)
+        public ICollection<RefreshTokenCacheItem> GetAllRefreshTokens(string clientId)
         {
             ICollection<string> allTokensAsString = GetAllRefreshTokensAsString();
             IList<RefreshTokenCacheItem> returnList = new List<RefreshTokenCacheItem>();
