@@ -39,18 +39,18 @@ namespace Microsoft.Identity.Client.Internal.Http
     internal class HttpRequest
     {
         public static async Task<HttpResponse> SendPost(Uri endpoint, Dictionary<string, string> headers,
-            Dictionary<string, string> bodyParameters, RequestContext callstate)
+            Dictionary<string, string> bodyParameters, RequestContext requestContext)
         {
             return
                 await
-                    ExecuteWithRetry(endpoint, headers, bodyParameters, HttpMethod.Post, callstate)
+                    ExecuteWithRetry(endpoint, headers, bodyParameters, HttpMethod.Post, requestContext)
                         .ConfigureAwait(false);
         }
 
         public static async Task<HttpResponse> SendGet(Uri endpoint, Dictionary<string, string> headers,
-            RequestContext callstate)
+            RequestContext requestContext)
         {
-            return await ExecuteWithRetry(endpoint, headers, null, HttpMethod.Get, callstate).ConfigureAwait(false);
+            return await ExecuteWithRetry(endpoint, headers, null, HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, Dictionary<string, string> headers)
@@ -74,8 +74,7 @@ namespace Microsoft.Identity.Client.Internal.Http
         {
             bool isRetryable = false;
             HttpResponse response = null;
-            MsalLogger msalLogger = new MsalLogger(requestContext);
-
+           
             try
             {
                 response = await Execute(endpoint, headers, bodyParameters, method);
@@ -85,7 +84,7 @@ namespace Microsoft.Identity.Client.Internal.Http
                     return response;
                 }
 
-                msalLogger.Info(string.Format(CultureInfo.InvariantCulture,
+                requestContext.MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
                         "Response status code does not indicate success: {0} ({1}).",
                         (int)response.StatusCode, response.StatusCode));
 
@@ -98,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal.Http
             }
             catch (TaskCanceledException exception)
             {
-                msalLogger.Error(exception);
+                requestContext.MsalLogger.Error(exception);
                 isRetryable = true;
             }
 
@@ -106,11 +105,11 @@ namespace Microsoft.Identity.Client.Internal.Http
             {
                 if (retry)
                 {
-                    msalLogger.Info("Retrying one more time..");
+                    requestContext.MsalLogger.Info("Retrying one more time..");
                     return await ExecuteWithRetry(endpoint, headers, bodyParameters, method, requestContext, false);
                 }
 
-                msalLogger.Info("Request retry failed.");
+                requestContext.MsalLogger.Info("Request retry failed.");
                 throw new RetryableRequestException();
             }
 

@@ -71,7 +71,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Authority = authority,
                 ClientKey = new ClientKey(TestConstants.ClientId),
                 Scope = TestConstants.Scope,
-                TokenCache = cache
+                TokenCache = cache,
+                RequestContext = new RequestContext(Guid.Empty)
             };
 
             parameters.User = null;
@@ -117,6 +118,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.ClientId),
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache,
+                RequestContext = new RequestContext(Guid.Empty),
                 User = new User()
                 {
                     HomeObjectId = TestConstants.HomeObjectId,
@@ -169,7 +171,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientKey = new ClientKey(TestConstants.ClientId),
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache,
-                User = new User() { UniqueId = ""}
+                User = new User() { UniqueId = ""},
+                RequestContext = new RequestContext(Guid.Empty)
             };
             
             try

@@ -37,7 +37,9 @@ namespace Microsoft.Identity.Client
 {
     internal class PlatformInformation : PlatformInformationBase
     {
-        private static readonly MsalLogger Logger = new MsalLogger();
+        public PlatformInformation(RequestContext requestContext) : base(requestContext)
+        {
+        }
 
         public override string GetProductName()
         {
@@ -74,7 +76,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetProcessorArchitecture()
         {
-            return NativeMethods.GetProcessorArchitecture();
+            return NativeMethods.GetProcessorArchitecture(RequestContext);
         }
 
         public override string GetOperatingSystem()
@@ -122,7 +124,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                Logger.Warning(ex.Message);
+                RequestContext.MsalLogger.Warning(ex.Message);
                 // ignore the exception as the result is already set to false;
             }
 
@@ -148,7 +150,7 @@ namespace Microsoft.Identity.Client
             [DllImport("kernel32.dll")]
             private static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
 
-            public static string GetProcessorArchitecture()
+            public static string GetProcessorArchitecture(RequestContext requestContext)
             {
                 try
                 {
@@ -172,7 +174,7 @@ namespace Microsoft.Identity.Client
                 }
                 catch (Exception ex)
                 {
-                    Logger.Warning(ex.Message);
+                    requestContext.MsalLogger.Warning(ex.Message);
                     return "Unknown";
                 }
             }

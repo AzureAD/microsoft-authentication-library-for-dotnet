@@ -70,10 +70,8 @@ namespace Microsoft.Identity.Client.Internal
 
         [DataMember(Name = IdTokenClaim.HomeObjectId, IsRequired = false)]
         public string HomeObjectId { get; set; }
-        
-        private static readonly MsalLogger MsalLogger = new MsalLogger();
-
-        public static IdToken Parse(string idToken)
+   
+        public static IdToken Parse(string idToken, RequestContext requestContext)
         {
             IdToken idTokenBody = null;
             if (!string.IsNullOrWhiteSpace(idToken))
@@ -94,12 +92,12 @@ namespace Microsoft.Identity.Client.Internal
                     }
                     catch (SerializationException ex)
                     {
-                        MsalLogger.Warning(ex.Message);
+                        requestContext.MsalLogger.Warning(ex.Message);
                         // We silently ignore the id token if exception occurs.   
                     }
                     catch (ArgumentException ex)
                     {
-                        MsalLogger.Warning(ex.Message);
+                        requestContext.MsalLogger.Warning(ex.Message);
                         // Again, we silently ignore the id token if exception occurs.   
                     }
                 }

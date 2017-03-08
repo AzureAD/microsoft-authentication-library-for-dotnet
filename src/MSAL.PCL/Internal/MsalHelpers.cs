@@ -200,8 +200,6 @@ namespace Microsoft.Identity.Client.Internal
             bool lowercaseKeys,
             RequestContext requestContext)
         {
-            MsalLogger msalLogger = new MsalLogger(requestContext);
-
             var response = new Dictionary<string, string>();
 
             List<string> queryPairs = SplitWithQuotes(input, delimiter);
@@ -231,7 +229,7 @@ namespace Microsoft.Identity.Client.Internal
 
                     if (response.ContainsKey(key) && requestContext != null)
                     {
-                        msalLogger.Warning(string.Format(CultureInfo.InvariantCulture,
+                        requestContext.MsalLogger.Warning(string.Format(CultureInfo.InvariantCulture,
                                 "Key/value pair list contains redundant key '{0}'.", key));
                     }
 

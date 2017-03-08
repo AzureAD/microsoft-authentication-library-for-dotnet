@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal
                 (IWebUIFactory)Activator.CreateInstance(assembly.GetType(Namespace + "WebUIFactory")),
                 (ITokenCachePlugin)Activator.CreateInstance(assembly.GetType(Namespace + "TokenCachePlugin")),
                 (ILogger)Activator.CreateInstance(assembly.GetType(Namespace + "Logger")),
-                (PlatformInformationBase)Activator.CreateInstance(assembly.GetType(Namespace + "PlatformInformation")),
+                (PlatformInformationBase)Activator.CreateInstance(assembly.GetType(Namespace + "PlatformInformation"), new RequestContext(Guid.Empty)),
                 (ICryptographyHelper)Activator.CreateInstance(assembly.GetType(Namespace + "CryptographyHelper")),
                 (IDeviceAuthHelper)Activator.CreateInstance(assembly.GetType(Namespace + "DeviceAuthHelper")),
                 (IBrokerHelper)Activator.CreateInstance(assembly.GetType(Namespace + "BrokerHelper")),

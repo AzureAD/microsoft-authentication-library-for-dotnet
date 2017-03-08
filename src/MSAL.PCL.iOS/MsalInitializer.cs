@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
@@ -35,8 +36,10 @@ namespace Microsoft.Identity.Client
         {
             PlatformPluginSwitch.DynamicallyLinkAssembly = false;
 
-            PlatformPlugin.InjectDependecies(new WebUIFactory(), new TokenCachePlugin(), new Logger(),
-                new PlatformInformation(), new CryptographyHelper(), new DeviceAuthHelper(), new BrokerHelper(),
+            RequestContext requestContext = new RequestContext(Guid.Empty);
+
+            PlatformPlugin.InjectDependecies(new WebUIFactory(), new TokenCachePlugin(requestContext), new Logger(),
+                new PlatformInformation(requestContext), new CryptographyHelper(), new DeviceAuthHelper(), new BrokerHelper(),
                 new PlatformParameters());
         }
     }

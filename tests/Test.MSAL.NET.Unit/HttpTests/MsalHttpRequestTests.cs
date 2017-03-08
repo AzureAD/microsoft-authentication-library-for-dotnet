@@ -135,7 +135,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
             try
             {
                 var msalHttpResponse = HttpRequest.SendGet(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), null).Result;
+                    new Dictionary<string, string>(), new RequestContext(Guid.Empty)).Result;
                 Assert.Fail("request should have failed");
             }
             catch (AggregateException exc)
@@ -165,7 +165,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
             try
             {
                 var msalHttpResponse = HttpRequest.SendPost(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), null, null).Result;
+                    new Dictionary<string, string>(), null, new RequestContext(Guid.Empty)).Result;
                 Assert.Fail("request should have failed");
             }
             catch (AggregateException exc)
@@ -197,7 +197,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
             try
             {
                 var msalHttpResponse = HttpRequest.SendGet(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), null).Result;
+                    new Dictionary<string, string>(), new RequestContext(Guid.Empty)).Result;
                 Assert.Fail("request should have failed");
             }
             catch (AggregateException exc)
@@ -229,7 +229,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
             try
             {
                 var msalHttpResponse = HttpRequest.SendPost(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), new Dictionary<string, string>(), null).Result;
+                    new Dictionary<string, string>(), new Dictionary<string, string>(), new RequestContext(Guid.Empty)).Result;
                 Assert.Fail("request should have failed");
             }
             catch (AggregateException exc)

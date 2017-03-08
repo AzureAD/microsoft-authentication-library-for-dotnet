@@ -54,17 +54,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected bool ForceRefresh { get; set; }
 
         protected bool StoreToCache { get; set; }
-
-        private MsalLogger MsalLogger { get; set; }
-
+        
         protected BaseRequest(AuthenticationRequestParameters authenticationRequestParameters)
         {
             this.Authority = authenticationRequestParameters.Authority;
             this.RequestContext = authenticationRequestParameters.RequestContext;
             this.TokenCache = authenticationRequestParameters.TokenCache;
-            this.MsalLogger = new MsalLogger(RequestContext);
-           
-            MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
+            
+            this.RequestContext.MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
                     "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
                     Authority.CanonicalAuthority, authenticationRequestParameters.Scope.AsSingleString(),
                     authenticationRequestParameters.ClientKey.ClientId,
@@ -133,7 +130,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             catch (Exception ex)
             {
-                MsalLogger.Error(ex);
+                this.RequestContext.MsalLogger.Error(ex);
                 throw;
             }
         }
@@ -173,7 +170,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected virtual AuthenticationResult PostTokenRequest(AccessTokenCacheItem item)
         {
-            AuthenticationResult result = new AuthenticationResult(item);
+            AuthenticationResult result = new AuthenticationResult(item, this.RequestContext);
             //add client id, token cache and authority to User object
             if (result.User != null)
             {
@@ -209,7 +206,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (string.IsNullOrEmpty(Response.Scope))
             {
                 Response.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
-                MsalLogger.Info("Scope was missing from the token response, so using developer provided scopes in the result");
+                this.RequestContext.MsalLogger.Info("Scope was missing from the token response, so using developer provided scopes in the result");
             }
         }
 
@@ -219,7 +216,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.Token);
 
-                MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
+                this.RequestContext.MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
                         "=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tExpiration Time: {1}\n\tUser Hash: {2}\n\t",
                         accessTokenHash,
                         result.ExpiresOn,

@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using Foundation;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.Interfaces;
 using Security;
@@ -36,9 +37,14 @@ namespace Microsoft.Identity.Client
 {
     internal class TokenCachePlugin : ITokenCachePlugin
     {
-        private static readonly MsalLogger Logger = new MsalLogger();
+        private readonly RequestContext _requestContext;
 
         private const string LocalSettingsContainerName = "MicrosoftAuthenticationLibrary";
+
+        public TokenCachePlugin(RequestContext requestContext)
+        {
+            _requestContext = requestContext;
+        }
 
         public void BeforeAccess(TokenCacheNotificationArgs args)
         {
@@ -68,7 +74,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                Logger.Warning("Failed to load cache: " + ex);
+                _requestContext.MsalLogger.Warning("Failed to load cache: " + ex);
                 // Ignore as the cache seems to be corrupt
             }
         }
@@ -100,7 +106,7 @@ namespace Microsoft.Identity.Client
                 }
                 catch (Exception ex)
                 {
-                    Logger.Warning("Failed to save cache: " + ex);
+                    _requestContext.MsalLogger.Warning("Failed to save cache: " + ex);
                 }
             }
         }

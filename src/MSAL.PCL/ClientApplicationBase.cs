@@ -50,7 +50,9 @@ namespace Microsoft.Identity.Client
         /// </Summary>
         static ClientApplicationBase()
         {
-            new MsalLogger().Info(string.Format(CultureInfo.InvariantCulture,
+            RequestContext requestContext = new RequestContext(Guid.Empty);
+
+            requestContext.MsalLogger.Info(string.Format(CultureInfo.InvariantCulture,
                    "MSAL {0} with assembly version '{1}', file version '{2}' and information version '{3}'" +
                    "is running...", PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
                    MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
@@ -95,17 +97,42 @@ namespace Microsoft.Identity.Client
         /// Gets or sets correlation Id which would be sent to the service with the next request.
         /// Correlation Id is to be used for diagnostics purposes.
         /// </summary>
-        public Guid CorrelationId { get; set; }
+        private Guid _correlationId;
+        public Guid CorrelationId
+        {
+            get
+            {
+                return _correlationId;
+            }
+            set
+            {
+                _correlationId = value;
+                _requestContext = this.CreateRequestContext(value);
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether address validation is ON or OFF.
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
-        /// <summary>
-        /// Logging object.
-        /// </summary>
-        private MsalLogger MsalLogger { get; } = new MsalLogger();
+        private RequestContext _requestContext;
+
+        private RequestContext RequestContext
+        {
+            get
+            {
+                if (_requestContext == null)
+                {
+                    _requestContext = this.CreateRequestContext(this.CorrelationId);
+                }
+                return _requestContext;
+            }
+            set
+            {
+                _requestContext = value;
+            }
+        }
 
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the signed in users.
@@ -116,7 +143,7 @@ namespace Microsoft.Identity.Client
             {
                 if (this.UserTokenCache == null)
                 {
-                    MsalLogger.Info("Token cache is null or empty");
+                    _requestContext.MsalLogger.Info("Token cache is null or empty");
                     return new List<User>();
                 }
 
