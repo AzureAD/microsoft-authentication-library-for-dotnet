@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client
         private ManualResetEvent _threadInitializedEvent;
         private Exception _uiException;
 
-        public RequestContext RequestContext { get; set; }
+        private RequestContext RequestContext { get; }
 
         public SilentWebUI(RequestContext requestContext)
         {

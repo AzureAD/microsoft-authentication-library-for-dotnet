@@ -36,10 +36,11 @@ namespace Microsoft.Identity.Client.Internal.Cache
     [DataContract]
     internal abstract class BaseTokenCacheItem
     {
-        protected RequestContext _requestContext;
+        protected RequestContext RequestContext;
+
         protected BaseTokenCacheItem(RequestContext requestContext)
         {
-            _requestContext = requestContext;
+            RequestContext = requestContext;
         }
         /// <summary>
         /// Default constructor.
@@ -50,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             if (response.IdToken!=null)
             {
                 RawIdToken = response.IdToken;
-                IdToken idToken = IdToken.Parse(response.IdToken, _requestContext);
+                IdToken idToken = IdToken.Parse(response.IdToken, RequestContext);
                 TenantId = idToken.TenantId;
                 User = new User(idToken);
             }
@@ -99,7 +100,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
             if (RawIdToken != null)
             {
-                IdToken idToken = IdToken.Parse(RawIdToken, _requestContext);
+                IdToken idToken = IdToken.Parse(RawIdToken, RequestContext);
                 TenantId = idToken.TenantId;
                 User = new User(idToken);
             }

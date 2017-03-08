@@ -37,35 +37,35 @@ namespace Microsoft.Identity.Client
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class WebUI : IWebUI
     {
-        private static SemaphoreSlim _returnedUriReady;
-        private static AuthorizationResult _authorizationResult;
-        private readonly PlatformParameters _parameters;
+        private static SemaphoreSlim returnedUriReady;
+        private static AuthorizationResult authorizationResult;
+        private readonly PlatformParameters parameters;
 
         public WebUI(IPlatformParameters parameters)
         {
-            this._parameters = parameters as PlatformParameters;
-            if (this._parameters == null)
+            this.parameters = parameters as PlatformParameters;
+            if (this.parameters == null)
             {
-                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(parameters));
+                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
 
-            if (this._parameters.CallerActivity == null)
+            if (this.parameters.CallerActivity == null)
             {
-                throw new ArgumentException("CallerActivity should be set in PlatformParameters", nameof(this._parameters.CallerActivity));
+                throw new ArgumentException("CallerActivity should be set in PlatformParameters", "CallerActivity");
             }
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
-            _returnedUriReady = new SemaphoreSlim(0);
-        
+            returnedUriReady = new SemaphoreSlim(0);
+
             try
             {
-                var agentIntent = new Intent(this._parameters.CallerActivity, typeof (AuthenticationActivity));
+                var agentIntent = new Intent(this.parameters.CallerActivity, typeof(AuthenticationActivity));
                 agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
                 agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.AbsoluteUri);
 
-                this._parameters.CallerActivity.StartActivityForResult(agentIntent, 0);
+                this.parameters.CallerActivity.StartActivityForResult(agentIntent, 0);
             }
             catch (Exception ex)
             {
@@ -73,21 +73,20 @@ namespace Microsoft.Identity.Client
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
 
-            await _returnedUriReady.WaitAsync().ConfigureAwait(false);
-            return _authorizationResult;
+            await returnedUriReady.WaitAsync().ConfigureAwait(false);
+            return authorizationResult;
         }
 
         public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput, RequestContext requestContext)
         {
-            if (_returnedUriReady != null)
+            if (returnedUriReady != null)
             {
-                _authorizationResult = authorizationResultInput;
-                _returnedUriReady.Release();
+                authorizationResult = authorizationResultInput;
+                returnedUriReady.Release();
             }
             else
             {
                 requestContext.MsalLogger.Info("No pending request for response from web ui.");
-
             }
         }
     }

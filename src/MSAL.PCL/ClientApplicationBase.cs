@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client
             set
             {
                 _correlationId = value;
-                _requestContext = this.CreateRequestContext(value);
+                RequestContext = this.CreateRequestContext(value);
             }
         }
 
@@ -116,23 +116,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
-        private RequestContext _requestContext;
-
-        private RequestContext RequestContext
-        {
-            get
-            {
-                if (_requestContext == null)
-                {
-                    _requestContext = this.CreateRequestContext(this.CorrelationId);
-                }
-                return _requestContext;
-            }
-            set
-            {
-                _requestContext = value;
-            }
-        }
+        private RequestContext RequestContext { get; set; } = new RequestContext(Guid.Empty);
 
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the signed in users.
@@ -143,7 +127,7 @@ namespace Microsoft.Identity.Client
             {
                 if (this.UserTokenCache == null)
                 {
-                    _requestContext.MsalLogger.Info("Token cache is null or empty");
+                    RequestContext.MsalLogger.Info("Token cache is null or empty");
                     return new List<User>();
                 }
 
