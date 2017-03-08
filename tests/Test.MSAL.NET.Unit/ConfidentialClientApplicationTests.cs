@@ -347,7 +347,7 @@ namespace Test.MSAL.NET.Unit
         {
             var app = new ConfidentialClientApplication(TestConstants.ClientId,
                 TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
-                new TokenCache(TestConstants.ClientId), new TokenCache(TestConstants.ClientId))
+                new TokenCache(), new TokenCache())
             {
                 ValidateAuthority = false
             };
