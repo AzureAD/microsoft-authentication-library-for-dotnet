@@ -83,29 +83,7 @@ namespace Microsoft.Identity.Client
 
             set { this.hasStateChanged = value; }
         }
-
-        /// <summary>
-        /// Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
-        /// impact all the instances of <see cref="PublicClientApplication" /> which share that cache.
-        /// </summary>
-        internal void Clear()
-        {
-            lock (LockObject)
-            {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-                {
-                    TokenCache = this,
-                    ClientId = ClientId,
-                    User = null
-                };
-
-                OnBeforeAccess(args);
-                OnBeforeWrite(args);
-                //_tokenCacheAccessor.DeleteAll(_clientId);
-                OnAfterAccess(args);
-            }
-        }
-
+        
         internal void OnAfterAccess(TokenCacheNotificationArgs args)
         {
             AfterAccess?.Invoke(args);
@@ -134,7 +112,7 @@ namespace Microsoft.Identity.Client
                     };
 
                     OnBeforeAccess(args);
-                    IList<AccessTokenCacheItem> tokenCacheItems = TokenCacheAccessor.GetAllAccessTokens(ClientId);
+                    ICollection<AccessTokenCacheItem> tokenCacheItems = TokenCacheAccessor.GetAllAccessTokens(ClientId);
                     OnAfterAccess(args);
                     return tokenCacheItems.Count;
                 }
@@ -154,7 +132,7 @@ namespace Microsoft.Identity.Client
                     };
 
                     OnBeforeAccess(args);
-                    IList<RefreshTokenCacheItem> tokenCacheItems = TokenCacheAccessor.GetAllRefreshTokens(ClientId);
+                    ICollection<RefreshTokenCacheItem> tokenCacheItems = TokenCacheAccessor.GetAllRefreshTokens(ClientId);
                     OnAfterAccess(args);
                     return tokenCacheItems.Count;
                 }
@@ -228,8 +206,6 @@ namespace Microsoft.Identity.Client
         {
             lock (LockObject)
             {
-                TokenCacheKey key = new TokenCacheKey(requestParam.Authority.CanonicalAuthority,
-                    requestParam.Scope, ClientId, requestParam.User);
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,
@@ -238,7 +214,7 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                IList<AccessTokenCacheItem> tokenCacheItems = TokenCacheAccessor.GetAllAccessTokens(ClientId);
+                ICollection<AccessTokenCacheItem> tokenCacheItems = TokenCacheAccessor.GetAllAccessTokens(ClientId);
                 OnAfterAccess(args);
 
                 //first filter the list by authority, client id and scopes
@@ -288,7 +264,7 @@ namespace Microsoft.Identity.Client
 
                 // Access token lookup needs to be a strict match. In the JSON response from token endpoint, server only returns the scope
                 // the developer requires the token for. We store the token separately for considerations i.e. MFA.
-                AccessTokenCacheItem accessTokenCacheItem = tokenCacheItems[0];
+                AccessTokenCacheItem accessTokenCacheItem = tokenCacheItems.First();
                 if (accessTokenCacheItem.ExpiresOn >
                     DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
                 {
@@ -313,7 +289,7 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                IList<RefreshTokenCacheItem> refreshTokenCacheItems = TokenCacheAccessor.GetRefreshTokens(key);
+                ICollection<RefreshTokenCacheItem> refreshTokenCacheItems = TokenCacheAccessor.GetRefreshTokens(key);
                 OnAfterAccess(args);
                 if (refreshTokenCacheItems.Count == 0)
                 {
@@ -328,7 +304,7 @@ namespace Microsoft.Identity.Client
                     throw new MsalException(MsalError.MultipleTokensMatched);
                 }
 
-                return refreshTokenCacheItems[0];
+                return refreshTokenCacheItems.First();
             }
         }
 
@@ -367,7 +343,7 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                IList<RefreshTokenCacheItem> allRefreshTokens =
+                ICollection<RefreshTokenCacheItem> allRefreshTokens =
                     TokenCacheAccessor.GetAllRefreshTokens(clientId);
                 OnAfterAccess(args);
 
@@ -396,14 +372,14 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                IList<RefreshTokenCacheItem> allRefreshTokens =
+                ICollection<RefreshTokenCacheItem> allRefreshTokens =
                     TokenCacheAccessor.GetAllRefreshTokens(ClientId);
                 OnAfterAccess(args);
 
-                return new ReadOnlyCollection<RefreshTokenCacheItem>(allRefreshTokens);
+                return allRefreshTokens;
             }
         }
-
+        
         internal ICollection<AccessTokenCacheItem> GetAllAccessTokens()
         {
             lock (LockObject)
@@ -416,15 +392,14 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                IList<AccessTokenCacheItem> allTokens =
+                ICollection<AccessTokenCacheItem> allAccessTokens =
                     TokenCacheAccessor.GetAllAccessTokens(ClientId);
                 OnAfterAccess(args);
 
-                return new ReadOnlyCollection<AccessTokenCacheItem>(allTokens);
+                return allAccessTokens;
             }
         }
-
-
+        
         internal void SignOut(User user)
         {
             lock (LockObject)
@@ -457,6 +432,50 @@ namespace Microsoft.Identity.Client
                 }
 
                 OnAfterAccess(args);
+            }
+        }
+
+        internal ICollection<string> GetAllAccessTokenCacheItems()
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (LockObject)
+            {
+                ICollection<string> allTokens =
+                    TokenCacheAccessor.GetAllAccessTokensAsString();
+                return allTokens;
+            }
+        }
+
+        internal ICollection<string> GetAllRefreshTokenCacheItems()
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (LockObject)
+            {
+                ICollection<string> allTokens =
+                    TokenCacheAccessor.GetAllRefreshTokensAsString();
+                return allTokens;
+            }
+        }
+
+        internal void AddAccessTokenCacheItem(AccessTokenCacheItem accessTokenCacheItem)
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (LockObject)
+            {
+                TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem);
+            }
+        }
+
+        internal void AddRefreshTokenCacheItem(RefreshTokenCacheItem refreshTokenCacheItem)
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (LockObject)
+            {
+                TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem);
             }
         }
     }

@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             TokenCachePlugin.SaveRefreshToken(refreshTokenItem.GetTokenCacheKey().ToString(), JsonHelper.SerializeToJson(refreshTokenItem));
         }
         
-        public IList<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
+        public ICollection<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
         {
             ICollection<string> allRefreshTokens = TokenCachePlugin.AllRefreshTokens();
             IList<RefreshTokenCacheItem> matchedRefreshTokens = new List<RefreshTokenCacheItem>();
@@ -70,10 +70,15 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
             TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item.GetTokenCacheKey().ToString());
         }
-
-        public IList<AccessTokenCacheItem> GetAllAccessTokens(string clientId)
+        
+        public ICollection<string> GetAllAccessTokensAsString()
         {
-            ICollection<string> allTokensAsString = TokenCachePlugin.GetAllAccessTokens();
+            return TokenCachePlugin.GetAllAccessTokens();
+        }
+
+        public ICollection<AccessTokenCacheItem> GetAllAccessTokens(string clientId)
+        {
+            ICollection<string> allTokensAsString = this.GetAllAccessTokensAsString();
             IList<AccessTokenCacheItem> returnList = new List<AccessTokenCacheItem>();
             foreach (var token in allTokensAsString)
             {
@@ -82,10 +87,15 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
             return returnList.Where(t => t.ClientId.Equals(clientId)).ToList();
         }
-        
-        public IList<RefreshTokenCacheItem> GetAllRefreshTokens(string clientId)
+
+        public ICollection<string> GetAllRefreshTokensAsString()
         {
-            ICollection<string> allTokensAsString = TokenCachePlugin.AllRefreshTokens();
+            return TokenCachePlugin.AllRefreshTokens();
+        }
+        
+        public ICollection<RefreshTokenCacheItem> GetAllRefreshTokens(string clientId)
+        {
+            ICollection<string> allTokensAsString = GetAllRefreshTokensAsString();
             IList<RefreshTokenCacheItem> returnList = new List<RefreshTokenCacheItem>();
             foreach (var token in allTokensAsString)
             {
