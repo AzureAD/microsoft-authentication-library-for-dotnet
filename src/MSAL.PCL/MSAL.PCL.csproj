@@ -90,7 +90,6 @@
     <Compile Include="Internal\MsalIdHelper.cs" />
     <Compile Include="MsalServiceException.cs" />
     <Compile Include="MsalSilentTokenAcquisitionException.cs" />
-    <Compile Include="MsalUserMismatchException.cs" />
     <Compile Include="AuthenticationResult.cs" />
     <Compile Include="Internal\Instance\Authority.cs" />
     <Compile Include="Internal\AuthorizationResult.cs" />

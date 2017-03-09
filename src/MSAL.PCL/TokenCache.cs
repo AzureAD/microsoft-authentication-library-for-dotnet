@@ -37,6 +37,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
+    /// Token cache class used by <see cref="ConfidentialClientApplication"/> and <see cref="PublicClientApplication"/> to store access and refresh tokens.
     /// </summary>
     public sealed class TokenCache
     {

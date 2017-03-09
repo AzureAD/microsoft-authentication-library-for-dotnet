@@ -36,7 +36,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 namespace Microsoft.Identity.Client
 {
     /// <Summary>
-    /// ClientApplicationBase
+    /// Abstract class containing common API methods and properties. Both PublicClientApplication and ConfidentialClientApplication extend this class.
     /// </Summary>
     public abstract class ClientApplicationBase
     {
@@ -45,9 +45,6 @@ namespace Microsoft.Identity.Client
         /// </Summary>
         protected const string DefaultAuthority = "https://login.microsoftonline.com/common/";
 
-        /// <Summary>
-        /// ClientApplicationBase
-        /// </Summary>
         static ClientApplicationBase()
         {
             PlatformPlugin.Logger.Information(null,
@@ -74,27 +71,27 @@ namespace Microsoft.Identity.Client
                 this.UserTokenCache.ClientId = clientId;
             }
         }
-        
+
         /// <Summary>
-        /// Authority
+        /// Authority provided by the developer
         /// </Summary>
-        public string Authority { get; }
+        internal string Authority { get; }
 
         /// <summary>
         /// Will be a default value. Can be overriden by the developer. Once set, application will bind to the client Id.
         /// </summary>
-        public string ClientId { get; }
+        internal string ClientId { get; }
 
         /// <summary>
         /// Redirect Uri configured in the portal. Will have a default value. Not required, if the developer is using the
         /// default client Id.
         /// </summary>
-        public string RedirectUri { get; set; }
+        public string RedirectUri { internal get; set; }
 
         /// <Summary>
-        /// UserTokenCache
+        /// Token Cache instance for storing User tokens.
         /// </Summary>
-        public TokenCache UserTokenCache { get; set; }
+        internal TokenCache UserTokenCache { get; set; }
 
         /// <summary>
         /// Gets or sets correlation Id which would be sent to the service with the next request.
@@ -105,10 +102,10 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets a value indicating whether address validation is ON or OFF.
         /// </summary>
-        public bool ValidateAuthority { get; set; }
+        public bool ValidateAuthority { internal get; set; }
 
         /// <summary>
-        /// Returns a User centric view over the cache that provides a list of all the signed in users.
+        /// Returns a User centric view over the cache that provides a list of all the available users in the cache.
         /// </summary>
         public IEnumerable<User> Users
         {
@@ -138,9 +135,12 @@ namespace Microsoft.Identity.Client
         }*/
 
         /// <summary>
+        /// Attempts to acquire the access token from cache. Access token is considered a match if it AT LEAST contains all the requested scopes.
+        /// This means that an access token with more scopes than requested could be returned as well. If access token is expired or 
+        /// close to expiration (within 5 minute window), then refresh token (if available) is used to acquire a new access token by making a network call.
         /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="user"></param>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="user">User for which the token is requested. <see cref="User"/></param>
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user)
         {
@@ -151,43 +151,46 @@ namespace Microsoft.Identity.Client
                         .ConfigureAwait(false);
         }
 
-/*        /// <summary>
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="userIdentifier"></param>
-        /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier)
-        {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
-            return
-                await
-                    this.AcquireTokenSilentCommonAsync(authority, scope, userIdentifier, this.PlatformParameters,
-                        false).ConfigureAwait(false);
-        }*/
+        /*        /// <summary>
+                /// </summary>
+                /// <param name="scope"></param>
+                /// <param name="userIdentifier"></param>
+                /// <returns></returns>
+                public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier)
+                {
+                    Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
+                    return
+                        await
+                            this.AcquireTokenSilentCommonAsync(authority, scope, userIdentifier, this.PlatformParameters,
+                                false).ConfigureAwait(false);
+                }*/
 
-/*        /// <summary>
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="userIdentifier"></param>
-        /// <param name="authority"></param>
-        /// <param name="forceRefresh"></param>
-        /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier,
-            string authority, bool forceRefresh)
-        {
-            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
-            return
-                await
-                    this.AcquireTokenSilentCommonAsync(authorityInstance, scope, userIdentifier, this.PlatformParameters,
-                        forceRefresh).ConfigureAwait(false);
-        }*/
+        /*        /// <summary>
+                /// </summary>
+                /// <param name="scope"></param>
+                /// <param name="userIdentifier"></param>
+                /// <param name="authority"></param>
+                /// <param name="forceRefresh"></param>
+                /// <returns></returns>
+                public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier,
+                    string authority, bool forceRefresh)
+                {
+                    Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
+                    return
+                        await
+                            this.AcquireTokenSilentCommonAsync(authorityInstance, scope, userIdentifier, this.PlatformParameters,
+                                forceRefresh).ConfigureAwait(false);
+                }*/
 
         /// <summary>
+        /// Attempts to acquire the access token from cache. Access token is considered a match if it AT LEAST contains all the requested scopes.
+        /// This means that an access token with more scopes than requested could be returned as well. If access token is expired or 
+        /// close to expiration (within 5 minute window), then refresh token (if available) is used to acquire a new access token by making a network call.
         /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="user"></param>
-        /// <param name="authority"></param>
-        /// <param name="forceRefresh"></param>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="user">User for which the token is requested <see cref="User"/></param>
+        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
+        /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using the refresh token if available</param>
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user,
             string authority, bool forceRefresh)
@@ -198,7 +201,7 @@ namespace Microsoft.Identity.Client
                     this.AcquireTokenSilentCommonAsync(authorityInstance, scope, user,
                         forceRefresh).ConfigureAwait(false);
         }
-        
+
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
             string[] scope, User user, bool forceRefresh)
         {
@@ -208,7 +211,8 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope, User user, TokenCache cache)
+        internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope,
+            User user, TokenCache cache)
         {
             return new AuthenticationRequestParameters
             {

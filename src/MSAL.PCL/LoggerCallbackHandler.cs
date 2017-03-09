@@ -28,7 +28,7 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// LogLevel
+    /// Log Level for callback
     /// </summary>
     public enum LogLevel
     {
@@ -50,6 +50,7 @@ namespace Microsoft.Identity.Client
     }
 
     /// <summary>
+    /// Interface for callback to be implemented and provided by the developer.
     /// </summary>
     public interface IMsalLogCallback
     {
@@ -59,6 +60,7 @@ namespace Microsoft.Identity.Client
     }
 
     /// <summary>
+    /// Class to consume developer provided callback.
     /// </summary>
     public sealed class LoggerCallbackHandler
     {
@@ -66,6 +68,7 @@ namespace Microsoft.Identity.Client
         private static IMsalLogCallback _localCallback;
 
         /// <summary>
+        /// Callback instance
         /// </summary>
         public static IMsalLogCallback Callback
         {
