@@ -48,19 +48,19 @@ namespace Microsoft.Identity.Client.Internal.Instance
             "login.microsoftonline.de"
         };
 
-        public AadAuthority(string authority) : base(authority)
+        public AadAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
         {
             this.AuthorityType = AuthorityType.Aad;
         }
 
-        protected override async Task<string> GetOpenIdConfigurationEndpoint(string host, string tenant, string userPrincipalName, RequestContext requestContext)
+        protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName, RequestContext requestContext)
         {
-            if (ValidateAuthority && !IsInTrustedHostList(host))
+
+            if (ValidateAuthority && !IsInTrustedHostList(new Uri(CanonicalAuthority).Host))
             {
                 OAuth2Client client = new OAuth2Client();
                 client.AddQueryParameter("api-version", "1.0");
-                client.AddQueryParameter("authorization_endpoint",
-                    string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/v2.0/authorize", host, tenant));
+                client.AddQueryParameter("authorization_endpoint", this.CanonicalAuthority + "oauth2/v2.0/authorize");
 
                 try
                 {

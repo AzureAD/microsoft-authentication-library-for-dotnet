@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
     {
         private const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
         private readonly HashSet<string> _validForDomainsList = new HashSet<string>();
-        public AdfsAuthority(string authority) : base(authority)
+        public AdfsAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
         {
             this.AuthorityType = AuthorityType.Adfs;
         }
@@ -58,8 +58,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
                        GetDomainFromUpn(userPrincipalName));
         }
 
-        protected override async Task<string> GetOpenIdConfigurationEndpoint(string host, string tenant,
-            string userPrincipalName, RequestContext requestContext)
+        protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName, RequestContext requestContext)
         {
             if (ValidateAuthority)
             {
@@ -74,7 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
                     throw new MsalServiceException("missing_passive_auth_endpoint", "missing_passive_auth_endpoint");
                 }
 
-                string resource = string.Format(CultureInfo.InvariantCulture, "https://{0}", host);
+                string resource = string.Format(CultureInfo.InvariantCulture, this.CanonicalAuthority);
                 string webfingerUrl = string.Format(CultureInfo.InvariantCulture,
                     "https://{0}/adfs/.well-known/webfinger?rel={1}&resource={2}",
                     drsResponse.IdentityProviderService.PassiveAuthEndpoint.Host,

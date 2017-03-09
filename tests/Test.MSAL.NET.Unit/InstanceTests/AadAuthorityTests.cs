@@ -47,7 +47,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
     [DeploymentItem("Resources\\OpenidConfiguration-MissingFields.json")]
     [DeploymentItem("Resources\\drs-response-missing-field.json")]
     [DeploymentItem("Resources\\drs-response.json")]
-    public class AuthorityTests
+    public class AadAuthorityTests
     {
         [TestInitialize]
         public void TestInitialize()
@@ -64,8 +64,8 @@ namespace Test.MSAL.NET.Unit.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AuthorityTests")]
-        public void AadSuccessfulValidationTest()
+        [TestCategory("AadAuthorityTests")]
+        public void SuccessfulValidationTest()
         {
             //add mock response for instance validation
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
@@ -107,8 +107,8 @@ namespace Test.MSAL.NET.Unit.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AuthorityTests")]
-        public void AadValidationOffSuccessTest()
+        [TestCategory("AadAuthorityTests")]
+        public void ValidationOffSuccessTest()
         {
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
@@ -136,8 +136,8 @@ namespace Test.MSAL.NET.Unit.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AuthorityTests")]
-        public void AadFailedValidationTest()
+        [TestCategory("AadAuthorityTests")]
+        public void FailedValidationTest()
         {
             //add mock response for instance validation
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
@@ -184,8 +184,8 @@ namespace Test.MSAL.NET.Unit.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AuthorityTests")]
-        public void AadFailedValidationMissingFieldsTest()
+        [TestCategory("AadAuthorityTests")]
+        public void FailedValidationMissingFieldsTest()
         {
             //add mock response for instance validation
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
@@ -220,8 +220,8 @@ namespace Test.MSAL.NET.Unit.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AuthorityTests")]
-        public void AadFailedTenantDiscoveryMissingEndpointsTest()
+        [TestCategory("AadAuthorityTests")]
+        public void FailedTenantDiscoveryMissingEndpointsTest()
         {
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler

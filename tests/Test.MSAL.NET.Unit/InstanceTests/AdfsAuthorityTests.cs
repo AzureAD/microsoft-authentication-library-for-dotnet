@@ -68,7 +68,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void AdfsSuccessfulValidationUsingOnPremiseDrsTest()
+        public void SuccessfulValidationUsingOnPremiseDrsTest()
         {
             //add mock response for on-premise DRS request
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
@@ -140,7 +140,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void AdfsSuccessfulValidationUsingCloudDrsFallbackTest()
+        public void SuccessfulValidationUsingCloudDrsFallbackTest()
         {
             //add mock failure response for on-premise DRS request
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
@@ -207,7 +207,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void AdfsValidationOffSuccessTest()
+        public void ValidationOffSuccessTest()
         {
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
@@ -236,7 +236,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void AdfsFailedValidationTest()
+        public void FailedValidationTest()
         {
             //add mock response for on-premise DRS request
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
@@ -285,7 +285,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void AdfsFailedValidationResourceNotInTrustedRealmTest()
+        public void FailedValidationResourceNotInTrustedRealmTest()
         {
             //add mock response for on-premise DRS request
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
@@ -334,7 +334,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void AdfsFailedValidationMissingFieldsInDrsResponseTest()
+        public void FailedValidationMissingFieldsInDrsResponseTest()
         {
             //add mock failure response for on-premise DRS request
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
@@ -369,7 +369,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void AdfsFailedTenantDiscoveryMissingEndpointsTest()
+        public void FailedTenantDiscoveryMissingEndpointsTest()
         {
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler

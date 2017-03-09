@@ -25,15 +25,37 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Instance
 {
     internal class B2CAuthority : AadAuthority
     {
-        public B2CAuthority(string authority) : base(authority)
+        public B2CAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
         {
+            Uri authorityUri = new Uri(authority);
+            string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(new [] { '/'}, StringSplitOptions.RemoveEmptyEntries);
+            if (pathSegments.Length < 3)
+            {
+                throw new ArgumentException(MsalErrorMessage.B2cAuthorityUriInvalidPath);
+            }
+
+            this.CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/{2}/{3}/", authorityUri.Host,
+                pathSegments[0], pathSegments[1], pathSegments[2]);
             AuthorityType = AuthorityType.B2C;
+        }
+
+        protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName, RequestContext requestContext)
+        {
+            if (ValidateAuthority && !IsInTrustedHostList(new Uri(CanonicalAuthority).Host))
+            {
+                throw new ArgumentException(MsalErrorMessage.UnsupportedAuthorityValidation);
+            }
+
+            return await Task.Run(() => GetDefaultOpenIdConfigurationEndpoint()).ConfigureAwait(false);
         }
     }
 }
