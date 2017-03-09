@@ -81,6 +81,8 @@ namespace Microsoft.Identity.Client.Internal
         public const string AuthorityValidationFailed = "Authority validation failed";
         public const string AuthorityUriInsecure = "'authority' should use the 'https' scheme";
 
+        public const string B2cAuthorityUriInvalidPath =
+            "B2C 'authority' Uri should have at least 3 segments in the path (i.e. https://<host>/tfp/<tenant>/<policy>/...)";
         public const string AuthorityUriInvalidPath =
             "'authority' Uri should have at least one segment in the path (i.e. https://<host>/<path>/...)";
 

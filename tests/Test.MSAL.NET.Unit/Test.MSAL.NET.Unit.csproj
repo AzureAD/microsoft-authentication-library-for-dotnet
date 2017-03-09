@@ -81,6 +81,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="HttpTests\HttpClientFactoryTests.cs" />
+    <Compile Include="InstanceTests\AdfsAuthorityTests.cs" />
     <Compile Include="InstanceTests\AuthorityTests.cs" />
     <Compile Include="HttpTests\HttpRequestTests.cs" />
     <Compile Include="RequestsTests\OboFlowTests.cs" />

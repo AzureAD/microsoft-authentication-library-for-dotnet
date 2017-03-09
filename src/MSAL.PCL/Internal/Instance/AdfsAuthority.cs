@@ -103,10 +103,9 @@ namespace Microsoft.Identity.Client.Internal.Instance
             return GetDefaultOpenIdConfigurationEndpoint();
         }
 
-        protected override string CreateEndpointForAuthorityType(string host, string tenant)
+        protected override string GetDefaultOpenIdConfigurationEndpoint()
         {
-            return string.Format(CultureInfo.InvariantCulture,
-                "https://{0}/{1}/.well-known/openid-configuration", host, tenant);
+            return this.CanonicalAuthority + ".well-known/openid-configuration";
         }
 
         protected override void AddToValidatedAuthorities(string userPrincipalName)

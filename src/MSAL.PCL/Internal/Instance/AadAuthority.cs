@@ -95,10 +95,9 @@ namespace Microsoft.Identity.Client.Internal.Instance
             ValidatedAuthorities[this.CanonicalAuthority] = this;
         }
 
-        protected override string CreateEndpointForAuthorityType(string host, string tenant)
+        protected override string GetDefaultOpenIdConfigurationEndpoint()
         {
-            return string.Format(CultureInfo.InvariantCulture,
-                "https://{0}/{1}/v2.0/.well-known/openid-configuration", host, tenant);
+            return this.CanonicalAuthority + "v2.0/.well-known/openid-configuration";
         }
 
         internal bool IsInTrustedHostList(string host)

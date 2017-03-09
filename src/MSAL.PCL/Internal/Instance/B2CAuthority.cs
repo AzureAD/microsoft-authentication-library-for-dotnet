@@ -29,31 +29,11 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Internal.Instance
 {
-    internal class B2CAuthority : Authority
+    internal class B2CAuthority : AadAuthority
     {
         public B2CAuthority(string authority) : base(authority)
         {
-        }
-
-        protected override Task<string> GetOpenIdConfigurationEndpoint(string host, string tenant, string userPrincipalName,
-            RequestContext requestContext)
-        {
-            return GetDefaultOpenIdConfigurationEndpoint();
-        }
-
-        protected override bool ExistsInValidatedAuthorityCache(string userPrincipalName)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        protected override void AddToValidatedAuthorities(string userPrincipalName)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        protected override string CreateEndpointForAuthorityType(string host, string tenant)
-        {
-            throw new System.NotImplementedException();
+            AuthorityType = AuthorityType.B2C;
         }
     }
 }
