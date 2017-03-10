@@ -60,9 +60,8 @@ namespace Microsoft.Identity.Client
         protected ClientApplicationBase(string authority, string clientId, string redirectUri,
             bool validateAuthority)
         {
-            string canonicalAuthority = Internal.Instance.Authority.CanonicalizeUri(authority);
-            Internal.Instance.Authority.ValidateAsUri(canonicalAuthority);
-            this.Authority = canonicalAuthority;
+            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, validateAuthority);
+            this.Authority = authorityInstance.CanonicalAuthority;
             this.ClientId = clientId;
             this.RedirectUri = redirectUri;
             this.ValidateAuthority = validateAuthority;

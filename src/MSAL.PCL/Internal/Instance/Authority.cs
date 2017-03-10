@@ -39,7 +39,8 @@ namespace Microsoft.Identity.Client.Internal.Instance
     internal enum AuthorityType
     {
         Aad,
-        Adfs
+        Adfs,
+        B2C
     }
 
     internal abstract class Authority
@@ -50,19 +51,22 @@ namespace Microsoft.Identity.Client.Internal.Instance
         internal static readonly ConcurrentDictionary<string, Authority> ValidatedAuthorities =
             new ConcurrentDictionary<string, Authority>();
 
-        protected abstract Task<string> GetOpenIdConfigurationEndpoint(string host, string tenant,
-            string userPrincipalName, RequestContext requestContext);
+        protected abstract Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName, RequestContext requestContext);
 
         public static Authority CreateAuthority(string authority, bool validateAuthority)
         {
-            Authority instance = CreateInstance(authority);
-            instance.ValidateAuthority = validateAuthority;
-            return instance;
+            return CreateInstance(authority, validateAuthority);
         }
 
-        protected Authority(string authority)
+        protected Authority(string authority, bool validateAuthority)
         {
-            this.CanonicalAuthority = authority;
+            Uri authorityUri = new Uri(authority);
+            string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+
+            this.CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Host,
+                pathSegments[0]);
+
+            this.ValidateAuthority = validateAuthority;
         }
 
         public AuthorityType AuthorityType { get; set; }
@@ -104,24 +108,33 @@ namespace Microsoft.Identity.Client.Internal.Instance
             {
                 throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, "authority");
             }
+
+            string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split('/');
+            if (pathSegments == null || pathSegments.Length == 0)
+            {
+                throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath);
+            }
         }
 
-        private static Authority CreateInstance(string authority)
+        private static Authority CreateInstance(string authority, bool validateAuthority)
         {
             authority = CanonicalizeUri(authority);
             ValidateAsUri(authority);
-            Uri authorityUri = new Uri(authority);
-            string path = authorityUri.AbsolutePath.Substring(1);
-            string firstPath = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-            bool isAdfsAuthority = string.Compare(firstPath, "adfs", StringComparison.OrdinalIgnoreCase) == 0;
-            string updatedAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Host,
-                firstPath);
+            string[] pathSegments = new Uri(authority).AbsolutePath.Substring(1).Split('/');
+            bool isAdfsAuthority = string.Compare(pathSegments[0], "adfs", StringComparison.OrdinalIgnoreCase) == 0;
+            bool isB2CAuthority = string.Compare(pathSegments[0], "tfp", StringComparison.OrdinalIgnoreCase) == 0;
+
             if (isAdfsAuthority)
             {
-                return new AdfsAuthority(updatedAuthority);
+                throw new MsalException(MsalError.InvalidAuthorityType, "ADFS is not a supported authority");
             }
 
-            return new AadAuthority(updatedAuthority);
+            if (isB2CAuthority)
+            {
+                return new B2CAuthority(authority, validateAuthority);
+            }
+
+            return new AadAuthority(authority, validateAuthority);
         }
 
         public async Task ResolveEndpointsAsync(string userPrincipalName, RequestContext requestContext)
@@ -153,7 +166,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
                 string openIdConfigurationEndpoint =
                     await
-                        this.GetOpenIdConfigurationEndpoint(host, tenant, userPrincipalName, requestContext)
+                        this.GetOpenIdConfigurationEndpoint(userPrincipalName, requestContext)
                             .ConfigureAwait(false);
 
                 //discover endpoints via openid-configuration
@@ -195,16 +208,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         protected abstract void AddToValidatedAuthorities(string userPrincipalName);
 
-        protected abstract string CreateEndpointForAuthorityType(string host, string tenant);
-
-        protected string GetDefaultOpenIdConfigurationEndpoint()
-        {
-            var authorityUri = new Uri(this.CanonicalAuthority);
-            string host = authorityUri.Authority;
-            string path = authorityUri.AbsolutePath.Substring(1);
-            string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-            return CreateEndpointForAuthorityType(host, tenant);
-        }
+        protected abstract string GetDefaultOpenIdConfigurationEndpoint();
 
         private async Task<TenantDiscoveryResponse> DiscoverEndpoints(string openIdConfigurationEndpoint,
             RequestContext requestContext)

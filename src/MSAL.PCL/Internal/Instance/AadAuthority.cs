@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
 {
     internal class AadAuthority : Authority
     {
-        private const string AadInstanceDiscoveryEndpoint = "https://login.windows.net/common/discovery/instance";
+        private const string AadInstanceDiscoveryEndpoint = "https://login.microsoftonline.com/common/discovery/instance";
 
 
         private static readonly HashSet<string> TrustedHostList = new HashSet<string>()
@@ -48,19 +48,19 @@ namespace Microsoft.Identity.Client.Internal.Instance
             "login.microsoftonline.de"
         };
 
-        public AadAuthority(string authority) : base(authority)
+        public AadAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
         {
             this.AuthorityType = AuthorityType.Aad;
         }
 
-        protected override async Task<string> GetOpenIdConfigurationEndpoint(string host, string tenant, string userPrincipalName, RequestContext requestContext)
+        protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName, RequestContext requestContext)
         {
-            if (ValidateAuthority && !IsInTrustedHostList(host))
+
+            if (ValidateAuthority && !IsInTrustedHostList(new Uri(CanonicalAuthority).Host))
             {
                 OAuth2Client client = new OAuth2Client();
                 client.AddQueryParameter("api-version", "1.0");
-                client.AddQueryParameter("authorization_endpoint",
-                    string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/v2.0/authorize", host, tenant));
+                client.AddQueryParameter("authorization_endpoint", this.CanonicalAuthority + "oauth2/v2.0/authorize");
 
                 try
                 {
@@ -95,10 +95,9 @@ namespace Microsoft.Identity.Client.Internal.Instance
             ValidatedAuthorities[this.CanonicalAuthority] = this;
         }
 
-        protected override string CreateEndpointForAuthorityType(string host, string tenant)
+        protected override string GetDefaultOpenIdConfigurationEndpoint()
         {
-            return string.Format(CultureInfo.InvariantCulture,
-                "https://{0}/{1}/v2.0/.well-known/openid-configuration", host, tenant);
+            return this.CanonicalAuthority + "v2.0/.well-known/openid-configuration";
         }
 
         internal bool IsInTrustedHostList(string host)

@@ -81,8 +81,10 @@
   </Choose>
   <ItemGroup>
     <Compile Include="HttpTests\HttpClientFactoryTests.cs" />
-    <Compile Include="InstanceTests\AuthorityTests.cs" />
+    <Compile Include="InstanceTests\AdfsAuthorityTests.cs" />
+    <Compile Include="InstanceTests\AadAuthorityTests.cs" />
     <Compile Include="HttpTests\HttpRequestTests.cs" />
+    <Compile Include="InstanceTests\B2cAuthorityTests.cs" />
     <Compile Include="RequestsTests\OboFlowTests.cs" />
     <Compile Include="RequestsTests\SilentRequestTests.cs" />
     <Compile Include="TokenCacheTests.cs" />
@@ -121,6 +123,12 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\OpenidConfiguration-B2C.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\OpenidConfiguration-MissingFields-B2C.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\OpenidConfiguration-OnPremise.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
