@@ -96,6 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             {
             }
 
+            TokenType = response.TokenType;
             Scope = response.Scope.AsSet();
         }
 

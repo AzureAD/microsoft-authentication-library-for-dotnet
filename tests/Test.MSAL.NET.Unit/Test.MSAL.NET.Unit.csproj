@@ -81,8 +81,11 @@
   </Choose>
   <ItemGroup>
     <Compile Include="HttpTests\HttpClientFactoryTests.cs" />
-    <Compile Include="HttpTests\HttpRequestTests.cs" />
     <Compile Include="InstanceTests\AuthorityTests.cs" />
+    <Compile Include="InstanceTests\AdfsAuthorityTests.cs" />
+    <Compile Include="InstanceTests\AadAuthorityTests.cs" />
+    <Compile Include="HttpTests\HttpRequestTests.cs" />
+    <Compile Include="InstanceTests\B2cAuthorityTests.cs" />
     <Compile Include="RequestsTests\OboFlowTests.cs" />
     <Compile Include="RequestsTests\SilentRequestTests.cs" />
     <Compile Include="TokenCacheTests.cs" />
@@ -104,6 +107,31 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Resources\invalid_cert.pfx">
+    <ProjectReference Include="..\..\src\MSAL.PCL.Desktop\MSAL.PCL.Desktop.csproj">
+      <Project>{fa2c7f08-3ccb-47c2-b359-627cc96c04a3}</Project>
+      <Name>MSAL.PCL.Desktop</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\MSAL.PCL\MSAL.PCL.csproj">
+      <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
+      <Name>MSAL.PCL</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="MSHTML">
+      <Guid>{3050F1C5-98B5-11CF-BB82-00AA00BDCE0B}</Guid>
+      <VersionMajor>4</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\OpenidConfiguration-B2C.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\OpenidConfiguration-MissingFields-B2C.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Resources\OpenidConfiguration-OnPremise.json">

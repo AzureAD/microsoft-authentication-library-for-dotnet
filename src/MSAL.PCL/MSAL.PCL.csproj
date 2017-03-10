@@ -64,6 +64,7 @@
     <Compile Include="Internal\Instance\AadAuthority.cs" />
     <Compile Include="Internal\Instance\AdfsAuthority.cs" />
     <Compile Include="Internal\Instance\AdfsWebFingerResponse.cs" />
+    <Compile Include="Internal\Instance\B2CAuthority.cs" />
     <Compile Include="Internal\Instance\DrsMetadataResponse.cs" />
     <Compile Include="Internal\Instance\TenantDiscoveryResponse.cs" />
     <Compile Include="Internal\Instance\InstanceDiscoveryResponse.cs" />
@@ -90,7 +91,6 @@
     <Compile Include="Internal\MsalIdHelper.cs" />
     <Compile Include="MsalServiceException.cs" />
     <Compile Include="MsalSilentTokenAcquisitionException.cs" />
-    <Compile Include="MsalUserMismatchException.cs" />
     <Compile Include="AuthenticationResult.cs" />
     <Compile Include="Internal\Instance\Authority.cs" />
     <Compile Include="Internal\AuthorizationResult.cs" />

@@ -28,6 +28,7 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
+    /// Interface for platform specific parameters required for public clients to operate.
     /// </summary>
     public interface IPlatformParameters
     {

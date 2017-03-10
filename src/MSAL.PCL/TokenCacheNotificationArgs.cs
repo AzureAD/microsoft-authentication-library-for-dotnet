@@ -43,8 +43,8 @@ namespace Microsoft.Identity.Client
         public string ClientId { get; internal set; }
 
         /// <summary>
-        /// Gets the user's unique Id.
+        /// Gets the user object.
         /// </summary>
-        public User User { get; set; }
+        public User User { get; internal set; }
     }
 }

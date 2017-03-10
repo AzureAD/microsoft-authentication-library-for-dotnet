@@ -693,5 +693,69 @@ namespace Test.MSAL.NET.Unit
 
             Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokens().First().RefreshToken);
         }
+
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void SerializeDeserializeCacheTest()
+        {
+            TokenCache cache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
+
+            TokenResponse response = new TokenResponse();
+            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId,
+                TestConstants.HomeObjectId);
+            response.AccessToken = "access-token";
+            response.ExpiresIn = 3599;
+            response.CorrelationId = "correlation-id";
+            response.RefreshToken = "refresh-token";
+            response.Scope = TestConstants.Scope.AsSingleString();
+            response.TokenType = "Bearer";
+
+            AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
+            {
+                Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
+                ClientId = TestConstants.ClientId
+            };
+
+            cache.SaveAccessAndRefreshToken(requestParams, response);
+            byte[] serializedCache = cache.Serialize();
+            
+            _tokenCachePlugin.TokenCacheDictionary.Clear();
+            Assert.AreEqual(0, cache.AccessTokenCount);
+            Assert.AreEqual(0, cache.RefreshTokenCount);
+
+            cache.Deserialize(serializedCache);
+            Assert.AreEqual(1, cache.AccessTokenCount);
+            Assert.AreEqual(1, cache.RefreshTokenCount);
+
+            serializedCache = cache.Serialize();
+            cache.Deserialize(serializedCache);
+            //item count should not change because old cache entries should have
+            //been overriden
+
+            Assert.AreEqual(1, cache.AccessTokenCount);
+            Assert.AreEqual(1, cache.RefreshTokenCount);
+
+            AccessTokenCacheItem atItem = cache.GetAllAccessTokens().First();
+            Assert.AreEqual(response.AccessToken, atItem.AccessToken);
+            Assert.AreEqual(TestConstants.AuthorityHomeTenant, atItem.Authority);
+            Assert.AreEqual(TestConstants.ClientId, atItem.ClientId);
+            Assert.AreEqual(response.TokenType, atItem.TokenType);
+            Assert.AreEqual(response.Scope, atItem.Scope.AsSingleString());
+            Assert.AreEqual(TestConstants.UniqueId, atItem.UniqueId);
+            Assert.AreEqual(TestConstants.DisplayableId, atItem.DisplayableId);
+            Assert.AreEqual(TestConstants.HomeObjectId, atItem.HomeObjectId);
+            Assert.AreEqual(response.IdToken, atItem.RawIdToken);
+
+            RefreshTokenCacheItem rtItem = cache.GetAllRefreshTokens().First();
+            Assert.AreEqual(response.RefreshToken, rtItem.RefreshToken);
+            Assert.AreEqual(response.IdToken, rtItem.RawIdToken);
+            Assert.AreEqual(TestConstants.ClientId, rtItem.ClientId);
+            Assert.AreEqual(TestConstants.HomeObjectId, rtItem.HomeObjectId);
+            Assert.IsNull(rtItem.Authority);
+        }
     }
 }
