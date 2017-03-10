@@ -26,7 +26,7 @@
     <ProjectCapability Include="ShowFilesOutsideOfProject" />
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
     <None Include="..\**\*.cs;..\**\*.xml;..\**\*.axml" Exclude="..\Microsoft.Identity.Client\obj\**\*.*;bin\**\*.*" />
-    <Compile Remove="Platforms\**\*.*;Resources\**\*.cs" />
+    <Compile Remove="Platforms\**\*.*" />
     <EmbeddedResource Include="Properties\Microsoft.Identity.Client.rd.xml" />
     <Compile Include="..\MSAL.PCL\**\*.cs" Exclude="..\MSAL.PCL\Properties\**\*.cs;..\MSAL.PCL\MsalOption.cs" />
   </ItemGroup>
@@ -111,12 +111,10 @@
     <Reference Include="System.Xml" />
     <Compile Include="Platforms\Android\**\*.cs" />
     <Compile Include="..\MSAL.PCL.Android\*.cs" />
-    <Compile Include="..\MSAL.PCL.Android\Resources\*.cs" />
     <AndroidResource Include="Resources\**\*.axml" />
     <AndroidResource Include="Resources\**\*.xml" />
     <AndroidResource Include="..\MSAL.PCL.Android\Resources\**\*.axml" />
     <AndroidResource Include="..\MSAL.PCL.Android\Resources\**\*.xml" />
-    <Compile Include="Resources\**\*.cs" />
     <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="23.3.0" />
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="23.3.0" />    
   </ItemGroup>
