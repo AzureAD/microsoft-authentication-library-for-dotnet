@@ -41,12 +41,8 @@ using Test.MSAL.NET.Unit.Mocks;
 namespace Test.MSAL.NET.Unit.InstanceTests
 {
     [TestClass]
-    [DeploymentItem("Resources\\OpenidConfiguration-OnPremise.json")]
-    [DeploymentItem("Resources\\OpenidConfiguration-MissingFields-OnPremise.json")]
     [DeploymentItem("Resources\\OpenidConfiguration.json")]
     [DeploymentItem("Resources\\OpenidConfiguration-MissingFields.json")]
-    [DeploymentItem("Resources\\drs-response-missing-field.json")]
-    [DeploymentItem("Resources\\drs-response.json")]
     public class AadAuthorityTests
     {
         [TestInitialize]

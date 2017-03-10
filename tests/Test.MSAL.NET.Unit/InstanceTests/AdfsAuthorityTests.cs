@@ -43,12 +43,10 @@ using Guid = System.Guid;
 namespace Test.MSAL.NET.Unit.InstanceTests
 {
     [TestClass]
-    [DeploymentItem("Resources\\OpenidConfiguration-OnPremise.json")]
-    [DeploymentItem("Resources\\OpenidConfiguration-MissingFields-OnPremise.json")]
-    [DeploymentItem("Resources\\OpenidConfiguration.json")]
-    [DeploymentItem("Resources\\OpenidConfiguration-MissingFields.json")]
     [DeploymentItem("Resources\\drs-response-missing-field.json")]
     [DeploymentItem("Resources\\drs-response.json")]
+    [DeploymentItem("Resources\\OpenidConfiguration-OnPremise.json")]
+    [DeploymentItem("Resources\\OpenidConfiguration-MissingFields-OnPremise.json")]
     [Ignore] //disable until we support ADFS
     public class AdfsAuthorityTests
     {

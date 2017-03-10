@@ -123,6 +123,12 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\OpenidConfiguration-B2C.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\OpenidConfiguration-MissingFields-B2C.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\OpenidConfiguration-OnPremise.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

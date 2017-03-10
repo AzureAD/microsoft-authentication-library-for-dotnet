@@ -28,7 +28,6 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Instance
 {

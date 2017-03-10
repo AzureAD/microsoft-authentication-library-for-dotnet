@@ -36,7 +36,9 @@ using Guid = System.Guid;
 namespace Test.MSAL.NET.Unit.InstanceTests
 {
     [TestClass]
-    public class B2cAuthorityTests
+    [DeploymentItem("Resources\\OpenidConfiguration-B2C.json")]
+    [DeploymentItem("Resources\\OpenidConfiguration-MissingFields-B2C.json")]
+    public class B2CAuthorityTests
     {
         [TestInitialize]
         public void TestInitialize()
