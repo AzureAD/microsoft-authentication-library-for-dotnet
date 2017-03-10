@@ -1,0 +1,125 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid7;Xamarin.iOS10</TargetFrameworks>    
+    <Version>1.0.0-alpha-001</Version>
+    <Authors>Microsoft Corp.</Authors>
+    <PackageTitle>Microsoft Authentication Library</PackageTitle>
+    <PackageLicenseUrl>http://go.microsoft.com/fwlink/?LinkId=317295</PackageLicenseUrl>
+    <PackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=258232</PackageProjectUrl>
+    <MinClientVersion>2.12</MinClientVersion>
+    <Description>This package contains the binaries of the Microsoft Authentication Library (MSAL).</Description>
+    <Summary>MSAL provides a library with easy to use authentication functionality for your .NET client on various platforms including Windows desktop, Windows Store, Xamarin iOS and Xamarin Android by taking advantage of Azure Active Directory and MSA.</Summary>
+    <Copyright>(C) Microsoft Corporation. All rights reserved.</Copyright>
+    <PackageTags>Microsoft Authentication Library;MSA;MSAL;Azure Active Directory;AAD;Identity;Authentication;.NET;Windows Store;Xamarin iOS;Android</PackageTags>
+    <Product>Microsoft.Identity.Client ($(TargetFramework))</Product>
+    <IncludeSymbols>true</IncludeSymbols>
+    <GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\build\MSAL.snk</AssemblyOriginatorKeyFile>
+    <!-- Workaround until Xamarin supports PPDB -->
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
+    <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectCapability Include="ShowFilesOutsideOfProject" />
+    <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
+    <None Include="..\**\*.cs;..\**\*.xml;..\**\*.axml" Exclude="..\Microsoft.Identity.Client\obj\**\*.*;bin\**\*.*" />
+    <Compile Remove="Platforms\**\*.*;Resources\**\*.cs" />
+    <EmbeddedResource Include="Properties\Microsoft.Identity.Client.rd.xml" />
+    <Compile Include="..\MSAL.PCL\**\*.cs" Exclude="..\MSAL.PCL\Properties\**\*.cs;..\MSAL.PCL\MsalOption.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'uap10.0' ">
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
+    <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.0" Condition="'$(TargetFramework)' != 'netstandard1.1'" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Compile Include="Platforms\net45\*.cs" />
+    <Compile Include="..\MSAL.PCL.Desktop\*.cs" />
+    <Compile Include="..\MSAL.Common\MsalEventSource.cs" />
+    <Compile Include="..\MSAL.Common\PublicClientApplicationExtensions.cs" />
+    <Compile Include="..\MSAL.Common\ClientAssertionCertificate.cs" />
+    <Compile Include="..\MSAL.Common\Logger.cs" />
+    <Compile Include="..\MSAL.Common\TokenCachePlugin.cs" />
+    <Compile Include="..\MSAL.Common\TokenCacheExtensions.cs" />
+    <Compile Include="..\MSAL.PCL\MsalOption.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
+    <Compile Include="Platforms\winrt\**\*.cs" />
+    <Compile Include="..\MSAL.PCL.WinRT\*.cs" />
+    <Compile Include="..\MSAL.Common\MsalEventSource.cs" />
+    <Compile Include="..\MSAL.Common\PublicClientApplicationExtensions.cs" />
+    <Compile Include="..\MSAL.Common\Logger.cs" />
+    <Compile Include="..\MSAL.PCL\MsalOption.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
+    <Compile Include="Platforms\netstandard1.3\**\*.cs" />
+    <Compile Include="..\MSAL.PCL.CoreCLR\*.cs" />
+    <Compile Include="..\MSAL.Common\MsalEventSource.cs" />
+    <Compile Include="..\MSAL.Common\Logger.cs" />
+    <Compile Include="..\MSAL.Common\TokenCachePlugin.cs" />
+    <Compile Include="..\MSAL.Common\TokenCacheExtensions.cs" />
+    <Compile Include="..\MSAL.PCL\MsalOption.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform " Version="5.3.0" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
+    <Reference Include="System" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="Xamarin.iOS" />
+    <Compile Include="Platforms\iOS\**\*.cs" />
+    <Compile Include="..\MSAL.PCL.iOS\*.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid7' ">
+    <Reference Include="Mono.Android" />
+    <Reference Include="System" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml" />
+    <Compile Include="Platforms\Android\**\*.cs" />
+    <Compile Include="..\MSAL.PCL.Android\*.cs" />
+    <Compile Include="..\MSAL.PCL.Android\Resources\*.cs" />
+    <AndroidResource Include="Resources\**\*.axml" />
+    <AndroidResource Include="Resources\**\*.xml" />
+    <AndroidResource Include="..\MSAL.PCL.Android\Resources\**\*.axml" />
+    <AndroidResource Include="..\MSAL.PCL.Android\Resources\**\*.xml" />
+    <Compile Include="Resources\**\*.cs" />
+    <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="23.3.0" />
+    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="23.3.0" />    
+  </ItemGroup>
+  
+  <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
+</Project>

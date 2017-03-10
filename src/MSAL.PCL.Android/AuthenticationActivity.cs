@@ -40,8 +40,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// </summary>
-    [Activity(Label = "Sign In")]
-    [CLSCompliant(false)]
+    [Activity(Label = "Sign In")]    
     [Android.Runtime.Preserve(AllMembers = true)]
     public class AuthenticationActivity : Activity
     {
