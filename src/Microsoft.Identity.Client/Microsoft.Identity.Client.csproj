@@ -22,18 +22,20 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
-    <ProjectCapability Include="ShowFilesOutsideOfProject" />
+    <!-- This None is here so the conditinonally included files show up in the Solution Explorer -->
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
-    <None Include="..\**\*.cs;..\**\*.xml;..\**\*.axml" Exclude="..\Microsoft.Identity.Client\obj\**\*.*;bin\**\*.*" />
     <Compile Remove="Platforms\**\*.*" />
+    <Compile Remove="Features\**\*.*" />
     <EmbeddedResource Include="Properties\Microsoft.Identity.Client.rd.xml" />
-    <Compile Include="..\MSAL.PCL\**\*.cs" Exclude="..\MSAL.PCL\Properties\**\*.cs;..\MSAL.PCL\MsalOption.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'uap10.0' ">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' ">
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
@@ -52,34 +54,31 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Compile Include="Platforms\net45\*.cs" />
-    <Compile Include="..\MSAL.PCL.Desktop\*.cs" />
-    <Compile Include="..\MSAL.Common\MsalEventSource.cs" />
-    <Compile Include="..\MSAL.Common\PublicClientApplicationExtensions.cs" />
-    <Compile Include="..\MSAL.Common\ClientAssertionCertificate.cs" />
-    <Compile Include="..\MSAL.Common\Logger.cs" />
-    <Compile Include="..\MSAL.Common\TokenCachePlugin.cs" />
-    <Compile Include="..\MSAL.Common\TokenCacheExtensions.cs" />
-    <Compile Include="..\MSAL.PCL\MsalOption.cs" />
+    <Compile Include="Features\EventSource\**\*.cs" />
+    <Compile Include="Features\TokenCache\**\*.cs" />
+    <Compile Include="Features\PublicClient\**\*.cs" />
+    <Compile Include="Features\ClientAssertion\**\*.cs" />
+    <Compile Update="Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
+    <Compile Update="Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
+    <Compile Update="Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
+    <Compile Update="Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
+    <Compile Update="Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
     <Compile Include="Platforms\winrt\**\*.cs" />
-    <Compile Include="..\MSAL.PCL.WinRT\*.cs" />
-    <Compile Include="..\MSAL.Common\MsalEventSource.cs" />
-    <Compile Include="..\MSAL.Common\PublicClientApplicationExtensions.cs" />
-    <Compile Include="..\MSAL.Common\Logger.cs" />
-    <Compile Include="..\MSAL.PCL\MsalOption.cs" />
+    <Compile Include="Features\EventSource\**\*.cs" />
+    <Compile Include="Features\PublicClient\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
     <Compile Include="Platforms\netstandard1.3\**\*.cs" />
-    <Compile Include="..\MSAL.PCL.CoreCLR\*.cs" />
-    <Compile Include="..\MSAL.Common\MsalEventSource.cs" />
-    <Compile Include="..\MSAL.Common\Logger.cs" />
-    <Compile Include="..\MSAL.Common\TokenCachePlugin.cs" />
-    <Compile Include="..\MSAL.Common\TokenCacheExtensions.cs" />
-    <Compile Include="..\MSAL.PCL\MsalOption.cs" />
+    <Compile Include="Features\EventSource\**\*.cs" />
+    <Compile Include="Features\TokenCache\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform " Version="5.3.0" />
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform " Version="5.2.2" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
+    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.0.3" />
+    <PackageReference Include="System.Xml.XDocument" Version="4.0.11" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
     <Reference Include="System" />
@@ -94,7 +93,6 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="Xamarin.iOS" />
     <Compile Include="Platforms\iOS\**\*.cs" />
-    <Compile Include="..\MSAL.PCL.iOS\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid7' ">
     <Reference Include="Mono.Android" />
@@ -110,14 +108,21 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Compile Include="Platforms\Android\**\*.cs" />
-    <Compile Include="..\MSAL.PCL.Android\*.cs" />
     <AndroidResource Include="Resources\**\*.axml" />
     <AndroidResource Include="Resources\**\*.xml" />
-    <AndroidResource Include="..\MSAL.PCL.Android\Resources\**\*.axml" />
-    <AndroidResource Include="..\MSAL.PCL.Android\Resources\**\*.xml" />
     <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="23.3.0" />
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="23.3.0" />    
   </ItemGroup>
   
   <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
+  
+ 
+  <!-- This is here to workaround designer issues so VS sees them appropriately -->
+  <ItemGroup>
+    <None Update="Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
+    <None Update="Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
+    <None Update="Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
+    <None Update="Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
+    <None Update="Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
+  </ItemGroup>
 </Project>
