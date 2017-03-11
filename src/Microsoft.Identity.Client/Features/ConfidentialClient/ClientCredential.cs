@@ -25,17 +25,45 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using System;
 
-namespace Microsoft.Identity.Client.Internal.Interfaces
+namespace Microsoft.Identity.Client
 {
-    internal interface IBrokerHelper
+    /// <summary>
+    /// Meant to be used in confidential client applications. Allows developers to 
+    /// pass either client secret or client assertion certificate of their application.
+    /// </summary>
+    public sealed class ClientCredential
     {
-        IPlatformParameters PlatformParameters { get; set; }
-        bool CanInvokeBroker { get; }
-        Task<TokenResponse> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload);
+#if !NETSTANDARD1_1
+        /// <summary>
+        /// Constructor provide client assertion certificate
+        /// </summary>
+        /// <param name="certificate">certificate of the client requesting the token.</param>
+        public ClientCredential(ClientAssertionCertificate certificate)
+        {
+            this.Certificate = certificate;
+        }
+
+        internal ClientAssertionCertificate Certificate { get; private set; }
+        internal string Assertion { get; set; }
+        internal long ValidTo { get; set; }
+#endif
+
+        /// <summary>
+        /// Constructor to provide client secret
+        /// </summary>
+        /// <param name="secret">Secret of the client requesting the token.</param>
+        public ClientCredential(string secret)
+        {
+            if (string.IsNullOrWhiteSpace(secret))
+            {
+                throw new ArgumentNullException("secret");
+            }
+
+            this.Secret = secret;
+        }
+
+        internal string Secret { get; private set; }
     }
 }

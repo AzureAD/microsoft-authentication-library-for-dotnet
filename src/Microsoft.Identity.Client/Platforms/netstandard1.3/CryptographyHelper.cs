@@ -26,6 +26,9 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client.Internal.Interfaces;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace Microsoft.Identity.Client
 {
@@ -39,6 +42,14 @@ namespace Microsoft.Identity.Client
         public string GenerateCodeVerifier()
         {
             return null;
+        }
+
+        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+        {
+            using (var key = certificate.GetRSAPrivateKey())
+            {
+                return key.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            }
         }
     }
 }

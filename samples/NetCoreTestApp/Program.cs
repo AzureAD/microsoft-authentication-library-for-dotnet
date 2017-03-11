@@ -26,26 +26,25 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal.Interfaces;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using Microsoft.Identity.Client;
 
-namespace Microsoft.Identity.Client
+namespace NetCoreTestApp
 {
-    internal class BrokerHelper : IBrokerHelper
+    class Program
     {
-        public IPlatformParameters PlatformParameters { get; set; }
-
-        public bool CanInvokeBroker
+        static void Main(string[] args)
         {
-            get { return false; }
-        }
-
-        public Task<TokenResponse> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
-        {
-            throw new NotImplementedException();
+            ClientCredential cc = new ClientCredential(new ClientAssertionCertificate(new System.Security.Cryptography.X509Certificates.X509Certificate2("cert.pfx")));
+            ConfidentialClientApplication app = new ConfidentialClientApplication("<client-id>", "http://localhost", cc, new TokenCache(), new TokenCache());
+            try
+            {
+                AuthenticationResult result = app.AcquireTokenForClientAsync(new string[] { "User.Read.All" }).Result;
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine(exc.Message);
+            }
+            finally { Console.ReadKey(); }
         }
     }
 }

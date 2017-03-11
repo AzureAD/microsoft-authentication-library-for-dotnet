@@ -73,8 +73,6 @@ namespace Microsoft.Identity.Client.Internal
         public static LoggerBase Logger { get; set; }
         public static PlatformInformationBase PlatformInformation { get; set; }
         public static ICryptographyHelper CryptographyHelper { get; set; }
-        public static IDeviceAuthHelper DeviceAuthHelper { get; set; }
-        public static IBrokerHelper BrokerHelper { get; set; }
         public static IPlatformParameters DefaultPlatformParameters { get; set; }
 
         public static void InitializeByAssemblyDynamicLinking()
@@ -86,24 +84,19 @@ namespace Microsoft.Identity.Client.Internal
                 (LoggerBase) new Logger(),
                 (PlatformInformationBase) new PlatformInformation(),
                 (ICryptographyHelper) new CryptographyHelper(),
-                (IDeviceAuthHelper) new DeviceAuthHelper(),
-                (IBrokerHelper) new BrokerHelper(),
                 (IPlatformParameters) new PlatformParameters());
 #endif
         }
 
         public static void InjectDependecies(IWebUIFactory webUIFactory, ITokenCachePlugin tokenCachePlugin,
             LoggerBase logger,
-            PlatformInformationBase platformInformation, ICryptographyHelper cryptographyHelper,
-            IDeviceAuthHelper deviceAuthHelper, IBrokerHelper brokerHelper, IPlatformParameters platformParameters)
+            PlatformInformationBase platformInformation, ICryptographyHelper cryptographyHelper, IPlatformParameters platformParameters)
         {
             WebUIFactory = webUIFactory;
             TokenCachePlugin = tokenCachePlugin;
             Logger = logger;
             PlatformInformation = platformInformation;
             CryptographyHelper = cryptographyHelper;
-            DeviceAuthHelper = deviceAuthHelper;
-            BrokerHelper = brokerHelper;
             DefaultPlatformParameters = platformParameters;
         }
     }

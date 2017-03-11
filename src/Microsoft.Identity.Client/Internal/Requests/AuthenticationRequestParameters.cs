@@ -33,7 +33,7 @@ using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class AuthenticationRequestParameters
+    internal partial class AuthenticationRequestParameters
     {
         public RequestContext RequestContext { get; set; }
 
@@ -61,14 +61,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IPlatformParameters PlatformParameters { get; set; }
 
+#if NET45 || NETSTANDARD1_3
         public ClientCredential ClientCredential { get; set; }
 
         public bool HasCredential => (ClientCredential != null);
 
+#endif
         public IDictionary<string, string> ToParameters()
         {
             IDictionary<string, string> parameters = new Dictionary<string, string>();
-
+#if NET45 || NETSTANDARD1_3
             if (ClientCredential != null)
             {
                 if (!string.IsNullOrEmpty(ClientCredential.Secret))
@@ -96,9 +98,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     parameters[OAuth2Parameter.ClientAssertion] = ClientCredential.Assertion;
                 }
             }
-
+#endif
             return parameters;
         }
-
     }
 }

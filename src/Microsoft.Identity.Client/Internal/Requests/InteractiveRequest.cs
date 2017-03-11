@@ -88,8 +88,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new ArgumentException(MsalErrorMessage.LoginHintNullForUiOption, "loginHint");
             }
-
-            PlatformPlugin.BrokerHelper.PlatformParameters = authenticationRequestParameters.PlatformParameters;
         }
 
         internal override async Task PreTokenRequest()

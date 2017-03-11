@@ -171,9 +171,11 @@ namespace Microsoft.Identity.Client
                                 item.Scope.ScopeIntersects(accessTokenCacheItem.Scope))
                         .ToList();
 
+#if NET45 || NETSTANDARD1_3
                 // if there is no credential then it is user flow
                 // and not a client credential flow.
                 if (!requestParams.HasCredential)
+#endif
                 {
                     //filter by home_oid of the user instead
                     accessTokenItemList =
@@ -239,9 +241,11 @@ namespace Microsoft.Identity.Client
                     }
                     else
                     {
-                        // if there is no credential then it is user flow
-                        // and not a client credential flow.
-                        if (!requestParam.HasCredential)
+#if NET45 || NETSTANDARD1_3
+                    // if there is no credential then it is user flow
+                    // and not a client credential flow.
+                    if (!requestParam.HasCredential)
+#endif
                         {
                             //filter by home_oid of the user instead
                             tokenCacheItems =
