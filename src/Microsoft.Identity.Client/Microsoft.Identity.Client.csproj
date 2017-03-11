@@ -4,8 +4,8 @@
     <Version>1.0.0-alpha-001</Version>
     <Authors>Microsoft Corp.</Authors>
     <PackageTitle>Microsoft Authentication Library</PackageTitle>
-    <PackageLicenseUrl>http://go.microsoft.com/fwlink/?LinkId=317295</PackageLicenseUrl>
-    <PackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=258232</PackageProjectUrl>
+    <PackageLicenseUrl>https://go.microsoft.com/fwlink/?linkid=844762</PackageLicenseUrl>
+    <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
     <MinClientVersion>2.12</MinClientVersion>
     <Description>This package contains the binaries of the Microsoft Authentication Library (MSAL).</Description>
     <Summary>MSAL provides a library with easy to use authentication functionality for your .NET client on various platforms including Windows desktop, Windows Store, Xamarin iOS and Xamarin Android by taking advantage of Azure Active Directory and MSA.</Summary>
