@@ -52,9 +52,9 @@ namespace Microsoft.Identity.Client
         /// Callback instance
         /// </summary>
         private static readonly object LockObj = new object();
-        private static volatile ILoggerCallBack _localCallback;
+        private static volatile ILoggerCallback _localCallback;
 
-        public static ILoggerCallBack Callback
+        public static ILoggerCallback Callback
         {
             set
             {
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Pii logging default is set to false
         /// </summary>
-        private static bool PiiLoggingEnabled = false;
+        public static bool PiiLoggingEnabled { get; set; } = false;
 
         internal static void ExecuteCallback(Logger.LogLevel level, string message, bool containsPii)
         {
@@ -172,29 +172,24 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
-        private void LogMessage(string logMessage, LogLevel logLevel, bool piiLoggingEnabled)
+        private void LogMessage(string logMessage, LogLevel logLevel, bool containsPii)
         {
             if (logLevel > Level) return;
+            if (!PiiLoggingEnabled && containsPii) return; 
 
             //format log message;
             string correlationId = (CorrelationId.Equals(Guid.Empty))
-                ? "No CorrelationId"
-                : CorrelationId.ToString();
+                ? String.Empty
+                : " - " + CorrelationId.ToString();
 
-            string log = string.Format(CultureInfo.InvariantCulture, "MSAL 0.1-dev {0} {1} {2} [{3} {4}] {5}", MsalIdHelper.GetMsalVersion(),
+            string log = string.Format(CultureInfo.InvariantCulture, "MSAL {0} {1} {2} [{3}{4}] {5}",
+                MsalIdHelper.GetMsalVersion(),
                 PlatformPlugin.PlatformInformation.GetOperatingSystem(),
-                MsalIdParameter.OS, DateTime.UtcNow,
-                correlationId, logMessage);
+                MsalIdParameter.OS, DateTime.UtcNow, correlationId, logMessage);
 
-            //platformPlugin
             PlatformPlugin.LogMessage(logLevel, log);
 
-            if(piiLoggingEnabled == true)
-            {
-                throw new Exception("PiiLoggingEnabled is set to true.");
-            }
-            //callback();
-            ExecuteCallback(logLevel, log, piiLoggingEnabled);
+            ExecuteCallback(logLevel, log, containsPii);
         }
     }
 }

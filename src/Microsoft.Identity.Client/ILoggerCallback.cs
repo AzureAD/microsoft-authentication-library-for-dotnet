@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Interface for callback to be implemented and provided by the developer.
     /// </summary>
-    public interface ILoggerCallBack
+    public interface ILoggerCallback
     {
         /// <summary>
         /// Way for develor to register a callback

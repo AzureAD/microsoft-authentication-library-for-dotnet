@@ -36,12 +36,12 @@ namespace Test.MSAL.NET.Unit
     [TestClass]
     public class LoggerCallbackTests
     {
-        private static ILoggerCallBack _callback;
+        private static ILoggerCallback _callback;
         
         [ClassInitialize()]
         public static void ClassInit(TestContext context)
         {
-            _callback = Substitute.For<ILoggerCallBack>();
+            _callback = Substitute.For<ILoggerCallback>();
             Logger.Callback = _callback;
         }
 
@@ -151,94 +151,110 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod()]
         [TestCategory("LoggerCallbackTests")]
-        [ExpectedException(typeof(Exception),
-            "PiiLoggingEnabled is set to true.")]
         public void CallbackTestErrorPii()
         {
             RequestContext requestContext = new RequestContext(Guid.Empty);
 
+            var counter = 0;
             requestContext.Logger.Level = Logger.LogLevel.Error;
+            Logger.PiiLoggingEnabled = true;
 
-            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true));
+            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.ErrorPii(new Exception("test message"));
+            Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), true));
+            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.WarningPii("test message");
+            Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), true));
+            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.InfoPii("test message");
+            Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), true));
+            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.VerbosePii("test message");
+            Assert.AreEqual(1, counter);
         }
 
         [TestMethod()]
         [TestCategory("LoggerCallbackTests")]
-        [ExpectedException(typeof(Exception),
-            "PiiLoggingEnabled is set to true.")]
         public void CallbackTestWarningPii()
         {
             RequestContext requestContext = new RequestContext(Guid.Empty);
 
+            var counter = 0;
             requestContext.Logger.Level = Logger.LogLevel.Warning;
+            Logger.PiiLoggingEnabled = true;
 
-            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true));
+            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.ErrorPii(new Exception("test message"));
-           
-            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), true));
+            Assert.AreEqual(1, counter);
+
+            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.WarningPii("test message");
+            Assert.AreEqual(2, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), true));
+            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.InfoPii("test message");
+            Assert.AreEqual(2, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), true));
+            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.VerbosePii("test message");
+            Assert.AreEqual(2, counter);
         }
 
         [TestMethod()]
         [TestCategory("LoggerCallbackTests")]
-        [ExpectedException(typeof(Exception),
-            "PiiLoggingEnabled is set to true.")]
         public void CallbackTestInfoPii()
         {
             RequestContext requestContext = new RequestContext(Guid.Empty);
 
+            var counter = 0;
             requestContext.Logger.Level = Logger.LogLevel.Info;
+            Logger.PiiLoggingEnabled = true;
 
-            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true));
+            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.ErrorPii(new Exception("test message"));
-            
-            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), true));
+            Assert.AreEqual(1, counter);
+
+            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.WarningPii("test message");
+            Assert.AreEqual(2, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), true));
+            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.InfoPii("test message");
+            Assert.AreEqual(3, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), true));
+            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.VerbosePii("test message");
+            Assert.AreEqual(3, counter);
         }
 
         [TestMethod()]
         [TestCategory("LoggerCallbackTests")]
-        [ExpectedException(typeof(Exception),
-            "PiiLoggingEnabled is set to true.")]
         public void CallbackTestVerbosePii()
         {
             RequestContext requestContext = new RequestContext(Guid.Empty);
-            
+
+            var counter = 0;
             requestContext.Logger.Level = Logger.LogLevel.Verbose;
+            Logger.PiiLoggingEnabled = true;
 
-            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true));
+            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.ErrorPii(new Exception("test message"));
-           
-            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), true));
+            Assert.AreEqual(1, counter);
+
+            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.WarningPii("test message");
+            Assert.AreEqual(2, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), true));
+            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.InfoPii("test message");
+            Assert.AreEqual(3, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), true));
+            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.VerbosePii("test message");
+            Assert.AreEqual(4, counter);
         }
     }
 }
