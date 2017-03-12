@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Internal
         {
 #if !NETSTANDARD1_1
             InjectDependecies(
-                (IWebUIFactory)new WebUIFactory(new RequestContext(Guid.Empty)),
+                (IWebUIFactory)new WebUIFactory(),
                 (ITokenCachePlugin)new TokenCachePlugin(new RequestContext(Guid.Empty)),
                 (ILogger)new PlatformLogger(),
                 (PlatformInformationBase)new PlatformInformation(new RequestContext(Guid.Empty)),

@@ -35,13 +35,6 @@ namespace Microsoft.Identity.Client
     {
         private PlatformParameters parameters;
 
-        protected RequestContext RequestContext { get; set; }
-
-        public WebUIFactory(RequestContext requestContext)
-        {
-            RequestContext = requestContext;
-        }
-
         public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters)
         {
             this.parameters = inputParameters as PlatformParameters;
@@ -52,7 +45,7 @@ namespace Microsoft.Identity.Client
 
             if (parameters.UseHiddenBrowser)
             {
-                return new SilentWebUI(RequestContext) {OwnerWindow = this.parameters.OwnerWindow};
+                return new SilentWebUI() {OwnerWindow = this.parameters.OwnerWindow};
             }
 
             return new InteractiveWebUI {OwnerWindow = this.parameters.OwnerWindow};

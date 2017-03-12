@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
 
             PlatformPluginSwitch.DynamicallyLinkAssembly = false;
 
-            PlatformPlugin.InjectDependecies(new WebUIFactory(requestContext), new TokenCachePlugin(requestContext), new PlatformLogger(),
+            PlatformPlugin.InjectDependecies(new WebUIFactory(), new TokenCachePlugin(requestContext), new PlatformLogger(),
                 new PlatformInformation(requestContext), new CryptographyHelper(), new DeviceAuthHelper(), new BrokerHelper(),
                 new PlatformParameters());
         }

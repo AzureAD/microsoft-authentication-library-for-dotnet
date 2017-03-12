@@ -44,17 +44,7 @@ namespace Microsoft.Identity.Client
         /// DefaultAuthority
         /// </Summary>
         protected const string DefaultAuthority = "https://login.microsoftonline.com/common/";
-
-        static ClientApplicationBase()
-        {
-            RequestContext requestContext = new RequestContext(Guid.Empty);
-
-            requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
-                    "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
-                    PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
-                    MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
-        }
-
+        
         /// <Summary>
         /// ClientApplicationBase
         /// </Summary>
@@ -70,6 +60,12 @@ namespace Microsoft.Identity.Client
             {
                 this.UserTokenCache.ClientId = clientId;
             }
+            RequestContext requestContext = new RequestContext(Guid.Empty);
+
+            requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
+                "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
+                PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
+                MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
         }
 
         /// <Summary>
@@ -116,7 +112,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool ValidateAuthority { internal get; set; }
 
-        private RequestContext RequestContext { get; set; }= new RequestContext(Guid.Empty);
+        private RequestContext RequestContext { get; set; } = new RequestContext(Guid.Empty);
 
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the available users in the cache.

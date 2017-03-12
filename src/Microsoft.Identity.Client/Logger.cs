@@ -31,10 +31,8 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-    public class Logger
+    public sealed class Logger
     {
-        private RequestContext requestContext;
-
         public enum LogLevel
         {
             Error = 0,
@@ -48,16 +46,48 @@ namespace Microsoft.Identity.Client
             this.CorrelationId = correlationId;
         }
 
-        public Logger()
-        {
-        }
-
         internal Guid CorrelationId { get; set; }
+
+        /// <summary>
+        /// Callback instance
+        /// </summary>
+        /// 
+        private static readonly object LockObj = new object();
+        private static ILoggerCallBack _localCallback;
+
+        public static ILoggerCallBack Callback
+        {
+            set
+            {
+                lock (LockObj)
+                {
+                    if (_localCallback != null)
+                    {
+                        throw new System.Exception("MSAL logging callback can only be set once per process and" +
+                                                   "should never change once set.");
+                    }
+                    _localCallback = value;
+                }
+            }
+        }
 
         /// <summary>
         /// The default log level is set to info.
         /// </summary>
-        internal LogLevel ApplicationLogLevel { get; set; } = LogLevel.Info;
+        public LogLevel Level { get; set; } = LogLevel.Info;
+
+        /// <summary>
+        /// Pii logging default is set to false
+        /// </summary>
+        internal static bool PiiLoggingEnabled = false;
+
+        internal static void ExecuteCallback(Logger.LogLevel level, string message, bool containsPii)
+        {
+            lock (LockObj)
+            {
+                _localCallback?.Log(level, message, containsPii);
+            }
+        }
 
         #region LogMessages
         /// <summary>
@@ -142,28 +172,28 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
-        private void LogMessage(string logMessage, LogLevel logLevel, bool containsPii)
+        private void LogMessage(string logMessage, LogLevel logLevel, bool piiLoggingEnabled)
         {
-            if (logLevel > ApplicationLogLevel) return;
+            if (logLevel > Level) return;
 
             //format log message;
             string correlationId = (CorrelationId.Equals(Guid.Empty))
                 ? "No CorrelationId"
                 : CorrelationId.ToString();
 
-            string log = string.Format(CultureInfo.InvariantCulture, "MSAL {0} {1} {2} [{3} {4}] {5}", MsalIdHelper.GetMsalVersion(),
-                PlatformPlugin.PlatformInformation.GetProductName(),
-                PlatformPlugin.PlatformInformation.GetAssemblyFileVersionAttribute(), DateTime.UtcNow,
+            string log = string.Format(CultureInfo.InvariantCulture, "MSAL 0.1-dev {0} {1} {2} [{3} {4}] {5}", MsalIdHelper.GetMsalVersion(),
+                PlatformPlugin.PlatformInformation.GetOperatingSystem(),
+                MsalIdParameter.OS, DateTime.UtcNow,
                 correlationId, logMessage);
 
             //platformPlugin
-            if (!containsPii)
+            if (!piiLoggingEnabled)
             {
                 PlatformPlugin.LogMessage(logLevel, log);
             }
 
             //callback();
-            LoggerCallbackHandler.ExecuteCallback(logLevel, log, containsPii);
+            ExecuteCallback(logLevel, log, piiLoggingEnabled);
         }
     }
 }

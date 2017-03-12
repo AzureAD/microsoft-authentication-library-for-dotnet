@@ -33,13 +33,6 @@ namespace Microsoft.Identity.Client
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        protected RequestContext RequestContext { get; set; }
-
-        public WebUIFactory(RequestContext requestContext)
-        {
-            RequestContext = requestContext;
-        }
-
         public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
         {
             throw new NotImplementedException();

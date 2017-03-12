@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Interface for callback to be implemented and provided by the developer.
     /// </summary>
-    public interface IMsalLogCallback
+    public interface ILoggerCallBack
     {
         /// <summary>
         /// Way for develor to register a callback
@@ -38,41 +38,5 @@ namespace Microsoft.Identity.Client
         /// message - whether the log message contains personally identifiable information (Pii)
         /// </summary>
         void Log(Logger.LogLevel level, string message, bool containsPii);
-    }
-
-    /// <summary>
-    /// Class to consume developer provided callback.
-    /// </summary>
-    public sealed class LoggerCallbackHandler
-    {
-        private static readonly object LockObj = new object();
-        private static IMsalLogCallback _localCallback;
-
-        /// <summary>
-        /// Callback instance
-        /// </summary>
-        public static IMsalLogCallback Callback
-        {
-            set
-            {
-                lock (LockObj)
-                {
-                    if (_localCallback != null)
-                    {
-                        throw new System.Exception("MSAL logging callback can only be set once per process and" +
-                                                   "should never change once set.");
-                    }
-                    _localCallback = value;
-                }
-            }
-        }
-
-        internal static void ExecuteCallback(Logger.LogLevel level, string message, bool containsPii)
-        {
-            lock (LockObj)
-            {
-                _localCallback?.Log(level, message, containsPii);
-            }
-        }
     }
 }
