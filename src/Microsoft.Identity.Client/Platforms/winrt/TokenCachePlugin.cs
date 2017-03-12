@@ -46,6 +46,13 @@ namespace Microsoft.Identity.Client
         private ApplicationDataContainer _refreshTokenContainer = null;
         private ApplicationDataContainer _tokenContainer = null;
 
+        private readonly RequestContext _requestContext;
+
+        public TokenCachePlugin(RequestContext requestContext)
+        {
+            _requestContext = requestContext;
+        }
+
         public TokenCachePlugin()
         {
             var localSettings = ApplicationData.Current.LocalSettings;

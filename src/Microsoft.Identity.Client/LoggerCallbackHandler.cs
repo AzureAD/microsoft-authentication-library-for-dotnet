@@ -25,38 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+
 namespace Microsoft.Identity.Client
 {
-    /// <summary>
-    /// Log Level for callback
-    /// </summary>
-    public enum LogLevel
-    {
-        /// <summary>
-        /// </summary>
-        Information,
-
-        /// <summary>
-        /// </summary>
-        Verbose,
-
-        /// <summary>
-        /// </summary>
-        Warning,
-
-        /// <summary>
-        /// </summary>
-        Error
-    }
-
     /// <summary>
     /// Interface for callback to be implemented and provided by the developer.
     /// </summary>
     public interface IMsalLogCallback
     {
         /// <summary>
+        /// Way for developer to register a callback
+        /// level - loggging level of the message
+        /// message - log message according to the log message format
+        /// containsPii - whether the log message contains personally identifiable information (Pii)
         /// </summary>
-        void Log(LogLevel level, string message);
+        void Log(Logger.LogLevel level, string message, bool containsPii);
     }
 
     /// <summary>
@@ -76,16 +60,20 @@ namespace Microsoft.Identity.Client
             {
                 lock (LockObj)
                 {
+                    if (_localCallback != null )
+                    {
+                        throw new Exception("MSAL logging callback can only be set once per process and should never change once set.");
+                    }
                     _localCallback = value;
                 }
             }
         }
 
-        internal static void ExecuteCallback(LogLevel level, string message)
+        internal static void ExecuteCallback(Logger.LogLevel level, string message, bool containsPii)
         {
             lock (LockObj)
             {
-                _localCallback?.Log(level, message);
+                _localCallback?.Log(level, message, containsPii);
             }
         }
     }

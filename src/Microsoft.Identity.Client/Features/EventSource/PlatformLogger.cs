@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -27,35 +27,41 @@
 
 using System;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
-    internal class WebUIFactory : IWebUIFactory
+    internal class PlatformLogger : ILogger
     {
-        private PlatformParameters parameters;
-
-        protected RequestContext RequestContext { get; set; }
-
-        public WebUIFactory(RequestContext requestContext)
+        static PlatformLogger()
         {
-            RequestContext = requestContext;
+            MsalEventSource = new MsalEventSource();
         }
 
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters)
+        internal static MsalEventSource MsalEventSource { get; }
+
+        public void Error(string message)
         {
-            this.parameters = inputParameters as PlatformParameters;
-            if (this.parameters == null)
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
-            }
+            MsalEventSource.Error(message);
+        }
 
-            if (parameters.UseHiddenBrowser)
-            {
-                return new SilentWebUI(RequestContext) {OwnerWindow = this.parameters.OwnerWindow};
-            }
+        public void Warning(string message)
+        {
+            MsalEventSource.Error(message);
+        }
 
-            return new InteractiveWebUI {OwnerWindow = this.parameters.OwnerWindow};
+        public void Verbose(string message)
+        {
+            MsalEventSource.Error(message);
+        }
+
+        public void Information(string message)
+        {
+            MsalEventSource.Error(message);
+        }
+
+        public void Error(Exception ex)
+        {
+            Error(ex.ToString());
         }
     }
 }

@@ -27,35 +27,34 @@
 
 using System;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
-    internal class WebUIFactory : IWebUIFactory
+    internal class PlatformLogger : ILogger
     {
-        private PlatformParameters parameters;
-
-        protected RequestContext RequestContext { get; set; }
-
-        public WebUIFactory(RequestContext requestContext)
+        public void Error(string message)
         {
-            RequestContext = requestContext;
+            Console.WriteLine(message); //Console.writeline writes to NSLog by default
         }
 
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters)
+        public void Warning(string message)
         {
-            this.parameters = inputParameters as PlatformParameters;
-            if (this.parameters == null)
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
-            }
+            Console.WriteLine(message); //Console.writeline writes to NSLog by default
+        }
 
-            if (parameters.UseHiddenBrowser)
-            {
-                return new SilentWebUI(RequestContext) {OwnerWindow = this.parameters.OwnerWindow};
-            }
+        public void Verbose(string message)
+        {
+            Console.WriteLine(message); //Console.writeline writes to NSLog by default
+        }
 
-            return new InteractiveWebUI {OwnerWindow = this.parameters.OwnerWindow};
+        public void Information(string message)
+        {
+            Console.WriteLine(message); //Console.writeline writes to NSLog by default
+        }
+
+        public void Error(Exception ex)
+        {
+            Error(ex.ToString());
         }
     }
 }

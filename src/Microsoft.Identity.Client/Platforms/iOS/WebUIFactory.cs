@@ -25,12 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
     internal class WebUIFactory : IWebUIFactory
     {
+        private RequestContext requestContext;
+
+        public WebUIFactory(RequestContext requestContext)
+        {
+            this.requestContext = requestContext;
+        }
+
         public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
         {
             return new WebUI(parameters);

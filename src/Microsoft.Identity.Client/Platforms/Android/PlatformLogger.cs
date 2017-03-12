@@ -26,36 +26,36 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Android.Util;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
-    internal class WebUIFactory : IWebUIFactory
+    internal class PlatformLogger : ILogger
     {
-        private PlatformParameters parameters;
-
-        protected RequestContext RequestContext { get; set; }
-
-        public WebUIFactory(RequestContext requestContext)
+        public void Error(string errorMessage)
         {
-            RequestContext = requestContext;
+            Log.Error(null, errorMessage);
         }
 
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters)
+        public void Warning(string message)
         {
-            this.parameters = inputParameters as PlatformParameters;
-            if (this.parameters == null)
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
-            }
+            Log.Warn(null, message);
+        }
 
-            if (parameters.UseHiddenBrowser)
-            {
-                return new SilentWebUI(RequestContext) {OwnerWindow = this.parameters.OwnerWindow};
-            }
+        public void Verbose(string message)
+        {
+            Log.Verbose(null, message);
+        }
 
-            return new InteractiveWebUI {OwnerWindow = this.parameters.OwnerWindow};
+        public void Information(string message)
+        {
+            Log.Info(null, message);
+        }
+
+        public void Error(Exception ex)
+        {
+            Error(ex.ToString());
         }
     }
 }

@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                 serviceEx = new MsalServiceException(MsalError.Unknown, response.Body);
             }
 
-            PlatformPlugin.Logger.Error(requestContext, serviceEx);
+            requestContext.Logger.Error(serviceEx);
             throw serviceEx;
         }
 
@@ -173,9 +173,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                     string correlationIdHeader = headers[trimmedKey].Trim();
                     if (!string.Equals(correlationIdHeader, requestContext.CorrelationId))
                     {
-                        PlatformPlugin.Logger.Warning(
-                            requestContext,
-                            string.Format(CultureInfo.InvariantCulture,
+                        requestContext.Logger.Warning(string.Format(CultureInfo.InvariantCulture,
                                 "Returned correlation id '{0}' does not match the sent correlation id '{1}'",
                                 correlationIdHeader, requestContext.CorrelationId));
                     }

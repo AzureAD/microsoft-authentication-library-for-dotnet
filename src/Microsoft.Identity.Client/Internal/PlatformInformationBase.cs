@@ -34,6 +34,12 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal abstract class PlatformInformationBase
     {
+        protected readonly RequestContext RequestContext;
+        protected PlatformInformationBase(RequestContext requestContext)
+        {
+            RequestContext = requestContext;
+        }
+
         public abstract string GetProductName();
         public abstract string GetEnvironmentVariable(string variable);
         public abstract Task<string> GetUserPrincipalNameAsync();

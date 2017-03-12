@@ -35,6 +35,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
     [DataContract]
     internal class AccessTokenCacheItem : BaseTokenCacheItem
     {
+        protected AccessTokenCacheItem(RequestContext requestContext)
+        {
+            RequestContext = requestContext;
+        }
         /// <summary>
         /// Gets the AccessToken Type.
         /// </summary>
@@ -91,7 +95,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(response.AccessTokenExpiresOn);
             }
             
-            IdToken idToken = IdToken.Parse(response.IdToken);
+            IdToken idToken = IdToken.Parse(response.IdToken, RequestContext);
             if (idToken != null)
             {
             }
