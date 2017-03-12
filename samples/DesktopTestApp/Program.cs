@@ -83,7 +83,7 @@ namespace DesktopTestApp
             {
                 string msg = ex.Message + "\n" + ex.StackTrace;
                 Console.WriteLine(msg);
-                return await app.AcquireTokenAsync(brkr.Sts.ValidScope, user.DisplayableId, UiOptions.ActAsCurrentUser, null);
+                return await app.AcquireTokenAsync(brkr.Sts.ValidScope, user.DisplayableId, UIOptions.SelectAccount, null);
             }
             
         }
@@ -113,7 +113,7 @@ namespace DesktopTestApp
             try
             {
                 PublicClientApplication app = new PublicClientApplication(Sts.Authority, "<client_id>");
-                var result = await app.AcquireTokenWithIntegratedAuthAsync(Sts.ValidScope);
+                var result = await app.AcquireTokenAsync(Sts.ValidScope);
                 return result.AccessToken;
             }
             catch (Exception ex)
