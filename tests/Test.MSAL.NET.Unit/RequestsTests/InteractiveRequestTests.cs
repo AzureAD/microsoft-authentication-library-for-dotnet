@@ -112,7 +112,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Authority = authority,
                 ClientId = TestConstants.ClientId,
                 Scope = TestConstants.Scope,
-                TokenCache = cache
+                TokenCache = cache, 
+                RequestContext = new RequestContext(Guid.Empty)
             };
 
             parameters.RedirectUri = new Uri("some://uri");
@@ -146,7 +147,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     Authority = authority,
                     ClientId = TestConstants.ClientId,
                     Scope = TestConstants.Scope,
-                    TokenCache = null
+                    TokenCache = null,
+                    RequestContext = new RequestContext(Guid.Empty)
                 };
 
                 parameters.RedirectUri = new Uri("some://uri#fragment=not-so-good");
@@ -185,7 +187,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Authority = authority,
                 ClientId = TestConstants.ClientId,
                 Scope = TestConstants.Scope,
-                TokenCache = null
+                TokenCache = null,
+                RequestContext = new RequestContext(Guid.Empty)
             };
 
             parameters.RedirectUri = new Uri("some://uri");
@@ -244,7 +247,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     Authority = authority,
                     ClientId = TestConstants.ClientId,
                     Scope = TestConstants.Scope,
-                    TokenCache = null
+                    TokenCache = null,
+                    RequestContext = new RequestContext(Guid.Empty)
                 };
 
                 parameters.RedirectUri = new Uri("some://uri");
@@ -273,7 +277,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     Authority = authority,
                     ClientId = TestConstants.ClientId,
                     Scope = TestConstants.Scope,
-                    TokenCache = null
+                    TokenCache = null,
+                    RequestContext = new RequestContext(Guid.Empty)
                 };
 
                 parameters.RedirectUri = new Uri("some://uri");
@@ -301,7 +306,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Authority = authority,
                 ClientId = TestConstants.ClientId,
                 Scope = TestConstants.Scope,
-                TokenCache = null
+                TokenCache = null,
+                RequestContext = new RequestContext(Guid.Empty)
             };
 
             parameters.RedirectUri = new Uri("some://uri");

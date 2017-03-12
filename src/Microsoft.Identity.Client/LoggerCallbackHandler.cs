@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -35,10 +33,9 @@ namespace Microsoft.Identity.Client
     public interface IMsalLogCallback
     {
         /// <summary>
-        /// Way for developer to register a callback
-        /// level - loggging level of the message
-        /// message - log message according to the log message format
-        /// containsPii - whether the log message contains personally identifiable information (Pii)
+        /// Way for develor to register a callback
+        /// level - logging level of the message
+        /// message - whether the log message contains personally identifiable information (Pii)
         /// </summary>
         void Log(Logger.LogLevel level, string message, bool containsPii);
     }
@@ -60,9 +57,10 @@ namespace Microsoft.Identity.Client
             {
                 lock (LockObj)
                 {
-                    if (_localCallback != null )
+                    if (_localCallback != null)
                     {
-                        throw new Exception("MSAL logging callback can only be set once per process and should never change once set.");
+                        throw new System.Exception("MSAL logging callback can only be set once per process and" +
+                                                   "should never change once set.");
                     }
                     _localCallback = value;
                 }

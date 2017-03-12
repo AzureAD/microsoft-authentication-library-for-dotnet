@@ -43,18 +43,18 @@ namespace Microsoft.Identity.Client.Internal.Http
         }
 
         public static async Task<HttpResponse> SendPost(Uri endpoint, Dictionary<string, string> headers,
-            Dictionary<string, string> bodyParameters, RequestContext callstate)
+            Dictionary<string, string> bodyParameters, RequestContext requestContext)
         {
             return
                 await
-                    ExecuteWithRetry(endpoint, headers, bodyParameters, HttpMethod.Post, callstate)
+                    ExecuteWithRetry(endpoint, headers, bodyParameters, HttpMethod.Post, requestContext)
                         .ConfigureAwait(false);
         }
 
         public static async Task<HttpResponse> SendGet(Uri endpoint, Dictionary<string, string> headers,
-            RequestContext callstate)
+            RequestContext requestContext)
         {
-            return await ExecuteWithRetry(endpoint, headers, null, HttpMethod.Get, callstate).ConfigureAwait(false);
+            return await ExecuteWithRetry(endpoint, headers, null, HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, Dictionary<string, string> headers)
