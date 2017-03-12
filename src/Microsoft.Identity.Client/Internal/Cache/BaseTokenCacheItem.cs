@@ -38,11 +38,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
     {
         protected RequestContext RequestContext;
 
-        protected BaseTokenCacheItem(RequestContext requestContext)
-        {
-            RequestContext = requestContext;
-        }
-
         /// <summary>
         /// Default constructor.
         /// </summary>

@@ -60,6 +60,7 @@ namespace Microsoft.Identity.Client
             {
                 this.UserTokenCache.ClientId = clientId;
             }
+
             RequestContext requestContext = new RequestContext(Guid.Empty);
 
             requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
@@ -93,26 +94,12 @@ namespace Microsoft.Identity.Client
         /// Gets or sets correlation Id which would be sent to the service with the next request.
         /// Correlation Id is to be used for diagnostics purposes.
         /// </summary>
-        private Guid _correlationId;
-        public Guid CorrelationId
-        {
-            get
-            {
-                return _correlationId;
-            }
-            set
-            {
-                _correlationId = value;
-                RequestContext = this.CreateRequestContext(value);
-            }
-        }
+        public Guid CorrelationId { get; set; }
         
         /// <summary>
         /// Gets a value indicating whether address validation is ON or OFF.
         /// </summary>
         public bool ValidateAuthority { internal get; set; }
-
-        private RequestContext RequestContext { get; set; } = new RequestContext(Guid.Empty);
 
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the available users in the cache.
@@ -123,7 +110,8 @@ namespace Microsoft.Identity.Client
             {
                 if (this.UserTokenCache == null)
                 {
-                    RequestContext.Logger.Info("Token cache is null or empty");
+                    RequestContext requestContext = new RequestContext(CorrelationId);
+                    requestContext.Logger.Info("Token cache is null or empty");
                     return new List<User>();
                 }
 

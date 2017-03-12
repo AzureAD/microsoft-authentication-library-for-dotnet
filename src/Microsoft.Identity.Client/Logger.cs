@@ -41,19 +41,18 @@ namespace Microsoft.Identity.Client
             Verbose = 3
         }
 
-        internal Logger(Guid correlationId)
+        public Logger(Guid correlationId)
         {
             this.CorrelationId = correlationId;
         }
 
-        internal Guid CorrelationId { get; set; }
+        private Guid CorrelationId { get; set; }
 
         /// <summary>
         /// Callback instance
         /// </summary>
-        /// 
         private static readonly object LockObj = new object();
-        private static ILoggerCallBack _localCallback;
+        private static volatile ILoggerCallBack _localCallback;
 
         public static ILoggerCallBack Callback
         {
@@ -63,9 +62,10 @@ namespace Microsoft.Identity.Client
                 {
                     if (_localCallback != null)
                     {
-                        throw new System.Exception("MSAL logging callback can only be set once per process and" +
+                        throw new Exception("MSAL logging callback can only be set once per process and" +
                                                    "should never change once set.");
                     }
+
                     _localCallback = value;
                 }
             }
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Pii logging default is set to false
         /// </summary>
-        internal static bool PiiLoggingEnabled = false;
+        private static bool PiiLoggingEnabled = false;
 
         internal static void ExecuteCallback(Logger.LogLevel level, string message, bool containsPii)
         {
@@ -187,11 +187,12 @@ namespace Microsoft.Identity.Client
                 correlationId, logMessage);
 
             //platformPlugin
-            if (!piiLoggingEnabled)
-            {
-                PlatformPlugin.LogMessage(logLevel, log);
-            }
+            PlatformPlugin.LogMessage(logLevel, log);
 
+            if(piiLoggingEnabled == true)
+            {
+                throw new Exception("PiiLoggingEnabled is set to true.");
+            }
             //callback();
             ExecuteCallback(logLevel, log, piiLoggingEnabled);
         }
