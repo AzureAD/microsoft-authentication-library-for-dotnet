@@ -12,9 +12,8 @@ namespace Microsoft.Identity.Client.Features
     public partial struct UIOptions
     {
         /// <summary>
-        /// AcquireToken will send prompt=select_account to authorize endpoint 
-        /// and would show a list of users from which one can be selected for 
-        /// authentication.
+        /// Only available on .NET platform. AcquireToken will send prompt=attempt_none to 
+        /// authorize endpoint and the library uses a hidden webview to authenticate the user.
         /// </summary>
         public readonly static UIOptions Never = new UIOptions("attempt_none");
     }
