@@ -30,30 +30,30 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Indicates how AcquireToken should prompt the user.
     /// </summary>
-    public partial struct UIOptions
+    public partial struct UIBehavior
     {
         /// <summary>
         /// AcquireToken will send prompt=select_account to authorize endpoint 
         /// and would show a list of users from which one can be selected for 
         /// authentication.
         /// </summary>
-        public readonly static UIOptions SelectAccount = new UIOptions("select_account");
+        public readonly static UIBehavior SelectAccount = new UIBehavior("select_account");
 
         /// <summary>
         /// The user will be prompted for credentials by the service. It is achieved
         /// by sending prompt=login to the service.
         /// </summary>
-        public readonly static UIOptions ForceLogin = new UIOptions("login");
+        public readonly static UIBehavior ForceLogin = new UIBehavior("login");
 
         /// <summary>
         /// The user will be prompted to consent even if consent was granted before. It is achieved
         /// by sending prompt=consent to the service.
         /// </summary>
-        public readonly static UIOptions Consent = new UIOptions("consent");
+        public readonly static UIBehavior Consent = new UIBehavior("consent");
 
         internal string PromptValue { get; set; }
 
-        internal UIOptions(string promptValue)
+        internal UIBehavior(string promptValue)
         {
             PromptValue = promptValue;
         }

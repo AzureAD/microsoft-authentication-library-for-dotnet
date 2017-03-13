@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string ParsingWsTrustResponseFailed = "Parsing WS-Trust response failed";
         public const string PasswordRequiredForManagedUserError = "Password is required for managed user";
         public const string RedirectUriContainsFragment = "'redirectUri' must NOT include a fragment component";
-        public const string LoginHintNullForUiOption = "Null login_hint is not allowed for UiOptions.ActAsCurrentUser";
+        public const string LoginHintNullForUiOption = "Null login_hint is not allowed for UIBehavior.ActAsCurrentUser";
         public const string ServiceReturnedError = "Service returned error. Check InnerException for more details";
 
         public const string BrokerReponseHashMismatch =

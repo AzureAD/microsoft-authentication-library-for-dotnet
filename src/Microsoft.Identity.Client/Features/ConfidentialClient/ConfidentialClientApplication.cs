@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
-                new InteractiveRequest(requestParameters, null, loginHint, UIOptions.SelectAccount, null);
+                new InteractiveRequest(requestParameters, null, loginHint, UIBehavior.SelectAccount, null);
             return await handler.CreateAuthorizationUriAsync(CreateRequestContext(CorrelationId)).ConfigureAwait(false);
         }
 
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
-                new InteractiveRequest(requestParameters, additionalScope, loginHint, UIOptions.SelectAccount, null);
+                new InteractiveRequest(requestParameters, additionalScope, loginHint, UIBehavior.SelectAccount, null);
             return await handler.CreateAuthorizationUriAsync(CreateRequestContext(CorrelationId)).ConfigureAwait(false);
         }
 

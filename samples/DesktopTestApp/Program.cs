@@ -83,7 +83,7 @@ namespace DesktopTestApp
             {
                 string msg = ex.Message + "\n" + ex.StackTrace;
                 Console.WriteLine(msg);
-                return await app.AcquireTokenAsync(brkr.Sts.ValidScope, user.DisplayableId, UIOptions.SelectAccount, null);
+                return await app.AcquireTokenAsync(brkr.Sts.ValidScope, user.DisplayableId, UIBehavior.SelectAccount, null);
             }
             
         }
