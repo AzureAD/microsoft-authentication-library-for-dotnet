@@ -38,23 +38,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class InteractiveRequest : BaseRequest
     {
         private readonly SortedSet<string> _additionalScope;
-        private readonly UIOptions _uiOptions;
+        private readonly UIBehavior _UIBehavior;
         private readonly IWebUI _webUi;
         private AuthorizationResult _authorizationResult;
         private string _codeVerifier;
         private string _state;
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            string[] additionalScope, UIOptions uiOptions, IWebUI webUI)
+            string[] additionalScope, UIBehavior UIBehavior, IWebUI webUI)
             : this(
                 authenticationRequestParameters, additionalScope, authenticationRequestParameters.User?.DisplayableId,
-                uiOptions, webUI)
+                UIBehavior, webUI)
         {
         }
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
             string[] additionalScope, string loginHint,
-            UIOptions uiOptions, IWebUI webUI)
+            UIBehavior UIBehavior, IWebUI webUI)
             : base(authenticationRequestParameters)
         {
             PlatformPlugin.PlatformInformation.ValidateRedirectUri(authenticationRequestParameters.RedirectUri,
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             this._webUi = webUI;
-            this._uiOptions = uiOptions;
+            this._UIBehavior = UIBehavior;
             this.LoadFromCache = false; //no cache lookup and refresh for interactive.
         }
 
@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[kvp.Key] = kvp.Value;
             }
 
-            authorizationRequestParameters[OAuth2Parameter.Prompt] = _uiOptions.PromptValue;
+            authorizationRequestParameters[OAuth2Parameter.Prompt] = _UIBehavior.PromptValue;
             return authorizationRequestParameters;
         }
 

@@ -221,7 +221,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual("code", qp["response_type"]);
             Assert.AreEqual(TestConstants.RedirectUri, qp["redirect_uri"]);
             Assert.AreEqual(TestConstants.DisplayableId, qp["login_hint"]);
-            Assert.AreEqual(UIOptions.SelectAccount.PromptValue, qp["prompt"]);
+            Assert.AreEqual(UIBehavior.SelectAccount.PromptValue, qp["prompt"]);
             Assert.AreEqual("MSAL.Desktop", qp["x-client-sku"]);
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));

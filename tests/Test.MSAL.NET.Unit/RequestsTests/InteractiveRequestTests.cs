@@ -122,7 +122,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
                  TestConstants.DisplayableId,
-                UIOptions.SelectAccount, ui);
+                UIBehavior.SelectAccount, ui);
             Task<AuthenticationResult> task = request.RunAsync();
             task.Wait();
             AuthenticationResult result = task.Result;
@@ -155,7 +155,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 parameters.ExtraQueryParameters = "extra=qp";
 
                 new InteractiveRequest(parameters, TestConstants.ScopeForAnotherResource.ToArray(),
-                    (string) null, UIOptions.ForceLogin, new MockWebUI()
+                    (string) null, UIBehavior.ForceLogin, new MockWebUI()
                     );
                 Assert.Fail("ArgumentException should be thrown here");
             }
@@ -196,7 +196,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(), 
-                (string) null, UIOptions.ForceLogin, webUi);
+                (string) null, UIBehavior.ForceLogin, webUi);
             request.PreRunAsync().Wait();
             try
             {
@@ -217,7 +217,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
-                (string) null, UIOptions.ForceLogin, webUi);
+                (string) null, UIBehavior.ForceLogin, webUi);
             request.PreRunAsync().Wait();
 
             try
@@ -262,7 +262,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
-                null, UIOptions.ForceLogin, new MockWebUI());
+                null, UIBehavior.ForceLogin, new MockWebUI());
             request.PreRunAsync().Wait();
 
             try
