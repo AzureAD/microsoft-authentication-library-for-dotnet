@@ -33,7 +33,7 @@
     <EmbeddedResource Include="Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.1.0" PrivateAssets="All" />
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' ">
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
