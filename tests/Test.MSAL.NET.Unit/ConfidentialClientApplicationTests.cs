@@ -214,47 +214,19 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(uri);
             Dictionary<string, string> qp = MsalHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
             Assert.IsNotNull(qp);
-            Assert.AreEqual(10, qp.Count);
+            Assert.AreEqual(11, qp.Count);
             Assert.IsTrue(qp.ContainsKey("client-request-id"));
             Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2", qp["scope"]);
             Assert.AreEqual(TestConstants.ClientId, qp["client_id"]);
             Assert.AreEqual("code", qp["response_type"]);
             Assert.AreEqual(TestConstants.RedirectUri, qp["redirect_uri"]);
             Assert.AreEqual(TestConstants.DisplayableId, qp["login_hint"]);
+            Assert.AreEqual(UIOptions.SelectAccount.PromptValue, qp["prompt"]);
             Assert.AreEqual("MSAL.Desktop", qp["x-client-sku"]);
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
-
-
-            app = new ConfidentialClientApplication(TestConstants.ClientId,
-                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
-                new TokenCache(), new TokenCache())
-            {
-                ValidateAuthority = false
-            };
-
-            task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(), TestConstants.DisplayableId,
-                "extra=qp&prompt=none");
-            uri = task.Result;
-            Assert.IsNotNull(uri);
-            Assert.IsTrue(uri.AbsoluteUri.StartsWith(app.Authority, StringComparison.CurrentCulture));
-            qp = MsalHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
-            Assert.IsNotNull(qp);
-            Assert.AreEqual(12, qp.Count);
-            Assert.IsTrue(qp.ContainsKey("client-request-id"));
-            Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2", qp["scope"]);
-            Assert.AreEqual(TestConstants.ClientId, qp["client_id"]);
-            Assert.AreEqual("code", qp["response_type"]);
-            Assert.AreEqual(TestConstants.RedirectUri, qp["redirect_uri"]);
-            Assert.AreEqual(TestConstants.DisplayableId, qp["login_hint"]);
-            Assert.AreEqual("MSAL.Desktop", qp["x-client-sku"]);
-            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
-            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
-            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
-            Assert.AreEqual("qp", qp["extra"]);
-            Assert.AreEqual("none", qp["prompt"]);
-
+            
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
@@ -314,7 +286,7 @@ namespace Test.MSAL.NET.Unit
             });
 
             Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(),
-                "custom://redirect-uri", TestConstants.DisplayableId, "extra=qp&prompt=none",
+                "custom://redirect-uri", TestConstants.DisplayableId, "extra=qp",
                 TestConstants.ScopeForAnotherResource.AsArray(), TestConstants.AuthorityGuestTenant);
             Uri uri = task.Result;
             Assert.IsNotNull(uri);
@@ -334,11 +306,10 @@ namespace Test.MSAL.NET.Unit
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
             Assert.AreEqual("qp", qp["extra"]);
-            Assert.AreEqual("none", qp["prompt"]);
+            Assert.AreEqual("select_account", qp["prompt"]);
 
-            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");            
         }
-
 
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]

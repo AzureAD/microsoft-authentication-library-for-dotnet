@@ -38,14 +38,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class InteractiveRequest : BaseRequest
     {
         private readonly SortedSet<string> _additionalScope;
-        private readonly UiOptions? _uiOptions;
+        private readonly UIOptions _uiOptions;
         private readonly IWebUI _webUi;
         private AuthorizationResult _authorizationResult;
         private string _codeVerifier;
         private string _state;
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            string[] additionalScope, UiOptions uiOptions, IWebUI webUI)
+            string[] additionalScope, UIOptions uiOptions, IWebUI webUI)
             : this(
                 authenticationRequestParameters, additionalScope, authenticationRequestParameters.User?.DisplayableId,
                 uiOptions, webUI)
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
             string[] additionalScope, string loginHint,
-            UiOptions? uiOptions, IWebUI webUI)
+            UIOptions uiOptions, IWebUI webUI)
             : base(authenticationRequestParameters)
         {
             PlatformPlugin.PlatformInformation.ValidateRedirectUri(authenticationRequestParameters.RedirectUri,
@@ -83,11 +83,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             this._webUi = webUI;
             this._uiOptions = uiOptions;
             this.LoadFromCache = false; //no cache lookup and refresh for interactive.
-
-            if (string.IsNullOrWhiteSpace(loginHint) && _uiOptions == UiOptions.ActAsCurrentUser)
-            {
-                throw new ArgumentException(MsalErrorMessage.LoginHintNullForUiOption, "loginHint");
-            }
 
             PlatformPlugin.BrokerHelper.PlatformParameters = authenticationRequestParameters.PlatformParameters;
         }
@@ -203,7 +198,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[kvp.Key] = kvp.Value;
             }
 
-            AddUiOptionToRequestParameters(authorizationRequestParameters);
+            authorizationRequestParameters[OAuth2Parameter.Prompt] = _uiOptions.PromptValue;
             return authorizationRequestParameters;
         }
 
@@ -224,28 +219,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new MsalServiceException("state_mismatch_error",
                     string.Format(CultureInfo.InvariantCulture, "Returned state({0}) from authorize endpoint is not the same as the one sent({1})", _state, _authorizationResult.State));
-            }
-        }
-
-        private void AddUiOptionToRequestParameters(Dictionary<string, string> authorizationRequestParameters)
-        {
-            switch (this._uiOptions)
-            {
-                case UiOptions.ForceConsent:
-                    authorizationRequestParameters[OAuth2Parameter.Prompt] = "consent";
-                    break;
-
-                case UiOptions.ForceLogin:
-                    authorizationRequestParameters[OAuth2Parameter.Prompt] = "login";
-                    break;
-
-                case UiOptions.SelectAccount:
-                    authorizationRequestParameters[OAuth2Parameter.Prompt] = "select_account";
-                    break;
-
-                case UiOptions.ActAsCurrentUser:
-                    authorizationRequestParameters[OAuth2Parameter.RestrictToHint] = "true";
-                    break;
             }
         }
     }

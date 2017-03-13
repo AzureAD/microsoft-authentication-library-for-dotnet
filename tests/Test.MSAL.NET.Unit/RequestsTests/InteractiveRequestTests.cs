@@ -122,7 +122,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
                  TestConstants.DisplayableId,
-                UiOptions.SelectAccount, ui);
+                UIOptions.SelectAccount, ui);
             Task<AuthenticationResult> task = request.RunAsync();
             task.Wait();
             AuthenticationResult result = task.Result;
@@ -155,7 +155,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 parameters.ExtraQueryParameters = "extra=qp";
 
                 new InteractiveRequest(parameters, TestConstants.ScopeForAnotherResource.ToArray(),
-                    (string) null, UiOptions.ForceLogin, new MockWebUI()
+                    (string) null, UIOptions.ForceLogin, new MockWebUI()
                     );
                 Assert.Fail("ArgumentException should be thrown here");
             }
@@ -196,7 +196,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(), 
-                (string) null, UiOptions.ForceLogin, webUi);
+                (string) null, UIOptions.ForceLogin, webUi);
             request.PreRunAsync().Wait();
             try
             {
@@ -217,7 +217,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
-                (string) null, UiOptions.ForceLogin, webUi);
+                (string) null, UIOptions.ForceLogin, webUi);
             request.PreRunAsync().Wait();
 
             try
@@ -233,66 +233,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
-        }
-
-        [TestMethod]
-        [TestCategory("InteractiveRequestTests")]
-        public void NullLoginHintForActAsCurrentUserTest()
-        {
-            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            try
-            {
-                AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
-                {
-                    Authority = authority,
-                    ClientId = TestConstants.ClientId,
-                    Scope = TestConstants.Scope,
-                    TokenCache = null,
-                    RequestContext = new RequestContext(Guid.Empty)
-                };
-
-                parameters.RedirectUri = new Uri("some://uri");
-                parameters.ExtraQueryParameters = "extra=qp";
-
-                InteractiveRequest request = new InteractiveRequest(parameters,
-                    TestConstants.ScopeForAnotherResource.ToArray(),
-                    (string) null, UiOptions.ActAsCurrentUser, new MockWebUI());
-                Assert.Fail("ArgumentException should be thrown here");
-            }
-            catch (ArgumentException ae)
-            {
-                Assert.IsTrue(ae.Message.Contains(MsalErrorMessage.LoginHintNullForUiOption));
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("InteractiveRequestTests")]
-        public void NullUserForActAsCurrentUserTest()
-        {
-            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            try
-            {
-                AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
-                {
-                    Authority = authority,
-                    ClientId = TestConstants.ClientId,
-                    Scope = TestConstants.Scope,
-                    TokenCache = null,
-                    RequestContext = new RequestContext(Guid.Empty)
-                };
-
-                parameters.RedirectUri = new Uri("some://uri");
-                parameters.ExtraQueryParameters = "extra=qp";
-
-                new InteractiveRequest(parameters,
-                    TestConstants.ScopeForAnotherResource.ToArray(),
-                    null, UiOptions.ActAsCurrentUser, new MockWebUI());
-                Assert.Fail("ArgumentException should be thrown here");
-            }
-            catch (ArgumentException ae)
-            {
-                Assert.IsTrue(ae.Message.Contains(MsalErrorMessage.LoginHintNullForUiOption));
-            }
         }
 
         [TestMethod]
@@ -322,7 +262,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
-                null, UiOptions.ForceLogin, new MockWebUI());
+                null, UIOptions.ForceLogin, new MockWebUI());
             request.PreRunAsync().Wait();
 
             try
