@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
 
             try
             {
-                var agentIntent = new Intent(this.parameters.CallerActivity, typeof (AuthenticationActivity));
+                var agentIntent = new Intent(this.parameters.CallerActivity, typeof(AuthenticationActivity));
                 agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
                 agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.AbsoluteUri);
 
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                PlatformPlugin.Logger.Error(requestContext, ex);
+                requestContext.Logger.Error(ex);
                 throw new MsalException(MsalError.AuthenticationUiFailed, ex);
             }
 
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client
             return authorizationResult;
         }
 
-        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
+        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput, RequestContext requestContext)
         {
             if (returnedUriReady != null)
             {
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                PlatformPlugin.Logger.Information(null, "No pending request for response from web ui.");
+                requestContext.Logger.Info("No pending request for response from web ui.");
             }
         }
     }

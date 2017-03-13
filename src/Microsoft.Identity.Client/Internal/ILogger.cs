@@ -25,17 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
+using System;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal
 {
-    [Android.Runtime.Preserve(AllMembers = true)]
-    internal class WebUIFactory : IWebUIFactory
+    internal interface ILogger
     {
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
-        {
-            return new WebUI(parameters);
-        }
+        void Error(string message);
+      
+        void Warning(string message);
+        
+        void Information(string message);
+      
+        void Verbose(string message);
+       
+        void Error(Exception ex);
     }
 }

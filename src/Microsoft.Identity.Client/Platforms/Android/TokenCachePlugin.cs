@@ -23,6 +23,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 using Android.App;
 using Android.Content;
@@ -38,6 +39,7 @@ namespace Microsoft.Identity.Client
         private const string RefreshTokenSharedPreferenceName = "com.microsoft.identity.client.refreshToken";
         private readonly ISharedPreferences _accessTokenSharedPreference;
         private readonly ISharedPreferences _refreshTokenSharedPreference;
+        private RequestContext requestContext;
 
         public TokenCachePlugin()
         {
@@ -51,6 +53,11 @@ namespace Microsoft.Identity.Client
             {
                 throw new MsalException("Fail to create SharedPreference");
             }
+        }
+        
+        public TokenCachePlugin(RequestContext requestContext)
+        {
+            this.requestContext = requestContext;
         }
 
         public ICollection<string> GetAllAccessTokens()

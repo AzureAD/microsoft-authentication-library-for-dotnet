@@ -40,6 +40,13 @@ namespace Microsoft.Identity.Client
         internal readonly IDictionary<string, string> TokenCacheDictionary =
             new ConcurrentDictionary<string, string>();
 
+        private readonly RequestContext _requestContext;
+
+        public TokenCachePlugin(RequestContext requestContext)
+        {
+            _requestContext = requestContext;
+        }
+
         public void BeforeAccess(TokenCacheNotificationArgs args)
         {
         }

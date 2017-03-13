@@ -25,17 +25,36 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
-    [Android.Runtime.Preserve(AllMembers = true)]
-    internal class WebUIFactory : IWebUIFactory
+    internal class PlatformLogger : ILogger
     {
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
+        public void Error(string message)
         {
-            return new WebUI(parameters);
+            Console.WriteLine(message); //Console.writeline writes to NSLog by default
+        }
+
+        public void Warning(string message)
+        {
+            Console.WriteLine(message); //Console.writeline writes to NSLog by default
+        }
+
+        public void Verbose(string message)
+        {
+            Console.WriteLine(message); //Console.writeline writes to NSLog by default
+        }
+
+        public void Information(string message)
+        {
+            Console.WriteLine(message); //Console.writeline writes to NSLog by default
+        }
+
+        public void Error(Exception ex)
+        {
+            Error(ex.ToString());
         }
     }
 }

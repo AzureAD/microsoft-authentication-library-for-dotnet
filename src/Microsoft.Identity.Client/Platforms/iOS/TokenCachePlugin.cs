@@ -39,6 +39,13 @@ namespace Microsoft.Identity.Client
     {
         private const string LocalSettingsContainerName = "MicrosoftAuthenticationLibrary";
 
+        private readonly RequestContext _requestContext;
+
+        public TokenCachePlugin(RequestContext requestContext)
+        {
+            _requestContext = requestContext;
+        }
+
         public void BeforeAccess(TokenCacheNotificationArgs args)
         {
             try
@@ -61,13 +68,13 @@ namespace Microsoft.Identity.Client
                     byte[] dataBytes = match.ValueData.ToArray();
                     if (dataBytes != null)
                     {
-                       // args.TokenCache.Deserialize(dataBytes);
+                        // args.TokenCache.Deserialize(dataBytes);
                     }
                 }
             }
             catch (Exception ex)
             {
-                PlatformPlugin.Logger.Warning(null, "Failed to load cache: " + ex);
+                _requestContext.Logger.Warning("Failed to load cache: " + ex);
                 // Ignore as the cache seems to be corrupt
             }
         }
@@ -91,15 +98,15 @@ namespace Microsoft.Identity.Client
 
                     var err = SecKeyChain.Remove(s);
 
-                       // s.ValueData = NSData.FromArray(args.TokenCache.Serialize());
-                        err = SecKeyChain.Add(s);
-                    
+                    // s.ValueData = NSData.FromArray(args.TokenCache.Serialize());
+                    err = SecKeyChain.Add(s);
+
 
                     args.TokenCache.HasStateChanged = false;
                 }
                 catch (Exception ex)
                 {
-                    PlatformPlugin.Logger.Warning(null, "Failed to save cache: " + ex);
+                    _requestContext.Logger.Warning("Failed to save cache: " + ex);
                 }
             }
         }
