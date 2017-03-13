@@ -1,0 +1,7 @@
+mode: ContinuousDeployment
+next-version: 1.1.0
+branches:
+  master:
+    tag: preview
+  develop:
+    tag: preview

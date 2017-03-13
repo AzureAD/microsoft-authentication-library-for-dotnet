@@ -1,0 +1,12 @@
+image: Visual Studio 2017     
+    
+build_script:
+  - ps: .\build.ps1
+
+skip_commits:
+  files:
+    - '**/*.md'
+    - 'changelog.txt'
+
+artifacts:
+- path: .\artifacts\*.nupkg
