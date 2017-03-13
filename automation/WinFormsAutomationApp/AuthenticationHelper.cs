@@ -247,9 +247,9 @@ namespace WinFormsAutomationApp
             return platformParameters;
         }
 
-        public static string FromDictionaryToJson(this Dictionary<string, string> dictionary)
+        private static string FromDictionaryToJson(this IDictionary<string, string> dictionary)
         {
-            var kvs = dictionary.Select(kvp => string.Format("\"{0}\":\"{1}\"", kvp.Key, string.Concat(kvp.Value)));
+            var kvs = dictionary.Select(kvp => $"\"{ kvp.Key}\":\"{ kvp.Value}\"");
             return string.Concat("{", string.Join(",", kvs), "}");
         }
 
@@ -289,16 +289,10 @@ namespace WinFormsAutomationApp
 
         private static void UpdateCache(KeyValuePair<TokenCacheKey, AuthenticationResultEx> item, KeyValuePair<TokenCacheKey, AuthenticationResultEx> updated)
         {
-            bool notifiedBeforeAccessCache = false;
             NotifyBeforeAccessCache(item.Key.Resource, item.Key.ClientId, item.Value.Result.UserInfo.UniqueId, item.Value.Result.UserInfo.DisplayableId);
-            notifiedBeforeAccessCache = true;
             TokenCache.DefaultShared.tokenCacheDictionary[updated.Key] = updated.Value;
             TokenCache.DefaultShared.StoreToCache(updated.Value, updated.Key.Authority, updated.Key.Resource, updated.Key.ClientId, updated.Key.TokenSubjectType, new CallState(new Guid()));
-            if (notifiedBeforeAccessCache)
-            {
-                NotifyAfterAccessCache(updated.Key.Resource, updated.Key.ClientId, updated.Value.Result.UserInfo.UniqueId, updated.Value.Result.UserInfo.DisplayableId);
-                notifiedBeforeAccessCache = false;
-            }
+            NotifyAfterAccessCache(updated.Key.Resource, updated.Key.ClientId, updated.Value.Result.UserInfo.UniqueId, updated.Value.Result.UserInfo.DisplayableId);
         }
         #endregion
 
