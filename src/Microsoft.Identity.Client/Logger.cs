@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client
             Verbose = 3
         }
 
-        public Logger(Guid correlationId)
+        internal Logger(Guid correlationId)
         {
             this.CorrelationId = correlationId;
         }
@@ -174,8 +174,10 @@ namespace Microsoft.Identity.Client
 
         private void LogMessage(string logMessage, LogLevel logLevel, bool containsPii)
         {
-            if (logLevel > Level) return;
-            if (!PiiLoggingEnabled && containsPii) return; 
+            if ((logLevel > Level) || (!PiiLoggingEnabled && containsPii))
+            {
+                return;
+            }
 
             //format log message;
             string correlationId = (CorrelationId.Equals(Guid.Empty))
