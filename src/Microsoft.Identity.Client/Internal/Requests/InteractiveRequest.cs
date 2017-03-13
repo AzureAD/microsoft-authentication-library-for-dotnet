@@ -83,8 +83,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             this._webUi = webUI;
             this._uiOptions = uiOptions;
             this.LoadFromCache = false; //no cache lookup and refresh for interactive.
-
-            PlatformPlugin.BrokerHelper.PlatformParameters = authenticationRequestParameters.PlatformParameters;
         }
 
         internal override async Task PreTokenRequest()

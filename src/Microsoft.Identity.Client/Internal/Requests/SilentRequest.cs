@@ -44,7 +44,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.User));
             }
             
-            PlatformPlugin.BrokerHelper.PlatformParameters = authenticationRequestParameters.PlatformParameters;
             this.ForceRefresh = forceRefresh;
         }
 

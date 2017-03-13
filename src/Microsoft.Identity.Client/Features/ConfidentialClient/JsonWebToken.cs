@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal
             };
         }
 
-        public string Sign(IClientAssertionCertificate credential)
+        public string Sign(ClientAssertionCertificate credential)
         {
             // Base64Url encoded header and claims
             string token = this.Encode(credential);
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.Internal
             return Base64UrlEncoder.Encode(segment);
         }
 
-        private static string EncodeHeaderToJson(IClientAssertionCertificate credential)
+        private static string EncodeHeaderToJson(ClientAssertionCertificate credential)
         {
             JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(credential);
             return JsonHelper.SerializeToJson(header);
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client.Internal
             return (long) (diff.TotalSeconds);
         }
 
-        private string Encode(IClientAssertionCertificate credential)
+        private string Encode(ClientAssertionCertificate credential)
         {
             // Header segment
             string jsonHeader = EncodeHeaderToJson(credential);
@@ -138,12 +138,12 @@ namespace Microsoft.Identity.Client.Internal
         [DataContract]
         internal class JWTHeader
         {
-            public JWTHeader(IClientAssertionCertificate credential)
+            public JWTHeader(ClientAssertionCertificate credential)
             {
                 this.Credential = credential;
             }
 
-            protected IClientAssertionCertificate Credential { get; }
+            protected ClientAssertionCertificate Credential { get; }
 
             [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.Type)]
             public static string Type
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Client.Internal
         [DataContract]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
-            public JWTHeaderWithCertificate(IClientAssertionCertificate credential)
+            public JWTHeaderWithCertificate(ClientAssertionCertificate credential)
                 : base(credential)
             {
             }

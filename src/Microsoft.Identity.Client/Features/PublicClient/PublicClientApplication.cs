@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,24 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal.Interfaces;
-
 namespace Microsoft.Identity.Client
 {
-    [Android.Runtime.Preserve(AllMembers = true)]
-    internal class DeviceAuthHelper : IDeviceAuthHelper
+    public sealed partial class PublicClientApplication : ClientApplicationBase
     {
-        public bool CanHandleDeviceAuthChallenge
+        
+        /// <summary>
+        /// </summary>
+        public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache) : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
         {
-            get { return false; }
-        }
-
-        public Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
-        {
-            return
-                Task.FromResult(string.Empty);
+            this.UserTokenCache = userTokenCache;
         }
     }
 }

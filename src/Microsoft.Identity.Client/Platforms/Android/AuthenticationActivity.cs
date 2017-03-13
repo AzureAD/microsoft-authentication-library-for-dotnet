@@ -46,6 +46,9 @@ namespace Microsoft.Identity.Client
     {
         private RequestContext RequestContext { get; }
 
+        public AuthenticationActivity()
+        { }
+
         private AuthenticationActivity(RequestContext requestContext)
         {
             RequestContext = requestContext;

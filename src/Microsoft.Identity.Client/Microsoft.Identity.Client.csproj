@@ -4,13 +4,13 @@
     <Version>1.0.0-alpha-001</Version>
     <Authors>Microsoft Corp.</Authors>
     <PackageTitle>Microsoft Authentication Library</PackageTitle>
-    <PackageLicenseUrl>http://go.microsoft.com/fwlink/?LinkId=317295</PackageLicenseUrl>
-    <PackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=258232</PackageProjectUrl>
+    <PackageLicenseUrl>https://go.microsoft.com/fwlink/?linkid=844762</PackageLicenseUrl>
+    <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
     <MinClientVersion>2.12</MinClientVersion>
     <Description>This package contains the binaries of the Microsoft Authentication Library (MSAL).</Description>
     <Summary>MSAL provides a library with easy to use authentication functionality for your .NET client on various platforms including Windows desktop, Windows Store, Xamarin iOS and Xamarin Android by taking advantage of Azure Active Directory and MSA.</Summary>
     <Copyright>(C) Microsoft Corporation. All rights reserved.</Copyright>
-    <PackageTags>Microsoft Authentication Library;MSA;MSAL;Azure Active Directory;AAD;Identity;Authentication;.NET;Windows Store;Xamarin iOS;Android</PackageTags>
+    <PackageTags>Microsoft Authentication Library;MSA;MSAL;B2C;Azure Active Directory;AAD;Identity;Authentication;.NET;Windows Store;Xamarin iOS;Android</PackageTags>
     <Product>Microsoft.Identity.Client ($(TargetFramework))</Product>
     <IncludeSymbols>true</IncludeSymbols>
     <GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
@@ -57,7 +57,7 @@
     <Compile Include="Features\EventSource\**\*.cs" />
     <Compile Include="Features\TokenCache\**\*.cs" />
     <Compile Include="Features\PublicClient\**\*.cs" />
-    <Compile Include="Features\ClientAssertion\**\*.cs" />
+    <Compile Include="Features\ConfidentialClient\**\*.cs" />
     <Compile Update="Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
     <Compile Update="Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
     <Compile Update="Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
@@ -69,8 +69,10 @@
     <Compile Include="Features\EventSource\**\*.cs" />
     <Compile Include="Features\PublicClient\**\*.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3' ">
     <Compile Include="Platforms\netstandard1.3\**\*.cs" />
+    <Compile Include="Features\PublicClient\**\*.cs" />
+    <Compile Include="Features\ConfidentialClient\**\*.cs" />
     <Compile Include="Features\EventSource\**\*.cs" />
     <Compile Include="Features\TokenCache\**\*.cs" />
   </ItemGroup>

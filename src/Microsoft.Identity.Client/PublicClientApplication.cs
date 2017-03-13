@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Class to be used for native applications (Desktop/UWP/iOS/Android).
     /// </summary>
-    public sealed class PublicClientApplication : ClientApplicationBase
+    public sealed partial class PublicClientApplication : ClientApplicationBase
     {
         private const string DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
 
@@ -61,16 +61,9 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId">Client id of the application</param>
         /// <param name="authority">Default authority to be used for the application</param>
         public PublicClientApplication(string clientId, string authority)
-            : this(clientId, authority, new TokenCache())
+            : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
         {
-        }
-
-
-        /// <summary>
-        /// </summary>
-        public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache) : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
-        {
-            this.UserTokenCache = userTokenCache;
+            this.UserTokenCache = new TokenCache();
         }
 
         /// <summary>

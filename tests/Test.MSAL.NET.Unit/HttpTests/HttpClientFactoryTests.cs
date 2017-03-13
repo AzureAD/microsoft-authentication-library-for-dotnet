@@ -41,6 +41,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
     public class HttpClientFactoryTests
     {
         [TestMethod]
+        [TestCategory("HttpClientFactoryTests")]
         public void GetHttpClient_MaxRespContentBuffSizeSetTo1Mb()
         {
             HttpClientFactory.ReturnHttpClientForMocks = false;

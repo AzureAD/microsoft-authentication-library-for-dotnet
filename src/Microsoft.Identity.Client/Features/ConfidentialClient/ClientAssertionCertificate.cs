@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Containing certificate used to create client assertion.
     /// </summary>
-    public sealed class ClientAssertionCertificate : IClientAssertionCertificate
+    public sealed class ClientAssertionCertificate
     {
         /// <summary>
         /// Constructor to create credential using certificate.
@@ -43,19 +43,17 @@ namespace Microsoft.Identity.Client
         /// <param name="certificate">The certificate used as credential.</param>
         public ClientAssertionCertificate(X509Certificate2 certificate)
         {
-            if (certificate == null)
-            {
-                throw new ArgumentNullException("certificate");
-            }
+            this.Certificate = certificate ?? throw new ArgumentNullException("certificate");
 
-            if (certificate.PublicKey.Key.KeySize < MinKeySizeInBits)
+#if NET45
+            if (certificate.PublicKey. Key.KeySize < MinKeySizeInBits)
             {
                 throw new ArgumentOutOfRangeException("certificate",
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
                         MinKeySizeInBits));
             }
+#endif
 
-            this.Certificate = certificate;
         }
 
         /// <summary>
