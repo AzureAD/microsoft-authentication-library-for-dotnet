@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Http
 
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, Dictionary<string, string> headers)
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage {RequestUri = endpoint};
+            HttpRequestMessage requestMessage = new HttpRequestMessage { RequestUri = endpoint };
             requestMessage.Headers.Accept.Clear();
             if (headers != null)
             {
@@ -87,14 +87,12 @@ namespace Microsoft.Identity.Client.Internal.Http
                     return response;
                 }
 
-               requestContext.Logger.Info(
-                    string.Format(CultureInfo.InvariantCulture,
-                        "Response status code does not indicate success: {0} ({1}).",
-                        (int) response.StatusCode, response.StatusCode));
+                requestContext.Logger.Info(
+                     string.Format(CultureInfo.InvariantCulture,
+                         "Response status code does not indicate success: {0} ({1}).",
+                         (int)response.StatusCode, response.StatusCode));
 
-                if ((response.StatusCode.Equals(HttpStatusCode.InternalServerError)) ||
-                    (response.StatusCode).Equals(HttpStatusCode.GatewayTimeout) ||
-                    (response.StatusCode).Equals(HttpStatusCode.ServiceUnavailable))
+                if ((int)response.StatusCode >= 500 && (int)response.StatusCode < 600)
                 {
                     isRetryable = true;
                 }
