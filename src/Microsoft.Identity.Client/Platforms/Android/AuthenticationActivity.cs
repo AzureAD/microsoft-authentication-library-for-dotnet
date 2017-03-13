@@ -44,6 +44,13 @@ namespace Microsoft.Identity.Client
     [Android.Runtime.Preserve(AllMembers = true)]
     public class AuthenticationActivity : Activity
     {
+        private RequestContext RequestContext { get; }
+
+        private AuthenticationActivity(RequestContext requestContext)
+        {
+            RequestContext = requestContext;
+        }
+
         private readonly string _customTabsServiceAction =
             "android.support.customtabs.action.CustomTabsService";
         private readonly string[] _chromePackages =
@@ -234,7 +241,7 @@ namespace Microsoft.Identity.Client
                 }
                 catch (PackageManager.NameNotFoundException exc)
                 {
-                    PlatformPlugin.Logger.Error(null, exc);
+                    RequestContext.Logger.Error(exc);
                     // swallow this exception. If the package does not exist then exception will be thrown.
                 }
             }

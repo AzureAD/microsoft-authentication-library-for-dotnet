@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public static EventSource MsalEventSource
         {
-            get { return Logger.MsalEventSource; }
+            get { return PlatformLogger.MsalEventSource; }
         }
     }
 }

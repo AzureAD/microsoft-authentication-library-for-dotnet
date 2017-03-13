@@ -42,6 +42,13 @@ namespace Microsoft.Identity.Client
     [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class WindowsFormsWebAuthenticationDialogBase : Form
     {
+        private RequestContext RequestContext { get; }
+
+        private WindowsFormsWebAuthenticationDialogBase(RequestContext requestContext)
+        {
+            RequestContext = requestContext;
+        }
+        
         private const int UIWidth = 566;
         private static readonly NavigateErrorStatus NavigateErrorStatus = new NavigateErrorStatus();
         private readonly CustomWebBrowser webBrowser;
@@ -153,8 +160,7 @@ namespace Microsoft.Identity.Client
 
             if (!e.Cancel)
             {
-                PlatformPlugin.Logger.Verbose(null,
-                    string.Format(CultureInfo.InvariantCulture, "Navigating to '{0}'.",
+                RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture, "Navigating to '{0}'.",
                         MsalHelpers.UrlDecode(e.Url.ToString())));
             }
         }
@@ -163,8 +169,7 @@ namespace Microsoft.Identity.Client
         {
             if (!this.CheckForClosingUrl(e.Url))
             {
-                PlatformPlugin.Logger.Verbose(null,
-                    string.Format(CultureInfo.InvariantCulture, "Navigated to '{0}'.",
+                RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture, "Navigated to '{0}'.",
                         MsalHelpers.UrlDecode(e.Url.ToString())));
             }
         }
@@ -240,14 +245,12 @@ namespace Microsoft.Identity.Client
             {
                 if (this.webBrowser.IsBusy)
                 {
-                    PlatformPlugin.Logger.Verbose(null,
-                        string.Format(CultureInfo.InvariantCulture,
+                    RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
                             "WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                             this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
                             this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
                     this.webBrowser.Stop();
-                    PlatformPlugin.Logger.Verbose(null,
-                        string.Format(CultureInfo.InvariantCulture,
+                    RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
                             "WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                             this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
                             this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));

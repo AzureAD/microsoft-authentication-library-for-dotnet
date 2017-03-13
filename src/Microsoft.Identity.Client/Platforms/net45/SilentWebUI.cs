@@ -51,6 +51,7 @@ namespace Microsoft.Identity.Client
         private AuthorizationResult result;
         private ManualResetEvent threadInitializedEvent;
         private Exception uiException;
+        private RequestContext RequestContext { get; }
 
         public SilentWebUI()
         {
@@ -80,18 +81,18 @@ namespace Microsoft.Identity.Client
             long navigationOverallTimeout = NavigationOverallTimeout;
             long navigationStartTime = DateTime.Now.Ticks;
 
-            bool initialized = this.threadInitializedEvent.WaitOne((int) navigationOverallTimeout);
+            bool initialized = this.threadInitializedEvent.WaitOne((int)navigationOverallTimeout);
             if (initialized)
             {
                 // Calculate time remaining after time spend on initialization.
                 // There are 10 000 ticks in each millisecond.
-                long elapsedTimeSinceStart = (DateTime.Now.Ticks - navigationStartTime)/10000;
+                long elapsedTimeSinceStart = (DateTime.Now.Ticks - navigationStartTime) / 10000;
                 navigationOverallTimeout -= elapsedTimeSinceStart;
 
-                bool completedNormally = uiThread.Join(navigationOverallTimeout > 0 ? (int) navigationOverallTimeout : 0);
+                bool completedNormally = uiThread.Join(navigationOverallTimeout > 0 ? (int)navigationOverallTimeout : 0);
                 if (!completedNormally)
                 {
-                    PlatformPlugin.Logger.Information(null, "Silent login thread did not complete on time.");
+                    RequestContext.Logger.Info("Silent login thread did not complete on time.");
 
                     // The invisible dialog has failed to complete in the allotted time.
                     // Attempt a graceful shutdown.
@@ -129,7 +130,7 @@ namespace Microsoft.Identity.Client
                     }
                     catch (Exception e)
                     {
-                        PlatformPlugin.Logger.Error(null, e);
+                        RequestContext.Logger.Error(e);
                         // Catch all exceptions to transfer them to the original calling thread.
                         this.uiException = e;
                     }
@@ -220,7 +221,7 @@ namespace Microsoft.Identity.Client
 
             // We need call dispose, while message loop is running.
             // WM_QUIT message from ExitThread will delayed, if Dispose will create a set of new messages (we suspect that it happens).
-            ((SilentWindowsFormsAuthenticationDialog) sender).Dispose();
+            ((SilentWindowsFormsAuthenticationDialog)sender).Dispose();
             Application.ExitThread();
         }
     }

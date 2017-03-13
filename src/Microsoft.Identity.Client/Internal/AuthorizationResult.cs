@@ -40,8 +40,7 @@ namespace Microsoft.Identity.Client.Internal
         UserCancel,
         UnknownError
     }
-
-
+    
     internal class AuthorizationResult
     {
         internal AuthorizationResult(AuthorizationStatus status, string returnedUriInput) : this(status)

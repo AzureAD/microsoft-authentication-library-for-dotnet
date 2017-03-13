@@ -28,65 +28,15 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Log Level for callback
-    /// </summary>
-    public enum LogLevel
-    {
-        /// <summary>
-        /// </summary>
-        Information,
-
-        /// <summary>
-        /// </summary>
-        Verbose,
-
-        /// <summary>
-        /// </summary>
-        Warning,
-
-        /// <summary>
-        /// </summary>
-        Error
-    }
-
-    /// <summary>
     /// Interface for callback to be implemented and provided by the developer.
     /// </summary>
-    public interface IMsalLogCallback
+    public interface ILoggerCallback
     {
         /// <summary>
+        /// Way for develor to register a callback
+        /// level - logging level of the message
+        /// message - whether the log message contains personally identifiable information (Pii)
         /// </summary>
-        void Log(LogLevel level, string message);
-    }
-
-    /// <summary>
-    /// Class to consume developer provided callback.
-    /// </summary>
-    public sealed class LoggerCallbackHandler
-    {
-        private static readonly object LockObj = new object();
-        private static IMsalLogCallback _localCallback;
-
-        /// <summary>
-        /// Callback instance
-        /// </summary>
-        public static IMsalLogCallback Callback
-        {
-            set
-            {
-                lock (LockObj)
-                {
-                    _localCallback = value;
-                }
-            }
-        }
-
-        internal static void ExecuteCallback(LogLevel level, string message)
-        {
-            lock (LockObj)
-            {
-                _localCallback?.Log(level, message);
-            }
-        }
+        void Log(Logger.LogLevel level, string message, bool containsPii);
     }
 }

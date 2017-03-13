@@ -32,6 +32,10 @@ namespace Microsoft.Identity.Client
 {
     internal class PlatformInformation : PlatformInformationBase
     {
+        public PlatformInformation(RequestContext requestContext) : base(requestContext)
+        {
+        }
+
         public override string GetProductName()
         {
             return "MSAL.CoreCLR";

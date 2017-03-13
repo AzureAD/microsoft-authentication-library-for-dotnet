@@ -44,16 +44,7 @@ namespace Microsoft.Identity.Client
         /// DefaultAuthority
         /// </Summary>
         protected const string DefaultAuthority = "https://login.microsoftonline.com/common/";
-
-        static ClientApplicationBase()
-        {
-            PlatformPlugin.Logger.Information(null,
-                string.Format(CultureInfo.InvariantCulture,
-                    "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
-                    PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
-                    MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
-        }
-
+        
         /// <Summary>
         /// ClientApplicationBase
         /// </Summary>
@@ -69,6 +60,13 @@ namespace Microsoft.Identity.Client
             {
                 this.UserTokenCache.ClientId = clientId;
             }
+
+            RequestContext requestContext = new RequestContext(Guid.Empty);
+
+            requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
+                "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
+                PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
+                MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
         }
 
         /// <Summary>
@@ -97,7 +95,7 @@ namespace Microsoft.Identity.Client
         /// Correlation Id is to be used for diagnostics purposes.
         /// </summary>
         public Guid CorrelationId { get; set; }
-
+        
         /// <summary>
         /// Gets a value indicating whether address validation is ON or OFF.
         /// </summary>
@@ -112,26 +110,14 @@ namespace Microsoft.Identity.Client
             {
                 if (this.UserTokenCache == null)
                 {
-                    PlatformPlugin.Logger.Information(null, "Token cache is null or empty");
+                    RequestContext requestContext = new RequestContext(CorrelationId);
+                    requestContext.Logger.Info("Token cache is null or empty");
                     return new List<User>();
                 }
 
                 return this.UserTokenCache.GetUsers(this.ClientId);
             }
         }
-
-/*        /// <summary>
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope)
-        {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
-            return
-                await
-                    this.AcquireTokenSilentCommonAsync(authority, scope, (string) null, this.PlatformParameters,
-                        null, false).ConfigureAwait(false);
-        }*/
 
         /// <summary>
         /// Attempts to acquire the access token from cache. Access token is considered a match if it AT LEAST contains all the requested scopes.
@@ -149,37 +135,6 @@ namespace Microsoft.Identity.Client
                     this.AcquireTokenSilentCommonAsync(authority, scope, user, false)
                         .ConfigureAwait(false);
         }
-
-        /*        /// <summary>
-                /// </summary>
-                /// <param name="scope"></param>
-                /// <param name="userIdentifier"></param>
-                /// <returns></returns>
-                public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier)
-                {
-                    Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
-                    return
-                        await
-                            this.AcquireTokenSilentCommonAsync(authority, scope, userIdentifier, this.PlatformParameters,
-                                false).ConfigureAwait(false);
-                }*/
-
-        /*        /// <summary>
-                /// </summary>
-                /// <param name="scope"></param>
-                /// <param name="userIdentifier"></param>
-                /// <param name="authority"></param>
-                /// <param name="forceRefresh"></param>
-                /// <returns></returns>
-                public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, string userIdentifier,
-                    string authority, bool forceRefresh)
-                {
-                    Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
-                    return
-                        await
-                            this.AcquireTokenSilentCommonAsync(authorityInstance, scope, userIdentifier, this.PlatformParameters,
-                                forceRefresh).ConfigureAwait(false);
-                }*/
 
         /// <summary>
         /// Attempts to acquire the access token from cache. Access token is considered a match if it AT LEAST contains all the requested scopes.
@@ -220,11 +175,11 @@ namespace Microsoft.Identity.Client
                 User = user,
                 Scope = scope.CreateSetFromArray(),
                 RedirectUri = new Uri(this.RedirectUri),
-                RequestContext = CreateCallState(this.CorrelationId)
+                RequestContext = CreateRequestContext(this.CorrelationId)
             };
         }
 
-        internal RequestContext CreateCallState(Guid correlationId)
+        internal RequestContext CreateRequestContext(Guid correlationId)
         {
             correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
             return new RequestContext(correlationId);
