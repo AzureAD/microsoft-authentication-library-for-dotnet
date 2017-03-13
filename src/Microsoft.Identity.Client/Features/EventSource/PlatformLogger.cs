@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,17 +25,43 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
-    [Android.Runtime.Preserve(AllMembers = true)]
-    internal class WebUIFactory : IWebUIFactory
+    internal class PlatformLogger : ILogger
     {
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
+        static PlatformLogger()
         {
-            return new WebUI(parameters);
+            MsalEventSource = new MsalEventSource();
+        }
+
+        internal static MsalEventSource MsalEventSource { get; }
+
+        public void Error(string message)
+        {
+            MsalEventSource.Error(message);
+        }
+
+        public void Warning(string message)
+        {
+            MsalEventSource.Error(message);
+        }
+
+        public void Verbose(string message)
+        {
+            MsalEventSource.Error(message);
+        }
+
+        public void Information(string message)
+        {
+            MsalEventSource.Error(message);
+        }
+
+        public void Error(Exception ex)
+        {
+            Error(ex.ToString());
         }
     }
 }

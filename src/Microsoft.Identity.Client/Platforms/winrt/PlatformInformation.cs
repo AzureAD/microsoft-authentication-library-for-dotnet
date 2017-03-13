@@ -40,6 +40,8 @@ namespace Microsoft.Identity.Client
 {
     internal class PlatformInformation : PlatformInformationBase
     {
+        public PlatformInformation(RequestContext requestContext) : base(requestContext) { }
+
         public override string GetProductName()
         {
             return "MSAL.WinRT";
@@ -65,7 +67,7 @@ namespace Microsoft.Identity.Client
             }
             catch (UnauthorizedAccessException ex)
             {
-                PlatformPlugin.Logger.Error(null, ex);
+                RequestContext.Logger.Error(ex);
                 throw new MsalException(MsalErrorEx.UnauthorizedUserInformationAccess,
                     MsalErrorMessageEx.UnauthorizedUserInformationAccess, ex);
             }
@@ -73,7 +75,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetProcessorArchitecture()
         {
-            return NativeMethods.GetProcessorArchitecture();
+            return NativeMethods.GetProcessorArchitecture(RequestContext);
         }
 
         public override string GetOperatingSystem()
@@ -96,8 +98,7 @@ namespace Microsoft.Identity.Client
                 // The access is not allowed and we cannot determine whether this is a local user or not. So, we do NOT add form auth parameter.
                 // This is the case where we can advise customers to add extra query parameter if they want.
 
-                PlatformPlugin.Logger.Information(requestContext,
-                    "Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.");
+                requestContext.Logger.Info("Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.");
                 return false;
             }
 
@@ -107,9 +108,8 @@ namespace Microsoft.Identity.Client
             }
             catch (UnauthorizedAccessException ae)
             {
-                PlatformPlugin.Logger.Warning(requestContext, ae.Message);
-                PlatformPlugin.Logger.Information(requestContext,
-                    "Cannot try Windows Integrated Auth due to lack of Enterprise capability.");
+                requestContext.Logger.Warning(ae.Message);
+                requestContext.Logger.Info("Cannot try Windows Integrated Auth due to lack of Enterprise capability.");
                 // This mostly means Enterprise capability is missing, so WIA cannot be used and
                 // we return true to add form auth parameter in the caller.
                 return true;
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client
             if (redirectUri == null)
             {
                 redirectUri = Constants.SsoPlaceHolderUri;
-                PlatformPlugin.Logger.Verbose(requestContext, "ms-app redirect Uri is used");
+                requestContext.Logger.Verbose("ms-app redirect Uri is used");
             }
 
             return redirectUri;
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client
             [DllImport("kernel32.dll")]
             private static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
 
-            public static string GetProcessorArchitecture()
+            public static string GetProcessorArchitecture(RequestContext requestContext)
             {
                 try
                 {
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Client
                 }
                 catch (Exception ex)
                 {
-                    PlatformPlugin.Logger.Warning(null, ex.Message);
+                    requestContext.Logger.Warning(ex.Message);
                     return "Unknown";
                 }
             }

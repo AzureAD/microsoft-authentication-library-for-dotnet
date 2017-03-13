@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
         public string GenerateCodeVerifier()
         {
             byte[] buffer = new byte[Constants.CodeVerifierByteSize];
-            var windowsBuffer = CryptographicBuffer.GenerateRandom((uint) buffer.Length);
+            var windowsBuffer = CryptographicBuffer.GenerateRandom((uint)buffer.Length);
             Array.Copy(windowsBuffer.ToArray(), buffer, buffer.Length);
 
             return MsalHelpers.EncodeToBase64Url(buffer);
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client
             DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
             IBuffer messageBuffer = CryptographicBuffer.ConvertStringToBinary(message, BinaryStringEncoding.Utf8);
             IBuffer protectedBuffer = RunAsyncTaskAndWait(dataProtectionProvider.ProtectAsync(messageBuffer).AsTask());
-            return Convert.ToBase64String(protectedBuffer.ToArray(0, (int) protectedBuffer.Length));
+            return Convert.ToBase64String(protectedBuffer.ToArray(0, (int)protectedBuffer.Length));
         }
 
         public static string Decrypt(string encryptedMessage)
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client
             DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
             IBuffer protectedBuffer =
                 RunAsyncTaskAndWait(dataProtectionProvider.ProtectAsync(message.AsBuffer()).AsTask());
-            return protectedBuffer.ToArray(0, (int) protectedBuffer.Length);
+            return protectedBuffer.ToArray(0, (int)protectedBuffer.Length);
         }
 
         public static byte[] Decrypt(byte[] encryptedMessage)
@@ -113,11 +113,13 @@ namespace Microsoft.Identity.Client
             DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
             IBuffer buffer =
                 RunAsyncTaskAndWait(dataProtectionProvider.UnprotectAsync(encryptedMessage.AsBuffer()).AsTask());
-            return buffer.ToArray(0, (int) buffer.Length);
+            return buffer.ToArray(0, (int)buffer.Length);
         }
 
         private static T RunAsyncTaskAndWait<T>(Task<T> task)
         {
+            RequestContext requestContext = new RequestContext(Guid.Empty);
+
             try
             {
                 Task.Run(async () => await task.ConfigureAwait(false)).Wait();
@@ -125,7 +127,7 @@ namespace Microsoft.Identity.Client
             }
             catch (AggregateException ae)
             {
-                PlatformPlugin.Logger.Error(null, ae.InnerException);
+                requestContext.Logger.Error(ae.InnerException);
                 // Any exception thrown as a result of running task will cause AggregateException to be thrown with 
                 // actual exception as inner.
                 throw ae.InnerExceptions[0];

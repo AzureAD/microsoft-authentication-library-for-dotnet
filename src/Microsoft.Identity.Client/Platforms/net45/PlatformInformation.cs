@@ -37,6 +37,10 @@ namespace Microsoft.Identity.Client
 {
     internal class PlatformInformation : PlatformInformationBase
     {
+        public PlatformInformation(RequestContext requestContext) :base(requestContext)
+        {
+        }
+
         public override string GetProductName()
         {
             return "MSAL.Desktop";
@@ -72,7 +76,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetProcessorArchitecture()
         {
-            return NativeMethods.GetProcessorArchitecture();
+            return NativeMethods.GetProcessorArchitecture(RequestContext);
         }
 
         public override string GetOperatingSystem()
@@ -119,7 +123,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                PlatformPlugin.Logger.Warning(null, ex.Message);
+                RequestContext.Logger.Warning(ex.Message);
                 // ignore the exception as the result is already set to false;
             }
 
@@ -145,7 +149,7 @@ namespace Microsoft.Identity.Client
             [DllImport("kernel32.dll")]
             private static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
 
-            public static string GetProcessorArchitecture()
+            public static string GetProcessorArchitecture(RequestContext requestContext)
             {
                 try
                 {
@@ -169,7 +173,7 @@ namespace Microsoft.Identity.Client
                 }
                 catch (Exception ex)
                 {
-                    PlatformPlugin.Logger.Warning(null, ex.Message);
+                    requestContext.Logger.Warning(ex.Message);
                     return "Unknown";
                 }
             }

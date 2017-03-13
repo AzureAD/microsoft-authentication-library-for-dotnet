@@ -26,9 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
 using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client.Internal
@@ -62,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal
             get
             {
 #if !NETSTANDARD1_1
-                return (ITokenCachePlugin) new TokenCachePlugin();
+                return (ITokenCachePlugin)new TokenCachePlugin(new RequestContext(Guid.Empty));
 #else
                 return null;
 #endif
@@ -70,7 +67,7 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         public static ITokenCachePlugin TokenCachePlugin { get; set; }
-        public static LoggerBase Logger { get; set; }
+        public static ILogger PlatformLogger { get; set; }
         public static PlatformInformationBase PlatformInformation { get; set; }
         public static ICryptographyHelper CryptographyHelper { get; set; }
         public static IPlatformParameters DefaultPlatformParameters { get; set; }
@@ -80,24 +77,43 @@ namespace Microsoft.Identity.Client.Internal
 #if !NETSTANDARD1_1
             InjectDependecies(
                 (IWebUIFactory) new WebUIFactory(),
-                (ITokenCachePlugin) new TokenCachePlugin(),
-                (LoggerBase) new Logger(),
-                (PlatformInformationBase) new PlatformInformation(),
+                (ITokenCachePlugin) new TokenCachePlugin(new RequestContext(Guid.Empty)),
+                (ILogger)new PlatformLogger(),
+                (PlatformInformationBase) new PlatformInformation(new RequestContext(Guid.Empty)),
                 (ICryptographyHelper) new CryptographyHelper(),
                 (IPlatformParameters) new PlatformParameters());
 #endif
         }
 
         public static void InjectDependecies(IWebUIFactory webUIFactory, ITokenCachePlugin tokenCachePlugin,
-            LoggerBase logger,
+            ILogger platformlogger,
             PlatformInformationBase platformInformation, ICryptographyHelper cryptographyHelper, IPlatformParameters platformParameters)
         {
             WebUIFactory = webUIFactory;
             TokenCachePlugin = tokenCachePlugin;
-            Logger = logger;
+            PlatformLogger = platformlogger;
             PlatformInformation = platformInformation;
             CryptographyHelper = cryptographyHelper;
             DefaultPlatformParameters = platformParameters;
+        }
+
+        public static void LogMessage(Logger.LogLevel logLevel, string formattedMessage)
+        {
+            switch (logLevel)
+            {
+                case Logger.LogLevel.Error:
+                    PlatformLogger.Error(formattedMessage);
+                    break;
+                case Logger.LogLevel.Warning:
+                    PlatformLogger.Warning(formattedMessage);
+                    break;
+                case Logger.LogLevel.Info:
+                    PlatformLogger.Information(formattedMessage);
+                    break;
+                case Logger.LogLevel.Verbose:
+                    PlatformLogger.Verbose(formattedMessage);
+                    break;
+            }
         }
     }
 }

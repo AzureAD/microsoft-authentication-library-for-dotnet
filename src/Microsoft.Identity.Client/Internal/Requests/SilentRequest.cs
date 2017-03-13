@@ -74,12 +74,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (_refreshTokenItem == null)
                 {
-                    PlatformPlugin.Logger.Verbose(this.RequestContext, "No token matching arguments found in the cache");
+                    RequestContext.Logger.Verbose("No token matching arguments found in the cache");
                     throw new MsalSilentTokenAcquisitionException(
                         new Exception("No token matching arguments found in the cache"));
                 }
 
-                PlatformPlugin.Logger.Verbose(this.RequestContext, "Refreshing access token...");
+                RequestContext.Logger.Verbose("Refreshing access token...");
                 await base.SendTokenRequestAsync().ConfigureAwait(false);
 
                 if (Response.IdToken == null)
@@ -92,8 +92,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (Response.RefreshToken == null)
                 {
                     Response.RefreshToken = _refreshTokenItem.RefreshToken;
-                    PlatformPlugin.Logger.Information(this.RequestContext,
-                        "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+                    RequestContext.Logger.Info("Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
                 }
             }
         }

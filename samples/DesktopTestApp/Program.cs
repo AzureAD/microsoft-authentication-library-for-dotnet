@@ -62,6 +62,14 @@ namespace DesktopTestApp
             }
         }
 
+        private static async Task AcquireTokenAsync()
+        {
+            TokenBroker app = new TokenBroker();
+            string token = await GetTokenIntegratedAuthAsync(app.Sts).ConfigureAwait(false);
+            Console.WriteLine(token);
+        }
+
+
         public static async Task<AuthenticationResult> GetTokenSilentAsync(User user)
         {
             TokenBroker brkr = new TokenBroker();
@@ -75,7 +83,7 @@ namespace DesktopTestApp
             {
                 string msg = ex.Message + "\n" + ex.StackTrace;
                 Console.WriteLine(msg);
-                return await app.AcquireTokenAsync(brkr.Sts.ValidScope, user.DisplayableId, UiOptions.ActAsCurrentUser, null);
+                return await app.AcquireTokenAsync(brkr.Sts.ValidScope, user.DisplayableId, UIOptions.SelectAccount, null);
             }
             
         }
@@ -98,6 +106,22 @@ namespace DesktopTestApp
             }
 
             return null;
+        }
+
+        public static async Task<string> GetTokenIntegratedAuthAsync(Sts Sts)
+        {
+            try
+            {
+                PublicClientApplication app = new PublicClientApplication(Sts.Authority, "<client_id>");
+                var result = await app.AcquireTokenAsync(Sts.ValidScope);
+                return result.AccessToken;
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message + "\n" + ex.StackTrace;
+
+                return msg;
+            }
         }
     }
 }
