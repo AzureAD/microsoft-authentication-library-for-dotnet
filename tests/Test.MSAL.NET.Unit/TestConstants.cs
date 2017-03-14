@@ -46,7 +46,6 @@ namespace Test.MSAL.NET.Unit
         public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
         public static readonly User User = new User
         {
-            UniqueId = UniqueId,
             DisplayableId = DisplayableId,
             HomeObjectId = HomeObjectId
         };
@@ -63,7 +62,6 @@ namespace Test.MSAL.NET.Unit
         public static readonly ClientCredential OnPremiseCredentialWithSecret = new ClientCredential(ClientSecret);
         public static readonly User OnPremiseUser = new User
         {
-            UniqueId = OnPremiseUniqueId,
             DisplayableId = OnPremiseDisplayableId,
             HomeObjectId = OnPremiseHomeObjectId
         };

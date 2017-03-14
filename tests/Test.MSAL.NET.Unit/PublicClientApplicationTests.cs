@@ -108,11 +108,6 @@ namespace Test.MSAL.NET.Unit
             users = app.Users;
             Assert.IsNotNull(users);
             Assert.AreEqual(1, users.Count());
-            foreach (var user in users)
-            {
-                Assert.AreEqual(TestConstants.ClientId, user.ClientId);
-                Assert.IsNotNull(user.TokenCache);
-            }
 
             // another cache entry for different home object id. user count should be 2.
             TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
@@ -128,7 +123,6 @@ namespace Test.MSAL.NET.Unit
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    UniqueId = TestConstants.UniqueId + "more",
                     HomeObjectId = TestConstants.HomeObjectId
                 },
                 Scope = TestConstants.Scope
@@ -148,7 +142,6 @@ namespace Test.MSAL.NET.Unit
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    UniqueId = TestConstants.UniqueId + "more",
                     HomeObjectId = TestConstants.HomeObjectId + "more"
                 }
             };
@@ -158,11 +151,6 @@ namespace Test.MSAL.NET.Unit
             users = app.Users;
             Assert.IsNotNull(users);
             Assert.AreEqual(2, users.Count());
-            foreach (var user in users)
-            {
-                Assert.AreEqual(TestConstants.ClientId, user.ClientId);
-                Assert.IsNotNull(user.TokenCache);
-            }
         }
 
 
@@ -179,7 +167,7 @@ namespace Test.MSAL.NET.Unit
 
             foreach (var user in app.Users)
             {
-                user.SignOut();
+                app.Remove(user);
             }
 
             Assert.AreEqual(0, app.UserTokenCache.AccessTokenCount);
@@ -213,14 +201,12 @@ namespace Test.MSAL.NET.Unit
 
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), new User()
             {
-                UniqueId = TestConstants.UniqueId,
                 DisplayableId = TestConstants.DisplayableId,
                 HomeObjectId = TestConstants.HomeObjectId,
             }, app.Authority, false);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
-            Assert.AreEqual(TestConstants.UniqueId, result.User.UniqueId);
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -260,14 +246,12 @@ namespace Test.MSAL.NET.Unit
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(),
                 new User()
                 {
-                    UniqueId = TestConstants.UniqueId,
                     DisplayableId = TestConstants.DisplayableId,
                     HomeObjectId = TestConstants.HomeObjectId,
                 }, app.Authority, true);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
-            Assert.AreEqual(TestConstants.UniqueId, result.User.UniqueId);
             Assert.AreEqual(
                 TestConstants.Scope.Union(TestConstants.ScopeForAnotherResource).ToArray().AsSingleString(),
                 result.Scope.AsSingleString());
@@ -308,7 +292,6 @@ namespace Test.MSAL.NET.Unit
                     app.AcquireTokenSilentAsync(TestConstants.ScopeForAnotherResource.ToArray(),
                         new User()
                         {
-                            UniqueId = TestConstants.UniqueId,
                             DisplayableId = TestConstants.DisplayableId,
                             HomeObjectId = TestConstants.HomeObjectId,
                         }, app.Authority, false);

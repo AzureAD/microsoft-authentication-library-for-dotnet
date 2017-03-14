@@ -48,8 +48,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             {
                 RawIdToken = response.IdToken;
                 IdToken idToken = IdToken.Parse(response.IdToken, RequestContext);
-                TenantId = idToken.TenantId;
-                User = new User(idToken);
+                User = User.CreateFromIdToken(idToken);
             }
             
             this.Authority = authority;
@@ -61,23 +60,18 @@ namespace Microsoft.Identity.Client.Internal.Cache
         }
 
         /// <summary>
-        /// Gets the Authority.
-        /// </summary>
-        [DataMember(Name = "authority")]
-        public string Authority { get; set; }
-
-        /// <summary>
         /// Gets the ClientId.
         /// </summary>
         [DataMember(Name = "client_id")]
         public string ClientId { get; set; }
 
         /// <summary>
-        /// Gets the TenantId.
+        /// Gets the Authority.
         /// </summary>
-        public string TenantId { get; set; }
+        [DataMember(Name = "authority")]
+        public string Authority { get; set; }
 
-        public string HomeObjectId { get { return User?.HomeObjectId; } }
+        internal string HomeObjectId { get { return User?.HomeObjectId; } }
         
         [DataMember(Name = "id_token")]
         public string RawIdToken { get; set; }
@@ -88,18 +82,5 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public User User { get; set; }
 
         public abstract TokenCacheKey GetTokenCacheKey();
-        
-        // This method is called after the object 
-        // is completely deserialized.
-        [OnDeserialized]
-        void OnDeserialized(StreamingContext context)
-        {
-            if (RawIdToken != null)
-            {
-                IdToken idToken = IdToken.Parse(RawIdToken, RequestContext);
-                TenantId = idToken.TenantId;
-                User = new User(idToken);
-            }
-        }
     }
 }

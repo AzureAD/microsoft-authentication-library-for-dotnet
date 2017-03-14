@@ -48,7 +48,6 @@ namespace Test.MSAL.NET.Unit.Mocks
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    UniqueId = TestConstants.UniqueId,
                     HomeObjectId = TestConstants.HomeObjectId
                 },
                 Scope = TestConstants.Scope
@@ -67,7 +66,6 @@ namespace Test.MSAL.NET.Unit.Mocks
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    UniqueId = TestConstants.UniqueId + "more",
                     HomeObjectId = TestConstants.HomeObjectId
                 },
                 Scope = TestConstants.ScopeForAnotherResource
@@ -85,7 +83,6 @@ namespace Test.MSAL.NET.Unit.Mocks
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    UniqueId = TestConstants.UniqueId,
                     HomeObjectId = TestConstants.HomeObjectId
                 }
             };

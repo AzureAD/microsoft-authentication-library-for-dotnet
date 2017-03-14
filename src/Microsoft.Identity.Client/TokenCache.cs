@@ -356,8 +356,6 @@ namespace Microsoft.Identity.Client
                 foreach (RefreshTokenCacheItem item in allRefreshTokens)
                 {
                     User user = new User(item.User);
-                    user.ClientId = item.ClientId;
-                    user.TokenCache = this;
                     allUsers[item.HomeObjectId] = user;
                 }
 
@@ -405,7 +403,7 @@ namespace Microsoft.Identity.Client
             }
         }
         
-        internal void SignOut(User user)
+        internal void Remove(User user)
         {
             lock (LockObject)
             {
@@ -419,7 +417,7 @@ namespace Microsoft.Identity.Client
                 OnBeforeAccess(args);
                 OnBeforeWrite(args);
                 IList<RefreshTokenCacheItem> allRefreshTokens =
-                    TokenCacheAccessor.GetAllRefreshTokens(user.ClientId)
+                    TokenCacheAccessor.GetAllRefreshTokens(this.ClientId)
                         .Where(item => item.HomeObjectId.Equals(user.HomeObjectId))
                         .ToList();
                 foreach (var rtItem in allRefreshTokens)

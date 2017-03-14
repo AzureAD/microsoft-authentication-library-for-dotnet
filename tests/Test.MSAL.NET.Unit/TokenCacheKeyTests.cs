@@ -55,7 +55,6 @@ namespace Test.MSAL.NET.Unit
 
             User user = new User();
             user.DisplayableId = TestConstants.DisplayableId;
-            user.UniqueId = TestConstants.UniqueId;
             user.HomeObjectId = TestConstants.HomeObjectId;
 
             //no policy, user object

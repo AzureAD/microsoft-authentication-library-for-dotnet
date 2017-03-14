@@ -93,7 +93,6 @@ namespace Test.MSAL.NET.Unit
                 User =
                     new User()
                     {
-                        UniqueId = TestConstants.UniqueId,
                         DisplayableId = TestConstants.DisplayableId,
                         HomeObjectId = TestConstants.HomeObjectId
                     }
@@ -135,7 +134,6 @@ namespace Test.MSAL.NET.Unit
                 User =
                     new User()
                     {
-                        UniqueId = TestConstants.UniqueId,
                         DisplayableId = TestConstants.DisplayableId,
                         HomeObjectId = TestConstants.HomeObjectId
                     }
@@ -180,7 +178,6 @@ namespace Test.MSAL.NET.Unit
                 User =
                     new User()
                     {
-                        UniqueId = TestConstants.UniqueId,
                         DisplayableId = TestConstants.DisplayableId,
                         HomeObjectId = TestConstants.HomeObjectId
                     }
@@ -221,7 +218,6 @@ namespace Test.MSAL.NET.Unit
                 User =
                     new User()
                     {
-                        UniqueId = TestConstants.UniqueId,
                         DisplayableId = TestConstants.DisplayableId,
                         HomeObjectId = TestConstants.HomeObjectId
                     }
@@ -256,7 +252,6 @@ namespace Test.MSAL.NET.Unit
                 User =
                     new User()
                     {
-                        UniqueId = TestConstants.UniqueId,
                         DisplayableId = TestConstants.DisplayableId,
                         HomeObjectId = TestConstants.HomeObjectId
                     }
@@ -280,7 +275,6 @@ namespace Test.MSAL.NET.Unit
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    UniqueId = TestConstants.UniqueId,
                     HomeObjectId = TestConstants.HomeObjectId
                 }
             };
@@ -295,7 +289,6 @@ namespace Test.MSAL.NET.Unit
                 User =
                     new User()
                     {
-                        UniqueId = TestConstants.UniqueId,
                         DisplayableId = TestConstants.DisplayableId,
                         HomeObjectId = TestConstants.HomeObjectId
                     }
@@ -312,7 +305,6 @@ namespace Test.MSAL.NET.Unit
                 User =
                     new User()
                     {
-                        UniqueId = TestConstants.UniqueId + "more",
                         DisplayableId = TestConstants.DisplayableId + "more",
                         HomeObjectId = TestConstants.HomeObjectId
                     }
