@@ -15,6 +15,6 @@ namespace Microsoft.Identity.Client.Features
         /// Only available on .NET platform. AcquireToken will send prompt=attempt_none to 
         /// authorize endpoint and the library uses a hidden webview to authenticate the user.
         /// </summary>
-        public readonly static UIBehavior Never = new UIBehavior("attempt_none");
+        public static readonly UIBehavior Never = new UIBehavior("attempt_none");
     }
 }
