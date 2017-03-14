@@ -26,18 +26,18 @@ namespace WinFormsAutomationApp
             pageControl1.SelectedTab = dataInputPage;
         }
 
-        private async void go_Click(object sender, EventArgs e)
+        private async void requestGo_Click(object sender, EventArgs e)
         {
-            string output = await _commandToRun((AuthenticationHelper.CreateDictionaryFromJson(dataInput.Text)));
+            string output = await _commandToRun((AuthenticationHelper.CreateDictionaryFromJson(requestInfo.Text)));
             pageControl1.SelectedTab = resultPage;
             resultInfo.Text = output;
             adalLogs.Text = loggerCallback.GetAdalLogs();
         }
 
-        private void done_Click(object sender, EventArgs e)
+        private void resultDone_Click(object sender, EventArgs e)
         {
             resultInfo.Text = string.Empty;
-            dataInput.Text = string.Empty;
+            requestInfo.Text = string.Empty;
             pageControl1.SelectedTab = mainPage;
         }
 
@@ -65,10 +65,11 @@ namespace WinFormsAutomationApp
             pageControl1.SelectedTab = dataInputPage;
         }
 
-        private void clearCache_Click(object sender, EventArgs e)
+        private async void clearCache_Click(object sender, EventArgs e)
         {
-            _commandToRun = AuthenticationHelper.ClearCache;
+            string output = await AuthenticationHelper.ClearCache(null);
             pageControl1.SelectedTab = resultPage;
+            resultInfo.Text = output;
             adalLogs.Text = loggerCallback.GetAdalLogs();
         }
 
