@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client
         {
             if (string.IsNullOrWhiteSpace(secret))
             {
-                throw new ArgumentNullException("secret");
+                throw new ArgumentNullException(nameof(secret));
             }
 
             this.Secret = secret;

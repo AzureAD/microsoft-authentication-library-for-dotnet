@@ -89,24 +89,24 @@ namespace Microsoft.Identity.Client.Internal.Instance
         {
             if (string.IsNullOrWhiteSpace(authority))
             {
-                throw new ArgumentNullException("authority");
+                throw new ArgumentNullException(nameof(authority));
             }
 
             if (!Uri.IsWellFormedUriString(authority, UriKind.Absolute))
             {
-                throw new ArgumentException(MsalErrorMessage.AuthorityInvalidUriFormat, "authority");
+                throw new ArgumentException(MsalErrorMessage.AuthorityInvalidUriFormat, nameof(authority));
             }
             
             var authorityUri = new Uri(authority);
             if (authorityUri.Scheme != "https")
             {
-                throw new ArgumentException(MsalErrorMessage.AuthorityUriInsecure, "authority");
+                throw new ArgumentException(MsalErrorMessage.AuthorityUriInsecure, nameof(authority));
             }
 
             string path = authorityUri.AbsolutePath.Substring(1);
             if (string.IsNullOrWhiteSpace(path))
             {
-                throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, "authority");
+                throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, nameof(authority));
             }
 
             string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split('/');

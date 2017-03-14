@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
             // Validate arguments
             if (numberOfThreads < 1)
             {
-                throw new ArgumentOutOfRangeException("numberOfThreads");
+                throw new ArgumentOutOfRangeException(nameof(numberOfThreads));
             }
 
             // Initialize the tasks collection

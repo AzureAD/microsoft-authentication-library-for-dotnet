@@ -48,12 +48,12 @@ namespace Microsoft.Identity.Client
             this.parameters = parameters as PlatformParameters;
             if (this.parameters == null)
             {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
+                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(this.parameters));
             }
 
             if (this.parameters.CallerActivity == null)
             {
-                throw new ArgumentException("CallerActivity should be set in PlatformParameters", "CallerActivity");
+                throw new ArgumentException("CallerActivity should be set in PlatformParameters", nameof(this.parameters.CallerActivity));
             }
         }
 
