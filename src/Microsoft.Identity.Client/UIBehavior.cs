@@ -37,19 +37,19 @@ namespace Microsoft.Identity.Client
         /// and would show a list of users from which one can be selected for 
         /// authentication.
         /// </summary>
-        public readonly static UIBehavior SelectAccount = new UIBehavior("select_account");
+        public static readonly UIBehavior SelectAccount = new UIBehavior("select_account");
 
         /// <summary>
         /// The user will be prompted for credentials by the service. It is achieved
         /// by sending prompt=login to the service.
         /// </summary>
-        public readonly static UIBehavior ForceLogin = new UIBehavior("login");
+        public static readonly UIBehavior ForceLogin = new UIBehavior("login");
 
         /// <summary>
         /// The user will be prompted to consent even if consent was granted before. It is achieved
         /// by sending prompt=consent to the service.
         /// </summary>
-        public readonly static UIBehavior Consent = new UIBehavior("consent");
+        public static readonly UIBehavior Consent = new UIBehavior("consent");
 
         internal string PromptValue { get; set; }
 
