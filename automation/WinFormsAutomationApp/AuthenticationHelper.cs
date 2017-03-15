@@ -1,9 +1,12 @@
 ﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 
@@ -14,7 +17,7 @@ namespace WinFormsAutomationApp
         #region Public Methods      
         public static async Task<string> AcquireToken(Dictionary<string, string> input)
         {
-            Dictionary<string, string> res = new Dictionary<string, string>();
+            Dictionary<string, object> res = new Dictionary<string, object>();
             AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
             try
             {
@@ -35,7 +38,7 @@ namespace WinFormsAutomationApp
         public static async Task<string> AcquireTokenSilent(Dictionary<string, string> input)
         {
             AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
-            Dictionary<string, string> res = new Dictionary<string, string>();
+            Dictionary<string, object> res = new Dictionary<string, object>();
             try
             {
                 AuthenticationResult result = await ctx.AcquireTokenSilentAsync(input["resource"], input["client_id"]).ConfigureAwait(false);
@@ -68,7 +71,7 @@ namespace WinFormsAutomationApp
                         UpdateCache(item, updated);
                     }
                 }
-                Dictionary<string, string> output = new Dictionary<string, string>();
+                Dictionary<string, object> output = new Dictionary<string, object>();
                 //Send back error if userId or displayableId is not sent back to the user
                 output.Add("expired_access_token_count", CacheItems.Count.ToString());
                 return output.FromDictionaryToJson();
@@ -80,7 +83,7 @@ namespace WinFormsAutomationApp
 
         public static async Task<string> InvalidateRefreshToken(Dictionary<string, string> input)
         {
-            Dictionary<string, string> output = new Dictionary<string, string>();
+            Dictionary<string, object> output = new Dictionary<string, object>();
             Task<string> myTask = Task<string>.Factory.StartNew(() =>
             {
                 try
@@ -108,22 +111,12 @@ namespace WinFormsAutomationApp
             return await myTask.ConfigureAwait(false);
         }
 
-        private static List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> QueryCache(string authority,
-            string clientId, string displayableId)
-        {
-            return TokenCache.DefaultShared.tokenCacheDictionary.Where(
-                p =>
-                    (string.IsNullOrWhiteSpace(authority) || p.Key.Authority == authority)
-                    && (string.IsNullOrWhiteSpace(clientId) || p.Key.ClientIdEquals(clientId))
-                    && (string.IsNullOrWhiteSpace(displayableId) || p.Key.DisplayableIdEquals(displayableId))).ToList();
-        }
-
         public static async Task<string> ReadCache(Dictionary<string, string> input)
         {
             Task<string> myTask = Task<string>.Factory.StartNew(() =>
             {                
                 int count = TokenCache.DefaultShared.Count;
-                Dictionary<string, string> output = new Dictionary<string, string>();
+                Dictionary<string, object> output = new Dictionary<string, object>();
                  output.Add("item_count", count.ToString());
                 var list = TokenCache.DefaultShared.ReadItems();
                 if (list.Any())
@@ -152,17 +145,66 @@ namespace WinFormsAutomationApp
 
         public static async Task<string> AcquireTokenUsingDeviceProfile(Dictionary<string, string> input)
         {
-            Task<string> myTask = Task<string>.Factory.StartNew(() =>
+            Dictionary<string, object> res = new Dictionary<string, object>();
+            IWebDriver driver = null;
+            AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
+            try
             {
-                int count = TokenCache.DefaultShared.Count;
-                Dictionary<string, string> output = new Dictionary<string, string>();
-                output.Add("item_count", count.ToString());
-                var list = TokenCache.DefaultShared.ReadItems().ToJson();
-                output.Add("AccessToken", list);
-                return output.ToJson();
-            });
+                //Get Device Code
+                DeviceCodeResult res1 = await ctx.AcquireDeviceCodeAsync(input["resource"], input["client_id"]);
 
-            return await myTask.ConfigureAwait(false);
+                //Open Chrome Driver in incognito mode
+                ChromeOptions options = new ChromeOptions();
+                options.AddArgument(@"--incognito");
+                options.AddArgument(@"--start-maximized");
+                driver = new ChromeDriver(options);           
+
+                // Do device auth on chrome
+                driver.Navigate().GoToUrl(res1.VerificationUrl);
+                driver.FindElement(By.Id("code"),15).SendKeys(res1.UserCode);
+                Thread.Sleep(1500);// Threadsleep added to wait until controls loaded.
+                driver.FindElement(By.Id("continueBtn"),15).Click();
+                driver.FindElement(By.Id("cred_userid_inputtext"),15).SendKeys(input["user_identifier"]);
+                driver.FindElement(By.Id("cred_password_inputtext"),15).SendKeys(input["password"]);
+                Thread.Sleep(1500); 
+                driver.FindElement(By.Id("cred_sign_in_button"), 15).Click();
+
+                //Try to get access code for the device code.
+                AuthenticationResult result = await ctx.AcquireTokenByDeviceCodeAsync(res1);
+                res.Add("unique_id", result.UserInfo.UniqueId);
+                res.Add("access_token", result.AccessToken);
+                res.Add("tenant_id", result.TenantId);               
+            }
+            catch (Exception exc)
+            {
+                res.Add("error", exc.Message);
+            }
+            finally
+            {
+               if(driver != null) driver.Quit();
+            }
+            return FromDictionaryToJson(res);
+        }
+
+        public static async Task<string> AcquireDeviceCode(Dictionary<string, string> input)
+        {
+            Dictionary<string, object> res = new Dictionary<string, object>();
+            AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
+            try
+            {
+                DeviceCodeResult result = await ctx.AcquireDeviceCodeAsync(input["resource"], input["client_id"]);
+                res.Add("device_code", result.DeviceCode);
+                res.Add("verification_url", result.VerificationUrl);
+                res.Add("user_code", result.UserCode);
+                res.Add("client_id", result.ClientId);
+                res.Add("resource", result.Resource);
+                res.Add("expires_on", result.ExpiresOn.DateTime);              
+            }
+            catch (Exception exc)
+            {
+                res.Add("error", exc.Message);
+            }
+            return FromDictionaryToJson(res);
         }
 
         public static string ToJson(this object obj)
@@ -246,15 +288,15 @@ namespace WinFormsAutomationApp
             return platformParameters;
         }
 
-        private static string FromDictionaryToJson(this IDictionary<string, string> dictionary)
+        private static string FromDictionaryToJson(this Dictionary<string, object> dictionary)
         {
-            var kvs = dictionary.Select(kvp => $"\"{ kvp.Key}\":\"{ kvp.Value}\"");
-            return string.Concat("{", string.Join(",", kvs), "}");
+            var jss = new JavaScriptSerializer();
+            return jss.Serialize(dictionary);
         }
 
-        private static Dictionary<string, string> ProcessResult(AuthenticationResult result, Dictionary<string, string> input)
+        private static Dictionary<string, object> ProcessResult(AuthenticationResult result, Dictionary<string, string> input)
         {
-            Dictionary<string, string> res = new Dictionary<string, string>();
+            Dictionary<string, object> res = new Dictionary<string, object>();
             res.Add("unique_id", result.UserInfo.UniqueId);
             res.Add("access_token", result.AccessToken);
             res.Add("tenant_id", result.TenantId);
@@ -293,7 +335,17 @@ namespace WinFormsAutomationApp
             TokenCache.DefaultShared.StoreToCache(updated.Value, updated.Key.Authority, updated.Key.Resource, updated.Key.ClientId, updated.Key.TokenSubjectType, new CallState(new Guid()));
             NotifyAfterAccessCache(updated.Key.Resource, updated.Key.ClientId, updated.Value.Result.UserInfo.UniqueId, updated.Value.Result.UserInfo.DisplayableId);
         }
+
+        private static List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> QueryCache(string authority,
+            string clientId, string displayableId)
+        {
+            return TokenCache.DefaultShared.tokenCacheDictionary.Where(
+                p =>
+                    (string.IsNullOrWhiteSpace(authority) || p.Key.Authority == authority)
+                    && (string.IsNullOrWhiteSpace(clientId) || p.Key.ClientIdEquals(clientId))
+                    && (string.IsNullOrWhiteSpace(displayableId) || p.Key.DisplayableIdEquals(displayableId))).ToList();
+        }
         #endregion
 
-    }
+    }    
 }
