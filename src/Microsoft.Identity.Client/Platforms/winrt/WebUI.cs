@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         {
             if (!(parameters is PlatformParameters))
             {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
+                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(parameters));
             }
 
             this.useCorporateNetwork = ((PlatformParameters) parameters).UseCorporateNetwork;

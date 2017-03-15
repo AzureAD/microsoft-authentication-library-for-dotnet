@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
             this.parameters = inputParameters as PlatformParameters;
             if (this.parameters == null)
             {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
+                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(this.parameters));
             }
 
             if (parameters.UseHiddenBrowser)

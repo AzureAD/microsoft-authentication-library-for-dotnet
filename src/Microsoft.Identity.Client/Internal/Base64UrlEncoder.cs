@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (arg == null)
             {
-                throw new ArgumentNullException("arg");
+                throw new ArgumentNullException(nameof(arg));
             }
 
             return Encode(TextEncoding.GetBytes(arg));
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Internal
                     s += Base64PadCharacter;
                     break; // One pad char
                 default:
-                    throw new ArgumentException("Illegal base64url string!", "arg");
+                    throw new ArgumentException("Illegal base64url string!", nameof(arg));
             }
 
             return Convert.FromBase64String(s); // Standard base64 decoder
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (arg == null)
             {
-                throw new ArgumentNullException("arg");
+                throw new ArgumentNullException(nameof(arg));
             }
 
             string s = Convert.ToBase64String(arg);

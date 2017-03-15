@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 this.RequestContext);
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))
             {
-                throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, "redirectUri");
+                throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, nameof(authenticationRequestParameters.RedirectUri));
             }
 
             _additionalScope = new SortedSet<string>();

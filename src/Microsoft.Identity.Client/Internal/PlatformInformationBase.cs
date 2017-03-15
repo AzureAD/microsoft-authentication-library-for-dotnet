@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (redirectUri == null)
             {
-                throw new ArgumentNullException("redirectUri");
+                throw new ArgumentNullException(nameof(redirectUri));
             }
 
             return redirectUri;

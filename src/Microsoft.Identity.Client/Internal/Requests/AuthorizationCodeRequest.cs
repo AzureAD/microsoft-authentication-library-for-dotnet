@@ -37,14 +37,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (string.IsNullOrWhiteSpace(authenticationRequestParameters.AuthorizationCode))
             {
-                throw new ArgumentNullException("authorizationCode");
+                throw new ArgumentNullException(nameof(authenticationRequestParameters.AuthorizationCode));
             }
 
             PlatformPlugin.PlatformInformation.ValidateRedirectUri(authenticationRequestParameters.RedirectUri,
                 this.RequestContext);
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))
             {
-                throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, "redirectUri");
+                throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, nameof(authenticationRequestParameters.RedirectUri));
             }
 
             this.LoadFromCache = false;

@@ -55,12 +55,12 @@ namespace Microsoft.Identity.Client
         {
             if (string.IsNullOrWhiteSpace(assertion))
             {
-                throw new ArgumentNullException("assertion");
+                throw new ArgumentNullException(nameof(assertion));
             }
 
             if (string.IsNullOrWhiteSpace(assertionType))
             {
-                throw new ArgumentNullException("assertionType");
+                throw new ArgumentNullException(nameof(assertionType));
             }
 
             this.AssertionType = assertionType;

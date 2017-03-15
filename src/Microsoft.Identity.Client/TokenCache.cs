@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Client
         {
             if (string.IsNullOrEmpty(clientId))
             {
-                throw new ArgumentNullException("empty or null clientId");
+                throw new ArgumentNullException(nameof(clientId));
             }
 
             lock (LockObject)

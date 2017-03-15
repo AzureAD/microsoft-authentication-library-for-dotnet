@@ -43,12 +43,12 @@ namespace Microsoft.Identity.Client
         /// <param name="certificate">The certificate used as credential.</param>
         public ClientAssertionCertificate(X509Certificate2 certificate)
         {
-            this.Certificate = certificate ?? throw new ArgumentNullException("certificate");
+            this.Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
 
 #if NET45
             if (certificate.PublicKey. Key.KeySize < MinKeySizeInBits)
             {
-                throw new ArgumentOutOfRangeException("certificate",
+                throw new ArgumentOutOfRangeException(nameof(certificate),
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
                         MinKeySizeInBits));
             }

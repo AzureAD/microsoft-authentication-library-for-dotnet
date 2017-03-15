@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0)
             {
-                throw new ArgumentNullException("scope");
+                throw new ArgumentNullException(nameof(authenticationRequestParameters.Scope));
             }
 
             ValidateScopeInput(authenticationRequestParameters.Scope);
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 if (scopesToValidate.Count > 1)
                 {
-                    throw new ArgumentException("Client Id can only be provided as a single scope");
+                    throw new ArgumentException("Client Id can only be provided as a single scope", nameof(AuthenticationRequestParameters.ClientId));
                 }
             }
         }
