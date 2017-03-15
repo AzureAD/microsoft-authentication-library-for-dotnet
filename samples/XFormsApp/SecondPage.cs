@@ -27,23 +27,16 @@
 
 using Microsoft.Identity.Client;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using TestApp.PCL;
 using Xamarin.Forms;
 
 namespace XFormsApp
 {
     public class SecondPage : ContentPage
     {
-        private TokenBroker tokenBroker;
         private Label result;
 
         public SecondPage()
         {
-            this.tokenBroker = new TokenBroker();
 
             var browseButton = new Button
             {
