@@ -53,6 +53,22 @@ namespace Microsoft.Identity.Client.Internal
             return scope.Overlaps(otherScope);
         }
 
+        internal static SortedSet<string> ToLower(this SortedSet<string> setOfStrings)
+        {
+            if (setOfStrings == null)
+            {
+                return null;
+            }
+
+            SortedSet<string> set = new SortedSet<string>();
+            foreach (var item in setOfStrings)
+            {
+                set.Add(item.ToLower());
+            }
+
+            return set;
+        }
+
         internal static string[] AsArray(this SortedSet<string> setOfStrings)
         {
             if (setOfStrings == null)
@@ -224,7 +240,7 @@ namespace Microsoft.Identity.Client.Internal
 
                     if (lowercaseKeys)
                     {
-                        key = key.Trim().ToLowerInvariant();
+                        key = key.Trim().ToLower();
                     }
 
                     value = value.Trim().Trim(new[] { '\"' }).Trim();

@@ -244,7 +244,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 uri = uri + "/";
             }
 
-            return uri.ToLowerInvariant();
+            return uri.ToLower();
         }
 
         private void ReplaceTenantlessTenant(string tenantId)
