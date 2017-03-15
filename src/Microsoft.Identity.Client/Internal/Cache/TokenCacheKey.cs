@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -137,7 +138,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             const string Delimiter = ":::";
             return (this.Authority + Delimiter
                     + MsalHelpers.AsSingleString(this.Scope) + Delimiter
-                    + this.ClientId.ToLower() + Delimiter
+                    + this.ClientId.ToLowerInvariant() + Delimiter
                     + this.HomeObjectId + Delimiter).GetHashCode();
         }
 
@@ -155,7 +156,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
             if (Scope.Count == otherScope.Count)
             {
-                return this.Scope.ToLower().Intersect(otherScope.ToLower()).Count() == this.Scope.Count;
+                return this.Scope.Intersect(otherScope, StringComparer.OrdinalIgnoreCase).Count() == this.Scope.Count;
             }
 
             return false;
