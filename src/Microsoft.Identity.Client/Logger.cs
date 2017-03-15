@@ -30,9 +30,15 @@ using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
-{
+{  
+    /// <summary>
+    /// MSAL Logger
+    /// </summary>
     public sealed class Logger
     {
+        /// <summary>
+        /// MSAL Log Levels
+        /// </summary>
         public enum LogLevel
         {
             /// <summary>
@@ -63,12 +69,12 @@ namespace Microsoft.Identity.Client
 
         private Guid CorrelationId { get; set; }
 
-        /// <summary>
-        /// Callback instance
-        /// </summary>
         private static readonly object LockObj = new object();
         private static volatile ILoggerCallback _localCallback;
 
+        /// <summary>
+        /// Callback instance
+        /// </summary>
         public static ILoggerCallback Callback
         {
             set
