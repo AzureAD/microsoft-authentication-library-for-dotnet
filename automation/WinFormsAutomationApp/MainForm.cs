@@ -31,7 +31,7 @@ namespace WinFormsAutomationApp
             string output = await _commandToRun((AuthenticationHelper.CreateDictionaryFromJson(requestInfo.Text)));
             pageControl1.SelectedTab = resultPage;
             resultInfo.Text = output;
-            adalLogs.Text = loggerCallback.GetAdalLogs();
+            resultLogs.Text = loggerCallback.GetAdalLogs();
         }
 
         private void resultDone_Click(object sender, EventArgs e)
@@ -70,7 +70,7 @@ namespace WinFormsAutomationApp
             string output = await AuthenticationHelper.ClearCache(null);
             pageControl1.SelectedTab = resultPage;
             resultInfo.Text = output;
-            adalLogs.Text = loggerCallback.GetAdalLogs();
+            resultLogs.Text = loggerCallback.GetAdalLogs();
         }
 
         private void acquireTokenDeviceProfile_Click(object sender, EventArgs e)
@@ -78,5 +78,11 @@ namespace WinFormsAutomationApp
             _commandToRun = AuthenticationHelper.AcquireTokenUsingDeviceProfile;
             pageControl1.SelectedTab = dataInputPage;
         }
+
+        private void acquireDeviceCode_Click(object sender, EventArgs e)
+        {
+            _commandToRun = AuthenticationHelper.AcquireDeviceCode;
+            pageControl1.SelectedTab = dataInputPage;
+        }        
     }
 }

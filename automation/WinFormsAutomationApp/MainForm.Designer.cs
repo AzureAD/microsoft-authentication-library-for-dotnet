@@ -30,6 +30,7 @@
         {
             this.pageControl1 = new WinFormsAutomationApp.PageControl();
             this.mainPage = new System.Windows.Forms.TabPage();
+            this.acquireDeviceCode = new System.Windows.Forms.Button();
             this.acquireTokenDeviceProfile = new System.Windows.Forms.Button();
             this.clearCache = new System.Windows.Forms.Button();
             this.readCache = new System.Windows.Forms.Button();
@@ -42,7 +43,7 @@
             this.requestInfo = new System.Windows.Forms.TextBox();
             this.resultPage = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
-            this.adalLogs = new System.Windows.Forms.TextBox();
+            this.resultLogs = new System.Windows.Forms.TextBox();
             this.resultDone = new System.Windows.Forms.Button();
             this.resultInfo = new System.Windows.Forms.TextBox();
             this.pageControl1.SuspendLayout();
@@ -64,6 +65,7 @@
             // 
             // mainPage
             // 
+            this.mainPage.Controls.Add(this.acquireDeviceCode);
             this.mainPage.Controls.Add(this.acquireTokenDeviceProfile);
             this.mainPage.Controls.Add(this.clearCache);
             this.mainPage.Controls.Add(this.readCache);
@@ -73,11 +75,22 @@
             this.mainPage.Controls.Add(this.acquireToken);
             this.mainPage.Location = new System.Drawing.Point(4, 22);
             this.mainPage.Name = "mainPage";
-            this.mainPage.Padding = new System.Windows.Forms.Padding(3);
+            this.mainPage.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
             this.mainPage.Size = new System.Drawing.Size(591, 547);
             this.mainPage.TabIndex = 0;
             this.mainPage.Text = "mainPage";
             this.mainPage.UseVisualStyleBackColor = true;
+            // 
+            // acquireDeviceCode
+            // 
+            this.acquireDeviceCode.AccessibleName = "acquireDeviceCode";
+            this.acquireDeviceCode.Location = new System.Drawing.Point(175, 446);
+            this.acquireDeviceCode.Name = "acquireDeviceCode";
+            this.acquireDeviceCode.Size = new System.Drawing.Size(233, 44);
+            this.acquireDeviceCode.TabIndex = 9;
+            this.acquireDeviceCode.Text = "Aquire Device Code";
+            this.acquireDeviceCode.UseVisualStyleBackColor = true;
+            this.acquireDeviceCode.Click += new System.EventHandler(this.acquireDeviceCode_Click);
             // 
             // acquireTokenDeviceProfile
             // 
@@ -162,7 +175,7 @@
             this.dataInputPage.Controls.Add(this.requestInfo);
             this.dataInputPage.Location = new System.Drawing.Point(4, 22);
             this.dataInputPage.Name = "dataInputPage";
-            this.dataInputPage.Padding = new System.Windows.Forms.Padding(3);
+            this.dataInputPage.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
             this.dataInputPage.Size = new System.Drawing.Size(591, 547);
             this.dataInputPage.TabIndex = 1;
             this.dataInputPage.Text = "dataInputPage";
@@ -191,12 +204,12 @@
             // resultPage
             // 
             this.resultPage.Controls.Add(this.label1);
-            this.resultPage.Controls.Add(this.adalLogs);
+            this.resultPage.Controls.Add(this.resultLogs);
             this.resultPage.Controls.Add(this.resultDone);
             this.resultPage.Controls.Add(this.resultInfo);
             this.resultPage.Location = new System.Drawing.Point(4, 22);
             this.resultPage.Name = "resultPage";
-            this.resultPage.Padding = new System.Windows.Forms.Padding(3);
+            this.resultPage.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
             this.resultPage.Size = new System.Drawing.Size(591, 547);
             this.resultPage.TabIndex = 2;
             this.resultPage.Text = "resultPage";
@@ -211,15 +224,15 @@
             this.label1.TabIndex = 3;
             this.label1.Text = "Adal Logs";
             // 
-            // adalLogs
+            // resultLogs
             // 
-            this.adalLogs.AccessibleName = "adalLogs";
-            this.adalLogs.Enabled = false;
-            this.adalLogs.Location = new System.Drawing.Point(28, 386);
-            this.adalLogs.Multiline = true;
-            this.adalLogs.Name = "adalLogs";
-            this.adalLogs.Size = new System.Drawing.Size(535, 151);
-            this.adalLogs.TabIndex = 2;
+            this.resultLogs.AccessibleName = "resultLogs";
+            this.resultLogs.Enabled = false;
+            this.resultLogs.Location = new System.Drawing.Point(28, 386);
+            this.resultLogs.Multiline = true;
+            this.resultLogs.Name = "resultLogs";
+            this.resultLogs.Size = new System.Drawing.Size(535, 151);
+            this.resultLogs.TabIndex = 2;
             // 
             // resultDone
             // 
@@ -280,7 +293,8 @@
         private System.Windows.Forms.Button readCache;
         private System.Windows.Forms.Button acquireTokenDeviceProfile;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox adalLogs;
+        private System.Windows.Forms.TextBox resultLogs;
+        private System.Windows.Forms.Button acquireDeviceCode;
     }
 }
 
