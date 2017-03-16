@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
+using static Microsoft.Identity.Client.TokenCache;
 
 namespace AutomationApp
 {
@@ -16,12 +17,12 @@ namespace AutomationApp
         private delegate Task<string> Command(Dictionary<string, string> input);
         LoggerCallbackImpl _loggerCallback = new LoggerCallbackImpl();
         private Command _commandToRun = null;
+        internal TokenCache UserTokenCache { get; set; }
 
         public AutomationApp()
         {
             InitializeComponent();
-            //TokenCache
-            
+            // += TokenCacheDelegates.AfterAccessNotification;
             Logger.Callback = _loggerCallback;
         }
 
