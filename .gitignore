@@ -214,3 +214,10 @@ FakesAssemblies/
 **/*.Server/GeneratedArtifacts
 **/*.Server/ModelManifest.xml
 _Pvt_Extensions
+
+# NuGet V3 artifacts
+*-packages.config
+*.nuget.props
+*.nuget.targets
+project.lock.json
+*.project.lock.json

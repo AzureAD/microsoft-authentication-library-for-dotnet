@@ -158,7 +158,7 @@
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
     <ProjectReference Include="..\XForms\XForms.csproj">
-      <Project>{a3f95657-3f62-4dac-bb98-5754c23edb22}</Project>
+      <Project>{a00ac06a-694f-4fea-999f-81e753fa7c28}</Project>
       <Name>XForms</Name>
     </ProjectReference>
   </ItemGroup>
