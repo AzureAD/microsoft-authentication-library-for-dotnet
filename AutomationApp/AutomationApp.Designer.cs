@@ -40,10 +40,10 @@
             this.go = new System.Windows.Forms.Button();
             this.dataInput = new System.Windows.Forms.TextBox();
             this.resultPage = new System.Windows.Forms.TabPage();
+            this.label1 = new System.Windows.Forms.Label();
+            this.msalLogs = new System.Windows.Forms.TextBox();
             this.Done = new System.Windows.Forms.Button();
             this.resultInfo = new System.Windows.Forms.TextBox();
-            this.msalLogs = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.pageControl1.SuspendLayout();
             this.mainPage.SuspendLayout();
             this.dataInputPage.SuspendLayout();
@@ -104,6 +104,7 @@
             this.invalidateToken.TabIndex = 3;
             this.invalidateToken.Text = "Invalidate Token";
             this.invalidateToken.UseVisualStyleBackColor = true;
+            this.invalidateToken.Click += new System.EventHandler(this.invalidateToken_Click);
             // 
             // expireAccessToken
             // 
@@ -122,6 +123,7 @@
             this.button1.TabIndex = 1;
             this.button1.Text = "Acquire Token Silent";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // acquireToken
             // 
@@ -166,7 +168,6 @@
             this.dataInput.Name = "dataInput";
             this.dataInput.Size = new System.Drawing.Size(329, 387);
             this.dataInput.TabIndex = 0;
-            this.dataInput.Text = "Please enter the sign-in info here...";
             // 
             // resultPage
             // 
@@ -181,6 +182,24 @@
             this.resultPage.TabIndex = 2;
             this.resultPage.Text = "Result Page";
             this.resultPage.UseVisualStyleBackColor = true;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(17, 295);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(55, 13);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "Msal Logs";
+            // 
+            // msalLogs
+            // 
+            this.msalLogs.BackColor = System.Drawing.Color.PowderBlue;
+            this.msalLogs.Location = new System.Drawing.Point(8, 311);
+            this.msalLogs.Multiline = true;
+            this.msalLogs.Name = "msalLogs";
+            this.msalLogs.Size = new System.Drawing.Size(330, 168);
+            this.msalLogs.TabIndex = 2;
             // 
             // Done
             // 
@@ -203,24 +222,6 @@
             this.resultInfo.Name = "resultInfo";
             this.resultInfo.Size = new System.Drawing.Size(330, 219);
             this.resultInfo.TabIndex = 0;
-            // 
-            // msalLogs
-            // 
-            this.msalLogs.BackColor = System.Drawing.Color.PowderBlue;
-            this.msalLogs.Location = new System.Drawing.Point(8, 311);
-            this.msalLogs.Multiline = true;
-            this.msalLogs.Name = "msalLogs";
-            this.msalLogs.Size = new System.Drawing.Size(330, 168);
-            this.msalLogs.TabIndex = 2;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(17, 295);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(55, 13);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Msal Logs";
             // 
             // AutomationApp
             // 

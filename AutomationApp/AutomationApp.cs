@@ -50,5 +50,15 @@ namespace AutomationApp
             dataInput.Text = string.Empty;
             pageControl1.SelectedTab = mainPage;
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void invalidateToken_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

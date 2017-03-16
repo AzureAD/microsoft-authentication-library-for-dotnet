@@ -29,6 +29,6 @@ namespace Microsoft.Identity.Client.Internal.Interfaces
 {
     internal interface IWebUIFactory
     {
-        IWebUI CreateAuthenticationDialog(IPlatformParameters parameters);
+        IWebUI CreateAuthenticationDialog(IPlatformParameters parameters, RequestContext requestContext);
     }
 }

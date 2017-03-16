@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client
     {
         private PlatformParameters parameters;
 
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters)
+        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters, RequestContext requestContext)
         {
             this.parameters = inputParameters as PlatformParameters;
             if (this.parameters == null)

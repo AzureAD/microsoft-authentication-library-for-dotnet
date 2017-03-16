@@ -33,9 +33,9 @@ namespace Microsoft.Identity.Client
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class WebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
+        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters, RequestContext requestContext)
         {
-            return new WebUI(parameters);
+            return new WebUI(parameters, requestContext);
         }
     }
 }
