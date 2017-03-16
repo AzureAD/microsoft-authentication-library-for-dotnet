@@ -157,6 +157,9 @@
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.NuGet.Build.Tasks.Workaround" Version="1.0.0">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>    
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
 </Project>

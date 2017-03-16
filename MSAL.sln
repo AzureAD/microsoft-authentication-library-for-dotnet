@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34FFBC9F-C270-4B10-98C8-F6882606DDFE}"
 EndProject
@@ -31,7 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{A3C8
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreTestApp", "samples\NetCoreTestApp\NetCoreTestApp.csproj", "{3D86AD34-35F2-4DB8-81CC-673BA65CCC55}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "XForms", "XForms", "{F9CCBE99-562C-443F-9474-7BEC49D068C2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Xamarin Forms", "Xamarin Forms", "{F9CCBE99-562C-443F-9474-7BEC49D068C2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.Android", "samples\XForms\XForms.Android\XForms.Android.csproj", "{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}"
 EndProject

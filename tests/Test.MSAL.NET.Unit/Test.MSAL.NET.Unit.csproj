@@ -18,7 +18,6 @@
     <TestProjectType>UnitTest</TestProjectType>
     <DefineConstants>TEST_ADAL_NET</DefineConstants>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -164,7 +163,8 @@
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="NSubstitute" Version="1.9.1.0">
+    <PackageReference Include="NSubstitute" Version="1.9.1.0" />
+    <PackageReference Include="Microsoft.NuGet.Build.Tasks.Workaround" Version="1.0.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
