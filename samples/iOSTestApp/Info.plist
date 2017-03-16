@@ -26,10 +26,10 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.your-company.AdaliOSTestApp</string>
+			<string>com.yourcompany.xformsapp</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>AdaliOSApp</string>
+				<string>adaliosxformsapp</string>
 			</array>
 		</dict>
 	</array>
