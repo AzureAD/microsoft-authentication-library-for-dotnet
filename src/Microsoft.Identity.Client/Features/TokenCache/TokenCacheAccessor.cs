@@ -32,7 +32,7 @@ using Microsoft.Identity.Client.Internal.Cache;
 
 namespace Microsoft.Identity.Client
 {
-    internal class TokenCacheAccessor
+    internal partial class TokenCacheAccessor
     {
         internal readonly IDictionary<string, string> TokenCacheDictionary =
             new ConcurrentDictionary<string, string>();

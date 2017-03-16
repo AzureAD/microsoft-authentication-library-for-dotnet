@@ -37,9 +37,14 @@ namespace Microsoft.Identity.Client
 {
     internal class TokenCacheAccessor
     {
+
         private RequestContext _requestContext;
 
-        public TokenCacheAccessor(RequestContext requestContext)
+        public TokenCacheAccessor()
+        {
+        }
+
+        public TokenCacheAccessor(RequestContext requestContext) : this()
         {
             _requestContext = requestContext;
         }
@@ -65,11 +70,6 @@ namespace Microsoft.Identity.Client
         }
 
         public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void Delete(string key, ISharedPreferencesEditor editor)
         {
             throw new NotImplementedException();
         }

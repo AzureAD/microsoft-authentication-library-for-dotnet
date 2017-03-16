@@ -47,13 +47,13 @@ namespace Test.MSAL.NET.Unit.RequestsTests
     [TestClass]
     public class InteractiveRequestTests
     {
-        private TokenCachePlugin _tokenCachePlugin;
+        TokenCache cache;
 
         [TestInitialize]
         public void TestInitialize()
         {
+            cache = new TokenCache();
             Authority.ValidatedAuthorities.Clear();
-            _tokenCachePlugin = (TokenCachePlugin)PlatformPlugin.TokenCachePlugin;
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
         }
@@ -61,7 +61,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCleanup]
         public void TestCleanup()
         {
-            _tokenCachePlugin.TokenCacheDictionary.Clear();
+            cache.TokenCacheAccessor.TokenCacheDictionary.Clear();
         }
 
         [TestMethod]
@@ -86,7 +86,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             TokenCacheKey atKey = atItem.GetTokenCacheKey();
             atItem.AccessToken = atKey.ToString();
-            _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
+            cache.TokenCacheAccessor.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
 
             MockWebUI ui = new MockWebUI()
             {
@@ -127,7 +127,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             task.Wait();
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
-            Assert.AreEqual(3, _tokenCachePlugin.TokenCacheDictionary.Count);
+            Assert.AreEqual(3, cache.TokenCacheAccessor.TokenCacheDictionary.Count);
             Assert.AreEqual(1, cache.RefreshTokenCount);
             Assert.AreEqual(2, cache.AccessTokenCount);
             Assert.AreEqual(result.AccessToken, "some-access-token");

@@ -36,7 +36,7 @@ namespace Test.MSAL.NET.Unit.Mocks
     {
         public static long ValidExpiresIn = 28800;
         
-        public static void PopulateCache(TokenCachePlugin cachePlugin)
+        public static void PopulateCache(TokenCacheAccessor accessor)
         {
             AccessTokenCacheItem item = new AccessTokenCacheItem()
             {
@@ -55,7 +55,7 @@ namespace Test.MSAL.NET.Unit.Mocks
             };
             item.AccessToken = item.GetTokenCacheKey().ToString();
             //add access token
-            cachePlugin.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
+            accessor.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
 
             item = new AccessTokenCacheItem()
             {
@@ -74,7 +74,7 @@ namespace Test.MSAL.NET.Unit.Mocks
             };
             item.AccessToken = item.GetTokenCacheKey().ToString();
             //add another access token
-            cachePlugin.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
+            accessor.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
             
             RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
             {
@@ -89,7 +89,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                     HomeObjectId = TestConstants.HomeObjectId
                 }
             };
-            cachePlugin.TokenCacheDictionary[rtItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
+            accessor.TokenCacheDictionary[rtItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
         }
     }
 }
