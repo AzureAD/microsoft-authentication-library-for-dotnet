@@ -26,7 +26,7 @@ Affected 3.x versions: 3.11.305310302-alpha, 3.10.305231913, 3.10.305161347, 3.1
 
 ## Samples and Documentation
 
-We provide a full suite of [sample applications](https://github.com/Azure-Samples?utf8=%E2%9C%93&query=active-directory) and [ADAL documentation](https://docs.microsoft.com/active-directory/adal/microsoft.identitymodel.clients.activedirectory) to help you get started with learning the Azure Identity system. Our [Azure AD Developer Guide](https://aka.ms/aaddev) includes tutorials for native clients such as Windows, Windows Phone, iOS, OSX, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features. 
+We provide a full suite of [sample applications](https://github.com/Azure-Samples?utf8=%E2%9C%93&q=active-directory) and [ADAL documentation](https://docs.microsoft.com/active-directory/adal/microsoft.identitymodel.clients.activedirectory) to help you get started with learning the Azure Identity system. Our [Azure AD Developer Guide](https://aka.ms/aaddev) includes tutorials for native clients such as Windows, Windows Phone, iOS, OSX, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features. 
 
 ## Community Help and Support
 
