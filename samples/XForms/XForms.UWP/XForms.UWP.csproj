@@ -157,6 +157,10 @@
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
+    <ProjectReference Include="..\XForms\XForms.csproj">
+      <Project>{a00ac06a-694f-4fea-999f-81e753fa7c28}</Project>
+      <Name>XForms</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
