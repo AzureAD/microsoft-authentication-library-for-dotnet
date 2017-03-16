@@ -68,23 +68,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// <summary>
         /// Gets the TenantId.
         /// </summary>
-        public string TenantId { get; set; }
-
-        /// <summary>
-        /// Gets the user's unique Id.
-        /// </summary>
-        public string UniqueId { get; set; }
-
-        /// <summary>
-        /// Gets the user's displayable Id.
-        /// </summary>
-        public string DisplayableId { get { return User?.DisplayableId; } }
+        public string TenantId => IdToken?.TenantId;
 
         [DataMember(Name = "user_assertion_hash")]
         internal string UserAssertionHash { get; set; }
-
-
-        internal IdToken IdToken { get; set; }
 
         internal AccessTokenCacheItem()
         {
@@ -104,30 +91,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
             if (idToken != null)
             {
                 User = User.CreateFromIdToken(idToken);
-                TenantId = idToken.TenantId;
             }
 
             TokenType = response.TokenType;
             Scope = response.Scope.AsSet();
-        }
-
-        // This method is called after the object 
-        // is completely deserialized.
-        [OnDeserialized]
-        void OnDeserialized(StreamingContext context)
-        {
-            if (RawIdToken != null)
-            {
-                IdToken = IdToken.Parse(RawIdToken, RequestContext);
-                UniqueId = IdToken.ObjectId;
-                if(UniqueId == null)
-                {
-                    UniqueId = IdToken.Subject;
-                }
-
-                TenantId = IdToken.TenantId;
-                User = User.CreateFromIdToken(IdToken);
-            }
         }
 
         public override TokenCacheKey GetTokenCacheKey()

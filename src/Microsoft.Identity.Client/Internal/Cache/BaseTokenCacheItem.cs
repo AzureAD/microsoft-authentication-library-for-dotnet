@@ -59,6 +59,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
         }
 
+        internal IdToken IdToken { get; set; }
+
         /// <summary>
         /// Gets the ClientId.
         /// </summary>
@@ -71,8 +73,15 @@ namespace Microsoft.Identity.Client.Internal.Cache
         [DataMember(Name = "authority")]
         public string Authority { get; set; }
 
-        internal string HomeObjectId { get { return User?.HomeObjectId; } }
-        
+        public string HomeObjectId { get { return User?.HomeObjectId; } }
+
+        public string UniqueId { get; set; }
+
+        /// <summary>
+        /// Gets the user's displayable Id.
+        /// </summary>
+        public string DisplayableId { get { return User?.DisplayableId; } }
+
         [DataMember(Name = "id_token")]
         public string RawIdToken { get; set; }
 
@@ -82,5 +91,23 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public User User { get; set; }
 
         public abstract TokenCacheKey GetTokenCacheKey();
+
+        // This method is called after the object 
+        // is completely deserialized.
+        [OnDeserialized]
+        void OnDeserialized(StreamingContext context)
+        {
+            if (RawIdToken != null)
+            {
+                IdToken = IdToken.Parse(RawIdToken, RequestContext);
+                UniqueId = IdToken.ObjectId;
+                if (UniqueId == null)
+                {
+                    UniqueId = IdToken.Subject;
+                }
+
+                User = User.CreateFromIdToken(IdToken);
+            }
+        }
     }
 }

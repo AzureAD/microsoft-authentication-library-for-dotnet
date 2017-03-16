@@ -82,7 +82,6 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.RedirectUri);
             Assert.IsTrue(app.ValidateAuthority);
 
-
             app = new PublicClientApplication(TestConstants.ClientId, "https://login.microsoftonline.com/tfp/vibrob2c.onmicrosoft.com/B2C_1_B2C_Signup_Signin_Policy/oauth2/v2.0");
             Assert.IsNotNull(app);
             Assert.AreEqual("https://login.microsoftonline.com/tfp/vibrob2c.onmicrosoft.com/b2c_1_b2c_signup_signin_policy/", app.Authority);
