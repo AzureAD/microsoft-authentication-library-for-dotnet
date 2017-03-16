@@ -25,72 +25,73 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Concurrent;
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+using Foundation;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.Interfaces;
+using Security;
 
 namespace Microsoft.Identity.Client
 {
-    internal class TokenCachePlugin : ITokenCachePlugin
+    internal class TokenCacheAccessor
     {
-        internal readonly IDictionary<string, string> TokenCacheDictionary =
-            new ConcurrentDictionary<string, string>();
+        private RequestContext _requestContext;
 
-        private readonly RequestContext _requestContext;
-
-        public TokenCachePlugin(RequestContext requestContext)
+        public TokenCacheAccessor(RequestContext requestContext)
         {
             _requestContext = requestContext;
         }
 
-        public void BeforeAccess(TokenCacheNotificationArgs args)
+        public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
         {
+            throw new NotImplementedException();
         }
 
-        public void AfterAccess(TokenCacheNotificationArgs args)
+        public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
         {
+            throw new NotImplementedException();
         }
 
-        public ICollection<string> GetAllAccessTokens()
+        public ICollection<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
         {
-            return
-                new ReadOnlyCollection<string>(
-                    TokenCacheDictionary.Values.Where(
-                        v =>
-                            (JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(v).Scope != null) &&
-                            (JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(v).Scope.Count > 0)).ToList());
+            throw new NotImplementedException();
         }
 
-        public ICollection<string> AllRefreshTokens()
+        public void DeleteAccessToken(AccessTokenCacheItem accessToken‪Item)
         {
-            return
-                new ReadOnlyCollection<string>(
-                    TokenCacheDictionary.Values.Where(
-                        v => !string.IsNullOrEmpty(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(v).RefreshToken)).ToList());
+            throw new NotImplementedException();
         }
 
-        public void SaveAccessToken(string cacheKey, string accessTokenItem)
+        public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
         {
-            TokenCacheDictionary[cacheKey] = accessTokenItem;
+            throw new NotImplementedException();
         }
 
-        public void SaveRefreshToken(string cacheKey, string refreshTokenItem)
+        private void Delete(string key, ISharedPreferencesEditor editor)
         {
-            TokenCacheDictionary[cacheKey] = refreshTokenItem;
+            throw new NotImplementedException();
         }
 
-        public void DeleteAccessToken(string cacheKey)
+        public ICollection<string> GetAllAccessTokensAsString()
         {
-            TokenCacheDictionary.Remove(cacheKey);
+            throw new NotImplementedException();
         }
 
-        public void DeleteRefreshToken(string cacheKey)
+        public ICollection<AccessTokenCacheItem> GetAllAccessTokens(string clientId)
         {
-            TokenCacheDictionary.Remove(cacheKey);
+            throw new NotImplementedException();
+        }
+
+        public ICollection<string> GetAllRefreshTokensAsString()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICollection<RefreshTokenCacheItem> GetAllRefreshTokens(string clientId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

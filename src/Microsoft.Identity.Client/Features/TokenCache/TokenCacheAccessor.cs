@@ -25,27 +25,42 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Identity.Client.Internal.Interfaces;
+using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 
-namespace Microsoft.Identity.Client.Internal.Cache
+namespace Microsoft.Identity.Client
 {
     internal class TokenCacheAccessor
     {
-        public ITokenCachePlugin TokenCachePlugin = PlatformPlugin.TokenCachePlugin;
+        internal readonly IDictionary<string, string> TokenCacheDictionary =
+            new ConcurrentDictionary<string, string>();
+
+        private RequestContext _requestContext;
+
+        public TokenCacheAccessor()
+        {
+        }
+
+        public TokenCacheAccessor(RequestContext requestContext) : this()
+        {
+            _requestContext = requestContext;
+        }
 
         public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
         {
-            TokenCachePlugin.SaveAccessToken(accessTokenItem.GetTokenCacheKey().ToString(), JsonHelper.SerializeToJson(accessTokenItem));
+            TokenCacheDictionary[accessTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(accessTokenItem);
         }
 
         public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
         {
-            TokenCachePlugin.SaveRefreshToken(refreshTokenItem.GetTokenCacheKey().ToString(), JsonHelper.SerializeToJson(refreshTokenItem));
+            TokenCacheDictionary[refreshTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(refreshTokenItem);
         }
         
         public ICollection<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
         {
-            ICollection<string> allRefreshTokens = TokenCachePlugin.AllRefreshTokens();
+            ICollection<string> allRefreshTokens = this.GetAllRefreshTokensAsString();
             IList<RefreshTokenCacheItem> matchedRefreshTokens = new List<RefreshTokenCacheItem>();
             foreach (string refreshTokenValue in allRefreshTokens)
             {
@@ -63,17 +78,12 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public void DeleteAccessToken(AccessTokenCacheItem accessToken‪Item)
         {
-            TokenCachePlugin.DeleteAccessToken(accessToken‪Item.GetTokenCacheKey().ToString());
+            TokenCacheDictionary.Remove(accessToken‪Item.GetTokenCacheKey().ToString());
         }
 
         public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
         {
-            TokenCachePlugin.DeleteRefreshToken(refreshToken‪Item.GetTokenCacheKey().ToString());
-        }
-        
-        public ICollection<string> GetAllAccessTokensAsString()
-        {
-            return TokenCachePlugin.GetAllAccessTokens();
+            TokenCacheDictionary.Remove(refreshToken‪Item.GetTokenCacheKey().ToString());
         }
 
         public ICollection<AccessTokenCacheItem> GetAllAccessTokens(string clientId)
@@ -88,9 +98,22 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return returnList.Where(t => t.ClientId.Equals(clientId)).ToList();
         }
 
+        public ICollection<string> GetAllAccessTokensAsString()
+        {
+            return
+                new ReadOnlyCollection<string>(
+                    TokenCacheDictionary.Values.Where(
+                        v =>
+                            (JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(v).Scope != null) &&
+                            (JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(v).Scope.Count > 0)).ToList());
+        }
+
         public ICollection<string> GetAllRefreshTokensAsString()
         {
-            return TokenCachePlugin.AllRefreshTokens();
+            return
+                new ReadOnlyCollection<string>(
+                    TokenCacheDictionary.Values.Where(
+                        v => !string.IsNullOrEmpty(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(v).RefreshToken)).ToList());
         }
         
         public ICollection<RefreshTokenCacheItem> GetAllRefreshTokens(string clientId)
