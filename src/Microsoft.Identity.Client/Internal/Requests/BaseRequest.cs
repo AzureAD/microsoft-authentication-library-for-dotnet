@@ -171,16 +171,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected virtual AuthenticationResult PostTokenRequest(AccessTokenCacheItem item)
         {
-            AuthenticationResult result = new AuthenticationResult(item, this.RequestContext);
-            //add client id, token cache and authority to User object
-            if (result.User != null)
-            {
-                result.User.TokenCache = this.TokenCache;
-                result.User.ClientId = AuthenticationRequestParameters.ClientId;
-                result.User.Authority = this.Authority.CanonicalAuthority;
-            }
-
-            return result;
+            return new AuthenticationResult(item, this.RequestContext);
         }
 
         protected abstract void SetAdditionalRequestParameters(OAuth2Client client);
@@ -219,11 +210,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.AccessToken);
 
                 this.RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
-                        "=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Hash: {0}\n\tExpiration Time: {1}\n\tUser Hash: {2}\n\t",
+                        "=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Truncated Hash: {0}\n\tExpiration Time: {1}\n\tUser Truncated  Hash: {2}\n\t",
                         accessTokenHash,
                         result.ExpiresOn,
                         result.User != null
-                            ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.User.UniqueId)
+                            ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.User.DisplayableId)
                             : "null"));
             }
         }

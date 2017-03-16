@@ -156,6 +156,20 @@ namespace Microsoft.Identity.Client
                         forceRefresh).ConfigureAwait(false);
         }
 
+
+
+        /// <summary>
+        /// </summary>
+        public void Remove(User user)
+        {
+            if(user == null || UserTokenCache == null)
+            {
+                return;
+            }
+
+            UserTokenCache.Remove(user);
+        }
+
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
             string[] scope, User user, bool forceRefresh)
         {

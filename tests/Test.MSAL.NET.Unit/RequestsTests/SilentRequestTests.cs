@@ -98,7 +98,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             parameters.User = new User()
             {
-                UniqueId = TestConstants.UniqueId
             };
             request = new SilentRequest(parameters, false);
             Assert.IsNotNull(request);
@@ -128,7 +127,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 User = new User()
                 {
                     HomeObjectId = TestConstants.HomeObjectId,
-                    UniqueId = TestConstants.UniqueId,
                     DisplayableId = TestConstants.DisplayableId
                 }
             };
@@ -180,7 +178,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientId = TestConstants.ClientId,
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache,
-                User = new User() { UniqueId = ""},
+                User = new User(),
                 RequestContext = new RequestContext(Guid.Empty)
             };
             
