@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         internal AuthenticationResult(AccessTokenCacheItem accessTokenCacheItem, RequestContext requestContext)
         {
             _accessTokenCacheItem = accessTokenCacheItem;
-            User = new User(Internal.IdToken.Parse(accessTokenCacheItem.RawIdToken, requestContext));
+            User = User.CreateFromIdToken(Internal.IdToken.Parse(accessTokenCacheItem.RawIdToken, requestContext));
         }
 
         /// <summary>

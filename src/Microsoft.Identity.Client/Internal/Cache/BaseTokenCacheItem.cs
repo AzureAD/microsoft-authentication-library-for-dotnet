@@ -48,8 +48,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             {
                 RawIdToken = response.IdToken;
                 IdToken idToken = IdToken.Parse(response.IdToken, RequestContext);
-                TenantId = idToken.TenantId;
-                User = new User(idToken);
+                User = User.CreateFromIdToken(idToken);
             }
             
             this.Authority = authority;
@@ -60,11 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
         }
 
-        /// <summary>
-        /// Gets the Authority.
-        /// </summary>
-        [DataMember(Name = "authority")]
-        public string Authority { get; set; }
+        internal IdToken IdToken { get; set; }
 
         /// <summary>
         /// Gets the ClientId.
@@ -73,12 +68,20 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public string ClientId { get; set; }
 
         /// <summary>
-        /// Gets the TenantId.
+        /// Gets the Authority.
         /// </summary>
-        public string TenantId { get; set; }
+        [DataMember(Name = "authority")]
+        public string Authority { get; set; }
 
         public string HomeObjectId { get { return User?.HomeObjectId; } }
-        
+
+        public string UniqueId { get; set; }
+
+        /// <summary>
+        /// Gets the user's displayable Id.
+        /// </summary>
+        public string DisplayableId { get { return User?.DisplayableId; } }
+
         [DataMember(Name = "id_token")]
         public string RawIdToken { get; set; }
 
@@ -88,7 +91,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public User User { get; set; }
 
         public abstract TokenCacheKey GetTokenCacheKey();
-        
+
         // This method is called after the object 
         // is completely deserialized.
         [OnDeserialized]
@@ -96,9 +99,14 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
             if (RawIdToken != null)
             {
-                IdToken idToken = IdToken.Parse(RawIdToken, RequestContext);
-                TenantId = idToken.TenantId;
-                User = new User(idToken);
+                IdToken = IdToken.Parse(RawIdToken, RequestContext);
+                UniqueId = IdToken.ObjectId;
+                if (UniqueId == null)
+                {
+                    UniqueId = IdToken.Subject;
+                }
+
+                User = User.CreateFromIdToken(IdToken);
             }
         }
     }

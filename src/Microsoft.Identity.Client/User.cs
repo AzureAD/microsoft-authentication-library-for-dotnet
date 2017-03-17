@@ -42,42 +42,11 @@ namespace Microsoft.Identity.Client
 
         internal User(User other)
         {
-            this.UniqueId = other.UniqueId;
             this.DisplayableId = other.DisplayableId;
             this.HomeObjectId = other.HomeObjectId;
             this.Name = other.Name;
-            this.ClientId = other.ClientId;
-            this.TokenCache = other.TokenCache;
+            this.IdentityProvider = other.IdentityProvider;
         }
-
-
-        internal User(IdToken idToken)
-        {
-            if (idToken == null)
-            {
-                return;
-            }
-
-            if (idToken.ObjectId != null)
-            {
-                UniqueId = idToken.ObjectId;
-            }
-            else
-            {
-                UniqueId = idToken.Subject;
-            }
-
-            DisplayableId = idToken.PreferredUsername;
-            HomeObjectId = idToken.HomeObjectId ?? UniqueId;
-            Name = idToken.Name;
-            IdentityProvider = idToken.Issuer;
-        }
-
-        /// <summary>
-        /// Gets identifier of the user authenticated during token acquisition.
-        /// </summary>
-        [DataMember]
-        public string UniqueId { get; internal set; }
 
         /// <summary>
         /// Gets a displayable value in UserPrincipalName (UPN) format. The value can be null.
@@ -100,26 +69,33 @@ namespace Microsoft.Identity.Client
         [DataMember]
         internal string HomeObjectId { get; set; }
 
-        internal TokenCache TokenCache { get; set; }
 
-        /// <summary>
-        /// </summary>
-        public string ClientId { get; internal set; }
-
-        /// <summary>
-        /// </summary>
-        public string Authority { get; internal set; }
-
-        /// <summary>
-        /// </summary>
-        public void SignOut()
+        internal static User CreateFromIdToken(IdToken idToken)
         {
-            if (this.TokenCache == null)
+            if (idToken == null)
             {
-                return;
+                return null;
             }
 
-            TokenCache.SignOut(this);
+            User user = new User();
+            if (idToken.HomeObjectId != null)
+            {
+                user.HomeObjectId = idToken.HomeObjectId;
+            }
+            else if (idToken.ObjectId != null)
+            {
+                user.HomeObjectId = idToken.ObjectId;
+            }
+            else
+            {
+                user.HomeObjectId = idToken.Subject;
+            }
+
+            user.DisplayableId = idToken.PreferredUsername;
+            user.Name = idToken.Name;
+            user.IdentityProvider = idToken.Issuer;
+
+            return user;
         }
     }
 }
