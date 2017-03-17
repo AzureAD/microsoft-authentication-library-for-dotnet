@@ -25,7 +25,7 @@ $rootPath = (Resolve-Path .).Path
 $artifacts = Join-Path $rootPath "artifacts"
 $targetFrameworks = "/p:""TargetFrameworks=net45;netstandard1.1;netstandard1.3;win81;Xamarin.iOS10"""
 
-if ($isAppVeryor)
+if ($isAppVeyor)
 {
     $appVeyorLogger = "/logger:""C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"""
 }
