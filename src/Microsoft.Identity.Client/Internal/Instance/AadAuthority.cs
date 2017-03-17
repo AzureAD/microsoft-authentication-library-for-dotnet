@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         public AadAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
         {
-            this.AuthorityType = AuthorityType.Aad;
+            AuthorityType = AuthorityType.Aad;
         }
 
         protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName, RequestContext requestContext)
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             {
                 OAuth2Client client = new OAuth2Client();
                 client.AddQueryParameter("api-version", "1.0");
-                client.AddQueryParameter("authorization_endpoint", this.CanonicalAuthority + "oauth2/v2.0/authorize");
+                client.AddQueryParameter("authorization_endpoint", CanonicalAuthority + "oauth2/v2.0/authorize");
 
                 try
                 {
@@ -86,18 +86,18 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         protected override bool ExistsInValidatedAuthorityCache(string userPrincipalName)
         {
-            return ValidatedAuthorities.ContainsKey(this.CanonicalAuthority);
+            return ValidatedAuthorities.ContainsKey(CanonicalAuthority);
         }
 
         protected override void AddToValidatedAuthorities(string userPrincipalName)
         {
             // add to the list of validated authorities so that we don't do openid configuration call
-            ValidatedAuthorities[this.CanonicalAuthority] = this;
+            ValidatedAuthorities[CanonicalAuthority] = this;
         }
 
         protected override string GetDefaultOpenIdConfigurationEndpoint()
         {
-            return this.CanonicalAuthority + "v2.0/.well-known/openid-configuration";
+            return CanonicalAuthority + "v2.0/.well-known/openid-configuration";
         }
 
         internal bool IsInTrustedHostList(string host)

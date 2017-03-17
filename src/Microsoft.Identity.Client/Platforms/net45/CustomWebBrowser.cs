@@ -62,18 +62,18 @@ namespace Microsoft.Identity.Client
             object activeXInstance = this.ActiveXInstance;
             if (activeXInstance != null)
             {
-                this.webBrowserEvent = new CustomWebBrowserEvent(this);
-                this.webBrowserEventCookie = new AxHost.ConnectionPointCookie(activeXInstance, this.webBrowserEvent,
+                webBrowserEvent = new CustomWebBrowserEvent(this);
+                webBrowserEventCookie = new AxHost.ConnectionPointCookie(activeXInstance, webBrowserEvent,
                     typeof (NativeWrapper.DWebBrowserEvents2));
             }
         }
 
         protected override void DetachSink()
         {
-            if (this.webBrowserEventCookie != null)
+            if (webBrowserEventCookie != null)
             {
-                this.webBrowserEventCookie.Disconnect();
-                this.webBrowserEventCookie = null;
+                webBrowserEventCookie.Disconnect();
+                webBrowserEventCookie = null;
             }
 
             base.DetachSink();
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client
         {
             if (NavigateError != null)
             {
-                this.NavigateError(this, e);
+                NavigateError(this, e);
             }
         }
 
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client
 
             public int GetExternal(out object ppDispatch)
             {
-                ppDispatch = this.host.ObjectForScripting;
+                ppDispatch = host.ObjectForScripting;
                 return S_OK;
             }
 
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client
                     info.dwFlags |= DOCHOSTUIFLAG_DPI_AWARE;
                 }
 
-                if (this.host.ScrollBarsEnabled)
+                if (host.ScrollBarsEnabled)
                 {
                     info.dwFlags |= DOCHOSTUIFLAG_FLAT_SCROLLBAR;
                 }

@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.User));
             }
             
-            this.ForceRefresh = forceRefresh;
+            ForceRefresh = forceRefresh;
         }
 
         protected override void SetAdditionalRequestParameters(OAuth2Client client)
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task SendTokenRequestAsync()
         {
-            if (!this.LoadFromCache)
+            if (!LoadFromCache)
             {
                 throw new MsalSilentTokenAcquisitionException(new Exception("Token cache is set to null"));
             }

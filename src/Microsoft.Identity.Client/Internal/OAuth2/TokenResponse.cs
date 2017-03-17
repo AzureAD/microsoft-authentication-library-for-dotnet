@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
 
         public DateTimeOffset AccessTokenExpiresOn
         {
-            get { return DateTime.UtcNow + TimeSpan.FromSeconds(this.ExpiresIn); }
+            get { return DateTime.UtcNow + TimeSpan.FromSeconds(ExpiresIn); }
         }
     }
 }

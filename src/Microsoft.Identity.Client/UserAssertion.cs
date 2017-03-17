@@ -63,8 +63,8 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(assertionType));
             }
 
-            this.AssertionType = assertionType;
-            this.Assertion = assertion;
+            AssertionType = assertionType;
+            Assertion = assertion;
             AssertionHash =
                 PlatformPlugin.CryptographyHelper.CreateSha256Hash(Assertion);
         }

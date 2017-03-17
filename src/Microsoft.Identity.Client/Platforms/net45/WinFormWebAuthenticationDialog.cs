@@ -50,17 +50,17 @@ namespace Microsoft.Identity.Client
             : base(ownerWindow)
         {
             this.Shown += this.FormShownHandler;
-            this.WebBrowser.DocumentTitleChanged += this.WebBrowserDocumentTitleChangedHandler;
-            this.WebBrowser.ObjectForScripting = this;
+            WebBrowser.DocumentTitleChanged += this.WebBrowserDocumentTitleChangedHandler;
+            WebBrowser.ObjectForScripting = this;
         }
 
         /// <summary>
         /// </summary>
         protected override void OnAuthenticate()
         {
-            this.zoomed = false;
-            this.statusCode = 0;
-            this.ShowBrowser();
+            zoomed = false;
+            statusCode = 0;
+            ShowBrowser();
 
             base.OnAuthenticate();
         }
@@ -69,17 +69,17 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public void ShowBrowser()
         {
-            DialogResult uiResult = this.ShowDialog(this.ownerWindow);
+            DialogResult uiResult = this.ShowDialog(ownerWindow);
 
             switch (uiResult)
             {
                 case DialogResult.OK:
                     break;
                 case DialogResult.Cancel:
-                    this.Result = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+                    Result = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
                     break;
                 default:
-                    throw this.CreateExceptionForAuthenticationUiFailed(this.statusCode);
+                    throw CreateExceptionForAuthenticationUiFailed(statusCode);
             }
         }
 
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected override void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
         {
-            this.SetBrowserZoom();
+            SetBrowserZoom();
             base.WebBrowserNavigatingHandler(sender, e);
         }
 
@@ -102,27 +102,27 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected override void OnNavigationCanceled(int inputStatusCode)
         {
-            this.statusCode = inputStatusCode;
+            statusCode = inputStatusCode;
             this.DialogResult = (inputStatusCode == 0) ? DialogResult.Cancel : DialogResult.Abort;
         }
 
         private void SetBrowserZoom()
         {
             int windowsZoomPercent = DpiHelper.ZoomPercent;
-            if (NativeWrapper.NativeMethods.IsProcessDPIAware() && 100 != windowsZoomPercent && !this.zoomed)
+            if (NativeWrapper.NativeMethods.IsProcessDPIAware() && 100 != windowsZoomPercent && !zoomed)
             {
                 // There is a bug in some versions of the IE browser control that causes it to 
                 // ignore scaling unless it is changed.
-                this.SetBrowserControlZoom(windowsZoomPercent - 1);
-                this.SetBrowserControlZoom(windowsZoomPercent);
+                SetBrowserControlZoom(windowsZoomPercent - 1);
+                SetBrowserControlZoom(windowsZoomPercent);
 
-                this.zoomed = true;
+                zoomed = true;
             }
         }
 
         private void SetBrowserControlZoom(int zoomPercent)
         {
-            NativeWrapper.IWebBrowser2 browser2 = (NativeWrapper.IWebBrowser2) this.WebBrowser.ActiveXInstance;
+            NativeWrapper.IWebBrowser2 browser2 = (NativeWrapper.IWebBrowser2) WebBrowser.ActiveXInstance;
             NativeWrapper.IOleCommandTarget cmdTarget = browser2.Document as NativeWrapper.IOleCommandTarget;
             if (cmdTarget != null)
             {
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client
 
         private void WebBrowserDocumentTitleChangedHandler(object sender, EventArgs e)
         {
-            this.Text = this.WebBrowser.DocumentTitle;
+            this.Text = WebBrowser.DocumentTitle;
         }
     }
 }

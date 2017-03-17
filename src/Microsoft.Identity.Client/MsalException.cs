@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         public MsalException()
             : base(MsalErrorMessage.Unknown)
         {
-            this.ErrorCode = MsalError.Unknown;
+            ErrorCode = MsalError.Unknown;
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
         public MsalException(string errorCode)
             : base(GetErrorMessage(errorCode))
         {
-            this.ErrorCode = errorCode;
+            ErrorCode = errorCode;
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
         public MsalException(string errorCode, string message)
             : base(message)
         {
-            this.ErrorCode = errorCode;
+            ErrorCode = errorCode;
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client
         public MsalException(string errorCode, Exception innerException)
             : base(GetErrorMessage(errorCode), innerException)
         {
-            this.ErrorCode = errorCode;
+            ErrorCode = errorCode;
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client
         public MsalException(string errorCode, string message, Exception innerException)
             : base(message, innerException)
         {
-            this.ErrorCode = errorCode;
+            ErrorCode = errorCode;
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A string representation of the current exception.</returns>
         public override string ToString()
         {
-            return base.ToString() + string.Format(CultureInfo.InvariantCulture, "\n\tErrorCode: {0}", this.ErrorCode);
+            return base.ToString() + string.Format(CultureInfo.InvariantCulture, "\n\tErrorCode: {0}", ErrorCode);
         }
 
         /// <summary>

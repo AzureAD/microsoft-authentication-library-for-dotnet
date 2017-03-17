@@ -51,8 +51,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 User = User.CreateFromIdToken(idToken);
             }
             
-            this.Authority = authority;
-            this.ClientId = clientId;
+            Authority = authority;
+            ClientId = clientId;
         }
 
         internal BaseTokenCacheItem()

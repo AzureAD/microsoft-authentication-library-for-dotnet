@@ -49,8 +49,8 @@ namespace Microsoft.Identity.Client
         public SilentWindowsFormsAuthenticationDialog(object ownerWindow)
             : base(ownerWindow)
         {
-            this.SuppressBrowserSubDialogs();
-            this.WebBrowser.DocumentCompleted += this.DocumentCompletedHandler;
+            SuppressBrowserSubDialogs();
+            WebBrowser.DocumentCompleted += this.DocumentCompletedHandler;
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public void CloseBrowser()
         {
-            this.SignalDone();
+            SignalDone();
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         private void SuppressBrowserSubDialogs()
         {
-            var webBrowser2 = (NativeWrapper.IWebBrowser2) this.WebBrowser.ActiveXInstance;
+            var webBrowser2 = (NativeWrapper.IWebBrowser2) WebBrowser.ActiveXInstance;
             webBrowser2.Silent = true;
         }
 
@@ -82,21 +82,21 @@ namespace Microsoft.Identity.Client
         {
             if (null == timer)
             {
-                this.timer = CreateStartedTimer(
+                timer = CreateStartedTimer(
                     () =>
                     {
                         DateTime now = DateTime.Now;
-                        if (now > this.navigationExpiry)
+                        if (now > navigationExpiry)
                         {
-                            this.OnUserInteractionRequired();
+                            OnUserInteractionRequired();
                         }
                     },
-                    this.NavigationWaitMiliSecs);
+                    NavigationWaitMiliSecs);
             }
 
             // We don't timeout each individual navigation, only the time between individual navigations.
             // Reset the expiry time so that it isn't relevant until the next document complete.
-            this.navigationExpiry = DateTime.MaxValue;
+            navigationExpiry = DateTime.MaxValue;
 
             base.WebBrowserNavigatingHandler(sender, e);
         }
@@ -118,32 +118,32 @@ namespace Microsoft.Identity.Client
         /// <param name="exception"></param>
         private void SignalDone(Exception exception = null)
         {
-            if (!this.doneSignaled)
+            if (!doneSignaled)
             {
-                this.timer.Stop();
+                timer.Stop();
                 SilentWebUIDoneEventArgs args = new SilentWebUIDoneEventArgs(exception);
 
-                if (null != this.Done)
+                if (null != Done)
                 {
-                    this.Done(this, args);
+                    Done(this, args);
                 }
 
-                this.doneSignaled = true;
+                doneSignaled = true;
             }
         }
 
         private void DocumentCompletedHandler(object sender, WebBrowserDocumentCompletedEventArgs args)
         {
-            this.navigationExpiry = DateTime.Now.AddMilliseconds(NavigationWaitMiliSecs);
-            if (this.HasLoginPage())
+            navigationExpiry = DateTime.Now.AddMilliseconds(NavigationWaitMiliSecs);
+            if (HasLoginPage())
             {
-                this.OnUserInteractionRequired();
+                OnUserInteractionRequired();
             }
         }
 
         private void OnUserInteractionRequired()
         {
-            this.SignalDone(
+            SignalDone(
                 new MsalException(MsalError.UserInteractionRequired));
         }
 
@@ -151,19 +151,19 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected override void OnClosingUrl()
         {
-            this.SignalDone();
+            SignalDone();
         }
 
         /// <summary>
         /// </summary>
         protected override void OnNavigationCanceled(int statusCode)
         {
-            this.SignalDone(this.CreateExceptionForAuthenticationUiFailed(statusCode));
+            SignalDone(CreateExceptionForAuthenticationUiFailed(statusCode));
         }
 
         private bool HasLoginPage()
         {
-            HtmlDocument doc = this.WebBrowser.Document;
+            HtmlDocument doc = WebBrowser.Document;
             HtmlElement passwordFieldElement = null;
 
             if (null != doc)
@@ -187,9 +187,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            if (this.timer != null)
+            if (timer != null)
             {
-                this.timer.Dispose();
+                timer.Dispose();
             }
             base.Dispose(disposing);
         }

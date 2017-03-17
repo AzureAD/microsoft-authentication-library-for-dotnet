@@ -63,11 +63,11 @@ namespace Microsoft.Identity.Client
 
             try
             {
-                var agentIntent = new Intent(this.parameters.CallerActivity, typeof(AuthenticationActivity));
+                var agentIntent = new Intent(parameters.CallerActivity, typeof(AuthenticationActivity));
                 agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
                 agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.AbsoluteUri);
 
-                this.parameters.CallerActivity.RunOnUiThread(()=> this.parameters.CallerActivity.StartActivityForResult(agentIntent, 0));
+                parameters.CallerActivity.RunOnUiThread(()=> parameters.CallerActivity.StartActivityForResult(agentIntent, 0));
             }
             catch (Exception ex)
             {

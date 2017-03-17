@@ -41,13 +41,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             PlatformPlugin.PlatformInformation.ValidateRedirectUri(authenticationRequestParameters.RedirectUri,
-                this.RequestContext);
+                RequestContext);
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))
             {
                 throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, nameof(authenticationRequestParameters.RedirectUri));
             }
 
-            this.LoadFromCache = false;
+            LoadFromCache = false;
         }
 
         protected override void SetAdditionalRequestParameters(OAuth2Client client)

@@ -37,8 +37,8 @@ namespace Microsoft.Identity.Client.Internal
 
         public RequestContext(Guid correlationId)
         {
-            this.CorrelationId = correlationId.ToString();
-            this.Logger = new Logger(correlationId);
+            CorrelationId = correlationId.ToString();
+            Logger = new Logger(correlationId);
         }
     }
 }

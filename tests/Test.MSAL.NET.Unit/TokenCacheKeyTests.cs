@@ -45,12 +45,12 @@ namespace Test.MSAL.NET.Unit
             //no policy, user properties
             TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
                 TestConstants.Scope, TestConstants.ClientId, TestConstants.HomeObjectId);
-            this.ValidateTokenCacheKey(key);
+            ValidateTokenCacheKey(key);
 
             //with policy, user properties
             key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
                 TestConstants.Scope, TestConstants.ClientId, TestConstants.HomeObjectId);
-            this.ValidateTokenCacheKey(key);
+            ValidateTokenCacheKey(key);
 
 
             User user = new User();
@@ -60,12 +60,12 @@ namespace Test.MSAL.NET.Unit
             //no policy, user object
             key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
                 TestConstants.Scope, TestConstants.ClientId, user);
-            this.ValidateTokenCacheKey(key);
+            ValidateTokenCacheKey(key);
 
             //with policy, user object
             key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
                 TestConstants.Scope, TestConstants.ClientId, user);
-            this.ValidateTokenCacheKey(key);
+            ValidateTokenCacheKey(key);
 
         }
 

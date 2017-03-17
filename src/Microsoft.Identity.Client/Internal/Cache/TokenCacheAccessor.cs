@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public ICollection<AccessTokenCacheItem> GetAllAccessTokens(string clientId)
         {
-            ICollection<string> allTokensAsString = this.GetAllAccessTokensAsString();
+            ICollection<string> allTokensAsString = GetAllAccessTokensAsString();
             IList<AccessTokenCacheItem> returnList = new List<AccessTokenCacheItem>();
             foreach (var token in allTokensAsString)
             {

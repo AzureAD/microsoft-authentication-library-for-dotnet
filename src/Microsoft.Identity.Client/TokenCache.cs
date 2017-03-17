@@ -80,9 +80,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool HasStateChanged
         {
-            get { return this.hasStateChanged; }
+            get { return hasStateChanged; }
 
-            set { this.hasStateChanged = value; }
+            set { hasStateChanged = value; }
         }
         
         internal void OnAfterAccess(TokenCacheNotificationArgs args)
@@ -417,7 +417,7 @@ namespace Microsoft.Identity.Client
                 OnBeforeAccess(args);
                 OnBeforeWrite(args);
                 IList<RefreshTokenCacheItem> allRefreshTokens =
-                    TokenCacheAccessor.GetAllRefreshTokens(this.ClientId)
+                    TokenCacheAccessor.GetAllRefreshTokens(ClientId)
                         .Where(item => item.HomeObjectId.Equals(user.HomeObjectId))
                         .ToList();
                 foreach (var rtItem in allRefreshTokens)

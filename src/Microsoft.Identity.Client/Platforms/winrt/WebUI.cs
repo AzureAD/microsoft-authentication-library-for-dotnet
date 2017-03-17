@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentException("parameters should be of type PlatformParameters", nameof(parameters));
             }
 
-            this.useCorporateNetwork = ((PlatformParameters) parameters).UseCorporateNetwork;
+            useCorporateNetwork = ((PlatformParameters) parameters).UseCorporateNetwork;
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client
             bool ssoMode = ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri);
 
             WebAuthenticationResult webAuthenticationResult;
-            WebAuthenticationOptions options = (this.useCorporateNetwork &&
+            WebAuthenticationOptions options = (useCorporateNetwork &&
                                                 (ssoMode || redirectUri.Scheme == Constants.MsAppScheme))
                 ? WebAuthenticationOptions.UseCorporateNetwork
                 : WebAuthenticationOptions.None;
