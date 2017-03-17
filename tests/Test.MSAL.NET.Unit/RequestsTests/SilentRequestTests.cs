@@ -43,12 +43,12 @@ namespace Test.MSAL.NET.Unit.RequestsTests
     [TestClass]
     public class SilentRequestTests
     {
-        private TokenCachePlugin _tokenCachePlugin;
+        TokenCache cache;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _tokenCachePlugin = (TokenCachePlugin)PlatformPlugin.TokenCachePlugin;
+            cache = new TokenCache();
             Authority.ValidatedAuthorities.Clear();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
@@ -57,7 +57,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCleanup]
         public void TestCleanup()
         {
-            _tokenCachePlugin.TokenCacheDictionary.Clear();
+            cache.TokenCacheAccessor.TokenCacheDictionary.Clear();
         }
 
         [TestMethod]
@@ -115,7 +115,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 ClientId = TestConstants.ClientId
             };
-            TokenCacheHelper.PopulateCache(_tokenCachePlugin);
+
+            TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {

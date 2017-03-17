@@ -46,18 +46,18 @@ namespace Test.MSAL.NET.Unit
         // Passing a seed to make repro possible
         private static readonly Random Rand = new Random(42);
 
-        private TokenCachePlugin _tokenCachePlugin;
+        TokenCache cache;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _tokenCachePlugin = (TokenCachePlugin) PlatformPlugin.TokenCachePlugin;
+            cache = new TokenCache();
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
-            _tokenCachePlugin.TokenCacheDictionary.Clear();
+            cache.TokenCacheAccessor.TokenCacheDictionary.Clear();
         }
 
 
@@ -84,7 +84,7 @@ namespace Test.MSAL.NET.Unit
             TokenCacheKey atKey = atItem.GetTokenCacheKey();
             atItem.AccessToken = atKey.ToString();
 
-            _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
+            cache.TokenCacheAccessor.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
             AccessTokenCacheItem item = cache.FindAccessToken(new AuthenticationRequestParameters()
             {
                 ClientId = TestConstants.ClientId,
@@ -125,7 +125,7 @@ namespace Test.MSAL.NET.Unit
             TokenCacheKey atKey = atItem.GetTokenCacheKey();
             atItem.AccessToken = atKey.ToString();
 
-            _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
+            cache.TokenCacheAccessor.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
             var param = new AuthenticationRequestParameters()
             {
                 ClientId = TestConstants.ClientId,
@@ -168,7 +168,7 @@ namespace Test.MSAL.NET.Unit
             // set it as the value of the access token.
             TokenCacheKey atKey = atItem.GetTokenCacheKey();
             atItem.AccessToken = atKey.ToString();
-            _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
+            cache.TokenCacheAccessor.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
 
             var param = new AuthenticationRequestParameters()
             {
@@ -208,7 +208,7 @@ namespace Test.MSAL.NET.Unit
                 AccessToken = atKey.ToString(),
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow)
             };
-            _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
+            cache.TokenCacheAccessor.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
 
             Assert.IsNull(cache.FindAccessToken(new AuthenticationRequestParameters()
             {
@@ -242,7 +242,7 @@ namespace Test.MSAL.NET.Unit
                 AccessToken = atKey.ToString(),
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromMinutes(4))
             };
-            _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
+            cache.TokenCacheAccessor.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
 
             Assert.IsNull(cache.FindAccessToken(new AuthenticationRequestParameters()
             {
@@ -280,7 +280,7 @@ namespace Test.MSAL.NET.Unit
             };
 
             TokenCacheKey rtKey = rtItem.GetTokenCacheKey();
-            _tokenCachePlugin.TokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
+            cache.TokenCacheAccessor.TokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
             Assert.IsNotNull(cache.FindRefreshToken(new AuthenticationRequestParameters()
             {
                 ClientId = TestConstants.ClientId,
@@ -315,7 +315,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("TokenCacheTests")]
         public void GetAppTokenFromCacheTest()
         {
-            TokenCache tokenCache = new TokenCache()
+            cache = new TokenCache()
             {
                 ClientId = TestConstants.ClientId
             };
@@ -331,9 +331,9 @@ namespace Test.MSAL.NET.Unit
                 Scope = TestConstants.Scope
             };
             item.AccessToken = item.GetTokenCacheKey().ToString();
-            _tokenCachePlugin.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
+            cache.TokenCacheAccessor.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
 
-            AccessTokenCacheItem cacheItem = tokenCache.FindAccessToken(new AuthenticationRequestParameters()
+            AccessTokenCacheItem cacheItem = cache.FindAccessToken(new AuthenticationRequestParameters()
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 ClientId = TestConstants.ClientId,
@@ -368,7 +368,7 @@ namespace Test.MSAL.NET.Unit
             TokenCacheKey atKey = atItem.GetTokenCacheKey();
             atItem.AccessToken = atKey.ToString();
 
-            _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
+            cache.TokenCacheAccessor.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
             var param = new AuthenticationRequestParameters()
             {
                 ClientId = TestConstants.ClientId,
@@ -409,7 +409,7 @@ namespace Test.MSAL.NET.Unit
             atItem.AccessToken = atKey.ToString();
             atItem.UserAssertionHash = new CryptographyHelper().CreateSha256Hash(atKey.ToString());
 
-            _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
+            cache.TokenCacheAccessor.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
             var param = new AuthenticationRequestParameters()
             {
                 ClientId = TestConstants.ClientId,
@@ -449,7 +449,7 @@ namespace Test.MSAL.NET.Unit
             atItem.AccessToken = atKey.ToString();
             atItem.UserAssertionHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(atKey.ToString());
 
-            _tokenCachePlugin.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
+            cache.TokenCacheAccessor.TokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
             var param = new AuthenticationRequestParameters()
             {
                 ClientId = TestConstants.ClientId,
@@ -715,7 +715,7 @@ namespace Test.MSAL.NET.Unit
             cache.SaveAccessAndRefreshToken(requestParams, response);
             byte[] serializedCache = cache.Serialize();
             
-            _tokenCachePlugin.TokenCacheDictionary.Clear();
+            cache.TokenCacheAccessor.TokenCacheDictionary.Clear();
             Assert.AreEqual(0, cache.AccessTokenCount);
             Assert.AreEqual(0, cache.RefreshTokenCount);
 

@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal
             get
             {
 #if !NETSTANDARD1_1
-                return (ITokenCachePlugin)new TokenCachePlugin(new RequestContext(Guid.Empty));
+                return null;
 #else
                 return null;
 #endif
@@ -77,7 +77,6 @@ namespace Microsoft.Identity.Client.Internal
 #if !NETSTANDARD1_1
             InjectDependecies(
                 (IWebUIFactory) new WebUIFactory(),
-                (ITokenCachePlugin) new TokenCachePlugin(new RequestContext(Guid.Empty)),
                 (ILogger)new PlatformLogger(),
                 (PlatformInformationBase) new PlatformInformation(new RequestContext(Guid.Empty)),
                 (ICryptographyHelper) new CryptographyHelper(),
@@ -85,12 +84,11 @@ namespace Microsoft.Identity.Client.Internal
 #endif
         }
 
-        public static void InjectDependecies(IWebUIFactory webUIFactory, ITokenCachePlugin tokenCachePlugin,
+        public static void InjectDependecies(IWebUIFactory webUIFactory,
             ILogger platformlogger,
             PlatformInformationBase platformInformation, ICryptographyHelper cryptographyHelper, IPlatformParameters platformParameters)
         {
             WebUIFactory = webUIFactory;
-            TokenCachePlugin = tokenCachePlugin;
             PlatformLogger = platformlogger;
             PlatformInformation = platformInformation;
             CryptographyHelper = cryptographyHelper;
