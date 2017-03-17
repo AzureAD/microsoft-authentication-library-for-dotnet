@@ -1,8 +1,12 @@
 # Microsoft Authentication Library (MSAL) for .NET, Windows Store, UWP, NetCore, Xamarin Android and iOS
 Build status of the dev branch
--![](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/10/badge)
 
--![](https://ci.appveyor.com/api/projects/status/pqtq4xvppjm0o4ul/branch/dev?svg=true)
+## Build status
+| Branch  | Status |
+| ------------- | ------------- |
+| dev (VSTS)  | ![](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/10/badge)  |
+| dev (AppVeyor)  | [![Build status](https://ci.appveyor.com/api/projects/status/pqtq4xvppjm0o4ul/branch/dev?svg=true)](https://ci.appveyor.com/project/AADDevExLibraries/microsoft-authentication-library-for-dotnet/branch/dev)  |
+
 
 Microsoft Authentication Library (MSAL) provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Azure Active Directory v2 (serves Microsoft Account and AAD) and B2C.
 Here you can find the source code for the library. You can find the corresponding releases on the NuGet gallery at [https://www.nuget.org/packages/Microsoft.Identity.Client/](https://www.nuget.org/packages/Microsoft.Identity.Client/).
