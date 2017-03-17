@@ -45,6 +45,11 @@ namespace Microsoft.Identity.Client.Internal
 
         internal static T DeserializeFromJson<T>(string json)
         {
+            if (string.IsNullOrEmpty(json))
+            {
+                return default(T);
+            }
+
             return DeserializeFromJson<T>(json.ToByteArray());
         }
 

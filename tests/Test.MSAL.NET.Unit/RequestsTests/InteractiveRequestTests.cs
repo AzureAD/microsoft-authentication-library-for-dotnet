@@ -70,7 +70,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         public void NoCacheLookup()
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = new TokenCache()
+            cache = new TokenCache()
             {
                 ClientId = TestConstants.ClientId
             };
@@ -129,7 +129,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
-            Assert.AreEqual(2, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
+            Assert.AreEqual(2, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
             Assert.AreEqual(result.AccessToken, "some-access-token");
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");

@@ -63,6 +63,11 @@ namespace Microsoft.Identity.Client
         
         public string GetRefreshToken(string refreshTokenKey)
         {
+            if (!RefreshTokenCacheDictionary.ContainsKey(refreshTokenKey))
+            {
+                return null;
+            }
+
             return RefreshTokenCacheDictionary[refreshTokenKey];
         }
 

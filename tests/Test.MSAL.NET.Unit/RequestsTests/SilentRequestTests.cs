@@ -161,7 +161,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         public void SilentRefreshFailedNoCacheItemFoundTest()
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = new TokenCache()
+            cache = new TokenCache()
             {
                 ClientId = TestConstants.ClientId
             };
