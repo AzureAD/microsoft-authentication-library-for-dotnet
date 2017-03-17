@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -26,22 +26,24 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using Microsoft.Identity.Client.Internal.Cache;
 
-namespace Microsoft.Identity.Client.Internal.Interfaces
+namespace Microsoft.Identity.Client.Internal.Cache
 {
-    internal interface ITokenCachePlugin
+    internal interface ITokenCacheAccessor
     {
-        ICollection<string> GetAllAccessTokens();
+        void SaveAccessToken(string cacheKey, string item);
 
-        ICollection<string> AllRefreshTokens();
+        void SaveRefreshToken(string cacheKey, string item);
 
-        void SaveAccessToken(string cacheKey, string accessTokenItem);
-
-        void SaveRefreshToken(string cacheKey, string refreshTokenItem);
+        string GetRefreshToken(string refreshTokenKey);
 
         void DeleteAccessToken(string cacheKey);
 
         void DeleteRefreshToken(string cacheKey);
+
+        ICollection<string> GetAllAccessTokensAsString();
+
+        ICollection<string> GetAllRefreshTokensAsString();
+
     }
 }
