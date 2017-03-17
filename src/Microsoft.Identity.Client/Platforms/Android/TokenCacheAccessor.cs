@@ -23,27 +23,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
 using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
-using Microsoft.Identity.Client.Internal.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Identity.Client
 {
-    internal class TokenCachePlugin : ITokenCachePlugin
+    internal class TokenCacheAccessor : ITokenCacheAccessor
     {
         private const string AccessTokenSharedPreferenceName = "com.microsoft.identity.client.token";
         private const string RefreshTokenSharedPreferenceName = "com.microsoft.identity.client.refreshToken";
         private readonly ISharedPreferences _accessTokenSharedPreference;
         private readonly ISharedPreferences _refreshTokenSharedPreference;
-        private RequestContext requestContext;
+        private RequestContext _requestContext;
 
-        public TokenCachePlugin()
+        public TokenCacheAccessor()
         {
-
             _accessTokenSharedPreference = Application.Context.GetSharedPreferences(AccessTokenSharedPreferenceName,
                     FileCreationMode.Private);
             _refreshTokenSharedPreference = Application.Context.GetSharedPreferences(RefreshTokenSharedPreferenceName,
@@ -54,39 +52,34 @@ namespace Microsoft.Identity.Client
                 throw new MsalException("Fail to create SharedPreference");
             }
         }
-        
-        public TokenCachePlugin(RequestContext requestContext)
+
+        public TokenCacheAccessor(RequestContext requestContext) : this()
         {
-            this.requestContext = requestContext;
+            _requestContext = requestContext;
         }
 
-        public ICollection<string> GetAllAccessTokens()
-        {
-            return _accessTokenSharedPreference.All.Values as ICollection<string>;
-        }
-
-        public ICollection<string> AllRefreshTokens()
-        {
-            return _refreshTokenSharedPreference.All.Values as ICollection<string>;
-        }
-
-        public void SaveAccessToken(string cacheKey, string accessTokenItem)
+        public void SaveAccessToken(string cacheKey, string item)
         {
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(cacheKey, accessTokenItem);
+            editor.PutString(cacheKey, item);
             editor.Apply();
         }
 
-        public void SaveRefreshToken(string cacheKey, string refreshTokenItem)
+        public void SaveRefreshToken(string cacheKey, string item)
         {
-            ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(cacheKey, refreshTokenItem);
+            ISharedPreferencesEditor editor = _refreshTokenSharedPreference.Edit();
+            editor.PutString(cacheKey, item);
             editor.Apply();
+        }
+
+        public string GetRefreshToken(string refreshTokenKey)
+        {
+            return _refreshTokenSharedPreference.GetString(refreshTokenKey, null);
         }
 
         public void DeleteAccessToken(string cacheKey)
         {
-            Delete(cacheKey, _accessTokenSharedPreference.Edit());
+            Delete(cacheKey, _refreshTokenSharedPreference.Edit());
         }
 
         public void DeleteRefreshToken(string cacheKey)
@@ -98,6 +91,16 @@ namespace Microsoft.Identity.Client
         {
             editor.Remove(key);
             editor.Apply();
+        }
+
+        public ICollection<string> GetAllAccessTokensAsString()
+        {
+            return _accessTokenSharedPreference.All.Values as ICollection<string>;
+        }
+
+        public ICollection<string> GetAllRefreshTokensAsString()
+        {
+            return _refreshTokenSharedPreference.All.Values as ICollection<string>;
         }
     }
 }

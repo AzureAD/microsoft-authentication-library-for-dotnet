@@ -25,44 +25,60 @@
 //
 //------------------------------------------------------------------------------
 
-using System.IO;
-using System.Runtime.Serialization.Json;
-using System.Text;
+using System;
+using System.Collections.Generic;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client
 {
-    internal static class JsonHelper
+    internal class TokenCacheAccessor : ITokenCacheAccessor
     {
-        internal static string SerializeToJson<T>(T toEncode)
+
+        private RequestContext _requestContext;
+
+        public TokenCacheAccessor()
         {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof (T));
-                ser.WriteObject(stream, toEncode);
-                return Encoding.UTF8.GetString(stream.ToArray(), 0, (int) stream.Position);
-            }
         }
 
-        internal static T DeserializeFromJson<T>(string json)
+        public TokenCacheAccessor(RequestContext requestContext) : this()
         {
-            if (string.IsNullOrEmpty(json))
-            {
-                return default(T);
-            }
-
-            return DeserializeFromJson<T>(json.ToByteArray());
+            _requestContext = requestContext;
         }
 
-        internal static T DeserializeFromJson<T>(byte[] jsonByteArray)
+        public void SaveAccessToken(string cacheKey, string item)
         {
-            T response;
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (T));
-            using (MemoryStream stream = new MemoryStream(jsonByteArray))
-            {
-                response = ((T) serializer.ReadObject(stream));
-            }
+            throw new NotImplementedException();
+        }
 
-            return response;
+        public void SaveRefreshToken(string cacheKey, string item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetRefreshToken(string refreshTokenKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteAccessToken(string cacheKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteRefreshToken(string cacheKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICollection<string> GetAllAccessTokensAsString()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICollection<string> GetAllRefreshTokensAsString()
+        {
+            throw new NotImplementedException();
         }
     }
 }
