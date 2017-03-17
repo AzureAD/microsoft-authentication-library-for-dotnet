@@ -27,14 +27,12 @@
 
 using System;
 using System.Collections.Generic;
-using Foundation;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
-using Security;
 
 namespace Microsoft.Identity.Client
 {
-    internal class TokenCacheAccessor : ITokenCAcheAccessor
+    internal class TokenCacheAccessor : ITokenCacheAccessor
     {
 
         private RequestContext _requestContext;
