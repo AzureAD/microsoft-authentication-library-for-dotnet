@@ -181,16 +181,7 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                IList<AccessTokenCacheItem> tokenCacheItems = new List<AccessTokenCacheItem>();
-                AccessTokenCacheItem atItem = null;
-                foreach (var accessTokenString in TokenCacheAccessor.GetAllAccessTokensAsString())
-                {
-                    atItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessTokenString);
-                    if (atItem.ClientId.Equals(ClientId))
-                    {
-                        tokenCacheItems.Add(atItem);
-                    }
-                }
+                ICollection<AccessTokenCacheItem> tokenCacheItems = GetAllAccessTokens();
 
                 OnAfterAccess(args);
 
@@ -268,7 +259,7 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                RefreshTokenCacheItem rtItem = JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(TokenCacheAccessor.GetRefreshToken(key.ToString());
+                RefreshTokenCacheItem rtItem = JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(TokenCacheAccessor.GetRefreshToken(key.ToString()));
                 OnAfterAccess(args);
                 return rtItem;
             }
@@ -309,12 +300,11 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                ICollection<RefreshTokenCacheItem> allRefreshTokens =
-                    TokenCacheAccessor.GetAllRefreshTokens(clientId);
+                ICollection<RefreshTokenCacheItem> tokenCacheItems = GetAllRefreshTokens();
                 OnAfterAccess(args);
 
                 IDictionary<string, User> allUsers = new Dictionary<string, User>();
-                foreach (RefreshTokenCacheItem item in allRefreshTokens)
+                foreach (RefreshTokenCacheItem item in tokenCacheItems)
                 {
                     User user = new User(item.User);
                     allUsers[item.HomeObjectId] = user;
@@ -328,17 +318,16 @@ namespace Microsoft.Identity.Client
         {
             lock (LockObject)
             {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                ICollection<RefreshTokenCacheItem> allRefreshTokens = new List<RefreshTokenCacheItem>();
+                RefreshTokenCacheItem rtItem = null;
+                foreach (var refreshTokenString in TokenCacheAccessor.GetAllRefreshTokensAsString())
                 {
-                    TokenCache = this,
-                    ClientId = ClientId,
-                    User = null
-                };
-
-                OnBeforeAccess(args);
-                ICollection<RefreshTokenCacheItem> allRefreshTokens =
-                    TokenCacheAccessor.GetAllRefreshTokens(ClientId);
-                OnAfterAccess(args);
+                    rtItem = JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(refreshTokenString);
+                    if (rtItem.ClientId.Equals(ClientId))
+                    {
+                        allRefreshTokens.Add(rtItem);
+                    }
+                }
 
                 return allRefreshTokens;
             }
@@ -348,17 +337,16 @@ namespace Microsoft.Identity.Client
         {
             lock (LockObject)
             {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                ICollection<AccessTokenCacheItem> allAccessTokens = new List<AccessTokenCacheItem>();
+                AccessTokenCacheItem atItem = null;
+                foreach (var accessTokenString in TokenCacheAccessor.GetAllAccessTokensAsString())
                 {
-                    TokenCache = this,
-                    ClientId = ClientId,
-                    User = null
-                };
-
-                OnBeforeAccess(args);
-                ICollection<AccessTokenCacheItem> allAccessTokens =
-                    TokenCacheAccessor.GetAllAccessTokens(ClientId);
-                OnAfterAccess(args);
+                    atItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessTokenString);
+                    if (atItem.ClientId.Equals(ClientId))
+                    {
+                        allAccessTokens.Add(atItem);
+                    }
+                }
 
                 return allAccessTokens;
             }
@@ -377,22 +365,20 @@ namespace Microsoft.Identity.Client
 
                 OnBeforeAccess(args);
                 OnBeforeWrite(args);
-                IList<RefreshTokenCacheItem> allRefreshTokens =
-                    TokenCacheAccessor.GetAllRefreshTokens(this.ClientId)
+                IList<RefreshTokenCacheItem> allRefreshTokens = GetAllRefreshTokens()
                         .Where(item => item.HomeObjectId.Equals(user.HomeObjectId))
                         .ToList();
                 foreach (var rtItem in allRefreshTokens)
                 {
-                    TokenCacheAccessor.DeleteRefreshToken(rtItem);
+                    TokenCacheAccessor.DeleteRefreshToken(rtItem.GetTokenCacheKey().ToString());
                 }
 
-                IList<AccessTokenCacheItem> allAccessTokens =
-                    TokenCacheAccessor.GetAllAccessTokens(ClientId)
+                IList<AccessTokenCacheItem> allAccessTokens = GetAllAccessTokens()
                         .Where(item => item.HomeObjectId.Equals(user.HomeObjectId)).ToList();
 
                 foreach (var atItem in allAccessTokens)
                 {
-                    TokenCacheAccessor.DeleteAccessToken(atItem);
+                    TokenCacheAccessor.DeleteAccessToken(atItem.GetTokenCacheKey().ToString());
                 }
 
                 OnAfterAccess(args);

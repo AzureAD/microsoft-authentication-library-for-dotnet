@@ -28,6 +28,7 @@ using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 
 namespace Microsoft.Identity.Client
 {
