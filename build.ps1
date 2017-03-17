@@ -17,8 +17,12 @@ $artifacts = Join-Path $rootPath "artifacts"
 
 New-Item -ItemType Directory -Force -Path $artifacts
 
+if (!(Test-Path .\nuget.exe)) {
+    wget "https://dist.nuget.org/win-x86-commandline/v4.0.0/nuget.exe" -outfile .\nuget.exe
+}
+
 Write-Host "Restoring packages for $scriptPath\MSAL.sln" -Foreground Green
-msbuild "$scriptPath\MSAL.sln" /m /t:restore /p:Configuration=$configuration 
+.\nuget.exe "$scriptPath\MSAL.sln" 
 ExitOnMSBuildError
 
 
