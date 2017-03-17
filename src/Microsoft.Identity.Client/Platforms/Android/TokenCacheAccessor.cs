@@ -32,7 +32,7 @@ using System.Linq;
 
 namespace Microsoft.Identity.Client
 {
-    internal class TokenCacheAccessor
+    internal class TokenCacheAccessor : ITokenCacheAccessor
     {
         private const string AccessTokenSharedPreferenceName = "com.microsoft.identity.client.token";
         private const string RefreshTokenSharedPreferenceName = "com.microsoft.identity.client.refreshToken";
@@ -58,46 +58,33 @@ namespace Microsoft.Identity.Client
             _requestContext = requestContext;
         }
 
-        public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
+        public void SaveAccessToken(string cacheKey, string item)
         {
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(accessTokenItem.GetTokenCacheKey().ToString(), JsonHelper.SerializeToJson(accessTokenItem));
+            editor.PutString(cacheKey, item);
             editor.Apply();
         }
 
-        public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        public void SaveRefreshToken(string cacheKey, string item)
         {
-            ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(refreshTokenItem.GetTokenCacheKey().ToString(), JsonHelper.SerializeToJson(refreshTokenItem));
+            ISharedPreferencesEditor editor = _refreshTokenSharedPreference.Edit();
+            editor.PutString(cacheKey, item);
             editor.Apply();
         }
 
-        public ICollection<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
+        public string GetRefreshToken(string refreshTokenKey)
         {
-            ICollection<string> allRefreshTokens = this.GetAllRefreshTokensAsString();
-            IList<RefreshTokenCacheItem> matchedRefreshTokens = new List<RefreshTokenCacheItem>();
-            foreach (string refreshTokenValue in allRefreshTokens)
-            {
-                RefreshTokenCacheItem refreshTokenCacheItem =
-                    JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(refreshTokenValue);
-
-                if (tokenCacheKey.Equals(refreshTokenCacheItem.GetTokenCacheKey()))
-                {
-                    matchedRefreshTokens.Add(refreshTokenCacheItem);
-                }
-            }
-
-            return matchedRefreshTokens;
+            return _refreshTokenSharedPreference.GetString(refreshTokenKey, null);
         }
 
-        public void DeleteAccessToken(AccessTokenCacheItem accessToken‪Item)
+        public void DeleteAccessToken(string cacheKey)
         {
-            Delete(accessToken‪Item.GetTokenCacheKey().ToString(), _refreshTokenSharedPreference.Edit());
+            Delete(cacheKey, _refreshTokenSharedPreference.Edit());
         }
 
-        public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
+        public void DeleteRefreshToken(string cacheKey)
         {
-            Delete(refreshToken‪Item.GetTokenCacheKey().ToString(), _refreshTokenSharedPreference.Edit());
+            Delete(cacheKey, _refreshTokenSharedPreference.Edit());
         }
 
         private void Delete(string key, ISharedPreferencesEditor editor)
@@ -111,33 +98,9 @@ namespace Microsoft.Identity.Client
             return _accessTokenSharedPreference.All.Values as ICollection<string>;
         }
 
-        public ICollection<AccessTokenCacheItem> GetAllAccessTokens(string clientId)
-        {
-            ICollection<string> allTokensAsString = this.GetAllAccessTokensAsString();
-            IList<AccessTokenCacheItem> returnList = new List<AccessTokenCacheItem>();
-            foreach (var token in allTokensAsString)
-            {
-                returnList.Add(JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(token));
-            }
-
-            return returnList.Where(t => t.ClientId.Equals(clientId)).ToList();
-        }
-
         public ICollection<string> GetAllRefreshTokensAsString()
         {
             return _refreshTokenSharedPreference.All.Values as ICollection<string>;
-        }
-
-        public ICollection<RefreshTokenCacheItem> GetAllRefreshTokens(string clientId)
-        {
-            ICollection<string> allTokensAsString = GetAllRefreshTokensAsString();
-            IList<RefreshTokenCacheItem> returnList = new List<RefreshTokenCacheItem>();
-            foreach (var token in allTokensAsString)
-            {
-                returnList.Add(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(token));
-            }
-
-            return returnList.Where(t => t.ClientId.Equals(clientId)).ToList();
         }
     }
 }

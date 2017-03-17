@@ -30,12 +30,11 @@ using System.Collections.Generic;
 using Foundation;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
-using Microsoft.Identity.Client.Internal.Interfaces;
 using Security;
 
 namespace Microsoft.Identity.Client
 {
-    internal class TokenCacheAccessor
+    internal class TokenCacheAccessor : ITokenCAcheAccessor
     {
 
         private RequestContext _requestContext;
@@ -49,27 +48,27 @@ namespace Microsoft.Identity.Client
             _requestContext = requestContext;
         }
 
-        public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
+        public void SaveAccessToken(string cacheKey, string item)
         {
             throw new NotImplementedException();
         }
 
-        public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        public void SaveRefreshToken(string cacheKey, string item)
         {
             throw new NotImplementedException();
         }
 
-        public ICollection<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
+        public string GetRefreshToken(string refreshTokenKey)
         {
             throw new NotImplementedException();
         }
 
-        public void DeleteAccessToken(AccessTokenCacheItem accessToken‪Item)
+        public void DeleteAccessToken(string cacheKey)
         {
             throw new NotImplementedException();
         }
 
-        public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
+        public void DeleteRefreshToken(string cacheKey)
         {
             throw new NotImplementedException();
         }
@@ -79,17 +78,7 @@ namespace Microsoft.Identity.Client
             throw new NotImplementedException();
         }
 
-        public ICollection<AccessTokenCacheItem> GetAllAccessTokens(string clientId)
-        {
-            throw new NotImplementedException();
-        }
-
         public ICollection<string> GetAllRefreshTokensAsString()
-        {
-            throw new NotImplementedException();
-        }
-
-        public ICollection<RefreshTokenCacheItem> GetAllRefreshTokens(string clientId)
         {
             throw new NotImplementedException();
         }

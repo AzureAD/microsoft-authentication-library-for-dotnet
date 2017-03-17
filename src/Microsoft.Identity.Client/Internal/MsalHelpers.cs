@@ -146,6 +146,11 @@ namespace Microsoft.Identity.Client.Internal
 
         internal static string ByteArrayToString(byte[] input)
         {
+            if (input == null || input.Length == 0)
+            {
+                return null;
+            }
+
             return Encoding.UTF8.GetString(input, 0, input.Length);
         }
 

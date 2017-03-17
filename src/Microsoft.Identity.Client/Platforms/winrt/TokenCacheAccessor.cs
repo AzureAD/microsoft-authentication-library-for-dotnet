@@ -32,7 +32,7 @@ using Windows.Storage;
 
 namespace Microsoft.Identity.Client
 {
-    internal class TokenCacheAccessor
+    internal class TokenCacheAccessor : ITokenCacheAccessor
     {
         private const string CacheValue = "CacheValue";
         private const string CacheValueSegmentCount = "SegmentCount";
@@ -59,53 +59,42 @@ namespace Microsoft.Identity.Client
             _requestContext = requestContext;
         }
 
-        public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
+        public void SaveAccessToken(string cacheKey, string item)
         {
             CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(accessTokenItem.GetTokenCacheKey().ToString());
+            string hashed = helper.CreateSha256Hash(cacheKey);
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
-            SetCacheValue(composite, JsonHelper.SerializeToJson(accessTokenItem));
+            SetCacheValue(composite, item);
             _accessTokenContainer.Values[hashed] = composite;
         }
 
-        public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        public void SaveRefreshToken(string cacheKey, string item)
         {
             CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(refreshTokenItem.GetTokenCacheKey().ToString());
+            string hashed = helper.CreateSha256Hash(cacheKey);
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
-            SetCacheValue(composite, JsonHelper.SerializeToJson(refreshTokenItem));
+            SetCacheValue(composite, item);
             _refreshTokenContainer.Values[hashed] = composite;
         }
 
-        public ICollection<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
-        {
-            ICollection<string> allRefreshTokens = this.GetAllRefreshTokensAsString();
-            IList<RefreshTokenCacheItem> matchedRefreshTokens = new List<RefreshTokenCacheItem>();
-            foreach (string refreshTokenValue in allRefreshTokens)
-            {
-                RefreshTokenCacheItem refreshTokenCacheItem =
-                    JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(refreshTokenValue);
-
-                if (tokenCacheKey.Equals(refreshTokenCacheItem.GetTokenCacheKey()))
-                {
-                    matchedRefreshTokens.Add(refreshTokenCacheItem);
-                }
-            }
-
-            return matchedRefreshTokens;
-        }
-
-        public void DeleteAccessToken(AccessTokenCacheItem accessToken‪Item)
+        public string GetRefreshToken(string refreshTokenKey)
         {
             CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(accessToken‪Item.GetTokenCacheKey().ToString());
+            string hashed = helper.CreateSha256Hash(refreshTokenKey);
+            return MsalHelpers.ByteArrayToString(GetCacheValue((ApplicationDataCompositeValue)_refreshTokenContainer.Values[hashed]));
+        }
+        
+        public void DeleteAccessToken(string cacheKey)
+        {
+            CryptographyHelper helper = new CryptographyHelper();
+            string hashed = helper.CreateSha256Hash(cacheKey);
             _accessTokenContainer.Values.Remove(hashed);
         }
 
-        public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
+        public void DeleteRefreshToken(string cacheKey)
         {
             CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(refreshToken‪Item.GetTokenCacheKey().ToString());
+            string hashed = helper.CreateSha256Hash(cacheKey);
             _refreshTokenContainer.Values.Remove(hashed);
         }
 
@@ -120,18 +109,6 @@ namespace Microsoft.Identity.Client
             return list;
         }
 
-        public ICollection<AccessTokenCacheItem> GetAllAccessTokens(string clientId)
-        {
-            ICollection<string> allTokensAsString = this.GetAllAccessTokensAsString();
-            IList<AccessTokenCacheItem> returnList = new List<AccessTokenCacheItem>();
-            foreach (var token in allTokensAsString)
-            {
-                returnList.Add(JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(token));
-            }
-
-            return returnList.Where(t => t.ClientId.Equals(clientId)).ToList();
-        }
-
         public ICollection<string> GetAllRefreshTokensAsString()
         {
             ICollection<string> list = new List<string>();
@@ -141,18 +118,6 @@ namespace Microsoft.Identity.Client
             }
 
             return list;
-        }
-
-        public ICollection<RefreshTokenCacheItem> GetAllRefreshTokens(string clientId)
-        {
-            ICollection<string> allTokensAsString = GetAllRefreshTokensAsString();
-            IList<RefreshTokenCacheItem> returnList = new List<RefreshTokenCacheItem>();
-            foreach (var token in allTokensAsString)
-            {
-                returnList.Add(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(token));
-            }
-
-            return returnList.Where(t => t.ClientId.Equals(clientId)).ToList();
         }
 
         internal static void SetCacheValue(ApplicationDataCompositeValue composite, string stringValue)

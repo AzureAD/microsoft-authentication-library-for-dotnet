@@ -28,13 +28,15 @@ using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Cache;
 
 namespace Microsoft.Identity.Client
 {
-    internal partial class TokenCacheAccessor
+    internal class TokenCacheAccessor : ITokenCacheAccessor
     {
-        internal readonly IDictionary<string, string> TokenCacheDictionary =
+        internal readonly IDictionary<string, string> AccessTokenCacheDictionary =
+            new ConcurrentDictionary<string, string>();
+
+        internal readonly IDictionary<string, string> RefreshTokenCacheDictionary =
             new ConcurrentDictionary<string, string>();
 
         private RequestContext _requestContext;
@@ -48,84 +50,44 @@ namespace Microsoft.Identity.Client
             _requestContext = requestContext;
         }
 
-        public void SaveAccessToken(AccessTokenCacheItem accessTokenItem)
+        public void SaveAccessToken(string cacheKey, string item)
         {
-            TokenCacheDictionary[accessTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(accessTokenItem);
+            AccessTokenCacheDictionary[cacheKey] = item;
         }
 
-        public void SaveRefreshToken(RefreshTokenCacheItem refreshTokenItem)
+        public void SaveRefreshToken(string cacheKey, string item)
         {
-            TokenCacheDictionary[refreshTokenItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(refreshTokenItem);
+            RefreshTokenCacheDictionary[cacheKey] = item;
         }
         
-        public ICollection<RefreshTokenCacheItem> GetRefreshTokens(TokenCacheKey tokenCacheKey)
+        public string GetRefreshToken(string refreshTokenKey)
         {
-            ICollection<string> allRefreshTokens = this.GetAllRefreshTokensAsString();
-            IList<RefreshTokenCacheItem> matchedRefreshTokens = new List<RefreshTokenCacheItem>();
-            foreach (string refreshTokenValue in allRefreshTokens)
-            {
-                RefreshTokenCacheItem refreshTokenCacheItem =
-                    JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(refreshTokenValue);
-
-                if (tokenCacheKey.Equals(refreshTokenCacheItem.GetTokenCacheKey()))
-                {
-                    matchedRefreshTokens.Add(refreshTokenCacheItem);
-                }
-            }
-
-            return matchedRefreshTokens;
+            return RefreshTokenCacheDictionary[refreshTokenKey];
         }
 
-        public void DeleteAccessToken(AccessTokenCacheItem accessToken‪Item)
+        public void DeleteAccessToken(string cacheKey)
         {
-            TokenCacheDictionary.Remove(accessToken‪Item.GetTokenCacheKey().ToString());
+            AccessTokenCacheDictionary.Remove(cacheKey);
         }
 
-        public void DeleteRefreshToken(RefreshTokenCacheItem refreshToken‪Item)
+        public void DeleteRefreshToken(string cacheKey)
         {
-            TokenCacheDictionary.Remove(refreshToken‪Item.GetTokenCacheKey().ToString());
+            RefreshTokenCacheDictionary.Remove(cacheKey);
         }
-
-        public ICollection<AccessTokenCacheItem> GetAllAccessTokens(string clientId)
-        {
-            ICollection<string> allTokensAsString = this.GetAllAccessTokensAsString();
-            IList<AccessTokenCacheItem> returnList = new List<AccessTokenCacheItem>();
-            foreach (var token in allTokensAsString)
-            {
-                returnList.Add(JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(token));
-            }
-
-            return returnList.Where(t => t.ClientId.Equals(clientId)).ToList();
-        }
-
+        
         public ICollection<string> GetAllAccessTokensAsString()
         {
             return
                 new ReadOnlyCollection<string>(
-                    TokenCacheDictionary.Values.Where(
-                        v =>
-                            (JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(v).Scope != null) &&
-                            (JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(v).Scope.Count > 0)).ToList());
+                    AccessTokenCacheDictionary.Values.ToList());
         }
 
         public ICollection<string> GetAllRefreshTokensAsString()
         {
             return
                 new ReadOnlyCollection<string>(
-                    TokenCacheDictionary.Values.Where(
-                        v => !string.IsNullOrEmpty(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(v).RefreshToken)).ToList());
+                    RefreshTokenCacheDictionary.Values.ToList());
         }
         
-        public ICollection<RefreshTokenCacheItem> GetAllRefreshTokens(string clientId)
-        {
-            ICollection<string> allTokensAsString = GetAllRefreshTokensAsString();
-            IList<RefreshTokenCacheItem> returnList = new List<RefreshTokenCacheItem>();
-            foreach (var token in allTokensAsString)
-            {
-                returnList.Add(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(token));
-            }
-
-            return returnList.Where(t => t.ClientId.Equals(clientId)).ToList();
-        }
     }
 }
