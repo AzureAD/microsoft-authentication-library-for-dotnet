@@ -54,6 +54,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
                 return dtDateTime.AddSeconds(ExpiresOnUnixTimestamp).ToUniversalTime();
             }
+            set
+            {
+                DateTimeOffset ignored = value;
+            }
         }
 
         [DataMember(Name = "expires_on")]

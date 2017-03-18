@@ -36,7 +36,6 @@ namespace AutomationApp
                     File.WriteAllBytes(CacheFilePath, ProtectedData.Protect(args.TokenCache.Serialize(), null, DataProtectionScope.CurrentUser));
                     // once the write operationtakes place restore the HasStateChanged bit to filse
                     args.TokenCache.HasStateChanged = false;
-
                 }
             }
         }

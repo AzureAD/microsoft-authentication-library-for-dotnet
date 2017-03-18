@@ -28,12 +28,14 @@
 using System;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
+using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Contains the results of one token acquisition operation.
     /// </summary>
+    [DataContract]
     public sealed class AuthenticationResult
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
@@ -48,35 +50,57 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the Access Token requested.
         /// </summary>
-        public string AccessToken => _accessTokenCacheItem.AccessToken;
+        [DataMember]
+        public string AccessToken
+        {
+            get { return _accessTokenCacheItem.AccessToken; }
+            set =>  _accessTokenCacheItem.AccessToken = value; 
+        }
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the Token property ceases to be valid.
         /// This value is calculated based on current UTC time measured locally and the value expiresIn received from the
         /// service.
         /// </summary>
-        public DateTimeOffset ExpiresOn => _accessTokenCacheItem.ExpiresOn;
+        [DataMember]
+        public DateTimeOffset ExpiresOn
+        {
+            get { return _accessTokenCacheItem.ExpiresOn; }
+            set => _accessTokenCacheItem.ExpiresOn = value;
+        }
 
         /// <summary>
         /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is
         /// not returned by the service.
         /// </summary>
-        public string TenantId => _accessTokenCacheItem.TenantId;
+        [DataMember]
+        public string TenantId
+        {
+            get { return _accessTokenCacheItem.TenantId; }
+            set =>  _accessTokenCacheItem.TenantId = value; 
+        } 
 
         /// <summary>
         /// Gets User object. Some elements in User might be null if not returned by the
         /// service. It can be passed back in some API overloads to identify which user should be used.
         /// </summary>
+        [DataMember]
         public User User { get; internal set; }
 
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
-        public string IdToken => _accessTokenCacheItem.RawIdToken;
+        [DataMember]
+        public string IdToken
+        {
+            get { return _accessTokenCacheItem.RawIdToken; }
+            set =>  _accessTokenCacheItem.RawIdToken = value;
+        }
 
         /// <summary>
         /// Gets the scope values returned from the service.
         /// </summary>
+        [DataMember]
         public string[] Scope => _accessTokenCacheItem.Scope.AsArray();
 
         /// <summary>
