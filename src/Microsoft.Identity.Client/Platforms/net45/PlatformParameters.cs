@@ -50,7 +50,5 @@ namespace Microsoft.Identity.Client
         /// Gets the owner of the browser dialog which pops up for receiving user credentials. It can be null.
         /// </summary>
         public object OwnerWindow { get; private set; }
-
-        internal bool UseHiddenBrowser { get; set; }
     }
 }

@@ -95,6 +95,7 @@
     <Compile Include="PublicClientApplicationTests.cs" />
     <Compile Include="ConfidentialClientApplicationTests.cs" />
     <Compile Include="LoggerCallbackTests.cs" />
+    <Compile Include="UIBehaviorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\invalid_cert.cer">

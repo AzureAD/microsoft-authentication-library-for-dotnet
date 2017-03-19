@@ -48,5 +48,7 @@ namespace Microsoft.Identity.Client
         /// application's callback URI as redirectUri.
         /// </summary>
         public bool UseCorporateNetwork { get; private set; }
+
+        internal bool UseHiddenBrowser { get; set; }
     }
 }

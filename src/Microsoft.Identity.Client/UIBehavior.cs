@@ -60,11 +60,29 @@ namespace Microsoft.Identity.Client
         public static readonly UIBehavior Never = new UIBehavior("attempt_none");
 #endif
 
-        internal string PromptValue { get; set; }
+        internal string PromptValue { get; }
 
         internal UIBehavior(string promptValue)
         {
             PromptValue = promptValue;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is UIBehavior && this == (UIBehavior)obj;
+        }
+        public override int GetHashCode()
+        {
+            return PromptValue.GetHashCode();
+        }
+        public static bool operator ==(UIBehavior x, UIBehavior y)
+        {
+            return x.PromptValue == y.PromptValue;
+        }
+
+        public static bool operator !=(UIBehavior x, UIBehavior y)
+        {
+            return !(x == y);
         }
     }
 }

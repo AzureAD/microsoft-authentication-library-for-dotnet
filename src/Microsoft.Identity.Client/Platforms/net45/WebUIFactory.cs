@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
@@ -35,7 +34,7 @@ namespace Microsoft.Identity.Client
     {
         private PlatformParameters parameters;
 
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters)
+        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters, UIBehavior behavior)
         {
             parameters = inputParameters as PlatformParameters;
             if (parameters == null)
@@ -43,7 +42,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentException("parameters should be of type PlatformParameters", nameof(parameters));
             }
 
-            if (parameters.UseHiddenBrowser)
+            if (behavior.Equals(UIBehavior.Never))
             {
                 return new SilentWebUI() {OwnerWindow = parameters.OwnerWindow};
             }
