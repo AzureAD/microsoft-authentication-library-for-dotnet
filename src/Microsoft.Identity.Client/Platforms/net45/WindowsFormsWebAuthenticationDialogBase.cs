@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public WebBrowser WebBrowser
         {
-            get { return this.webBrowser; }
+            get { return webBrowser; }
         }
 
         private void webBrowser_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected virtual void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
         {
-            if (this.DialogResult == DialogResult.OK)
+            if (DialogResult == DialogResult.OK)
             {
                 e.Cancel = true;
                 return;
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected virtual void WebBrowserNavigateErrorHandler(object sender, WebBrowserNavigateErrorEventArgs e)
         {
-            if (this.DialogResult == DialogResult.OK)
+            if (DialogResult == DialogResult.OK)
             {
                 e.Cancel = true;
                 return;
@@ -274,8 +274,8 @@ namespace Microsoft.Identity.Client
             // The WebBrowser event handlers must not throw exceptions.
             // If they do then they may be swallowed by the native
             // browser com control.
-            webBrowser.Navigating += this.WebBrowserNavigatingHandler;
-            webBrowser.Navigated += this.WebBrowserNavigatedHandler;
+            webBrowser.Navigating += WebBrowserNavigatingHandler;
+            webBrowser.Navigated += WebBrowserNavigatedHandler;
             webBrowser.NavigateError += WebBrowserNavigateErrorHandler;
 
             webBrowser.Navigate(requestUri);
@@ -300,7 +300,7 @@ namespace Microsoft.Identity.Client
             int uiHeight = (int) (Math.Max(screen.WorkingArea.Height, 160)*70.0/DpiHelper.ZoomPercent);
             webBrowserPanel = new Panel();
             webBrowserPanel.SuspendLayout();
-            this.SuspendLayout();
+            SuspendLayout();
 
             // 
             // webBrowser
@@ -327,28 +327,28 @@ namespace Microsoft.Identity.Client
             // 
             // BrowserAuthenticationWindow
             // 
-            this.AutoScaleDimensions = new SizeF(6, 13);
-            this.AutoScaleMode = AutoScaleMode.Font;
-            this.ClientSize = new Size(UIWidth, uiHeight);
-            this.Controls.Add(webBrowserPanel);
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
-            this.Name = "BrowserAuthenticationWindow";
+            AutoScaleDimensions = new SizeF(6, 13);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(UIWidth, uiHeight);
+            Controls.Add(webBrowserPanel);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            Name = "BrowserAuthenticationWindow";
 
             // Move the window to the center of the parent window only if owner window is set.
-            this.StartPosition = (ownerWindow != null)
+            StartPosition = (ownerWindow != null)
                 ? FormStartPosition.CenterParent
                 : FormStartPosition.CenterScreen;
-            this.Text = string.Empty;
-            this.ShowIcon = false;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
+            Text = string.Empty;
+            ShowIcon = false;
+            MaximizeBox = false;
+            MinimizeBox = false;
 
             // If we don't have an owner we need to make sure that the pop up browser 
             // window is in the task bar so that it can be selected with the mouse.
-            this.ShowInTaskbar = (null == ownerWindow);
+            ShowInTaskbar = (null == ownerWindow);
 
             webBrowserPanel.ResumeLayout(false);
-            this.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         /// <summary>

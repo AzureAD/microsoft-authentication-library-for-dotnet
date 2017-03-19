@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
         public string Thumbprint
         {
             // Thumbprint should be url encoded
-            get { return Base64UrlEncoder.Encode(this.Certificate.GetCertHash()); }
+            get { return Base64UrlEncoder.Encode(Certificate.GetCertHash()); }
         }
     }
 }

@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
             AppTokenCache = appTokenCache;
             if (AppTokenCache != null)
             {
-                this.AppTokenCache.ClientId = clientId;
+                AppTokenCache.ClientId = clientId;
             }
         }
 
