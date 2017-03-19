@@ -57,11 +57,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected BaseRequest(AuthenticationRequestParameters authenticationRequestParameters)
         {
-            this.Authority = authenticationRequestParameters.Authority;
-            this.RequestContext = authenticationRequestParameters.RequestContext;
-            this.TokenCache = authenticationRequestParameters.TokenCache;
+            Authority = authenticationRequestParameters.Authority;
+            RequestContext = authenticationRequestParameters.RequestContext;
+            TokenCache = authenticationRequestParameters.TokenCache;
 
-            this.RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
+            RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
                     "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
                     Authority.CanonicalAuthority, authenticationRequestParameters.Scope.AsSingleString(),
                     authenticationRequestParameters.ClientId,
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         ? TokenCache.GetType().FullName
                         : null));
 
-            this.AuthenticationRequestParameters = authenticationRequestParameters;
+            AuthenticationRequestParameters = authenticationRequestParameters;
 
             if (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0)
             {
@@ -78,9 +78,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ValidateScopeInput(authenticationRequestParameters.Scope);
 
-            this.LoadFromCache = (TokenCache != null);
-            this.StoreToCache = (TokenCache != null);
-            this.SupportADFS = true;
+            LoadFromCache = (TokenCache != null);
+            StoreToCache = (TokenCache != null);
+            SupportADFS = true;
         }
 
         protected virtual SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
@@ -116,9 +116,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             try
             {
                 //authority endpoints resolution and validation 
-                await this.PreRunAsync().ConfigureAwait(false);
-                await this.PreTokenRequest().ConfigureAwait(false);
-                await this.SendTokenRequestAsync().ConfigureAwait(false);
+                await PreRunAsync().ConfigureAwait(false);
+                await PreTokenRequest().ConfigureAwait(false);
+                await SendTokenRequestAsync().ConfigureAwait(false);
                 //save to cache if no access token item found
                 //this means that no cached item was found
                 if (AccessTokenItem == null)
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
 
                 result = PostTokenRequest(AccessTokenItem);
-                await this.PostRunAsync(result).ConfigureAwait(false);
+                await PostRunAsync(result).ConfigureAwait(false);
                 return result;
             }
             catch (Exception ex)
@@ -139,17 +139,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal virtual async Task PreRunAsync()
         {
-            await this.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, this.RequestContext).ConfigureAwait(false);
+            await Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, RequestContext).ConfigureAwait(false);
         }
 
         private AccessTokenCacheItem SaveTokenResponseToCache()
         {
             if (StoreToCache)
             {
-                this.TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
+                TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
             }
 
-            return new AccessTokenCacheItem(this.Authority.CanonicalAuthority,
+            return new AccessTokenCacheItem(Authority.CanonicalAuthority,
                 AuthenticationRequestParameters.ClientId, Response);
         }
 
@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected virtual AuthenticationResult PostTokenRequest(AccessTokenCacheItem item)
         {
-            return new AuthenticationResult(item, this.RequestContext);
+            return new AuthenticationResult(item, RequestContext);
         }
 
         protected abstract void SetAdditionalRequestParameters(OAuth2Client client);
@@ -186,20 +186,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             client.AddBodyParameter(OAuth2Parameter.Scope,
-                this.GetDecoratedScope(AuthenticationRequestParameters.Scope).AsSingleString());
-            this.SetAdditionalRequestParameters(client);
-            await this.SendHttpMessageAsync(client).ConfigureAwait(false);
+                GetDecoratedScope(AuthenticationRequestParameters.Scope).AsSingleString());
+            SetAdditionalRequestParameters(client);
+            await SendHttpMessageAsync(client).ConfigureAwait(false);
         }
 
         private async Task SendHttpMessageAsync(OAuth2Client client)
         {
             Response =
-                await client.GetToken(new Uri(this.Authority.TokenEndpoint), this.RequestContext).ConfigureAwait(false);
+                await client.GetToken(new Uri(Authority.TokenEndpoint), RequestContext).ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(Response.Scope))
             {
                 Response.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
-                this.RequestContext.Logger.Info("Scope was missing from the token response, so using developer provided scopes in the result");
+                RequestContext.Logger.Info("Scope was missing from the token response, so using developer provided scopes in the result");
             }
         }
 
@@ -209,7 +209,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.AccessToken);
 
-                this.RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
+                RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
                         "=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Truncated Hash: {0}\n\tExpiration Time: {1}\n\tUser Truncated  Hash: {2}\n\t",
                         accessTokenHash,
                         result.ExpiresOn,

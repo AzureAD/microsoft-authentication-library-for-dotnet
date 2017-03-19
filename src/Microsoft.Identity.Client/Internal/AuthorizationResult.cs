@@ -45,25 +45,25 @@ namespace Microsoft.Identity.Client.Internal
     {
         internal AuthorizationResult(AuthorizationStatus status, string returnedUriInput) : this(status)
         {
-            if (this.Status == AuthorizationStatus.UserCancel)
+            if (Status == AuthorizationStatus.UserCancel)
             {
-                this.Error = MsalError.AuthenticationCanceled;
-                this.ErrorDescription = MsalErrorMessage.AuthenticationCanceled;
+                Error = MsalError.AuthenticationCanceled;
+                ErrorDescription = MsalErrorMessage.AuthenticationCanceled;
             }
-            else if (this.Status == AuthorizationStatus.UnknownError)
+            else if (Status == AuthorizationStatus.UnknownError)
             {
-                this.Error = MsalError.Unknown;
-                this.ErrorDescription = MsalErrorMessage.Unknown;
+                Error = MsalError.Unknown;
+                ErrorDescription = MsalErrorMessage.Unknown;
             }
             else
             {
-                this.ParseAuthorizeResponse(returnedUriInput);
+                ParseAuthorizeResponse(returnedUriInput);
             }
         }
 
         internal AuthorizationResult(AuthorizationStatus status)
         {
-            this.Status = status;
+            Status = status;
         }
 
         public AuthorizationStatus Status { get; private set; }
@@ -96,28 +96,28 @@ namespace Microsoft.Identity.Client.Internal
 
                 if (response.ContainsKey(TokenResponseClaim.Code))
                 {
-                    this.Code = response[TokenResponseClaim.Code];
+                    Code = response[TokenResponseClaim.Code];
                 }
                 else if (response.ContainsKey(TokenResponseClaim.Error))
                 {
-                    this.Error = response[TokenResponseClaim.Error];
-                    this.ErrorDescription = response.ContainsKey(TokenResponseClaim.ErrorDescription)
+                    Error = response[TokenResponseClaim.Error];
+                    ErrorDescription = response.ContainsKey(TokenResponseClaim.ErrorDescription)
                         ? response[TokenResponseClaim.ErrorDescription]
                         : null;
-                    this.Status = AuthorizationStatus.ProtocolError;
+                    Status = AuthorizationStatus.ProtocolError;
                 }
                 else
                 {
-                    this.Error = MsalError.AuthenticationFailed;
-                    this.ErrorDescription = MsalErrorMessage.AuthorizationServerInvalidResponse;
-                    this.Status = AuthorizationStatus.UnknownError;
+                    Error = MsalError.AuthenticationFailed;
+                    ErrorDescription = MsalErrorMessage.AuthorizationServerInvalidResponse;
+                    Status = AuthorizationStatus.UnknownError;
                 }
             }
             else
             {
-                this.Error = MsalError.AuthenticationFailed;
-                this.ErrorDescription = MsalErrorMessage.AuthorizationServerInvalidResponse;
-                this.Status = AuthorizationStatus.UnknownError;
+                Error = MsalError.AuthenticationFailed;
+                ErrorDescription = MsalErrorMessage.AuthorizationServerInvalidResponse;
+                Status = AuthorizationStatus.UnknownError;
             }
         }
     }

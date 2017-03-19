@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
 
         public PlatformParameters(bool useCorporateNetwork)
         {
-            this.UseCorporateNetwork = useCorporateNetwork;
+            UseCorporateNetwork = useCorporateNetwork;
         }
 
         /// <summary>

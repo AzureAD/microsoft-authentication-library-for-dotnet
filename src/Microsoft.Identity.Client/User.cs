@@ -42,10 +42,10 @@ namespace Microsoft.Identity.Client
 
         internal User(User other)
         {
-            this.DisplayableId = other.DisplayableId;
-            this.HomeObjectId = other.HomeObjectId;
-            this.Name = other.Name;
-            this.IdentityProvider = other.IdentityProvider;
+            DisplayableId = other.DisplayableId;
+            HomeObjectId = other.HomeObjectId;
+            Name = other.Name;
+            IdentityProvider = other.IdentityProvider;
         }
 
         /// <summary>

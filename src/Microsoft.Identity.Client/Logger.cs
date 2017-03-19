@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client
 
         internal Logger(Guid correlationId)
         {
-            this.CorrelationId = correlationId;
+            CorrelationId = correlationId;
         }
 
         private Guid CorrelationId { get; set; }

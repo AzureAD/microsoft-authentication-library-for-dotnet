@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client
             {
                 return
                     string.Concat(new object[]
-                    {"Left = ", this.left, " Top ", this.top, " Right = ", this.right, " Bottom = ", this.bottom});
+                    {"Left = ", left, " Top ", top, " Right = ", right, " Bottom = ", bottom});
             }
 
             public COMRECT()
@@ -114,10 +114,10 @@ namespace Microsoft.Identity.Client
 
             public COMRECT(Rectangle r)
             {
-                this.left = r.X;
-                this.top = r.Y;
-                this.right = r.Right;
-                this.bottom = r.Bottom;
+                left = r.X;
+                top = r.Y;
+                right = r.Right;
+                bottom = r.Bottom;
             }
 
             public COMRECT(int left, int top, int right, int bottom)

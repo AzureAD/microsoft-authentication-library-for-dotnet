@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
         /// <param name="ownerWindow"></param>
         public PlatformParameters(object ownerWindow)
         {
-            this.OwnerWindow = ownerWindow;
+            OwnerWindow = ownerWindow;
         }
 
         /// <summary>

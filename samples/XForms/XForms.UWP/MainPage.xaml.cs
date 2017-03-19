@@ -19,7 +19,7 @@ namespace XForms.UWP
     {
         public MainPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
 
             LoadApplication(new XForms.App());
         }

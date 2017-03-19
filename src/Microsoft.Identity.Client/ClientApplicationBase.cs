@@ -52,13 +52,13 @@ namespace Microsoft.Identity.Client
             bool validateAuthority)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, validateAuthority);
-            this.Authority = authorityInstance.CanonicalAuthority;
-            this.ClientId = clientId;
-            this.RedirectUri = redirectUri;
-            this.ValidateAuthority = validateAuthority;
+            Authority = authorityInstance.CanonicalAuthority;
+            ClientId = clientId;
+            RedirectUri = redirectUri;
+            ValidateAuthority = validateAuthority;
             if (UserTokenCache != null)
             {
-                this.UserTokenCache.ClientId = clientId;
+                UserTokenCache.ClientId = clientId;
             }
 
             RequestContext requestContext = new RequestContext(Guid.Empty);
@@ -108,14 +108,14 @@ namespace Microsoft.Identity.Client
         {
             get
             {
-                if (this.UserTokenCache == null)
+                if (UserTokenCache == null)
                 {
                     RequestContext requestContext = new RequestContext(CorrelationId);
                     requestContext.Logger.Info("Token cache is null or empty");
                     return new List<User>();
                 }
 
-                return this.UserTokenCache.GetUsers(this.ClientId);
+                return UserTokenCache.GetUsers(ClientId);
             }
         }
 
@@ -129,10 +129,10 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user)
         {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    this.AcquireTokenSilentCommonAsync(authority, scope, user, false)
+                    AcquireTokenSilentCommonAsync(authority, scope, user, false)
                         .ConfigureAwait(false);
         }
 
@@ -149,10 +149,10 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user,
             string authority, bool forceRefresh)
         {
-            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
+            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
             return
                 await
-                    this.AcquireTokenSilentCommonAsync(authorityInstance, scope, user,
+                    AcquireTokenSilentCommonAsync(authorityInstance, scope, user,
                         forceRefresh).ConfigureAwait(false);
         }
 
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client
             string[] scope, User user, bool forceRefresh)
         {
             var handler = new SilentRequest(
-                this.CreateRequestParameters(authority, scope, user, this.UserTokenCache),
+                CreateRequestParameters(authority, scope, user, UserTokenCache),
                 forceRefresh);
             return await handler.RunAsync().ConfigureAwait(false);
         }
@@ -188,8 +188,8 @@ namespace Microsoft.Identity.Client
                 TokenCache = cache,
                 User = user,
                 Scope = scope.CreateSetFromArray(),
-                RedirectUri = new Uri(this.RedirectUri),
-                RequestContext = CreateRequestContext(this.CorrelationId)
+                RedirectUri = new Uri(RedirectUri),
+                RequestContext = CreateRequestContext(CorrelationId)
             };
         }
 

@@ -46,15 +46,15 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, string homeObjectId)
         {
-            this.Authority = authority;
-            this.Scope = scope;
-            if (this.Scope == null)
+            Authority = authority;
+            Scope = scope;
+            if (Scope == null)
             {
-                this.Scope = new SortedSet<string>();
+                Scope = new SortedSet<string>();
             }
 
-            this.ClientId = clientId;
-            this.HomeObjectId = homeObjectId;
+            ClientId = clientId;
+            HomeObjectId = homeObjectId;
         }
 
         public string Authority { get; }
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public override bool Equals(object obj)
         {
             TokenCacheKey other = obj as TokenCacheKey;
-            return (other != null) && this.Equals(other);
+            return (other != null) && Equals(other);
         }
 
         /// <summary>
@@ -121,10 +121,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
             return ReferenceEquals(this, other) ||
                    (other != null
-                    && (other.Authority == this.Authority)
-                    && this.ScopeEquals(other.Scope)
-                    && this.Equals(this.ClientId, other.ClientId)
-                    && (this.HomeObjectId == other.HomeObjectId));
+                    && (other.Authority == Authority)
+                    && ScopeEquals(other.Scope)
+                    && Equals(ClientId, other.ClientId)
+                    && HomeObjectId == other.HomeObjectId);
         }
 
         /// <summary>
@@ -136,27 +136,27 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public override int GetHashCode()
         {
             const string Delimiter = ":::";
-            return (this.Authority + Delimiter
-                    + MsalHelpers.AsSingleString(this.Scope) + Delimiter
-                    + this.ClientId.ToLowerInvariant() + Delimiter
-                    + this.HomeObjectId + Delimiter).GetHashCode();
+            return (Authority + Delimiter
+                    + MsalHelpers.AsSingleString(Scope) + Delimiter
+                    + ClientId.ToLowerInvariant() + Delimiter
+                    + HomeObjectId + Delimiter).GetHashCode();
         }
 
         internal bool ScopeEquals(SortedSet<string> otherScope)
         {
-            if (this.Scope == null)
+            if (Scope == null)
             {
                 return otherScope == null;
             }
 
             if (otherScope == null)
             {
-                return this.Scope == null;
+                return Scope == null;
             }
 
             if (Scope.Count == otherScope.Count)
             {
-                return this.Scope.Intersect(otherScope, StringComparer.OrdinalIgnoreCase).Count() == this.Scope.Count;
+                return Scope.Intersect(otherScope, StringComparer.OrdinalIgnoreCase).Count() == Scope.Count;
             }
 
             return false;

@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client
     {
         public SilentWebUIDoneEventArgs(Exception e)
         {
-            this.TransferedException = e;
+            TransferedException = e;
         }
 
         public Exception TransferedException { get; private set; }

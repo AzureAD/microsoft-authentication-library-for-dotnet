@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public PlatformParameters(Activity callerActivity) : this()
         {
-            this.CallerActivity = callerActivity;
+            CallerActivity = callerActivity;
         }
 
         /// <summary>

@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(secret));
             }
 
-            this.Secret = secret;
+            Secret = secret;
         }
 
         internal string Secret { get; private set; }

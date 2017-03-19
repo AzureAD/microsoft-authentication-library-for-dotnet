@@ -79,9 +79,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool HasStateChanged
         {
-            get { return this.hasStateChanged; }
+            get { return hasStateChanged; }
 
-            set { this.hasStateChanged = value; }
+            set { hasStateChanged = value; }
         }
         
         internal void OnAfterAccess(TokenCacheNotificationArgs args)

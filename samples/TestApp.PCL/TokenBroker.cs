@@ -41,26 +41,26 @@ namespace TestApp.PCL
     {
         public MobileAppSts()
         {
-            this.InvalidAuthority = "https://invalid_address.com/path";
-            this.ValidateAuthority = true;
-            this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
-            this.ValidExpiresIn = 28800;
-            this.ValidNonExistingRedirectUri = new Uri("urn:ietf:wg:oauth:2.0:oob");
-            this.ValidLoggedInFederatedUserName = "dummy\\dummy";
-            string[] segments = this.ValidLoggedInFederatedUserName.Split(new[] { '\\' });
-            this.ValidLoggedInFederatedUserId = string.Format(CultureInfo.InvariantCulture,"{0}@microsoft.com", (segments.Length == 2) ? segments[1] : segments[0]);
-            this.TenantName = "Common";
-            this.Authority = string.Format(CultureInfo.InvariantCulture,"https://login.windows.net/{0}", this.TenantName);
-            this.TenantlessAuthority = "https://login.windows.net/Common";
-            this.ValidClientId = "dd9caee2-38bd-484e-998c-7529bdef220f";
-            this.ValidNonExistentRedirectUriClientId = this.ValidClientId;
-            this.ValidClientIdWithExistingRedirectUri = this.ValidClientId;
-            this.ValidUserName = @"<REPLACE>";
-            this.ValidDefaultRedirectUri = new Uri("https://login.live.com/");
-            this.ValidExistingRedirectUri = new Uri("https://login.live.com/");
-            this.ValidRedirectUriForConfidentialClient = new Uri("https://confidential.clientredirecturi.com");
-            this.ValidPassword = "<REPLACE>";
-            this.ValidScope = new[] {"https://graph.microsoft.com/user.read"};
+            InvalidAuthority = "https://invalid_address.com/path";
+            ValidateAuthority = true;
+            ValidExistingRedirectUri = new Uri("https://login.live.com/");
+            ValidExpiresIn = 28800;
+            ValidNonExistingRedirectUri = new Uri("urn:ietf:wg:oauth:2.0:oob");
+            ValidLoggedInFederatedUserName = "dummy\\dummy";
+            string[] segments = ValidLoggedInFederatedUserName.Split(new[] { '\\' });
+            ValidLoggedInFederatedUserId = string.Format(CultureInfo.InvariantCulture,"{0}@microsoft.com", (segments.Length == 2) ? segments[1] : segments[0]);
+            TenantName = "Common";
+            Authority = string.Format(CultureInfo.InvariantCulture,"https://login.windows.net/{0}", TenantName);
+            TenantlessAuthority = "https://login.windows.net/Common";
+            ValidClientId = "dd9caee2-38bd-484e-998c-7529bdef220f";
+            ValidNonExistentRedirectUriClientId = ValidClientId;
+            ValidClientIdWithExistingRedirectUri = ValidClientId;
+            ValidUserName = @"<REPLACE>";
+            ValidDefaultRedirectUri = new Uri("https://login.live.com/");
+            ValidExistingRedirectUri = new Uri("https://login.live.com/");
+            ValidRedirectUriForConfidentialClient = new Uri("https://confidential.clientredirecturi.com");
+            ValidPassword = "<REPLACE>";
+            ValidScope = new[] {"https://graph.microsoft.com/user.read"};
 
         }
 

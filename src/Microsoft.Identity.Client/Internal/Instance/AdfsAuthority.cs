@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
         private readonly HashSet<string> _validForDomainsList = new HashSet<string>();
         public AdfsAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
         {
-            this.AuthorityType = AuthorityType.Adfs;
+            AuthorityType = AuthorityType.Adfs;
         }
 
         protected override bool ExistsInValidatedAuthorityCache(string userPrincipalName)
@@ -53,8 +53,8 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 throw new MsalException("UPN is required for ADFS authority validation.");
             }
 
-            return ValidatedAuthorities.ContainsKey(this.CanonicalAuthority) &&
-                   ((AdfsAuthority) ValidatedAuthorities[this.CanonicalAuthority])._validForDomainsList.Contains(
+            return ValidatedAuthorities.ContainsKey(CanonicalAuthority) &&
+                   ((AdfsAuthority) ValidatedAuthorities[CanonicalAuthority])._validForDomainsList.Contains(
                        GetDomainFromUpn(userPrincipalName));
         }
 
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
                     throw new MsalServiceException("missing_passive_auth_endpoint", "missing_passive_auth_endpoint");
                 }
 
-                string resource = string.Format(CultureInfo.InvariantCulture, this.CanonicalAuthority);
+                string resource = string.Format(CultureInfo.InvariantCulture, CanonicalAuthority);
                 string webfingerUrl = string.Format(CultureInfo.InvariantCulture,
                     "https://{0}/adfs/.well-known/webfinger?rel={1}&resource={2}",
                     drsResponse.IdentityProviderService.PassiveAuthEndpoint.Host,
@@ -104,19 +104,19 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         protected override string GetDefaultOpenIdConfigurationEndpoint()
         {
-            return this.CanonicalAuthority + ".well-known/openid-configuration";
+            return CanonicalAuthority + ".well-known/openid-configuration";
         }
 
         protected override void AddToValidatedAuthorities(string userPrincipalName)
         {
             AdfsAuthority authorityInstance = this;
-            if (ValidatedAuthorities.ContainsKey(this.CanonicalAuthority))
+            if (ValidatedAuthorities.ContainsKey(CanonicalAuthority))
             {
-                authorityInstance = (AdfsAuthority) ValidatedAuthorities[this.CanonicalAuthority];
+                authorityInstance = (AdfsAuthority) ValidatedAuthorities[CanonicalAuthority];
             }
 
             authorityInstance._validForDomainsList.Add(GetDomainFromUpn(userPrincipalName));
-            ValidatedAuthorities[this.CanonicalAuthority] = authorityInstance;
+            ValidatedAuthorities[CanonicalAuthority] = authorityInstance;
         }
 
         private async Task<DrsMetadataResponse> GetMetadataFromEnrollmentServer(string userPrincipalName,

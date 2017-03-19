@@ -37,18 +37,18 @@ namespace Microsoft.Identity.Client
 
         public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters)
         {
-            this.parameters = inputParameters as PlatformParameters;
-            if (this.parameters == null)
+            parameters = inputParameters as PlatformParameters;
+            if (parameters == null)
             {
-                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(this.parameters));
+                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(parameters));
             }
 
             if (parameters.UseHiddenBrowser)
             {
-                return new SilentWebUI() {OwnerWindow = this.parameters.OwnerWindow};
+                return new SilentWebUI() {OwnerWindow = parameters.OwnerWindow};
             }
 
-            return new InteractiveWebUI {OwnerWindow = this.parameters.OwnerWindow};
+            return new InteractiveWebUI {OwnerWindow = parameters.OwnerWindow};
         }
     }
 }

@@ -46,13 +46,13 @@ namespace Test.MSAL.Common
 
         public Sts()
         {
-            this.ValidDefaultRedirectUri = new Uri("https://non_existing_uri.com/");
-            this.InvalidExistingRedirectUri = new Uri("https://skydrive.live.com/");
-            this.InvalidNonExistingRedirectUri = new Uri("https://invalid_non_existing_uri.com/");
-            this.ConfidentialClientCertificateName = "valid_cert.pfx";
-            this.InvalidConfidentialClientCertificateName = "invalid_cert.pfx";
-            this.ConfidentialClientCertificatePassword = "password";
-            this.InvalidConfidentialClientCertificatePassword = "password";
+            ValidDefaultRedirectUri = new Uri("https://non_existing_uri.com/");
+            InvalidExistingRedirectUri = new Uri("https://skydrive.live.com/");
+            InvalidNonExistingRedirectUri = new Uri("https://invalid_non_existing_uri.com/");
+            ConfidentialClientCertificateName = "valid_cert.pfx";
+            InvalidConfidentialClientCertificateName = "invalid_cert.pfx";
+            ConfidentialClientCertificatePassword = "password";
+            InvalidConfidentialClientCertificatePassword = "password";
         }
 
         public bool ValidateAuthority { get; protected set; }
@@ -121,7 +121,7 @@ namespace Test.MSAL.Common
 
         public string InvalidUserName
         {
-            get { return this.ValidUserName + "x"; }
+            get { return ValidUserName + "x"; }
         }
 
         public string ValidNonExistentRedirectUriClientId { get; set; }

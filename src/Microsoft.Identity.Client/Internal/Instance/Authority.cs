@@ -63,10 +63,10 @@ namespace Microsoft.Identity.Client.Internal.Instance
             Uri authorityUri = new Uri(authority);
             string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
-            this.CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Host,
+            CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Host,
                 pathSegments[0]);
 
-            this.ValidateAuthority = validateAuthority;
+            ValidateAuthority = validateAuthority;
         }
 
         public AuthorityType AuthorityType { get; set; }
@@ -139,19 +139,19 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         public async Task ResolveEndpointsAsync(string userPrincipalName, RequestContext requestContext)
         {
-            if (!this._resolved)
+            if (!_resolved)
             {
-                var authorityUri = new Uri(this.CanonicalAuthority);
+                var authorityUri = new Uri(CanonicalAuthority);
                 string host = authorityUri.Authority;
                 string path = authorityUri.AbsolutePath.Substring(1);
                 string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-                this.IsTenantless =
+                IsTenantless =
                     TenantlessTenantName.Any(
                         name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
 
                 if (ExistsInValidatedAuthorityCache(userPrincipalName))
                 {
-                    Authority authority = ValidatedAuthorities[this.CanonicalAuthority];
+                    Authority authority = ValidatedAuthorities[CanonicalAuthority];
                     AuthorityType = authority.AuthorityType;
                     CanonicalAuthority = authority.CanonicalAuthority;
                     ValidateAuthority = authority.ValidateAuthority;
@@ -166,12 +166,12 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
                 string openIdConfigurationEndpoint =
                     await
-                        this.GetOpenIdConfigurationEndpoint(userPrincipalName, requestContext)
+                        GetOpenIdConfigurationEndpoint(userPrincipalName, requestContext)
                             .ConfigureAwait(false);
 
                 //discover endpoints via openid-configuration
                 TenantDiscoveryResponse edr =
-                    await this.DiscoverEndpoints(openIdConfigurationEndpoint, requestContext).ConfigureAwait(false);
+                    await DiscoverEndpoints(openIdConfigurationEndpoint, requestContext).ConfigureAwait(false);
 
                 if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
                 {
@@ -194,13 +194,13 @@ namespace Microsoft.Identity.Client.Internal.Instance
                             openIdConfigurationEndpoint));
                 }
 
-                this.AuthorizationEndpoint = edr.AuthorizationEndpoint.Replace("{tenant}", tenant);
-                this.TokenEndpoint = edr.TokenEndpoint.Replace("{tenant}", tenant);
-                this.SelfSignedJwtAudience = edr.Issuer.Replace("{tenant}", tenant);
+                AuthorizationEndpoint = edr.AuthorizationEndpoint.Replace("{tenant}", tenant);
+                TokenEndpoint = edr.TokenEndpoint.Replace("{tenant}", tenant);
+                SelfSignedJwtAudience = edr.Issuer.Replace("{tenant}", tenant);
 
-                this._resolved = true;
+                _resolved = true;
 
-                this.AddToValidatedAuthorities(userPrincipalName);
+                AddToValidatedAuthorities(userPrincipalName);
             }
         }
 
@@ -231,9 +231,9 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         public void UpdateTenantId(string tenantId)
         {
-            if (this.IsTenantless && !string.IsNullOrWhiteSpace(tenantId))
+            if (IsTenantless && !string.IsNullOrWhiteSpace(tenantId))
             {
-                this.ReplaceTenantlessTenant(tenantId);
+                ReplaceTenantlessTenant(tenantId);
             }
         }
 
@@ -252,7 +252,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             foreach (var name in TenantlessTenantName)
             {
                 var regex = new Regex(Regex.Escape(name), RegexOptions.IgnoreCase);
-                this.CanonicalAuthority = regex.Replace(this.CanonicalAuthority, tenantId, 1);
+                CanonicalAuthority = regex.Replace(CanonicalAuthority, tenantId, 1);
             }
         }
     }

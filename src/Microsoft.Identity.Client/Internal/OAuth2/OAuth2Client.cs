@@ -92,14 +92,14 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             if (method == HttpMethod.Post)
             {
                 response = await
-                    HttpRequest.SendPost(CreateFullEndpointUri(endPoint), this._headers, this._bodyParameters,
+                    HttpRequest.SendPost(CreateFullEndpointUri(endPoint), _headers, _bodyParameters,
                         requestContext);
             }
             else
             {
                 response =
                     await
-                        HttpRequest.SendGet(CreateFullEndpointUri(endPoint), this._headers, requestContext);
+                        HttpRequest.SendGet(CreateFullEndpointUri(endPoint), _headers, requestContext);
             }
 
             return CreateResponse<T>(response, requestContext, addCorrelationId);
