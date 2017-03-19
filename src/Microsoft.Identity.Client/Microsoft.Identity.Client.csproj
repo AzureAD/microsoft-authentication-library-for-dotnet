@@ -22,6 +22,9 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
+    <DefineConstants>$(DefineConstants);WINRT</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
@@ -58,6 +61,7 @@
     <Compile Include="Features\EventSource\**\*.cs" />
     <Compile Include="Features\TokenCache\**\*.cs" />
     <Compile Include="Features\PublicClient\**\*.cs" />
+    <Compile Include="Features\*.cs" />
     <Compile Include="Features\ConfidentialClient\**\*.cs" />
     <Compile Update="Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
     <Compile Update="Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
@@ -69,6 +73,7 @@
     <Compile Include="Platforms\winrt\**\*.cs" />
     <Compile Include="Features\EventSource\**\*.cs" />
     <Compile Include="Features\PublicClient\**\*.cs" />
+    <Compile Include="Features\*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
     <Compile Include="Features\TokenCache\**\*.cs" />
