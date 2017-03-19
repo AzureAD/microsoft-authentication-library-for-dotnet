@@ -70,8 +70,7 @@ namespace Microsoft.Identity.Client
             AppTokenCache = appTokenCache;
             if (AppTokenCache != null)
             {
-                AppTokenCache.ClientId = clientId;
-                AppTokenCache.TokenCacheAccessor.TokenCachePlugin = PlatformPlugin.NewTokenCachePluginInstance;
+                this.AppTokenCache.ClientId = clientId;
             }
         }
 

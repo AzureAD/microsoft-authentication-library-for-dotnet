@@ -1,7 +1,21 @@
+branches:
+  only:
+    - dev
+    - duncanp/ci
+
 image: Visual Studio 2017     
+
+configuration: Release
+
+before_build:
+  - nuget restore
     
 build_script:
-  - ps: .\build.ps1
+  - ps: .\build\build.ps1
+
+test:
+  assemblies: 
+    - Test.MSAL.NET.Unit.dll
 
 skip_commits:
   files:
@@ -10,3 +24,7 @@ skip_commits:
 
 artifacts:
 - path: .\artifacts\*.nupkg
+
+on_finish:
+# Uncomment this to be able to RDP into the build agent
+# ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

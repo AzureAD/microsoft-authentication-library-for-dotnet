@@ -53,20 +53,7 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         public static IWebUIFactory WebUIFactory { get; set; }
-
-        public static ITokenCachePlugin NewTokenCachePluginInstance
-        {
-            get
-            {
-#if !NETSTANDARD1_1
-                return (ITokenCachePlugin)new TokenCachePlugin(new RequestContext(Guid.Empty));
-#else
-                return null;
-#endif
-            }
-        }
-
-        public static ITokenCachePlugin TokenCachePlugin { get; set; }
+        
         public static ILogger PlatformLogger { get; set; }
         public static PlatformInformationBase PlatformInformation { get; set; }
         public static ICryptographyHelper CryptographyHelper { get; set; }
@@ -77,7 +64,6 @@ namespace Microsoft.Identity.Client.Internal
 #if !NETSTANDARD1_1
             InjectDependecies(
                 (IWebUIFactory) new WebUIFactory(),
-                (ITokenCachePlugin) new TokenCachePlugin(new RequestContext(Guid.Empty)),
                 (ILogger)new PlatformLogger(),
                 (PlatformInformationBase) new PlatformInformation(new RequestContext(Guid.Empty)),
                 (ICryptographyHelper) new CryptographyHelper(),
@@ -85,12 +71,11 @@ namespace Microsoft.Identity.Client.Internal
 #endif
         }
 
-        public static void InjectDependecies(IWebUIFactory webUIFactory, ITokenCachePlugin tokenCachePlugin,
+        public static void InjectDependecies(IWebUIFactory webUIFactory,
             ILogger platformlogger,
             PlatformInformationBase platformInformation, ICryptographyHelper cryptographyHelper, IPlatformParameters platformParameters)
         {
             WebUIFactory = webUIFactory;
-            TokenCachePlugin = tokenCachePlugin;
             PlatformLogger = platformlogger;
             PlatformInformation = platformInformation;
             CryptographyHelper = cryptographyHelper;
