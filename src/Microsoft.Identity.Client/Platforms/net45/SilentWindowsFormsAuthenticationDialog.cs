@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client
             : base(ownerWindow)
         {
             SuppressBrowserSubDialogs();
-            WebBrowser.DocumentCompleted += this.DocumentCompletedHandler;
+            WebBrowser.DocumentCompleted += DocumentCompletedHandler;
         }
 
         /// <summary>

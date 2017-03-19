@@ -87,8 +87,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                                                     Constants.ExpirationMarginInMinutes)));
                         if (assertionNearExpiry)
                         {
-                            JsonWebToken jwtToken = new JsonWebToken(this.ClientId,
-                                this.Authority.SelfSignedJwtAudience);
+                            JsonWebToken jwtToken = new JsonWebToken(ClientId,
+                                Authority.SelfSignedJwtAudience);
                             ClientCredential.Assertion = jwtToken.Sign(ClientCredential.Certificate);
                             ClientCredential.ValidTo = jwtToken.Payload.ValidTo;
                         }

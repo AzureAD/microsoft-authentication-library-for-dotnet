@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
         {
             base.CreateSink();
 
-            object activeXInstance = this.ActiveXInstance;
+            object activeXInstance = ActiveXInstance;
             if (activeXInstance != null)
             {
                 webBrowserEvent = new CustomWebBrowserEvent(this);

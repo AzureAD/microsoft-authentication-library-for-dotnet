@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client
                     User = accessTokenCacheItem.User
                 };
 
-                this.HasStateChanged = true;
+                HasStateChanged = true;
                 OnBeforeAccess(args);
                 OnBeforeWrite(args);
 

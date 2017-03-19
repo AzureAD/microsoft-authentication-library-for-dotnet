@@ -49,8 +49,8 @@ namespace Microsoft.Identity.Client
         public WindowsFormsWebAuthenticationDialog(object ownerWindow)
             : base(ownerWindow)
         {
-            this.Shown += this.FormShownHandler;
-            WebBrowser.DocumentTitleChanged += this.WebBrowserDocumentTitleChangedHandler;
+            Shown += FormShownHandler;
+            WebBrowser.DocumentTitleChanged += WebBrowserDocumentTitleChangedHandler;
             WebBrowser.ObjectForScripting = this;
         }
 
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public void ShowBrowser()
         {
-            DialogResult uiResult = this.ShowDialog(ownerWindow);
+            DialogResult uiResult = ShowDialog(ownerWindow);
 
             switch (uiResult)
             {
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected override void OnClosingUrl()
         {
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client
         protected override void OnNavigationCanceled(int inputStatusCode)
         {
             statusCode = inputStatusCode;
-            this.DialogResult = (inputStatusCode == 0) ? DialogResult.Cancel : DialogResult.Abort;
+            DialogResult = (inputStatusCode == 0) ? DialogResult.Cancel : DialogResult.Abort;
         }
 
         private void SetBrowserZoom()
@@ -141,15 +141,15 @@ namespace Microsoft.Identity.Client
         {
             // If we don't have an owner we need to make sure that the pop up browser 
             // window is on top of other windows.  Activating the window will accomplish this.
-            if (null == this.Owner)
+            if (null == Owner)
             {
-                this.Activate();
+                Activate();
             }
         }
 
         private void WebBrowserDocumentTitleChangedHandler(object sender, EventArgs e)
         {
-            this.Text = WebBrowser.DocumentTitle;
+            Text = WebBrowser.DocumentTitle;
         }
     }
 }
