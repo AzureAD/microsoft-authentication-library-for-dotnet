@@ -35,10 +35,10 @@ msbuild "$sourcePath\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csp
 msbuild "$sourcePath\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" /m /t:build /p:Configuration=$configuration $appVeyorLogger $targetFrameworks 
 ExitOnError
 
-#Log("Building Tests...")
-#msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:restore /p:Configuration=$configuration $appVeyorLogger $targetFrameworks
-#msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:build /p:Configuration=$configuration $appVeyorLogger $targetFrameworks
-#ExitOnError
+Log("Building Tests...")
+msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:restore /p:Configuration=$configuration $appVeyorLogger
+msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:build /p:Configuration=$configuration $appVeyorLogger
+ExitOnError
 
 
 Log("Building Packages")
