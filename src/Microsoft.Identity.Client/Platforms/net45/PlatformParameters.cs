@@ -43,14 +43,12 @@ namespace Microsoft.Identity.Client
         /// <param name="ownerWindow"></param>
         public PlatformParameters(object ownerWindow)
         {
-            this.OwnerWindow = ownerWindow;
+            OwnerWindow = ownerWindow;
         }
 
         /// <summary>
         /// Gets the owner of the browser dialog which pops up for receiving user credentials. It can be null.
         /// </summary>
         public object OwnerWindow { get; private set; }
-
-        internal bool UseHiddenBrowser { get; set; }
     }
 }

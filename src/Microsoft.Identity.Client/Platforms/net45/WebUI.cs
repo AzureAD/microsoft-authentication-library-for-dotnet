@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
             AuthorizationResult authorizationResult = null;
 
             var sendAuthorizeRequest = new Action(
-                delegate { authorizationResult = this.Authenticate(authorizationUri, redirectUri); });
+                delegate { authorizationResult = Authenticate(authorizationUri, redirectUri); });
 
             // If the thread is MTA, it cannot create or communicate with WebBrowser which is a COM control.
             // In this case, we have to create the browser in an STA thread via StaTaskScheduler object.
@@ -88,11 +88,11 @@ namespace Microsoft.Identity.Client
 
         internal AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri)
         {
-            this.RequestUri = requestUri;
-            this.CallbackUri = callbackUri;
+            RequestUri = requestUri;
+            CallbackUri = callbackUri;
 
             ThrowOnNetworkDown();
-            return this.OnAuthenticate();
+            return OnAuthenticate();
         }
 
         private static void ThrowOnNetworkDown()

@@ -43,12 +43,12 @@ namespace Test.MSAL.NET.Unit.RequestsTests
     [TestClass]
     public class SilentRequestTests
     {
-        private TokenCachePlugin _tokenCachePlugin;
+        TokenCache cache;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _tokenCachePlugin = (TokenCachePlugin)PlatformPlugin.TokenCachePlugin;
+            cache = new TokenCache();
             Authority.ValidatedAuthorities.Clear();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
@@ -57,7 +57,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCleanup]
         public void TestCleanup()
         {
-            _tokenCachePlugin.TokenCacheDictionary.Clear();
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Clear();
+            cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Clear();
         }
 
         [TestMethod]
@@ -98,7 +99,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             parameters.User = new User()
             {
-                UniqueId = TestConstants.UniqueId
             };
             request = new SilentRequest(parameters, false);
             Assert.IsNotNull(request);
@@ -116,7 +116,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 ClientId = TestConstants.ClientId
             };
-            TokenCacheHelper.PopulateCache(_tokenCachePlugin);
+            TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
@@ -128,7 +128,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 User = new User()
                 {
                     HomeObjectId = TestConstants.HomeObjectId,
-                    UniqueId = TestConstants.UniqueId,
                     DisplayableId = TestConstants.DisplayableId
                 }
             };
@@ -162,7 +161,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         public void SilentRefreshFailedNoCacheItemFoundTest()
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-            TokenCache cache = new TokenCache()
+            cache = new TokenCache()
             {
                 ClientId = TestConstants.ClientId
             };
@@ -180,7 +179,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientId = TestConstants.ClientId,
                 Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
                 TokenCache = cache,
-                User = new User() { UniqueId = ""},
+                User = new User(),
                 RequestContext = new RequestContext(Guid.Empty)
             };
             

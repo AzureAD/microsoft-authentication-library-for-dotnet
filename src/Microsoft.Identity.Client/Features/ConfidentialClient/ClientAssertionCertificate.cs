@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
         /// <param name="certificate">The certificate used as credential.</param>
         public ClientAssertionCertificate(X509Certificate2 certificate)
         {
-            this.Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
+            Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
 
 #if NET45
             if (certificate.PublicKey. Key.KeySize < MinKeySizeInBits)
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client
         public byte[] Sign(string message)
         {
             CryptographyHelper helper = new CryptographyHelper();
-            return helper.SignWithCertificate(message, this.Certificate);
+            return helper.SignWithCertificate(message, Certificate);
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
         public string Thumbprint
         {
             // Thumbprint should be url encoded
-            get { return Base64UrlEncoder.Encode(this.Certificate.GetCertHash()); }
+            get { return Base64UrlEncoder.Encode(Certificate.GetCertHash()); }
         }
     }
 }

@@ -25,19 +25,60 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Diagnostics.Tracing;
+using System;
+using System.Collections.Generic;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 
 namespace Microsoft.Identity.Client
 {
-    /// <summary>
-    /// </summary>
-    public static class MsalOption
+    internal class TokenCacheAccessor : ITokenCacheAccessor
     {
-        /// <summary>
-        /// </summary>
-        public static EventSource MsalEventSource
+
+        private RequestContext _requestContext;
+
+        public TokenCacheAccessor()
         {
-            get { return PlatformLogger.MsalEventSource; }
+        }
+
+        public TokenCacheAccessor(RequestContext requestContext) : this()
+        {
+            _requestContext = requestContext;
+        }
+
+        public void SaveAccessToken(string cacheKey, string item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SaveRefreshToken(string cacheKey, string item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetRefreshToken(string refreshTokenKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteAccessToken(string cacheKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteRefreshToken(string cacheKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICollection<string> GetAllAccessTokensAsString()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICollection<string> GetAllRefreshTokensAsString()
+        {
+            throw new NotImplementedException();
         }
     }
 }

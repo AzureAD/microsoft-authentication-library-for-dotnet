@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
 
         public PlatformParameters(bool useCorporateNetwork)
         {
-            this.UseCorporateNetwork = useCorporateNetwork;
+            UseCorporateNetwork = useCorporateNetwork;
         }
 
         /// <summary>
@@ -48,5 +48,7 @@ namespace Microsoft.Identity.Client
         /// application's callback URI as redirectUri.
         /// </summary>
         public bool UseCorporateNetwork { get; private set; }
+
+        internal bool UseHiddenBrowser { get; set; }
     }
 }

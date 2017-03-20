@@ -90,7 +90,7 @@ namespace AndroidTestApp
             linLayout.AddView(clearCacheButton);
 
 
-            this.accessTokenTextView = new TextView(this)
+            accessTokenTextView = new TextView(this)
             {
                 Id = 5
             };
@@ -108,7 +108,7 @@ namespace AndroidTestApp
         
         private async void acquireTokenSilentButton_Click(object sender, EventArgs e)
         {
-            this.accessTokenTextView.Text = string.Empty;
+            accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
             tokenBroker.Sts = sts;
             EditText email = FindViewById<EditText>(1);
@@ -127,7 +127,7 @@ namespace AndroidTestApp
                 value = exc.Message;
             }
 
-            this.accessTokenTextView.Text = value;
+            accessTokenTextView.Text = value;
 
         }
 
@@ -135,7 +135,7 @@ namespace AndroidTestApp
         {
             PublicClientApplication application = new PublicClientApplication("<client_id>");
             application.RedirectUri = "<redirect_uri>";
-            this.accessTokenTextView.Text = string.Empty;
+            accessTokenTextView.Text = string.Empty;
             TokenBroker tokenBroker = new TokenBroker();
             tokenBroker.Sts = sts;
             EditText email = FindViewById<EditText>(1);
@@ -156,14 +156,14 @@ namespace AndroidTestApp
                 value = exc.Message;
             }
 
-            this.accessTokenTextView.Text = value;
+            accessTokenTextView.Text = value;
         }
 
         private async void clearCacheButton_Click(object sender, EventArgs e)
         {
             await Task.Factory.StartNew(() =>
             {
-                this.accessTokenTextView.Text = "Cache cleared";
+                accessTokenTextView.Text = "Cache cleared";
             }).ConfigureAwait(false);
         }
     }

@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client
 
         public NavigateErrorStatus()
         {
-            this.Messages = new Dictionary<int, string>
+            Messages = new Dictionary<int, string>
             {
                 {
                     (int) NavigateErrorStatusCode.HTTP_STATUS_BAD_REQUEST,

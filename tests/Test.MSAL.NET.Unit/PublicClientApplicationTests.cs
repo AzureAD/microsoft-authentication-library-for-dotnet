@@ -46,13 +46,12 @@ namespace Test.MSAL.NET.Unit
     [TestClass]
     public class PublicClientApplicationTests
     {
-
-        private TokenCachePlugin _tokenCachePlugin;
+        TokenCache cache;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _tokenCachePlugin = (TokenCachePlugin)PlatformPlugin.TokenCachePlugin;
+            cache = new TokenCache();
             Authority.ValidatedAuthorities.Clear();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
@@ -61,7 +60,8 @@ namespace Test.MSAL.NET.Unit
         [TestCleanup]
         public void TestCleanup()
         {
-            _tokenCachePlugin.TokenCacheDictionary.Clear();
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Clear();
+            cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Clear();
         }
 
         [TestMethod]
@@ -82,7 +82,6 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.RedirectUri);
             Assert.IsTrue(app.ValidateAuthority);
 
-
             app = new PublicClientApplication(TestConstants.ClientId, "https://login.microsoftonline.com/tfp/vibrob2c.onmicrosoft.com/B2C_1_B2C_Signup_Signin_Policy/oauth2/v2.0");
             Assert.IsNotNull(app);
             Assert.AreEqual("https://login.microsoftonline.com/tfp/vibrob2c.onmicrosoft.com/b2c_1_b2c_signup_signin_policy/", app.Authority);
@@ -99,20 +98,16 @@ namespace Test.MSAL.NET.Unit
             IEnumerable<User> users = app.Users;
             Assert.IsNotNull(users);
             Assert.IsFalse(users.Any());
-            app.UserTokenCache = new TokenCache()
+            cache = new TokenCache()
             {
                 ClientId = TestConstants.ClientId
             };
 
-            TokenCacheHelper.PopulateCache(_tokenCachePlugin);
+            app.UserTokenCache = cache;
+            TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
             users = app.Users;
             Assert.IsNotNull(users);
             Assert.AreEqual(1, users.Count());
-            foreach (var user in users)
-            {
-                Assert.AreEqual(TestConstants.ClientId, user.ClientId);
-                Assert.IsNotNull(user.TokenCache);
-            }
 
             // another cache entry for different home object id. user count should be 2.
             TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
@@ -128,18 +123,17 @@ namespace Test.MSAL.NET.Unit
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    UniqueId = TestConstants.UniqueId + "more",
                     HomeObjectId = TestConstants.HomeObjectId
                 },
                 Scope = TestConstants.Scope
             };
-            _tokenCachePlugin.TokenCacheDictionary[key.ToString()] = JsonHelper.SerializeToJson(item);
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary[key.ToString()] = JsonHelper.SerializeToJson(item);
 
 
             // another cache entry for different home object id. user count should be 2.
             TokenCacheKey rtKey = new TokenCacheKey(null, null, TestConstants.ClientId,
                 TestConstants.HomeObjectId + "more");
-            
+
             RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
             {
                 ClientId = TestConstants.ClientId,
@@ -148,21 +142,15 @@ namespace Test.MSAL.NET.Unit
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    UniqueId = TestConstants.UniqueId + "more",
                     HomeObjectId = TestConstants.HomeObjectId + "more"
                 }
             };
-            _tokenCachePlugin.TokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
+            cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
 
 
             users = app.Users;
             Assert.IsNotNull(users);
             Assert.AreEqual(2, users.Count());
-            foreach (var user in users)
-            {
-                Assert.AreEqual(TestConstants.ClientId, user.ClientId);
-                Assert.IsNotNull(user.TokenCache);
-            }
         }
 
 
@@ -175,15 +163,15 @@ namespace Test.MSAL.NET.Unit
             {
                 ClientId = TestConstants.ClientId
             };
-            TokenCacheHelper.PopulateCache(_tokenCachePlugin);
+            TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
 
             foreach (var user in app.Users)
             {
-                user.SignOut();
+                app.Remove(user);
             }
 
-            Assert.AreEqual(0, app.UserTokenCache.AccessTokenCount);
-            Assert.AreEqual(0, app.UserTokenCache.RefreshTokenCount);
+            Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
         }
 
         [TestMethod]
@@ -202,30 +190,30 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
 
-            app.UserTokenCache = new TokenCache()
+            cache = new TokenCache()
             {
                 ClientId = TestConstants.ClientId
             };
-            TokenCacheHelper.PopulateCache(_tokenCachePlugin);
-            _tokenCachePlugin.TokenCacheDictionary.Remove(new TokenCacheKey(TestConstants.AuthorityGuestTenant,
+
+            app.UserTokenCache = cache;
+            TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Remove(new TokenCacheKey(TestConstants.AuthorityGuestTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
                 TestConstants.HomeObjectId).ToString());
 
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), new User()
             {
-                UniqueId = TestConstants.UniqueId,
                 DisplayableId = TestConstants.DisplayableId,
                 HomeObjectId = TestConstants.HomeObjectId,
             }, app.Authority, false);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
-            Assert.AreEqual(TestConstants.UniqueId, result.User.UniqueId);
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
-        
+
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSilentForceRefreshTest()
@@ -242,11 +230,13 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
 
-            app.UserTokenCache = new TokenCache()
+            cache = new TokenCache()
             {
                 ClientId = TestConstants.ClientId
             };
-            TokenCacheHelper.PopulateCache(_tokenCachePlugin);
+
+            app.UserTokenCache = cache;
+            TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
@@ -260,14 +250,12 @@ namespace Test.MSAL.NET.Unit
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(),
                 new User()
                 {
-                    UniqueId = TestConstants.UniqueId,
                     DisplayableId = TestConstants.DisplayableId,
                     HomeObjectId = TestConstants.HomeObjectId,
                 }, app.Authority, true);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
-            Assert.AreEqual(TestConstants.UniqueId, result.User.UniqueId);
             Assert.AreEqual(
                 TestConstants.Scope.Union(TestConstants.ScopeForAnotherResource).ToArray().AsSingleString(),
                 result.Scope.AsSingleString());
@@ -292,11 +280,13 @@ namespace Test.MSAL.NET.Unit
             });
 
             //populate cache
-            app.UserTokenCache = new TokenCache()
+            cache = new TokenCache()
             {
                 ClientId = TestConstants.ClientId
             };
-            TokenCacheHelper.PopulateCache(_tokenCachePlugin);
+
+            app.UserTokenCache = cache;
+            TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
 
             MockHttpMessageHandler mockHandler = new MockHttpMessageHandler();
             mockHandler.Method = HttpMethod.Post;
@@ -308,7 +298,6 @@ namespace Test.MSAL.NET.Unit
                     app.AcquireTokenSilentAsync(TestConstants.ScopeForAnotherResource.ToArray(),
                         new User()
                         {
-                            UniqueId = TestConstants.UniqueId,
                             DisplayableId = TestConstants.DisplayableId,
                             HomeObjectId = TestConstants.HomeObjectId,
                         }, app.Authority, false);
@@ -319,7 +308,7 @@ namespace Test.MSAL.NET.Unit
             {
                 Assert.IsNotNull(ex.InnerException);
                 Assert.IsTrue(ex.InnerException is MsalServiceException);
-                var msalExc = (MsalServiceException) ex.InnerException;
+                var msalExc = (MsalServiceException)ex.InnerException;
                 Assert.AreEqual(msalExc.ErrorCode, "invalid_grant");
             }
 

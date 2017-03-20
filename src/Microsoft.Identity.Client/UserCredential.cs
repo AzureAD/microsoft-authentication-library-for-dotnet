@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public UserCredential()
         {
-            this.UserAuthType = UserAuthType.IntegratedAuth;
+            UserAuthType = UserAuthType.IntegratedAuth;
         }
 
         /// <summary>
@@ -54,8 +54,8 @@ namespace Microsoft.Identity.Client
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
         public UserCredential(string userName)
         {
-            this.UserName = userName;
-            this.UserAuthType = UserAuthType.IntegratedAuth;
+            UserName = userName;
+            UserAuthType = UserAuthType.IntegratedAuth;
         }
 
         /// <summary>

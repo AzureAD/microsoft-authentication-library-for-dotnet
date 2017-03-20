@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,31 +25,32 @@
 //
 //------------------------------------------------------------------------------
 
-using Android.App;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Client
+namespace Test.MSAL.NET.Unit
 {
-    /// <summary>
-    /// Additional parameters used in acquiring user's authorization
-    /// </summary>
-    public class PlatformParameters : IPlatformParameters
+    [TestClass]
+    public class UIBehaviorTests
     {
-        /// <summary>
-        /// </summary>
-        public PlatformParameters()
-        {
-        }
 
-        /// <summary>
-        /// </summary>
-        public PlatformParameters(Activity callerActivity) : this()
+        [TestMethod()]
+        [TestCategory("UIBehaviorTests")]
+        public void EqualityTest()
         {
-            CallerActivity = callerActivity;
-        }
+            UIBehavior ub1 = UIBehavior.Never;
+            UIBehavior ub2 = UIBehavior.ForceLogin;
 
-        /// <summary>
-        /// Caller Android Activity
-        /// </summary>
-        public Activity CallerActivity { get; private set; }
+            Assert.AreNotEqual(ub1, ub2);
+            Assert.AreEqual(ub1, UIBehavior.Never);
+            Assert.IsTrue(ub1 != ub2);
+            Assert.IsTrue(ub1 == UIBehavior.Never);
+        }
     }
+
 }

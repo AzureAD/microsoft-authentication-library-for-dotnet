@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
 
             //dismiss safariviewcontroller
-            this.parameters.CallerViewController.InvokeOnMainThread(() =>
+            parameters.CallerViewController.InvokeOnMainThread(() =>
             { safariViewController.DismissViewController(false, null);
             });
 
@@ -82,9 +82,9 @@ namespace Microsoft.Identity.Client
             {
                 safariViewController = new SFSafariViewController(new NSUrl(authorizationUri.AbsoluteUri), false);
                 safariViewController.Delegate = this;
-                this.parameters.CallerViewController.InvokeOnMainThread(() =>
+                parameters.CallerViewController.InvokeOnMainThread(() =>
                 {
-                    this.parameters.CallerViewController.PresentViewController(safariViewController, false, null);
+                    parameters.CallerViewController.PresentViewController(safariViewController, false, null);
                 });
             }
             catch (Exception ex)

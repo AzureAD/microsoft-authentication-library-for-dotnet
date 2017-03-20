@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Client
     internal class WebUI : IWebUI
     {
         private readonly bool useCorporateNetwork;
+        private readonly bool silentMode;
 
         public WebUI(IPlatformParameters parameters, RequestContext requestContext)
         {
@@ -45,7 +46,8 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentException("parameters should be of type PlatformParameters", nameof(parameters));
             }
 
-            this.useCorporateNetwork = ((PlatformParameters) parameters).UseCorporateNetwork;
+            useCorporateNetwork = ((PlatformParameters) parameters).UseCorporateNetwork;
+            silentMode = ((PlatformParameters) parameters).UseHiddenBrowser;
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
@@ -54,10 +56,15 @@ namespace Microsoft.Identity.Client
             bool ssoMode = ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri);
 
             WebAuthenticationResult webAuthenticationResult;
-            WebAuthenticationOptions options = (this.useCorporateNetwork &&
+            WebAuthenticationOptions options = (useCorporateNetwork &&
                                                 (ssoMode || redirectUri.Scheme == Constants.MsAppScheme))
                 ? WebAuthenticationOptions.UseCorporateNetwork
                 : WebAuthenticationOptions.None;
+
+            if (silentMode)
+            {
+                options |= WebAuthenticationOptions.SilentMode;
+            }
 
             try
             {

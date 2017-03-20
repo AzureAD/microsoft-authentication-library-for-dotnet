@@ -1,7 +1,26 @@
+branches:
+  only:
+    - dev
+    - duncanp/ci
+
 image: Visual Studio 2017     
+
+configuration: Release
+
+install:
+- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/install-android-sdk.ps1?v=2'))
+- ps: $sdks = Get-AndroidSDKs |? { $_.name -like 'sdk platform*API 24*' -or $_.name -like 'Google APIs, Android API 24' } 
+- ps: Install-AndroidSDK -sdks $sdks
+
+before_build:
+  - nuget restore
     
 build_script:
-  - ps: .\build.ps1
+  - ps: .\build\build.ps1
+
+test:
+  assemblies: 
+    - Test.MSAL.NET.Unit.dll
 
 skip_commits:
   files:
@@ -10,3 +29,7 @@ skip_commits:
 
 artifacts:
 - path: .\artifacts\*.nupkg
+
+on_finish:
+# Uncomment this to be able to RDP into the build agent
+# ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

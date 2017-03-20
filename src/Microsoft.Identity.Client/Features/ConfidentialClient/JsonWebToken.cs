@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Internal
 
             DateTime validTo = validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds);
 
-            this.Payload = new JWTPayload
+            Payload = new JWTPayload
             {
                 Audience = audience,
                 Issuer = clientId,
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.Internal
         public string Sign(ClientAssertionCertificate credential)
         {
             // Base64Url encoded header and claims
-            string token = this.Encode(credential);
+            string token = Encode(credential);
 
             // Length check before sign
             if (MaxTokenLength < token.Length)
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Internal
             string encodedHeader = EncodeSegment(jsonHeader);
 
             // Payload segment
-            string jsonPayload = JsonHelper.SerializeToJson(this.Payload);
+            string jsonPayload = JsonHelper.SerializeToJson(Payload);
 
             string encodedPayload = EncodeSegment(jsonPayload);
 
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             public JWTHeader(ClientAssertionCertificate credential)
             {
-                this.Credential = credential;
+                Credential = credential;
             }
 
             protected ClientAssertionCertificate Credential { get; }
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client.Internal
             {
                 get
                 {
-                    return this.Credential == null
+                    return Credential == null
                         ? JsonWebTokenConstants.Algorithms.None
                         : JsonWebTokenConstants.Algorithms.RsaSha256;
                 }
@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Client.Internal
                 get
                 {
                     // Thumbprint should be url encoded
-                    return this.Credential.Thumbprint;
+                    return Credential.Thumbprint;
                 }
 
                 set

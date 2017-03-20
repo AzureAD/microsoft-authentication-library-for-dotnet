@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string TargetFrameName
         {
-            get { return this.targetFrameName; }
+            get { return targetFrameName; }
         }
 
         // url as a string, as in case of error it could be invalid url
@@ -63,21 +63,21 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string Url
         {
-            get { return this.url; }
+            get { return url; }
         }
         
         /// <summary>
         /// </summary>
         public int StatusCode
         {
-            get { return this.statusCode; }
+            get { return statusCode; }
         }
 
         /// <summary>
         /// </summary>
         public object WebBrowserActiveXInstance
         {
-            get { return this.webBrowserActiveXInstance; }
+            get { return webBrowserActiveXInstance; }
         }
     }
 }

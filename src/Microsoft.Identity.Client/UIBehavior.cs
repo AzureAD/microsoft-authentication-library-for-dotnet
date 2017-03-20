@@ -51,11 +51,38 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public static readonly UIBehavior Consent = new UIBehavior("consent");
 
-        internal string PromptValue { get; set; }
 
-        internal UIBehavior(string promptValue)
+#if NET45 || WINRT
+        /// <summary>
+        /// Only available on .NET platform. AcquireToken will send prompt=attempt_none to 
+        /// authorize endpoint and the library uses a hidden webview to authenticate the user.
+        /// </summary>
+        public static readonly UIBehavior Never = new UIBehavior("attempt_none");
+#endif
+
+        internal string PromptValue { get; }
+
+        private UIBehavior(string promptValue)
         {
             PromptValue = promptValue;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is UIBehavior && this == (UIBehavior)obj;
+        }
+        public override int GetHashCode()
+        {
+            return PromptValue.GetHashCode();
+        }
+        public static bool operator ==(UIBehavior x, UIBehavior y)
+        {
+            return x.PromptValue == y.PromptValue;
+        }
+
+        public static bool operator !=(UIBehavior x, UIBehavior y)
+        {
+            return !(x == y);
         }
     }
 }

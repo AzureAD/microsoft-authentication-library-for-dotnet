@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public PlatformParameters(UIViewController callerViewController) : this()
         {
-            this.CallerViewController = callerViewController;
+            CallerViewController = callerViewController;
         }
 
         /// <summary>

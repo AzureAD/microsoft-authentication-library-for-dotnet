@@ -68,7 +68,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                 }
             }
 
-            return await Task.Factory.StartNew(() => this.MockResult).ConfigureAwait(false);
+            return await Task.Factory.StartNew(() => MockResult).ConfigureAwait(false);
         }
     }
 }

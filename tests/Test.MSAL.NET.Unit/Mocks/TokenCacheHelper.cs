@@ -35,8 +35,8 @@ namespace Test.MSAL.NET.Unit.Mocks
     internal class TokenCacheHelper
     {
         public static long ValidExpiresIn = 28800;
-        
-        public static void PopulateCache(TokenCachePlugin cachePlugin)
+
+        public static void PopulateCache(TokenCacheAccessor accessor)
         {
             AccessTokenCacheItem item = new AccessTokenCacheItem()
             {
@@ -48,14 +48,13 @@ namespace Test.MSAL.NET.Unit.Mocks
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    UniqueId = TestConstants.UniqueId,
                     HomeObjectId = TestConstants.HomeObjectId
                 },
                 Scope = TestConstants.Scope
             };
             item.AccessToken = item.GetTokenCacheKey().ToString();
             //add access token
-            cachePlugin.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
+            accessor.AccessTokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
 
             item = new AccessTokenCacheItem()
             {
@@ -67,29 +66,27 @@ namespace Test.MSAL.NET.Unit.Mocks
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    UniqueId = TestConstants.UniqueId + "more",
                     HomeObjectId = TestConstants.HomeObjectId
                 },
                 Scope = TestConstants.ScopeForAnotherResource
             };
             item.AccessToken = item.GetTokenCacheKey().ToString();
             //add another access token
-            cachePlugin.TokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
-            
+            accessor.AccessTokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
+
             RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
             {
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
                 RefreshToken = "someRT",
-                RawIdToken = MockHelpers.DefaultIdToken,
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId, TestConstants.HomeObjectId),
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    UniqueId = TestConstants.UniqueId,
                     HomeObjectId = TestConstants.HomeObjectId
                 }
             };
-            cachePlugin.TokenCacheDictionary[rtItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
+            accessor.RefreshTokenCacheDictionary[rtItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
         }
     }
 }

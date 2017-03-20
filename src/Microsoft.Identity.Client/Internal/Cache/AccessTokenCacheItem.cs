@@ -70,14 +70,9 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public SortedSet<string> Scope { get; internal set; }
 
         /// <summary>
-        /// Gets the user's unique Id.
+        /// Gets the TenantId.
         /// </summary>
-        public string UniqueId { get { return User?.UniqueId; } }
-
-        /// <summary>
-        /// Gets the user's displayable Id.
-        /// </summary>
-        public string DisplayableId { get { return User?.DisplayableId; } }
+        public string TenantId => IdToken?.TenantId;
 
         [DataMember(Name = "user_assertion_hash")]
         internal string UserAssertionHash { get; set; }
@@ -96,8 +91,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
             }
 
             IdToken idToken = IdToken.Parse(response.IdToken, RequestContext);
+
             if (idToken != null)
             {
+                User = User.CreateFromIdToken(idToken);
             }
 
             TokenType = response.TokenType;

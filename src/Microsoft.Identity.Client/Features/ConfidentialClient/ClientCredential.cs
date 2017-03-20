@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         /// <param name="certificate">certificate of the client requesting the token.</param>
         public ClientCredential(ClientAssertionCertificate certificate)
         {
-            this.Certificate = certificate;
+            Certificate = certificate;
         }
 
         internal ClientAssertionCertificate Certificate { get; private set; }
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(secret));
             }
 
-            this.Secret = secret;
+            Secret = secret;
         }
 
         internal string Secret { get; private set; }

@@ -77,6 +77,7 @@ namespace AutomationApp
 
         public async Task<string> AcquireTokenSilent(Dictionary<string, string> input)
         {
+
             PublicClientApplication client = new PublicClientApplication(input["client_id"]);
             string[] scope = new string[] { "mail.read" };
 
@@ -87,7 +88,7 @@ namespace AutomationApp
             return ToJson(result);
         }
 
-        public async Task<string> ExpireAccessToken(Dictionary<string, string> input)
+        /*public async Task<string> ExpireAccessToken(Dictionary<string, string> input)
         {
             CurrentTokenCache.FindAccessToken()
 

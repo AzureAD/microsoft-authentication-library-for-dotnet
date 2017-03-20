@@ -92,9 +92,9 @@ namespace Microsoft.Identity.Client
                     "Invalid owner window type. Expected types are IWin32Window or IntPtr (for window handle).");
             }
 
-            this.webBrowser = new CustomWebBrowser();
-            this.webBrowser.PreviewKeyDown += webBrowser_PreviewKeyDown;
-            this.InitializeComponent();
+            webBrowser = new CustomWebBrowser();
+            webBrowser.PreviewKeyDown += webBrowser_PreviewKeyDown;
+            InitializeComponent();
         }
 
         internal AuthorizationResult Result { get; set; }
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public WebBrowser WebBrowser
         {
-            get { return this.webBrowser; }
+            get { return webBrowser; }
         }
 
         private void webBrowser_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -119,13 +119,13 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected virtual void WebBrowserNavigatingHandler(object sender, WebBrowserNavigatingEventArgs e)
         {
-            if (this.DialogResult == DialogResult.OK)
+            if (DialogResult == DialogResult.OK)
             {
                 e.Cancel = true;
                 return;
             }
 
-            if (this.webBrowser.IsDisposed)
+            if (webBrowser.IsDisposed)
             {
                 // we cancel all flows in disposed object and just do nothing, let object to close.
                 // it just for safety.
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Client
             // we cancel further processing, if we reached final URL.
             // Security issue: we prohibit navigation with auth code
             // if redirect URI is URN, then we prohibit navigation, to prevent random browser popup.
-            e.Cancel = this.CheckForClosingUrl(e.Url);
+            e.Cancel = CheckForClosingUrl(e.Url);
 
             // check if the url scheme is of type browser-install://
             // this means we need to launch external browser
@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client
 
         private void WebBrowserNavigatedHandler(object sender, WebBrowserNavigatedEventArgs e)
         {
-            if (!this.CheckForClosingUrl(e.Url))
+            if (!CheckForClosingUrl(e.Url))
             {
                 RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture, "Navigated to '{0}'.",
                         MsalHelpers.UrlDecode(e.Url.ToString())));
@@ -173,20 +173,20 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected virtual void WebBrowserNavigateErrorHandler(object sender, WebBrowserNavigateErrorEventArgs e)
         {
-            if (this.DialogResult == DialogResult.OK)
+            if (DialogResult == DialogResult.OK)
             {
                 e.Cancel = true;
                 return;
             }
 
-            if (this.webBrowser.IsDisposed)
+            if (webBrowser.IsDisposed)
             {
                 // we cancel all flow in disposed object.
                 e.Cancel = true;
                 return;
             }
 
-            if (this.webBrowser.ActiveXInstance != e.WebBrowserActiveXInstance)
+            if (webBrowser.ActiveXInstance != e.WebBrowserActiveXInstance)
             {
                 // this event came from internal frame, ignore this.
                 return;
@@ -199,36 +199,36 @@ namespace Microsoft.Identity.Client
             }
 
             e.Cancel = true;
-            this.StopWebBrowser();
+            StopWebBrowser();
             // in this handler object could be already disposed, so it should be the last method
-            this.OnNavigationCanceled(e.StatusCode);
+            OnNavigationCanceled(e.StatusCode);
         }
 
         private bool CheckForClosingUrl(Uri url)
         {
             bool readyToClose = false;
 
-            if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) &&
-                url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath))
+            if (url.Authority.Equals(desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) &&
+                url.AbsolutePath.Equals(desiredCallbackUri.AbsolutePath))
             {
-                this.Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
+                Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
                 readyToClose = true;
             }
 
             if (!readyToClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) &&
                 !url.AbsoluteUri.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) && !url.AbsoluteUri.Equals("javascript", StringComparison.CurrentCultureIgnoreCase))
             {
-                this.Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
-                this.Result.Error = MsalError.NonHttpsRedirectNotSupported;
-                this.Result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
+                Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
+                Result.Error = MsalError.NonHttpsRedirectNotSupported;
+                Result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
                 readyToClose = true;
             }
 
             if (readyToClose)
             {
-                this.StopWebBrowser();
+                StopWebBrowser();
                 // in this handler object could be already disposed, so it should be the last method
-                this.OnClosingUrl();
+                OnClosingUrl();
             }
 
             return readyToClose;
@@ -236,19 +236,19 @@ namespace Microsoft.Identity.Client
 
         private void StopWebBrowser()
         {
-            if (!this.webBrowser.IsDisposed)
+            if (!webBrowser.IsDisposed)
             {
-                if (this.webBrowser.IsBusy)
+                if (webBrowser.IsBusy)
                 {
                     RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
                             "WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
-                            this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
-                            this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
-                    this.webBrowser.Stop();
+                            webBrowser.IsBusy, webBrowser.ReadyState, webBrowser.Created,
+                            webBrowser.Disposing, webBrowser.IsDisposed, webBrowser.IsOffline));
+                    webBrowser.Stop();
                     RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
                             "WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
-                            this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
-                            this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
+                            webBrowser.IsBusy, webBrowser.ReadyState, webBrowser.Created,
+                            webBrowser.Disposing, webBrowser.IsDisposed, webBrowser.IsOffline));
                 }
             }
         }
@@ -263,20 +263,20 @@ namespace Microsoft.Identity.Client
 
         internal AuthorizationResult AuthenticateAAD(Uri requestUri, Uri callbackUri)
         {
-            this.desiredCallbackUri = callbackUri;
-            this.Result = null;
+            desiredCallbackUri = callbackUri;
+            Result = null;
 
             // The WebBrowser event handlers must not throw exceptions.
             // If they do then they may be swallowed by the native
             // browser com control.
-            this.webBrowser.Navigating += this.WebBrowserNavigatingHandler;
-            this.webBrowser.Navigated += this.WebBrowserNavigatedHandler;
-            this.webBrowser.NavigateError += this.WebBrowserNavigateErrorHandler;
+            webBrowser.Navigating += WebBrowserNavigatingHandler;
+            webBrowser.Navigated += WebBrowserNavigatedHandler;
+            webBrowser.NavigateError += WebBrowserNavigateErrorHandler;
 
-            this.webBrowser.Navigate(requestUri);
-            this.OnAuthenticate();
+            webBrowser.Navigate(requestUri);
+            OnAuthenticate();
 
-            return this.Result;
+            return Result;
         }
 
         /// <summary>
@@ -287,63 +287,63 @@ namespace Microsoft.Identity.Client
 
         private void InitializeComponent()
         {
-            Screen screen = (this.ownerWindow != null)
-                ? Screen.FromHandle(this.ownerWindow.Handle)
+            Screen screen = (ownerWindow != null)
+                ? Screen.FromHandle(ownerWindow.Handle)
                 : Screen.PrimaryScreen;
 
             // Window height is set to 70% of the screen height.
             int uiHeight = (int) (Math.Max(screen.WorkingArea.Height, 160)*70.0/DpiHelper.ZoomPercent);
-            this.webBrowserPanel = new Panel();
-            this.webBrowserPanel.SuspendLayout();
-            this.SuspendLayout();
+            webBrowserPanel = new Panel();
+            webBrowserPanel.SuspendLayout();
+            SuspendLayout();
 
             // 
             // webBrowser
             // 
-            this.webBrowser.Dock = DockStyle.Fill;
-            this.webBrowser.Location = new Point(0, 25);
-            this.webBrowser.MinimumSize = new Size(20, 20);
-            this.webBrowser.Name = "webBrowser";
-            this.webBrowser.Size = new Size(UIWidth, 565);
-            this.webBrowser.TabIndex = 1;
-            this.webBrowser.IsWebBrowserContextMenuEnabled = false;
+            webBrowser.Dock = DockStyle.Fill;
+            webBrowser.Location = new Point(0, 25);
+            webBrowser.MinimumSize = new Size(20, 20);
+            webBrowser.Name = "webBrowser";
+            webBrowser.Size = new Size(UIWidth, 565);
+            webBrowser.TabIndex = 1;
+            webBrowser.IsWebBrowserContextMenuEnabled = false;
 
             // 
             // webBrowserPanel
             // 
-            this.webBrowserPanel.Controls.Add(this.webBrowser);
-            this.webBrowserPanel.Dock = DockStyle.Fill;
-            this.webBrowserPanel.BorderStyle = BorderStyle.None;
-            this.webBrowserPanel.Location = new Point(0, 0);
-            this.webBrowserPanel.Name = "webBrowserPanel";
-            this.webBrowserPanel.Size = new Size(UIWidth, uiHeight);
-            this.webBrowserPanel.TabIndex = 2;
+            webBrowserPanel.Controls.Add(webBrowser);
+            webBrowserPanel.Dock = DockStyle.Fill;
+            webBrowserPanel.BorderStyle = BorderStyle.None;
+            webBrowserPanel.Location = new Point(0, 0);
+            webBrowserPanel.Name = "webBrowserPanel";
+            webBrowserPanel.Size = new Size(UIWidth, uiHeight);
+            webBrowserPanel.TabIndex = 2;
 
             // 
             // BrowserAuthenticationWindow
             // 
-            this.AutoScaleDimensions = new SizeF(6, 13);
-            this.AutoScaleMode = AutoScaleMode.Font;
-            this.ClientSize = new Size(UIWidth, uiHeight);
-            this.Controls.Add(this.webBrowserPanel);
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
-            this.Name = "BrowserAuthenticationWindow";
+            AutoScaleDimensions = new SizeF(6, 13);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(UIWidth, uiHeight);
+            Controls.Add(webBrowserPanel);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            Name = "BrowserAuthenticationWindow";
 
             // Move the window to the center of the parent window only if owner window is set.
-            this.StartPosition = (this.ownerWindow != null)
+            StartPosition = (ownerWindow != null)
                 ? FormStartPosition.CenterParent
                 : FormStartPosition.CenterScreen;
-            this.Text = string.Empty;
-            this.ShowIcon = false;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
+            Text = string.Empty;
+            ShowIcon = false;
+            MaximizeBox = false;
+            MinimizeBox = false;
 
             // If we don't have an owner we need to make sure that the pop up browser 
             // window is in the task bar so that it can be selected with the mouse.
-            this.ShowInTaskbar = (null == this.ownerWindow);
+            ShowInTaskbar = (null == ownerWindow);
 
-            this.webBrowserPanel.ResumeLayout(false);
-            this.ResumeLayout(false);
+            webBrowserPanel.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         /// <summary>

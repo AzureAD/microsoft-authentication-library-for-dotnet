@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
 
                 WebBrowserNavigateErrorEventArgs e = new WebBrowserNavigateErrorEventArgs(uriString, frameString,
                     statusCodeInt, pDisp);
-                this.parent.OnNavigateError(e);
+                parent.OnNavigateError(e);
                 cancel = e.Cancel;
             }
 

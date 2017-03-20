@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
         public PublicClientApplication(string clientId, string authority)
             : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
         {
-            this.UserTokenCache = new TokenCache();
+            UserTokenCache = new TokenCache();
         }
 
         /// <summary>
@@ -73,10 +73,10 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope)
         {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authority, scope, null, (string) null,
+                    AcquireTokenCommonAsync(authority, scope, null, (string) null,
                         UIBehavior.SelectAccount, null).ConfigureAwait(false);
         }
 
@@ -88,10 +88,10 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string loginHint)
         {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authority, scope, null, loginHint,
+                    AcquireTokenCommonAsync(authority, scope, null, loginHint,
                         UIBehavior.SelectAccount, null).ConfigureAwait(false);
         }
 
@@ -100,17 +100,17 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
-        /// <param name="options">Enumeration to control UI behavior.</param>
+        /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string loginHint,
-            UIBehavior options, string extraQueryParameters)
+            UIBehavior behavior, string extraQueryParameters)
         {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authority, scope, null, loginHint,
-                        options, extraQueryParameters).ConfigureAwait(false);
+                    AcquireTokenCommonAsync(authority, scope, null, loginHint,
+                        behavior, extraQueryParameters).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -118,16 +118,16 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
-        /// <param name="options">Enumeration to control UI behavior.</param>
+        /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User user,
-            UIBehavior options, string extraQueryParameters)
+            UIBehavior behavior, string extraQueryParameters)
         {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authority, scope, null, user, options,
+                    AcquireTokenCommonAsync(authority, scope, null, user, behavior,
                         extraQueryParameters).ConfigureAwait(false);
         }
 
@@ -136,19 +136,19 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
-        /// <param name="options">Enumeration to control UI behavior.</param>
+        /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, string loginHint,
-            UIBehavior options, string extraQueryParameters, string[] additionalScope, string authority)
+            UIBehavior behavior, string extraQueryParameters, string[] additionalScope, string authority)
         {
-            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
+            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authorityInstance, scope, additionalScope,
-                        loginHint, options, extraQueryParameters).ConfigureAwait(false);
+                    AcquireTokenCommonAsync(authorityInstance, scope, additionalScope,
+                        loginHint, behavior, extraQueryParameters).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -156,24 +156,24 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
-        /// <param name="options">Enumeration to control UI behavior.</param>
+        /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string[] scope, User user,
-            UIBehavior options, string extraQueryParameters, string[] additionalScope, string authority)
+            UIBehavior behavior, string extraQueryParameters, string[] additionalScope, string authority)
         {
-            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
+            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
             return
                 await
-                    this.AcquireTokenCommonAsync(authorityInstance, scope, additionalScope, user,
-                        options, extraQueryParameters).ConfigureAwait(false);
+                    AcquireTokenCommonAsync(authorityInstance, scope, additionalScope, user,
+                        behavior, extraQueryParameters).ConfigureAwait(false);
         }
 
-        internal IWebUI CreateWebAuthenticationDialog(IPlatformParameters parameters, RequestContext requestContext)
+        internal IWebUI CreateWebAuthenticationDialog(IPlatformParameters parameters, UIBehavior behavior, RequestContext requestContext)
         {
-            return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parameters, requestContext);
+            return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parameters, behavior, requestContext);
         }
 
         /// <summary>
@@ -183,10 +183,10 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope)
         {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(this.Authority, this.ValidateAuthority);
+            Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    this.AcquireTokenUsingIntegratedAuthCommonAsync(authority, scope,
+                    AcquireTokenUsingIntegratedAuthCommonAsync(authority, scope,
                         new UserCredential()).ConfigureAwait(false);
         }
 
@@ -199,10 +199,10 @@ namespace Microsoft.Identity.Client
         internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(string[] scope,
             string authority)
         {
-            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, this.ValidateAuthority);
+            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
             return
                 await
-                    this.AcquireTokenUsingIntegratedAuthCommonAsync(authorityInstance, scope,
+                    AcquireTokenUsingIntegratedAuthCommonAsync(authorityInstance, scope,
                         new UserCredential()).ConfigureAwait(false);
         }
 
@@ -217,38 +217,38 @@ namespace Microsoft.Identity.Client
         }
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authority authority, string[] scope,
-            string[] additionalScope, string loginHint, UIBehavior UIBehavior,
+            string[] additionalScope, string loginHint, UIBehavior behavior,
             string extraQueryParameters)
         {
-            var requestParams = this.CreateRequestParameters(authority, scope, null, this.UserTokenCache);
+            var requestParams = CreateRequestParameters(authority, scope, null, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
             
             var handler =
-                new InteractiveRequest(requestParams, additionalScope, loginHint, UIBehavior,
-                    this.CreateWebAuthenticationDialog(this.PlatformParameters, requestParams.RequestContext));
+                new InteractiveRequest(requestParams, additionalScope, loginHint, behavior,
+                    CreateWebAuthenticationDialog(PlatformParameters, behavior, requestParams.RequestContext));
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authority authority, string[] scope,
-            string[] additionalScope, User user, UIBehavior UIBehavior, string extraQueryParameters)
+            string[] additionalScope, User user, UIBehavior behavior, string extraQueryParameters)
         {
 
-            var requestParams = this.CreateRequestParameters(authority, scope, user, this.UserTokenCache);
+            var requestParams = CreateRequestParameters(authority, scope, user, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
-                new InteractiveRequest(requestParams, additionalScope, UIBehavior,
-                    this.CreateWebAuthenticationDialog(this.PlatformParameters, requestParams.RequestContext));
+                new InteractiveRequest(requestParams, additionalScope, behavior,
+                    CreateWebAuthenticationDialog(PlatformParameters, behavior, requestParams.RequestContext));
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
         internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope, User user, TokenCache cache)
         {
             AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scope, user, cache);
-            parameters.ClientId = this.ClientId;
-            if (this.PlatformParameters == null)
+            parameters.ClientId = ClientId;
+            if (PlatformParameters == null)
             {
-                this.PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
+                PlatformParameters = PlatformPlugin.DefaultPlatformParameters;
             }
 
             return parameters;

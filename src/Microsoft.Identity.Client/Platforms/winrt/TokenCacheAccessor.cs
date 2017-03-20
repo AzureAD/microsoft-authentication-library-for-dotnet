@@ -22,20 +22,17 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using Windows.Foundation.Collections;
-using Windows.Storage;
-using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Windows.Storage;
 
 namespace Microsoft.Identity.Client
 {
-    internal class TokenCachePlugin : ITokenCachePlugin
+    internal class TokenCacheAccessor : ITokenCacheAccessor
     {
         private const string CacheValue = "CacheValue";
         private const string CacheValueSegmentCount = "SegmentCount";
@@ -44,70 +41,54 @@ namespace Microsoft.Identity.Client
         private const string LocalSettingsTokenContainerName = "MicrosoftAuthenticationLibrary.Tokens";
         private const string LocalSettingsRefreshTokenContainerName = "MicrosoftAuthenticationLibrary.RefreshTokens";
         private ApplicationDataContainer _refreshTokenContainer = null;
-        private ApplicationDataContainer _tokenContainer = null;
+        private ApplicationDataContainer _accessTokenContainer = null;
 
-        private readonly RequestContext _requestContext;
+        private RequestContext _requestContext;
 
-        public TokenCachePlugin(RequestContext requestContext)
-        {
-            _requestContext = requestContext;
-        }
-
-        public TokenCachePlugin()
+        public TokenCacheAccessor()
         {
             var localSettings = ApplicationData.Current.LocalSettings;
-            _tokenContainer =
+            _accessTokenContainer =
                 localSettings.CreateContainer(LocalSettingsTokenContainerName, ApplicationDataCreateDisposition.Always);
             _refreshTokenContainer =
                 localSettings.CreateContainer(LocalSettingsRefreshTokenContainerName,
                     ApplicationDataCreateDisposition.Always);
         }
-
-        public ICollection<string> GetAllAccessTokens()
+        public TokenCacheAccessor(RequestContext requestContext) : this()
         {
-            IList<string> list = new List<string>();
-            foreach (ApplicationDataCompositeValue item in _tokenContainer.Values.Values)
-            {
-                list.Add(MsalHelpers.CreateString(GetCacheValue(item)));
-            }
-
-            return list;
+            _requestContext = requestContext;
         }
 
-        public ICollection<string> AllRefreshTokens()
-        {
-            IList<string> list = new List<string>();
-            foreach (ApplicationDataCompositeValue item in _refreshTokenContainer.Values.Values)
-            {
-                list.Add(MsalHelpers.CreateString(GetCacheValue(item)));
-            }
-
-            return list;
-        }
-
-        public void SaveAccessToken(string cacheKey, string accessTokenItem)
+        public void SaveAccessToken(string cacheKey, string item)
         {
             CryptographyHelper helper = new CryptographyHelper();
             string hashed = helper.CreateSha256Hash(cacheKey);
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
-            SetCacheValue(composite, accessTokenItem);
-            _tokenContainer.Values[hashed] = composite;
+            SetCacheValue(composite, item);
+            _accessTokenContainer.Values[hashed] = composite;
         }
 
-        public void SaveRefreshToken(string cacheKey, string refreshTokenItem)
+        public void SaveRefreshToken(string cacheKey, string item)
         {
             CryptographyHelper helper = new CryptographyHelper();
             string hashed = helper.CreateSha256Hash(cacheKey);
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
-            SetCacheValue(composite, refreshTokenItem);
+            SetCacheValue(composite, item);
             _refreshTokenContainer.Values[hashed] = composite;
         }
 
+        public string GetRefreshToken(string refreshTokenKey)
+        {
+            CryptographyHelper helper = new CryptographyHelper();
+            string hashed = helper.CreateSha256Hash(refreshTokenKey);
+            return MsalHelpers.ByteArrayToString(GetCacheValue((ApplicationDataCompositeValue)_refreshTokenContainer.Values[hashed]));
+        }
+        
         public void DeleteAccessToken(string cacheKey)
         {
             CryptographyHelper helper = new CryptographyHelper();
             string hashed = helper.CreateSha256Hash(cacheKey);
-            _tokenContainer.Values.Remove(hashed);
+            _accessTokenContainer.Values.Remove(hashed);
         }
 
         public void DeleteRefreshToken(string cacheKey)
@@ -117,21 +98,43 @@ namespace Microsoft.Identity.Client
             _refreshTokenContainer.Values.Remove(hashed);
         }
 
+        public ICollection<string> GetAllAccessTokensAsString()
+        {
+            ICollection<string> list = new List<string>();
+            foreach (ApplicationDataCompositeValue item in _accessTokenContainer.Values.Values)
+            {
+                list.Add(MsalHelpers.CreateString(GetCacheValue(item)));
+            }
+
+            return list;
+        }
+
+        public ICollection<string> GetAllRefreshTokensAsString()
+        {
+            ICollection<string> list = new List<string>();
+            foreach (ApplicationDataCompositeValue item in _refreshTokenContainer.Values.Values)
+            {
+                list.Add(MsalHelpers.CreateString(GetCacheValue(item)));
+            }
+
+            return list;
+        }
+
         internal static void SetCacheValue(ApplicationDataCompositeValue composite, string stringValue)
         {
             byte[] encryptedValue = CryptographyHelper.Encrypt(stringValue.ToByteArray());
             composite[CacheValueLength] = encryptedValue.Length;
 
-            int segmentCount = (encryptedValue.Length/MaxCompositeValueLength) +
-                               ((encryptedValue.Length%MaxCompositeValueLength == 0) ? 0 : 1);
+            int segmentCount = (encryptedValue.Length / MaxCompositeValueLength) +
+                               ((encryptedValue.Length % MaxCompositeValueLength == 0) ? 0 : 1);
             byte[] subValue = new byte[MaxCompositeValueLength];
             for (int i = 0; i < segmentCount - 1; i++)
             {
-                Array.Copy(encryptedValue, i*MaxCompositeValueLength, subValue, 0, MaxCompositeValueLength);
+                Array.Copy(encryptedValue, i * MaxCompositeValueLength, subValue, 0, MaxCompositeValueLength);
                 composite[CacheValue + i] = subValue;
             }
 
-            int copiedLength = (segmentCount - 1)*MaxCompositeValueLength;
+            int copiedLength = (segmentCount - 1) * MaxCompositeValueLength;
             Array.Copy(encryptedValue, copiedLength, subValue, 0, encryptedValue.Length - copiedLength);
             composite[CacheValue + (segmentCount - 1)] = subValue;
             composite[CacheValueSegmentCount] = segmentCount;
@@ -144,26 +147,26 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            int encyptedValueLength = (int) composite[CacheValueLength];
-            int segmentCount = (int) composite[CacheValueSegmentCount];
+            int encyptedValueLength = (int)composite[CacheValueLength];
+            int segmentCount = (int)composite[CacheValueSegmentCount];
 
             byte[] encryptedValue = new byte[encyptedValueLength];
             if (segmentCount == 1)
             {
-                encryptedValue = (byte[]) composite[CacheValue + 0];
+                encryptedValue = (byte[])composite[CacheValue + 0];
             }
             else
             {
                 for (int i = 0; i < segmentCount - 1; i++)
                 {
-                    Array.Copy((byte[]) composite[CacheValue + i], 0, encryptedValue, i*MaxCompositeValueLength,
+                    Array.Copy((byte[])composite[CacheValue + i], 0, encryptedValue, i * MaxCompositeValueLength,
                         MaxCompositeValueLength);
                 }
             }
 
-            Array.Copy((byte[]) composite[CacheValue + (segmentCount - 1)], 0, encryptedValue,
-                (segmentCount - 1)*MaxCompositeValueLength,
-                encyptedValueLength - (segmentCount - 1)*MaxCompositeValueLength);
+            Array.Copy((byte[])composite[CacheValue + (segmentCount - 1)], 0, encryptedValue,
+                (segmentCount - 1) * MaxCompositeValueLength,
+                encyptedValueLength - (segmentCount - 1) * MaxCompositeValueLength);
 
             return CryptographyHelper.Decrypt(encryptedValue);
         }

@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
 
         public SilentWebUI()
         {
-            this.threadInitializedEvent = new ManualResetEvent(false);
+            threadInitializedEvent = new ManualResetEvent(false);
         }
 
         public void Dispose()
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client
             long navigationOverallTimeout = NavigationOverallTimeout;
             long navigationStartTime = DateTime.Now.Ticks;
 
-            bool initialized = this.threadInitializedEvent.WaitOne((int)navigationOverallTimeout);
+            bool initialized = threadInitializedEvent.WaitOne((int)navigationOverallTimeout);
             if (initialized)
             {
                 // Calculate time remaining after time spend on initialization.
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
 
                     // The invisible dialog has failed to complete in the allotted time.
                     // Attempt a graceful shutdown.
-                    this.formsSyncContext.Post(state => this.dialog.CloseBrowser(), null);
+                    formsSyncContext.Post(state => dialog.CloseBrowser(), null);
                 }
             }
         }
@@ -110,29 +110,29 @@ namespace Microsoft.Identity.Client
                 {
                     try
                     {
-                        this.formsSyncContext = new WindowsFormsSynchronizationContext();
+                        formsSyncContext = new WindowsFormsSynchronizationContext();
 
-                        this.dialog = new SilentWindowsFormsAuthenticationDialog(this.OwnerWindow)
+                        dialog = new SilentWindowsFormsAuthenticationDialog(this.OwnerWindow)
                         {
                             NavigationWaitMiliSecs = NavigationWaitMiliSecs
                         };
 
-                        this.dialog.Done += this.UIDoneHandler;
+                        dialog.Done += UIDoneHandler;
 
-                        this.threadInitializedEvent.Set();
+                        threadInitializedEvent.Set();
 
-                        this.dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri);
+                        dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri);
 
                         // Start and turn control over to the message loop.
                         Application.Run();
 
-                        this.result = this.dialog.Result;
+                        result = dialog.Result;
                     }
                     catch (Exception e)
                     {
                         RequestContext.Logger.Error(e);
                         // Catch all exceptions to transfer them to the original calling thread.
-                        this.uiException = e;
+                        uiException = e;
                     }
                 });
 
@@ -159,20 +159,20 @@ namespace Microsoft.Identity.Client
                 throw new InvalidOperationException("CallbackUri cannot be null");
             }
 
-            Thread uiSubThread = this.StartUIThread();
+            Thread uiSubThread = StartUIThread();
 
             // Block until the uiSubThread is complete indicating that the invisible dialog has completed
-            this.WaitForCompletionOrTimeout(uiSubThread);
-            this.Cleanup();
+            WaitForCompletionOrTimeout(uiSubThread);
+            Cleanup();
 
-            this.ThrowIfTransferredException();
+            ThrowIfTransferredException();
 
-            if (this.result == null)
+            if (result == null)
             {
                 throw new MsalException(MsalError.UserInteractionRequired);
             }
 
-            return this.result;
+            return result;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -181,16 +181,16 @@ namespace Microsoft.Identity.Client
             {
                 if (disposing)
                 {
-                    if (this.threadInitializedEvent != null)
+                    if (threadInitializedEvent != null)
                     {
-                        this.threadInitializedEvent.Dispose();
-                        this.threadInitializedEvent = null;
+                        threadInitializedEvent.Dispose();
+                        threadInitializedEvent = null;
                     }
 
-                    if (this.formsSyncContext != null)
+                    if (formsSyncContext != null)
                     {
-                        this.formsSyncContext.Dispose();
-                        this.formsSyncContext = null;
+                        formsSyncContext.Dispose();
+                        formsSyncContext = null;
                     }
                 }
 
@@ -200,23 +200,23 @@ namespace Microsoft.Identity.Client
 
         private void Cleanup()
         {
-            this.threadInitializedEvent.Dispose();
-            this.threadInitializedEvent = null;
+            threadInitializedEvent.Dispose();
+            threadInitializedEvent = null;
         }
 
         private void ThrowIfTransferredException()
         {
-            if (null != this.uiException)
+            if (null != uiException)
             {
-                throw this.uiException;
+                throw uiException;
             }
         }
 
         private void UIDoneHandler(object sender, SilentWebUIDoneEventArgs e)
         {
-            if (this.uiException == null)
+            if (uiException == null)
             {
-                this.uiException = e.TransferedException;
+                uiException = e.TransferedException;
             }
 
             // We need call dispose, while message loop is running.
