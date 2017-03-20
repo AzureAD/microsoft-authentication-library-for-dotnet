@@ -15,6 +15,7 @@ namespace AutomationApp
         private static readonly Dictionary<string, string> JsonLabelReplacements = new Dictionary<string, string>();
         public User CurrentUser { get; set; }
 
+        public TokenCache CurrentTokenCache { get; set; }
         #endregion
 
         #region Constructor
@@ -78,24 +79,37 @@ namespace AutomationApp
         {
             PublicClientApplication client = new PublicClientApplication(input["client_id"]);
             string[] scope = new string[] { "mail.read" };
-            
+
             AuthenticationResult result = await client
                 .AcquireTokenSilentAsync(scope, CurrentUser)
                 .ConfigureAwait(false);
-            
+
             return ToJson(result);
         }
 
-        /* public async Task<string> ExpireAccessToken(Dictionary<string, string> input)
-          {
+        public async Task<string> ExpireAccessToken(Dictionary<string, string> input)
+        {
+            CurrentTokenCache.FindAccessToken()
 
 
+        }
 
-          }
+        public async Task<string> ReadCache(Dictionary<string, string> input)
+        {
+            Task<string> myTask = Task<string>.Factory.StartNew(() =>
+            {
+                int count = CurrentTokenCache.AccessTokenCount;
+                Dictionary<string, string> output = new Dictionary<string, string>();
+                output.Add("item_count", count.ToString());
+                var list = CurrentTokenCache.GetAllAccessTokenCacheItems();
+                return
+            });
+        }
 
-          public async Task<string> ClearCache(Dictionary<string, string> input)
-         {
+        /*
+        public async Task<string> ClearCache(Dictionary<string, string> input)
+        {
 
-         }*/
+        }*/
     }
 }
