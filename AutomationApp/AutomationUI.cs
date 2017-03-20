@@ -54,6 +54,11 @@ namespace AutomationApp
             pageControl1.SelectedTab = dataInputPage;
         }
 
+       /* private void clearCache_Click(object sender, EventArgs e)
+        {
+            _commandToRun = tokenHandlerApp.ClearCache;
+        }*/
+
         #endregion
 
         private async void GoBtn_Click(object sender, EventArgs e)
@@ -74,7 +79,6 @@ namespace AutomationApp
         private void Done_Click(object sender, EventArgs e)
         {
             resultInfo.Text = string.Empty;
-           // dataInput.Text = string.Empty;
             pageControl1.SelectedTab = mainPage;
         }
 

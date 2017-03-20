@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Serialization.Json;
-using System.Web.Script.Serialization;
+using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal.Cache;
 
@@ -17,6 +14,7 @@ namespace AutomationApp
         #region Properties
         private static readonly Dictionary<string, string> JsonLabelReplacements = new Dictionary<string, string>();
         public User CurrentUser { get; set; }
+
         #endregion
 
         #region Constructor
@@ -78,15 +76,26 @@ namespace AutomationApp
 
         public async Task<string> AcquireTokenSilent(Dictionary<string, string> input)
         {
-            string output = string.Empty;
-
             PublicClientApplication client = new PublicClientApplication(input["client_id"]);
             string[] scope = new string[] { "mail.read" };
-
+            
             AuthenticationResult result = await client
                 .AcquireTokenSilentAsync(scope, CurrentUser)
                 .ConfigureAwait(false);
+            
             return ToJson(result);
         }
+
+        /* public async Task<string> ExpireAccessToken(Dictionary<string, string> input)
+          {
+
+
+
+          }
+
+          public async Task<string> ClearCache(Dictionary<string, string> input)
+         {
+
+         }*/
     }
 }
