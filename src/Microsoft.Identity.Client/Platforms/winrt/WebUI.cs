@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client
             silentMode = ((PlatformParameters) parameters).UseHiddenBrowser;
         }
 
-    public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext)
         {
             bool ssoMode = ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri);
