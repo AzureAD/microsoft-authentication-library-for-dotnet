@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 return MockHandlerQueue.Dequeue();
             }
 
-            return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials };
+            return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials, Proxy = System.Net.WebRequest.DefaultWebProxy };
         }
 
         private readonly static Queue<HttpMessageHandler> MockHandlerQueue = new Queue<HttpMessageHandler>();
