@@ -31,8 +31,9 @@ namespace Microsoft.Identity.Client
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
+        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters, UIBehavior behavior)
         {
+            ((PlatformParameters) parameters).UseHiddenBrowser = behavior.Equals(UIBehavior.Never);
             return new WebUI(parameters);
         }
     }
