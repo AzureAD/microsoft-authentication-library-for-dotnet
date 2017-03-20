@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client
 
         internal string PromptValue { get; }
 
-        internal UIBehavior(string promptValue)
+        private UIBehavior(string promptValue)
         {
             PromptValue = promptValue;
         }
