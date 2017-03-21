@@ -68,7 +68,7 @@ namespace AutomationApp
         private List<KeyValuePair<TokenCacheKey, AuthenticationResult>> QueryCache(string authority, string clientId,
             string uniqueId, string displayableId)
         {
-            return TokenCacheAccessor.
+           // return TokenCacheAccessor.
         }
 
         public async Task<string> AcquireToken(Dictionary<string, string> input)
