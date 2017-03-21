@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Runtime.Serialization.Json;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal.Cache;
+using Microsoft.Identity.Client.Internal;
 
 namespace AutomationApp
 {
@@ -63,6 +65,12 @@ namespace AutomationApp
             }
         }
 
+        private List<KeyValuePair<TokenCacheKey, AuthenticationResult>> QueryCache(string authority, string clientId,
+            string uniqueId, string displayableId)
+        {
+            return TokenCacheAccessor.
+        }
+
         public async Task<string> AcquireToken(Dictionary<string, string> input)
         {
             PublicClientApplication client = new PublicClientApplication(input["client_id"], input["authority"]);
@@ -77,7 +85,6 @@ namespace AutomationApp
 
         public async Task<string> AcquireTokenSilent(Dictionary<string, string> input)
         {
-
             PublicClientApplication client = new PublicClientApplication(input["client_id"]);
             string[] scope = new string[] { "mail.read" };
 
@@ -88,13 +95,16 @@ namespace AutomationApp
             return ToJson(result);
         }
 
-        /*public async Task<string> ExpireAccessToken(Dictionary<string, string> input)
+        public async Task<string> ExpireAccessToken(Dictionary<string, string> input)
         {
-            CurrentTokenCache.FindAccessToken()
+            List<KeyValuePair<TokenCacheKey, AuthenticationResult>> CacheItems = QueryCache(input["authority"],
+                input["client_id"], input["unique_id"], input["displable_id"]);
+
+            if (input["resource"] == null || )
 
 
         }
-
+        /*
         public async Task<string> ReadCache(Dictionary<string, string> input)
         {
             Task<string> myTask = Task<string>.Factory.StartNew(() =>

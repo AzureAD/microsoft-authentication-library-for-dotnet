@@ -54,10 +54,15 @@ namespace AutomationApp
             pageControl1.SelectedTab = dataInputPage;
         }
 
-       /* private void clearCache_Click(object sender, EventArgs e)
+        private void expireAccessToken_Click(object sender, EventArgs e)
         {
-            _commandToRun = tokenHandlerApp.ClearCache;
-        }*/
+            _commandToRun = tokenHandlerApp.ExpireAccessToken;
+        }
+
+        /* private void clearCache_Click(object sender, EventArgs e)
+         {
+             _commandToRun = tokenHandlerApp.ClearCache;
+         }*/
 
         #endregion
 
@@ -86,7 +91,6 @@ namespace AutomationApp
         {
 
         }
-
 
     }
 }

@@ -56,7 +56,7 @@
             this.pageControl1.Controls.Add(this.dataInputPage);
             this.pageControl1.Controls.Add(this.resultPage);
             this.pageControl1.Location = new System.Drawing.Point(18, 15);
-            this.pageControl1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.pageControl1.Margin = new System.Windows.Forms.Padding(6);
             this.pageControl1.Name = "pageControl1";
             this.pageControl1.SelectedIndex = 0;
             this.pageControl1.Size = new System.Drawing.Size(1102, 1402);
@@ -72,9 +72,9 @@
             this.mainPage.Controls.Add(this.acquireToken);
             this.mainPage.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.mainPage.Location = new System.Drawing.Point(8, 39);
-            this.mainPage.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.mainPage.Margin = new System.Windows.Forms.Padding(6);
             this.mainPage.Name = "mainPage";
-            this.mainPage.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.mainPage.Padding = new System.Windows.Forms.Padding(6);
             this.mainPage.Size = new System.Drawing.Size(1086, 1355);
             this.mainPage.TabIndex = 0;
             this.mainPage.Text = "Main Page";
@@ -83,18 +83,17 @@
             // clearCache
             // 
             this.clearCache.Location = new System.Drawing.Point(324, 796);
-            this.clearCache.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.clearCache.Margin = new System.Windows.Forms.Padding(6);
             this.clearCache.Name = "clearCache";
             this.clearCache.Size = new System.Drawing.Size(470, 88);
             this.clearCache.TabIndex = 5;
             this.clearCache.Text = "Clear Cache";
             this.clearCache.UseVisualStyleBackColor = true;
-            //this.clearCache.Click += new System.EventHandler(this.clearCache_Click);
             // 
             // readCache
             // 
             this.readCache.Location = new System.Drawing.Point(322, 633);
-            this.readCache.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.readCache.Margin = new System.Windows.Forms.Padding(6);
             this.readCache.Name = "readCache";
             this.readCache.Size = new System.Drawing.Size(472, 87);
             this.readCache.TabIndex = 4;
@@ -104,7 +103,7 @@
             // invalidateToken
             // 
             this.invalidateToken.Location = new System.Drawing.Point(318, 483);
-            this.invalidateToken.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.invalidateToken.Margin = new System.Windows.Forms.Padding(6);
             this.invalidateToken.Name = "invalidateToken";
             this.invalidateToken.Size = new System.Drawing.Size(476, 85);
             this.invalidateToken.TabIndex = 3;
@@ -115,17 +114,18 @@
             // expireAccessToken
             // 
             this.expireAccessToken.Location = new System.Drawing.Point(318, 348);
-            this.expireAccessToken.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.expireAccessToken.Margin = new System.Windows.Forms.Padding(6);
             this.expireAccessToken.Name = "expireAccessToken";
             this.expireAccessToken.Size = new System.Drawing.Size(480, 85);
             this.expireAccessToken.TabIndex = 2;
             this.expireAccessToken.Text = "Expire Access Token";
             this.expireAccessToken.UseVisualStyleBackColor = true;
+            this.expireAccessToken.Click += new System.EventHandler(this.expireAccessToken_Click);
             // 
             // acquireTokenSilent
             // 
             this.acquireTokenSilent.Location = new System.Drawing.Point(318, 212);
-            this.acquireTokenSilent.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.acquireTokenSilent.Margin = new System.Windows.Forms.Padding(6);
             this.acquireTokenSilent.Name = "acquireTokenSilent";
             this.acquireTokenSilent.Size = new System.Drawing.Size(484, 88);
             this.acquireTokenSilent.TabIndex = 1;
@@ -136,7 +136,7 @@
             // acquireToken
             // 
             this.acquireToken.Location = new System.Drawing.Point(314, 67);
-            this.acquireToken.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.acquireToken.Margin = new System.Windows.Forms.Padding(6);
             this.acquireToken.Name = "acquireToken";
             this.acquireToken.Size = new System.Drawing.Size(488, 92);
             this.acquireToken.TabIndex = 0;
@@ -150,9 +150,9 @@
             this.dataInputPage.Controls.Add(this.dataInput);
             this.dataInputPage.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.dataInputPage.Location = new System.Drawing.Point(8, 39);
-            this.dataInputPage.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.dataInputPage.Margin = new System.Windows.Forms.Padding(6);
             this.dataInputPage.Name = "dataInputPage";
-            this.dataInputPage.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.dataInputPage.Padding = new System.Windows.Forms.Padding(6);
             this.dataInputPage.Size = new System.Drawing.Size(1086, 1355);
             this.dataInputPage.TabIndex = 1;
             this.dataInputPage.Text = "Data Input Page";
@@ -163,7 +163,7 @@
             this.GoBtn.BackColor = System.Drawing.Color.DarkOrange;
             this.GoBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.GoBtn.Location = new System.Drawing.Point(382, 787);
-            this.GoBtn.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.GoBtn.Margin = new System.Windows.Forms.Padding(6);
             this.GoBtn.Name = "GoBtn";
             this.GoBtn.Size = new System.Drawing.Size(270, 113);
             this.GoBtn.TabIndex = 1;
@@ -175,7 +175,7 @@
             // 
             this.dataInput.BackColor = System.Drawing.Color.Bisque;
             this.dataInput.Location = new System.Drawing.Point(206, 12);
-            this.dataInput.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.dataInput.Margin = new System.Windows.Forms.Padding(6);
             this.dataInput.Multiline = true;
             this.dataInput.Name = "dataInput";
             this.dataInput.Size = new System.Drawing.Size(654, 760);
@@ -190,9 +190,9 @@
             this.resultPage.Controls.Add(this.Done);
             this.resultPage.Controls.Add(this.resultInfo);
             this.resultPage.Location = new System.Drawing.Point(8, 39);
-            this.resultPage.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.resultPage.Margin = new System.Windows.Forms.Padding(6);
             this.resultPage.Name = "resultPage";
-            this.resultPage.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.resultPage.Padding = new System.Windows.Forms.Padding(6);
             this.resultPage.Size = new System.Drawing.Size(1086, 1355);
             this.resultPage.TabIndex = 2;
             this.resultPage.Text = "Result Page";
@@ -212,7 +212,7 @@
             // 
             this.msalLogs.BackColor = System.Drawing.Color.PowderBlue;
             this.msalLogs.Location = new System.Drawing.Point(18, 1017);
-            this.msalLogs.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.msalLogs.Margin = new System.Windows.Forms.Padding(6);
             this.msalLogs.Multiline = true;
             this.msalLogs.Name = "msalLogs";
             this.msalLogs.Size = new System.Drawing.Size(1052, 319);
@@ -224,7 +224,7 @@
             this.Done.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Done.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Done.Location = new System.Drawing.Point(362, 860);
-            this.Done.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Done.Margin = new System.Windows.Forms.Padding(6);
             this.Done.Name = "Done";
             this.Done.Size = new System.Drawing.Size(358, 106);
             this.Done.TabIndex = 1;
@@ -236,7 +236,7 @@
             // 
             this.resultInfo.BackColor = System.Drawing.Color.PaleTurquoise;
             this.resultInfo.Location = new System.Drawing.Point(18, 13);
-            this.resultInfo.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.resultInfo.Margin = new System.Windows.Forms.Padding(6);
             this.resultInfo.Multiline = true;
             this.resultInfo.Name = "resultInfo";
             this.resultInfo.Size = new System.Drawing.Size(1052, 831);
@@ -248,7 +248,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1144, 1440);
             this.Controls.Add(this.pageControl1);
-            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "AutomationUI";
             this.Text = ".NET Automation App";
             this.Load += new System.EventHandler(this.AutomationApp_Load);
