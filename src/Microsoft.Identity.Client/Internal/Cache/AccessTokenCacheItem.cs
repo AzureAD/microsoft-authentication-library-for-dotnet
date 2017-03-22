@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         [DataMember(Name = "user_assertion_hash")]
         internal string UserAssertionHash { get; set; }
 
-        internal AccessTokenCacheItem()
+        public AccessTokenCacheItem()
         {
         }
 

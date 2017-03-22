@@ -10,11 +10,21 @@ using Xamarin.Forms.Xaml;
 namespace XForms
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class MainPage : TabbedPage
+    public partial class LogPage : ContentPage
     {
-        public MainPage()
+        static Label l;
+
+        public LogPage()
         {
             InitializeComponent();
+            log.Text = "init";
+
+            l = log;
+        }
+
+        static public void AddToLog(string str)
+        {
+            l.Text = l.Text + System.Environment.NewLine + str;
         }
     }
 }

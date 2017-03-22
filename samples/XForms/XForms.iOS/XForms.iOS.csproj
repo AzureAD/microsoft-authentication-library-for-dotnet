@@ -86,6 +86,7 @@
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AcquirePageRenderer.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
     <None Include="Entitlements.plist" />
@@ -122,7 +123,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NuGet.Build.Tasks.Workaround" Version="1.0.0">
       <PrivateAssets>All</PrivateAssets>
-    </PackageReference>    
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
