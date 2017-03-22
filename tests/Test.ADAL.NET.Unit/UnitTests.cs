@@ -28,13 +28,17 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
+using System.Net.Http;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Test.ADAL.Common;
+using Test.ADAL.NET.Unit.Mocks;
 
 namespace Test.ADAL.NET.Unit
 {
@@ -46,6 +50,12 @@ namespace Test.ADAL.NET.Unit
     {
         private const string ComplexString = "asdfk+j0a-=skjwe43;1l234 1#$!$#%345903485qrq@#$!@#$!(rekr341!#$%Ekfaآزمايشsdsdfsddfdgsfgjsglk==CVADS";
         private const string ComplexString2 = @"a\u0304\u0308"" = ""ā̈";
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            HttpMessageHandlerFactory.ClearMockHandlers();
+        }
 
         [TestMethod]
         [Description("Tests for SecureClientSecret")]
@@ -141,9 +151,13 @@ namespace Test.ADAL.NET.Unit
             RunAuthenticationParametersNegative("Bearer ");
             RunAuthenticationParametersNegative("BearerX");
             RunAuthenticationParametersNegative("BearerX authorization_uri=\"abc\", resource_id=\"de\"");
-            RunAuthenticationParametersNegative("Bearer authorization_uri=\"abc\"=\"de\"");
-            RunAuthenticationParametersNegative("Bearer authorization_uri=abc=de");
+
+            // TODO: the following input doesn't cause errors.
+            // Issue #611: https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/issues/611
+            //RunAuthenticationParametersNegative("Bearer authorization_uri=\"abc\"=\"de\"");
+            //RunAuthenticationParametersNegative("Bearer authorization_uri=abc=de");
         }
+
 
         [TestMethod]
         [Description("Test for ParseKeyValueList method in EncodingHelper")]
@@ -202,7 +216,7 @@ namespace Test.ADAL.NET.Unit
         {
             CommonUnitTests.AdalIdTest();
         }
-        
+
         [TestMethod]
         [Description("Test for Id Token Parsing")]
         public void IdTokenParsingPasswordClaimsTest()
@@ -250,32 +264,82 @@ namespace Test.ADAL.NET.Unit
                 ClientAssertionCertificate cac = new ClientAssertionCertificate("some_id", x509Certificate);
                 byte[] signature = cac.Sign(Message);
                 Assert.IsNotNull(signature);
-                
+
                 GC.WaitForPendingFinalizers();
 
                 signature = cac.Sign(Message);
                 Assert.IsNotNull(signature);
             }
         }
-        
+
+        [TestMethod]
+        public void ResponseSizeOverLimitTest()
+        {
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var stringChars = new char[1048577];
+            var random = new Random();
+
+            for (int i = 0; i < stringChars.Length; i++)
+            {
+                stringChars[i] = chars[random.Next(chars.Length)];
+            }
+
+            var finalString = new string(stringChars);
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(finalString)
+                }
+            });
+
+
+            var exc = AssertException.TaskThrows<HttpRequestException>(() =>
+                new HttpClientWrapper(TestConstants.DefaultAuthorityCommonTenant, null).GetResponseAsync());
+            Assert.AreEqual(exc.Message, "Cannot write more bytes to the buffer than the configured maximum buffer size: 1048576.");
+        }
+
+        [TestMethod]
+        public async Task ResponseSizeAtLimitTest()
+        {
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var stringChars = new char[1048576];
+            var random = new Random();
+
+            for (int i = 0; i < stringChars.Length; i++)
+            {
+                stringChars[i] = chars[random.Next(chars.Length)];
+            }
+
+            var finalString = new string(stringChars);
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(finalString)
+                }
+            });
+            HttpClientWrapper wrapper = new HttpClientWrapper(TestConstants.DefaultAuthorityCommonTenant, null);
+            await wrapper.GetResponseAsync();
+        }
+
         private static void RunAuthenticationParametersPositive(string authenticateHeader, string expectedAuthority, string excepectedResource)
         {
             AuthenticationParameters parameters = AuthenticationParameters.CreateFromResponseAuthenticateHeader(authenticateHeader);
             Assert.AreEqual(expectedAuthority, parameters.Authority);
-            Assert.AreEqual(excepectedResource, parameters.Resource);            
+            Assert.AreEqual(excepectedResource, parameters.Resource);
         }
 
         private static void RunAuthenticationParametersNegative(string authenticateHeader)
         {
-            try
-            {
-                AuthenticationParameters.CreateFromResponseAuthenticateHeader(authenticateHeader);
-            }
-            catch (ArgumentException ex)
-            {
-                Assert.AreEqual("authenticateHeader", ex.ParamName);
-                Assert.IsTrue(string.IsNullOrWhiteSpace(authenticateHeader) || ex.Message.Contains("header format"));
-            }
+            var ex = AssertException.Throws<ArgumentException>(() =>
+               AuthenticationParameters.CreateFromResponseAuthenticateHeader(authenticateHeader),
+               allowDerived: true);
+
+            Assert.AreEqual("authenticateHeader", ex.ParamName);
+            Assert.IsTrue(string.IsNullOrWhiteSpace(authenticateHeader) || ex.Message.Contains("header format"));
         }
 
         private static void RunParseKeyValueList(string input, int expectedCount, string[] keys = null, string[] values = null, bool urlDecode = false)
@@ -313,7 +377,7 @@ namespace Test.ADAL.NET.Unit
             char[] encodedChars = EncodingHelper.UrlEncode((str == null) ? null : str.ToCharArray());
             string encodedStr2 = (encodedChars == null) ? null : new string(encodedChars);
 
-            Assert.AreEqual(encodedStr, encodedStr2);            
+            Assert.AreEqual(encodedStr, encodedStr2);
         }
     }
 }

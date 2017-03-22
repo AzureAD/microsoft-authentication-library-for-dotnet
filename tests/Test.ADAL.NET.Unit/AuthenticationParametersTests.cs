@@ -59,24 +59,17 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(Resource, authParams.Resource);
             Assert.IsNull(authParams.Authority);
 
-            try
-            {
-                AuthenticationParameters.CreateFromResponseAuthenticateHeader(null);
-            }
-            catch(ArgumentNullException ex)
-            {
-                Assert.AreEqual(ex.ParamName, "authenticateHeader");
-            }
+            // Null parameter -> error
+            var ex = AssertException.Throws<ArgumentNullException>(() =>
+                AuthenticationParameters.CreateFromResponseAuthenticateHeader(null));
+            Assert.AreEqual(ex.ParamName, "authenticateHeader");
 
-            try
-            {
-                AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(CultureInfo.InvariantCulture, @"authorization_uri=""{0}"",Resource_id=""{1}""", authority, Resource));
-            }
-            catch (ArgumentException ex)
-            {
-                Assert.AreEqual(ex.ParamName, "authenticateHeader");
-                Assert.IsTrue(ex.Message.Contains("format"));
-            }
+
+            // Invalid format -> error
+            var argEx = AssertException.Throws<ArgumentException>(() =>
+                AuthenticationParameters.CreateFromResponseAuthenticateHeader(string.Format(CultureInfo.InvariantCulture, @"authorization_uri=""{0}"",Resource_id=""{1}""", authority, Resource)));
+            Assert.AreEqual(argEx.ParamName, "authenticateHeader");
+            Assert.IsTrue(argEx.Message.Contains("format"));
         }
     }
 }

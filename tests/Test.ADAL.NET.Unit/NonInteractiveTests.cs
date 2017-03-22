@@ -25,19 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Security;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.ADAL.Common;
 using System.Xml;
+using System.Xml.Linq;
+using Test.ADAL.Common;
 using Test.ADAL.NET.Unit.Mocks;
 
 namespace Test.ADAL.NET.Unit
@@ -51,9 +50,8 @@ namespace Test.ADAL.NET.Unit
         [TestInitialize]
         public void Initialize()
         {
-            HttpMessageHandlerFactory.ClearMockHandlers();    
+            HttpMessageHandlerFactory.ClearMockHandlers();
         }
-
 
         [TestMethod]
         [Description("Get WsTrust Address from mex")]
@@ -99,7 +97,6 @@ namespace Test.ADAL.NET.Unit
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, null);
             VerifyUserRealmResponse(userRealmResponse, "Federated");
 
-
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Get,
@@ -115,22 +112,94 @@ namespace Test.ADAL.NET.Unit
             userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, null);
             VerifyUserRealmResponse(userRealmResponse, "Unknown");
 
-            try
+
+            var ex = AssertException.TaskThrows<AdalException>(() =>
+                UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, null, null));
+            Assert.IsNotNull(ex.ErrorCode, AdalError.UnknownUser);
+        }
+
+        [TestMethod]
+        [Description("Cloud Audience Urn Test")]
+        public async Task CloudAudienceUrnTest()
+        {
+            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
+            await context.Authenticator.UpdateFromTemplateAsync(null);
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
-                await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, null, null);
-                Assert.Fail("Exception expected");
-            }
-            catch (AdalException ex)
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"Federated\",\"domain_name\":\"microsoft.com\"," +
+                                    "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
+                                    "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
+                                    "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
+                                    ",\"cloud_audience_urn\":\"urn:federation:Blackforest\"" +
+                                    ",\"cloudinstancename\":\"login.microsoftonline.com\"}")
+                },
+                QueryParams = new Dictionary<string, string>()
+                {
+                    {"api-version", "1.0" }
+                }
+            });
+
+            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, null);
+
+            WsTrustAddress address = new WsTrustAddress()
             {
-                Assert.IsNotNull(ex.ErrorCode, AdalError.UnknownUser);
-            }
+                Uri = new Uri("https://some/address/usernamemixed"),
+                Version = WsTrustVersion.WsTrust13
+            };
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                }
+            });
+
+            WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null, userRealmResponse.CloudAudienceUrn);
+
+            VerifyCloudInstanceUrnResponse(userRealmResponse.CloudAudienceUrn, "urn:federation:Blackforest");
+        }
+
+        [TestMethod]
+        [Description("Cloud Audience Urn Null Test")]
+        public async Task CloudAudienceUrnNullTest()
+        {
+            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
+            await context.Authenticator.UpdateFromTemplateAsync(null);
+
+            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, null);
+
+            WsTrustAddress address = new WsTrustAddress()
+            {
+                Uri = new Uri("https://some/address/usernamemixed"),
+                Version = WsTrustVersion.WsTrust13
+            };
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                }
+            });
+
+            WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null, null);
+
+            VerifyCloudInstanceUrnResponse(userRealmResponse.CloudAudienceUrn, "urn:federation:MicrosoftOnline");
         }
 
         [TestMethod]
         [Description("WS-Trust Address Extraction Test")]
         public async Task WsTrust2005AddressExtractionTest()
         {
-            await Task.Factory.StartNew(() => {
+            await Task.Factory.StartNew(() =>
+            {
                 XDocument mexDocument = null;
                 using (Stream stream = new FileStream("TestMex2005.xml", FileMode.Open))
                 {
@@ -156,15 +225,6 @@ namespace Test.ADAL.NET.Unit
                 Uri = new Uri("https://some/address/usernamemixed"),
                 Version = WsTrustVersion.WsTrust13
             };
-            
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
-                }
-            });
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
@@ -175,32 +235,68 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword), null);
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                }
+            });
+
+            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword), null, TestConstants.CloudAudienceUrnMicrosoft);
             Assert.IsNotNull(wstResponse.Token);
 
-            wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null);
+            wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null, TestConstants.CloudAudienceUrnMicrosoft);
+            Assert.IsNotNull(wstResponse.Token);
+        }
+
+        [TestMethod]
+        [Description("WS-Trust Request Generic Cloud Urn Test")]
+        public async Task WsTrustRequestGenericCloudUrnTest()
+        {
+            WsTrustAddress address = new WsTrustAddress()
+            {
+                Uri = new Uri("https://some/address/usernamemixed"),
+                Version = WsTrustVersion.WsTrust13
+            };
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                }
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                }
+            });
+
+            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword), null, TestConstants.CloudAudienceUrn);
+            Assert.IsNotNull(wstResponse.Token);
+
+            wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null, TestConstants.CloudAudienceUrn);
             Assert.IsNotNull(wstResponse.Token);
         }
 
         [TestMethod]
         [Description("WS-Trust Request Xml Format Test")]
-        public async Task WsTrustRequestXmlFormatTest()
+        public void WsTrustRequestXmlFormatTest()
         {
-            await Task.Factory.StartNew(() =>
-            {
-                UserCredential cred = new UserPasswordCredential("user", "pass&<>\"'");
-                StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto",
-                    new WsTrustAddress {Uri = new Uri("some://resource")}, cred);
-                try
-                {
-                    XmlDocument doc = new XmlDocument();
-                    doc.LoadXml("<?xml version=\"1.0\"?>" + sb.ToString());
-                }
-                catch (Exception ex)
-                {
-                    Assert.Fail("Not expected -- " + ex.Message);
-                }
-            });
+            UserCredential cred = new UserPasswordCredential("user", "pass&<>\"'");
+            StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto",
+                new WsTrustAddress { Uri = new Uri("some://resource") }, cred);
+
+            // Expecting XML to be valid
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml("<?xml version=\"1.0\"?>" + sb.ToString());
         }
 
         private static void VerifyUserRealmResponse(UserRealmDiscoveryResponse userRealmResponse, string expectedAccountType)
@@ -219,6 +315,11 @@ namespace Test.ADAL.NET.Unit
                 Assert.IsNull(userRealmResponse.FederationMetadataUrl);
                 Assert.IsNull(userRealmResponse.FederationProtocol);
             }
+        }
+
+        private static void VerifyCloudInstanceUrnResponse(string cloudAudienceUrn, string expectedCloudAudienceUrn)
+        {
+            Assert.AreEqual(cloudAudienceUrn, expectedCloudAudienceUrn);
         }
     }
 }
