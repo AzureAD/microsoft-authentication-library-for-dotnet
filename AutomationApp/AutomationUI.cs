@@ -57,6 +57,7 @@ namespace AutomationApp
         private void expireAccessToken_Click(object sender, EventArgs e)
         {
             _commandToRun = tokenHandlerApp.ExpireAccessToken;
+            pageControl1.SelectedTab = dataInputPage;
         }
 
         /* private void clearCache_Click(object sender, EventArgs e)

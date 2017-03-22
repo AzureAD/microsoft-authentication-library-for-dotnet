@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client
         public string TenantId
         {
             get { return _accessTokenCacheItem.TenantId; }
-            //set =>  _accessTokenCacheItem.TenantId = value; 
+            set =>  _accessTokenCacheItem.TenantId = value; 
         } 
 
         /// <summary>

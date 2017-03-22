@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Instance;
 
 namespace AutomationApp
 {
@@ -16,9 +17,8 @@ namespace AutomationApp
         #region Properties
         private static readonly Dictionary<string, string> JsonLabelReplacements = new Dictionary<string, string>();
         public User CurrentUser { get; set; }
-
-        public TokenCache CurrentTokenCache { get; set; }
-        #endregion
+        
+       #endregion
 
         #region Constructor
         static TokenHandler()
@@ -65,16 +65,17 @@ namespace AutomationApp
             }
         }
 
-        private List<KeyValuePair<TokenCacheKey, AuthenticationResult>> QueryCache(string authority, string clientId,
+        /*private List<KeyValuePair<TokenCacheKey, AuthenticationResult>> QueryCache(string authority, string clientId,
             string uniqueId, string displayableId)
         {
-           // return TokenCacheAccessor.
-        }
+           return CurrentTokenCache.
+        }*/
 
         public async Task<string> AcquireToken(Dictionary<string, string> input)
         {
             PublicClientApplication client = new PublicClientApplication(input["client_id"], input["authority"]);
             string[] scope = new string[] { "mail.read" };
+
             AuthenticationResult result =
                 await
                     client.AcquireTokenAsync(scope)
@@ -88,8 +89,9 @@ namespace AutomationApp
             PublicClientApplication client = new PublicClientApplication(input["client_id"]);
             string[] scope = new string[] { "mail.read" };
 
-            AuthenticationResult result = await client
-                .AcquireTokenSilentAsync(scope, CurrentUser)
+            AuthenticationResult result = await 
+                //client.AcquireTokenSilentCommonAsync(Authority.CreateAuthority(input["authority"], true), scope, CurrentUser, false)
+                client.AcquireTokenSilentAsync(scope, CurrentUser)
                 .ConfigureAwait(false);
 
             return ToJson(result);
@@ -97,24 +99,21 @@ namespace AutomationApp
 
         public async Task<string> ExpireAccessToken(Dictionary<string, string> input)
         {
-            List<KeyValuePair<TokenCacheKey, AuthenticationResult>> CacheItems = QueryCache(input["authority"],
-                input["client_id"], input["unique_id"], input["displable_id"]);
+            PublicClientApplication client = new PublicClientApplication(input["client_id"]);
+            string[] scope = new string[] { "mail.read" };
 
-            if (input["resource"] == null || )
+            AuthenticationResult result = await client
+                .AcquireTokenAsync(scope)
+                .ConfigureAwait(false);
 
+            string expireResult = result.ExpiresOn.AddSeconds(5).ToString();
 
+            return ToJson(expireResult);
         }
-        /*
-        public async Task<string> ReadCache(Dictionary<string, string> input)
+        
+       /* public async Task<string> ReadCache(Dictionary<string, string> input)
         {
-            Task<string> myTask = Task<string>.Factory.StartNew(() =>
-            {
-                int count = CurrentTokenCache.AccessTokenCount;
-                Dictionary<string, string> output = new Dictionary<string, string>();
-                output.Add("item_count", count.ToString());
-                var list = CurrentTokenCache.GetAllAccessTokenCacheItems();
-                return
-            });
+            
         }
 
         /*
