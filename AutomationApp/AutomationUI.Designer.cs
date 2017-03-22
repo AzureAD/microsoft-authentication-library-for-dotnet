@@ -71,11 +71,9 @@
             this.mainPage.Controls.Add(this.acquireTokenSilent);
             this.mainPage.Controls.Add(this.acquireToken);
             this.mainPage.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.mainPage.Location = new System.Drawing.Point(8, 39);
             this.mainPage.Margin = new System.Windows.Forms.Padding(6);
             this.mainPage.Name = "mainPage";
             this.mainPage.Padding = new System.Windows.Forms.Padding(6);
-            this.mainPage.Size = new System.Drawing.Size(1086, 1355);
             this.mainPage.TabIndex = 0;
             this.mainPage.Text = "Main Page";
             this.mainPage.UseVisualStyleBackColor = true;
@@ -148,11 +146,9 @@
             this.dataInputPage.Controls.Add(this.GoBtn);
             this.dataInputPage.Controls.Add(this.dataInput);
             this.dataInputPage.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.dataInputPage.Location = new System.Drawing.Point(8, 39);
             this.dataInputPage.Margin = new System.Windows.Forms.Padding(6);
             this.dataInputPage.Name = "dataInputPage";
             this.dataInputPage.Padding = new System.Windows.Forms.Padding(6);
-            this.dataInputPage.Size = new System.Drawing.Size(1086, 1355);
             this.dataInputPage.TabIndex = 1;
             this.dataInputPage.Text = "Data Input Page";
             this.dataInputPage.UseVisualStyleBackColor = true;
@@ -179,8 +175,6 @@
             this.dataInput.Name = "dataInput";
             this.dataInput.Size = new System.Drawing.Size(654, 760);
             this.dataInput.TabIndex = 0;
-            this.dataInput.Text = "{\"authority\":\"https://login.microsoftonline.com/common\",\"client_id\":\"ac10dee2-ffc" +
-    "7-4362-83f2-074f5233b317\",\"scopes\":\"user.read\"}";
             // 
             // resultPage
             // 
@@ -188,11 +182,9 @@
             this.resultPage.Controls.Add(this.msalLogs);
             this.resultPage.Controls.Add(this.Done);
             this.resultPage.Controls.Add(this.resultInfo);
-            this.resultPage.Location = new System.Drawing.Point(8, 39);
             this.resultPage.Margin = new System.Windows.Forms.Padding(6);
             this.resultPage.Name = "resultPage";
             this.resultPage.Padding = new System.Windows.Forms.Padding(6);
-            this.resultPage.Size = new System.Drawing.Size(1086, 1355);
             this.resultPage.TabIndex = 2;
             this.resultPage.Text = "Result Page";
             this.resultPage.UseVisualStyleBackColor = true;
@@ -245,7 +237,6 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1144, 1440);
             this.Controls.Add(this.pageControl1);
             this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "AutomationUI";
