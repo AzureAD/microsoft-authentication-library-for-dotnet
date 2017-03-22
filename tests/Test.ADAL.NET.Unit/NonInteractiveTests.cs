@@ -293,15 +293,20 @@ namespace Test.ADAL.NET.Unit
             UserCredential cred = new UserPasswordCredential("user", "pass&<>\"'");
             StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto",
                 new WsTrustAddress { Uri = new Uri("some://resource") }, cred);
-
-            // Expecting XML to be valid
-            XmlDocument document = new XmlDocument();
-            document.XmlResolver = null;
-            document.PreserveWhitespace = false;
-            using (var xmlReader = new XmlTextReader(new StringReader("<?xml version=\"1.0\"?>" + sb)))
+            try
             {
-                xmlReader.Settings.DtdProcessing = DtdProcessing.Ignore;
-                document.Load(xmlReader);
+                XmlDocument document = new XmlDocument();
+                document.XmlResolver = null;
+                document.PreserveWhitespace = false;
+                using (var xmlReader = new XmlTextReader(new StringReader("<?xml version=\"1.0\"?>" + sb)))
+                {
+                    xmlReader.DtdProcessing = DtdProcessing.Ignore;
+                    document.Load(xmlReader);
+                }
+            }
+            catch (Exception)
+            {
+                Assert.Fail("Not expected");
             }
         }
 
