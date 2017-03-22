@@ -72,7 +72,11 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// <summary>
         /// Gets the TenantId.
         /// </summary>
-        public string TenantId => IdToken?.TenantId;
+        public string TenantId
+        {
+            get => IdToken?.TenantId;
+            set { throw new NotImplementedException(); }
+        }
 
         [DataMember(Name = "user_assertion_hash")]
         internal string UserAssertionHash { get; set; }

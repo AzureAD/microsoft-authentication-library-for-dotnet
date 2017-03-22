@@ -109,7 +109,6 @@
             this.invalidateToken.TabIndex = 3;
             this.invalidateToken.Text = "Invalidate Token";
             this.invalidateToken.UseVisualStyleBackColor = true;
-            this.invalidateToken.Click += new System.EventHandler(this.invalidateToken_Click);
             // 
             // expireAccessToken
             // 

@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Runtime.Serialization.Json;
-using System.Windows.Forms;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal.Cache;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Instance;
 
 namespace AutomationApp
 {
@@ -17,7 +11,8 @@ namespace AutomationApp
         #region Properties
         private static readonly Dictionary<string, string> JsonLabelReplacements = new Dictionary<string, string>();
         public User CurrentUser { get; set; }
-        
+
+        private PublicClientApplication _publicClientApplication;
        #endregion
 
         #region Constructor
@@ -43,7 +38,6 @@ namespace AutomationApp
 
         private static string ToJson(object obj)
         {
-            string result = String.Empty;
             using (MemoryStream msStream = new MemoryStream())
             {
                 DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
@@ -52,7 +46,7 @@ namespace AutomationApp
 
                 using (StreamReader reader = new StreamReader(msStream))
                 {
-                    result = reader.ReadToEnd();
+                    var result = reader.ReadToEnd();
                     foreach (KeyValuePair<string, string> entry in JsonLabelReplacements)
                     {
                         if (result.Contains(entry.Key))
@@ -65,20 +59,24 @@ namespace AutomationApp
             }
         }
 
-        /*private List<KeyValuePair<TokenCacheKey, AuthenticationResult>> QueryCache(string authority, string clientId,
-            string uniqueId, string displayableId)
+        private void EnsurePublicClientApplication(Dictionary<string, string> input)
         {
-           return CurrentTokenCache.
-        }*/
+            if (_publicClientApplication != null) return;
+            if (!input.ContainsKey("client_id")) return;
+            _publicClientApplication = input.ContainsKey("authority")
+                ? new PublicClientApplication(input["client_id"], input["authority"])
+                : new PublicClientApplication(input["client_id"]);
+        }
 
         public async Task<string> AcquireToken(Dictionary<string, string> input)
         {
-            PublicClientApplication client = new PublicClientApplication(input["client_id"], input["authority"]);
-            string[] scope = new string[] { "mail.read" };
+            EnsurePublicClientApplication(input);
+
+            string[] scope = { "mail.read" };
 
             AuthenticationResult result =
                 await
-                    client.AcquireTokenAsync(scope)
+                    _publicClientApplication.AcquireTokenAsync(scope)
                         .ConfigureAwait(false);
             CurrentUser = result.User;
             return ToJson(result);
@@ -86,12 +84,12 @@ namespace AutomationApp
 
         public async Task<string> AcquireTokenSilent(Dictionary<string, string> input)
         {
-            PublicClientApplication client = new PublicClientApplication(input["client_id"]);
-            string[] scope = new string[] { "mail.read" };
+            EnsurePublicClientApplication(input);
 
-            AuthenticationResult result = await 
-                //client.AcquireTokenSilentCommonAsync(Authority.CreateAuthority(input["authority"], true), scope, CurrentUser, false)
-                client.AcquireTokenSilentAsync(scope, CurrentUser)
+            string[] scope = { "mail.read" };
+
+            AuthenticationResult result = await
+                _publicClientApplication.AcquireTokenSilentAsync(scope, CurrentUser)
                 .ConfigureAwait(false);
 
             return ToJson(result);
@@ -99,27 +97,17 @@ namespace AutomationApp
 
         public async Task<string> ExpireAccessToken(Dictionary<string, string> input)
         {
-            PublicClientApplication client = new PublicClientApplication(input["client_id"]);
-            string[] scope = new string[] { "mail.read" };
+            EnsurePublicClientApplication(input);
 
-            AuthenticationResult result = await client
-                .AcquireTokenAsync(scope)
+            string[] scope = { "mail.read" };
+
+            AuthenticationResult result = await
+                _publicClientApplication.AcquireTokenSilentAsync(scope, CurrentUser)
                 .ConfigureAwait(false);
 
             string expireResult = result.ExpiresOn.AddSeconds(5).ToString();
 
             return ToJson(expireResult);
         }
-        
-       /* public async Task<string> ReadCache(Dictionary<string, string> input)
-        {
-            
-        }
-
-        /*
-        public async Task<string> ClearCache(Dictionary<string, string> input)
-        {
-
-        }*/
     }
 }

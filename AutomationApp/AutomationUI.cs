@@ -1,27 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Json;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
-using static Microsoft.Identity.Client.TokenCache;
 
 namespace AutomationApp
 {
     public partial class AutomationUI : Form
     {
         private delegate Task<string> Command(Dictionary<string, string> input);
-        LoggerCallbackImpl _loggerCallback = new LoggerCallbackImpl();
-        private Command _commandToRun = null;
-        internal TokenCache UserTokenCache { get; set; }
-        private TokenHandler tokenHandlerApp = new TokenHandler();
+        private readonly LoggerCallbackImpl _loggerCallback = new LoggerCallbackImpl();
+        private Command _commandToRun;
+        private readonly TokenHandler _tokenHandlerApp = new TokenHandler();
 
         public AutomationUI()
         {
@@ -44,26 +35,21 @@ namespace AutomationApp
 
         private void acquireToken_Click(object sender, EventArgs e)
         {
-            _commandToRun = tokenHandlerApp.AcquireToken;
+            _commandToRun = _tokenHandlerApp.AcquireToken;
             pageControl1.SelectedTab = dataInputPage;
         }
 
         private void acquireTokenSilent_Click(object sender, EventArgs e)
         {
-            _commandToRun = tokenHandlerApp.AcquireTokenSilent;
+            _commandToRun = _tokenHandlerApp.AcquireTokenSilent;
             pageControl1.SelectedTab = dataInputPage;
         }
 
         private void expireAccessToken_Click(object sender, EventArgs e)
         {
-            _commandToRun = tokenHandlerApp.ExpireAccessToken;
+            _commandToRun = _tokenHandlerApp.ExpireAccessToken;
             pageControl1.SelectedTab = dataInputPage;
         }
-
-        /* private void clearCache_Click(object sender, EventArgs e)
-         {
-             _commandToRun = tokenHandlerApp.ClearCache;
-         }*/
 
         #endregion
 
@@ -87,11 +73,5 @@ namespace AutomationApp
             resultInfo.Text = string.Empty;
             pageControl1.SelectedTab = mainPage;
         }
-
-        private void invalidateToken_Click(object sender, EventArgs e)
-        {
-
-        }
-
     }
 }
