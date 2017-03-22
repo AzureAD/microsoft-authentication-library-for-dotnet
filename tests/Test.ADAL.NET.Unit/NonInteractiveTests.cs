@@ -295,8 +295,24 @@ namespace Test.ADAL.NET.Unit
                 new WsTrustAddress { Uri = new Uri("some://resource") }, cred);
 
             // Expecting XML to be valid
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml("<?xml version=\"1.0\"?>" + sb.ToString());
+            XmlDocument document = new XmlDocument();
+            document.XmlResolver = null;
+            document.PreserveWhitespace = false;
+            using (var xmlReader = new XmlTextReader(new StringReader("<?xml version=\"1.0\"?>" + sb)))
+            {
+                xmlReader.Settings.DtdProcessing = DtdProcessing.Ignore;
+                document.Load(xmlReader);
+            }
+        }
+
+        public static Stream GenerateStreamFromString(string s)
+        {
+            MemoryStream stream = new MemoryStream();
+            StreamWriter writer = new StreamWriter(stream);
+            writer.Write(s);
+            writer.Flush();
+            stream.Position = 0;
+            return stream;
         }
 
         private static void VerifyUserRealmResponse(UserRealmDiscoveryResponse userRealmResponse, string expectedAccountType)
