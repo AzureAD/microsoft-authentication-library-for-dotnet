@@ -29,7 +29,7 @@
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <!-- This None is here so the conditinonally included files show up in the Solution Explorer -->
+    <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
     <Compile Remove="Platforms\**\*.*" />
     <Compile Remove="Features\**\*.*" />

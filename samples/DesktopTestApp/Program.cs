@@ -70,7 +70,7 @@ namespace DesktopTestApp
         }
 
 
-        public static async Task<AuthenticationResult> GetTokenSilentAsync(User user)
+        public static async Task<IAuthenticationResult> GetTokenSilentAsync(User user)
         {
             TokenBroker brkr = new TokenBroker();
             PublicClientApplication app =
@@ -88,7 +88,7 @@ namespace DesktopTestApp
             
         }
 
-        public static async Task<AuthenticationResult> GetTokenInteractiveAsync()
+        public static async Task<IAuthenticationResult> GetTokenInteractiveAsync()
         {
             try
             {

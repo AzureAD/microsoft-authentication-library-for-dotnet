@@ -110,8 +110,8 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
             });
 
-            Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
-            AuthenticationResult result = task.Result;
+            Task<IAuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
+            IAuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull("header.payload.signature", result.AccessToken);
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
@@ -159,8 +159,8 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
             });
 
-            Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
-            AuthenticationResult result = task.Result;
+            Task<IAuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
+            IAuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull("header.payload.signature", result.AccessToken);
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
