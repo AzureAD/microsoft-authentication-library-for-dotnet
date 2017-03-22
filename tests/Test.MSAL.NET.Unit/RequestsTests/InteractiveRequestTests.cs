@@ -126,7 +126,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 UIBehavior.SelectAccount, ui);
             Task<AuthenticationResult> task = request.RunAsync();
             task.Wait();
-            AuthenticationResult result = task.Result;
+            IAuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(2, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
