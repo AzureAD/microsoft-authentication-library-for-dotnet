@@ -57,6 +57,32 @@ namespace XForms
             SetPlatformParameters();
         }
 
+        private string ToString(User user)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("user.DisplayableId : " + user.DisplayableId);
+            sb.AppendLine("user.IdentityProvider : " + user.IdentityProvider);
+            sb.AppendLine("user.Name : " + user.Name);
+
+            return sb.ToString();
+        }
+
+        private string ToString(AuthenticationResult result)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("AccessToken : " + result.AccessToken);
+            sb.AppendLine("IdToken : " + result.IdToken);
+            sb.AppendLine("ExpiresOn : " + result.ExpiresOn);
+            sb.AppendLine("TenantId : " + result.TenantId);
+            sb.AppendLine("Scope : " + string.Join(",", result.Scope));
+            sb.AppendLine("User :");
+            sb.Append(ToString(result.User));
+
+            return sb.ToString();
+        }
+
         private async void OnAcquireClicked(object sender, EventArgs e)
         {
 
@@ -69,8 +95,7 @@ namespace XForms
             {
                 AuthenticationResult res = await App.PCA.AcquireTokenAsync(App.Scopes);
 
-                acquireResponseLabel.Text = "Result - " + res.AccessToken;
-
+                acquireResponseLabel.Text = ToString(res);
             }
             catch (MsalException exception)
             {
