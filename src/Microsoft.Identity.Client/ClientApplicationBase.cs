@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets a value indicating whether address validation is ON or OFF.
         /// </summary>
-        public bool ValidateAuthority { get; internal set; }
+        public bool ValidateAuthority { get; set; }
 
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the available users in the cache.
