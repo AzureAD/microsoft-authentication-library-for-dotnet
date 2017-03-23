@@ -50,11 +50,11 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the Access Token requested.
         /// </summary>
-        [DataMember]
+        [DataMember(Name = "access_token")]
         public string AccessToken
         {
             get { return _accessTokenCacheItem.AccessToken; }
-            set =>  _accessTokenCacheItem.AccessToken = value; 
+            private set {}
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client
         /// This value is calculated based on current UTC time measured locally and the value expiresIn received from the
         /// service.
         /// </summary>
-        [DataMember]
+        [DataMember(Name = "expires_on")]
         public DateTimeOffset ExpiresOn
         {
             get { return _accessTokenCacheItem.ExpiresOn; }
@@ -73,13 +73,13 @@ namespace Microsoft.Identity.Client
         /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is
         /// not returned by the service.
         /// </summary>
-        [DataMember]
+        [DataMember(Name ="tenant_id")]
         public string TenantId
         {
             get { return _accessTokenCacheItem.TenantId; }
             set =>  _accessTokenCacheItem.TenantId = value; 
         } 
-
+        
         /// <summary>
         /// Gets User object. Some elements in User might be null if not returned by the
         /// service. It can be passed back in some API overloads to identify which user should be used.
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
-        [DataMember]
+        [DataMember(Name = "id_token")]
         public string IdToken
         {
             get { return _accessTokenCacheItem.RawIdToken; }

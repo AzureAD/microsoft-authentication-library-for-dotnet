@@ -12,7 +12,7 @@ namespace AutomationApp
     internal static class TokenCacheDelegates
     {
         public static string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location +
-                                             "msal-cach.txt";
+                                             "msal-cache.txt";
         private static readonly object FileLock = new object();
 
         public static void BeforeAccessNotification(TokenCacheNotificationArgs args)
