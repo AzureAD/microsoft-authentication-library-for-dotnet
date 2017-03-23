@@ -12,7 +12,9 @@ namespace XForms
     public partial class App : Application
     {
         public static PublicClientApplication PCA;
-        public static string ClientID = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
+        public const string ClientID = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
+        public const string RedirectUriOnAndroid = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
+        public const string RedirectUriOnIOS = "adaliosxformsapp://com.yourcompany.xformsapp";
         public static string[] Scopes = { "User.Read" };
 
         class LoggerCallback : ILoggerCallback
@@ -31,15 +33,14 @@ namespace XForms
         {
             PCA = new PublicClientApplication(ClientID);
             Device.OnPlatform(Android: () => {
-                PCA.RedirectUri = "adaliosxformsapp://com.yourcompany.xformsapp";
+                PCA.RedirectUri = RedirectUriOnAndroid;
             });
 
             Device.OnPlatform(iOS: () => {
-                PCA.RedirectUri = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
+                PCA.RedirectUri = RedirectUriOnIOS;
             });
 
             MainPage = new XForms.MainPage();
-            LogPage.AddToLog("hello from App page");
 
             Logger.Callback = new LoggerCallback();
 

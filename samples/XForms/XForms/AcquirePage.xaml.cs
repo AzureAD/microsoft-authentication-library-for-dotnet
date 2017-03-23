@@ -20,9 +20,14 @@ namespace XForms
             InitializeComponent();
         }
 
-        protected override void OnAppearing()
+        private void SetPlatformParameters()
         {
             App.PCA.PlatformParameters = platformParameters;
+        }
+
+        protected override void OnAppearing()
+        {
+            SetPlatformParameters();
         }
 
         private async void OnAcquireClicked(object sender, EventArgs e)
@@ -30,48 +35,14 @@ namespace XForms
 
             if (App.PCA.PlatformParameters == null)
             {
-                OnAppearing();
+                SetPlatformParameters();
             }
-
-
-            // execute any acquire call
-
-            // update 
-            acquireResponseLabel.Text = "acquire call Start";
-            LogPage.AddToLog("hello from Acquire page");
-
-            // PublicClientApplication app = new PublicClientApplication("5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
-            // {
-            //      RedirectUri = "adaliosxformsapp://com.yourcompany.xformsapp"
-            // };
-
-
-            /*
-            Device.OnPlatform(Android: () =>
-            {
-                Xamarin.Forms.Platform;
-                var renderer = Platform.GetRenderer(this);
-
-                if (renderer == null)
-                {
-                    renderer = RendererFactory.GetRenderer(page);
-                    Platform.SetRenderer(page, renderer);
-                }
-                var viewController = renderer.ViewController;
-
-                //Activity androidActivity;
-
-                IPlatformParameters androidParams = new PlatformParameters();
-
-                app.PlatformParameters = androidParams;
-            });
-            */
 
             try
             {
                 AuthenticationResult res = await App.PCA.AcquireTokenAsync(App.Scopes);
 
-                acquireResponseLabel.Text = "Result - " + res;
+                acquireResponseLabel.Text = "Result - " + res.AccessToken;
 
             }
             catch (MsalException exception)

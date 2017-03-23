@@ -70,5 +70,11 @@ namespace AdaliOSSample
         public override void WillTerminate(UIApplication application)
         {
         }
+
+        public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options)
+        {
+            AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(url, "");
+            return true;
+        }
     }
 }
