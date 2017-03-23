@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
@@ -34,67 +33,8 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Component to be used for confidential client applications like Web Apps/API.
     /// </summary>
-    public interface IConfidentialClientApplication
+    public interface IConfidentialClientApplication : IClientApplicationBase
     {
-        #region Common application members
-
-        /// <summary>
-        /// Redirect Uri configured in the portal. Will have a default value. Not required if the developer is using the
-        /// default client Id.
-        /// </summary>
-        string RedirectUri { get; set; }
-
-        /// <summary>
-        /// Gets or sets correlation Id which would be sent to the service with the next request.
-        /// Correlation Id is to be used for diagnostics purposes.
-        /// </summary>
-        Guid CorrelationId { get; set; }
-
-        /// <summary>
-        /// Gets a value indicating whether address validation is ON or OFF.
-        /// </summary>
-        bool ValidateAuthority { get; }
-
-        /// <summary>
-        /// Returns a user-centric view over the cache that provides a list of all the available users in the cache.
-        /// </summary>
-        IEnumerable<User> Users { get; }
-
-        /// <summary>
-        /// Attempts to acquire the access token from cache. Access token is considered a match if it AT LEAST contains all the requested scopes.
-        /// This means that an access token with more scopes than requested could be returned as well. If access token is expired or 
-        /// close to expiration (within 5 minute window), then refresh token (if available) is used to acquire a new access token by making a network call.
-        /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
-        /// <param name="user">User for which the token is requested. <see cref="User"/></param>
-        Task<IAuthenticationResult> AcquireTokenSilentAsync(
-            string[] scope,
-            User user);
-
-        /// <summary>
-        /// Attempts to acquire the access token from cache. Access token is considered a match if it AT LEAST contains all the requested scopes.
-        /// This means that an access token with more scopes than requested could be returned as well. If access token is expired or 
-        /// close to expiration (within 5 minute window), then refresh token (if available) is used to acquire a new access token by making a network call.
-        /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
-        /// <param name="user">User for which the token is requested <see cref="User"/></param>
-        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
-        /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using the refresh token if available</param>
-        Task<IAuthenticationResult> AcquireTokenSilentAsync(
-            string[] scope,
-            User user,
-            string authority,
-            bool forceRefresh);
-
-        /// <summary>
-        /// Removes any cached token for the specified user
-        /// </summary>
-        void Remove(User user);
-
-        #endregion Common application members
-
-        #region Confidential client-only members
-
         /// <summary>
         /// Acquires token using On-Behalf-Of flow.
         /// </summary>
@@ -173,7 +113,5 @@ namespace Microsoft.Identity.Client
             string redirectUri,
             string loginHint,
             string extraQueryParameters, string[] additionalScope, string authority);
-
-        #endregion
     }
 }
