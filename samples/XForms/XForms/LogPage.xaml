@@ -21,6 +21,8 @@
             </StackLayout>
         </ScrollView>
 
+        <Button  Text="Clear"  Clicked="OnClearClicked"/>
+
     </StackLayout>
 
 </ContentPage>

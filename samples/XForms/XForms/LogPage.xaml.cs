@@ -39,18 +39,38 @@ namespace XForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class LogPage : ContentPage
     {
-        static Label l;
+        private static StringBuilder sb = new StringBuilder();
+        static readonly object bufferLock = new object();
 
         public LogPage()
         {
             InitializeComponent();
-
-            l = log;
         }
 
-        static public void AddToLog(string str)
+        protected override void OnAppearing()
         {
-            l.Text = l.Text + System.Environment.NewLine + str;
+            ShowLog();
+        }
+
+        private void ShowLog()
+        {
+            lock (bufferLock)
+            {
+                log.Text = sb.ToString();
+            }
+        }
+
+        private void OnClearClicked(object sender, EventArgs e)
+        {
+            sb.Clear();
+            ShowLog();
+        }
+
+        public static void AddToLog(string str)
+        {
+            lock (bufferLock) {
+                sb.AppendLine(str);
+            }
         }
     }
 }
