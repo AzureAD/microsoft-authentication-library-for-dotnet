@@ -11,21 +11,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.MSAL.NET.Unit", "tests
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{3433EB33-114A-4DB7-BC57-14F17F55DA3C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{A3C8C4E2-8090-4D24-A118-C32C973AECE7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dev apps", "dev apps", "{A3C8C4E2-8090-4D24-A118-C32C973AECE7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreTestApp", "samples\NetCoreTestApp\NetCoreTestApp.csproj", "{3D86AD34-35F2-4DB8-81CC-673BA65CCC55}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreTestApp", "dev apps\NetCoreTestApp\NetCoreTestApp.csproj", "{3D86AD34-35F2-4DB8-81CC-673BA65CCC55}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Xamarin Forms", "Xamarin Forms", "{F9CCBE99-562C-443F-9474-7BEC49D068C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.Android", "samples\XForms\XForms.Android\XForms.Android.csproj", "{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.Android", "dev apps\XForms\XForms.Android\XForms.Android.csproj", "{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XForms", "samples\XForms\XForms\XForms.csproj", "{A00AC06A-694F-4FEA-999F-81E753FA7C28}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XForms", "dev apps\XForms\XForms\XForms.csproj", "{A00AC06A-694F-4FEA-999F-81E753FA7C28}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.UWP", "samples\XForms\XForms.UWP\XForms.UWP.csproj", "{0B22271B-163F-429B-A472-4C7BF531CEE9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.UWP", "dev apps\XForms\XForms.UWP\XForms.UWP.csproj", "{0B22271B-163F-429B-A472-4C7BF531CEE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.iOS", "samples\XForms\XForms.iOS\XForms.iOS.csproj", "{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.iOS", "dev apps\XForms\XForms.iOS\XForms.iOS.csproj", "{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopTestApp", "samples\DesktopTestApp\DesktopTestApp.csproj", "{3A8EC886-C71D-4384-BFE4-73378CC7293D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopTestApp", "dev apps\DesktopTestApp\DesktopTestApp.csproj", "{3A8EC886-C71D-4384-BFE4-73378CC7293D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Unit.PublicApi", "tests\Test.MSAL.NET.Unit.PublicApi\Test.MSAL.NET.Unit.PublicApi.csproj", "{16BA13CA-A2DD-4533-919A-1134E9A4CFD7}"
 EndProject
