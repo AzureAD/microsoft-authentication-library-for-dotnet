@@ -90,7 +90,7 @@ namespace DesktopTestApp
             PublicClientApplication clientApplication = CreateClientApplication();
             string output = string.Empty;
             callResult.Text = output;
-            AuthenticationResult result;
+            IAuthenticationResult result;
             try
             {
                 result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '));
