@@ -56,7 +56,6 @@ namespace DesktopTestApp
         private void acquire_Click(object sender, EventArgs e)
         {
             tabControl1.SelectedTab = acquireTabPage;
-
         }
 
         private void settings_Click(object sender, EventArgs e)
@@ -76,17 +75,14 @@ namespace DesktopTestApp
 
         private void label1_Click(object sender, EventArgs e)
         {
-
         }
 
         private void label2_Click(object sender, EventArgs e)
         {
-
         }
 
         private async void acquireTokenInteractive_Click(object sender, EventArgs e)
         {
-
             PublicClientApplication clientApplication = CreateClientApplication();
             string output = string.Empty;
             callResult.Text = output;
@@ -98,7 +94,6 @@ namespace DesktopTestApp
             }
             catch (Exception exc)
             {
-
                 if (exc is MsalServiceException)
                 {
                     output += ((MsalServiceException) exc).ErrorCode;
