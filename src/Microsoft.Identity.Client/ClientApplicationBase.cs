@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client
         /// Redirect Uri configured in the portal. Will have a default value. Not required, if the developer is using the
         /// default client Id.
         /// </summary>
-        public string RedirectUri { internal get; set; }
+        public string RedirectUri { get; set; }
 
         /// <Summary>
         /// Token Cache instance for storing User tokens.
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets a value indicating whether address validation is ON or OFF.
         /// </summary>
-        public bool ValidateAuthority { internal get; set; }
+        public bool ValidateAuthority { get; set; }
 
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the available users in the cache.
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="user">User for which the token is requested. <see cref="User"/></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user)
+        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using the refresh token if available</param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user,
+        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user,
             string authority, bool forceRefresh)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);

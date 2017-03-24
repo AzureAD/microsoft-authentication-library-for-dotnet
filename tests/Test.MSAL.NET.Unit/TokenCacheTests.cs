@@ -466,6 +466,7 @@ namespace Test.MSAL.NET.Unit
                 UserAssertion = new UserAssertion(atKey.ToString())
             };
 
+            cache.AfterAccess = AfterAccessNoChangeNotification;
             AccessTokenCacheItem item = cache.FindAccessToken(param);
 
             Assert.IsNotNull(item);
@@ -548,8 +549,8 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
 
-            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokens().First().RefreshToken);
-            Assert.AreEqual("access-token-2", cache.GetAllAccessTokens().First().AccessToken);
+            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokensForClient().First().RefreshToken);
+            Assert.AreEqual("access-token-2", cache.GetAllAccessTokensForClient().First().AccessToken);
         }
 
         [TestMethod]
@@ -592,8 +593,8 @@ namespace Test.MSAL.NET.Unit
 
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
-            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokens().First().RefreshToken);
-            Assert.AreEqual("access-token-2", cache.GetAllAccessTokens().First().AccessToken);
+            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokensForClient().First().RefreshToken);
+            Assert.AreEqual("access-token-2", cache.GetAllAccessTokensForClient().First().AccessToken);
         }
 
         [TestMethod]
@@ -638,8 +639,8 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
 
-            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokens().First().RefreshToken);
-            Assert.AreEqual("access-token-2", cache.GetAllAccessTokens().First().AccessToken);
+            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokensForClient().First().RefreshToken);
+            Assert.AreEqual("access-token-2", cache.GetAllAccessTokensForClient().First().AccessToken);
         }
 
         [TestMethod]
@@ -685,14 +686,24 @@ namespace Test.MSAL.NET.Unit
                 ClientId = TestConstants.ClientId
             };
 
+            cache.SetAfterAccess(AfterAccessChangedNotification);
             cache.SaveAccessAndRefreshToken(requestParams, response);
+            Assert.IsFalse(cache.HasStateChanged);
 
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(2, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
 
-            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokens().First().RefreshToken);
+            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokensForClient().First().RefreshToken);
         }
-
+        
+        private void AfterAccessChangedNotification(TokenCacheNotificationArgs args)
+        {
+            Assert.IsTrue(args.TokenCache.HasStateChanged);
+        }
+        private void AfterAccessNoChangeNotification(TokenCacheNotificationArgs args)
+        {
+            Assert.IsFalse(args.TokenCache.HasStateChanged);
+        }
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
@@ -742,7 +753,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
 
-            AccessTokenCacheItem atItem = cache.GetAllAccessTokens().First();
+            AccessTokenCacheItem atItem = cache.GetAllAccessTokensForClient().First();
             Assert.AreEqual(response.AccessToken, atItem.AccessToken);
             Assert.AreEqual(TestConstants.AuthorityHomeTenant, atItem.Authority);
             Assert.AreEqual(TestConstants.ClientId, atItem.ClientId);
@@ -753,7 +764,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.HomeObjectId, atItem.HomeObjectId);
             Assert.AreEqual(response.IdToken, atItem.RawIdToken);
 
-            RefreshTokenCacheItem rtItem = cache.GetAllRefreshTokens().First();
+            RefreshTokenCacheItem rtItem = cache.GetAllRefreshTokensForClient().First();
             Assert.AreEqual(response.RefreshToken, rtItem.RefreshToken);
             Assert.AreEqual(response.IdToken, rtItem.RawIdToken);
             Assert.AreEqual(TestConstants.ClientId, rtItem.ClientId);

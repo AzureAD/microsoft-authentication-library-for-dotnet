@@ -16,6 +16,7 @@ build_script:
 test:
   assemblies: 
     - Test.MSAL.NET.Unit.dll
+    - Test.MSAL.NET.Unit.PublicApi.dll
 
 skip_commits:
   files:

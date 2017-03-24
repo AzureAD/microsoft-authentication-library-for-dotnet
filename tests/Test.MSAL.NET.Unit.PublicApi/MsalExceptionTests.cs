@@ -24,38 +24,42 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
+using Microsoft.Identity.Client;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
-using System.Reflection;
-using System.Runtime.InteropServices;
+namespace Test.MSAL.NET.Unit.PublicApi
+{
+    [TestClass]
+    public class MsalExceptionTests
+    {
+        [TestMethod]
+        public void ExceptionsArePubliclyCreatable_MsalException()
+        {
+            var innerEx = new Exception();
+            var ex = new MsalException("code1", "msg1", innerEx);
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
-[assembly: AssemblyTitle("Test.MSAL.NET.Unit")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Test.MSAL.NET.Unit")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+            Assert.AreEqual("code1", ex.ErrorCode);
+            Assert.AreEqual("msg1", ex.Message);
+            Assert.AreSame(innerEx, ex.InnerException);
+        }
+   
+        [TestMethod]
+        public void ExceptionsArePubliclyCreatable_ServiceException()
+        {
+            var ex = new MsalServiceException("code1", "msg1");
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
-[assembly: ComVisible(false)]
+            Assert.AreEqual("code1", ex.ErrorCode);
+            Assert.AreEqual("msg1", ex.Message);
+            Assert.IsNull(ex.InnerException);
+        }
 
-// The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("da901825-68ec-4aca-b10c-c1a2d234ea6d")]
+        [TestMethod]
+        public void ExceptionsArePubliclyCreatable_MsalSilentTokenAcquisitionException()
+        {
+            var ex = new MsalSilentTokenAcquisitionException();
 
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+            Assert.IsNull(ex.InnerException);
+        }
+    }
+}
