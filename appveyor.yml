@@ -16,9 +16,6 @@ skip_commits:
     - '**/*.md'
     - 'changelog.txt'
 
-artifacts:
-- path: .\artifacts\*.nupkg
-
 on_finish:
 # Uncomment this to be able to RDP into the build agent
 # ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
