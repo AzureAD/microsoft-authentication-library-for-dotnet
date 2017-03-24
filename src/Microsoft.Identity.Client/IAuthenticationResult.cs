@@ -26,67 +26,46 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Cache;
-using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Contains the results of one token acquisition operation.
     /// </summary>
-    internal sealed class AuthenticationResult : IAuthenticationResult
+    public interface IAuthenticationResult
     {
-        private const string Oauth2AuthorizationHeader = "Bearer ";
-        private readonly AccessTokenCacheItem _accessTokenCacheItem;
-
-        internal AuthenticationResult(AccessTokenCacheItem accessTokenCacheItem, RequestContext requestContext)
-        {
-            _accessTokenCacheItem = accessTokenCacheItem;
-            User = User.CreateFromIdToken(Internal.IdToken.Parse(accessTokenCacheItem.RawIdToken, requestContext));
-        }
-
         /// <summary>
         /// Gets the Access Token requested.
         /// </summary>
-        public string AccessToken => _accessTokenCacheItem.AccessToken;
+        string AccessToken { get; }
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the Token property ceases to be valid.
         /// This value is calculated based on current UTC time measured locally and the value expiresIn received from the
         /// service.
         /// </summary>
-        public DateTimeOffset ExpiresOn => _accessTokenCacheItem.ExpiresOn;
+        DateTimeOffset ExpiresOn { get; }
 
         /// <summary>
         /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is
         /// not returned by the service.
         /// </summary>
-        public string TenantId => _accessTokenCacheItem.TenantId;
+        string TenantId { get; }
 
         /// <summary>
         /// Gets User object. Some elements in User might be null if not returned by the
         /// service. It can be passed back in some API overloads to identify which user should be used.
         /// </summary>
-        public User User { get; internal set; }
+        User User { get; }
 
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
-        public string IdToken => _accessTokenCacheItem.RawIdToken;
+        string IdToken { get; }
 
         /// <summary>
         /// Gets the scope values returned from the service.
         /// </summary>
-        public string[] Scope => _accessTokenCacheItem.Scope.AsArray();
-
-        /// <summary>
-        /// Creates authorization header from authentication result.
-        /// </summary>
-        /// <returns>Created authorization header</returns>
-        public string CreateAuthorizationHeader()
-        {
-            return Oauth2AuthorizationHeader + AccessToken;
-        }
+        string[] Scope { get; }
     }
 }

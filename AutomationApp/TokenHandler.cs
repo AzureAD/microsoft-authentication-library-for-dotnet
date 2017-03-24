@@ -24,46 +24,38 @@ namespace AutomationApp
                 : new PublicClientApplication(input["client_id"]);
         }
 
-        public async Task<string> AcquireToken(Dictionary<string, string> input)
+        public async Task<IAuthenticationResult> AcquireToken(Dictionary<string, string> input)
         {
             EnsurePublicClientApplication(input);
 
             string[] scope = { "mail.read" };
 
-            AuthenticationResult result =
+            IAuthenticationResult result =
                 await
                     _publicClientApplication.AcquireTokenAsync(scope)
                         .ConfigureAwait(false);
             CurrentUser = result.User;
-            return JsonHelper.SerializeToJson(result);
+            return result;
         }
 
-        public async Task<string> AcquireTokenSilent(Dictionary<string, string> input)
+        public async Task<IAuthenticationResult> AcquireTokenSilent(Dictionary<string, string> input)
         {
             EnsurePublicClientApplication(input);
 
             string[] scope = { "mail.read" };
 
-            AuthenticationResult result = await
+            IAuthenticationResult result = await
                 _publicClientApplication.AcquireTokenSilentAsync(scope, CurrentUser)
                 .ConfigureAwait(false);
 
-            return JsonHelper.SerializeToJson(result);
+            return result;
         }
 
-        public async Task<string> ExpireAccessToken(Dictionary<string, string> input)
+        public void ExpireAccessToken(Dictionary<string, string> input)
         {
             EnsurePublicClientApplication(input);
 
-            string[] scope = { "mail.read" };
-
-            AuthenticationResult result = await
-                _publicClientApplication.AcquireTokenSilentAsync(scope, CurrentUser)
-                .ConfigureAwait(false);
-
-            string expireResult = result.ExpiresOn.AddSeconds(5).ToString();
-
-            return JsonHelper.SerializeToJson(result);
+            _publicClientApplication.Remove(CurrentUser);
         }
     }
 }

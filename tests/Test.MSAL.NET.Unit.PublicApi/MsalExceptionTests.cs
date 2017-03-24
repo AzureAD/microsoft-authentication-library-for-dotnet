@@ -24,27 +24,42 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-
-using System;
 using Microsoft.Identity.Client;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
-namespace NetCoreTestApp
+namespace Test.MSAL.NET.Unit.PublicApi
 {
-    class Program
+    [TestClass]
+    public class MsalExceptionTests
     {
-        static void Main(string[] args)
+        [TestMethod]
+        public void ExceptionsArePubliclyCreatable_MsalException()
         {
-            ClientCredential cc = new ClientCredential(new ClientAssertionCertificate(new System.Security.Cryptography.X509Certificates.X509Certificate2("cert.pfx")));
-            ConfidentialClientApplication app = new ConfidentialClientApplication("<client-id>", "http://localhost", cc, new TokenCache(), new TokenCache());
-            try
-            {
-                IAuthenticationResult result = app.AcquireTokenForClientAsync(new string[] { "User.Read.All" }).Result;
-            }
-            catch (Exception exc)
-            {
-                Console.WriteLine(exc.Message);
-            }
-            finally { Console.ReadKey(); }
+            var innerEx = new Exception();
+            var ex = new MsalException("code1", "msg1", innerEx);
+
+            Assert.AreEqual("code1", ex.ErrorCode);
+            Assert.AreEqual("msg1", ex.Message);
+            Assert.AreSame(innerEx, ex.InnerException);
+        }
+   
+        [TestMethod]
+        public void ExceptionsArePubliclyCreatable_ServiceException()
+        {
+            var ex = new MsalServiceException("code1", "msg1");
+
+            Assert.AreEqual("code1", ex.ErrorCode);
+            Assert.AreEqual("msg1", ex.Message);
+            Assert.IsNull(ex.InnerException);
+        }
+
+        [TestMethod]
+        public void ExceptionsArePubliclyCreatable_MsalSilentTokenAcquisitionException()
+        {
+            var ex = new MsalSilentTokenAcquisitionException();
+
+            Assert.IsNull(ex.InnerException);
         }
     }
 }

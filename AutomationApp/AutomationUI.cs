@@ -36,7 +36,7 @@ namespace AutomationApp
 {
     public partial class AutomationUI : Form
     {
-        private delegate Task<string> Command(Dictionary<string, string> input);
+        private delegate Task<IAuthenticationResult> Command(Dictionary<string, string> input);
         private readonly LoggerCallbackImpl _loggerCallback = new LoggerCallbackImpl();
         private Command _commandToRun;
         private readonly TokenHandler _tokenHandlerApp = new TokenHandler();
@@ -69,7 +69,7 @@ namespace AutomationApp
 
         private void expireAccessToken_Click(object sender, EventArgs e)
         {
-            _commandToRun = _tokenHandlerApp.ExpireAccessToken;
+            _commandToRun = null;
             pageControl1.SelectedTab = dataInputPage;
         }
 
@@ -80,11 +80,21 @@ namespace AutomationApp
             Dictionary<string, string> dict = CreateDictionaryFromJson(dataInput.Text);
             try
             {
-                resultInfo.Text = await _commandToRun(dict);
+                if (_commandToRun == null)
+                {
+                    _tokenHandlerApp.ExpireAccessToken(dict);
+                    ClearResultPageInfo();
+                    messageResult.Text = "The access token has expired.";
+                }
+                else
+                {
+                    IAuthenticationResult authenticationResult = await _commandToRun(dict);
+                    SetResultPageInfo(authenticationResult);
+                }
             }
             catch (Exception exception)
             {
-                resultInfo.Text = exception.ToString();
+                exceptionResult.Text = exception.ToString();
             }
             msalLogs.Text = _loggerCallback.GetMsalLogs();
             pageControl1.SelectedTab = resultPage;
@@ -92,8 +102,34 @@ namespace AutomationApp
 
         private void Done_Click(object sender, EventArgs e)
         {
-            resultInfo.Text = string.Empty;
+            ClearResultPageInfo();
             pageControl1.SelectedTab = mainPage;
+        }
+
+        private void SetResultPageInfo(IAuthenticationResult authenticationResult)
+        {
+            accessTokenResult.Text = authenticationResult.AccessToken;
+            expiresOnResult.Text = authenticationResult.ExpiresOn.ToString();
+            tenantIdResult.Text = authenticationResult.TenantId;
+            userResult.Text = authenticationResult.User.DisplayableId;
+            idTokenResult.Text = authenticationResult.IdToken;
+            scopeResult.DataSource = authenticationResult.Scope;
+        }
+
+        private void ClearResultPageInfo()
+        {
+            accessTokenResult.Text = string.Empty;
+            expiresOnResult.Text = string.Empty;
+            tenantIdResult.Text = string.Empty;
+            userResult.Text = string.Empty;
+            idTokenResult.Text = string.Empty;
+            scopeResult.DataSource = null;
+            messageResult.Text = string.Empty;
+        }
+
+        private void AutomationUI_Load(object sender, EventArgs e)
+        {
+            ClearResultPageInfo();
         }
     }
 }
