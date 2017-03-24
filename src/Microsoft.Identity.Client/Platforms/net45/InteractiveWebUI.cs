@@ -33,11 +33,18 @@ namespace Microsoft.Identity.Client
     {
         private WindowsFormsWebAuthenticationDialog dialog;
 
+        public InteractiveWebUI(RequestContext requestContext)
+        {
+            RequestContext = requestContext;
+        }
+
+        private RequestContext RequestContext { get; }
+
         protected override AuthorizationResult OnAuthenticate()
         {
             AuthorizationResult result;
 
-            using (dialog = new WindowsFormsWebAuthenticationDialog(this.OwnerWindow))
+            using (dialog = new WindowsFormsWebAuthenticationDialog(this.OwnerWindow, RequestContext))
             {
                 result = dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri);
             }

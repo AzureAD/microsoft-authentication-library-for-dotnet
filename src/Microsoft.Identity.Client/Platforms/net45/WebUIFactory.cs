@@ -45,10 +45,10 @@ namespace Microsoft.Identity.Client
 
             if (behavior.Equals(UIBehavior.Never))
             {
-                return new SilentWebUI() {OwnerWindow = parameters.OwnerWindow};
+                return new SilentWebUI {OwnerWindow = parameters.OwnerWindow};
             }
 
-            return new InteractiveWebUI {OwnerWindow = parameters.OwnerWindow};
+            return new InteractiveWebUI(requestContext) {OwnerWindow = parameters.OwnerWindow};
         }
     }
 }

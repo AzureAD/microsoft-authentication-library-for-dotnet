@@ -46,8 +46,8 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// </summary>
-        public SilentWindowsFormsAuthenticationDialog(object ownerWindow)
-            : base(ownerWindow)
+        public SilentWindowsFormsAuthenticationDialog(object ownerWindow, RequestContext requestContext)
+            : base(ownerWindow, requestContext)
         {
             SuppressBrowserSubDialogs();
             WebBrowser.DocumentCompleted += DocumentCompletedHandler;
@@ -123,10 +123,7 @@ namespace Microsoft.Identity.Client
                 timer.Stop();
                 SilentWebUIDoneEventArgs args = new SilentWebUIDoneEventArgs(exception);
 
-                if (null != Done)
-                {
-                    Done(this, args);
-                }
+                Done?.Invoke(this, args);
 
                 doneSignaled = true;
             }

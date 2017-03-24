@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
     [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class WindowsFormsWebAuthenticationDialogBase : Form
     {
-        private RequestContext RequestContext { get; set; } = new RequestContext(Guid.Empty);
+        private RequestContext RequestContext { get;  } 
 
         private const int UIWidth = 566;
         private static readonly NavigateErrorStatus NavigateErrorStatus = new NavigateErrorStatus();
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// </summary>
-        protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow)
+        protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow, RequestContext requestContext)
         {
             // From MSDN (http://msdn.microsoft.com/en-us/library/ie/dn720860(v=vs.85).aspx): 
             // The net session count tracks the number of instances of the web browser control. 
