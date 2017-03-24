@@ -30,6 +30,15 @@
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.acquireTabPage = new System.Windows.Forms.TabPage();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.never = new System.Windows.Forms.RadioButton();
+            this.consent = new System.Windows.Forms.RadioButton();
+            this.forceLogin = new System.Windows.Forms.RadioButton();
+            this.selectAccount = new System.Windows.Forms.RadioButton();
+            this.callResult = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.userList = new System.Windows.Forms.ComboBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.acquireTokenSilent = new System.Windows.Forms.Button();
             this.acquireTokenInteractive = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -38,26 +47,27 @@
             this.loginHint = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
-            this.tenant = new System.Windows.Forms.TextBox();
+            this.overridenAuthority = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.environment = new System.Windows.Forms.ComboBox();
+            this.authority = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.settingsTabPage = new System.Windows.Forms.TabPage();
             this.cacheTabPage = new System.Windows.Forms.TabPage();
             this.logsTabPage = new System.Windows.Forms.TabPage();
             this.button1 = new System.Windows.Forms.Button();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.msalPIILogs = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.msalLogs = new System.Windows.Forms.TextBox();
             this.acquire = new System.Windows.Forms.Button();
             this.settings = new System.Windows.Forms.Button();
             this.cache = new System.Windows.Forms.Button();
             this.logs = new System.Windows.Forms.Button();
-            this.userList = new System.Windows.Forms.ComboBox();
-            this.label7 = new System.Windows.Forms.Label();
+            this.scopes = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.acquireTabPage.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.logsTabPage.SuspendLayout();
             this.SuspendLayout();
@@ -77,6 +87,11 @@
             // acquireTabPage
             // 
             this.acquireTabPage.BackColor = System.Drawing.SystemColors.Control;
+            this.acquireTabPage.Controls.Add(this.scopes);
+            this.acquireTabPage.Controls.Add(this.label9);
+            this.acquireTabPage.Controls.Add(this.groupBox2);
+            this.acquireTabPage.Controls.Add(this.callResult);
+            this.acquireTabPage.Controls.Add(this.label8);
             this.acquireTabPage.Controls.Add(this.userList);
             this.acquireTabPage.Controls.Add(this.label7);
             this.acquireTabPage.Controls.Add(this.acquireTokenSilent);
@@ -85,9 +100,9 @@
             this.acquireTabPage.Controls.Add(this.loginHint);
             this.acquireTabPage.Controls.Add(this.label6);
             this.acquireTabPage.Controls.Add(this.label5);
-            this.acquireTabPage.Controls.Add(this.tenant);
+            this.acquireTabPage.Controls.Add(this.overridenAuthority);
             this.acquireTabPage.Controls.Add(this.label4);
-            this.acquireTabPage.Controls.Add(this.environment);
+            this.acquireTabPage.Controls.Add(this.authority);
             this.acquireTabPage.Controls.Add(this.label3);
             this.acquireTabPage.Location = new System.Drawing.Point(4, 22);
             this.acquireTabPage.Name = "acquireTabPage";
@@ -96,9 +111,101 @@
             this.acquireTabPage.TabIndex = 0;
             this.acquireTabPage.Text = "acquireTabPage";
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.never);
+            this.groupBox2.Controls.Add(this.consent);
+            this.groupBox2.Controls.Add(this.forceLogin);
+            this.groupBox2.Controls.Add(this.selectAccount);
+            this.groupBox2.Location = new System.Drawing.Point(256, 154);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(332, 51);
+            this.groupBox2.TabIndex = 10;
+            this.groupBox2.TabStop = false;
+            // 
+            // never
+            // 
+            this.never.AutoSize = true;
+            this.never.Location = new System.Drawing.Point(267, 18);
+            this.never.Name = "never";
+            this.never.Size = new System.Drawing.Size(54, 17);
+            this.never.TabIndex = 10;
+            this.never.Text = "Never";
+            this.never.UseVisualStyleBackColor = true;
+            // 
+            // consent
+            // 
+            this.consent.AutoSize = true;
+            this.consent.Location = new System.Drawing.Point(197, 18);
+            this.consent.Name = "consent";
+            this.consent.Size = new System.Drawing.Size(64, 17);
+            this.consent.TabIndex = 9;
+            this.consent.Text = "Consent";
+            this.consent.UseVisualStyleBackColor = true;
+            // 
+            // forceLogin
+            // 
+            this.forceLogin.AutoSize = true;
+            this.forceLogin.Location = new System.Drawing.Point(110, 18);
+            this.forceLogin.Name = "forceLogin";
+            this.forceLogin.Size = new System.Drawing.Size(81, 17);
+            this.forceLogin.TabIndex = 8;
+            this.forceLogin.Text = "Force Login";
+            this.forceLogin.UseVisualStyleBackColor = true;
+            // 
+            // selectAccount
+            // 
+            this.selectAccount.AutoSize = true;
+            this.selectAccount.Checked = true;
+            this.selectAccount.Location = new System.Drawing.Point(6, 19);
+            this.selectAccount.Name = "selectAccount";
+            this.selectAccount.Size = new System.Drawing.Size(98, 17);
+            this.selectAccount.TabIndex = 7;
+            this.selectAccount.TabStop = true;
+            this.selectAccount.Text = "Select Account";
+            this.selectAccount.UseVisualStyleBackColor = true;
+            // 
+            // callResult
+            // 
+            this.callResult.Location = new System.Drawing.Point(12, 352);
+            this.callResult.Multiline = true;
+            this.callResult.Name = "callResult";
+            this.callResult.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.callResult.Size = new System.Drawing.Size(645, 353);
+            this.callResult.TabIndex = 13;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(8, 172);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(106, 24);
+            this.label8.TabIndex = 9;
+            this.label8.Text = "UI Behavior";
+            // 
+            // userList
+            // 
+            this.userList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.userList.FormattingEnabled = true;
+            this.userList.Location = new System.Drawing.Point(256, 266);
+            this.userList.Name = "userList";
+            this.userList.Size = new System.Drawing.Size(352, 21);
+            this.userList.TabIndex = 12;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label7.Location = new System.Drawing.Point(8, 266);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(49, 24);
+            this.label7.TabIndex = 11;
+            this.label7.Text = "User";
+            // 
             // acquireTokenSilent
             // 
-            this.acquireTokenSilent.Location = new System.Drawing.Point(444, 694);
+            this.acquireTokenSilent.Location = new System.Drawing.Point(444, 711);
             this.acquireTokenSilent.Name = "acquireTokenSilent";
             this.acquireTokenSilent.Size = new System.Drawing.Size(164, 46);
             this.acquireTokenSilent.TabIndex = 10;
@@ -107,7 +214,7 @@
             // 
             // acquireTokenInteractive
             // 
-            this.acquireTokenInteractive.Location = new System.Drawing.Point(42, 694);
+            this.acquireTokenInteractive.Location = new System.Drawing.Point(42, 711);
             this.acquireTokenInteractive.Name = "acquireTokenInteractive";
             this.acquireTokenInteractive.Size = new System.Drawing.Size(164, 46);
             this.acquireTokenInteractive.TabIndex = 9;
@@ -149,7 +256,7 @@
             // 
             // loginHint
             // 
-            this.loginHint.Location = new System.Drawing.Point(256, 159);
+            this.loginHint.Location = new System.Drawing.Point(256, 226);
             this.loginHint.Name = "loginHint";
             this.loginHint.Size = new System.Drawing.Size(352, 20);
             this.loginHint.TabIndex = 6;
@@ -158,7 +265,7 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(8, 161);
+            this.label6.Location = new System.Drawing.Point(8, 228);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(95, 24);
             this.label6.TabIndex = 5;
@@ -174,39 +281,37 @@
             this.label5.TabIndex = 4;
             this.label5.Text = "Validate Authority";
             // 
-            // tenant
+            // overridenAuthority
             // 
-            this.tenant.Location = new System.Drawing.Point(256, 65);
-            this.tenant.Name = "tenant";
-            this.tenant.Size = new System.Drawing.Size(352, 20);
-            this.tenant.TabIndex = 3;
-            this.tenant.Text = "common";
+            this.overridenAuthority.Location = new System.Drawing.Point(256, 59);
+            this.overridenAuthority.Name = "overridenAuthority";
+            this.overridenAuthority.Size = new System.Drawing.Size(352, 20);
+            this.overridenAuthority.TabIndex = 3;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(8, 64);
+            this.label4.Location = new System.Drawing.Point(8, 58);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(69, 24);
+            this.label4.Size = new System.Drawing.Size(246, 24);
             this.label4.TabIndex = 2;
-            this.label4.Text = "Tenant";
+            this.label4.Text = "Overriden Authority for 1 call";
             // 
-            // environment
+            // authority
             // 
-            this.environment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.environment.FormattingEnabled = true;
-            this.environment.Items.AddRange(new object[] {
-            "https://login.microsoftonline.com",
-            "https://login.microsoftonline.de",
-            "https://login.microsoftonline.us",
-            "https://​login-us.microsoftonline.com",
-            "https://login.chinacloudapi.cn",
-            "https://login.windows.net"});
-            this.environment.Location = new System.Drawing.Point(256, 19);
-            this.environment.Name = "environment";
-            this.environment.Size = new System.Drawing.Size(352, 21);
-            this.environment.TabIndex = 1;
+            this.authority.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.authority.FormattingEnabled = true;
+            this.authority.Items.AddRange(new object[] {
+            "https://login.microsoftonline.com/common",
+            "https://login.microsoftonline.de/common",
+            "https://login.microsoftonline.us/common",
+            "https://​login-us.microsoftonline.com/common",
+            "https://login.chinacloudapi.cn/common"});
+            this.authority.Location = new System.Drawing.Point(256, 19);
+            this.authority.Name = "authority";
+            this.authority.Size = new System.Drawing.Size(352, 21);
+            this.authority.TabIndex = 1;
             // 
             // label3
             // 
@@ -214,9 +319,9 @@
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.Location = new System.Drawing.Point(8, 19);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(117, 24);
+            this.label3.Size = new System.Drawing.Size(83, 24);
             this.label3.TabIndex = 0;
-            this.label3.Text = "Environment";
+            this.label3.Text = "Authority";
             // 
             // settingsTabPage
             // 
@@ -241,10 +346,10 @@
             // logsTabPage
             // 
             this.logsTabPage.Controls.Add(this.button1);
-            this.logsTabPage.Controls.Add(this.textBox2);
+            this.logsTabPage.Controls.Add(this.msalPIILogs);
             this.logsTabPage.Controls.Add(this.label2);
             this.logsTabPage.Controls.Add(this.label1);
-            this.logsTabPage.Controls.Add(this.textBox1);
+            this.logsTabPage.Controls.Add(this.msalLogs);
             this.logsTabPage.Location = new System.Drawing.Point(4, 22);
             this.logsTabPage.Name = "logsTabPage";
             this.logsTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -262,15 +367,15 @@
             this.button1.Text = "Clear Logs";
             this.button1.UseVisualStyleBackColor = true;
             // 
-            // textBox2
+            // msalPIILogs
             // 
-            this.textBox2.Location = new System.Drawing.Point(7, 365);
-            this.textBox2.Multiline = true;
-            this.textBox2.Name = "textBox2";
-            this.textBox2.ReadOnly = true;
-            this.textBox2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox2.Size = new System.Drawing.Size(655, 304);
-            this.textBox2.TabIndex = 3;
+            this.msalPIILogs.Location = new System.Drawing.Point(7, 365);
+            this.msalPIILogs.Multiline = true;
+            this.msalPIILogs.Name = "msalPIILogs";
+            this.msalPIILogs.ReadOnly = true;
+            this.msalPIILogs.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.msalPIILogs.Size = new System.Drawing.Size(655, 304);
+            this.msalPIILogs.TabIndex = 3;
             // 
             // label2
             // 
@@ -292,15 +397,15 @@
             this.label1.Text = "========================= PII Logs =========================";
             this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
-            // textBox1
+            // msalLogs
             // 
-            this.textBox1.Location = new System.Drawing.Point(7, 21);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ReadOnly = true;
-            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(655, 304);
-            this.textBox1.TabIndex = 0;
+            this.msalLogs.Location = new System.Drawing.Point(7, 21);
+            this.msalLogs.Multiline = true;
+            this.msalLogs.Name = "msalLogs";
+            this.msalLogs.ReadOnly = true;
+            this.msalLogs.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.msalLogs.Size = new System.Drawing.Size(655, 304);
+            this.msalLogs.TabIndex = 0;
             // 
             // acquire
             // 
@@ -342,24 +447,23 @@
             this.logs.UseVisualStyleBackColor = true;
             this.logs.Click += new System.EventHandler(this.logs_Click);
             // 
-            // userList
+            // scopes
             // 
-            this.userList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.userList.FormattingEnabled = true;
-            this.userList.Location = new System.Drawing.Point(256, 199);
-            this.userList.Name = "userList";
-            this.userList.Size = new System.Drawing.Size(352, 21);
-            this.userList.TabIndex = 12;
+            this.scopes.Location = new System.Drawing.Point(256, 310);
+            this.scopes.Name = "scopes";
+            this.scopes.Size = new System.Drawing.Size(352, 20);
+            this.scopes.TabIndex = 15;
+            this.scopes.Text = "mail.read";
             // 
-            // label7
+            // label9
             // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(8, 199);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(49, 24);
-            this.label7.TabIndex = 11;
-            this.label7.Text = "User";
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.Location = new System.Drawing.Point(8, 312);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(74, 24);
+            this.label9.TabIndex = 14;
+            this.label9.Text = "Scopes";
             // 
             // MainForm
             // 
@@ -377,6 +481,8 @@
             this.tabControl1.ResumeLayout(false);
             this.acquireTabPage.ResumeLayout(false);
             this.acquireTabPage.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.logsTabPage.ResumeLayout(false);
@@ -397,14 +503,14 @@
         private System.Windows.Forms.TabPage cacheTabPage;
         private System.Windows.Forms.TabPage logsTabPage;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox msalLogs;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox msalPIILogs;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ComboBox environment;
+        private System.Windows.Forms.ComboBox authority;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox tenant;
+        private System.Windows.Forms.TextBox overridenAuthority;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox loginHint;
         private System.Windows.Forms.Label label6;
@@ -415,6 +521,15 @@
         private System.Windows.Forms.Button acquireTokenInteractive;
         private System.Windows.Forms.ComboBox userList;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox callResult;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.RadioButton forceLogin;
+        private System.Windows.Forms.RadioButton selectAccount;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.RadioButton never;
+        private System.Windows.Forms.RadioButton consent;
+        private System.Windows.Forms.TextBox scopes;
+        private System.Windows.Forms.Label label9;
     }
 }
 
