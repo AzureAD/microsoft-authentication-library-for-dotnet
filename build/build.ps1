@@ -9,6 +9,11 @@ function ExitOnError
     }
 }
 
+function Log([String] $message)
+{
+    Write-Host $message -Foreground Green
+}
+
 Log ("Building product code...")
 MSBuild ./src/ADAL.PCL/ADAL.PCL.csproj /t:Build /p:runcodeanalysis=false
 ExitOnError
