@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
@@ -34,7 +35,7 @@ namespace Microsoft.Identity.Client
     {
         private PlatformParameters parameters;
 
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters, UIBehavior behavior)
+        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters, UIBehavior behavior, RequestContext requestContext)
         {
             parameters = inputParameters as PlatformParameters;
             if (parameters == null)

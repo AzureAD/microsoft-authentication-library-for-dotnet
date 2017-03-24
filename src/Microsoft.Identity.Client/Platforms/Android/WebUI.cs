@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
         private static AuthorizationResult authorizationResult;
         private readonly PlatformParameters parameters;
 
-        public WebUI(IPlatformParameters parameters)
+        public WebUI(IPlatformParameters parameters, RequestContext requestContext)
         {
             this.parameters = parameters as PlatformParameters;
             if (this.parameters == null)

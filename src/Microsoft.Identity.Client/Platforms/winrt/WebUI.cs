@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
         private readonly bool useCorporateNetwork;
         private readonly bool silentMode;
 
-        public WebUI(IPlatformParameters parameters)
+        public WebUI(IPlatformParameters parameters, RequestContext requestContext)
         {
             if (!(parameters is PlatformParameters))
             {
