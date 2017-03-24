@@ -28,6 +28,7 @@
 using System;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
+using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Client
 {
