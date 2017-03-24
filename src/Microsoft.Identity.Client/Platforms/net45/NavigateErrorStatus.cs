@@ -165,7 +165,10 @@ namespace Microsoft.Identity.Client
                 (int)NavigateErrorStatusCode.HTTP_STATUS_BAD_GATEWAY,
                 "The server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request."
             },
-            { (int)NavigateErrorStatusCode.HTTP_STATUS_SERVICE_UNAVAIL, "The service is temporarily overloaded."},
+            {
+                (int)NavigateErrorStatusCode.HTTP_STATUS_SERVICE_UNAVAIL,
+                "The service is temporarily overloaded."
+            },
             {
                 (int)NavigateErrorStatusCode.HTTP_STATUS_GATEWAY_TIMEOUT,
                 "The request was timed out waiting for a gateway."
@@ -210,7 +213,10 @@ namespace Microsoft.Identity.Client
                 (int)NavigateErrorStatusCode.INET_E_CODE_INSTALL_BLOCKED_BY_HASH_POLICY,
                 "Internet Explorer 6 for Windows XP SP2 and later. Installation of ActiveX control (as identified by cryptographic file hash) has been disallowed by registry key policy."
             },
-            { (int)NavigateErrorStatusCode.INET_E_CONNECTION_TIMEOUT, "The Internet connection has timed out."},
+            {
+                (int)NavigateErrorStatusCode.INET_E_CONNECTION_TIMEOUT,
+                "The Internet connection has timed out."
+            },
             {
                 (int)NavigateErrorStatusCode.INET_E_DATA_NOT_AVAILABLE,
                 "An Internet connection was established, but the data cannot be retrieved."
