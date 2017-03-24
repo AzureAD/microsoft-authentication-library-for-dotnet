@@ -9,8 +9,7 @@ before_build:
   - nuget restore
 
 build_script:
-  - msbuild ./ADAL.NET.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - msbuild ./ADAL.NET.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - ps: .\build\build.ps1
 
 skip_commits:
   files:
