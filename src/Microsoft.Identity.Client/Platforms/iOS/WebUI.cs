@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
         private readonly PlatformParameters parameters;
         private SFSafariViewController safariViewController;
 
-        public WebUI(IPlatformParameters parameters)
+        public WebUI(IPlatformParameters parameters, RequestContext requestContext)
         {
             this.parameters = parameters as PlatformParameters;
             if (this.parameters == null)

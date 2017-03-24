@@ -171,9 +171,9 @@ namespace Microsoft.Identity.Client
                         behavior, extraQueryParameters).ConfigureAwait(false);
         }
 
-        internal IWebUI CreateWebAuthenticationDialog(IPlatformParameters parameters, UIBehavior behavior)
+        internal IWebUI CreateWebAuthenticationDialog(IPlatformParameters parameters, UIBehavior behavior, RequestContext requestContext)
         {
-            return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parameters, behavior);
+            return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parameters, behavior, requestContext);
         }
 
         /// <summary>
@@ -225,7 +225,7 @@ namespace Microsoft.Identity.Client
             
             var handler =
                 new InteractiveRequest(requestParams, additionalScope, loginHint, behavior,
-                    CreateWebAuthenticationDialog(PlatformParameters, behavior));
+                    CreateWebAuthenticationDialog(PlatformParameters, behavior, requestParams.RequestContext));
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Client
 
             var handler =
                 new InteractiveRequest(requestParams, additionalScope, behavior,
-                    CreateWebAuthenticationDialog(PlatformParameters, behavior));
+                    CreateWebAuthenticationDialog(PlatformParameters, behavior, requestParams.RequestContext));
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
