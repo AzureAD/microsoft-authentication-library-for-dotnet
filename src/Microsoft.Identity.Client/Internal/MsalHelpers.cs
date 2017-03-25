@@ -55,12 +55,7 @@ namespace Microsoft.Identity.Client.Internal
 
         internal static string[] AsArray(this SortedSet<string> setOfStrings)
         {
-            if (setOfStrings == null)
-            {
-                return null;
-            }
-
-            return setOfStrings.ToArray();
+            return setOfStrings?.ToArray();
         }
 
         internal static string AsSingleString(this SortedSet<string> setOfStrings)
@@ -94,17 +89,17 @@ namespace Microsoft.Identity.Client.Internal
                 return new SortedSet<string>();
             }
 
-            return new SortedSet<string>(singleString.Split(new[] {" "}, StringSplitOptions.None));
+            return new SortedSet<string>(singleString.Split(new[] { " " }, StringSplitOptions.None));
         }
 
         internal static string[] AsArray(this string singleString)
         {
             if (String.IsNullOrWhiteSpace(singleString))
             {
-                return new string[] {};
+                return new string[] { };
             }
 
-            return singleString.Split(new[] {" "}, StringSplitOptions.None);
+            return singleString.Split(new[] { " " }, StringSplitOptions.None);
         }
 
         internal static SortedSet<string> CreateSetFromArray(this string[] arrayStrings)
@@ -138,16 +133,18 @@ namespace Microsoft.Identity.Client.Internal
             return Encoding.UTF8.GetString(input, 0, input.Length);
         }
 
-        public static DateTime UnixTimestampToDateTime(double unixTimeStamp)
+        public static DateTime UnixTimestampToDateTime(double unixTimestamp)
         {
-            DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            dtDateTime = dtDateTime.AddSeconds(unixTimeStamp).ToUniversalTime();
-            return dtDateTime;
+            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            dateTime = dateTime.AddSeconds(unixTimestamp).ToUniversalTime();
+            return dateTime;
         }
 
-        public static long DateTimeToUnixTimestamp(DateTimeOffset dtOffset)
+        public static long DateTimeToUnixTimestamp(DateTimeOffset dateTimeOffset)
         {
-            return (long)(dtOffset.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc))).TotalSeconds;
+            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            long unixTimestamp = (long)dateTimeOffset.Subtract(dateTime).TotalSeconds;
+            return unixTimestamp;
         }
 
         public static string CreateString(byte[] bytes)
@@ -232,12 +229,12 @@ namespace Microsoft.Identity.Client.Internal
                         key = key.Trim().ToLowerInvariant();
                     }
 
-                    value = value.Trim().Trim(new[] { '\"' }).Trim();
+                    value = value.Trim().Trim('\"').Trim();
 
-                    if (response.ContainsKey(key) && requestContext != null)
+                    if (response.ContainsKey(key))
                     {
-                        requestContext.Logger.Warning(string.Format(CultureInfo.InvariantCulture,
-                                "Key/value pair list contains redundant key '{0}'.", key));
+                        requestContext?.Logger.Warning(string.Format(CultureInfo.InvariantCulture,
+                            "Key/value pair list contains redundant key '{0}'.", key));
                     }
 
                     response[key] = value;
