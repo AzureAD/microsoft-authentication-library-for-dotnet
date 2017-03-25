@@ -155,9 +155,7 @@ namespace Microsoft.Identity.Client
                     AcquireTokenSilentCommonAsync(authorityInstance, scope, user,
                         forceRefresh).ConfigureAwait(false);
         }
-
-
-
+        
         /// <summary>
         /// </summary>
         public void Remove(User user)

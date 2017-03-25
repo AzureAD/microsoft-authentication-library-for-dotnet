@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected TokenResponse Response;
         protected AccessTokenCacheItem AccessTokenItem;
 
-        internal RequestContext RequestContext { get; set; }
+        internal RequestContext RequestContext { get; set; } = new RequestContext(Guid.Empty);
 
         protected bool SupportADFS { get; set; }
 
