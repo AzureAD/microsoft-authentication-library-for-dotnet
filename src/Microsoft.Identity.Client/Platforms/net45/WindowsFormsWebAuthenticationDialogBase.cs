@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client
             }
             else if (ownerWindow is IntPtr)
             {
-                this.ownerWindow = new WindowsFormsWin32Window {Handle = (IntPtr) ownerWindow};
+                this.ownerWindow = new WindowsFormsWin32Window { Handle = (IntPtr) ownerWindow };
             }
             else
             {
