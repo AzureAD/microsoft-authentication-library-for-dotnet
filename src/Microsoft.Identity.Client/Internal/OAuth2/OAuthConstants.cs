@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
         // correlation id is not standard oauth2 parameter
 
         public const string Prompt = "prompt"; // prompt is not standard oauth2 parameter
-        public const string RestrictToHint = "restrict_to_hint"; // restrict_to_hint is not standard oauth2 parameter
+        public const string ClientInfo = "client_info"; // restrict_to_hint is not standard oauth2 parameter
     }
 
     internal class OAuth2GrantType

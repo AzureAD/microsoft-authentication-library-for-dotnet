@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
         public const string AccessToken = "access_token";
         public const string RefreshToken = "refresh_token";
         public const string Scope = "scope";
-        public const string FamilyId = "foci";
+        public const string ClientInfo = "client_info";
         public const string IdToken = "id_token";
         public const string ExpiresIn = "expires_in";
     }
@@ -57,8 +57,8 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
         [DataMember(Name = TokenResponseClaim.Scope, IsRequired = false)]
         public string Scope { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.FamilyId, IsRequired = false)]
-        public string FamilyId { get; set; }
+        [DataMember(Name = TokenResponseClaim.ClientInfo, IsRequired = false)]
+        public string ClientInfo { get; set; }
 
         [DataMember(Name = TokenResponseClaim.IdToken, IsRequired = false)]
         public string IdToken { get; set; }

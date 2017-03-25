@@ -180,6 +180,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             OAuth2Client client = new OAuth2Client();
             client.AddBodyParameter(OAuth2Parameter.ClientId, AuthenticationRequestParameters.ClientId);
+            client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
             foreach (var entry in AuthenticationRequestParameters.ToParameters())
             {
                 client.AddBodyParameter(entry.Key, entry.Value);
@@ -207,15 +208,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (result.AccessToken != null)
             {
-                string accessTokenHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.AccessToken);
-
                 RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
-                        "=== Token Acquisition finished successfully. An access token was retuned:\n\tAccess Token Truncated Hash: {0}\n\tExpiration Time: {1}\n\tUser Truncated  Hash: {2}\n\t",
-                        accessTokenHash,
-                        result.ExpiresOn,
-                        result.User != null
-                            ? PlatformPlugin.CryptographyHelper.CreateSha256Hash(result.User.DisplayableId)
-                            : "null"));
+                    "=== Token Acquisition finished successfully. An access token was retuned with Expiration Time: {0}",
+                    result.ExpiresOn));
             }
         }
     }

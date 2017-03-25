@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client
         {
             data.PutExtra(AndroidConstants.RequestId, _requestId);
             SetResult((Result) resultCode, data);
-            this.Finish();
+            Finish();
         }
 
         /**
