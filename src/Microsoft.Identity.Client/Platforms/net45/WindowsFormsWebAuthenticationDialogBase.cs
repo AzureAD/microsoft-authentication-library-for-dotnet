@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// </summary>
-        protected IWin32Window ownerWindow;
+        protected IWin32Window ownerWindow { get; set; }
 
         private Panel webBrowserPanel;
 
@@ -80,11 +80,11 @@ namespace Microsoft.Identity.Client
             }
             else if (ownerWindow is IWin32Window)
             {
-                this.ownerWindow = (IWin32Window) ownerWindow;
+                this.ownerWindow = (IWin32Window)ownerWindow;
             }
             else if (ownerWindow is IntPtr)
             {
-                this.ownerWindow = new WindowsFormsWin32Window {Handle = (IntPtr) ownerWindow};
+                this.ownerWindow = new WindowsFormsWin32Window { Handle = (IntPtr)ownerWindow };
             }
             else
             {
@@ -292,14 +292,12 @@ namespace Microsoft.Identity.Client
                 : Screen.PrimaryScreen;
 
             // Window height is set to 70% of the screen height.
-            int uiHeight = (int) (Math.Max(screen.WorkingArea.Height, 160)*70.0/DpiHelper.ZoomPercent);
+            int uiHeight = (int)(Math.Max(screen.WorkingArea.Height, 160) * 70.0 / DpiHelper.ZoomPercent);
             webBrowserPanel = new Panel();
             webBrowserPanel.SuspendLayout();
             SuspendLayout();
 
-            // 
             // webBrowser
-            // 
             webBrowser.Dock = DockStyle.Fill;
             webBrowser.Location = new Point(0, 25);
             webBrowser.MinimumSize = new Size(20, 20);
@@ -308,9 +306,7 @@ namespace Microsoft.Identity.Client
             webBrowser.TabIndex = 1;
             webBrowser.IsWebBrowserContextMenuEnabled = false;
 
-            // 
             // webBrowserPanel
-            // 
             webBrowserPanel.Controls.Add(webBrowser);
             webBrowserPanel.Dock = DockStyle.Fill;
             webBrowserPanel.BorderStyle = BorderStyle.None;
@@ -319,9 +315,7 @@ namespace Microsoft.Identity.Client
             webBrowserPanel.Size = new Size(UIWidth, uiHeight);
             webBrowserPanel.TabIndex = 2;
 
-            // 
             // BrowserAuthenticationWindow
-            // 
             AutoScaleDimensions = new SizeF(6, 13);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(UIWidth, uiHeight);
@@ -340,7 +334,7 @@ namespace Microsoft.Identity.Client
 
             // If we don't have an owner we need to make sure that the pop up browser 
             // window is in the task bar so that it can be selected with the mouse.
-            ShowInTaskbar = (null == ownerWindow);
+            ShowInTaskbar = null == ownerWindow;
 
             webBrowserPanel.ResumeLayout(false);
             ResumeLayout(false);
@@ -364,18 +358,14 @@ namespace Microsoft.Identity.Client
         {
             if (NavigateErrorStatus.Messages.ContainsKey(statusCode))
             {
-                return new MsalServiceException(
-                    MsalError.AuthenticationUiFailed,
-                    string.Format(CultureInfo.InvariantCulture,
-                        "The browser based authentication dialog failed to complete. Reason: {0}",
-                        NavigateErrorStatus.Messages[statusCode]));
+                string format = "The browser based authentication dialog failed to complete. Reason: {0}";
+                string message = string.Format(CultureInfo.InvariantCulture, format, NavigateErrorStatus.Messages[statusCode]);
+                return new MsalServiceException(MsalError.AuthenticationUiFailed, message) { StatusCode = statusCode };
             }
 
-            return new MsalServiceException(
-                MsalError.AuthenticationUiFailed,
-                string.Format(CultureInfo.InvariantCulture,
-                    "The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}",
-                    statusCode)) {StatusCode = statusCode};
+            string formatUnknown = "The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}";
+            string messageUnknown = string.Format(CultureInfo.InvariantCulture, formatUnknown, statusCode);
+            return new MsalServiceException(MsalError.AuthenticationUiFailed, messageUnknown) { StatusCode = statusCode };
         }
 
         private sealed class WindowsFormsWin32Window : IWin32Window
@@ -410,8 +400,8 @@ namespace Microsoft.Identity.Client
                     deviceDpiY = DefaultDpi;
                 }
 
-                int zoomPercentX = (int) (100*(deviceDpiX/DefaultDpi));
-                int zoomPercentY = (int) (100*(deviceDpiY/DefaultDpi));
+                int zoomPercentX = (int)(100 * (deviceDpiX / DefaultDpi));
+                int zoomPercentY = (int)(100 * (deviceDpiY / DefaultDpi));
 
                 ZoomPercent = Math.Min(zoomPercentX, zoomPercentY);
             }
@@ -433,7 +423,7 @@ namespace Microsoft.Identity.Client
                 SESSION_QUERY = 0,
                 SESSION_INCREMENT,
                 SESSION_DECREMENT
-            };
+            }
         }
     }
 }
