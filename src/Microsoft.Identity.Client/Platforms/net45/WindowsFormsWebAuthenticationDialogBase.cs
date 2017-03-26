@@ -237,9 +237,8 @@ namespace Microsoft.Identity.Client
 
         private void StopWebBrowser()
         {
-            // Guard conditions
-            if (_webBrowser.IsDisposed) return;
-            if (!_webBrowser.IsBusy) return;
+            // Guard condition
+            if (_webBrowser.IsDisposed || !_webBrowser.IsBusy) return;
 
             RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
                 "WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
