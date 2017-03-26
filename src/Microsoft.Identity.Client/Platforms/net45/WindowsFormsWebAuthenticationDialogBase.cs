@@ -301,7 +301,7 @@ namespace Microsoft.Identity.Client
             _webBrowser.Dock = DockStyle.Fill;
             _webBrowser.Location = new Point(0, 25);
             _webBrowser.MinimumSize = new Size(20, 20);
-            _webBrowser.Name = "_webBrowser";
+            _webBrowser.Name = "webBrowser";
             _webBrowser.Size = new Size(UIWidth, 565);
             _webBrowser.TabIndex = 1;
             _webBrowser.IsWebBrowserContextMenuEnabled = false;
@@ -311,7 +311,7 @@ namespace Microsoft.Identity.Client
             _webBrowserPanel.Dock = DockStyle.Fill;
             _webBrowserPanel.BorderStyle = BorderStyle.None;
             _webBrowserPanel.Location = new Point(0, 0);
-            _webBrowserPanel.Name = "_webBrowserPanel";
+            _webBrowserPanel.Name = "webBrowserPanel";
             _webBrowserPanel.Size = new Size(UIWidth, uiHeight);
             _webBrowserPanel.TabIndex = 2;
 

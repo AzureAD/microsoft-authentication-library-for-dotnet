@@ -129,12 +129,12 @@ namespace Microsoft.Identity.Client
                     IList<AccessTokenCacheItem> accessTokenItemList = new List<AccessTokenCacheItem>();
                     foreach (var accessTokenString in TokenCacheAccessor.GetAllAccessTokensAsString())
                     {
-                        AccessTokenCacheItem token = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessTokenString);
-                        if (token.ClientId.Equals(ClientId) &&
-                            token.Authority.Equals(requestParams.Authority.CanonicalAuthority) &&
-                            token.Scope.ScopeIntersects(accessTokenCacheItem.Scope))
+                        AccessTokenCacheItem accessTokenItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessTokenString);
+                        if (accessTokenItem.ClientId.Equals(ClientId) &&
+                            accessTokenItem.Authority.Equals(requestParams.Authority.CanonicalAuthority) &&
+                            accessTokenItem.Scope.ScopeIntersects(accessTokenCacheItem.Scope))
                         {
-                            accessTokenItemList.Add(token);
+                            accessTokenItemList.Add(accessTokenItem);
                         }
                     }
 #if NET45 || NETSTANDARD1_3
