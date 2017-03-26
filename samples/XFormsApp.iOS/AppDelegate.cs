@@ -56,5 +56,11 @@ namespace XFormsApp.iOS
 
             return base.FinishedLaunching(app, options);
         }
+
+        public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options)
+        {
+            AuthenticationContinuationHelper.SetBrokerContinuationEventArgs(url);
+            return true;
+        }
     }
 }

@@ -20,12 +20,28 @@
       <string>UIInterfaceOrientationLandscapeLeft</string>
       <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
+
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>msauth</string>
+    </array>
+
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>adaliosapp</string>
+        </array>
+      </dict>
+    </array>
+    
     <key>MinimumOSVersion</key>
     <string>6.0</string>
     <key>CFBundleDisplayName</key>
     <string>XFormsApp</string>
     <key>CFBundleIdentifier</key>
-    <string>com.yourcompany.XFormsApp</string>
+    <string>com.yourcompany.xformsapp</string>
     <key>CFBundleVersion</key>
     <string>1.0</string>
     <key>CFBundleIconFiles</key>
