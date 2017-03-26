@@ -157,6 +157,75 @@ There is also a default event listener which writes logs to a local file named *
 AdalTrace.Level = AdalTraceLevel.Informational;
 ```
 
+### Brokered Authentication for iOS
+
+If your app requires conditional access or certificate authentication (currently in preview) support, you must set up your AuthenticationContext and redirectURI to be able to talk to the Azure Authenticator app.
+
+
+#### Enable Broker Mode on Your Context
+Broker is enabled on a per-authentication-context basis. It is disabled by default. You must set useBroker flag to true in PlatformParamters constructor if you wish ADAL to call to broker:
+
+```C#
+public PlatformParameters(UIViewController callerViewController, bool useBroker)
+```
+
+The userBroker flag setting will allow ADAL to try to call out to the broker.
+
+#### AppDelegate changes
+Update the AppDelegate.cs file to  include the override method below. This method is invoked everytime the application is launched and is used as an opportunity to process response from the Broker and complete the authentication process. 
+```C#
+public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options)
+{
+    AuthenticationContinuationHelper.SetBrokerContinuationEventArgs(url);
+    return true;
+}
+```
+
+#### Registering a URL Scheme
+ADAL uses URLs to invoke the broker and then return back to your app. To finish that round trip you need a URL scheme registered for your app. We recommend making the URL scheme fairly unique to minimize the chances of another app using the same URL scheme.
+
+```
+<key>CFBundleURLTypes</key>
+<array>
+    <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLName</key>
+        <string>com.mycompany.myapp</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>mytestiosapp</string>
+        </array>
+    </dict>
+</array>
+```
+
+#### LSApplicationQueriesSchemes
+ADAL uses –canOpenURL: to check if the broker is installed on the device. in iOS 9 Apple locked down what schemes an application can query for. You will need to add “msauth” to the LSApplicationQueriesSchemes section of your info.plist file.
+
+```
+<key>LSApplicationQueriesSchemes</key>
+<array>
+     <string>msauth</string>
+</array>
+````
+
+#### Redirect URI
+This adds extra requirements on your redirect URI. Your redirect URI must be in the proper form.
+
+```
+<app-scheme>://<your.bundle.id>
+ex: mytestiosapp://com.mycompany.myapp
+```
+
+This Redirect URI needs to be registered on the app portal as a valid redirect URI. Additionally a second "msauth" form needs to be registered to handle certificate authentication in Azure Authenticator.
+
+```
+msauth://code/<broker-redirect-uri-in-url-encoded-form>
+ex: msauth://code/mytestiosapp%3A%2F%2Fcom.mycompany.myapp
+```
+
+
 ### Network Traces
 
 You can use various tools to capture the HTTP traffic that ADAL generates.  This is most useful if you are familiar with the OAuth protocol or if you need to provide diagnostic information to Microsoft or other support channels.
