@@ -159,11 +159,10 @@ AdalTrace.Level = AdalTraceLevel.Informational;
 
 ### Brokered Authentication for iOS
 
-If your app requires conditional access or certificate authentication (currently in preview) support, you must set up your AuthenticationContext and redirectURI to be able to talk to the Azure Authenticator app.
-
+If your app requires conditional access or certificate authentication (currently in preview) support, you must set up your AuthenticationContext and redirectURI to be able to talk to the Azure Authenticator app. Make sure that your Redirect URI and application's bundle id is all in lower case.
 
 #### Enable Broker Mode on Your Context
-Broker is enabled on a per-authentication-context basis. It is disabled by default. You must set useBroker flag to true in PlatformParamters constructor if you wish ADAL to call to broker:
+Broker is enabled on a per-authentication-context basis. It is disabled by default. You must set useBroker flag to true in PlatformParameters constructor if you wish ADAL to call to broker:
 
 ```C#
 public PlatformParameters(UIViewController callerViewController, bool useBroker)
@@ -183,7 +182,6 @@ public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options)
 
 #### Registering a URL Scheme
 ADAL uses URLs to invoke the broker and then return back to your app. To finish that round trip you need a URL scheme registered for your app. We recommend making the URL scheme fairly unique to minimize the chances of another app using the same URL scheme.
-
 ```
 <key>CFBundleURLTypes</key>
 <array>
