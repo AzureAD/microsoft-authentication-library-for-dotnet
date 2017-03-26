@@ -46,15 +46,15 @@ namespace Microsoft.Identity.Client
 
         private const int UIWidth = 566;
         private static readonly NavigateErrorStatus NavigateErrorStatus = new NavigateErrorStatus();
-        private readonly CustomWebBrowser webBrowser;
-        private Uri desiredCallbackUri;
-        private Keys key = Keys.None;
+        private readonly CustomWebBrowser _webBrowser;
+        private Uri _desiredCallbackUri;
+        private Keys _key = Keys.None;
 
         /// <summary>
         /// </summary>
         protected IWin32Window ownerWindow { get; set; }
 
-        private Panel webBrowserPanel;
+        private Panel _webBrowserPanel;
 
         /// <summary>
         /// </summary>
@@ -92,8 +92,8 @@ namespace Microsoft.Identity.Client
                     "Invalid owner window type. Expected types are IWin32Window or IntPtr (for window handle).");
             }
 
-            webBrowser = new CustomWebBrowser();
-            webBrowser.PreviewKeyDown += webBrowser_PreviewKeyDown;
+            _webBrowser = new CustomWebBrowser();
+            _webBrowser.PreviewKeyDown += WebBrowser_PreviewKeyDown;
             InitializeComponent();
         }
 
@@ -102,16 +102,13 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets Web Browser control used by the dialog.
         /// </summary>
-        public WebBrowser WebBrowser
-        {
-            get { return webBrowser; }
-        }
+        public WebBrowser WebBrowser => _webBrowser;
 
-        private void webBrowser_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        private void WebBrowser_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
             if (e.KeyCode == Keys.Back)
             {
-                key = Keys.Back;
+                _key = Keys.Back;
             }
         }
 
@@ -125,7 +122,7 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            if (webBrowser.IsDisposed)
+            if (_webBrowser.IsDisposed)
             {
                 // we cancel all flows in disposed object and just do nothing, let object to close.
                 // it just for safety.
@@ -133,10 +130,10 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            if (key == Keys.Back)
+            if (_key == Keys.Back)
             {
                 //navigation is being done via back key. This needs to be disabled.
-                key = Keys.None;
+                _key = Keys.None;
                 e.Cancel = true;
             }
 
@@ -155,18 +152,20 @@ namespace Microsoft.Identity.Client
 
             if (!e.Cancel)
             {
-                RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture, "Navigating to '{0}'.",
-                        MsalHelpers.UrlDecode(e.Url.ToString())));
+                string urlDecode = MsalHelpers.UrlDecode(e.Url.ToString());
+                string message = string.Format(CultureInfo.InvariantCulture, "Navigating to '{0}'.", urlDecode);
+                RequestContext.Logger.Verbose(message);
             }
         }
 
         private void WebBrowserNavigatedHandler(object sender, WebBrowserNavigatedEventArgs e)
         {
-            if (!CheckForClosingUrl(e.Url))
-            {
-                RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture, "Navigated to '{0}'.",
-                        MsalHelpers.UrlDecode(e.Url.ToString())));
-            }
+            // Guard condition
+            if (CheckForClosingUrl(e.Url)) return;
+
+            string urlDecode = MsalHelpers.UrlDecode(e.Url.ToString());
+            string message = string.Format(CultureInfo.InvariantCulture, "Navigated to '{0}'.", urlDecode);
+            RequestContext.Logger.Verbose(message);
         }
 
         /// <summary>
@@ -179,14 +178,14 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            if (webBrowser.IsDisposed)
+            if (_webBrowser.IsDisposed)
             {
                 // we cancel all flow in disposed object.
                 e.Cancel = true;
                 return;
             }
 
-            if (webBrowser.ActiveXInstance != e.WebBrowserActiveXInstance)
+            if (_webBrowser.ActiveXInstance != e.WebBrowserActiveXInstance)
             {
                 // this event came from internal frame, ignore this.
                 return;
@@ -208,8 +207,8 @@ namespace Microsoft.Identity.Client
         {
             bool readyToClose = false;
 
-            if (url.Authority.Equals(desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) &&
-                url.AbsolutePath.Equals(desiredCallbackUri.AbsolutePath))
+            if (url.Authority.Equals(_desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) &&
+                url.AbsolutePath.Equals(_desiredCallbackUri.AbsolutePath))
             {
                 Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
                 readyToClose = true;
@@ -218,9 +217,11 @@ namespace Microsoft.Identity.Client
             if (!readyToClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) &&
                 !url.AbsoluteUri.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) && !url.AbsoluteUri.Equals("javascript", StringComparison.CurrentCultureIgnoreCase))
             {
-                Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
-                Result.Error = MsalError.NonHttpsRedirectNotSupported;
-                Result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
+                Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
+                {
+                    Error = MsalError.NonHttpsRedirectNotSupported,
+                    ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported
+                };
                 readyToClose = true;
             }
 
@@ -236,21 +237,21 @@ namespace Microsoft.Identity.Client
 
         private void StopWebBrowser()
         {
-            if (!webBrowser.IsDisposed)
-            {
-                if (webBrowser.IsBusy)
-                {
-                    RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
-                            "WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
-                            webBrowser.IsBusy, webBrowser.ReadyState, webBrowser.Created,
-                            webBrowser.Disposing, webBrowser.IsDisposed, webBrowser.IsOffline));
-                    webBrowser.Stop();
-                    RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
-                            "WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
-                            webBrowser.IsBusy, webBrowser.ReadyState, webBrowser.Created,
-                            webBrowser.Disposing, webBrowser.IsDisposed, webBrowser.IsOffline));
-                }
-            }
+            // Guard conditions
+            if (_webBrowser.IsDisposed) return;
+            if (!_webBrowser.IsBusy) return;
+
+            RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
+                "WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
+                _webBrowser.IsBusy, _webBrowser.ReadyState, _webBrowser.Created,
+                _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline));
+
+            _webBrowser.Stop();
+
+            RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
+                "WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
+                _webBrowser.IsBusy, _webBrowser.ReadyState, _webBrowser.Created,
+                _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline));
         }
 
         /// <summary>
@@ -263,17 +264,17 @@ namespace Microsoft.Identity.Client
 
         internal AuthorizationResult AuthenticateAAD(Uri requestUri, Uri callbackUri)
         {
-            desiredCallbackUri = callbackUri;
+            _desiredCallbackUri = callbackUri;
             Result = null;
 
             // The WebBrowser event handlers must not throw exceptions.
             // If they do then they may be swallowed by the native
             // browser com control.
-            webBrowser.Navigating += WebBrowserNavigatingHandler;
-            webBrowser.Navigated += WebBrowserNavigatedHandler;
-            webBrowser.NavigateError += WebBrowserNavigateErrorHandler;
+            _webBrowser.Navigating += WebBrowserNavigatingHandler;
+            _webBrowser.Navigated += WebBrowserNavigatedHandler;
+            _webBrowser.NavigateError += WebBrowserNavigateErrorHandler;
 
-            webBrowser.Navigate(requestUri);
+            _webBrowser.Navigate(requestUri);
             OnAuthenticate();
 
             return Result;
@@ -293,38 +294,38 @@ namespace Microsoft.Identity.Client
 
             // Window height is set to 70% of the screen height.
             int uiHeight = (int)(Math.Max(screen.WorkingArea.Height, 160) * 70.0 / DpiHelper.ZoomPercent);
-            webBrowserPanel = new Panel();
-            webBrowserPanel.SuspendLayout();
+            _webBrowserPanel = new Panel();
+            _webBrowserPanel.SuspendLayout();
             SuspendLayout();
 
             // webBrowser
-            webBrowser.Dock = DockStyle.Fill;
-            webBrowser.Location = new Point(0, 25);
-            webBrowser.MinimumSize = new Size(20, 20);
-            webBrowser.Name = "webBrowser";
-            webBrowser.Size = new Size(UIWidth, 565);
-            webBrowser.TabIndex = 1;
-            webBrowser.IsWebBrowserContextMenuEnabled = false;
+            _webBrowser.Dock = DockStyle.Fill;
+            _webBrowser.Location = new Point(0, 25);
+            _webBrowser.MinimumSize = new Size(20, 20);
+            _webBrowser.Name = "_webBrowser";
+            _webBrowser.Size = new Size(UIWidth, 565);
+            _webBrowser.TabIndex = 1;
+            _webBrowser.IsWebBrowserContextMenuEnabled = false;
 
             // webBrowserPanel
-            webBrowserPanel.Controls.Add(webBrowser);
-            webBrowserPanel.Dock = DockStyle.Fill;
-            webBrowserPanel.BorderStyle = BorderStyle.None;
-            webBrowserPanel.Location = new Point(0, 0);
-            webBrowserPanel.Name = "webBrowserPanel";
-            webBrowserPanel.Size = new Size(UIWidth, uiHeight);
-            webBrowserPanel.TabIndex = 2;
+            _webBrowserPanel.Controls.Add(_webBrowser);
+            _webBrowserPanel.Dock = DockStyle.Fill;
+            _webBrowserPanel.BorderStyle = BorderStyle.None;
+            _webBrowserPanel.Location = new Point(0, 0);
+            _webBrowserPanel.Name = "_webBrowserPanel";
+            _webBrowserPanel.Size = new Size(UIWidth, uiHeight);
+            _webBrowserPanel.TabIndex = 2;
 
             // BrowserAuthenticationWindow
             AutoScaleDimensions = new SizeF(6, 13);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(UIWidth, uiHeight);
-            Controls.Add(webBrowserPanel);
+            Controls.Add(_webBrowserPanel);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Name = "BrowserAuthenticationWindow";
 
             // Move the window to the center of the parent window only if owner window is set.
-            StartPosition = (ownerWindow != null)
+            StartPosition = ownerWindow != null
                 ? FormStartPosition.CenterParent
                 : FormStartPosition.CenterScreen;
             Text = string.Empty;
@@ -336,7 +337,7 @@ namespace Microsoft.Identity.Client
             // window is in the task bar so that it can be selected with the mouse.
             ShowInTaskbar = null == ownerWindow;
 
-            webBrowserPanel.ResumeLayout(false);
+            _webBrowserPanel.ResumeLayout(false);
             ResumeLayout(false);
         }
 

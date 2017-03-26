@@ -73,14 +73,13 @@ namespace Microsoft.Identity.Client
         internal TokenCacheNotification AfterAccess { get; set; }
 
         /// <summary>
-        /// Gets or sets the flag indicating whether cache state has changed. MSAL methods set this flag after any change.
-        /// Caller application should reset
-        /// the flag after serializing and persisting the state of the cache.
+        /// Gets or sets the flag indicating whether cache state has changed.
+        /// MSAL methods set this flag after any change.
+        /// Caller application should reset the flag after serializing and persisting the state of the cache.
         /// </summary>
         public bool HasStateChanged
         {
             get { return _hasStateChanged; }
-
             set { _hasStateChanged = value; }
         }
 
@@ -110,8 +109,8 @@ namespace Microsoft.Identity.Client
                     // create the access token cache item
                     AccessTokenCacheItem accessTokenCacheItem =
                         new AccessTokenCacheItem(requestParams.Authority.CanonicalAuthority, requestParams.ClientId,
-                            response);
-                    accessTokenCacheItem.UserAssertionHash = requestParams.UserAssertion?.AssertionHash;
+                            response)
+                        { UserAssertionHash = requestParams.UserAssertion?.AssertionHash };
 
                     TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                     {
@@ -337,10 +336,9 @@ namespace Microsoft.Identity.Client
             lock (LockObject)
             {
                 ICollection<RefreshTokenCacheItem> allRefreshTokens = new List<RefreshTokenCacheItem>();
-                RefreshTokenCacheItem refreshTokenCacheItem = null;
                 foreach (var refreshTokenString in TokenCacheAccessor.GetAllRefreshTokensAsString())
                 {
-                    refreshTokenCacheItem = JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(refreshTokenString);
+                    RefreshTokenCacheItem refreshTokenCacheItem = JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(refreshTokenString);
                     if (refreshTokenCacheItem.ClientId.Equals(ClientId))
                     {
                         allRefreshTokens.Add(refreshTokenCacheItem);
@@ -356,10 +354,9 @@ namespace Microsoft.Identity.Client
             lock (LockObject)
             {
                 ICollection<AccessTokenCacheItem> allAccessTokens = new List<AccessTokenCacheItem>();
-                AccessTokenCacheItem accessTokenCacheItem = null;
                 foreach (var accessTokenString in TokenCacheAccessor.GetAllAccessTokensAsString())
                 {
-                    accessTokenCacheItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessTokenString);
+                    AccessTokenCacheItem accessTokenCacheItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessTokenString);
                     if (accessTokenCacheItem.ClientId.Equals(ClientId))
                     {
                         allAccessTokens.Add(accessTokenCacheItem);
