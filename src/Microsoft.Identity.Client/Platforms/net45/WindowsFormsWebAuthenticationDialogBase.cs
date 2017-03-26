@@ -324,7 +324,7 @@ namespace Microsoft.Identity.Client
             Name = "BrowserAuthenticationWindow";
 
             // Move the window to the center of the parent window only if owner window is set.
-            StartPosition = ownerWindow != null
+            StartPosition = (ownerWindow != null)
                 ? FormStartPosition.CenterParent
                 : FormStartPosition.CenterScreen;
             Text = string.Empty;
@@ -334,7 +334,7 @@ namespace Microsoft.Identity.Client
 
             // If we don't have an owner we need to make sure that the pop up browser 
             // window is in the task bar so that it can be selected with the mouse.
-            ShowInTaskbar = null == ownerWindow;
+            ShowInTaskbar = (null == ownerWindow);
 
             _webBrowserPanel.ResumeLayout(false);
             ResumeLayout(false);
