@@ -220,9 +220,10 @@ This Redirect URI needs to be registered on the app portal as a valid redirect U
 
 ```
 msauth://code/<broker-redirect-uri-in-url-encoded-form>
-ex: msauth://code/mytestiosapp%3A%2F%2Fcom.mycompany.myapp
+AND
+msauth://code/<broker-redirect-uri-in-url-encoded-form>/
+ex: msauth://code/mytestiosapp%3A%2F%2Fcom.mycompany.myapp and msauth://code/mytestiosapp%3A%2F%2Fcom.mycompany.myapp/  
 ```
-
 
 ### Network Traces
 
