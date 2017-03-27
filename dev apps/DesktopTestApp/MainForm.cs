@@ -26,13 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
@@ -41,21 +36,24 @@ namespace DesktopTestApp
 {
     public partial class MainForm : Form
     {
+        LoggerCallback myCallback = new LoggerCallback();
+
         public MainForm()
         {
             InitializeComponent();
             tabControl1.Appearance = TabAppearance.FlatButtons;
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
-            authority.SelectedIndex = 0;
 
+            Logger.Callback = myCallback;
+            Logger.Level = Logger.LogLevel.Info;
             userList.DataSource = new PublicClientApplication(
                 "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc") {UserTokenCache = TokenCacheHelper.GetCache()}.Users.ToList();
         }
 
         private void acquire_Click(object sender, EventArgs e)
         {
-            tabControl1.SelectedTab = acquireTabPage;
+            tabControl1.SelectedTab = publicClientTabPage;
         }
 
         private void settings_Click(object sender, EventArgs e)
@@ -71,6 +69,10 @@ namespace DesktopTestApp
         private void logs_Click(object sender, EventArgs e)
         {
             tabControl1.SelectedTab = logsTabPage;
+        }
+        private void confidentialClient_Click(object sender, EventArgs e)
+        {
+            tabControl1.SelectedTab = confidentialClientTabPage;
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -89,7 +91,17 @@ namespace DesktopTestApp
             IAuthenticationResult result;
             try
             {
-                result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '));
+                if (userList.SelectedIndex != -1)
+                {
+                    result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
+                        (User) userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
+                }
+                else
+                {
+                    result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
+                        GetUIBehavior(), extraQueryParams.Text);
+                }
+
                 output = JsonHelper.SerializeToJson(result);
             }
             catch (Exception exc)
@@ -101,8 +113,34 @@ namespace DesktopTestApp
 
                 output = exc.Message + Environment.NewLine + exc.StackTrace;
             }
+            finally
+            {
+                callResult.Text = output;
+                RefreshUI();
+            }
 
-            callResult.Text = output;
+        }
+
+        private UIBehavior GetUIBehavior()
+        {
+            UIBehavior behavior = UIBehavior.SelectAccount;
+
+            if (forceLogin.Checked)
+            {
+                behavior = UIBehavior.ForceLogin;
+            }
+
+            if (never.Checked)
+            {
+                behavior = UIBehavior.Never;
+            }
+
+            if (consent.Checked)
+            {
+                behavior = UIBehavior.Consent;
+            }
+
+            return behavior;
         }
 
         private PublicClientApplication CreateClientApplication()
@@ -116,10 +154,62 @@ namespace DesktopTestApp
             else
             {
                 clientApplication = new PublicClientApplication(
-                    "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc", authority.SelectedItem.ToString());
+                    "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc", authority.Text);
             }
 
             return clientApplication;
+        }
+
+        private void applySettings_Click(object sender, EventArgs e)
+        {
+            Environment.SetEnvironmentVariable("ExtraQueryParameters", environmentQP.Text);
+        }
+
+        private async void acquireTokenSilent_Click(object sender, EventArgs e)
+        {
+            PublicClientApplication clientApplication = CreateClientApplication();
+            string output = string.Empty;
+            callResult.Text = output;
+            IAuthenticationResult result;
+            try
+            {
+                if (userList.SelectedIndex != -1)
+                {
+                    result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
+                        (User)userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
+                }
+                else
+                {
+                    result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
+                        GetUIBehavior(), extraQueryParams.Text);
+                }
+
+                output = JsonHelper.SerializeToJson(result);
+            }
+            catch (Exception exc)
+            {
+                if (exc is MsalServiceException)
+                {
+                    output += ((MsalServiceException)exc).ErrorCode;
+                }
+
+                output = exc.Message + Environment.NewLine + exc.StackTrace;
+            }
+            finally
+            {
+                callResult.Text = output;
+                RefreshUI();
+            }
+
+        }
+
+        private void RefreshUI()
+        {
+            msalPIILogs.Text = myCallback.DrainPiiLogs();
+            msalLogs.Text = myCallback.DrainLogs();
+            userList.DataSource = new PublicClientApplication(
+                    "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
+                { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
         }
     }
 }

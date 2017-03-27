@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// The default log level is set to info.
         /// </summary>
-        public LogLevel Level { get; set; } = LogLevel.Info;
+        public static LogLevel Level { get; set; } = LogLevel.Info;
 
         /// <summary>
         /// Pii logging default is set to false

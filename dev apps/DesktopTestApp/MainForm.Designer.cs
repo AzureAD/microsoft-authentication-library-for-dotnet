@@ -28,8 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.authority = new System.Windows.Forms.TextBox();
+            this.extraQueryParams = new System.Windows.Forms.TextBox();
+            this.environmentQP = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.acquireTabPage = new System.Windows.Forms.TabPage();
+            this.publicClientTabPage = new System.Windows.Forms.TabPage();
+            this.scopes = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.never = new System.Windows.Forms.RadioButton();
             this.consent = new System.Windows.Forms.RadioButton();
@@ -49,9 +54,11 @@
             this.label5 = new System.Windows.Forms.Label();
             this.overridenAuthority = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.authority = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.settingsTabPage = new System.Windows.Forms.TabPage();
+            this.label11 = new System.Windows.Forms.Label();
+            this.applySettings = new System.Windows.Forms.Button();
+            this.label10 = new System.Windows.Forms.Label();
             this.cacheTabPage = new System.Windows.Forms.TabPage();
             this.logsTabPage = new System.Windows.Forms.TabPage();
             this.button1 = new System.Windows.Forms.Button();
@@ -59,57 +66,102 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.msalLogs = new System.Windows.Forms.TextBox();
-            this.acquire = new System.Windows.Forms.Button();
+            this.confidentialClientTabPage = new System.Windows.Forms.TabPage();
+            this.publicClient = new System.Windows.Forms.Button();
             this.settings = new System.Windows.Forms.Button();
             this.cache = new System.Windows.Forms.Button();
             this.logs = new System.Windows.Forms.Button();
-            this.scopes = new System.Windows.Forms.TextBox();
-            this.label9 = new System.Windows.Forms.Label();
+            this.confidentialClient = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
-            this.acquireTabPage.SuspendLayout();
+            this.publicClientTabPage.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.settingsTabPage.SuspendLayout();
             this.logsTabPage.SuspendLayout();
             this.SuspendLayout();
             // 
+            // authority
+            // 
+            this.authority.AccessibleName = "authority";
+            this.authority.Location = new System.Drawing.Point(256, 19);
+            this.authority.Name = "authority";
+            this.authority.Size = new System.Drawing.Size(352, 20);
+            this.authority.TabIndex = 16;
+            this.authority.Text = "https://login.microsoftonline.com/common";
+            // 
+            // extraQueryParams
+            // 
+            this.extraQueryParams.AccessibleName = "";
+            this.extraQueryParams.Location = new System.Drawing.Point(248, 90);
+            this.extraQueryParams.Name = "extraQueryParams";
+            this.extraQueryParams.Size = new System.Drawing.Size(352, 20);
+            this.extraQueryParams.TabIndex = 21;
+            // 
+            // environmentQP
+            // 
+            this.environmentQP.AccessibleName = "";
+            this.environmentQP.Location = new System.Drawing.Point(248, 32);
+            this.environmentQP.Name = "environmentQP";
+            this.environmentQP.Size = new System.Drawing.Size(352, 20);
+            this.environmentQP.TabIndex = 18;
+            // 
             // tabControl1
             // 
-            this.tabControl1.Controls.Add(this.acquireTabPage);
+            this.tabControl1.Controls.Add(this.publicClientTabPage);
             this.tabControl1.Controls.Add(this.settingsTabPage);
             this.tabControl1.Controls.Add(this.cacheTabPage);
             this.tabControl1.Controls.Add(this.logsTabPage);
+            this.tabControl1.Controls.Add(this.confidentialClientTabPage);
             this.tabControl1.Location = new System.Drawing.Point(1, 1);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(676, 814);
             this.tabControl1.TabIndex = 0;
             // 
-            // acquireTabPage
+            // publicClientTabPage
             // 
-            this.acquireTabPage.BackColor = System.Drawing.SystemColors.Control;
-            this.acquireTabPage.Controls.Add(this.scopes);
-            this.acquireTabPage.Controls.Add(this.label9);
-            this.acquireTabPage.Controls.Add(this.groupBox2);
-            this.acquireTabPage.Controls.Add(this.callResult);
-            this.acquireTabPage.Controls.Add(this.label8);
-            this.acquireTabPage.Controls.Add(this.userList);
-            this.acquireTabPage.Controls.Add(this.label7);
-            this.acquireTabPage.Controls.Add(this.acquireTokenSilent);
-            this.acquireTabPage.Controls.Add(this.acquireTokenInteractive);
-            this.acquireTabPage.Controls.Add(this.groupBox1);
-            this.acquireTabPage.Controls.Add(this.loginHint);
-            this.acquireTabPage.Controls.Add(this.label6);
-            this.acquireTabPage.Controls.Add(this.label5);
-            this.acquireTabPage.Controls.Add(this.overridenAuthority);
-            this.acquireTabPage.Controls.Add(this.label4);
-            this.acquireTabPage.Controls.Add(this.authority);
-            this.acquireTabPage.Controls.Add(this.label3);
-            this.acquireTabPage.Location = new System.Drawing.Point(4, 22);
-            this.acquireTabPage.Name = "acquireTabPage";
-            this.acquireTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.acquireTabPage.Size = new System.Drawing.Size(668, 788);
-            this.acquireTabPage.TabIndex = 0;
-            this.acquireTabPage.Text = "acquireTabPage";
+            this.publicClientTabPage.BackColor = System.Drawing.SystemColors.Control;
+            this.publicClientTabPage.Controls.Add(this.authority);
+            this.publicClientTabPage.Controls.Add(this.scopes);
+            this.publicClientTabPage.Controls.Add(this.label9);
+            this.publicClientTabPage.Controls.Add(this.groupBox2);
+            this.publicClientTabPage.Controls.Add(this.callResult);
+            this.publicClientTabPage.Controls.Add(this.label8);
+            this.publicClientTabPage.Controls.Add(this.userList);
+            this.publicClientTabPage.Controls.Add(this.label7);
+            this.publicClientTabPage.Controls.Add(this.acquireTokenSilent);
+            this.publicClientTabPage.Controls.Add(this.acquireTokenInteractive);
+            this.publicClientTabPage.Controls.Add(this.groupBox1);
+            this.publicClientTabPage.Controls.Add(this.loginHint);
+            this.publicClientTabPage.Controls.Add(this.label6);
+            this.publicClientTabPage.Controls.Add(this.label5);
+            this.publicClientTabPage.Controls.Add(this.overridenAuthority);
+            this.publicClientTabPage.Controls.Add(this.label4);
+            this.publicClientTabPage.Controls.Add(this.label3);
+            this.publicClientTabPage.Location = new System.Drawing.Point(4, 22);
+            this.publicClientTabPage.Name = "publicClientTabPage";
+            this.publicClientTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.publicClientTabPage.Size = new System.Drawing.Size(668, 788);
+            this.publicClientTabPage.TabIndex = 0;
+            this.publicClientTabPage.Text = "publicClientTabPage";
+            // 
+            // scopes
+            // 
+            this.scopes.Location = new System.Drawing.Point(256, 310);
+            this.scopes.Name = "scopes";
+            this.scopes.Size = new System.Drawing.Size(352, 20);
+            this.scopes.TabIndex = 15;
+            this.scopes.Text = "mail.read";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.Location = new System.Drawing.Point(8, 312);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(110, 32);
+            this.label9.TabIndex = 14;
+            this.label9.Text = "Scopes";
             // 
             // groupBox2
             // 
@@ -128,7 +180,7 @@
             this.never.AutoSize = true;
             this.never.Location = new System.Drawing.Point(267, 18);
             this.never.Name = "never";
-            this.never.Size = new System.Drawing.Size(54, 17);
+            this.never.Size = new System.Drawing.Size(61, 20);
             this.never.TabIndex = 10;
             this.never.Text = "Never";
             this.never.UseVisualStyleBackColor = true;
@@ -138,7 +190,7 @@
             this.consent.AutoSize = true;
             this.consent.Location = new System.Drawing.Point(197, 18);
             this.consent.Name = "consent";
-            this.consent.Size = new System.Drawing.Size(64, 17);
+            this.consent.Size = new System.Drawing.Size(71, 20);
             this.consent.TabIndex = 9;
             this.consent.Text = "Consent";
             this.consent.UseVisualStyleBackColor = true;
@@ -148,7 +200,7 @@
             this.forceLogin.AutoSize = true;
             this.forceLogin.Location = new System.Drawing.Point(110, 18);
             this.forceLogin.Name = "forceLogin";
-            this.forceLogin.Size = new System.Drawing.Size(81, 17);
+            this.forceLogin.Size = new System.Drawing.Size(88, 20);
             this.forceLogin.TabIndex = 8;
             this.forceLogin.Text = "Force Login";
             this.forceLogin.UseVisualStyleBackColor = true;
@@ -159,7 +211,7 @@
             this.selectAccount.Checked = true;
             this.selectAccount.Location = new System.Drawing.Point(6, 19);
             this.selectAccount.Name = "selectAccount";
-            this.selectAccount.Size = new System.Drawing.Size(98, 17);
+            this.selectAccount.Size = new System.Drawing.Size(105, 20);
             this.selectAccount.TabIndex = 7;
             this.selectAccount.TabStop = true;
             this.selectAccount.Text = "Select Account";
@@ -170,6 +222,7 @@
             this.callResult.Location = new System.Drawing.Point(12, 352);
             this.callResult.Multiline = true;
             this.callResult.Name = "callResult";
+            this.callResult.ReadOnly = true;
             this.callResult.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.callResult.Size = new System.Drawing.Size(645, 353);
             this.callResult.TabIndex = 13;
@@ -180,7 +233,7 @@
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label8.Location = new System.Drawing.Point(8, 172);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(106, 24);
+            this.label8.Size = new System.Drawing.Size(162, 32);
             this.label8.TabIndex = 9;
             this.label8.Text = "UI Behavior";
             // 
@@ -199,7 +252,7 @@
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label7.Location = new System.Drawing.Point(8, 266);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(49, 24);
+            this.label7.Size = new System.Drawing.Size(74, 32);
             this.label7.TabIndex = 11;
             this.label7.Text = "User";
             // 
@@ -211,6 +264,7 @@
             this.acquireTokenSilent.TabIndex = 10;
             this.acquireTokenSilent.Text = "Acquire Token Silent";
             this.acquireTokenSilent.UseVisualStyleBackColor = true;
+            this.acquireTokenSilent.Click += new System.EventHandler(this.acquireTokenSilent_Click);
             // 
             // acquireTokenInteractive
             // 
@@ -237,7 +291,7 @@
             this.validateAuthorityDisabled.AutoSize = true;
             this.validateAuthorityDisabled.Location = new System.Drawing.Point(134, 18);
             this.validateAuthorityDisabled.Name = "validateAuthorityDisabled";
-            this.validateAuthorityDisabled.Size = new System.Drawing.Size(66, 17);
+            this.validateAuthorityDisabled.Size = new System.Drawing.Size(73, 20);
             this.validateAuthorityDisabled.TabIndex = 8;
             this.validateAuthorityDisabled.Text = "Disabled";
             this.validateAuthorityDisabled.UseVisualStyleBackColor = true;
@@ -248,7 +302,7 @@
             this.validateAuthorityEnabled.Checked = true;
             this.validateAuthorityEnabled.Location = new System.Drawing.Point(6, 19);
             this.validateAuthorityEnabled.Name = "validateAuthorityEnabled";
-            this.validateAuthorityEnabled.Size = new System.Drawing.Size(64, 17);
+            this.validateAuthorityEnabled.Size = new System.Drawing.Size(71, 20);
             this.validateAuthorityEnabled.TabIndex = 7;
             this.validateAuthorityEnabled.TabStop = true;
             this.validateAuthorityEnabled.Text = "Enabled";
@@ -267,7 +321,7 @@
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label6.Location = new System.Drawing.Point(8, 228);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(95, 24);
+            this.label6.Size = new System.Drawing.Size(144, 32);
             this.label6.TabIndex = 5;
             this.label6.Text = "Login Hint";
             // 
@@ -277,7 +331,7 @@
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label5.Location = new System.Drawing.Point(8, 109);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(155, 24);
+            this.label5.Size = new System.Drawing.Size(240, 32);
             this.label5.TabIndex = 4;
             this.label5.Text = "Validate Authority";
             // 
@@ -294,24 +348,9 @@
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.Location = new System.Drawing.Point(8, 58);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(246, 24);
+            this.label4.Size = new System.Drawing.Size(374, 32);
             this.label4.TabIndex = 2;
             this.label4.Text = "Overriden Authority for 1 call";
-            // 
-            // authority
-            // 
-            this.authority.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.authority.FormattingEnabled = true;
-            this.authority.Items.AddRange(new object[] {
-            "https://login.microsoftonline.com/common",
-            "https://login.microsoftonline.de/common",
-            "https://login.microsoftonline.us/common",
-            "https://​login-us.microsoftonline.com/common",
-            "https://login.chinacloudapi.cn/common"});
-            this.authority.Location = new System.Drawing.Point(256, 19);
-            this.authority.Name = "authority";
-            this.authority.Size = new System.Drawing.Size(352, 21);
-            this.authority.TabIndex = 1;
             // 
             // label3
             // 
@@ -319,12 +358,17 @@
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.Location = new System.Drawing.Point(8, 19);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(83, 24);
+            this.label3.Size = new System.Drawing.Size(128, 32);
             this.label3.TabIndex = 0;
             this.label3.Text = "Authority";
             // 
             // settingsTabPage
             // 
+            this.settingsTabPage.Controls.Add(this.extraQueryParams);
+            this.settingsTabPage.Controls.Add(this.label11);
+            this.settingsTabPage.Controls.Add(this.applySettings);
+            this.settingsTabPage.Controls.Add(this.environmentQP);
+            this.settingsTabPage.Controls.Add(this.label10);
             this.settingsTabPage.Location = new System.Drawing.Point(4, 22);
             this.settingsTabPage.Name = "settingsTabPage";
             this.settingsTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -332,6 +376,36 @@
             this.settingsTabPage.TabIndex = 1;
             this.settingsTabPage.Text = "settingsTabPage";
             this.settingsTabPage.UseVisualStyleBackColor = true;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label11.Location = new System.Drawing.Point(10, 78);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(269, 32);
+            this.label11.TabIndex = 20;
+            this.label11.Text = "Extra Query Params";
+            // 
+            // applySettings
+            // 
+            this.applySettings.Location = new System.Drawing.Point(437, 704);
+            this.applySettings.Name = "applySettings";
+            this.applySettings.Size = new System.Drawing.Size(140, 46);
+            this.applySettings.TabIndex = 19;
+            this.applySettings.Text = "Apply";
+            this.applySettings.UseVisualStyleBackColor = true;
+            this.applySettings.Click += new System.EventHandler(this.applySettings_Click);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(10, 20);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(223, 32);
+            this.label10.TabIndex = 17;
+            this.label10.Text = "Environment QP";
             // 
             // cacheTabPage
             // 
@@ -407,21 +481,31 @@
             this.msalLogs.Size = new System.Drawing.Size(655, 304);
             this.msalLogs.TabIndex = 0;
             // 
-            // acquire
+            // confidentialClientTabPage
             // 
-            this.acquire.Location = new System.Drawing.Point(1, 817);
-            this.acquire.Name = "acquire";
-            this.acquire.Size = new System.Drawing.Size(151, 45);
-            this.acquire.TabIndex = 1;
-            this.acquire.Text = "Acquire";
-            this.acquire.UseVisualStyleBackColor = true;
-            this.acquire.Click += new System.EventHandler(this.acquire_Click);
+            this.confidentialClientTabPage.Location = new System.Drawing.Point(4, 22);
+            this.confidentialClientTabPage.Name = "confidentialClientTabPage";
+            this.confidentialClientTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.confidentialClientTabPage.Size = new System.Drawing.Size(668, 788);
+            this.confidentialClientTabPage.TabIndex = 4;
+            this.confidentialClientTabPage.Text = "confidentialClientTabPage";
+            this.confidentialClientTabPage.UseVisualStyleBackColor = true;
+            // 
+            // publicClient
+            // 
+            this.publicClient.Location = new System.Drawing.Point(1, 817);
+            this.publicClient.Name = "publicClient";
+            this.publicClient.Size = new System.Drawing.Size(97, 45);
+            this.publicClient.TabIndex = 1;
+            this.publicClient.Text = "Public Client";
+            this.publicClient.UseVisualStyleBackColor = true;
+            this.publicClient.Click += new System.EventHandler(this.acquire_Click);
             // 
             // settings
             // 
-            this.settings.Location = new System.Drawing.Point(173, 817);
+            this.settings.Location = new System.Drawing.Point(307, 817);
             this.settings.Name = "settings";
-            this.settings.Size = new System.Drawing.Size(151, 45);
+            this.settings.Size = new System.Drawing.Size(92, 45);
             this.settings.TabIndex = 2;
             this.settings.Text = "Settings";
             this.settings.UseVisualStyleBackColor = true;
@@ -429,9 +513,9 @@
             // 
             // cache
             // 
-            this.cache.Location = new System.Drawing.Point(349, 817);
+            this.cache.Location = new System.Drawing.Point(434, 817);
             this.cache.Name = "cache";
-            this.cache.Size = new System.Drawing.Size(151, 45);
+            this.cache.Size = new System.Drawing.Size(110, 45);
             this.cache.TabIndex = 3;
             this.cache.Text = "Cache";
             this.cache.UseVisualStyleBackColor = true;
@@ -439,52 +523,47 @@
             // 
             // logs
             // 
-            this.logs.Location = new System.Drawing.Point(522, 817);
+            this.logs.Location = new System.Drawing.Point(581, 817);
             this.logs.Name = "logs";
-            this.logs.Size = new System.Drawing.Size(151, 45);
+            this.logs.Size = new System.Drawing.Size(92, 45);
             this.logs.TabIndex = 4;
             this.logs.Text = "Logs";
             this.logs.UseVisualStyleBackColor = true;
             this.logs.Click += new System.EventHandler(this.logs_Click);
             // 
-            // scopes
+            // confidentialClient
             // 
-            this.scopes.Location = new System.Drawing.Point(256, 310);
-            this.scopes.Name = "scopes";
-            this.scopes.Size = new System.Drawing.Size(352, 20);
-            this.scopes.TabIndex = 15;
-            this.scopes.Text = "mail.read";
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(8, 312);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(74, 24);
-            this.label9.TabIndex = 14;
-            this.label9.Text = "Scopes";
+            this.confidentialClient.Location = new System.Drawing.Point(147, 817);
+            this.confidentialClient.Name = "confidentialClient";
+            this.confidentialClient.Size = new System.Drawing.Size(115, 45);
+            this.confidentialClient.TabIndex = 5;
+            this.confidentialClient.Text = "Confidential Client";
+            this.confidentialClient.UseVisualStyleBackColor = true;
+            this.confidentialClient.Click += new System.EventHandler(this.confidentialClient_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(674, 863);
+            this.Controls.Add(this.confidentialClient);
             this.Controls.Add(this.logs);
             this.Controls.Add(this.cache);
             this.Controls.Add(this.settings);
-            this.Controls.Add(this.acquire);
+            this.Controls.Add(this.publicClient);
             this.Controls.Add(this.tabControl1);
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "Dev Utility Test App";
             this.tabControl1.ResumeLayout(false);
-            this.acquireTabPage.ResumeLayout(false);
-            this.acquireTabPage.PerformLayout();
+            this.publicClientTabPage.ResumeLayout(false);
+            this.publicClientTabPage.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.settingsTabPage.ResumeLayout(false);
+            this.settingsTabPage.PerformLayout();
             this.logsTabPage.ResumeLayout(false);
             this.logsTabPage.PerformLayout();
             this.ResumeLayout(false);
@@ -492,11 +571,10 @@
         }
 
         #endregion
-
         private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage acquireTabPage;
+        private System.Windows.Forms.TabPage publicClientTabPage;
         private System.Windows.Forms.TabPage settingsTabPage;
-        private System.Windows.Forms.Button acquire;
+        private System.Windows.Forms.Button publicClient;
         private System.Windows.Forms.Button settings;
         private System.Windows.Forms.Button cache;
         private System.Windows.Forms.Button logs;
@@ -508,7 +586,6 @@
         private System.Windows.Forms.TextBox msalPIILogs;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ComboBox authority;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox overridenAuthority;
         private System.Windows.Forms.Label label5;
@@ -530,6 +607,14 @@
         private System.Windows.Forms.RadioButton consent;
         private System.Windows.Forms.TextBox scopes;
         private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Button applySettings;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Button confidentialClient;
+        private System.Windows.Forms.TabPage confidentialClientTabPage;
+        private System.Windows.Forms.TextBox authority;
+        private System.Windows.Forms.TextBox extraQueryParams;
+        private System.Windows.Forms.TextBox environmentQP;
     }
 }
 

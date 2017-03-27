@@ -42,7 +42,8 @@ namespace Microsoft.Identity.Client
     [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class WindowsFormsWebAuthenticationDialogBase : Form
     {
-        private RequestContext RequestContext { get; set; } = new RequestContext(Guid.Empty);
+
+        internal RequestContext RequestContext { get; set; }
 
         private const int UIWidth = 566;
         private static readonly NavigateErrorStatus NavigateErrorStatus = new NavigateErrorStatus();
