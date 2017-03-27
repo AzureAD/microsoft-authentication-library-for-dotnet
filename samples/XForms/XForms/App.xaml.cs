@@ -38,7 +38,7 @@ namespace XForms
 {
     public partial class App : Application
     {
-        public static PublicClientApplication PCA;
+        public static PublicClientApplication msalPublicClient;
         public const string ClientID = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
         public const string RedirectUriOnAndroid = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
         public const string RedirectUriOnIOS = "adaliosxformsapp://com.yourcompany.xformsapp";
@@ -58,19 +58,18 @@ namespace XForms
 
         public App()
         {
-            PCA = new PublicClientApplication(ClientID);
+            msalPublicClient = new PublicClientApplication(ClientID);
             Device.OnPlatform(Android: () => {
-                PCA.RedirectUri = RedirectUriOnAndroid;
+                msalPublicClient.RedirectUri = RedirectUriOnAndroid;
             });
 
             Device.OnPlatform(iOS: () => {
-                PCA.RedirectUri = RedirectUriOnIOS;
+                msalPublicClient.RedirectUri = RedirectUriOnIOS;
             });
 
             MainPage = new XForms.MainPage();
 
             Logger.Callback = new LoggerCallback();
-
         }
 
         protected override void OnStart()

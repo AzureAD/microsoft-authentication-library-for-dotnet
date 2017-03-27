@@ -49,7 +49,7 @@ namespace XForms
 
         private void SetPlatformParameters()
         {
-            App.PCA.PlatformParameters = platformParameters;
+            App.msalPublicClient.PlatformParameters = platformParameters;
         }
 
         protected override void OnAppearing()
@@ -85,8 +85,8 @@ namespace XForms
 
         private User getUserByDisplayableId(string str)
         {
-            var length = App.PCA.Users.Count();
-            foreach (User user in App.PCA.Users){
+            var length = App.msalPublicClient.Users.Count();
+            foreach (User user in App.msalPublicClient.Users){
                 if (user.DisplayableId.Equals(str))
                 {
                     return user;
@@ -99,7 +99,7 @@ namespace XForms
         private async void OnAcquireSilentlyClicked(object sender, EventArgs e)
         {
 
-            if (App.PCA.PlatformParameters == null)
+            if (App.msalPublicClient.PlatformParameters == null)
             {
                 SetPlatformParameters();
             }
@@ -114,7 +114,7 @@ namespace XForms
                     acquireResponseLabel.Text = "User - \"" + UserEntry.Text.Trim() + "\" was not found in the cache";
                     return;
                 }
-                AuthenticationResult res = await App.PCA.AcquireTokenSilentAsync(App.Scopes, user);
+                AuthenticationResult res = await App.msalPublicClient.AcquireTokenSilentAsync(App.Scopes, user);
 
                 acquireResponseLabel.Text = ToString(res);
             }
@@ -132,7 +132,7 @@ namespace XForms
         private async void OnAcquireClicked(object sender, EventArgs e)
         {
 
-            if (App.PCA.PlatformParameters == null)
+            if (App.msalPublicClient.PlatformParameters == null)
             {
                 SetPlatformParameters();
             }
@@ -145,12 +145,12 @@ namespace XForms
                 AuthenticationResult res;
                 if (LoginHint.IsToggled)
                 {
-                    res = await App.PCA.AcquireTokenAsync(App.Scopes, UserEntry.Text.Trim());
+                    res = await App.msalPublicClient.AcquireTokenAsync(App.Scopes, UserEntry.Text.Trim());
 
                 }
                 else
                 {
-                    res = await App.PCA.AcquireTokenAsync(App.Scopes);
+                    res = await App.msalPublicClient.AcquireTokenAsync(App.Scopes);
                 }
 
                 acquireResponseLabel.Text = ToString(res);
