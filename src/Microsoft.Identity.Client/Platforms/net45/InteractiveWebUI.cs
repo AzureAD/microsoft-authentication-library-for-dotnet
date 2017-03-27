@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -32,6 +32,13 @@ namespace Microsoft.Identity.Client
     internal class InteractiveWebUI : WebUI
     {
         private WindowsFormsWebAuthenticationDialog dialog;
+
+        public InteractiveWebUI(RequestContext requestContext)
+        {
+            RequestContext = requestContext;
+        }
+
+        private RequestContext RequestContext { get; }
 
         protected override AuthorizationResult OnAuthenticate()
         {
