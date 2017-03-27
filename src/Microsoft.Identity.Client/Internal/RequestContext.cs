@@ -29,7 +29,7 @@ using System;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    public class RequestContext
+    internal class RequestContext
     {
         public string CorrelationId { get; }
 

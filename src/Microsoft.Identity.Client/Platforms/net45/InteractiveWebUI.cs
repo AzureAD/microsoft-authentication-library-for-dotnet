@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -33,18 +33,11 @@ namespace Microsoft.Identity.Client
     {
         private WindowsFormsWebAuthenticationDialog dialog;
 
-        public InteractiveWebUI(RequestContext requestContext)
-        {
-            RequestContext = requestContext;
-        }
-
-        private RequestContext RequestContext { get; }
-
         protected override AuthorizationResult OnAuthenticate()
         {
             AuthorizationResult result;
 
-            using (dialog = new WindowsFormsWebAuthenticationDialog(this.OwnerWindow, RequestContext))
+            using (dialog = new WindowsFormsWebAuthenticationDialog(this.OwnerWindow) {RequestContext = this.RequestContext})
             {
                 result = dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri);
             }

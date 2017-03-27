@@ -42,6 +42,8 @@ namespace Microsoft.Identity.Client
         protected Uri CallbackUri { get; private set; }
         public Object OwnerWindow { get; set; }
 
+        public RequestContext RequestContext { get; set; }
+
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext)
         {

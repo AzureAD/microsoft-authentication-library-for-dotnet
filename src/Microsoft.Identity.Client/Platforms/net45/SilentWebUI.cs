@@ -51,7 +51,6 @@ namespace Microsoft.Identity.Client
         private AuthorizationResult result;
         private ManualResetEvent threadInitializedEvent;
         private Exception uiException;
-        private RequestContext RequestContext { get; }
 
         public SilentWebUI()
         {
@@ -112,9 +111,10 @@ namespace Microsoft.Identity.Client
                     {
                         formsSyncContext = new WindowsFormsSynchronizationContext();
 
-                        dialog = new SilentWindowsFormsAuthenticationDialog(this.OwnerWindow, RequestContext)
+                        dialog = new SilentWindowsFormsAuthenticationDialog(this.OwnerWindow)
                         {
-                            NavigationWaitMiliSecs = NavigationWaitMiliSecs
+                            NavigationWaitMiliSecs = NavigationWaitMiliSecs,
+                            RequestContext = RequestContext
                         };
 
                         dialog.Done += UIDoneHandler;

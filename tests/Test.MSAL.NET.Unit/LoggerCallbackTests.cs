@@ -52,7 +52,7 @@ namespace Test.MSAL.NET.Unit
             RequestContext requestContext = new RequestContext(Guid.Empty);
 
             var counter = 0;
-            requestContext.Logger.Level = Logger.LogLevel.Error;
+            Logger.Level = Logger.LogLevel.Error;
 
             _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Error(new Exception("test message"));
@@ -78,7 +78,7 @@ namespace Test.MSAL.NET.Unit
             RequestContext requestContext = new RequestContext(Guid.Empty);
 
             var counter = 0;
-            requestContext.Logger.Level = Logger.LogLevel.Warning;
+            Logger.Level = Logger.LogLevel.Warning;
 
             _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Error(new Exception("test message"));
@@ -104,7 +104,7 @@ namespace Test.MSAL.NET.Unit
             RequestContext requestContext = new RequestContext(Guid.Empty);
 
             var counter = 0;
-            requestContext.Logger.Level = Logger.LogLevel.Info;
+            Logger.Level = Logger.LogLevel.Info;
 
             _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Error(new Exception("test message"));
@@ -130,7 +130,7 @@ namespace Test.MSAL.NET.Unit
             RequestContext requestContext = new RequestContext(Guid.Empty);
 
             var counter = 0;
-            requestContext.Logger.Level = Logger.LogLevel.Verbose;
+            Logger.Level = Logger.LogLevel.Verbose;
 
             _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Error(new Exception("test message"));
@@ -156,7 +156,7 @@ namespace Test.MSAL.NET.Unit
             RequestContext requestContext = new RequestContext(Guid.Empty);
 
             var counter = 0;
-            requestContext.Logger.Level = Logger.LogLevel.Error;
+            Logger.Level = Logger.LogLevel.Error;
             Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
@@ -183,7 +183,7 @@ namespace Test.MSAL.NET.Unit
             RequestContext requestContext = new RequestContext(Guid.Empty);
 
             var counter = 0;
-            requestContext.Logger.Level = Logger.LogLevel.Warning;
+            Logger.Level = Logger.LogLevel.Warning;
             Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
@@ -210,7 +210,7 @@ namespace Test.MSAL.NET.Unit
             RequestContext requestContext = new RequestContext(Guid.Empty);
 
             var counter = 0;
-            requestContext.Logger.Level = Logger.LogLevel.Info;
+            Logger.Level = Logger.LogLevel.Info;
             Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
@@ -237,7 +237,7 @@ namespace Test.MSAL.NET.Unit
             RequestContext requestContext = new RequestContext(Guid.Empty);
 
             var counter = 0;
-            requestContext.Logger.Level = Logger.LogLevel.Verbose;
+            Logger.Level = Logger.LogLevel.Verbose;
             Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
