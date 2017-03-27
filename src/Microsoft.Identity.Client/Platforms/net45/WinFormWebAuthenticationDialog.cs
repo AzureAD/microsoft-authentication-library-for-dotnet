@@ -46,8 +46,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Default constructor
         /// </summary>
-        public WindowsFormsWebAuthenticationDialog(object ownerWindow)
-            : base(ownerWindow)
+        public WindowsFormsWebAuthenticationDialog(object ownerWindow, RequestContext requestContext)
+            : base(ownerWindow, requestContext)
         {
             Shown += FormShownHandler;
             WebBrowser.DocumentTitleChanged += WebBrowserDocumentTitleChangedHandler;
