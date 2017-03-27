@@ -45,7 +45,6 @@ namespace Test.MSAL.NET.Unit
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
             response.RefreshToken = "refresh-token";
-            response.FamilyId = "1";
             response.Scope = "scope1 scope2";
             response.TokenType = "Bearer";
             DateTimeOffset current = DateTimeOffset.UtcNow;
