@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client
                     {
                         formsSyncContext = new WindowsFormsSynchronizationContext();
 
-                        dialog = new SilentWindowsFormsAuthenticationDialog(this.OwnerWindow, RequestContext)
+                        dialog = new SilentWindowsFormsAuthenticationDialog(this.OwnerWindow)
                         {
                             NavigationWaitMiliSecs = NavigationWaitMiliSecs,
                             RequestContext = RequestContext

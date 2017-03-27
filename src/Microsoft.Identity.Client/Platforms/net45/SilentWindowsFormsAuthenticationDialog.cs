@@ -46,8 +46,8 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// </summary>
-        public SilentWindowsFormsAuthenticationDialog(object ownerWindow, RequestContext requestContext)
-            : base(ownerWindow, requestContext)
+        public SilentWindowsFormsAuthenticationDialog(object ownerWindow)
+            : base(ownerWindow)
         {
             SuppressBrowserSubDialogs();
             WebBrowser.DocumentCompleted += DocumentCompletedHandler;

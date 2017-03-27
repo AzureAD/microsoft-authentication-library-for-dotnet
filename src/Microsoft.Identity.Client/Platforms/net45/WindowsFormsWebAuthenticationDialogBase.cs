@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// </summary>
-        protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow, RequestContext requestContext)
+        protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow)
         {
             // From MSDN (http://msdn.microsoft.com/en-us/library/ie/dn720860(v=vs.85).aspx): 
             // The net session count tracks the number of instances of the web browser control. 

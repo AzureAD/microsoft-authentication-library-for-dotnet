@@ -33,13 +33,6 @@ namespace Microsoft.Identity.Client
     {
         private WindowsFormsWebAuthenticationDialog dialog;
 
-        public InteractiveWebUI(RequestContext requestContext)
-        {
-            RequestContext = requestContext;
-        }
-
-        private RequestContext RequestContext { get; }
-
         protected override AuthorizationResult OnAuthenticate()
         {
             AuthorizationResult result;
