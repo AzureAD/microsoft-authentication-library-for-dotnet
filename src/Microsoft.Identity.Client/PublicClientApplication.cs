@@ -64,6 +64,7 @@ namespace Microsoft.Identity.Client
             : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
         {
             UserTokenCache = new TokenCache();
+            UserTokenCache.ClientId = clientId;
         }
 
         /// <summary>

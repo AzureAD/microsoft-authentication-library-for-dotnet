@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
     [DataContract]
     internal class RefreshTokenCacheItem : BaseTokenCacheItem
     {
-        internal RefreshTokenCacheItem()
+        public RefreshTokenCacheItem()
         {
         }
 
