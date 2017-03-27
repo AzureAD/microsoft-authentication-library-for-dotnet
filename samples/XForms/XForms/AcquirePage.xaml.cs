@@ -83,6 +83,52 @@ namespace XForms
             return sb.ToString();
         }
 
+        private User getUserByDisplayableId(string str)
+        {
+            var length = App.PCA.Users.Count();
+            foreach (User user in App.PCA.Users){
+                if (user.DisplayableId.Equals(str))
+                {
+                    return user;
+                }
+            }
+
+            return null;
+        }
+
+        private async void OnAcquireSilentlyClicked(object sender, EventArgs e)
+        {
+
+            if (App.PCA.PlatformParameters == null)
+            {
+                SetPlatformParameters();
+            }
+            acquireResponseLabel.Text = "Starting silent token acquisition";
+            await Task.Delay(700);
+
+            try
+            {
+                User user = getUserByDisplayableId(UserEntry.Text.Trim());
+                if (user == null)
+                {
+                    acquireResponseLabel.Text = "User - \"" + UserEntry.Text.Trim() + "\" was not found in the cache";
+                    return;
+                }
+                AuthenticationResult res = await App.PCA.AcquireTokenSilentAsync(App.Scopes, user);
+
+                acquireResponseLabel.Text = ToString(res);
+            }
+            catch (MsalException exception)
+            {
+                acquireResponseLabel.Text = "MsalException - " + exception;
+            }
+            catch (Exception exception)
+            {
+                acquireResponseLabel.Text = "Exception - " + exception;
+            }
+
+        }
+
         private async void OnAcquireClicked(object sender, EventArgs e)
         {
 
@@ -91,9 +137,21 @@ namespace XForms
                 SetPlatformParameters();
             }
 
+            acquireResponseLabel.Text = "Starting token acquisition";
+            await Task.Delay(700);
+
             try
             {
-                AuthenticationResult res = await App.PCA.AcquireTokenAsync(App.Scopes);
+                AuthenticationResult res;
+                if (LoginHint.IsToggled)
+                {
+                    res = await App.PCA.AcquireTokenAsync(App.Scopes, UserEntry.Text.Trim());
+
+                }
+                else
+                {
+                    res = await App.PCA.AcquireTokenAsync(App.Scopes);
+                }
 
                 acquireResponseLabel.Text = ToString(res);
             }

@@ -14,10 +14,29 @@
 
         <Label Text="Acquire Page" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" Margin="5" />
 
-        <Button  Text="Acquire"  Clicked="OnAcquireClicked"/>
+        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+            <Label Text="User" HorizontalTextAlignment="Center"  Margin="5"/>
+            <Entry x:Name="UserEntry" Text="user@msdevex.onmicrosoft.com"  HorizontalOptions="FillAndExpand"/>
+        </StackLayout>
+        
+        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+            <Label Text="Login hint" HorizontalTextAlignment="Center"  Margin="5"/>
+            <Switch x:Name="LoginHint"/>
+        </StackLayout>
 
+        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+            <StackLayout Orientation="Vertical" HorizontalOptions="FillAndExpand" >
+                <Button  Text="Acquire"  Clicked="OnAcquireClicked" BorderColor="Black" HorizontalOptions="FillAndExpand"  BackgroundColor="Gray"/>
+            </StackLayout>
+            <StackLayout Orientation="Vertical" HorizontalOptions="FillAndExpand" >
+                <Button  Text="AcquireSilently"  Clicked="OnAcquireSilentlyClicked" BorderColor="Black" HorizontalOptions="FillAndExpand" BackgroundColor="Gray"/>
+            </StackLayout>
+        </StackLayout>
+
+        <Label Text="Result:" />
+        
         <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
-            <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
+            <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" BackgroundColor="Gray">
                 <Label x:Name="acquireResponseLabel" Text="" />
 
             </StackLayout>
