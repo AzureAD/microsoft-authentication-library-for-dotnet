@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -27,15 +27,46 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client;
 
-namespace Microsoft.Identity.Client.Internal.Interfaces
+namespace DesktopTestApp
 {
-    internal interface IWebUI
+    class LoggerCallback : ILoggerCallback
     {
-        RequestContext RequestContext { get; set; }
+        private StringBuilder logBuilder = new StringBuilder();
+        private StringBuilder piiLogBuilder = new StringBuilder();
 
-        Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext);
+        public void Log(Logger.LogLevel level, string message, bool containsPii)
+        {
+            if (containsPii)
+            {
+                piiLogBuilder.AppendLine(message);
+            }
+            else
+            {
+                logBuilder.AppendLine(message);
+            }
+        }
+
+        public string DrainPiiLogs()
+        {
+            return Drain(piiLogBuilder);
+        }
+
+        public string DrainLogs()
+        {
+            return Drain(logBuilder);
+        }
+
+        private string Drain(StringBuilder builder)
+        {
+            string logs = builder.ToString();
+            builder.Clear();
+            return logs;
+        }
+
     }
 }

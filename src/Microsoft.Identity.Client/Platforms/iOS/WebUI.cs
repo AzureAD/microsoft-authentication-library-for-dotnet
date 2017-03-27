@@ -52,6 +52,8 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        public RequestContext RequestContext { get; set; }
+
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext)
         {

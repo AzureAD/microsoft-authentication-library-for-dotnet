@@ -123,10 +123,7 @@ namespace Microsoft.Identity.Client
                 timer.Stop();
                 SilentWebUIDoneEventArgs args = new SilentWebUIDoneEventArgs(exception);
 
-                if (null != Done)
-                {
-                    Done(this, args);
-                }
+                Done?.Invoke(this, args);
 
                 doneSignaled = true;
             }

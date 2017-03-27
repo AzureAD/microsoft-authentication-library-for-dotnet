@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
     [Android.Runtime.Preserve(AllMembers = true)]
     public class AuthenticationActivity : Activity
     {
-        private RequestContext RequestContext { get; set;  } = new RequestContext(Guid.Empty);
+        private RequestContext RequestContext { get; } 
 
         public AuthenticationActivity()
         { }

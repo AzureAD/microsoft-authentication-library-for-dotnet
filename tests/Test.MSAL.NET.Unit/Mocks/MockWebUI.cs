@@ -48,6 +48,8 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public bool AddStateInAuthorizationResult { get; set; }
 
+        public RequestContext RequestContext { get; set; }
+
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             IDictionary<string, string> inputQp = MsalHelpers.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);
