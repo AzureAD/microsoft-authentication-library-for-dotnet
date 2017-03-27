@@ -10,6 +10,11 @@ The latest stable release is available at [nuget.org](https://www.nuget.org/pack
 
 The next version of the library in prerelease form is also avialable on the NuGet gallery.
 
+## Build status
+| Branch  | Status |
+| ------------- | ------------- |
+| dev (AppVeyor)  | [![Build status](https://ci.appveyor.com/api/projects/status/e9rsfjshqr3vj6b7/branch/dev?svg=true)](https://ci.appveyor.com/project/AADDevExLibraries/azure-activedirectory-library-for-dotnet/branch/dev) |
+
 ## Versions
 Current version - latest one at [nuget.org](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).  
 Minimum recommended version - 2.28.0  
