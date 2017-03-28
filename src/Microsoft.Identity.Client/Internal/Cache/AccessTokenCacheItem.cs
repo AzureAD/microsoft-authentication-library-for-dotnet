@@ -54,6 +54,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
                 return dtDateTime.AddSeconds(ExpiresOnUnixTimestamp).ToUniversalTime();
             }
+            set
+            {
+                DateTimeOffset ignored = value;
+            }
         }
 
         [DataMember(Name = "expires_on")]
@@ -68,7 +72,11 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// <summary>
         /// Gets the TenantId.
         /// </summary>
-        public string TenantId => IdToken?.TenantId;
+        public string TenantId
+        {
+            get => IdToken?.TenantId;
+            set { throw new NotImplementedException(); }
+        }
 
         [DataMember(Name = "user_assertion_hash")]
         internal string UserAssertionHash { get; set; }

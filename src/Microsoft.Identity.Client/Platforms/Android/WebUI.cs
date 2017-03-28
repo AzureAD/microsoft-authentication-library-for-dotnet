@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
         private static AuthorizationResult authorizationResult;
         private readonly PlatformParameters parameters;
 
-        public WebUI(IPlatformParameters parameters)
+        public WebUI(IPlatformParameters parameters, RequestContext requestContext)
         {
             this.parameters = parameters as PlatformParameters;
             if (this.parameters == null)
@@ -56,6 +56,8 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentException("CallerActivity should be set in PlatformParameters", nameof(this.parameters.CallerActivity));
             }
         }
+
+        public RequestContext RequestContext { get; set; }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {

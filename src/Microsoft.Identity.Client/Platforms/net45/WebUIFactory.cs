@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
@@ -34,7 +35,7 @@ namespace Microsoft.Identity.Client
     {
         private PlatformParameters parameters;
 
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters, UIBehavior behavior)
+        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters, UIBehavior behavior, RequestContext requestContext)
         {
             parameters = inputParameters as PlatformParameters;
             if (parameters == null)
@@ -44,10 +45,10 @@ namespace Microsoft.Identity.Client
 
             if (behavior.Equals(UIBehavior.Never))
             {
-                return new SilentWebUI() {OwnerWindow = parameters.OwnerWindow};
+                return new SilentWebUI() {OwnerWindow = parameters.OwnerWindow, RequestContext = requestContext};
             }
 
-            return new InteractiveWebUI {OwnerWindow = parameters.OwnerWindow};
+            return new InteractiveWebUI {OwnerWindow = parameters.OwnerWindow, RequestContext = requestContext };
         }
     }
 }

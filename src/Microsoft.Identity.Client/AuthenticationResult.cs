@@ -28,13 +28,14 @@
 using System;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
+using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Contains the results of one token acquisition operation.
     /// </summary>
-    public sealed class AuthenticationResult
+    internal sealed class AuthenticationResult : IAuthenticationResult
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
         private readonly AccessTokenCacheItem _accessTokenCacheItem;

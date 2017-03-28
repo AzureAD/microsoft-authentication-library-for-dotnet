@@ -201,12 +201,12 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
                 TestConstants.HomeObjectId).ToString());
 
-            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), new User()
+            Task<IAuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), new User()
             {
                 DisplayableId = TestConstants.DisplayableId,
                 HomeObjectId = TestConstants.HomeObjectId,
             }, app.Authority, false);
-            AuthenticationResult result = task.Result;
+            IAuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
@@ -247,13 +247,13 @@ namespace Test.MSAL.NET.Unit
                         TestConstants.Scope.Union(TestConstants.ScopeForAnotherResource).ToArray())
             });
 
-            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(),
+            Task<IAuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(),
                 new User()
                 {
                     DisplayableId = TestConstants.DisplayableId,
                     HomeObjectId = TestConstants.HomeObjectId,
                 }, app.Authority, true);
-            AuthenticationResult result = task.Result;
+            IAuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
             Assert.AreEqual(
@@ -294,14 +294,14 @@ namespace Test.MSAL.NET.Unit
             HttpMessageHandlerFactory.AddMockHandler(mockHandler);
             try
             {
-                Task<AuthenticationResult> task =
+                Task<IAuthenticationResult> task =
                     app.AcquireTokenSilentAsync(TestConstants.ScopeForAnotherResource.ToArray(),
                         new User()
                         {
                             DisplayableId = TestConstants.DisplayableId,
                             HomeObjectId = TestConstants.HomeObjectId,
                         }, app.Authority, false);
-                AuthenticationResult result = task.Result;
+                IAuthenticationResult result = task.Result;
                 Assert.Fail("AdalSilentTokenAcquisitionException was expected");
             }
             catch (AggregateException ex)

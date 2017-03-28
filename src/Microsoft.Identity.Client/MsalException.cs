@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 
@@ -36,6 +37,37 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class MsalException : Exception
     {
+        private static readonly Dictionary<string, string> ErrorMessages = new Dictionary<string, string>
+        {
+            [MsalError.InvalidCredentialType] = MsalErrorMessage.InvalidCredentialType,
+            [MsalError.IdentityProtocolLoginUrlNull] = MsalErrorMessage.IdentityProtocolLoginUrlNull,
+            [MsalError.IdentityProtocolMismatch] = MsalErrorMessage.IdentityProtocolMismatch,
+            [MsalError.EmailAddressSuffixMismatch] = MsalErrorMessage.EmailAddressSuffixMismatch,
+            [MsalError.IdentityProviderRequestFailed] = MsalErrorMessage.IdentityProviderRequestFailed,
+            [MsalError.StsTokenRequestFailed] = MsalErrorMessage.StsTokenRequestFailed,
+            [MsalError.EncodedTokenTooLong] = MsalErrorMessage.EncodedTokenTooLong,
+            [MsalError.StsMetadataRequestFailed] = MsalErrorMessage.StsMetadataRequestFailed,
+            [MsalError.AuthorityNotInValidList] = MsalErrorMessage.AuthorityNotInValidList,
+            [MsalError.UnsupportedUserType] = MsalErrorMessage.UnsupportedUserType,
+            [MsalError.UnknownUser] = MsalErrorMessage.UnknownUser,
+            [MsalError.UserRealmDiscoveryFailed] = MsalErrorMessage.UserRealmDiscoveryFailed,
+            [MsalError.AccessingWsMetadataExchangeFailed] = MsalErrorMessage.AccessingMetadataDocumentFailed,
+            [MsalError.ParsingWsMetadataExchangeFailed] = MsalErrorMessage.ParsingMetadataDocumentFailed,
+            [MsalError.WsTrustEndpointNotFoundInMetadataDocument] = MsalErrorMessage.WsTrustEndpointNotFoundInMetadataDocument,
+            [MsalError.ParsingWsTrustResponseFailed] = MsalErrorMessage.ParsingWsTrustResponseFailed,
+            [MsalError.AuthenticationCanceled] = MsalErrorMessage.AuthenticationCanceled,
+            [MsalError.NetworkNotAvailable] = MsalErrorMessage.NetworkIsNotAvailable,
+            [MsalError.AuthenticationUiFailed] = MsalErrorMessage.AuthenticationUiFailed,
+            [MsalError.UserInteractionRequired] = MsalErrorMessage.UserInteractionRequired,
+            [MsalError.MissingFederationMetadataUrl] = MsalErrorMessage.MissingFederationMetadataUrl,
+            [MsalError.IntegratedAuthFailed] = MsalErrorMessage.IntegratedAuthFailed,
+            [MsalError.UnauthorizedResponseExpected] = MsalErrorMessage.UnauthorizedResponseExpected,
+            [MsalError.MultipleTokensMatched] = MsalErrorMessage.MultipleTokensMatched,
+            [MsalError.PasswordRequiredForManagedUserError] = MsalErrorMessage.PasswordRequiredForManagedUserError,
+            [MsalError.GetUserNameFailed] = MsalErrorMessage.GetUserNameFailed,
+            // MsalErrorMessage.Unknown will be set as the default error message in GetErrorMessage(string errorCode).
+        };
+
         /// <summary>
         /// Initializes a new instance of the exception class.
         /// </summary>
@@ -133,118 +165,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected static string GetErrorMessage(string errorCode)
         {
-            string message;
-            switch (errorCode)
-            {
-                case MsalError.InvalidCredentialType:
-                    message = MsalErrorMessage.InvalidCredentialType;
-                    break;
-
-                case MsalError.IdentityProtocolLoginUrlNull:
-                    message = MsalErrorMessage.IdentityProtocolLoginUrlNull;
-                    break;
-
-                case MsalError.IdentityProtocolMismatch:
-                    message = MsalErrorMessage.IdentityProtocolMismatch;
-                    break;
-
-                case MsalError.EmailAddressSuffixMismatch:
-                    message = MsalErrorMessage.EmailAddressSuffixMismatch;
-                    break;
-
-                case MsalError.IdentityProviderRequestFailed:
-                    message = MsalErrorMessage.IdentityProviderRequestFailed;
-                    break;
-
-                case MsalError.StsTokenRequestFailed:
-                    message = MsalErrorMessage.StsTokenRequestFailed;
-                    break;
-
-                case MsalError.EncodedTokenTooLong:
-                    message = MsalErrorMessage.EncodedTokenTooLong;
-                    break;
-
-                case MsalError.StsMetadataRequestFailed:
-                    message = MsalErrorMessage.StsMetadataRequestFailed;
-                    break;
-
-                case MsalError.AuthorityNotInValidList:
-                    message = MsalErrorMessage.AuthorityNotInValidList;
-                    break;
-
-                case MsalError.UnsupportedUserType:
-                    message = MsalErrorMessage.UnsupportedUserType;
-                    break;
-
-                case MsalError.UnknownUser:
-                    message = MsalErrorMessage.UnknownUser;
-                    break;
-
-                case MsalError.UserRealmDiscoveryFailed:
-                    message = MsalErrorMessage.UserRealmDiscoveryFailed;
-                    break;
-
-                case MsalError.AccessingWsMetadataExchangeFailed:
-                    message = MsalErrorMessage.AccessingMetadataDocumentFailed;
-                    break;
-
-                case MsalError.ParsingWsMetadataExchangeFailed:
-                    message = MsalErrorMessage.ParsingMetadataDocumentFailed;
-                    break;
-
-                case MsalError.WsTrustEndpointNotFoundInMetadataDocument:
-                    message = MsalErrorMessage.WsTrustEndpointNotFoundInMetadataDocument;
-                    break;
-
-                case MsalError.ParsingWsTrustResponseFailed:
-                    message = MsalErrorMessage.ParsingWsTrustResponseFailed;
-                    break;
-
-                case MsalError.AuthenticationCanceled:
-                    message = MsalErrorMessage.AuthenticationCanceled;
-                    break;
-
-                case MsalError.NetworkNotAvailable:
-                    message = MsalErrorMessage.NetworkIsNotAvailable;
-                    break;
-
-                case MsalError.AuthenticationUiFailed:
-                    message = MsalErrorMessage.AuthenticationUiFailed;
-                    break;
-
-                case MsalError.UserInteractionRequired:
-                    message = MsalErrorMessage.UserInteractionRequired;
-                    break;
-
-                case MsalError.MissingFederationMetadataUrl:
-                    message = MsalErrorMessage.MissingFederationMetadataUrl;
-                    break;
-
-                case MsalError.IntegratedAuthFailed:
-                    message = MsalErrorMessage.IntegratedAuthFailed;
-                    break;
-
-                case MsalError.UnauthorizedResponseExpected:
-                    message = MsalErrorMessage.UnauthorizedResponseExpected;
-                    break;
-
-                case MsalError.MultipleTokensMatched:
-                    message = MsalErrorMessage.MultipleTokensMatched;
-                    break;
-
-                case MsalError.PasswordRequiredForManagedUserError:
-                    message = MsalErrorMessage.PasswordRequiredForManagedUserError;
-                    break;
-
-                case MsalError.GetUserNameFailed:
-                    message = MsalErrorMessage.GetUserNameFailed;
-                    break;
-
-                default:
-                    message = MsalErrorMessage.Unknown;
-                    break;
-            }
-
+            string message = ErrorMessages.ContainsKey(errorCode) ? ErrorMessages[errorCode] : MsalErrorMessage.Unknown;
             return String.Format(CultureInfo.InvariantCulture, "{0}: {1}", errorCode, message);
         }
 

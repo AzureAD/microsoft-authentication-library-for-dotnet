@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client
         [StructLayout(LayoutKind.Sequential), ComVisible(true)]
         public class DOCHOSTUIINFO
         {
-            [MarshalAs(UnmanagedType.U4)] public int cbSize = Marshal.SizeOf(typeof (DOCHOSTUIINFO));
+            [MarshalAs(UnmanagedType.U4)] public int cbSize = Marshal.SizeOf(typeof(DOCHOSTUIINFO));
             [MarshalAs(UnmanagedType.I4)] public int dwFlags;
             [MarshalAs(UnmanagedType.I4)] public int dwDoubleClick;
             [MarshalAs(UnmanagedType.I4)] public int dwReserved1;
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client
             {
                 return
                     string.Concat(new object[]
-                    {"Left = ", left, " Top ", top, " Right = ", right, " Bottom = ", bottom});
+                        {"Left = ", left, " Top ", top, " Right = ", right, " Bottom = ", bottom});
             }
 
             public COMRECT()
@@ -283,7 +283,8 @@ namespace Microsoft.Identity.Client
 
             [return: MarshalAs(UnmanagedType.I4)]
             [PreserveSig]
-            int TranslateAccelerator([In] ref MSG msg, [In] ref Guid group, [In, MarshalAs(UnmanagedType.I4)] int nCmdID);
+            int TranslateAccelerator([In] ref MSG msg, [In] ref Guid group,
+                [In, MarshalAs(UnmanagedType.I4)] int nCmdID);
 
             [return: MarshalAs(UnmanagedType.I4)]
             [PreserveSig]

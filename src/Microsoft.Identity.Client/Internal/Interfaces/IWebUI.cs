@@ -34,6 +34,8 @@ namespace Microsoft.Identity.Client.Internal.Interfaces
 {
     internal interface IWebUI
     {
+        RequestContext RequestContext { get; set; }
+
         Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext);
     }
 }

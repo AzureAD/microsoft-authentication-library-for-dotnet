@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
         private readonly PlatformParameters parameters;
         private SFSafariViewController safariViewController;
 
-        public WebUI(IPlatformParameters parameters)
+        public WebUI(IPlatformParameters parameters, RequestContext requestContext)
         {
             this.parameters = parameters as PlatformParameters;
             if (this.parameters == null)
@@ -51,6 +51,8 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentException("parameters should be of type PlatformParameters", nameof(this.parameters));
             }
         }
+
+        public RequestContext RequestContext { get; set; }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext)
