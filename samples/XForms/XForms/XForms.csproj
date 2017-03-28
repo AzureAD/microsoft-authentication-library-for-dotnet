@@ -8,6 +8,9 @@
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
     <!-- Workaround until Xamarin supports PPDB -->
     <DebugType>full</DebugType>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>MSAL.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>False</DelaySign>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="AcquirePage.xaml" />
@@ -34,6 +37,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="StrongNamer" Version="0.0.3" />
     <PackageReference Include="Xamarin.Forms" Version="2.3.3.193" />
   </ItemGroup>
   <ItemGroup>

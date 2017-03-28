@@ -30,7 +30,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -39,8 +38,8 @@ namespace XForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class LogPage : ContentPage
     {
-        private static StringBuilder sb = new StringBuilder();
-        static readonly object bufferLock = new object();
+        private static readonly StringBuilder Sb = new StringBuilder();
+        private static readonly object BufferLock = new object();
 
         public LogPage()
         {
@@ -54,22 +53,26 @@ namespace XForms
 
         private void ShowLog()
         {
-            lock (bufferLock)
+            lock (BufferLock)
             {
-                log.Text = sb.ToString();
+                log.Text = Sb.ToString();
             }
         }
 
         private void OnClearClicked(object sender, EventArgs e)
         {
-            sb.Clear();
+            lock (BufferLock)
+            {
+                Sb.Clear();
+            }
             ShowLog();
         }
 
         public static void AddToLog(string str)
         {
-            lock (bufferLock) {
-                sb.AppendLine(str);
+            lock (BufferLock)
+            {
+                Sb.AppendLine(str);
             }
         }
     }

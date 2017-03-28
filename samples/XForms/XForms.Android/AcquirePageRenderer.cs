@@ -29,7 +29,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using Android.App;
 using Android.Content;
 using Android.OS;
@@ -41,20 +40,21 @@ using Xamarin.Forms.Platform.Android;
 using XForms;
 using Xamarin.Forms;
 using XForms.Droid;
+
 [assembly: ExportRenderer(typeof(AcquirePage), typeof(AcquirePageRenderer))]
 
 namespace XForms.Droid
 {
-    class AcquirePageRenderer : PageRenderer
+    internal class AcquirePageRenderer : PageRenderer
     {
-        AcquirePage page;
+        AcquirePage _page;
 
         protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
         {
             base.OnElementChanged(e);
-            page = e.NewElement as AcquirePage;
+            _page = (AcquirePage)e.NewElement;
             var activity = this.Context as Activity;
-            page.platformParameters = new PlatformParameters(activity);
+            _page.platformParameters = new PlatformParameters(activity);
         }
     }
 }

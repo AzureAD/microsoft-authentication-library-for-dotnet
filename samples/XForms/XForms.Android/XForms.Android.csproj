@@ -86,6 +86,9 @@
     <PackageReference Include="Microsoft.NuGet.Build.Tasks.Workaround" Version="1.0.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="StrongNamer">
+      <Version>0.0.3</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">

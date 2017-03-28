@@ -25,12 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal.Cache;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -44,10 +46,83 @@ namespace XForms
             InitializeComponent();
         }
 
+        private static string ToString(IEnumerable<string> collection)
+        {
+            var sb = new StringBuilder();
+
+            foreach (var str in collection)
+            {
+                sb.AppendLine(str);
+                sb.AppendLine("");
+            }
+            return sb.ToString();
+        }
+
+        private void RefreshCacheView()
+        {
+            var tokenCache = App.MsalPublicClient.UserTokenCache;
+            accessTokenCacheItems.ItemsSource = tokenCache.GetAllAccessTokensForClient();
+
+            var accesTokens = tokenCache.GetAllAccessTokenCacheItems();
+            accessTokenLabel.Text = ToString(accesTokens);
+
+
+            refreshTokenCacheItems.ItemsSource = tokenCache.GetAllRefreshTokensForClient();
+
+            var refreshTokens = tokenCache.GetAllRefreshTokenCacheItems();
+            refreshTokenLabel.Text = ToString(refreshTokens);
+        }
+
         protected override void OnAppearing()
         {
-            DateTime dateTime = DateTime.UtcNow;
-            cache.Text = dateTime.ToString();
+            RefreshCacheView();
+        }
+
+        private void OnClearClicked(object sender, EventArgs e)
+        {
+            var tokenCache = App.MsalPublicClient.UserTokenCache;
+            var users = tokenCache.GetUsers(App.ClientId);
+            foreach (var user in users)
+            {
+                tokenCache.Remove(user);
+            }
+
+            RefreshCacheView();
+        }
+
+        private static long GetCurrentTimestamp()
+        {
+            return (long) (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
+        }
+
+        public void OnExpire(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem) sender);
+            var accessTokenCacheItem = (AccessTokenCacheItem) mi.CommandParameter;
+            var tokenCache = App.MsalPublicClient.UserTokenCache;
+
+            // set access token as expired
+            accessTokenCacheItem.ExpiresOnUnixTimestamp = GetCurrentTimestamp();
+
+            // update entry in the cache
+            tokenCache.AddAccessTokenCacheItem(accessTokenCacheItem);
+
+            RefreshCacheView();
+        }
+
+        public void OnInvalidate(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem) sender);
+            var refreshTokenCacheItem = (RefreshTokenCacheItem) mi.CommandParameter;
+            var tokenCache = App.MsalPublicClient.UserTokenCache;
+
+            // invalidate refresh token
+            refreshTokenCacheItem.RefreshToken = "InvalidValue";
+
+            // update entry in the cache
+            tokenCache.AddRefreshTokenCacheItem(refreshTokenCacheItem);
+
+            RefreshCacheView();
         }
     }
 }

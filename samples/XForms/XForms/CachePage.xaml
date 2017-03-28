@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:XForms;assembly=XForms"
              x:Class="XForms.CachePage">
 
     <Label Text="Cache Page" 
@@ -13,17 +14,108 @@
         </OnPlatform>
     </ContentPage.Padding>
 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <local:ArrayToStringConverter x:Key="arrayToStringConverter"></local:ArrayToStringConverter>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
 
     <StackLayout Padding="10,0">
 
         <Label Text="Cache Page" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" Margin="5" />
 
+        <Label Text="Access Tokens:" HorizontalOptions="Start"/>
         <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
-            <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
-                <Label x:Name="cache" Text="" />
-
+            <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" BackgroundColor="Gray">
+                <Label x:Name="accessTokenLabel" Text="" />
             </StackLayout>
         </ScrollView>
+
+        <ListView x:Name="accessTokenCacheItems">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <ViewCell.ContextActions>
+                            <MenuItem Clicked="OnExpire" Text="Expire" CommandParameter="{Binding .}" />
+                        </ViewCell.ContextActions>
+                        <ViewCell.View>
+                            <StackLayout Padding="10,0">
+
+                                <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand">
+                                    <Label Text="Authority : " HorizontalOptions="CenterAndExpand" TextColor="Blue" />
+                                    <Label Text="{Binding Authority}" HorizontalOptions="CenterAndExpand" TextColor="Blue" />
+                                </StackLayout>
+
+                                <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand">
+                                    <Label Text="DisplayableId : " HorizontalOptions="CenterAndExpand" TextColor="Blue" />
+                                    <Label Text="{Binding DisplayableId}" HorizontalOptions="CenterAndExpand" TextColor="Blue" />
+                                </StackLayout>
+
+                                <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand">
+                                    <Label Text="ExpiresOn : " HorizontalOptions="Start" TextColor="Blue" />
+                                    <Label Text="{Binding ExpiresOn.DateTime, StringFormat='{0:MM/dd/yy H:mm:ss zzz}'}" HorizontalOptions="Start" TextColor="Blue" />
+                                </StackLayout>
+
+                                <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand">
+                                    <Label Text="Scopes : " HorizontalOptions="CenterAndExpand" TextColor="Blue" />
+                                    <Label Text="{Binding Scope, Converter={StaticResource arrayToStringConverter}}" HorizontalOptions="CenterAndExpand" TextColor="Blue" />
+                                </StackLayout>
+
+                            </StackLayout>
+                        </ViewCell.View>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        
+        
+        <Label Text="Refresh Tokens:" HorizontalOptions="Start"/>
+        <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
+            <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" BackgroundColor="Gray">
+                <Label x:Name="refreshTokenLabel" Text="" />
+            </StackLayout>
+        </ScrollView>
+
+        <ListView x:Name="refreshTokenCacheItems">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <ViewCell.ContextActions>
+                            <MenuItem Clicked="OnInvalidate" Text="Invalidate" CommandParameter="{Binding .}" />
+                        </ViewCell.ContextActions>
+                        <ViewCell.View>
+                            <StackLayout Padding="10,0">
+
+                                <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand">
+                                    <Label Text="Authority : " HorizontalOptions="CenterAndExpand" TextColor="Blue" />
+                                    <Label Text="{Binding Authority}" HorizontalOptions="CenterAndExpand" TextColor="Blue" />
+                                </StackLayout>
+
+                                <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand">
+                                    <Label Text="DisplayableId : " HorizontalOptions="CenterAndExpand" TextColor="Blue" />
+                                    <Label Text="{Binding DisplayableId}" HorizontalOptions="CenterAndExpand" TextColor="Blue" />
+                                </StackLayout>
+
+                                <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand">
+                                    <Label Text="ExpiresOn : " HorizontalOptions="Start" TextColor="Blue" />
+                                    <Label Text="{Binding ExpiresOn.DateTime, StringFormat='{0:MM/dd/yy H:mm:ss zzz}'}" HorizontalOptions="Start" TextColor="Blue" />
+                                </StackLayout>
+
+                                <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand">
+                                    <Label Text="Scopes : " HorizontalOptions="CenterAndExpand" TextColor="Blue" />
+                                    <Label Text="{Binding Scope, Converter={StaticResource arrayToStringConverter}}" HorizontalOptions="CenterAndExpand" TextColor="Blue" />
+                                </StackLayout>
+
+                            </StackLayout>
+                        </ViewCell.View>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+
+        <Button  Text="Clear"  Clicked="OnClearClicked"/>
 
     </StackLayout>
     

@@ -30,42 +30,36 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client;
-
-
 using Xamarin.Forms;
 
 namespace XForms
 {
     public partial class App : Application
     {
-        public static PublicClientApplication msalPublicClient;
-        public const string ClientID = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
-        public const string RedirectUriOnAndroid = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
-        public const string RedirectUriOnIOS = "adaliosxformsapp://com.yourcompany.xformsapp";
-        public static string[] Scopes = { "User.Read" };
+        public static PublicClientApplication MsalPublicClient;
+        public const string ClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
 
-        class LoggerCallback : ILoggerCallback
+        public const string RedirectUriOnAndroid =
+            "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
+
+        public const string RedirectUriOnIos = "adaliosxformsapp://com.yourcompany.xformsapp";
+        public const string Authority = "https://login.microsoftonline.com/common";
+        public static string[] Scopes = {"User.Read"};
+
+        private class LoggerCallback : ILoggerCallback
         {
-
             public void Log(Logger.LogLevel level, string message, bool containsPii)
             {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    LogPage.AddToLog("[" + level + "]" + " - " + message);
-                });
+                Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message); });
             }
         }
 
         public App()
         {
-            msalPublicClient = new PublicClientApplication(ClientID);
-            Device.OnPlatform(Android: () => {
-                msalPublicClient.RedirectUri = RedirectUriOnAndroid;
-            });
+            MsalPublicClient = new PublicClientApplication(ClientId);
+            Device.OnPlatform(Android: () => { MsalPublicClient.RedirectUri = RedirectUriOnAndroid; });
 
-            Device.OnPlatform(iOS: () => {
-                msalPublicClient.RedirectUri = RedirectUriOnIOS;
-            });
+            Device.OnPlatform(iOS: () => { MsalPublicClient.RedirectUri = RedirectUriOnIos; });
 
             MainPage = new XForms.MainPage();
 

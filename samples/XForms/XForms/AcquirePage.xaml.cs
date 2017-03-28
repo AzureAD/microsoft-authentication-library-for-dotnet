@@ -30,7 +30,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using Microsoft.Identity.Client;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -49,7 +48,7 @@ namespace XForms
 
         private void SetPlatformParameters()
         {
-            App.msalPublicClient.PlatformParameters = platformParameters;
+            App.MsalPublicClient.PlatformParameters = platformParameters;
         }
 
         protected override void OnAppearing()
@@ -59,7 +58,7 @@ namespace XForms
 
         private string ToString(User user)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             sb.AppendLine("user.DisplayableId : " + user.DisplayableId);
             sb.AppendLine("user.IdentityProvider : " + user.IdentityProvider);
@@ -70,7 +69,7 @@ namespace XForms
 
         private string ToString(AuthenticationResult result)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             sb.AppendLine("AccessToken : " + result.AccessToken);
             sb.AppendLine("IdToken : " + result.IdToken);
@@ -85,21 +84,12 @@ namespace XForms
 
         private User getUserByDisplayableId(string str)
         {
-            var length = App.msalPublicClient.Users.Count();
-            foreach (User user in App.msalPublicClient.Users){
-                if (user.DisplayableId.Equals(str))
-                {
-                    return user;
-                }
-            }
-
-            return null;
+            return App.MsalPublicClient.Users.FirstOrDefault(user => user.DisplayableId.Equals(str));
         }
 
         private async void OnAcquireSilentlyClicked(object sender, EventArgs e)
         {
-
-            if (App.msalPublicClient.PlatformParameters == null)
+            if (App.MsalPublicClient.PlatformParameters == null)
             {
                 SetPlatformParameters();
             }
@@ -108,13 +98,13 @@ namespace XForms
 
             try
             {
-                User user = getUserByDisplayableId(UserEntry.Text.Trim());
+                var user = getUserByDisplayableId(UserEntry.Text.Trim());
                 if (user == null)
                 {
                     acquireResponseLabel.Text = "User - \"" + UserEntry.Text.Trim() + "\" was not found in the cache";
                     return;
                 }
-                AuthenticationResult res = await App.msalPublicClient.AcquireTokenSilentAsync(App.Scopes, user);
+                var res = await App.MsalPublicClient.AcquireTokenSilentAsync(App.Scopes, user);
 
                 acquireResponseLabel.Text = ToString(res);
             }
@@ -126,13 +116,11 @@ namespace XForms
             {
                 acquireResponseLabel.Text = "Exception - " + exception;
             }
-
         }
 
         private async void OnAcquireClicked(object sender, EventArgs e)
         {
-
-            if (App.msalPublicClient.PlatformParameters == null)
+            if (App.MsalPublicClient.PlatformParameters == null)
             {
                 SetPlatformParameters();
             }
@@ -145,12 +133,11 @@ namespace XForms
                 AuthenticationResult res;
                 if (LoginHint.IsToggled)
                 {
-                    res = await App.msalPublicClient.AcquireTokenAsync(App.Scopes, UserEntry.Text.Trim());
-
+                    res = await App.MsalPublicClient.AcquireTokenAsync(App.Scopes, UserEntry.Text.Trim());
                 }
                 else
                 {
-                    res = await App.msalPublicClient.AcquireTokenAsync(App.Scopes);
+                    res = await App.MsalPublicClient.AcquireTokenAsync(App.Scopes);
                 }
 
                 acquireResponseLabel.Text = ToString(res);
@@ -163,7 +150,6 @@ namespace XForms
             {
                 acquireResponseLabel.Text = "Exception - " + exception;
             }
-
         }
     }
 }
