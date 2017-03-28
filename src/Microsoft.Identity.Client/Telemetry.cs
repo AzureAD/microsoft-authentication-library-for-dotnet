@@ -25,18 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace Microsoft.Identity.Client
 {
     public class Telemetry
     {
-        private static readonly Telemetry Singleton = new Telemetry();
+        public delegate void Receiver(List<Dictionary<string, string>> events);
 
-        private IReceiver Receiver = null;  // TBD: Actually we could just use a delegate EventAction(List<Dictionary<string, string>> events) here, not a full class.
+        private Receiver _receiver = null;
 
-        public void RegisterReceiver(IReceiver r)
+        public void RegisterReceiver(Receiver r)
         {
-            Receiver = r;
+            _receiver = r;
         }
+
+        private static readonly Telemetry Singleton = new Telemetry();
 
         public static Telemetry GetInstance()
         {

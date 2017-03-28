@@ -32,9 +32,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.MSAL.NET.Unit
 {
-    class MyReceiver : IReceiver
+    class MyReceiver
     {
-        public void onEvents(List<Dictionary<string, string>> events)
+        public void OnEvents(List<Dictionary<string, string>> events)
         {
             foreach(Dictionary<string, string> e in events)
             {
@@ -59,10 +59,10 @@ namespace Test.MSAL.NET.Unit
         {
             Telemetry telemetry = Telemetry.GetInstance();
             MyReceiver receiver = new MyReceiver();
-            telemetry.RegisterReceiver(receiver);
+            telemetry.RegisterReceiver(receiver.OnEvents);
 
             // Or you can use a one-liner:
-            Telemetry.GetInstance().RegisterReceiver(new MyReceiver());
+            Telemetry.GetInstance().RegisterReceiver(new MyReceiver().OnEvents);
         }
     }
 }
