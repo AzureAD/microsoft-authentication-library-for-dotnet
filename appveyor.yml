@@ -2,9 +2,7 @@ configuration: Release
 
 before_build:
   - nuget restore
-
-build_script:
-  - ps: .\build\build.ps1
+  - sn -Vr .\src\ADAL.PCL\bin\Release\Microsoft.IdentityModel.Clients.ActiveDirectory.dll
 
 skip_commits:
   files:
