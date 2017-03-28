@@ -42,6 +42,8 @@ namespace Microsoft.Identity.Client
 
         private static readonly Telemetry Singleton = new Telemetry();
 
+        private Telemetry(){}
+
         public static Telemetry GetInstance()
         {
             return Singleton;
