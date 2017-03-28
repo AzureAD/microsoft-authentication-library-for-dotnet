@@ -1,3 +1,5 @@
+image: Visual Studio 2015
+
 configuration: Release
 
 before_build:
