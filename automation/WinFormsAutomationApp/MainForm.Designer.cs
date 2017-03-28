@@ -75,7 +75,7 @@
             this.mainPage.Controls.Add(this.acquireToken);
             this.mainPage.Location = new System.Drawing.Point(4, 22);
             this.mainPage.Name = "mainPage";
-            this.mainPage.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.mainPage.Padding = new System.Windows.Forms.Padding(3);
             this.mainPage.Size = new System.Drawing.Size(591, 547);
             this.mainPage.TabIndex = 0;
             this.mainPage.Text = "mainPage";
@@ -175,7 +175,7 @@
             this.dataInputPage.Controls.Add(this.requestInfo);
             this.dataInputPage.Location = new System.Drawing.Point(4, 22);
             this.dataInputPage.Name = "dataInputPage";
-            this.dataInputPage.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.dataInputPage.Padding = new System.Windows.Forms.Padding(3);
             this.dataInputPage.Size = new System.Drawing.Size(591, 547);
             this.dataInputPage.TabIndex = 1;
             this.dataInputPage.Text = "dataInputPage";
@@ -209,7 +209,7 @@
             this.resultPage.Controls.Add(this.resultInfo);
             this.resultPage.Location = new System.Drawing.Point(4, 22);
             this.resultPage.Name = "resultPage";
-            this.resultPage.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.resultPage.Padding = new System.Windows.Forms.Padding(3);
             this.resultPage.Size = new System.Drawing.Size(591, 547);
             this.resultPage.TabIndex = 2;
             this.resultPage.Text = "resultPage";
@@ -250,8 +250,10 @@
             this.resultInfo.AccessibleName = "resultInfo";
             this.resultInfo.Enabled = false;
             this.resultInfo.Location = new System.Drawing.Point(28, 16);
+            this.resultInfo.MaxLength = 0;
             this.resultInfo.Multiline = true;
             this.resultInfo.Name = "resultInfo";
+            this.resultInfo.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.resultInfo.Size = new System.Drawing.Size(536, 280);
             this.resultInfo.TabIndex = 0;
             // 

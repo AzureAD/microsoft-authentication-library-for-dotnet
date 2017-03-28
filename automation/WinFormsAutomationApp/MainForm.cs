@@ -14,6 +14,7 @@ namespace WinFormsAutomationApp
 
         public MainForm()
         {
+            DeleteCache.CleanCoockies();
             InitializeComponent();
             TokenCache.DefaultShared.AfterAccess += TokenCacheDelegates.AfterAccessNotification;
             TokenCache.DefaultShared.BeforeAccess += TokenCacheDelegates.BeforeAccessNotification;

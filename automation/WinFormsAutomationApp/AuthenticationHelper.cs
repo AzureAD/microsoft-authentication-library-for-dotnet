@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,11 +22,22 @@ namespace WinFormsAutomationApp
             AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
             try
             {
-                string prompt = input.ContainsKey("prompt_behavior") ? input["prompt_behavior"] : null;
-                AuthenticationResult result =
-                    await
-                        ctx.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
-                            GetPlatformParametersInstance(prompt)).ConfigureAwait(false);
+                AuthenticationResult result = null;
+                 if (input.ContainsKey("user_identifier") && input.ContainsKey("password"))
+                {
+                    UserPasswordCredential user = new UserPasswordCredential(input["user_identifier"], input["password"]);
+                    result =
+                        await
+                            ctx.AcquireTokenAsync(input["resource"], input["client_id"],user).ConfigureAwait(false);
+                }
+                else
+                {
+                    string prompt = input.ContainsKey("prompt_behavior") ? input["prompt_behavior"] : null;
+                    result =
+                        await
+                            ctx.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
+                                GetPlatformParametersInstance(prompt)).ConfigureAwait(false);
+                }
                 res = ProcessResult(result, input);
             }
             catch (Exception exc)
@@ -56,7 +68,7 @@ namespace WinFormsAutomationApp
            
             Task<string> myTask = Task<string>.Factory.StartNew(() =>
             {
-            
+                TokenCache.DefaultShared.ReadItems();
                 List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> CacheItems = QueryCache(input["authority"],
                     input["client_id"], input["user_identifier"]);
 
@@ -88,6 +100,7 @@ namespace WinFormsAutomationApp
             {
                 try
                 {
+                    TokenCache.DefaultShared.ReadItems();
                     List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> CacheItems = QueryCache(input["authority"],
                     input["client_id"], input["user_identifier"]);
 
@@ -114,15 +127,22 @@ namespace WinFormsAutomationApp
         public static async Task<string> ReadCache(Dictionary<string, string> input)
         {
             Task<string> myTask = Task<string>.Factory.StartNew(() =>
-            {                
-                int count = TokenCache.DefaultShared.Count;
+            {
+
                 Dictionary<string, object> output = new Dictionary<string, object>();
-                 output.Add("item_count", count.ToString());
-                var list = TokenCache.DefaultShared.ReadItems();
+                output.Add("total_count", TokenCache.DefaultShared.ReadItems().Count());
+                var list = TokenCache.DefaultShared.tokenCacheDictionary.Where(x => x.Key.ClientId == input["client_id"] && 
+                                                                                    x.Key.DisplayableId == input["user_identifier"]);
+                output.Add("exact_count", list.Count());
+               
                 if (list.Any())
                 {
-                    output.Add("AccessToken", ((list.ToList())[0]).AccessToken);
+                    var item = list.FirstOrDefault();
+                    output.Add("AccessToken", item.Value.Result.AccessToken);
+                    output.Add("expires_on", item.Value.Result.ExpiresOn);
+                    output.Add("refresh_token", item.Value.RefreshToken);
                 }
+              
                 return FromDictionaryToJson(output);
             });
             return await myTask.ConfigureAwait(false);
@@ -232,6 +252,16 @@ namespace WinFormsAutomationApp
         #endregion
 
         #region Private Methods
+        // This function clears cookies from the browser control used by ADAL.
+        public static void ClearCookies()
+        {
+            const int INTERNET_OPTION_END_BROWSER_SESSION = 42;
+            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_END_BROWSER_SESSION, IntPtr.Zero, 0);
+        }
+
+        [DllImport("wininet.dll", SetLastError = true)]
+        private static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int lpdwBufferLength);
+
         private static string JsonOutputFormat(string result)
         {
             Dictionary<string, string> jsonDictitionary = new Dictionary<string, string>();
@@ -300,7 +330,7 @@ namespace WinFormsAutomationApp
             res.Add("unique_id", result.UserInfo.UniqueId);
             res.Add("access_token", result.AccessToken);
             res.Add("tenant_id", result.TenantId);
-            res.Add("refresh_token", TokenCache.DefaultShared.tokenCacheDictionary[new TokenCacheKey(input["authority"], input["resource"], input["client_id"], TokenSubjectType.User, result.UserInfo)].RefreshToken);
+            res.Add("refresh_token", TokenCache.DefaultShared.tokenCacheDictionary.Where(x => x.Key.UniqueId == result.UserInfo.UniqueId).FirstOrDefault().Value.RefreshToken);
             return res;
         }
 

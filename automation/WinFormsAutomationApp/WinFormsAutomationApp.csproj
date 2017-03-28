@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthenticationHelper.cs" />
+    <Compile Include="DeleteCookies.cs" />
     <Compile Include="LoggerCallbackImpl.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
