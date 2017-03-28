@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// 
     /// </summary>
-    [Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
+    //[Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
     public class BrowserTabActivity : Activity
     {
         /// <summary>

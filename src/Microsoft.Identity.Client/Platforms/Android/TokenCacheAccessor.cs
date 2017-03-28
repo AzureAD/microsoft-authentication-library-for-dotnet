@@ -95,12 +95,12 @@ namespace Microsoft.Identity.Client
 
         public ICollection<string> GetAllAccessTokensAsString()
         {
-            return _accessTokenSharedPreference.All.Values as ICollection<string>;
+            return _accessTokenSharedPreference.All.Values.Cast<string>().ToList();
         }
 
         public ICollection<string> GetAllRefreshTokensAsString()
         {
-            return _refreshTokenSharedPreference.All.Values as ICollection<string>;
+            return _refreshTokenSharedPreference.All.Values.Cast<string>().ToList();
         }
     }
 }

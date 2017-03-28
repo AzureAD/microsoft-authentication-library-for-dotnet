@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,29 +25,36 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Runtime.Serialization;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Android.App;
+using Android.Content;
+using Android.OS;
+using Android.Runtime;
+using Android.Views;
+using Android.Widget;
+using Microsoft.Identity.Client;
+using Xamarin.Forms.Platform.Android;
+using XForms;
+using Xamarin.Forms;
+using XForms.Droid;
 
-namespace Microsoft.Identity.Client.Internal.Cache
+[assembly: ExportRenderer(typeof(AcquirePage), typeof(AcquirePageRenderer))]
+
+namespace XForms.Droid
 {
-    [DataContract]
-    internal class RefreshTokenCacheItem : BaseTokenCacheItem
+    internal class AcquirePageRenderer : PageRenderer
     {
-        public RefreshTokenCacheItem()
-        {
-        }
+        AcquirePage _page;
 
-        public RefreshTokenCacheItem(string authority, string clientId, TokenResponse response) : base(authority, clientId, response)
+        protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
         {
-            RefreshToken = response.RefreshToken;
-        }
-
-        [DataMember (Name = "refresh_token")]
-        public string RefreshToken { get; set; }
-
-        public override TokenCacheKey GetTokenCacheKey()
-        {
-            return new TokenCacheKey(null, null, ClientId, User.HomeObjectId);
+            base.OnElementChanged(e);
+            _page = (AcquirePage)e.NewElement;
+            var activity = this.Context as Activity;
+            _page.platformParameters = new PlatformParameters(activity);
         }
     }
 }

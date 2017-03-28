@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="XForms.LogPage">
+
+    <ContentPage.Padding>
+        <OnPlatform x:TypeArguments="Thickness">
+            <OnPlatform.iOS>0,20,0,0</OnPlatform.iOS>
+        </OnPlatform>
+    </ContentPage.Padding>
+
+
+    <StackLayout Padding="10,0">
+
+        <Label Text="Log Page" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" Margin="5" />
+
+        <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
+            <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
+                <Label x:Name="log" Text="" />
+
+            </StackLayout>
+        </ScrollView>
+
+        <Button  Text="Clear"  Clicked="OnClearClicked"/>
+
+    </StackLayout>
+
+</ContentPage>
