@@ -33,6 +33,10 @@
             this.environmentQP = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.publicClientTabPage = new System.Windows.Forms.TabPage();
+            this.label12 = new System.Windows.Forms.Label();
+            this.PiiLoggingDisabled = new System.Windows.Forms.RadioButton();
+            this.PiiLoggingEnabled = new System.Windows.Forms.RadioButton();
+            this.PiiLoggingLabel = new System.Windows.Forms.Label();
             this.ScopeResult = new System.Windows.Forms.ListBox();
             this.Scope = new System.Windows.Forms.Label();
             this.IdTokenResult = new System.Windows.Forms.Label();
@@ -72,6 +76,12 @@
             this.applySettings = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.cacheTabPage = new System.Windows.Forms.TabPage();
+            this.ExpiresOnResultInCache = new System.Windows.Forms.Label();
+            this.ExpiresOnInCache = new System.Windows.Forms.Label();
+            this.UserResultInCache = new System.Windows.Forms.Label();
+            this.UserInCache = new System.Windows.Forms.Label();
+            this.AccessTokenResultInCache = new System.Windows.Forms.TextBox();
+            this.ExpireAccessTokenBtn = new System.Windows.Forms.Button();
             this.logsTabPage = new System.Windows.Forms.TabPage();
             this.button1 = new System.Windows.Forms.Button();
             this.msalPIILogs = new System.Windows.Forms.TextBox();
@@ -84,12 +94,13 @@
             this.cache = new System.Windows.Forms.Button();
             this.logs = new System.Windows.Forms.Button();
             this.confidentialClient = new System.Windows.Forms.Button();
-            this.ExpireAccessTokenBtn = new System.Windows.Forms.Button();
-            this.AccessTokenResultInCache = new System.Windows.Forms.TextBox();
-            this.UserInCache = new System.Windows.Forms.Label();
-            this.UserResultInCache = new System.Windows.Forms.Label();
-            this.ExpiresOnInCache = new System.Windows.Forms.Label();
-            this.ExpiresOnResultInCache = new System.Windows.Forms.Label();
+            this.CcAuthorityLabel = new System.Windows.Forms.Label();
+            this.ConfClientAuthority = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
+            this.ConfClientOverrideAuthority = new System.Windows.Forms.TextBox();
+            this.ConfClientValidateAuthorityLabel = new System.Windows.Forms.Label();
+            this.ConfClientValidateAuthorityEnabled = new System.Windows.Forms.RadioButton();
+            this.ConfClientValidateAuthorityDisabled = new System.Windows.Forms.RadioButton();
             this.tabControl1.SuspendLayout();
             this.publicClientTabPage.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -97,6 +108,7 @@
             this.settingsTabPage.SuspendLayout();
             this.cacheTabPage.SuspendLayout();
             this.logsTabPage.SuspendLayout();
+            this.confidentialClientTabPage.SuspendLayout();
             this.SuspendLayout();
             // 
             // authority
@@ -133,6 +145,7 @@
             this.tabControl1.Controls.Add(this.confidentialClientTabPage);
             this.tabControl1.Location = new System.Drawing.Point(1, -3);
             this.tabControl1.Name = "tabControl1";
+            this.tabControl1.RightToLeftLayout = true;
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(676, 814);
             this.tabControl1.TabIndex = 0;
@@ -140,6 +153,10 @@
             // publicClientTabPage
             // 
             this.publicClientTabPage.BackColor = System.Drawing.SystemColors.Control;
+            this.publicClientTabPage.Controls.Add(this.label12);
+            this.publicClientTabPage.Controls.Add(this.PiiLoggingDisabled);
+            this.publicClientTabPage.Controls.Add(this.PiiLoggingEnabled);
+            this.publicClientTabPage.Controls.Add(this.PiiLoggingLabel);
             this.publicClientTabPage.Controls.Add(this.ScopeResult);
             this.publicClientTabPage.Controls.Add(this.Scope);
             this.publicClientTabPage.Controls.Add(this.IdTokenResult);
@@ -175,6 +192,45 @@
             this.publicClientTabPage.Size = new System.Drawing.Size(660, 779);
             this.publicClientTabPage.TabIndex = 0;
             this.publicClientTabPage.Text = "publicClientTabPage";
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(25, 716);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(101, 13);
+            this.label12.TabIndex = 32;
+            this.label12.Text = "Pii Logging Enabled";
+            // 
+            // PiiLoggingDisabled
+            // 
+            this.PiiLoggingDisabled.AutoSize = true;
+            this.PiiLoggingDisabled.Checked = true;
+            this.PiiLoggingDisabled.Location = new System.Drawing.Point(229, 709);
+            this.PiiLoggingDisabled.Name = "PiiLoggingDisabled";
+            this.PiiLoggingDisabled.Size = new System.Drawing.Size(79, 26);
+            this.PiiLoggingDisabled.TabIndex = 31;
+            this.PiiLoggingDisabled.TabStop = true;
+            this.PiiLoggingDisabled.Text = "Disabled";
+            this.PiiLoggingDisabled.UseVisualStyleBackColor = true;
+            // 
+            // PiiLoggingEnabled
+            // 
+            this.PiiLoggingEnabled.AutoSize = true;
+            this.PiiLoggingEnabled.Location = new System.Drawing.Point(146, 709);
+            this.PiiLoggingEnabled.Name = "PiiLoggingEnabled";
+            this.PiiLoggingEnabled.Size = new System.Drawing.Size(77, 26);
+            this.PiiLoggingEnabled.TabIndex = 30;
+            this.PiiLoggingEnabled.Text = "Enabled";
+            this.PiiLoggingEnabled.UseVisualStyleBackColor = true;
+            // 
+            // PiiLoggingLabel
+            // 
+            this.PiiLoggingLabel.AutoSize = true;
+            this.PiiLoggingLabel.Location = new System.Drawing.Point(25, 716);
+            this.PiiLoggingLabel.Name = "PiiLoggingLabel";
+            this.PiiLoggingLabel.Size = new System.Drawing.Size(0, 13);
+            this.PiiLoggingLabel.TabIndex = 29;
             // 
             // ScopeResult
             // 
@@ -362,7 +418,7 @@
             this.callResult.Name = "callResult";
             this.callResult.ReadOnly = true;
             this.callResult.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.callResult.Size = new System.Drawing.Size(645, 353);
+            this.callResult.Size = new System.Drawing.Size(645, 267);
             this.callResult.TabIndex = 13;
             // 
             // label8
@@ -383,7 +439,6 @@
             this.userList.Name = "userList";
             this.userList.Size = new System.Drawing.Size(352, 21);
             this.userList.TabIndex = 12;
-            //this.userList.SelectedIndexChanged += new System.EventHandler(this.userList_SelectedIndexChanged);
             // 
             // label7
             // 
@@ -397,7 +452,7 @@
             // 
             // acquireTokenSilent
             // 
-            this.acquireTokenSilent.Location = new System.Drawing.Point(444, 711);
+            this.acquireTokenSilent.Location = new System.Drawing.Point(453, 635);
             this.acquireTokenSilent.Name = "acquireTokenSilent";
             this.acquireTokenSilent.Size = new System.Drawing.Size(164, 46);
             this.acquireTokenSilent.TabIndex = 10;
@@ -407,7 +462,7 @@
             // 
             // acquireTokenInteractive
             // 
-            this.acquireTokenInteractive.Location = new System.Drawing.Point(42, 711);
+            this.acquireTokenInteractive.Location = new System.Drawing.Point(37, 635);
             this.acquireTokenInteractive.Name = "acquireTokenInteractive";
             this.acquireTokenInteractive.Size = new System.Drawing.Size(164, 46);
             this.acquireTokenInteractive.TabIndex = 9;
@@ -487,9 +542,9 @@
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.Location = new System.Drawing.Point(8, 58);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(503, 44);
+            this.label4.Size = new System.Drawing.Size(524, 44);
             this.label4.TabIndex = 2;
-            this.label4.Text = "Overriden Authority for 1 call";
+            this.label4.Text = "Overridden Authority for 1 call";
             // 
             // label3
             // 
@@ -562,6 +617,60 @@
             this.cacheTabPage.Text = "cacheTabPage";
             this.cacheTabPage.UseVisualStyleBackColor = true;
             // 
+            // ExpiresOnResultInCache
+            // 
+            this.ExpiresOnResultInCache.AutoSize = true;
+            this.ExpiresOnResultInCache.Location = new System.Drawing.Point(276, 248);
+            this.ExpiresOnResultInCache.Name = "ExpiresOnResultInCache";
+            this.ExpiresOnResultInCache.Size = new System.Drawing.Size(114, 13);
+            this.ExpiresOnResultInCache.TabIndex = 5;
+            this.ExpiresOnResultInCache.Text = "Expires on placeholder";
+            // 
+            // ExpiresOnInCache
+            // 
+            this.ExpiresOnInCache.AutoSize = true;
+            this.ExpiresOnInCache.Location = new System.Drawing.Point(212, 248);
+            this.ExpiresOnInCache.Name = "ExpiresOnInCache";
+            this.ExpiresOnInCache.Size = new System.Drawing.Size(58, 13);
+            this.ExpiresOnInCache.TabIndex = 4;
+            this.ExpiresOnInCache.Text = "Expires On";
+            // 
+            // UserResultInCache
+            // 
+            this.UserResultInCache.AutoSize = true;
+            this.UserResultInCache.Location = new System.Drawing.Point(276, 222);
+            this.UserResultInCache.Name = "UserResultInCache";
+            this.UserResultInCache.Size = new System.Drawing.Size(88, 13);
+            this.UserResultInCache.TabIndex = 3;
+            this.UserResultInCache.Text = "User Placeholder";
+            // 
+            // UserInCache
+            // 
+            this.UserInCache.AutoSize = true;
+            this.UserInCache.Location = new System.Drawing.Point(212, 222);
+            this.UserInCache.Name = "UserInCache";
+            this.UserInCache.Size = new System.Drawing.Size(29, 13);
+            this.UserInCache.TabIndex = 2;
+            this.UserInCache.Text = "User";
+            // 
+            // AccessTokenResultInCache
+            // 
+            this.AccessTokenResultInCache.Location = new System.Drawing.Point(215, 20);
+            this.AccessTokenResultInCache.Multiline = true;
+            this.AccessTokenResultInCache.Name = "AccessTokenResultInCache";
+            this.AccessTokenResultInCache.Size = new System.Drawing.Size(424, 188);
+            this.AccessTokenResultInCache.TabIndex = 1;
+            // 
+            // ExpireAccessTokenBtn
+            // 
+            this.ExpireAccessTokenBtn.Location = new System.Drawing.Point(23, 30);
+            this.ExpireAccessTokenBtn.Name = "ExpireAccessTokenBtn";
+            this.ExpireAccessTokenBtn.Size = new System.Drawing.Size(154, 54);
+            this.ExpireAccessTokenBtn.TabIndex = 0;
+            this.ExpireAccessTokenBtn.Text = "Expire Access Token";
+            this.ExpireAccessTokenBtn.UseVisualStyleBackColor = true;
+            this.ExpireAccessTokenBtn.Click += new System.EventHandler(this.ExpireAccessTokenBtn_Click);
+            // 
             // logsTabPage
             // 
             this.logsTabPage.Controls.Add(this.button1);
@@ -604,7 +713,6 @@
             this.label2.Size = new System.Drawing.Size(336, 13);
             this.label2.TabIndex = 2;
             this.label2.Text = "========================= Logs =========================";
-            //this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // label1
             // 
@@ -614,7 +722,6 @@
             this.label1.Size = new System.Drawing.Size(352, 13);
             this.label1.TabIndex = 1;
             this.label1.Text = "========================= PII Logs =========================";
-            //this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // msalLogs
             // 
@@ -628,6 +735,13 @@
             // 
             // confidentialClientTabPage
             // 
+            this.confidentialClientTabPage.Controls.Add(this.ConfClientValidateAuthorityDisabled);
+            this.confidentialClientTabPage.Controls.Add(this.ConfClientValidateAuthorityEnabled);
+            this.confidentialClientTabPage.Controls.Add(this.ConfClientValidateAuthorityLabel);
+            this.confidentialClientTabPage.Controls.Add(this.ConfClientOverrideAuthority);
+            this.confidentialClientTabPage.Controls.Add(this.label13);
+            this.confidentialClientTabPage.Controls.Add(this.ConfClientAuthority);
+            this.confidentialClientTabPage.Controls.Add(this.CcAuthorityLabel);
             this.confidentialClientTabPage.Location = new System.Drawing.Point(8, 27);
             this.confidentialClientTabPage.Name = "confidentialClientTabPage";
             this.confidentialClientTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -686,59 +800,71 @@
             this.confidentialClient.UseVisualStyleBackColor = true;
             this.confidentialClient.Click += new System.EventHandler(this.confidentialClient_Click);
             // 
-            // ExpireAccessTokenBtn
+            // CcAuthorityLabel
             // 
-            this.ExpireAccessTokenBtn.Location = new System.Drawing.Point(23, 30);
-            this.ExpireAccessTokenBtn.Name = "ExpireAccessTokenBtn";
-            this.ExpireAccessTokenBtn.Size = new System.Drawing.Size(154, 54);
-            this.ExpireAccessTokenBtn.TabIndex = 0;
-            this.ExpireAccessTokenBtn.Text = "Expire Access Token";
-            this.ExpireAccessTokenBtn.UseVisualStyleBackColor = true;
-            this.ExpireAccessTokenBtn.Click += new System.EventHandler(this.ExpireAccessTokenBtn_Click);
+            this.CcAuthorityLabel.AutoSize = true;
+            this.CcAuthorityLabel.Location = new System.Drawing.Point(23, 20);
+            this.CcAuthorityLabel.Name = "CcAuthorityLabel";
+            this.CcAuthorityLabel.Size = new System.Drawing.Size(48, 13);
+            this.CcAuthorityLabel.TabIndex = 0;
+            this.CcAuthorityLabel.Text = "Authority";
             // 
-            // AccessTokenResultInCache
+            // ConfClientAuthority
             // 
-            this.AccessTokenResultInCache.Location = new System.Drawing.Point(215, 20);
-            this.AccessTokenResultInCache.Multiline = true;
-            this.AccessTokenResultInCache.Name = "AccessTokenResultInCache";
-            this.AccessTokenResultInCache.Size = new System.Drawing.Size(424, 188);
-            this.AccessTokenResultInCache.TabIndex = 1;
+            this.ConfClientAuthority.AutoSize = true;
+            this.ConfClientAuthority.Location = new System.Drawing.Point(184, 20);
+            this.ConfClientAuthority.Name = "ConfClientAuthority";
+            this.ConfClientAuthority.Size = new System.Drawing.Size(206, 13);
+            this.ConfClientAuthority.TabIndex = 1;
+            this.ConfClientAuthority.Text = "https://login.microsoftonline.com/common";
             // 
-            // UserInCache
+            // label13
             // 
-            this.UserInCache.AutoSize = true;
-            this.UserInCache.Location = new System.Drawing.Point(212, 222);
-            this.UserInCache.Name = "UserInCache";
-            this.UserInCache.Size = new System.Drawing.Size(29, 13);
-            this.UserInCache.TabIndex = 2;
-            this.UserInCache.Text = "User";
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(23, 48);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(147, 13);
+            this.label13.TabIndex = 2;
+            this.label13.Text = "Overridden Authority for 1 Call";
             // 
-            // UserResultInCache
+            // ConfClientOverrideAuthority
             // 
-            this.UserResultInCache.AutoSize = true;
-            this.UserResultInCache.Location = new System.Drawing.Point(276, 222);
-            this.UserResultInCache.Name = "UserResultInCache";
-            this.UserResultInCache.Size = new System.Drawing.Size(88, 13);
-            this.UserResultInCache.TabIndex = 3;
-            this.UserResultInCache.Text = "User Placeholder";
+            this.ConfClientOverrideAuthority.Location = new System.Drawing.Point(187, 41);
+            this.ConfClientOverrideAuthority.Name = "ConfClientOverrideAuthority";
+            this.ConfClientOverrideAuthority.Size = new System.Drawing.Size(308, 20);
+            this.ConfClientOverrideAuthority.TabIndex = 3;
             // 
-            // ExpiresOnInCache
+            // ConfClientValidateAuthorityLabel
             // 
-            this.ExpiresOnInCache.AutoSize = true;
-            this.ExpiresOnInCache.Location = new System.Drawing.Point(212, 248);
-            this.ExpiresOnInCache.Name = "ExpiresOnInCache";
-            this.ExpiresOnInCache.Size = new System.Drawing.Size(58, 13);
-            this.ExpiresOnInCache.TabIndex = 4;
-            this.ExpiresOnInCache.Text = "Expires On";
+            this.ConfClientValidateAuthorityLabel.AutoSize = true;
+            this.ConfClientValidateAuthorityLabel.Location = new System.Drawing.Point(23, 80);
+            this.ConfClientValidateAuthorityLabel.Name = "ConfClientValidateAuthorityLabel";
+            this.ConfClientValidateAuthorityLabel.Size = new System.Drawing.Size(89, 13);
+            this.ConfClientValidateAuthorityLabel.TabIndex = 4;
+            this.ConfClientValidateAuthorityLabel.Text = "Validate Authority";
             // 
-            // ExpiresOnResultInCache
+            // ConfClientValidateAuthorityEnabled
             // 
-            this.ExpiresOnResultInCache.AutoSize = true;
-            this.ExpiresOnResultInCache.Location = new System.Drawing.Point(276, 248);
-            this.ExpiresOnResultInCache.Name = "ExpiresOnResultInCache";
-            this.ExpiresOnResultInCache.Size = new System.Drawing.Size(114, 13);
-            this.ExpiresOnResultInCache.TabIndex = 5;
-            this.ExpiresOnResultInCache.Text = "Expires on placeholder";
+            this.ConfClientValidateAuthorityEnabled.AutoSize = true;
+            this.ConfClientValidateAuthorityEnabled.Checked = true;
+            this.ConfClientValidateAuthorityEnabled.Location = new System.Drawing.Point(176, 73);
+            this.ConfClientValidateAuthorityEnabled.Name = "ConfClientValidateAuthorityEnabled";
+            this.ConfClientValidateAuthorityEnabled.Size = new System.Drawing.Size(77, 26);
+            this.ConfClientValidateAuthorityEnabled.TabIndex = 5;
+            this.ConfClientValidateAuthorityEnabled.TabStop = true;
+            this.ConfClientValidateAuthorityEnabled.Text = "Enabled";
+            this.ConfClientValidateAuthorityEnabled.UseVisualStyleBackColor = true;
+            // 
+            // ConfClientValidateAuthorityDisabled
+            // 
+            this.ConfClientValidateAuthorityDisabled.AutoSize = true;
+            this.ConfClientValidateAuthorityDisabled.Location = new System.Drawing.Point(281, 73);
+            this.ConfClientValidateAuthorityDisabled.Name = "ConfClientValidateAuthorityDisabled";
+            this.ConfClientValidateAuthorityDisabled.Size = new System.Drawing.Size(79, 26);
+            this.ConfClientValidateAuthorityDisabled.TabIndex = 6;
+            this.ConfClientValidateAuthorityDisabled.TabStop = true;
+            this.ConfClientValidateAuthorityDisabled.Text = "Disabled";
+            this.ConfClientValidateAuthorityDisabled.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -767,6 +893,8 @@
             this.cacheTabPage.PerformLayout();
             this.logsTabPage.ResumeLayout(false);
             this.logsTabPage.PerformLayout();
+            this.confidentialClientTabPage.ResumeLayout(false);
+            this.confidentialClientTabPage.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -834,6 +962,17 @@
         private System.Windows.Forms.Label ExpiresOnInCache;
         private System.Windows.Forms.Label UserResultInCache;
         private System.Windows.Forms.Label UserInCache;
+        private System.Windows.Forms.RadioButton PiiLoggingDisabled;
+        private System.Windows.Forms.RadioButton PiiLoggingEnabled;
+        private System.Windows.Forms.Label PiiLoggingLabel;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.RadioButton ConfClientValidateAuthorityDisabled;
+        private System.Windows.Forms.RadioButton ConfClientValidateAuthorityEnabled;
+        private System.Windows.Forms.Label ConfClientValidateAuthorityLabel;
+        private System.Windows.Forms.TextBox ConfClientOverrideAuthority;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label ConfClientAuthority;
+        private System.Windows.Forms.Label CcAuthorityLabel;
     }
 }
 

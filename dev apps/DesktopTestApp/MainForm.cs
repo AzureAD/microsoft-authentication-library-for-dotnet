@@ -38,8 +38,10 @@ namespace DesktopTestApp
         readonly LoggerCallback myCallback = new LoggerCallback();
 
         #region Properties
+
         public User CurrentUser { get; set; }
         private PublicClientApplication _publicClientApplication;
+
         #endregion
 
         public MainForm()
@@ -51,12 +53,14 @@ namespace DesktopTestApp
 
             Logger.Callback = myCallback;
             Logger.Level = Logger.LogLevel.Info;
+            PiiLogging();
             userList.DataSource = new PublicClientApplication(
-                "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
-            { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
+                    "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
+                {UserTokenCache = TokenCacheHelper.GetCache()}.Users.ToList();
         }
 
         #region UI Controls
+
         private void acquire_Click(object sender, EventArgs e)
         {
             tabControl1.SelectedTab = publicClientTabPage;
@@ -76,13 +80,16 @@ namespace DesktopTestApp
         {
             tabControl1.SelectedTab = logsTabPage;
         }
+
         private void confidentialClient_Click(object sender, EventArgs e)
         {
             tabControl1.SelectedTab = confidentialClientTabPage;
         }
+
         #endregion
 
         #region Acquire Token Logic
+
         private async void acquireTokenInteractive_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
@@ -96,7 +103,7 @@ namespace DesktopTestApp
                 if (userList.SelectedIndex != -1)
                 {
                     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
-                        (User)userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
+                        (User) userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
                 }
                 else
                 {
@@ -133,7 +140,8 @@ namespace DesktopTestApp
 
             try
             {
-                IAuthenticationResult result = await _publicClientApplication.AcquireTokenSilentAsync(scopes.Text.Split(' '), CurrentUser);
+                IAuthenticationResult result =
+                    await _publicClientApplication.AcquireTokenSilentAsync(scopes.Text.Split(' '), CurrentUser);
 
                 SetResultPageInfo(result);
             }
@@ -161,6 +169,7 @@ namespace DesktopTestApp
             ClearResultPageInfo();
             AccessTokenResult.Text = @"The Access Token has expired";
         }
+
         #endregion
 
         private UIBehavior GetUIBehavior()
@@ -214,10 +223,11 @@ namespace DesktopTestApp
             msalLogs.Text = myCallback.DrainLogs();
             userList.DataSource = new PublicClientApplication(
                     "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
-            { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
+                {UserTokenCache = TokenCacheHelper.GetCache()}.Users.ToList();
         }
 
         #region App logic
+
         private void SetResultPageInfo(IAuthenticationResult authenticationResult)
         {
             AccessTokenResult.Text = authenticationResult.AccessToken;
@@ -240,6 +250,16 @@ namespace DesktopTestApp
             IdTokenResult.Text = string.Empty;
             ScopeResult.DataSource = null;
         }
+
         #endregion
+
+        private void PiiLogging()
+        {
+            if (PiiLoggingEnabled.Checked)
+            {
+                Logger.PiiLoggingEnabled = true;
+            }
+            Logger.PiiLoggingEnabled = false;
+        }
     }
 }
