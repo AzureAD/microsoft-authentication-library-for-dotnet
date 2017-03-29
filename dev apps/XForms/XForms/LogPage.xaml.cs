@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,29 +25,55 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Runtime.Serialization;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
 
-namespace Microsoft.Identity.Client.Internal.Cache
+namespace XForms
 {
-    [DataContract]
-    internal class RefreshTokenCacheItem : BaseTokenCacheItem
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class LogPage : ContentPage
     {
-        public RefreshTokenCacheItem()
+        private static readonly StringBuilder Sb = new StringBuilder();
+        private static readonly object BufferLock = new object();
+
+        public LogPage()
         {
+            InitializeComponent();
         }
 
-        public RefreshTokenCacheItem(string authority, string clientId, TokenResponse response) : base(authority, clientId, response)
+        protected override void OnAppearing()
         {
-            RefreshToken = response.RefreshToken;
+            ShowLog();
         }
 
-        [DataMember (Name = "refresh_token")]
-        public string RefreshToken { get; set; }
-
-        public override TokenCacheKey GetTokenCacheKey()
+        private void ShowLog()
         {
-            return new TokenCacheKey(null, null, ClientId, User.HomeObjectId);
+            lock (BufferLock)
+            {
+                log.Text = Sb.ToString();
+            }
+        }
+
+        private void OnClearClicked(object sender, EventArgs e)
+        {
+            lock (BufferLock)
+            {
+                Sb.Clear();
+            }
+            ShowLog();
+        }
+
+        public static void AddToLog(string str)
+        {
+            lock (BufferLock)
+            {
+                Sb.AppendLine(str);
+            }
         }
     }
 }

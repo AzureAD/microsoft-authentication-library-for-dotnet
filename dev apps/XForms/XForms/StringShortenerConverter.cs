@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,29 +25,31 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Runtime.Serialization;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
+using Xamarin.Forms;
 
-namespace Microsoft.Identity.Client.Internal.Cache
+namespace XForms
 {
-    [DataContract]
-    internal class RefreshTokenCacheItem : BaseTokenCacheItem
+    internal class StringShortenerConverter : IValueConverter
     {
-        public RefreshTokenCacheItem()
+        private const int Length = 30;
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            var str = (string)value;
+            if (str.Length > Length)
+            {
+                str = str.Substring(0, Length) + "...";
+            }
+
+            return str;
         }
 
-        public RefreshTokenCacheItem(string authority, string clientId, TokenResponse response) : base(authority, clientId, response)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            RefreshToken = response.RefreshToken;
-        }
-
-        [DataMember (Name = "refresh_token")]
-        public string RefreshToken { get; set; }
-
-        public override TokenCacheKey GetTokenCacheKey()
-        {
-            return new TokenCacheKey(null, null, ClientId, User.HomeObjectId);
+            throw new NotImplementedException();
         }
     }
 }

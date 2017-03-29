@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,29 +25,33 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Runtime.Serialization;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using Microsoft.Identity.Client;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using XForms;
+using XForms.iOS;
+using Xamarin.Forms;
+using Xamarin.Forms.Platform.iOS;
 
-namespace Microsoft.Identity.Client.Internal.Cache
+[assembly: ExportRenderer(typeof(AcquirePage), typeof(AcquirePageRenderer))]
+
+namespace XForms.iOS
 {
-    [DataContract]
-    internal class RefreshTokenCacheItem : BaseTokenCacheItem
+    internal class AcquirePageRenderer : PageRenderer
     {
-        public RefreshTokenCacheItem()
+        AcquirePage page;
+
+        protected override void OnElementChanged(VisualElementChangedEventArgs e)
         {
+            base.OnElementChanged(e);
+            page = e.NewElement as AcquirePage;
         }
 
-        public RefreshTokenCacheItem(string authority, string clientId, TokenResponse response) : base(authority, clientId, response)
+        public override void ViewDidLoad()
         {
-            RefreshToken = response.RefreshToken;
-        }
-
-        [DataMember (Name = "refresh_token")]
-        public string RefreshToken { get; set; }
-
-        public override TokenCacheKey GetTokenCacheKey()
-        {
-            return new TokenCacheKey(null, null, ClientId, User.HomeObjectId);
+            base.ViewDidLoad();
+            page.platformParameters = new PlatformParameters(this);
         }
     }
 }
