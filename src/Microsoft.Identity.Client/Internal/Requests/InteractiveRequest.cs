@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _codeVerifier = PlatformPlugin.CryptographyHelper.GenerateCodeVerifier();
                 string codeVerifierHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(_codeVerifier);
 
-                requestParameters[OAuth2Parameter.CodeChallenge] = MsalHelpers.EncodeToBase64Url(codeVerifierHash);
+                requestParameters[OAuth2Parameter.CodeChallenge] = MsalHelpers.EncodeToBase64Url(Convert.FromBase64String(codeVerifierHash));
                 requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
             }
 
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.LoginHint;
             }
 
-            if (RequestContext != null && !string.IsNullOrEmpty(RequestContext.CorrelationId))
+            if (!string.IsNullOrEmpty(RequestContext?.CorrelationId))
             {
                 authorizationRequestParameters[OAuth2Parameter.CorrelationId] = RequestContext.CorrelationId;
             }

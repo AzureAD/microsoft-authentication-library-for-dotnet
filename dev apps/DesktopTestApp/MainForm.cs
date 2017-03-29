@@ -36,10 +36,12 @@ namespace DesktopTestApp
 {
     public partial class MainForm : Form
     {
-        LoggerCallback myCallback = new LoggerCallback();
+        readonly LoggerCallback myCallback = new LoggerCallback();
 
         public MainForm()
         {
+            //ClearResultPageInfo();
+
             InitializeComponent();
             tabControl1.Appearance = TabAppearance.FlatButtons;
             tabControl1.ItemSize = new Size(0, 1);
@@ -48,7 +50,8 @@ namespace DesktopTestApp
             Logger.Callback = myCallback;
             Logger.Level = Logger.LogLevel.Info;
             userList.DataSource = new PublicClientApplication(
-                "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc") {UserTokenCache = TokenCacheHelper.GetCache()}.Users.ToList();
+                "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
+            { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
         }
 
         private void acquire_Click(object sender, EventArgs e)
@@ -85,16 +88,18 @@ namespace DesktopTestApp
 
         private async void acquireTokenInteractive_Click(object sender, EventArgs e)
         {
+            ClearResultPageInfo();
+
             PublicClientApplication clientApplication = CreateClientApplication();
             string output = string.Empty;
             callResult.Text = output;
-            IAuthenticationResult result;
             try
             {
+                IAuthenticationResult result;
                 if (userList.SelectedIndex != -1)
                 {
                     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
-                        (User) userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
+                        (User)userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
                 }
                 else
                 {
@@ -102,13 +107,15 @@ namespace DesktopTestApp
                         GetUIBehavior(), extraQueryParams.Text);
                 }
 
-                output = JsonHelper.SerializeToJson(result);
+                SetResultPageInfo(result);
             }
             catch (Exception exc)
             {
-                if (exc is MsalServiceException)
+                MsalServiceException exception = exc as MsalServiceException;
+
+                if (exception != null)
                 {
-                    output += ((MsalServiceException) exc).ErrorCode;
+                   output = exception.ErrorCode;
                 }
 
                 output = exc.Message + Environment.NewLine + exc.StackTrace;
@@ -118,7 +125,6 @@ namespace DesktopTestApp
                 callResult.Text = output;
                 RefreshUI();
             }
-
         }
 
         private UIBehavior GetUIBehavior()
@@ -170,9 +176,9 @@ namespace DesktopTestApp
             PublicClientApplication clientApplication = CreateClientApplication();
             string output = string.Empty;
             callResult.Text = output;
-            IAuthenticationResult result;
             try
             {
+                IAuthenticationResult result;
                 if (userList.SelectedIndex != -1)
                 {
                     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
@@ -209,7 +215,29 @@ namespace DesktopTestApp
             msalLogs.Text = myCallback.DrainLogs();
             userList.DataSource = new PublicClientApplication(
                     "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
-                { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
+            { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
         }
+
+        #region App logic
+        private void SetResultPageInfo(IAuthenticationResult authenticationResult)
+        {
+            AccessTokenResult.Text = authenticationResult.AccessToken;
+            ExpiresOnResult.Text = authenticationResult.ExpiresOn.ToString();
+            TenantIdResult.Text = authenticationResult.TenantId;
+            UserResult.Text = authenticationResult.User.DisplayableId;
+            IdTokenResult.Text = authenticationResult.IdToken;
+            ScopeResult.DataSource = authenticationResult.Scope;
+        }
+
+        private void ClearResultPageInfo()
+        {
+            AccessTokenResult.Text = string.Empty;
+            ExpiresOnResult.Text = string.Empty;
+            TenantIdResult.Text = string.Empty;
+            UserResult.Text = string.Empty;
+            IdTokenResult.Text = string.Empty;
+            ScopeResult.DataSource = null;
+        }
+        #endregion
     }
 }
