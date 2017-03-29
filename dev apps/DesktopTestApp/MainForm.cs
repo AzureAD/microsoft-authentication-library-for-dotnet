@@ -30,13 +30,17 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
 
 namespace DesktopTestApp
 {
     public partial class MainForm : Form
     {
         readonly LoggerCallback myCallback = new LoggerCallback();
+
+        #region Properties
+        public User CurrentUser { get; set; }
+        private PublicClientApplication _publicClientApplication;
+        #endregion
 
         public MainForm()
         {
@@ -52,6 +56,7 @@ namespace DesktopTestApp
             { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
         }
 
+        #region UI Controls
         private void acquire_Click(object sender, EventArgs e)
         {
             tabControl1.SelectedTab = publicClientTabPage;
@@ -83,9 +88,11 @@ namespace DesktopTestApp
         private void label2_Click(object sender, EventArgs e)
         {
         }
+        #endregion
 
         #region Acquire Token Logic
-        private async void acquireTokenInteractive_Click(object sender, EventArgs e)
+
+       private async void acquireTokenInteractive_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
 
@@ -105,7 +112,7 @@ namespace DesktopTestApp
                     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
                         GetUIBehavior(), extraQueryParams.Text);
                 }
-
+                CurrentUser = result.User;
                 SetResultPageInfo(result);
             }
             catch (Exception exc)
@@ -125,26 +132,17 @@ namespace DesktopTestApp
                 RefreshUI();
             }
         }
-        /*
+
         private async void acquireTokenSilent_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
 
-            PublicClientApplication clientApplication = CreateClientApplication();
             string output = string.Empty;
             callResult.Text = output;
+
             try
             {
-                IAuthenticationResult result;
-                if (userList.SelectedIndex != -1)
-                {
-                    result = await clientApplication.AcquireTokenSilentAsync(scopes.Text.Split(' '), );
-                }
-                else
-                {
-                    result = await clientApplication.AcquireTokenSilentAsync(scopes.Text.Split(' '), (User)userList.SelectedItem,
-                        clientApplication.Authority, true);
-                }
+                IAuthenticationResult result = await _publicClientApplication.AcquireTokenSilentAsync(scopes.Text.Split(' '), CurrentUser);
 
                 SetResultPageInfo(result);
             }
@@ -163,7 +161,7 @@ namespace DesktopTestApp
                 callResult.Text = output;
                 RefreshUI();
             }
-        }*/
+        }
         #endregion
 
         private UIBehavior GetUIBehavior()
@@ -190,19 +188,20 @@ namespace DesktopTestApp
 
         private PublicClientApplication CreateClientApplication()
         {
-            PublicClientApplication clientApplication = null;
+            if (_publicClientApplication != null) return _publicClientApplication;
+
             if (!string.IsNullOrEmpty(overriddenAuthority.Text))
             {
-                clientApplication = new PublicClientApplication(
+                _publicClientApplication = new PublicClientApplication(
                     "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
             }
             else
             {
-                clientApplication = new PublicClientApplication(
+                _publicClientApplication = new PublicClientApplication(
                     "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc", authority.Text);
             }
 
-            return clientApplication;
+            return _publicClientApplication;
         }
 
         private void applySettings_Click(object sender, EventArgs e)

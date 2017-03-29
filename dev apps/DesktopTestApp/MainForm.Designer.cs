@@ -288,7 +288,7 @@
             this.acquireTokenSilent.TabIndex = 10;
             this.acquireTokenSilent.Text = "Acquire Token Silent";
             this.acquireTokenSilent.UseVisualStyleBackColor = true;
-            //this.acquireTokenSilent.Click += new System.EventHandler(this.acquireTokenSilent_Click);
+            this.acquireTokenSilent.Click += new System.EventHandler(this.acquireTokenSilent_Click);
             // 
             // acquireTokenInteractive
             // 
