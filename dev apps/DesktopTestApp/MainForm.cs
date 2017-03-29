@@ -80,19 +80,10 @@ namespace DesktopTestApp
         {
             tabControl1.SelectedTab = confidentialClientTabPage;
         }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-        }
         #endregion
 
         #region Acquire Token Logic
-
-       private async void acquireTokenInteractive_Click(object sender, EventArgs e)
+        private async void acquireTokenInteractive_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
 
@@ -162,6 +153,14 @@ namespace DesktopTestApp
                 RefreshUI();
             }
         }
+
+        private void ExpireAccessTokenBtn_Click(object sender, EventArgs e)
+        {
+            _publicClientApplication.Remove(CurrentUser);
+            AccessTokenResultInCache.Text = @"The Access Token for " + CurrentUser.DisplayableId + @" has been removed";
+            ClearResultPageInfo();
+            AccessTokenResult.Text = @"The Access Token has expired";
+        }
         #endregion
 
         private UIBehavior GetUIBehavior()
@@ -222,9 +221,12 @@ namespace DesktopTestApp
         private void SetResultPageInfo(IAuthenticationResult authenticationResult)
         {
             AccessTokenResult.Text = authenticationResult.AccessToken;
+            AccessTokenResultInCache.Text = authenticationResult.AccessToken;
             ExpiresOnResult.Text = authenticationResult.ExpiresOn.ToString();
+            ExpiresOnResultInCache.Text = authenticationResult.ExpiresOn.ToString();
             TenantIdResult.Text = authenticationResult.TenantId;
             UserResult.Text = authenticationResult.User.DisplayableId;
+            UserResultInCache.Text = authenticationResult.User.DisplayableId;
             IdTokenResult.Text = authenticationResult.IdToken;
             ScopeResult.DataSource = authenticationResult.Scope;
         }

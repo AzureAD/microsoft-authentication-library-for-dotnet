@@ -33,6 +33,18 @@
             this.environmentQP = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.publicClientTabPage = new System.Windows.Forms.TabPage();
+            this.ScopeResult = new System.Windows.Forms.ListBox();
+            this.Scope = new System.Windows.Forms.Label();
+            this.IdTokenResult = new System.Windows.Forms.Label();
+            this.IdToken = new System.Windows.Forms.Label();
+            this.UserResult = new System.Windows.Forms.Label();
+            this.User = new System.Windows.Forms.Label();
+            this.TenantIdResult = new System.Windows.Forms.Label();
+            this.TenantId = new System.Windows.Forms.Label();
+            this.ExpiresOnResult = new System.Windows.Forms.Label();
+            this.ExpiresOn = new System.Windows.Forms.Label();
+            this.AccessTokenResult = new System.Windows.Forms.Label();
+            this.AccessToken = new System.Windows.Forms.Label();
             this.scopes = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -72,23 +84,18 @@
             this.cache = new System.Windows.Forms.Button();
             this.logs = new System.Windows.Forms.Button();
             this.confidentialClient = new System.Windows.Forms.Button();
-            this.AccessToken = new System.Windows.Forms.Label();
-            this.AccessTokenResult = new System.Windows.Forms.Label();
-            this.ExpiresOn = new System.Windows.Forms.Label();
-            this.ExpiresOnResult = new System.Windows.Forms.Label();
-            this.TenantId = new System.Windows.Forms.Label();
-            this.TenantIdResult = new System.Windows.Forms.Label();
-            this.User = new System.Windows.Forms.Label();
-            this.UserResult = new System.Windows.Forms.Label();
-            this.IdToken = new System.Windows.Forms.Label();
-            this.IdTokenResult = new System.Windows.Forms.Label();
-            this.Scope = new System.Windows.Forms.Label();
-            this.ScopeResult = new System.Windows.Forms.ListBox();
+            this.ExpireAccessTokenBtn = new System.Windows.Forms.Button();
+            this.AccessTokenResultInCache = new System.Windows.Forms.TextBox();
+            this.UserInCache = new System.Windows.Forms.Label();
+            this.UserResultInCache = new System.Windows.Forms.Label();
+            this.ExpiresOnInCache = new System.Windows.Forms.Label();
+            this.ExpiresOnResultInCache = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.publicClientTabPage.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.settingsTabPage.SuspendLayout();
+            this.cacheTabPage.SuspendLayout();
             this.logsTabPage.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -124,7 +131,7 @@
             this.tabControl1.Controls.Add(this.cacheTabPage);
             this.tabControl1.Controls.Add(this.logsTabPage);
             this.tabControl1.Controls.Add(this.confidentialClientTabPage);
-            this.tabControl1.Location = new System.Drawing.Point(1, 1);
+            this.tabControl1.Location = new System.Drawing.Point(1, -3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(676, 814);
@@ -168,6 +175,113 @@
             this.publicClientTabPage.Size = new System.Drawing.Size(660, 779);
             this.publicClientTabPage.TabIndex = 0;
             this.publicClientTabPage.Text = "publicClientTabPage";
+            // 
+            // ScopeResult
+            // 
+            this.ScopeResult.FormattingEnabled = true;
+            this.ScopeResult.Location = new System.Drawing.Point(134, 534);
+            this.ScopeResult.Name = "ScopeResult";
+            this.ScopeResult.Size = new System.Drawing.Size(150, 69);
+            this.ScopeResult.TabIndex = 28;
+            // 
+            // Scope
+            // 
+            this.Scope.AutoSize = true;
+            this.Scope.Location = new System.Drawing.Point(34, 532);
+            this.Scope.Name = "Scope";
+            this.Scope.Size = new System.Drawing.Size(38, 13);
+            this.Scope.TabIndex = 27;
+            this.Scope.Text = "Scope";
+            // 
+            // IdTokenResult
+            // 
+            this.IdTokenResult.AutoSize = true;
+            this.IdTokenResult.Location = new System.Drawing.Point(132, 504);
+            this.IdTokenResult.Name = "IdTokenResult";
+            this.IdTokenResult.Size = new System.Drawing.Size(109, 13);
+            this.IdTokenResult.TabIndex = 26;
+            this.IdTokenResult.Text = "Id Token Placeholder";
+            // 
+            // IdToken
+            // 
+            this.IdToken.AutoSize = true;
+            this.IdToken.Location = new System.Drawing.Point(34, 504);
+            this.IdToken.Name = "IdToken";
+            this.IdToken.Size = new System.Drawing.Size(50, 13);
+            this.IdToken.TabIndex = 25;
+            this.IdToken.Text = "Id Token";
+            // 
+            // UserResult
+            // 
+            this.UserResult.AutoSize = true;
+            this.UserResult.Location = new System.Drawing.Point(132, 472);
+            this.UserResult.Name = "UserResult";
+            this.UserResult.Size = new System.Drawing.Size(88, 13);
+            this.UserResult.TabIndex = 24;
+            this.UserResult.Text = "User Placeholder";
+            // 
+            // User
+            // 
+            this.User.AutoSize = true;
+            this.User.Location = new System.Drawing.Point(34, 472);
+            this.User.Name = "User";
+            this.User.Size = new System.Drawing.Size(29, 13);
+            this.User.TabIndex = 23;
+            this.User.Text = "User";
+            // 
+            // TenantIdResult
+            // 
+            this.TenantIdResult.AutoSize = true;
+            this.TenantIdResult.Location = new System.Drawing.Point(132, 438);
+            this.TenantIdResult.Name = "TenantIdResult";
+            this.TenantIdResult.Size = new System.Drawing.Size(112, 13);
+            this.TenantIdResult.TabIndex = 22;
+            this.TenantIdResult.Text = "Tenant Id Placeholder";
+            // 
+            // TenantId
+            // 
+            this.TenantId.AutoSize = true;
+            this.TenantId.Location = new System.Drawing.Point(32, 438);
+            this.TenantId.Name = "TenantId";
+            this.TenantId.Size = new System.Drawing.Size(53, 13);
+            this.TenantId.TabIndex = 21;
+            this.TenantId.Text = "Tenant Id";
+            // 
+            // ExpiresOnResult
+            // 
+            this.ExpiresOnResult.AutoSize = true;
+            this.ExpiresOnResult.Location = new System.Drawing.Point(132, 406);
+            this.ExpiresOnResult.Name = "ExpiresOnResult";
+            this.ExpiresOnResult.Size = new System.Drawing.Size(117, 13);
+            this.ExpiresOnResult.TabIndex = 20;
+            this.ExpiresOnResult.Text = "Expires On Placeholder";
+            // 
+            // ExpiresOn
+            // 
+            this.ExpiresOn.AutoSize = true;
+            this.ExpiresOn.Location = new System.Drawing.Point(34, 406);
+            this.ExpiresOn.Name = "ExpiresOn";
+            this.ExpiresOn.Size = new System.Drawing.Size(58, 13);
+            this.ExpiresOn.TabIndex = 19;
+            this.ExpiresOn.Text = "Expires On";
+            // 
+            // AccessTokenResult
+            // 
+            this.AccessTokenResult.AutoSize = true;
+            this.AccessTokenResult.Location = new System.Drawing.Point(132, 368);
+            this.AccessTokenResult.Name = "AccessTokenResult";
+            this.AccessTokenResult.Size = new System.Drawing.Size(135, 13);
+            this.AccessTokenResult.TabIndex = 18;
+            this.AccessTokenResult.Text = "Access Token Placeholder";
+            // 
+            // AccessToken
+            // 
+            this.AccessToken.AutoSize = true;
+            this.AccessToken.Location = new System.Drawing.Point(32, 372);
+            this.AccessToken.Name = "AccessToken";
+            this.AccessToken.Size = new System.Drawing.Size(76, 13);
+            this.AccessToken.TabIndex = 17;
+            this.AccessToken.Text = "Access Token";
             // 
             // scopes
             // 
@@ -269,6 +383,7 @@
             this.userList.Name = "userList";
             this.userList.Size = new System.Drawing.Size(352, 21);
             this.userList.TabIndex = 12;
+            //this.userList.SelectedIndexChanged += new System.EventHandler(this.userList_SelectedIndexChanged);
             // 
             // label7
             // 
@@ -359,7 +474,7 @@
             this.label5.TabIndex = 4;
             this.label5.Text = "Validate Authority";
             // 
-            // overridenAuthority
+            // overriddenAuthority
             // 
             this.overriddenAuthority.Location = new System.Drawing.Point(256, 59);
             this.overriddenAuthority.Name = "overriddenAuthority";
@@ -433,6 +548,12 @@
             // 
             // cacheTabPage
             // 
+            this.cacheTabPage.Controls.Add(this.ExpiresOnResultInCache);
+            this.cacheTabPage.Controls.Add(this.ExpiresOnInCache);
+            this.cacheTabPage.Controls.Add(this.UserResultInCache);
+            this.cacheTabPage.Controls.Add(this.UserInCache);
+            this.cacheTabPage.Controls.Add(this.AccessTokenResultInCache);
+            this.cacheTabPage.Controls.Add(this.ExpireAccessTokenBtn);
             this.cacheTabPage.Location = new System.Drawing.Point(8, 27);
             this.cacheTabPage.Name = "cacheTabPage";
             this.cacheTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -483,7 +604,7 @@
             this.label2.Size = new System.Drawing.Size(336, 13);
             this.label2.TabIndex = 2;
             this.label2.Text = "========================= Logs =========================";
-            this.label2.Click += new System.EventHandler(this.label2_Click);
+            //this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // label1
             // 
@@ -493,7 +614,7 @@
             this.label1.Size = new System.Drawing.Size(352, 13);
             this.label1.TabIndex = 1;
             this.label1.Text = "========================= PII Logs =========================";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
+            //this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // msalLogs
             // 
@@ -565,112 +686,59 @@
             this.confidentialClient.UseVisualStyleBackColor = true;
             this.confidentialClient.Click += new System.EventHandler(this.confidentialClient_Click);
             // 
-            // AccessToken
+            // ExpireAccessTokenBtn
             // 
-            this.AccessToken.AutoSize = true;
-            this.AccessToken.Location = new System.Drawing.Point(32, 372);
-            this.AccessToken.Name = "AccessToken";
-            this.AccessToken.Size = new System.Drawing.Size(76, 13);
-            this.AccessToken.TabIndex = 17;
-            this.AccessToken.Text = "Access Token";
+            this.ExpireAccessTokenBtn.Location = new System.Drawing.Point(23, 30);
+            this.ExpireAccessTokenBtn.Name = "ExpireAccessTokenBtn";
+            this.ExpireAccessTokenBtn.Size = new System.Drawing.Size(154, 54);
+            this.ExpireAccessTokenBtn.TabIndex = 0;
+            this.ExpireAccessTokenBtn.Text = "Expire Access Token";
+            this.ExpireAccessTokenBtn.UseVisualStyleBackColor = true;
+            this.ExpireAccessTokenBtn.Click += new System.EventHandler(this.ExpireAccessTokenBtn_Click);
             // 
-            // AccessTokenResult
+            // AccessTokenResultInCache
             // 
-            this.AccessTokenResult.AutoSize = true;
-            this.AccessTokenResult.Location = new System.Drawing.Point(132, 368);
-            this.AccessTokenResult.Name = "AccessTokenResult";
-            this.AccessTokenResult.Size = new System.Drawing.Size(135, 13);
-            this.AccessTokenResult.TabIndex = 18;
-            this.AccessTokenResult.Text = "Access Token Placeholder";
+            this.AccessTokenResultInCache.Location = new System.Drawing.Point(215, 20);
+            this.AccessTokenResultInCache.Multiline = true;
+            this.AccessTokenResultInCache.Name = "AccessTokenResultInCache";
+            this.AccessTokenResultInCache.Size = new System.Drawing.Size(424, 188);
+            this.AccessTokenResultInCache.TabIndex = 1;
             // 
-            // ExpiresOn
+            // UserInCache
             // 
-            this.ExpiresOn.AutoSize = true;
-            this.ExpiresOn.Location = new System.Drawing.Point(34, 406);
-            this.ExpiresOn.Name = "ExpiresOn";
-            this.ExpiresOn.Size = new System.Drawing.Size(58, 13);
-            this.ExpiresOn.TabIndex = 19;
-            this.ExpiresOn.Text = "Expires On";
+            this.UserInCache.AutoSize = true;
+            this.UserInCache.Location = new System.Drawing.Point(212, 222);
+            this.UserInCache.Name = "UserInCache";
+            this.UserInCache.Size = new System.Drawing.Size(29, 13);
+            this.UserInCache.TabIndex = 2;
+            this.UserInCache.Text = "User";
             // 
-            // ExpiresOnResult
+            // UserResultInCache
             // 
-            this.ExpiresOnResult.AutoSize = true;
-            this.ExpiresOnResult.Location = new System.Drawing.Point(132, 406);
-            this.ExpiresOnResult.Name = "ExpiresOnResult";
-            this.ExpiresOnResult.Size = new System.Drawing.Size(117, 13);
-            this.ExpiresOnResult.TabIndex = 20;
-            this.ExpiresOnResult.Text = "Expires On Placeholder";
+            this.UserResultInCache.AutoSize = true;
+            this.UserResultInCache.Location = new System.Drawing.Point(276, 222);
+            this.UserResultInCache.Name = "UserResultInCache";
+            this.UserResultInCache.Size = new System.Drawing.Size(88, 13);
+            this.UserResultInCache.TabIndex = 3;
+            this.UserResultInCache.Text = "User Placeholder";
             // 
-            // TenantId
+            // ExpiresOnInCache
             // 
-            this.TenantId.AutoSize = true;
-            this.TenantId.Location = new System.Drawing.Point(32, 438);
-            this.TenantId.Name = "TenantId";
-            this.TenantId.Size = new System.Drawing.Size(53, 13);
-            this.TenantId.TabIndex = 21;
-            this.TenantId.Text = "Tenant Id";
+            this.ExpiresOnInCache.AutoSize = true;
+            this.ExpiresOnInCache.Location = new System.Drawing.Point(212, 248);
+            this.ExpiresOnInCache.Name = "ExpiresOnInCache";
+            this.ExpiresOnInCache.Size = new System.Drawing.Size(58, 13);
+            this.ExpiresOnInCache.TabIndex = 4;
+            this.ExpiresOnInCache.Text = "Expires On";
             // 
-            // TenantIdResult
+            // ExpiresOnResultInCache
             // 
-            this.TenantIdResult.AutoSize = true;
-            this.TenantIdResult.Location = new System.Drawing.Point(132, 438);
-            this.TenantIdResult.Name = "TenantIdResult";
-            this.TenantIdResult.Size = new System.Drawing.Size(112, 13);
-            this.TenantIdResult.TabIndex = 22;
-            this.TenantIdResult.Text = "Tenant Id Placeholder";
-            // 
-            // User
-            // 
-            this.User.AutoSize = true;
-            this.User.Location = new System.Drawing.Point(34, 472);
-            this.User.Name = "User";
-            this.User.Size = new System.Drawing.Size(29, 13);
-            this.User.TabIndex = 23;
-            this.User.Text = "User";
-            // 
-            // UserResult
-            // 
-            this.UserResult.AutoSize = true;
-            this.UserResult.Location = new System.Drawing.Point(132, 472);
-            this.UserResult.Name = "UserResult";
-            this.UserResult.Size = new System.Drawing.Size(88, 13);
-            this.UserResult.TabIndex = 24;
-            this.UserResult.Text = "User Placeholder";
-            // 
-            // IdToken
-            // 
-            this.IdToken.AutoSize = true;
-            this.IdToken.Location = new System.Drawing.Point(34, 504);
-            this.IdToken.Name = "IdToken";
-            this.IdToken.Size = new System.Drawing.Size(50, 13);
-            this.IdToken.TabIndex = 25;
-            this.IdToken.Text = "Id Token";
-            // 
-            // IdTokenResult
-            // 
-            this.IdTokenResult.AutoSize = true;
-            this.IdTokenResult.Location = new System.Drawing.Point(132, 504);
-            this.IdTokenResult.Name = "IdTokenResult";
-            this.IdTokenResult.Size = new System.Drawing.Size(109, 13);
-            this.IdTokenResult.TabIndex = 26;
-            this.IdTokenResult.Text = "Id Token Placeholder";
-            // 
-            // Scope
-            // 
-            this.Scope.AutoSize = true;
-            this.Scope.Location = new System.Drawing.Point(34, 532);
-            this.Scope.Name = "Scope";
-            this.Scope.Size = new System.Drawing.Size(38, 13);
-            this.Scope.TabIndex = 27;
-            this.Scope.Text = "Scope";
-            // 
-            // ScopeResult
-            // 
-            this.ScopeResult.FormattingEnabled = true;
-            this.ScopeResult.Location = new System.Drawing.Point(134, 534);
-            this.ScopeResult.Name = "ScopeResult";
-            this.ScopeResult.Size = new System.Drawing.Size(150, 69);
-            this.ScopeResult.TabIndex = 28;
+            this.ExpiresOnResultInCache.AutoSize = true;
+            this.ExpiresOnResultInCache.Location = new System.Drawing.Point(276, 248);
+            this.ExpiresOnResultInCache.Name = "ExpiresOnResultInCache";
+            this.ExpiresOnResultInCache.Size = new System.Drawing.Size(114, 13);
+            this.ExpiresOnResultInCache.TabIndex = 5;
+            this.ExpiresOnResultInCache.Text = "Expires on placeholder";
             // 
             // MainForm
             // 
@@ -695,6 +763,8 @@
             this.groupBox1.PerformLayout();
             this.settingsTabPage.ResumeLayout(false);
             this.settingsTabPage.PerformLayout();
+            this.cacheTabPage.ResumeLayout(false);
+            this.cacheTabPage.PerformLayout();
             this.logsTabPage.ResumeLayout(false);
             this.logsTabPage.PerformLayout();
             this.ResumeLayout(false);
@@ -758,6 +828,12 @@
         private System.Windows.Forms.Label ExpiresOnResult;
         private System.Windows.Forms.Label ExpiresOn;
         private System.Windows.Forms.ListBox ScopeResult;
+        private System.Windows.Forms.Button ExpireAccessTokenBtn;
+        private System.Windows.Forms.TextBox AccessTokenResultInCache;
+        private System.Windows.Forms.Label ExpiresOnResultInCache;
+        private System.Windows.Forms.Label ExpiresOnInCache;
+        private System.Windows.Forms.Label UserResultInCache;
+        private System.Windows.Forms.Label UserInCache;
     }
 }
 
