@@ -1,63 +1,63 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-      <TargetFramework>netstandard1.1</TargetFramework>
-          <PackageTargetFallback>portable-net45+win8+wpa81+wp8</PackageTargetFallback>
-	      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	          <RunCodeAnalysis>false</RunCodeAnalysis>
-		      <CodeAnalysisRuleSet>..\..\..\build\Sdl7.0.ruleset</CodeAnalysisRuleSet>
-		          <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
-			      <!-- Workaround until Xamarin supports PPDB -->
-			          <DebugType>full</DebugType>
-				      <SignAssembly>True</SignAssembly>
-				          <AssemblyOriginatorKeyFile>MSAL.snk</AssemblyOriginatorKeyFile>
-					      <DelaySign>False</DelaySign>
-					        </PropertyGroup>
-						  <ItemGroup>
-						      <None Remove="AcquirePage.xaml" />
-						          <None Remove="CachePage.xaml" />
-							      <None Remove="LogPage.xaml" />
-							          <None Remove="MainPage.xaml" />
-								      <None Remove="SettingsPage.xaml" />
-								        </ItemGroup>
-									  <ItemGroup>
-									      <EmbeddedResource Include="AcquirePage.xaml">
-									            <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-										        </EmbeddedResource>
-											    <EmbeddedResource Include="CachePage.xaml">
-											          <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-												      </EmbeddedResource>
-												          <EmbeddedResource Include="LogPage.xaml">
-													        <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-														    </EmbeddedResource>
-														        <EmbeddedResource Include="MainPage.xaml">
-															      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-															          </EmbeddedResource>
-																      <EmbeddedResource Include="SettingsPage.xaml">
-																            <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-																	        </EmbeddedResource>
-																		  </ItemGroup>
-																		    <ItemGroup>
-																		        <PackageReference Include="StrongNamer" Version="0.0.3" />
-																			    <PackageReference Include="Xamarin.Forms" Version="2.3.3.193" />
-																			      </ItemGroup>
-																			        <ItemGroup>
-																				    <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-																				      </ItemGroup>
-																				        <ItemGroup>
-																					    <Compile Update="AcquirePage.xaml.cs">
-																					          <SubType>Code</SubType>
-																						      </Compile>
-																						          <Compile Update="CachePage.xaml.cs">
-																							        <SubType>Code</SubType>
-																								    </Compile>
-																								        <Compile Update="LogPage.xaml.cs">
-																									      <SubType>Code</SubType>
-																									          </Compile>
-																										      <Compile Update="MainPage.xaml.cs">
-																										            <SubType>Code</SubType>
-																											        </Compile>
-																												    <Compile Update="SettingsPage.xaml.cs">
-																												          <SubType>Code</SubType>
-																													      </Compile>
-																													        </ItemGroup>
-																														</Project>
+    <TargetFramework>netstandard1.1</TargetFramework>
+    <PackageTargetFallback>portable-net45+win8+wpa81+wp8</PackageTargetFallback>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>..\..\..\build\Sdl7.0.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <!-- Workaround until Xamarin supports PPDB -->
+    <DebugType>full</DebugType>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>MSAL.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>False</DelaySign>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="AcquirePage.xaml" />
+    <None Remove="CachePage.xaml" />
+    <None Remove="LogPage.xaml" />
+    <None Remove="MainPage.xaml" />
+    <None Remove="SettingsPage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="AcquirePage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CachePage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LogPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="StrongNamer" Version="0.0.3" />
+    <PackageReference Include="Xamarin.Forms" Version="2.3.3.193" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="AcquirePage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="CachePage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="LogPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="MainPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="SettingsPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>

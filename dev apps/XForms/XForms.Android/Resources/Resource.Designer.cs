@@ -1276,7 +1276,6 @@ namespace XForms.Droid
 			global::Microsoft.Identity.Client.Resource.Styleable.ViewStubCompat_android_id = global::XForms.Droid.Resource.Styleable.ViewStubCompat_android_id;
 			global::Microsoft.Identity.Client.Resource.Styleable.ViewStubCompat_android_inflatedId = global::XForms.Droid.Resource.Styleable.ViewStubCompat_android_inflatedId;
 			global::Microsoft.Identity.Client.Resource.Styleable.ViewStubCompat_android_layout = global::XForms.Droid.Resource.Styleable.ViewStubCompat_android_layout;
-			global::Xamarin.Forms.Platform.Android.Resource.Attribute.actionBarSize = global::XForms.Droid.Resource.Attribute.actionBarSize;
 		}
 		
 		public partial class Animation

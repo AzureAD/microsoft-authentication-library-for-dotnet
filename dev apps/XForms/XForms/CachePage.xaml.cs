@@ -46,18 +46,6 @@ namespace XForms
             InitializeComponent();
         }
 
-        private static string ToString(IEnumerable<string> collection)
-        {
-            var sb = new StringBuilder();
-
-            foreach (var str in collection)
-            {
-                sb.AppendLine(str);
-                sb.AppendLine("");
-            }
-            return sb.ToString();
-        }
-
         private void RefreshCacheView()
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;

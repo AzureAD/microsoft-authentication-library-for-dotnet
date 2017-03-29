@@ -32,6 +32,7 @@
                     <ViewCell>
                         <ViewCell.ContextActions>
                             <MenuItem Clicked="OnExpire" Text="Expire" CommandParameter="{Binding .}" />
+                            <MenuItem Clicked="OnDelete" Text="Delete" CommandParameter="{Binding .}" />
                         </ViewCell.ContextActions>
                         <ViewCell.View>
                             <ContentView Padding="5">
