@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="XForms.AcquirePage">
+
+    <ContentPage.Padding>
+        <OnPlatform x:TypeArguments="Thickness">
+            <OnPlatform.iOS>0,20,0,0</OnPlatform.iOS>
+        </OnPlatform>
+    </ContentPage.Padding>
+
+
+    <StackLayout Padding="10,0">
+
+        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+            <Label Text="User" HorizontalTextAlignment="Center"  Margin="5"/>
+            <Entry x:Name="UserEntry" Text="user@msdevex.onmicrosoft.com"  HorizontalOptions="FillAndExpand"/>
+        </StackLayout>
+        
+        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+            <Label Text="Login hint" HorizontalTextAlignment="Center"  Margin="5"/>
+            <Switch x:Name="LoginHint"/>
+        </StackLayout>
+
+        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+            <StackLayout Orientation="Vertical" HorizontalOptions="FillAndExpand" >
+                <Button  Text="Acquire"  Clicked="OnAcquireClicked" BorderColor="Black" HorizontalOptions="FillAndExpand"  BackgroundColor="Gray"/>
+            </StackLayout>
+            <StackLayout Orientation="Vertical" HorizontalOptions="FillAndExpand" >
+                <Button  Text="AcquireSilently"  Clicked="OnAcquireSilentlyClicked" BorderColor="Black" HorizontalOptions="FillAndExpand" BackgroundColor="Gray"/>
+            </StackLayout>
+        </StackLayout>
+
+        <Label Text="Result:" Font="Bold,15"/>
+        
+        <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
+            <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
+                <Frame OutlineColor="Black" Padding="10">
+                    <Label x:Name="acquireResponseLabel" Text="" />
+                </Frame>
+                <Button  Text="Clear"  Clicked="OnClearClicked" TextColor="Blue" Font="Bold,15"/>
+            </StackLayout>
+        </ScrollView>
+
+    </StackLayout>
+    
+</ContentPage>

@@ -20,6 +20,22 @@
       <string>UIInterfaceOrientationLandscapeLeft</string>
       <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
+
+
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLName</key>
+        <string>com.yourcompany.XForms</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>adaliosxformsapp</string>
+        </array>
+      </dict>
+    </array>
+
     <key>MinimumOSVersion</key>
     <string>8.0</string>
     <key>CFBundleDisplayName</key>
