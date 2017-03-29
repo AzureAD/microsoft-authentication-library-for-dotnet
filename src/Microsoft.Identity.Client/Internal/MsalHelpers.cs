@@ -58,28 +58,14 @@ namespace Microsoft.Identity.Client.Internal
             return setOfStrings?.ToArray();
         }
 
-        internal static string AsSingleString(this SortedSet<string> setOfStrings)
+        internal static string AsSingleString(this IEnumerable<string> input)
         {
-            return AsSingleString(setOfStrings.ToArray());
-        }
-
-        internal static string AsSingleString(this string[] arrayOfStrings)
-        {
-            if (IsNullOrEmpty(arrayOfStrings))
+            if (IsNullOrEmpty(input))
             {
                 return String.Empty;
             }
 
-            StringBuilder sb = new StringBuilder();
-            sb.Append(arrayOfStrings[0]);
-
-            for (int i = 1; i < arrayOfStrings.Length; i++)
-            {
-                sb.Append(" ");
-                sb.Append(arrayOfStrings[i]);
-            }
-
-            return sb.ToString();
+            return string.Join(" ", input);
         }
 
         internal static SortedSet<string> AsSet(this string singleString)
@@ -118,9 +104,9 @@ namespace Microsoft.Identity.Client.Internal
             return set;
         }
         
-        internal static bool IsNullOrEmpty(string[] input)
+        internal static bool IsNullOrEmpty(IEnumerable<string> input)
         {
-            return input == null || input.Length == 0;
+            return input == null || !input.Any();
         }
 
         internal static string ByteArrayToString(byte[] input)

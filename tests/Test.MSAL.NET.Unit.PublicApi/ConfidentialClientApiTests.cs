@@ -27,6 +27,7 @@
 using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using System.Collections.Generic;
 using System.Linq;
 using Test.MSAL.Common;
 
@@ -53,7 +54,7 @@ namespace Test.MSAL.NET.Unit.PublicApi
             Assert.AreEqual("id token", mockResult.IdToken, "Mock result failed to return the expected id token");
             
             // Check the scope property
-            string[] scopes = actualResult.Scope;
+            IEnumerable<string> scopes = actualResult.Scope;
             Assert.IsNotNull(scopes);
             Assert.AreEqual("scope1", scopes.First());
             Assert.AreEqual("scope2", scopes.Last());
