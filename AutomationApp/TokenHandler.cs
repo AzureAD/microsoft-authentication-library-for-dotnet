@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
-using System.Runtime.Serialization.Json;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
 
 namespace AutomationApp
 {

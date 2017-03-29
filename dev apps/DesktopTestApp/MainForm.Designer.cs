@@ -52,7 +52,7 @@
             this.loginHint = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
-            this.overridenAuthority = new System.Windows.Forms.TextBox();
+            this.overriddenAuthority = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.settingsTabPage = new System.Windows.Forms.TabPage();
@@ -159,7 +159,7 @@
             this.publicClientTabPage.Controls.Add(this.loginHint);
             this.publicClientTabPage.Controls.Add(this.label6);
             this.publicClientTabPage.Controls.Add(this.label5);
-            this.publicClientTabPage.Controls.Add(this.overridenAuthority);
+            this.publicClientTabPage.Controls.Add(this.overriddenAuthority);
             this.publicClientTabPage.Controls.Add(this.label4);
             this.publicClientTabPage.Controls.Add(this.label3);
             this.publicClientTabPage.Location = new System.Drawing.Point(8, 27);
@@ -288,7 +288,7 @@
             this.acquireTokenSilent.TabIndex = 10;
             this.acquireTokenSilent.Text = "Acquire Token Silent";
             this.acquireTokenSilent.UseVisualStyleBackColor = true;
-            this.acquireTokenSilent.Click += new System.EventHandler(this.acquireTokenSilent_Click);
+            //this.acquireTokenSilent.Click += new System.EventHandler(this.acquireTokenSilent_Click);
             // 
             // acquireTokenInteractive
             // 
@@ -361,10 +361,10 @@
             // 
             // overridenAuthority
             // 
-            this.overridenAuthority.Location = new System.Drawing.Point(256, 59);
-            this.overridenAuthority.Name = "overridenAuthority";
-            this.overridenAuthority.Size = new System.Drawing.Size(352, 20);
-            this.overridenAuthority.TabIndex = 3;
+            this.overriddenAuthority.Location = new System.Drawing.Point(256, 59);
+            this.overriddenAuthority.Name = "overriddenAuthority";
+            this.overriddenAuthority.Size = new System.Drawing.Size(352, 20);
+            this.overriddenAuthority.TabIndex = 3;
             // 
             // label4
             // 
@@ -718,7 +718,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox overridenAuthority;
+        private System.Windows.Forms.TextBox overriddenAuthority;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox loginHint;
         private System.Windows.Forms.Label label6;

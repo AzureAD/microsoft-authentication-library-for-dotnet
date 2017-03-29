@@ -40,8 +40,6 @@ namespace DesktopTestApp
 
         public MainForm()
         {
-            //ClearResultPageInfo();
-
             InitializeComponent();
             tabControl1.Appearance = TabAppearance.FlatButtons;
             tabControl1.ItemSize = new Size(0, 1);
@@ -86,6 +84,7 @@ namespace DesktopTestApp
         {
         }
 
+        #region Acquire Token Logic
         private async void acquireTokenInteractive_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
@@ -115,7 +114,7 @@ namespace DesktopTestApp
 
                 if (exception != null)
                 {
-                   output = exception.ErrorCode;
+                    output = exception.ErrorCode;
                 }
 
                 output = exc.Message + Environment.NewLine + exc.StackTrace;
@@ -126,6 +125,46 @@ namespace DesktopTestApp
                 RefreshUI();
             }
         }
+        /*
+        private async void acquireTokenSilent_Click(object sender, EventArgs e)
+        {
+            ClearResultPageInfo();
+
+            PublicClientApplication clientApplication = CreateClientApplication();
+            string output = string.Empty;
+            callResult.Text = output;
+            try
+            {
+                IAuthenticationResult result;
+                if (userList.SelectedIndex != -1)
+                {
+                    result = await clientApplication.AcquireTokenSilentAsync(scopes.Text.Split(' '), );
+                }
+                else
+                {
+                    result = await clientApplication.AcquireTokenSilentAsync(scopes.Text.Split(' '), (User)userList.SelectedItem,
+                        clientApplication.Authority, true);
+                }
+
+                SetResultPageInfo(result);
+            }
+            catch (Exception exc)
+            {
+                MsalServiceException exception = exc as MsalServiceException;
+                if (exception != null)
+                {
+                    output = exception.ErrorCode;
+                }
+
+                output = exc.Message + Environment.NewLine + exc.StackTrace;
+            }
+            finally
+            {
+                callResult.Text = output;
+                RefreshUI();
+            }
+        }*/
+        #endregion
 
         private UIBehavior GetUIBehavior()
         {
@@ -152,7 +191,7 @@ namespace DesktopTestApp
         private PublicClientApplication CreateClientApplication()
         {
             PublicClientApplication clientApplication = null;
-            if (!string.IsNullOrEmpty(overridenAuthority.Text))
+            if (!string.IsNullOrEmpty(overriddenAuthority.Text))
             {
                 clientApplication = new PublicClientApplication(
                     "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
@@ -169,44 +208,6 @@ namespace DesktopTestApp
         private void applySettings_Click(object sender, EventArgs e)
         {
             Environment.SetEnvironmentVariable("ExtraQueryParameters", environmentQP.Text);
-        }
-
-        private async void acquireTokenSilent_Click(object sender, EventArgs e)
-        {
-            PublicClientApplication clientApplication = CreateClientApplication();
-            string output = string.Empty;
-            callResult.Text = output;
-            try
-            {
-                IAuthenticationResult result;
-                if (userList.SelectedIndex != -1)
-                {
-                    result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
-                        (User)userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
-                }
-                else
-                {
-                    result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
-                        GetUIBehavior(), extraQueryParams.Text);
-                }
-
-                output = JsonHelper.SerializeToJson(result);
-            }
-            catch (Exception exc)
-            {
-                if (exc is MsalServiceException)
-                {
-                    output += ((MsalServiceException)exc).ErrorCode;
-                }
-
-                output = exc.Message + Environment.NewLine + exc.StackTrace;
-            }
-            finally
-            {
-                callResult.Text = output;
-                RefreshUI();
-            }
-
         }
 
         private void RefreshUI()

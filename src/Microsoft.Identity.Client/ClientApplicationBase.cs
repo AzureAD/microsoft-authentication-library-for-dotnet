@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client
         internal string Authority { get; }
 
         /// <summary>
-        /// Will be a default value. Can be overriden by the developer. Once set, application will bind to the client Id.
+        /// Will be a default value. Can be overridden by the developer. Once set, application will bind to the client Id.
         /// </summary>
         internal string ClientId { get; }
 
