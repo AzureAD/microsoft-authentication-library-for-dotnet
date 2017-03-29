@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,29 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Runtime.Serialization;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
 
-namespace Microsoft.Identity.Client.Internal.Cache
+namespace XForms
 {
-    [DataContract]
-    internal class RefreshTokenCacheItem : BaseTokenCacheItem
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class SettingsPage : ContentPage
     {
-        public RefreshTokenCacheItem()
+        public SettingsPage()
         {
-        }
-
-        public RefreshTokenCacheItem(string authority, string clientId, TokenResponse response) : base(authority, clientId, response)
-        {
-            RefreshToken = response.RefreshToken;
-        }
-
-        [DataMember (Name = "refresh_token")]
-        public string RefreshToken { get; set; }
-
-        public override TokenCacheKey GetTokenCacheKey()
-        {
-            return new TokenCacheKey(null, null, ClientId, User.HomeObjectId);
+            InitializeComponent();
         }
     }
 }
