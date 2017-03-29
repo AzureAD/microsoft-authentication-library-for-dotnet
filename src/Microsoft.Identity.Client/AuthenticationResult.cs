@@ -25,10 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
-using System.Runtime.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Identity.Client
 {
@@ -78,7 +79,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the scope values returned from the service.
         /// </summary>
-        public string[] Scope => _accessTokenCacheItem.Scope.AsArray();
+        public IEnumerable<string> Scope => _accessTokenCacheItem.Scope.AsArray();
 
         /// <summary>
         /// Creates authorization header from authentication result.

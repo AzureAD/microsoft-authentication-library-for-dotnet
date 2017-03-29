@@ -27,6 +27,8 @@
 using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using System.Collections.Generic;
+using System.Linq;
 using Test.MSAL.Common;
 
 namespace Test.MSAL.NET.Unit.PublicApi
@@ -54,9 +56,9 @@ namespace Test.MSAL.NET.Unit.PublicApi
             Assert.AreEqual("id token", actualResult.IdToken, "Mock result failed to return the expected id token");
 
             // Check the users properties returns the dummy users
-            string[] scopes = actualResult.Scope;
+            IEnumerable<string> scopes = actualResult.Scope;
             Assert.IsNotNull(scopes);
-            CollectionAssert.AreEqual(new string[] { "scope1" }, actualResult.Scope);
+            CollectionAssert.AreEqual(new string[] { "scope1" }, actualResult.Scope.ToArray());
         }
 
         [TestMethod]

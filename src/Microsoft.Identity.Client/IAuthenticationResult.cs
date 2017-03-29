@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client
 {
@@ -66,6 +67,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the scope values returned from the service.
         /// </summary>
-        string[] Scope { get; }
+        IEnumerable<string> Scope { get; }
     }
 }
