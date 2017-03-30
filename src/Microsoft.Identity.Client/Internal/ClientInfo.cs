@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal
         public string UniqueIdentifier { get; set; }
 
         [DataMember(Name = ClientInfoClaim.UnqiueTenantIdentifier, IsRequired = false)]
-        public string UnqiueTenantIdentifier { get; set; }
+        public string UniqueTenantIdentifier { get; set; }
 
         public static ClientInfo Parse(string clientInfo)
         {
@@ -51,8 +51,8 @@ namespace Microsoft.Identity.Client.Internal
             {
                 return null;
             }
-
-            return JsonHelper.DeserializeFromJson<ClientInfo>(clientInfo);
+            
+            return JsonHelper.DeserializeFromJson<ClientInfo>(Base64UrlEncoder.DecodeBytes(clientInfo));
         }
     }
 }

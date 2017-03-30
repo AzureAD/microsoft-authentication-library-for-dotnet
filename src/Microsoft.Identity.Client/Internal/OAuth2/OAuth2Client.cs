@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
 
             endpointUri.Query += extraQp;
 
-            return endpointUri.Uri;
+            return new Uri(CheckForExtraQueryParameter(endpointUri.Uri.AbsoluteUri));
         }
 
         private static string CheckForExtraQueryParameter(string url)

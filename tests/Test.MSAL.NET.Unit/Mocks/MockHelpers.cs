@@ -52,15 +52,15 @@ namespace Test.MSAL.NET.Unit.Mocks
                                              "zNkNTFkZC1mMGU1LTQ5NTktYjRlYS1hODBjNGUzNmZlNWUiLCJ2" +
                                              "ZXIiOiIyLjAifQ." +
                                              "AD4-sdfsfsdf";
+
+        public static readonly string DefaultClientInfo = "{\"uid\":\"" + TestConstants.Uid + "\",\"utid\":\"" + TestConstants.Utid + "\"}";
+
         public static readonly string DefaultAccessTokenResponse =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
             "\"some-scope1 some-scope2\",\"access_token\":\"some-access-token\"" +
-            ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\"" +
-            ":\""+DefaultIdToken+"\",\"id_token_expires_in\":\"3600\",\"client_info\"" +
-            ":\"eyJ2ZXIiOiIxLjAiLCJuYW1lIjoiTWFyaW8gUm9zc2kiLCJwcmVmZXJyZWRfdXNlcm5hbW" +
-            "UiOiJtYXJpb0BkZXZlbG9wZXJ0ZW5hbnQub25taWNyb3NvZnQuY29tIiwic3ViIjoiSzRfU0d" +
-            "HeEtxVzFTeFVBbWhnNkMxRjZWUGlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM2Q1MWRk" +
-            "LWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZSJ9\"}";
+            ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
+            ":\"" + Base64UrlEncoder.Encode(DefaultClientInfo) + "\",\"id_token\"" +
+            ":\""+DefaultIdToken+"\",\"id_token_expires_in\":\"3600\"}";
         public static Stream GenerateStreamFromString(string s)
         {
             MemoryStream stream = new MemoryStream();
@@ -92,20 +92,6 @@ namespace Test.MSAL.NET.Unit.Mocks
             HttpContent content = new StringContent("Request Timed Out.");
             responseMessage.Content = content;
             return responseMessage;
-        }
-
-        public static HttpResponseMessage CreateSuccessIdTokenResponseMessage()
-        {
-            return CreateSuccessResponseMessage("{\"token_type\":\"Bearer\"," +
-                                                "\"refresh_token\":\"OAAsomethingencryptedQwgAA\"" +
-                                                ",\"id_token\":\""+DefaultIdToken+"\"," +
-                                                "\"id_token_expires_in\":\"3600\"," +
-                                                "\"profile_info\":\"eyJ2ZXIiOiIxLjAiLCJuYW1lIjoi" +
-                                                "TWFyaW8gUm9zc2kiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ" +
-                                                "tYXJpb0BkZXZlbG9wZXJ0ZW5hbnQub25taWNyb3NvZnQuY2" +
-                                                "9tIiwic3ViIjoiSzRfU0dHeEtxVzFTeFVBbWhnNkMxRjZWU" +
-                                                "GlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM2Q1MWRk" +
-                                                "LWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZSJ9\"}");
         }
 
         internal static HttpResponseMessage CreateFailureMessage(HttpStatusCode code, string message)

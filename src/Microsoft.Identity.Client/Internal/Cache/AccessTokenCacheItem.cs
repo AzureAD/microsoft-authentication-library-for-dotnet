@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             if (ClientInfo != null)
             {
                 Uid = ClientInfo.UniqueIdentifier;
-                Utid = ClientInfo.UnqiueTenantIdentifier;
+                Utid = ClientInfo.UniqueTenantIdentifier;
             }
             else
             {

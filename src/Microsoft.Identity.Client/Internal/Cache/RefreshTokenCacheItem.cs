@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             if (info != null)
             {
                 Uid = info.UniqueIdentifier;
-                Utid = info.UnqiueTenantIdentifier;
+                Utid = info.UniqueTenantIdentifier;
             }
             else
             {

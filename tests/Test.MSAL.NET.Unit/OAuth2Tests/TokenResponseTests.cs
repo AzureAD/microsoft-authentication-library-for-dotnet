@@ -26,14 +26,28 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Http;
 using Microsoft.Identity.Client.Internal.OAuth2;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Test.MSAL.NET.Unit.Mocks;
 
 namespace Test.MSAL.NET.Unit
 {
     [TestClass]
     public class TokenResponseTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            HttpClientFactory.ReturnHttpClientForMocks = true;
+            HttpMessageHandlerFactory.ClearMockHandlers();
+        }
+
         [TestMethod]
         [TestCategory("TokenResponseTests")]
         public void ExpirationTimeTest()
@@ -49,6 +63,23 @@ namespace Test.MSAL.NET.Unit
             response.TokenType = "Bearer";
             DateTimeOffset current = DateTimeOffset.UtcNow;
             Assert.IsTrue(response.AccessTokenExpiresOn.Subtract(current) >= TimeSpan.FromSeconds(3599));
+        }
+
+        [TestMethod]
+        [TestCategory("TokenResponseTests")]
+        public void JsonDeserializationTest()
+        {
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage =
+                    MockHelpers.CreateSuccessTokenResponseMessage()
+            });
+            OAuth2Client client = new OAuth2Client();
+            Task<TokenResponse> task = client.GetToken(new Uri(TestConstants.AuthorityCommonTenant), new RequestContext(Guid.Empty));
+            TokenResponse response = task.Result;
+            Assert.IsNotNull(response);
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
     }
 }
