@@ -167,7 +167,7 @@ namespace DesktopTestApp
             _publicClientApplication.Remove(CurrentUser);
             AccessTokenResultInCache.Text = @"The Access Token for " + CurrentUser.DisplayableId + @" has been removed";
             ClearResultPageInfo();
-            AccessTokenResult.Text = @"The Access Token has expired";
+            accessTokenResult.Text = @"The Access Token has expired";
         }
 
         #endregion
@@ -230,7 +230,7 @@ namespace DesktopTestApp
 
         private void SetResultPageInfo(IAuthenticationResult authenticationResult)
         {
-            AccessTokenResult.Text = authenticationResult.AccessToken;
+            accessTokenResult.Text = authenticationResult.AccessToken;
             AccessTokenResultInCache.Text = authenticationResult.AccessToken;
             ExpiresOnResult.Text = authenticationResult.ExpiresOn.ToString();
             ExpiresOnResultInCache.Text = authenticationResult.ExpiresOn.ToString();
@@ -243,7 +243,7 @@ namespace DesktopTestApp
 
         private void ClearResultPageInfo()
         {
-            AccessTokenResult.Text = string.Empty;
+            accessTokenResult.Text = string.Empty;
             ExpiresOnResult.Text = string.Empty;
             TenantIdResult.Text = string.Empty;
             UserResult.Text = string.Empty;
