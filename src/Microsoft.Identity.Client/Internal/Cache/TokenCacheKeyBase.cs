@@ -25,34 +25,25 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Globalization;
-using System.Runtime.Serialization;
+using System;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.Cache
 {
-    internal class ClientInfoClaim
+    internal abstract class TokenCacheKeyBase
     {
-        public const string UniqueIdentifier = "uid";
-        public const string UnqiueTenantIdentifier = "utid";
-    }
-
-    [DataContract]
-    internal class ClientInfo
-    {
-        [DataMember(Name = ClientInfoClaim.UniqueIdentifier, IsRequired = false)]
-        public string UniqueIdentifier { get; set; }
-
-        [DataMember(Name = ClientInfoClaim.UnqiueTenantIdentifier, IsRequired = false)]
-        public string UnqiueTenantIdentifier { get; set; }
-
-        public static ClientInfo Parse(string clientInfo)
+        public TokenCacheKeyBase(string clientId, string userIdentifier)
         {
-            if (string.IsNullOrEmpty(clientInfo))
-            {
-                return null;
-            }
+            ClientId = clientId;
+            UserIdentifier = userIdentifier;
+        }
 
-            return JsonHelper.DeserializeFromJson<ClientInfo>(clientInfo);
+        public string ClientId { get; set; }
+
+        public string UserIdentifier { get; set; }
+
+        public bool Equals(string string1, string string2)
+        {
+            return (string.Compare(string2, string1, StringComparison.OrdinalIgnoreCase) == 0);
         }
     }
 }

@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System.Runtime.Serialization;
-using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -43,7 +42,7 @@ namespace Microsoft.Identity.Client
         internal User(User other)
         {
             DisplayableId = other.DisplayableId;
-            HomeObjectId = other.HomeObjectId;
+            Identifier = other.Identifier;
             Name = other.Name;
             IdentityProvider = other.IdentityProvider;
         }
@@ -67,35 +66,18 @@ namespace Microsoft.Identity.Client
         public string IdentityProvider { get; internal set; }
 
         [DataMember]
-        internal string HomeObjectId { get; set; }
+        internal string Identifier { get; set; }
 
 
-        internal static User CreateFromIdToken(IdToken idToken)
+        internal static User Create(string displayableId, string name, string identityProvider, string identifier)
         {
-            if (idToken == null)
+            return new User
             {
-                return null;
-            }
-
-            User user = new User();
-            if (idToken.HomeObjectId != null)
-            {
-                user.HomeObjectId = idToken.HomeObjectId;
-            }
-            else if (idToken.ObjectId != null)
-            {
-                user.HomeObjectId = idToken.ObjectId;
-            }
-            else
-            {
-                user.HomeObjectId = idToken.Subject;
-            }
-
-            user.DisplayableId = idToken.PreferredUsername;
-            user.Name = idToken.Name;
-            user.IdentityProvider = idToken.Issuer;
-
-            return user;
+                DisplayableId = displayableId,
+                Name = name,
+                IdentityProvider = identityProvider,
+                Identifier = identifier
+            };
         }
     }
 }

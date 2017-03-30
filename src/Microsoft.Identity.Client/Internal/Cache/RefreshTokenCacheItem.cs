@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Globalization;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
@@ -33,21 +34,71 @@ namespace Microsoft.Identity.Client.Internal.Cache
     [DataContract]
     internal class RefreshTokenCacheItem : BaseTokenCacheItem
     {
+
         public RefreshTokenCacheItem()
         {
         }
 
-        public RefreshTokenCacheItem(string authority, string clientId, TokenResponse response) : base(authority, clientId, response)
+        public RefreshTokenCacheItem(string environment, string clientId, TokenResponse response) : base(clientId)
         {
             RefreshToken = response.RefreshToken;
+            Environment = environment;
+            PopulateIdentifiers(response);
+
+            User = User.Create(DisplayableId, Name, IdentityProvider,
+                GetUserIdentifier());
         }
+
+        [DataMember(Name = "environment")]
+        public string Environment { get; set; }
+
+        [DataMember(Name = "uid")]
+        public string Uid { get; set; }
+
+        [DataMember(Name = "utid")]
+        public string Utid { get; set; }
+
+        [DataMember(Name = "displayable_id")]
+        public string DisplayableId { get; internal set; }
+
+        [DataMember(Name = "name")]
+        public string Name { get; internal set; }
+
+        [DataMember(Name = "idp")]
+        public string IdentityProvider { get; internal set; }
 
         [DataMember (Name = "refresh_token")]
         public string RefreshToken { get; set; }
 
-        public override TokenCacheKey GetTokenCacheKey()
+        public RefreshTokenCacheKey GetRefreshTokenItemKey()
         {
-            return new TokenCacheKey(null, null, ClientId, User.HomeObjectId);
+            return new RefreshTokenCacheKey(Environment, ClientId, GetUserIdentifier());
+        }
+
+        public void PopulateIdentifiers(TokenResponse response)
+        {
+            ClientInfo info = ClientInfo.Parse(response.ClientInfo);
+            IdToken idToken = IdToken.Parse(response.IdToken);
+            if (info != null)
+            {
+                Uid = info.UniqueIdentifier;
+                Utid = info.UnqiueTenantIdentifier;
+            }
+            else
+            {
+                Uid = idToken.GetUniqueId();
+                Utid = idToken.TenantId;
+            }
+
+            DisplayableId = idToken.PreferredUsername;
+            Name = idToken.Name;
+            IdentityProvider = idToken.Issuer;
+        }
+
+        public sealed override string GetUserIdentifier()
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", MsalHelpers.EncodeToBase64Url(Uid),
+                MsalHelpers.EncodeToBase64Url(Utid));
         }
     }
 }

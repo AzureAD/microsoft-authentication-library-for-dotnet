@@ -127,9 +127,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (addVerifier)
             {
                 _codeVerifier = PlatformPlugin.CryptographyHelper.GenerateCodeVerifier();
-                string codeVerifierHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(_codeVerifier);
+                string codeVerifierHash = MsalHelpers.EncodeToBase64Url(
+                    Convert.FromBase64String(PlatformPlugin.CryptographyHelper.CreateSha256Hash(_codeVerifier)));
 
-                requestParameters[OAuth2Parameter.CodeChallenge] = MsalHelpers.EncodeToBase64Url(Convert.FromBase64String(codeVerifierHash));
+                requestParameters[OAuth2Parameter.CodeChallenge] = codeVerifierHash;
                 requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
             }
 

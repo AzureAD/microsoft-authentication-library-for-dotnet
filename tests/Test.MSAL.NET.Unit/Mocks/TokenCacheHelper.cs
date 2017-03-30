@@ -48,13 +48,13 @@ namespace Test.MSAL.NET.Unit.Mocks
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    HomeObjectId = TestConstants.HomeObjectId
+                    Identifier = TestConstants.UserIdentifier
                 },
                 Scope = TestConstants.Scope
             };
-            item.AccessToken = item.GetTokenCacheKey().ToString();
+            item.AccessToken = item.GetAccessTokenItemKey().ToString();
             //add access token
-            accessor.AccessTokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
+            accessor.AccessTokenCacheDictionary[item.GetAccessTokenItemKey().ToString()] = JsonHelper.SerializeToJson(item);
 
             item = new AccessTokenCacheItem()
             {
@@ -62,31 +62,28 @@ namespace Test.MSAL.NET.Unit.Mocks
                 ClientId = TestConstants.ClientId,
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
-                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId, TestConstants.HomeObjectId),
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId, TestConstants.UserIdentifier),
                 User = new User
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    HomeObjectId = TestConstants.HomeObjectId
+                    Identifier = TestConstants.UserIdentifier
                 },
                 Scope = TestConstants.ScopeForAnotherResource
             };
-            item.AccessToken = item.GetTokenCacheKey().ToString();
+            item.AccessToken = item.GetAccessTokenItemKey().ToString();
             //add another access token
-            accessor.AccessTokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
+            accessor.AccessTokenCacheDictionary[item.GetAccessTokenItemKey().ToString()] = JsonHelper.SerializeToJson(item);
 
             RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
             {
-                Authority = TestConstants.AuthorityHomeTenant,
+                Environment= TestConstants.ProductionEnvironment,
                 ClientId = TestConstants.ClientId,
                 RefreshToken = "someRT",
-                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId, TestConstants.HomeObjectId),
-                User = new User
-                {
-                    DisplayableId = TestConstants.DisplayableId,
-                    HomeObjectId = TestConstants.HomeObjectId
-                }
+                Uid = TestConstants.Uid,
+                Utid = TestConstants.Utid,
+                DisplayableId = TestConstants.DisplayableId
             };
-            accessor.RefreshTokenCacheDictionary[rtItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
+            accessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
         }
     }
 }

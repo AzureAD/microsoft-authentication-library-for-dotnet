@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
@@ -35,17 +36,68 @@ namespace Microsoft.Identity.Client.Internal.Cache
     [DataContract]
     internal class AccessTokenCacheItem : BaseTokenCacheItem
     {
+        public AccessTokenCacheItem()
+        {
+        }
+
+        public AccessTokenCacheItem(string authority, string clientId, TokenResponse response)
+            : base(clientId)
+        {
+            if (response.AccessToken != null)
+            {
+                AccessToken = response.AccessToken;
+                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(response.AccessTokenExpiresOn);
+            }
+
+            IdToken = IdToken.Parse(response.IdToken);
+            ClientInfo = ClientInfo.Parse(response.ClientInfo);
+            User = User.Create(IdToken.PreferredUsername, IdToken.Name, IdToken.Issuer,
+                GetUserIdentifier());
+
+            TokenType = response.TokenType;
+            Scope = response.Scope.AsSet();
+            Authority = authority;
+        }
+
         /// <summary>
         /// Gets the AccessToken Type.
         /// </summary>
         [DataMember(Name = "token_type")]
-        public string TokenType { get; internal set; }
+        public string TokenType { get; set; }
 
         /// <summary>
         /// Gets the Access Token requested.
         /// </summary>
         [DataMember(Name = "access_token")]
-        public string AccessToken { get; internal set; }
+        public string AccessToken { get; set; }
+
+        [DataMember(Name = "id_token")]
+        public string RawIdToken { get; set; }
+
+        [DataMember(Name = "client_info")]
+        public string RawClientInfo { get; set; }
+
+        [DataMember(Name = "expires_on")]
+        public long ExpiresOnUnixTimestamp { get; set; }
+
+        /// <summary>
+        /// Gets the Authority.
+        /// </summary>
+        [DataMember(Name = "authority")]
+        public string Authority { get; set; }
+
+        /// <summary>
+        /// Gets the Scope.
+        /// </summary>
+        [DataMember(Name = "scope")]
+        public SortedSet<string> Scope { get; set; }
+
+        [DataMember(Name = "user_assertion_hash")]
+        public string UserAssertionHash { get; set; }
+
+        public IdToken IdToken { get; set; }
+
+        public ClientInfo ClientInfo { get; set; }
 
         public DateTimeOffset ExpiresOn
         {
@@ -60,54 +112,35 @@ namespace Microsoft.Identity.Client.Internal.Cache
             }
         }
 
-        [DataMember(Name = "expires_on")]
-        public long ExpiresOnUnixTimestamp { get; internal set; }
-
-        /// <summary>
-        /// Gets the Scope.
-        /// </summary>
-        [DataMember(Name = "scope")]
-        public SortedSet<string> Scope { get; internal set; }
-
-        /// <summary>
-        /// Gets the TenantId.
-        /// </summary>
-        public string TenantId
+        public AccessTokenCacheKey GetAccessTokenItemKey()
         {
-            get => IdToken?.TenantId;
-            set { throw new NotImplementedException(); }
+            return new AccessTokenCacheKey(Authority, Scope, ClientId, GetUserIdentifier());
         }
 
-        [DataMember(Name = "user_assertion_hash")]
-        internal string UserAssertionHash { get; set; }
-
-        public AccessTokenCacheItem()
+        public sealed override string GetUserIdentifier()
         {
-        }
-
-        public AccessTokenCacheItem(string authority, string clientId, TokenResponse response)
-            : base(authority, clientId, response)
-        {
-            if (response.AccessToken != null)
+            string Uid;
+            string Utid;
+            if (ClientInfo != null)
             {
-                AccessToken = response.AccessToken;
-                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(response.AccessTokenExpiresOn);
+                Uid = ClientInfo.UniqueIdentifier;
+                Utid = ClientInfo.UnqiueTenantIdentifier;
+            }
+            else
+            {
+                Uid = IdToken.GetUniqueId();
+                Utid = IdToken.TenantId;
             }
 
-            IdToken idToken = IdToken.Parse(response.IdToken, RequestContext);
-
-            if (idToken != null)
-            {
-                User = User.CreateFromIdToken(idToken);
-            }
-
-            TokenType = response.TokenType;
-            Scope = response.Scope.AsSet();
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", MsalHelpers.EncodeToBase64Url(Uid),
+                MsalHelpers.EncodeToBase64Url(Utid));
         }
 
-        public override TokenCacheKey GetTokenCacheKey()
+        // This method is called after the object 
+        // is completely deserialized.
+        [OnDeserialized]
+        void OnDeserialized(StreamingContext context)
         {
-            return new TokenCacheKey(Authority, Scope, ClientId, User);
         }
     }
 }

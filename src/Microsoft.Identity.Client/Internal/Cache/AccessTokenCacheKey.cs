@@ -27,40 +27,25 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Internal.Cache
 {
     /// <summary>
-    /// <see cref="TokenCacheKey" /> can be used with Linq to access items from the TokenCache dictionary.
+    /// <see cref="AccessTokenCacheKey" /> can be used with Linq to access items from the TokenCache dictionary.
     /// </summary>
-    internal sealed class TokenCacheKey
+    internal class AccessTokenCacheKey : TokenCacheKeyBase
     {
-        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, User user)
-            : this(
-                authority, scope, clientId, (user != null) ? user.HomeObjectId : null)
-        {
-        }
-
-        internal TokenCacheKey(string authority, SortedSet<string> scope, string clientId, string homeObjectId)
+        public AccessTokenCacheKey(string authority, SortedSet<string> scope, string clientId, string userIdentifier) : base(clientId, userIdentifier)
         {
             Authority = authority;
-            Scope = scope;
-            if (Scope == null)
-            {
-                Scope = new SortedSet<string>();
-            }
-
-            ClientId = clientId;
-            HomeObjectId = homeObjectId;
+            Scope = scope ?? new SortedSet<string>();
         }
 
         public string Authority { get; }
+
         public SortedSet<string> Scope { get; }
-        public string ClientId { get; }
-        public string HomeObjectId { get; }
 
         /// <summary>
         /// </summary>
@@ -72,28 +57,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
             stringBuilder.Append(MsalHelpers.Base64Encode(ClientId) + "$");
             // scope is treeSet to guarantee the order of the scopes when converting to string.
             stringBuilder.Append(MsalHelpers.Base64Encode(Scope.AsSingleString()) + "$");
-            stringBuilder.Append(MsalHelpers.Base64Encode(HomeObjectId) + "$");
+            stringBuilder.Append(MsalHelpers.Base64Encode(UserIdentifier) + "$");
 
             return stringBuilder.ToString();
         }
-
-/*        public static TokenCacheKey Deserialize(string serializedKey)
-        {
-            var sentences = new List<string>();
-            int position = 0;
-            int start = 0;
-            // Extract from the string.
-            do
-            {
-                position = serializedKey.IndexOf('$', start);
-                if (position >= 0)
-                {
-                    sentences.Add(serializedKey.Substring(start, position - start + 1));
-                    start = position + 1;
-                }
-            } while (position > 0);
-
-        }*/
 
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
@@ -105,30 +72,30 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
-            TokenCacheKey other = obj as TokenCacheKey;
+            AccessTokenCacheKey other = obj as AccessTokenCacheKey;
             return (other != null) && Equals(other);
         }
 
         /// <summary>
-        /// Determines whether the specified TokenCacheKey is equal to the current object.
+        /// Determines whether the specified AccessTokenCacheKey is equal to the current object.
         /// </summary>
         /// <returns>
-        /// true if the specified TokenCacheKey is equal to the current object; otherwise, false.
+        /// true if the specified AccessTokenCacheKey is equal to the current object; otherwise, false.
         /// </returns>
-        /// <param name="other">The TokenCacheKey to compare with the current object. </param>
+        /// <param name="other">The AccessTokenCacheKey to compare with the current object. </param>
         /// <filterpriority>2</filterpriority>
-        public bool Equals(TokenCacheKey other)
+        public bool Equals(AccessTokenCacheKey other)
         {
             return ReferenceEquals(this, other) ||
                    (other != null
                     && (other.Authority == Authority)
                     && ScopeEquals(other.Scope)
                     && Equals(ClientId, other.ClientId)
-                    && HomeObjectId == other.HomeObjectId);
+                    && UserIdentifier == other.UserIdentifier);
         }
 
         /// <summary>
-        /// Returns the hash code for this TokenCacheKey.
+        /// Returns the hash code for this AccessTokenCacheKey.
         /// </summary>
         /// <returns>
         /// A 32-bit signed integer hash code.
@@ -139,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return (Authority + Delimiter
                     + MsalHelpers.AsSingleString(Scope) + Delimiter
                     + ClientId.ToLowerInvariant() + Delimiter
-                    + HomeObjectId + Delimiter).GetHashCode();
+                    + UserIdentifier + Delimiter).GetHashCode();
         }
 
         internal bool ScopeEquals(SortedSet<string> otherScope)
@@ -160,11 +127,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
             }
 
             return false;
-        }
-
-        internal bool Equals(string string1, string string2)
-        {
-            return (string.Compare(string2, string1, StringComparison.OrdinalIgnoreCase) == 0);
         }
     }
 }

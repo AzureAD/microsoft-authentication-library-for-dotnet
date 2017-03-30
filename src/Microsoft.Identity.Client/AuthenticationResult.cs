@@ -40,17 +40,26 @@ namespace Microsoft.Identity.Client
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
         private readonly AccessTokenCacheItem _accessTokenCacheItem;
+        private readonly IdToken _idToken;
 
-        internal AuthenticationResult(AccessTokenCacheItem accessTokenCacheItem, RequestContext requestContext)
+        public AuthenticationResult() { }
+
+        public AuthenticationResult(AccessTokenCacheItem accessTokenCacheItem)
         {
             _accessTokenCacheItem = accessTokenCacheItem;
-            User = User.CreateFromIdToken(Internal.IdToken.Parse(accessTokenCacheItem.RawIdToken, requestContext));
+            _idToken = Internal.IdToken.Parse(accessTokenCacheItem.RawIdToken);
+            User = User.Create(_idToken.PreferredUsername, _idToken.Name, _idToken.Issuer, accessTokenCacheItem.GetUserIdentifier());
         }
 
         /// <summary>
         /// Gets the Access Token requested.
         /// </summary>
         public string AccessToken => _accessTokenCacheItem.AccessToken;
+
+        /// <summary>
+        /// Gets the Unique Id of the user.
+        /// </summary>
+        public string UniqueId => _idToken?.GetUniqueId();
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the Token property ceases to be valid.
@@ -63,7 +72,7 @@ namespace Microsoft.Identity.Client
         /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is
         /// not returned by the service.
         /// </summary>
-        public string TenantId => _accessTokenCacheItem.TenantId;
+        public string TenantId => _accessTokenCacheItem.IdToken?.TenantId;
 
         /// <summary>
         /// Gets User object. Some elements in User might be null if not returned by the

@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal
         [DataMember(Name = IdTokenClaim.HomeObjectId, IsRequired = false)]
         public string HomeObjectId { get; set; }
 
-        public static IdToken Parse(string idToken, RequestContext requestContext)
+        public static IdToken Parse(string idToken)
         {
             IdToken idTokenBody = null;
             if (!string.IsNullOrWhiteSpace(idToken))
@@ -90,20 +90,19 @@ namespace Microsoft.Identity.Client.Internal
                             idTokenBody = (IdToken) serializer.ReadObject(stream);
                         }
                     }
-                    catch (SerializationException ex)
+                    catch (SerializationException)
                     {
-                        requestContext.Logger.Warning(ex.Message);
                         // We silently ignore the id token if exception occurs.   
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        requestContext.Logger.Warning(ex.Message);
-                        // Again, we silently ignore the id token if exception occurs.   
                     }
                 }
             }
 
             return idTokenBody;
+        }
+
+        public string GetUniqueId()
+        {
+            return ObjectId ?? Subject;
         }
     }
 }

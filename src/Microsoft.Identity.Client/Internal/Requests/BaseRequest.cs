@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected virtual AuthenticationResult PostTokenRequest(AccessTokenCacheItem item)
         {
-            return new AuthenticationResult(item, RequestContext);
+            return new AuthenticationResult(item);
         }
 
         protected abstract void SetAdditionalRequestParameters(OAuth2Client client);

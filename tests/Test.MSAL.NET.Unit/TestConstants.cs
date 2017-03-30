@@ -34,20 +34,24 @@ namespace Test.MSAL.NET.Unit
     {
         public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] {"r1/scope1", "r1/scope2"});
         public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
-        public static readonly string AuthorityHomeTenant = "https://login.microsoftonline.com/home/";
-        public static readonly string AuthorityGuestTenant = "https://login.microsoftonline.com/guest/";
-        public static readonly string AuthorityCommonTenant = "https://login.microsoftonline.com/common/";
+        public static readonly string ProductionEnvironment = "login.microsoftonline.com";
+        public static readonly string SovereignEnvironment = "login.microsoftonline.de";
+        public static readonly string AuthorityHomeTenant = "https://" + ProductionEnvironment + "/home/";
+        public static readonly string AuthorityGuestTenant = "https://" + ProductionEnvironment + "/guest/";
+        public static readonly string AuthorityCommonTenant = "https://" + ProductionEnvironment + "/common/";
         public static readonly string ClientId = "client_id";
         public static readonly string UniqueId = "unique_id";
         public static readonly string DisplayableId = "displayable@id.com";
-        public static readonly string HomeObjectId = "home_oid";
+        public static readonly string UserIdentifier = "user_identifier";
         public static readonly string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public static readonly string ClientSecret = "client_secret";
         public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
+        public static readonly string Uid = "my-UID";
+        public static readonly string Utid= "my-UTID";
         public static readonly User User = new User
         {
             DisplayableId = DisplayableId,
-            HomeObjectId = HomeObjectId
+            Identifier = UserIdentifier
         };
         
         public static readonly string OnPremiseAuthority = "https://fs.contoso.com/adfs/";
@@ -59,11 +63,13 @@ namespace Test.MSAL.NET.Unit
         public static readonly string OnPremisePolicy = "on_premise_policy";
         public static readonly string OnPremiseRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public static readonly string OnPremiseClientSecret = "on_premise_client_secret";
+        public static readonly string OnPremiseUid = "my-OnPremise-UID";
+        public static readonly string OnPremiseUtid = "my-OnPremise-UTID";
         public static readonly ClientCredential OnPremiseCredentialWithSecret = new ClientCredential(ClientSecret);
         public static readonly User OnPremiseUser = new User
         {
             DisplayableId = OnPremiseDisplayableId,
-            HomeObjectId = OnPremiseHomeObjectId
+            Identifier = OnPremiseHomeObjectId
         };
     }
 }
