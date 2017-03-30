@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="user">User for which the token is requested. <see cref="User"/></param>
         /// <returns></returns>
-        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user)
+        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, User user)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using the refresh token if available</param>
         /// <returns></returns>
-        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(string[] scope, User user,
+        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, User user,
             string authority, bool forceRefresh)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
-            string[] scope, User user, bool forceRefresh)
+            IEnumerable<string> scope, User user, bool forceRefresh)
         {
             var handler = new SilentRequest(
                 CreateRequestParameters(authority, scope, user, UserTokenCache),
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope,
+        internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority, IEnumerable<string> scope,
             User user, TokenCache cache)
         {
             return new AuthenticationRequestParameters
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Client
                 Authority = authority,
                 TokenCache = cache,
                 User = user,
-                Scope = scope.CreateSetFromArray(),
+                Scope = scope.CreateSetFromEnumerable(),
                 RedirectUri = new Uri(RedirectUri),
                 RequestContext = CreateRequestContext(CorrelationId)
             };
