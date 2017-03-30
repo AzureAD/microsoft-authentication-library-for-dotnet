@@ -33,6 +33,8 @@
             this.environmentQP = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.publicClientTabPage = new System.Windows.Forms.TabPage();
+            this.IdTokenResult = new System.Windows.Forms.TextBox();
+            this.accessTokenResult = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.PiiLoggingDisabled = new System.Windows.Forms.RadioButton();
             this.PiiLoggingEnabled = new System.Windows.Forms.RadioButton();
@@ -87,6 +89,24 @@
             this.label1 = new System.Windows.Forms.Label();
             this.msalLogs = new System.Windows.Forms.TextBox();
             this.confidentialClientTabPage = new System.Windows.Forms.TabPage();
+            this.confClientAcquireTokenSilentBtn = new System.Windows.Forms.Button();
+            this.confClientAcquireTokenBtn = new System.Windows.Forms.Button();
+            this.confClientPiiEnabledButton = new System.Windows.Forms.RadioButton();
+            this.confClientPiiDisabledButton = new System.Windows.Forms.RadioButton();
+            this.confClientPiiEnabledLabel = new System.Windows.Forms.Label();
+            this.confClientScopesResult = new System.Windows.Forms.ListBox();
+            this.conClientScopesLabel = new System.Windows.Forms.Label();
+            this.confClientIdTokenResult = new System.Windows.Forms.Label();
+            this.confClientIdTokenLabel = new System.Windows.Forms.Label();
+            this.confClientUserResult = new System.Windows.Forms.Label();
+            this.conClientUserLabel = new System.Windows.Forms.Label();
+            this.confClientTenantIdResult = new System.Windows.Forms.Label();
+            this.confClientTenantIdLabel = new System.Windows.Forms.Label();
+            this.confClientExpiresOnResult = new System.Windows.Forms.Label();
+            this.confClientExpiresOnLabel = new System.Windows.Forms.Label();
+            this.confClientAccessTokenResult = new System.Windows.Forms.TextBox();
+            this.confClientAccessTokenLabel = new System.Windows.Forms.Label();
+            this.callResultConfClient = new System.Windows.Forms.TextBox();
             this.ConfClientScopesBox = new System.Windows.Forms.ListView();
             this.ConfClientScopesLabel = new System.Windows.Forms.Label();
             this.ConfClientUserBox = new System.Windows.Forms.TextBox();
@@ -110,26 +130,6 @@
             this.cache = new System.Windows.Forms.Button();
             this.logs = new System.Windows.Forms.Button();
             this.confidentialClient = new System.Windows.Forms.Button();
-            this.callResultConfClient = new System.Windows.Forms.TextBox();
-            this.confClientAccessTokenLabel = new System.Windows.Forms.Label();
-            this.confClientAccessTokenResult = new System.Windows.Forms.TextBox();
-            this.confClientExpiresOnLabel = new System.Windows.Forms.Label();
-            this.confClientExpiresOnResult = new System.Windows.Forms.Label();
-            this.confClientTenantIdLabel = new System.Windows.Forms.Label();
-            this.confClientTenantIdResult = new System.Windows.Forms.Label();
-            this.conClientUserLabel = new System.Windows.Forms.Label();
-            this.confClientUserResult = new System.Windows.Forms.Label();
-            this.confClientIdTokenLabel = new System.Windows.Forms.Label();
-            this.confClientIdTokenResult = new System.Windows.Forms.Label();
-            this.conClientScopesLabel = new System.Windows.Forms.Label();
-            this.confClientScopesResult = new System.Windows.Forms.ListBox();
-            this.confClientPiiEnabledLabel = new System.Windows.Forms.Label();
-            this.confClientPiiDisabledButton = new System.Windows.Forms.RadioButton();
-            this.confClientPiiEnabledButton = new System.Windows.Forms.RadioButton();
-            this.confClientAcquireTokenBtn = new System.Windows.Forms.Button();
-            this.confClientAcquireTokenSilentBtn = new System.Windows.Forms.Button();
-            this.accessTokenResult = new System.Windows.Forms.TextBox();
-            this.IdTokenResult = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.publicClientTabPage.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -221,6 +221,23 @@
             this.publicClientTabPage.Size = new System.Drawing.Size(660, 779);
             this.publicClientTabPage.TabIndex = 0;
             this.publicClientTabPage.Text = "publicClientTabPage";
+            this.publicClientTabPage.Click += new System.EventHandler(this.publicClientTabPage_Click);
+            // 
+            // IdTokenResult
+            // 
+            this.IdTokenResult.Location = new System.Drawing.Point(131, 586);
+            this.IdTokenResult.Multiline = true;
+            this.IdTokenResult.Name = "IdTokenResult";
+            this.IdTokenResult.Size = new System.Drawing.Size(481, 40);
+            this.IdTokenResult.TabIndex = 34;
+            // 
+            // accessTokenResult
+            // 
+            this.accessTokenResult.Location = new System.Drawing.Point(130, 417);
+            this.accessTokenResult.Multiline = true;
+            this.accessTokenResult.Name = "accessTokenResult";
+            this.accessTokenResult.Size = new System.Drawing.Size(483, 92);
+            this.accessTokenResult.TabIndex = 33;
             // 
             // label12
             // 
@@ -791,6 +808,170 @@
             this.confidentialClientTabPage.Text = "confidentialClientTabPage";
             this.confidentialClientTabPage.UseVisualStyleBackColor = true;
             // 
+            // confClientAcquireTokenSilentBtn
+            // 
+            this.confClientAcquireTokenSilentBtn.Location = new System.Drawing.Point(451, 700);
+            this.confClientAcquireTokenSilentBtn.Name = "confClientAcquireTokenSilentBtn";
+            this.confClientAcquireTokenSilentBtn.Size = new System.Drawing.Size(160, 58);
+            this.confClientAcquireTokenSilentBtn.TabIndex = 35;
+            this.confClientAcquireTokenSilentBtn.Text = "Acquire Token Silent";
+            this.confClientAcquireTokenSilentBtn.UseVisualStyleBackColor = true;
+            // 
+            // confClientAcquireTokenBtn
+            // 
+            this.confClientAcquireTokenBtn.Location = new System.Drawing.Point(43, 700);
+            this.confClientAcquireTokenBtn.Name = "confClientAcquireTokenBtn";
+            this.confClientAcquireTokenBtn.Size = new System.Drawing.Size(154, 50);
+            this.confClientAcquireTokenBtn.TabIndex = 34;
+            this.confClientAcquireTokenBtn.Text = "Acquire Token";
+            this.confClientAcquireTokenBtn.UseVisualStyleBackColor = true;
+            // 
+            // confClientPiiEnabledButton
+            // 
+            this.confClientPiiEnabledButton.AutoSize = true;
+            this.confClientPiiEnabledButton.Location = new System.Drawing.Point(260, 301);
+            this.confClientPiiEnabledButton.Name = "confClientPiiEnabledButton";
+            this.confClientPiiEnabledButton.Size = new System.Drawing.Size(77, 26);
+            this.confClientPiiEnabledButton.TabIndex = 33;
+            this.confClientPiiEnabledButton.TabStop = true;
+            this.confClientPiiEnabledButton.Text = "Enabled";
+            this.confClientPiiEnabledButton.UseVisualStyleBackColor = true;
+            // 
+            // confClientPiiDisabledButton
+            // 
+            this.confClientPiiDisabledButton.AutoSize = true;
+            this.confClientPiiDisabledButton.Checked = true;
+            this.confClientPiiDisabledButton.Location = new System.Drawing.Point(175, 302);
+            this.confClientPiiDisabledButton.Name = "confClientPiiDisabledButton";
+            this.confClientPiiDisabledButton.Size = new System.Drawing.Size(79, 26);
+            this.confClientPiiDisabledButton.TabIndex = 32;
+            this.confClientPiiDisabledButton.TabStop = true;
+            this.confClientPiiDisabledButton.Text = "Disabled";
+            this.confClientPiiDisabledButton.UseVisualStyleBackColor = true;
+            // 
+            // confClientPiiEnabledLabel
+            // 
+            this.confClientPiiEnabledLabel.AutoSize = true;
+            this.confClientPiiEnabledLabel.Location = new System.Drawing.Point(27, 308);
+            this.confClientPiiEnabledLabel.Name = "confClientPiiEnabledLabel";
+            this.confClientPiiEnabledLabel.Size = new System.Drawing.Size(101, 13);
+            this.confClientPiiEnabledLabel.TabIndex = 31;
+            this.confClientPiiEnabledLabel.Text = "Pii Logging Enabled";
+            // 
+            // confClientScopesResult
+            // 
+            this.confClientScopesResult.FormattingEnabled = true;
+            this.confClientScopesResult.Location = new System.Drawing.Point(144, 624);
+            this.confClientScopesResult.Name = "confClientScopesResult";
+            this.confClientScopesResult.Size = new System.Drawing.Size(477, 56);
+            this.confClientScopesResult.TabIndex = 30;
+            // 
+            // conClientScopesLabel
+            // 
+            this.conClientScopesLabel.AutoSize = true;
+            this.conClientScopesLabel.Location = new System.Drawing.Point(39, 627);
+            this.conClientScopesLabel.Name = "conClientScopesLabel";
+            this.conClientScopesLabel.Size = new System.Drawing.Size(43, 13);
+            this.conClientScopesLabel.TabIndex = 29;
+            this.conClientScopesLabel.Text = "Scopes";
+            // 
+            // confClientIdTokenResult
+            // 
+            this.confClientIdTokenResult.AutoSize = true;
+            this.confClientIdTokenResult.Location = new System.Drawing.Point(144, 590);
+            this.confClientIdTokenResult.Name = "confClientIdTokenResult";
+            this.confClientIdTokenResult.Size = new System.Drawing.Size(109, 13);
+            this.confClientIdTokenResult.TabIndex = 28;
+            this.confClientIdTokenResult.Text = "Id Token Placeholder";
+            // 
+            // confClientIdTokenLabel
+            // 
+            this.confClientIdTokenLabel.AutoSize = true;
+            this.confClientIdTokenLabel.Location = new System.Drawing.Point(39, 590);
+            this.confClientIdTokenLabel.Name = "confClientIdTokenLabel";
+            this.confClientIdTokenLabel.Size = new System.Drawing.Size(50, 13);
+            this.confClientIdTokenLabel.TabIndex = 27;
+            this.confClientIdTokenLabel.Text = "Id Token";
+            // 
+            // confClientUserResult
+            // 
+            this.confClientUserResult.AutoSize = true;
+            this.confClientUserResult.Location = new System.Drawing.Point(144, 564);
+            this.confClientUserResult.Name = "confClientUserResult";
+            this.confClientUserResult.Size = new System.Drawing.Size(88, 13);
+            this.confClientUserResult.TabIndex = 26;
+            this.confClientUserResult.Text = "User Placeholder";
+            // 
+            // conClientUserLabel
+            // 
+            this.conClientUserLabel.AutoSize = true;
+            this.conClientUserLabel.Location = new System.Drawing.Point(39, 564);
+            this.conClientUserLabel.Name = "conClientUserLabel";
+            this.conClientUserLabel.Size = new System.Drawing.Size(29, 13);
+            this.conClientUserLabel.TabIndex = 25;
+            this.conClientUserLabel.Text = "User";
+            // 
+            // confClientTenantIdResult
+            // 
+            this.confClientTenantIdResult.AutoSize = true;
+            this.confClientTenantIdResult.Location = new System.Drawing.Point(141, 532);
+            this.confClientTenantIdResult.Name = "confClientTenantIdResult";
+            this.confClientTenantIdResult.Size = new System.Drawing.Size(112, 13);
+            this.confClientTenantIdResult.TabIndex = 24;
+            this.confClientTenantIdResult.Text = "Tenant Id Placeholder";
+            // 
+            // confClientTenantIdLabel
+            // 
+            this.confClientTenantIdLabel.AutoSize = true;
+            this.confClientTenantIdLabel.Location = new System.Drawing.Point(39, 532);
+            this.confClientTenantIdLabel.Name = "confClientTenantIdLabel";
+            this.confClientTenantIdLabel.Size = new System.Drawing.Size(53, 13);
+            this.confClientTenantIdLabel.TabIndex = 23;
+            this.confClientTenantIdLabel.Text = "Tenant Id";
+            // 
+            // confClientExpiresOnResult
+            // 
+            this.confClientExpiresOnResult.AutoSize = true;
+            this.confClientExpiresOnResult.Location = new System.Drawing.Point(142, 504);
+            this.confClientExpiresOnResult.Name = "confClientExpiresOnResult";
+            this.confClientExpiresOnResult.Size = new System.Drawing.Size(117, 13);
+            this.confClientExpiresOnResult.TabIndex = 22;
+            this.confClientExpiresOnResult.Text = "Expires On Placeholder";
+            // 
+            // confClientExpiresOnLabel
+            // 
+            this.confClientExpiresOnLabel.AutoSize = true;
+            this.confClientExpiresOnLabel.Location = new System.Drawing.Point(39, 504);
+            this.confClientExpiresOnLabel.Name = "confClientExpiresOnLabel";
+            this.confClientExpiresOnLabel.Size = new System.Drawing.Size(58, 13);
+            this.confClientExpiresOnLabel.TabIndex = 21;
+            this.confClientExpiresOnLabel.Text = "Expires On";
+            // 
+            // confClientAccessTokenResult
+            // 
+            this.confClientAccessTokenResult.Location = new System.Drawing.Point(145, 362);
+            this.confClientAccessTokenResult.Multiline = true;
+            this.confClientAccessTokenResult.Name = "confClientAccessTokenResult";
+            this.confClientAccessTokenResult.Size = new System.Drawing.Size(480, 139);
+            this.confClientAccessTokenResult.TabIndex = 20;
+            // 
+            // confClientAccessTokenLabel
+            // 
+            this.confClientAccessTokenLabel.AutoSize = true;
+            this.confClientAccessTokenLabel.Location = new System.Drawing.Point(39, 358);
+            this.confClientAccessTokenLabel.Name = "confClientAccessTokenLabel";
+            this.confClientAccessTokenLabel.Size = new System.Drawing.Size(76, 13);
+            this.confClientAccessTokenLabel.TabIndex = 19;
+            this.confClientAccessTokenLabel.Text = "Access Token";
+            // 
+            // callResultConfClient
+            // 
+            this.callResultConfClient.Location = new System.Drawing.Point(25, 348);
+            this.callResultConfClient.Multiline = true;
+            this.callResultConfClient.Name = "callResultConfClient";
+            this.callResultConfClient.Size = new System.Drawing.Size(615, 344);
+            this.callResultConfClient.TabIndex = 18;
+            // 
             // ConfClientScopesBox
             // 
             this.ConfClientScopesBox.Location = new System.Drawing.Point(175, 236);
@@ -1001,186 +1182,6 @@
             this.confidentialClient.Text = "Confidential Client";
             this.confidentialClient.UseVisualStyleBackColor = true;
             this.confidentialClient.Click += new System.EventHandler(this.confidentialClient_Click);
-            // 
-            // callResultConfClient
-            // 
-            this.callResultConfClient.Location = new System.Drawing.Point(25, 348);
-            this.callResultConfClient.Multiline = true;
-            this.callResultConfClient.Name = "callResultConfClient";
-            this.callResultConfClient.Size = new System.Drawing.Size(615, 344);
-            this.callResultConfClient.TabIndex = 18;
-            // 
-            // confClientAccessTokenLabel
-            // 
-            this.confClientAccessTokenLabel.AutoSize = true;
-            this.confClientAccessTokenLabel.Location = new System.Drawing.Point(39, 358);
-            this.confClientAccessTokenLabel.Name = "confClientAccessTokenLabel";
-            this.confClientAccessTokenLabel.Size = new System.Drawing.Size(76, 13);
-            this.confClientAccessTokenLabel.TabIndex = 19;
-            this.confClientAccessTokenLabel.Text = "Access Token";
-            // 
-            // confClientAccessTokenResult
-            // 
-            this.confClientAccessTokenResult.Location = new System.Drawing.Point(145, 362);
-            this.confClientAccessTokenResult.Multiline = true;
-            this.confClientAccessTokenResult.Name = "confClientAccessTokenResult";
-            this.confClientAccessTokenResult.Size = new System.Drawing.Size(480, 139);
-            this.confClientAccessTokenResult.TabIndex = 20;
-            // 
-            // confClientExpiresOnLabel
-            // 
-            this.confClientExpiresOnLabel.AutoSize = true;
-            this.confClientExpiresOnLabel.Location = new System.Drawing.Point(39, 504);
-            this.confClientExpiresOnLabel.Name = "confClientExpiresOnLabel";
-            this.confClientExpiresOnLabel.Size = new System.Drawing.Size(58, 13);
-            this.confClientExpiresOnLabel.TabIndex = 21;
-            this.confClientExpiresOnLabel.Text = "Expires On";
-            // 
-            // confClientExpiresOnResult
-            // 
-            this.confClientExpiresOnResult.AutoSize = true;
-            this.confClientExpiresOnResult.Location = new System.Drawing.Point(142, 504);
-            this.confClientExpiresOnResult.Name = "confClientExpiresOnResult";
-            this.confClientExpiresOnResult.Size = new System.Drawing.Size(117, 13);
-            this.confClientExpiresOnResult.TabIndex = 22;
-            this.confClientExpiresOnResult.Text = "Expires On Placeholder";
-            // 
-            // confClientTenantIdLabel
-            // 
-            this.confClientTenantIdLabel.AutoSize = true;
-            this.confClientTenantIdLabel.Location = new System.Drawing.Point(39, 532);
-            this.confClientTenantIdLabel.Name = "confClientTenantIdLabel";
-            this.confClientTenantIdLabel.Size = new System.Drawing.Size(53, 13);
-            this.confClientTenantIdLabel.TabIndex = 23;
-            this.confClientTenantIdLabel.Text = "Tenant Id";
-            // 
-            // confClientTenantIdResult
-            // 
-            this.confClientTenantIdResult.AutoSize = true;
-            this.confClientTenantIdResult.Location = new System.Drawing.Point(141, 532);
-            this.confClientTenantIdResult.Name = "confClientTenantIdResult";
-            this.confClientTenantIdResult.Size = new System.Drawing.Size(112, 13);
-            this.confClientTenantIdResult.TabIndex = 24;
-            this.confClientTenantIdResult.Text = "Tenant Id Placeholder";
-            // 
-            // conClientUserLabel
-            // 
-            this.conClientUserLabel.AutoSize = true;
-            this.conClientUserLabel.Location = new System.Drawing.Point(39, 564);
-            this.conClientUserLabel.Name = "conClientUserLabel";
-            this.conClientUserLabel.Size = new System.Drawing.Size(29, 13);
-            this.conClientUserLabel.TabIndex = 25;
-            this.conClientUserLabel.Text = "User";
-            // 
-            // confClientUserResult
-            // 
-            this.confClientUserResult.AutoSize = true;
-            this.confClientUserResult.Location = new System.Drawing.Point(144, 564);
-            this.confClientUserResult.Name = "confClientUserResult";
-            this.confClientUserResult.Size = new System.Drawing.Size(88, 13);
-            this.confClientUserResult.TabIndex = 26;
-            this.confClientUserResult.Text = "User Placeholder";
-            // 
-            // confClientIdTokenLabel
-            // 
-            this.confClientIdTokenLabel.AutoSize = true;
-            this.confClientIdTokenLabel.Location = new System.Drawing.Point(39, 590);
-            this.confClientIdTokenLabel.Name = "confClientIdTokenLabel";
-            this.confClientIdTokenLabel.Size = new System.Drawing.Size(50, 13);
-            this.confClientIdTokenLabel.TabIndex = 27;
-            this.confClientIdTokenLabel.Text = "Id Token";
-            // 
-            // confClientIdTokenResult
-            // 
-            this.confClientIdTokenResult.AutoSize = true;
-            this.confClientIdTokenResult.Location = new System.Drawing.Point(144, 590);
-            this.confClientIdTokenResult.Name = "confClientIdTokenResult";
-            this.confClientIdTokenResult.Size = new System.Drawing.Size(109, 13);
-            this.confClientIdTokenResult.TabIndex = 28;
-            this.confClientIdTokenResult.Text = "Id Token Placeholder";
-            // 
-            // conClientScopesLabel
-            // 
-            this.conClientScopesLabel.AutoSize = true;
-            this.conClientScopesLabel.Location = new System.Drawing.Point(39, 627);
-            this.conClientScopesLabel.Name = "conClientScopesLabel";
-            this.conClientScopesLabel.Size = new System.Drawing.Size(43, 13);
-            this.conClientScopesLabel.TabIndex = 29;
-            this.conClientScopesLabel.Text = "Scopes";
-            // 
-            // confClientScopesResult
-            // 
-            this.confClientScopesResult.FormattingEnabled = true;
-            this.confClientScopesResult.Location = new System.Drawing.Point(144, 624);
-            this.confClientScopesResult.Name = "confClientScopesResult";
-            this.confClientScopesResult.Size = new System.Drawing.Size(477, 56);
-            this.confClientScopesResult.TabIndex = 30;
-            // 
-            // confClientPiiEnabledLabel
-            // 
-            this.confClientPiiEnabledLabel.AutoSize = true;
-            this.confClientPiiEnabledLabel.Location = new System.Drawing.Point(27, 308);
-            this.confClientPiiEnabledLabel.Name = "confClientPiiEnabledLabel";
-            this.confClientPiiEnabledLabel.Size = new System.Drawing.Size(101, 13);
-            this.confClientPiiEnabledLabel.TabIndex = 31;
-            this.confClientPiiEnabledLabel.Text = "Pii Logging Enabled";
-            // 
-            // confClientPiiDisabledButton
-            // 
-            this.confClientPiiDisabledButton.AutoSize = true;
-            this.confClientPiiDisabledButton.Checked = true;
-            this.confClientPiiDisabledButton.Location = new System.Drawing.Point(175, 302);
-            this.confClientPiiDisabledButton.Name = "confClientPiiDisabledButton";
-            this.confClientPiiDisabledButton.Size = new System.Drawing.Size(79, 26);
-            this.confClientPiiDisabledButton.TabIndex = 32;
-            this.confClientPiiDisabledButton.TabStop = true;
-            this.confClientPiiDisabledButton.Text = "Disabled";
-            this.confClientPiiDisabledButton.UseVisualStyleBackColor = true;
-            // 
-            // confClientPiiEnabledButton
-            // 
-            this.confClientPiiEnabledButton.AutoSize = true;
-            this.confClientPiiEnabledButton.Location = new System.Drawing.Point(260, 301);
-            this.confClientPiiEnabledButton.Name = "confClientPiiEnabledButton";
-            this.confClientPiiEnabledButton.Size = new System.Drawing.Size(77, 26);
-            this.confClientPiiEnabledButton.TabIndex = 33;
-            this.confClientPiiEnabledButton.TabStop = true;
-            this.confClientPiiEnabledButton.Text = "Enabled";
-            this.confClientPiiEnabledButton.UseVisualStyleBackColor = true;
-            // 
-            // confClientAcquireTokenBtn
-            // 
-            this.confClientAcquireTokenBtn.Location = new System.Drawing.Point(43, 700);
-            this.confClientAcquireTokenBtn.Name = "confClientAcquireTokenBtn";
-            this.confClientAcquireTokenBtn.Size = new System.Drawing.Size(154, 50);
-            this.confClientAcquireTokenBtn.TabIndex = 34;
-            this.confClientAcquireTokenBtn.Text = "Acquire Token";
-            this.confClientAcquireTokenBtn.UseVisualStyleBackColor = true;
-            // 
-            // confClientAcquireTokenSilentBtn
-            // 
-            this.confClientAcquireTokenSilentBtn.Location = new System.Drawing.Point(451, 700);
-            this.confClientAcquireTokenSilentBtn.Name = "confClientAcquireTokenSilentBtn";
-            this.confClientAcquireTokenSilentBtn.Size = new System.Drawing.Size(160, 58);
-            this.confClientAcquireTokenSilentBtn.TabIndex = 35;
-            this.confClientAcquireTokenSilentBtn.Text = "Acquire Token Silent";
-            this.confClientAcquireTokenSilentBtn.UseVisualStyleBackColor = true;
-            // 
-            // accessTokenResult
-            // 
-            this.accessTokenResult.Location = new System.Drawing.Point(130, 417);
-            this.accessTokenResult.Multiline = true;
-            this.accessTokenResult.Name = "accessTokenResult";
-            this.accessTokenResult.Size = new System.Drawing.Size(483, 92);
-            this.accessTokenResult.TabIndex = 33;
-            // 
-            // IdTokenResult
-            // 
-            this.IdTokenResult.Location = new System.Drawing.Point(131, 586);
-            this.IdTokenResult.Multiline = true;
-            this.IdTokenResult.Name = "IdTokenResult";
-            this.IdTokenResult.Size = new System.Drawing.Size(481, 40);
-            this.IdTokenResult.TabIndex = 34;
             // 
             // MainForm
             // 

@@ -261,5 +261,9 @@ namespace DesktopTestApp
             }
             Logger.PiiLoggingEnabled = false;
         }
+
+        private void publicClientTabPage_Click(object sender, EventArgs e)
+        {
+        }
     }
 }
