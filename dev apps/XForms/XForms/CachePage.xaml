@@ -31,9 +31,8 @@
                 <DataTemplate>
                     <ViewCell>
                         <ViewCell.ContextActions>
-                            <MenuItem Clicked="OnExpire" Text="Expire" CommandParameter="{Binding .}" />
-                            <MenuItem Clicked="OnDelete" Text="Delete" CommandParameter="{Binding .}" />
-                        </ViewCell.ContextActions>
+                                <MenuItem Clicked="OnExpire" Text="Expire" CommandParameter="{Binding .}" />
+                            </ViewCell.ContextActions>
                         <ViewCell.View>
                             <ContentView Padding="5">
                                 <Frame OutlineColor="Black" Padding="10">

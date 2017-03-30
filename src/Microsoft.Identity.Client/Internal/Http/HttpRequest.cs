@@ -122,6 +122,7 @@ namespace Microsoft.Identity.Client.Internal.Http
             Dictionary<string, string> bodyParameters, HttpMethod method)
         {
             HttpClient client = HttpClientFactory.GetHttpClient();
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
