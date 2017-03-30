@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,29 +25,28 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Runtime.Serialization;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using System.Collections.Generic;
 
-namespace Microsoft.Identity.Client.Internal.Cache
+namespace Microsoft.Identity.Client
 {
-    [DataContract]
-    internal class RefreshTokenCacheItem : BaseTokenCacheItem
+    public class Telemetry
     {
-        public RefreshTokenCacheItem()
+        public delegate void Receiver(List<Dictionary<string, string>> events);
+
+        private Receiver _receiver = null;
+
+        public void RegisterReceiver(Receiver r)
         {
+            _receiver = r;
         }
 
-        public RefreshTokenCacheItem(string authority, string clientId, TokenResponse response) : base(authority, clientId, response)
-        {
-            RefreshToken = response.RefreshToken;
-        }
+        private static readonly Telemetry Singleton = new Telemetry();
 
-        [DataMember (Name = "refresh_token")]
-        public string RefreshToken { get; set; }
+        private Telemetry(){}
 
-        public override TokenCacheKey GetTokenCacheKey()
+        public static Telemetry GetInstance()
         {
-            return new TokenCacheKey(null, null, ClientId, User.HomeObjectId);
+            return Singleton;
         }
     }
 }

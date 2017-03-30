@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,29 +25,55 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Runtime.Serialization;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using System;
+using System.Collections.Generic;
+using Microsoft.Identity.Client;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Client.Internal.Cache
+namespace Test.MSAL.NET.Unit
 {
-    [DataContract]
-    internal class RefreshTokenCacheItem : BaseTokenCacheItem
+    class MyReceiver
     {
-        public RefreshTokenCacheItem()
+        public void OnEvents(List<Dictionary<string, string>> events)
+        {
+            foreach(var e in events)
+            {
+                foreach(var entry in e)
+                {
+                    Console.WriteLine("{0}: {1}", entry.Key, entry.Value);
+                }
+            }
+        }
+    }
+
+    [TestClass]
+    public class TelemetryTests
+    {
+        [TestInitialize]
+        public void Initialize()
         {
         }
 
-        public RefreshTokenCacheItem(string authority, string clientId, TokenResponse response) : base(authority, clientId, response)
+        [TestMethod]
+        [TestCategory("TelemetryTests")]
+        public void TelemetryPublicApiSample()
         {
-            RefreshToken = response.RefreshToken;
+            var telemetry = Telemetry.GetInstance();
+            var receiver = new MyReceiver();
+            telemetry.RegisterReceiver(receiver.OnEvents);
+
+            // Or you can use a one-liner:
+            Telemetry.GetInstance().RegisterReceiver(new MyReceiver().OnEvents);
         }
 
-        [DataMember (Name = "refresh_token")]
-        public string RefreshToken { get; set; }
-
-        public override TokenCacheKey GetTokenCacheKey()
+        [TestMethod]
+        [TestCategory("TelemetryTests")]
+        public void TelemetryIsSingleton()
         {
-            return new TokenCacheKey(null, null, ClientId, User.HomeObjectId);
+            var t1 = Telemetry.GetInstance();
+            Assert.IsNotNull(t1);
+            var t2 = Telemetry.GetInstance();
+            Assert.AreEqual(t1, t2);
         }
     }
 }
