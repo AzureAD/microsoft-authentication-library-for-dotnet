@@ -1,7 +1,7 @@
 branches:
   only:
     - dev
-    - duncanp/ci
+    - test/ci		# dummy branch used for testing the CI build (pusing directly to this branch will trigger a build)
 
 image: Visual Studio 2017     
 
@@ -20,7 +20,6 @@ test:
 
 skip_commits:
   files:
-    - '**/*.md'
     - 'changelog.txt'
 
 artifacts:
