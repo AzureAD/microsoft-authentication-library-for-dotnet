@@ -106,41 +106,36 @@ namespace Test.MSAL.NET.Unit
             users = app.Users;
             Assert.IsNotNull(users);
             Assert.AreEqual(1, users.Count());
-
-            // another cache entry for different home object id. user count should be 2.
-            AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
-                TestConstants.UserIdentifier + "more");
-
-
+            
             AccessTokenCacheItem item = new AccessTokenCacheItem()
             {
-                AccessToken = key.ToString(),
+                Authority = TestConstants.AuthorityHomeTenant,
+                ClientId = TestConstants.ClientId,
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp((DateTime.UtcNow + TimeSpan.FromSeconds(3600))),
-                User = new User
-                {
-                    DisplayableId = TestConstants.DisplayableId,
-                    Identifier = TestConstants.UserIdentifier
-                },
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                RawClientInfo = MockHelpers.DefaultClientInfo,
                 Scope = TestConstants.Scope
             };
-            cache.TokenCacheAccessor.AccessTokenCacheDictionary[key.ToString()] = JsonHelper.SerializeToJson(item);
+            item.IdToken = IdToken.Parse(item.RawIdToken);
+            item.ClientInfo = ClientInfo.Parse(item.RawClientInfo);
+            item.AccessToken = item.GetAccessTokenItemKey().ToString();
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary[item.GetAccessTokenItemKey().ToString()] = JsonHelper.SerializeToJson(item);
 
 
-            // another cache entry for different home object id. user count should be 2.
-            AccessTokenCacheKey rtKey = new AccessTokenCacheKey(null, null, TestConstants.ClientId,
-                TestConstants.UserIdentifier + "more");
-
+            // another cache entry for different uid. user count should be 2.
             RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
             {
+                Environment = TestConstants.ProductionEnvironment,
                 ClientId = TestConstants.ClientId,
                 RefreshToken = "someRT",
-                DisplayableId = TestConstants.DisplayableId,
                 Uid = TestConstants.Uid + "more",
                 Utid = TestConstants.Utid,
+                DisplayableId = TestConstants.DisplayableId,
+                IdentityProvider = TestConstants.IdentityProvider,
+                Name = TestConstants.Name
             };
-            cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
+            cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
 
 
             users = app.Users;
@@ -238,7 +233,7 @@ namespace Test.MSAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage =
                     MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.UniqueId,
-                        TestConstants.DisplayableId, TestConstants.UserIdentifier,
+                        TestConstants.DisplayableId,
                         TestConstants.Scope.Union(TestConstants.ScopeForAnotherResource).ToArray())
             });
 

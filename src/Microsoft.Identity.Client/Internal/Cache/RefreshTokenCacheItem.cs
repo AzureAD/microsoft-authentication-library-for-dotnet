@@ -100,5 +100,14 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", MsalHelpers.EncodeToBase64Url(Uid),
                 MsalHelpers.EncodeToBase64Url(Utid));
         }
+
+        // This method is called after the object 
+        // is completely deserialized.
+        [OnDeserialized]
+        void OnDeserialized(StreamingContext context)
+        {
+            User = User.Create(DisplayableId, Name, IdentityProvider,
+                GetUserIdentifier());
+        }
     }
 }

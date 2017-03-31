@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
         public string IdentityProvider { get; internal set; }
 
         [DataMember]
-        internal string Identifier { get; set; }
+        public string Identifier { get; internal set; }
 
 
         internal static User Create(string displayableId, string name, string identityProvider, string identifier)

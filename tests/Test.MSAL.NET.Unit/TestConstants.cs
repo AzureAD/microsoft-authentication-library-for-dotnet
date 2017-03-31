@@ -26,7 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 
 namespace Test.MSAL.NET.Unit
 {
@@ -41,19 +43,32 @@ namespace Test.MSAL.NET.Unit
         public static readonly string AuthorityCommonTenant = "https://" + ProductionEnvironment + "/common/";
         public static readonly string ClientId = "client_id";
         public static readonly string UniqueId = "unique_id";
+        public static readonly string IdentityProvider = "my-idp";
+        public static readonly string Name = "First Last";
         public static readonly string DisplayableId = "displayable@id.com";
-        public static readonly string UserIdentifier = "user_identifier";
         public static readonly string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public static readonly string ClientSecret = "client_secret";
         public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
         public static readonly string Uid = "my-UID";
         public static readonly string Utid= "my-UTID";
+
+        public static readonly string UserIdentifier = GetUserIdentifer();
+
+        private static string GetUserIdentifer()
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}",
+                MsalHelpers.EncodeToBase64Url(Uid),
+                MsalHelpers.EncodeToBase64Url(Utid));
+        }
+
         public static readonly User User = new User
         {
             DisplayableId = DisplayableId,
-            Identifier = UserIdentifier
+            Identifier = UserIdentifier,
+            IdentityProvider = IdentityProvider,
+            Name = Name,
         };
-        
+
         public static readonly string OnPremiseAuthority = "https://fs.contoso.com/adfs/";
         public static readonly string OnPremiseClientId = "on_premise_client_id";
         public static readonly string OnPremiseUniqueId = "on_premise_unique_id";

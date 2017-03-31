@@ -141,6 +141,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
         [OnDeserialized]
         void OnDeserialized(StreamingContext context)
         {
+            IdToken = IdToken.Parse(RawIdToken);
+            ClientInfo = ClientInfo.Parse(RawClientInfo);
+            User = User.Create(IdToken.PreferredUsername, IdToken.Name, IdToken.Issuer,
+                GetUserIdentifier());
         }
     }
 }

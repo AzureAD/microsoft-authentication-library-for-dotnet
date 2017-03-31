@@ -260,7 +260,9 @@ namespace Microsoft.Identity.Client
         {
             lock (LockObject)
             {
-                AccessTokenCacheKey key = new AccessTokenCacheKey(null, null, requestParam.ClientId, requestParam.User?.Identifier);
+                RefreshTokenCacheKey key = new RefreshTokenCacheKey(
+                    new Uri(requestParam.Authority.CanonicalAuthority).Host, requestParam.ClientId,
+                    requestParam.User?.Identifier);
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,

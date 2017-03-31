@@ -40,15 +40,12 @@ namespace Microsoft.Identity.Client
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
         private readonly AccessTokenCacheItem _accessTokenCacheItem;
-        private readonly IdToken _idToken;
 
         public AuthenticationResult() { }
 
         public AuthenticationResult(AccessTokenCacheItem accessTokenCacheItem)
         {
             _accessTokenCacheItem = accessTokenCacheItem;
-            _idToken = Internal.IdToken.Parse(accessTokenCacheItem.RawIdToken);
-            User = User.Create(_idToken.PreferredUsername, _idToken.Name, _idToken.Issuer, accessTokenCacheItem.GetUserIdentifier());
         }
 
         /// <summary>
@@ -59,7 +56,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the Unique Id of the user.
         /// </summary>
-        public string UniqueId => _idToken?.GetUniqueId();
+        public string UniqueId => _accessTokenCacheItem.IdToken?.GetUniqueId();
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the Token property ceases to be valid.
@@ -78,7 +75,7 @@ namespace Microsoft.Identity.Client
         /// Gets User object. Some elements in User might be null if not returned by the
         /// service. It can be passed back in some API overloads to identify which user should be used.
         /// </summary>
-        public User User { get; internal set; }
+        public User User => _accessTokenCacheItem.User;
 
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
