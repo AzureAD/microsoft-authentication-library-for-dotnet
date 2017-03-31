@@ -218,12 +218,15 @@ namespace DesktopTestApp
             if (_confidentialClientApplication != null) return _confidentialClientApplication;
             if (!string.IsNullOrEmpty(overriddenAuthority.Text))
             {
-                _confidentialClientApplication = new ConfidentialClientApplication();
+                _confidentialClientApplication = new ConfidentialClientApplication("5a434691-ccb2-4fd1-b97b-b64bcfbc03fc", _confidentialClientApplication.RedirectUri, _confidentialClientApplication.ClientCredential, 
+                    _confidentialClientApplication.UserTokenCache, _confidentialClientApplication.AppTokenCache);
             }
-            else
+            /*se
             {
-                _confidentialClientApplication = new ConfidentialClientApplication(, authority.Text);
-            }
+                _confidentialClientApplication = new ConfidentialClientApplication(
+                    "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc", authority.Text, _confidentialClientApplication.RedirectUri,
+                    _confidentialClientApplication.UserTokenCache, _confidentialClientApplication.AppTokenCache);
+            }*/
 
             return _confidentialClientApplication;
         }
