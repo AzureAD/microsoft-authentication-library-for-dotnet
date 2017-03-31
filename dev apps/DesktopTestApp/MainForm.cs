@@ -41,6 +41,7 @@ namespace DesktopTestApp
 
         public User CurrentUser { get; set; }
         private PublicClientApplication _publicClientApplication;
+        private ConfidentialClientApplication _confidentialClientApplication;
 
         #endregion
 
@@ -210,6 +211,21 @@ namespace DesktopTestApp
             }
 
             return _publicClientApplication;
+        }
+
+        private ConfidentialClientApplication CreateConfidentialClientApplication()
+        {
+            if (_confidentialClientApplication != null) return _confidentialClientApplication;
+            if (!string.IsNullOrEmpty(overriddenAuthority.Text))
+            {
+                _confidentialClientApplication = new ConfidentialClientApplication();
+            }
+            else
+            {
+                _confidentialClientApplication = new ConfidentialClientApplication(, authority.Text);
+            }
+
+            return _confidentialClientApplication;
         }
 
         private void applySettings_Click(object sender, EventArgs e)
