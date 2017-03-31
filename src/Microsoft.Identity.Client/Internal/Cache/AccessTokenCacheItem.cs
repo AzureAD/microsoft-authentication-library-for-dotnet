@@ -60,7 +60,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
             }
 
             TokenType = response.TokenType;
-            Scope = response.Scope.AsSet();
+            Scope = response.Scope;
+            ScopeSet = response.Scope.AsSet();
             Authority = authority;
         }
 
@@ -92,10 +93,12 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public string Authority { get; set; }
 
         /// <summary>
-        /// Gets the Scope.
+        /// Gets the ScopeSet.
         /// </summary>
         [DataMember(Name = "scope")]
-        public SortedSet<string> Scope { get; set; }
+        public string Scope { get; set; }
+        
+        public SortedSet<string> ScopeSet { get; set; }
 
         [DataMember(Name = "user_assertion_hash")]
         public string UserAssertionHash { get; set; }
@@ -119,7 +122,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public AccessTokenCacheKey GetAccessTokenItemKey()
         {
-            return new AccessTokenCacheKey(Authority, Scope, ClientId, GetUserIdentifier());
+            return new AccessTokenCacheKey(Authority, ScopeSet, ClientId, GetUserIdentifier());
         }
 
         public sealed override string GetUserIdentifier()
@@ -152,6 +155,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         [OnDeserialized]
         void OnDeserialized(StreamingContext context)
         {
+            ScopeSet = Scope.AsSet();
             IdToken = IdToken.Parse(RawIdToken);
             ClientInfo = ClientInfo.Parse(RawClientInfo);
             if (IdToken != null)

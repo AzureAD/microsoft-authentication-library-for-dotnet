@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client
                         AccessTokenCacheItem accessTokenItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessTokenString);
                         if (accessTokenItem.ClientId.Equals(ClientId) &&
                             accessTokenItem.Authority.Equals(requestParams.Authority.CanonicalAuthority) &&
-                            accessTokenItem.Scope.ScopeIntersects(accessTokenCacheItem.Scope))
+                            accessTokenItem.ScopeSet.ScopeIntersects(accessTokenCacheItem.ScopeSet))
                         {
                             accessTokenItemList.Add(accessTokenItem);
                         }
@@ -201,11 +201,11 @@ namespace Microsoft.Identity.Client
                         item =>
                             item.Authority.Equals(requestParam.Authority.CanonicalAuthority) &&
                             item.ClientId.Equals(requestParam.ClientId) &&
-                            item.Scope.ScopeContains(requestParam.Scope))
+                            item.ScopeSet.ScopeContains(requestParam.Scope))
                         .ToList();
 
                 // this is OBO flow. match the cache entry with assertion hash,
-                // Authority, Scope and client Id.
+                // Authority, ScopeSet and client Id.
                 if (requestParam.UserAssertion != null)
                 {
                     tokenCacheItems =

@@ -115,7 +115,7 @@ namespace Test.MSAL.NET.Unit
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp((DateTime.UtcNow + TimeSpan.FromSeconds(3600))),
                 RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
                 RawClientInfo = MockHelpers.DefaultClientInfo,
-                Scope = TestConstants.Scope
+                ScopeSet = TestConstants.Scope
             };
             item.IdToken = IdToken.Parse(item.RawIdToken);
             item.ClientInfo = ClientInfo.Parse(item.RawClientInfo);

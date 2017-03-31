@@ -46,7 +46,8 @@ namespace Test.MSAL.NET.Unit.Mocks
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
                 RawIdToken = MockHelpers.DefaultIdToken,
                 RawClientInfo = MockHelpers.DefaultClientInfo,
-                Scope = TestConstants.Scope
+                Scope = TestConstants.Scope.AsSingleString(),
+                ScopeSet = TestConstants.Scope
             };
             item.IdToken = IdToken.Parse(item.RawIdToken);
             item.ClientInfo = ClientInfo.Parse(item.RawClientInfo);
@@ -62,7 +63,8 @@ namespace Test.MSAL.NET.Unit.Mocks
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
                 RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId),
                 RawClientInfo = MockHelpers.DefaultClientInfo,
-                Scope = TestConstants.ScopeForAnotherResource
+                Scope = TestConstants.ScopeForAnotherResource.AsSingleString(),
+                ScopeSet = TestConstants.ScopeForAnotherResource
             };
             item.IdToken = IdToken.Parse(item.RawIdToken);
             item.ClientInfo = ClientInfo.Parse(item.RawClientInfo);

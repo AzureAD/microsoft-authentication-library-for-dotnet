@@ -83,7 +83,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 RawClientInfo = MockHelpers.DefaultClientInfo,
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
-                Scope = TestConstants.Scope
+                ScopeSet = TestConstants.Scope
             };
             atItem.IdToken = IdToken.Parse(atItem.RawIdToken);
             atItem.ClientInfo = ClientInfo.Parse(atItem.RawClientInfo);

@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (string.IsNullOrEmpty(Response.Scope))
             {
                 Response.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
-                RequestContext.Logger.Info("Scope was missing from the token response, so using developer provided scopes in the result");
+                RequestContext.Logger.Info("ScopeSet was missing from the token response, so using developer provided scopes in the result");
             }
         }
 
