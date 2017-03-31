@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         [DataMember(Name = "name")]
         public string Name { get; internal set; }
 
-        [DataMember(Name = "idp")]
+        [DataMember(Name = "identity_provider")]
         public string IdentityProvider { get; internal set; }
 
         [DataMember (Name = "refresh_token")]

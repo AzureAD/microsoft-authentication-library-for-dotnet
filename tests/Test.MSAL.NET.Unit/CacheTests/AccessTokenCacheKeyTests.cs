@@ -140,5 +140,30 @@ namespace Test.MSAL.NET.Unit.CacheTests
             otherScope.Clear();
             Assert.IsFalse(key.ScopeEquals(otherScope));
         }
+
+        [TestMethod]
+        [TestCategory("AccessTokenCacheKeyTests")]
+        public void TestHashCode()
+        {
+            AccessTokenCacheKey key1 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
+                TestConstants.Scope, TestConstants.ClientId, TestConstants.UserIdentifier);
+
+            AccessTokenCacheKey key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
+                TestConstants.Scope, TestConstants.ClientId, TestConstants.UserIdentifier);
+            Assert.AreEqual(key1.GetHashCode(), key2.GetHashCode());
+
+            //environment
+            key2 = new AccessTokenCacheKey(TestConstants.SovereignEnvironment,
+                TestConstants.Scope, TestConstants.ClientId, TestConstants.UserIdentifier);
+            Assert.AreNotEqual(key1.GetHashCode(), key2.GetHashCode());
+
+            key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
+                TestConstants.Scope, TestConstants.ClientId + "more", TestConstants.UserIdentifier);
+            Assert.AreNotEqual(key1.GetHashCode(), key2.GetHashCode());
+
+            key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
+                TestConstants.Scope, TestConstants.ClientId, TestConstants.UserIdentifier + "more");
+            Assert.AreNotEqual(key1.GetHashCode(), key2.GetHashCode());
+        }
     }
 }

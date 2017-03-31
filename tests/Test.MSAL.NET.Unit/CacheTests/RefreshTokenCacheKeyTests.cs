@@ -82,6 +82,34 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
             // mistmatched object
             Assert.IsFalse(key1.Equals(new object()));
+
+            // null
+            Assert.IsFalse(key1.Equals(null));
+        }
+
+        [TestMethod]
+        [TestCategory("RefreshTokenCacheKeyTests")]
+        public void TestHashCode()
+        {
+            RefreshTokenCacheKey key1 = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
+                TestConstants.ClientId, TestConstants.UserIdentifier);
+
+            RefreshTokenCacheKey key2 = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
+                TestConstants.ClientId, TestConstants.UserIdentifier);
+            Assert.AreEqual(key1.GetHashCode(), key2.GetHashCode());
+
+            //environment
+            key2 = new RefreshTokenCacheKey(TestConstants.SovereignEnvironment,
+                TestConstants.ClientId, TestConstants.UserIdentifier);
+            Assert.AreNotEqual(key1.GetHashCode(), key2.GetHashCode());
+
+            key2 = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
+                TestConstants.ClientId + "more", TestConstants.UserIdentifier);
+            Assert.AreNotEqual(key1.GetHashCode(), key2.GetHashCode());
+
+            key2 = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
+                TestConstants.ClientId, TestConstants.UserIdentifier + "more");
+            Assert.AreNotEqual(key1.GetHashCode(), key2.GetHashCode());
         }
     }
 }

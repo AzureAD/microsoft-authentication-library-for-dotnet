@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
@@ -792,7 +793,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
             byte[] serializedCache = cache.Serialize();
-            
+
             cache.TokenCacheAccessor.AccessTokenCacheDictionary.Clear();
             cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Clear();
 
