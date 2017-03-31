@@ -49,10 +49,15 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(response.AccessTokenExpiresOn);
             }
 
+            RawClientInfo = response.ClientInfo;
+            RawIdToken = response.IdToken;
             IdToken = IdToken.Parse(response.IdToken);
             ClientInfo = ClientInfo.Parse(response.ClientInfo);
-            User = User.Create(IdToken.PreferredUsername, IdToken.Name, IdToken.Issuer,
-                GetUserIdentifier());
+            if (IdToken != null)
+            {
+                User = User.Create(IdToken.PreferredUsername, IdToken.Name, IdToken.Issuer,
+                    GetUserIdentifier());
+            }
 
             TokenType = response.TokenType;
             Scope = response.Scope.AsSet();
@@ -121,6 +126,12 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
             string Uid;
             string Utid;
+
+            if (ClientInfo == null && IdToken == null)
+            {
+                return null;
+            }
+
             if (ClientInfo != null)
             {
                 Uid = ClientInfo.UniqueIdentifier;
@@ -143,8 +154,11 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
             IdToken = IdToken.Parse(RawIdToken);
             ClientInfo = ClientInfo.Parse(RawClientInfo);
-            User = User.Create(IdToken.PreferredUsername, IdToken.Name, IdToken.Issuer,
-                GetUserIdentifier());
+            if (IdToken != null)
+            {
+                User = User.Create(IdToken.PreferredUsername, IdToken.Name, IdToken.Issuer,
+                    GetUserIdentifier());
+            }
         }
     }
 }
