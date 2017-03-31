@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client
                     return new List<User>();
                 }
 
-                return UserTokenCache.GetUsers(ClientId);
+                return UserTokenCache.GetUsers(new Uri(Authority).Host);
             }
         }
 

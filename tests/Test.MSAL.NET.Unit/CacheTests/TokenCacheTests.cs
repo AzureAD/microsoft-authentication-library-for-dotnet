@@ -103,6 +103,46 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
+        public void GetExactScopesMatchedAccessTokenNoClientInfoTest()
+        {
+            TokenCache cache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
+            AccessTokenCacheItem atItem = new AccessTokenCacheItem()
+            {
+                Authority = TestConstants.AuthorityHomeTenant,
+                ClientId = TestConstants.ClientId,
+                TokenType = "Bearer",
+                Scope = TestConstants.Scope,
+                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromHours(1)),
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+            };
+            atItem.IdToken = IdToken.Parse(atItem.RawIdToken);
+
+            // create key out of access token cache item and then
+            // set it as the value of the access token.
+            AccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
+            atItem.AccessToken = atKey.ToString();
+
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
+            AccessTokenCacheItem item = cache.FindAccessToken(new AuthenticationRequestParameters()
+            {
+                ClientId = TestConstants.ClientId,
+                Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
+                Scope = TestConstants.Scope,
+                User = new User
+                {
+                    Identifier = atItem.GetUserIdentifier()
+                }
+            });
+
+            Assert.IsNotNull(item);
+            Assert.AreEqual(atKey.ToString(), item.AccessToken);
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
         public void GetSubsetScopesMatchedAccessTokenTest()
         {
             TokenCache cache = new TokenCache()
@@ -306,6 +346,38 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 Scope = TestConstants.Scope,
                 User = TestConstants.User
             }));
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void GetRefreshTokenDifferentEnvironmentTest()
+        {
+            TokenCache cache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
+            RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
+            {
+                Environment = TestConstants.SovereignEnvironment,
+                ClientId = TestConstants.ClientId,
+                RefreshToken = "someRT",
+                Uid = TestConstants.Uid,
+                Utid = TestConstants.Utid,
+                DisplayableId = TestConstants.DisplayableId,
+                IdentityProvider = TestConstants.IdentityProvider,
+                Name = TestConstants.Name
+            };
+
+            RefreshTokenCacheKey rtKey = rtItem.GetRefreshTokenItemKey();
+            cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
+            var authParams = new AuthenticationRequestParameters()
+            {
+                ClientId = TestConstants.ClientId,
+                Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
+                Scope = TestConstants.Scope,
+                User = TestConstants.User
+            };
+            Assert.IsNull(cache.FindRefreshToken(authParams));
         }
 
         [TestMethod]

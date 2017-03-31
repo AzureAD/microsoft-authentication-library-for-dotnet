@@ -302,13 +302,8 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal ICollection<User> GetUsers(string clientId)
+        internal ICollection<User> GetUsers(string environment)
         {
-            if (string.IsNullOrEmpty(clientId))
-            {
-                throw new ArgumentNullException(nameof(clientId));
-            }
-
             lock (LockObject)
             {
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
@@ -325,8 +320,12 @@ namespace Microsoft.Identity.Client
                 IDictionary<string, User> allUsers = new Dictionary<string, User>();
                 foreach (RefreshTokenCacheItem item in tokenCacheItems)
                 {
-                    User user = new User(item.User);
-                    allUsers[item.GetUserIdentifier()] = user;
+                    if (environment.Equals(
+                        item.Environment, StringComparison.OrdinalIgnoreCase))
+                    {
+                        User user = new User(item.User);
+                        allUsers[item.GetUserIdentifier()] = user;
+                    }
                 }
 
                 return allUsers.Values;

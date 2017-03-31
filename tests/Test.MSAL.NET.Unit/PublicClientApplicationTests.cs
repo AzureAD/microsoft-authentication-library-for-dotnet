@@ -136,8 +136,25 @@ namespace Test.MSAL.NET.Unit
                 Name = TestConstants.Name
             };
             cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
+            Assert.AreEqual(2, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
+            users = app.Users;
+            Assert.IsNotNull(users);
+            Assert.AreEqual(2, users.Count());
 
-
+            // another cache entry for different environment. user count should still be 2. Sovereign cloud user must not be returned
+            rtItem = new RefreshTokenCacheItem()
+            {
+                Environment = TestConstants.SovereignEnvironment,
+                ClientId = TestConstants.ClientId,
+                RefreshToken = "someRT",
+                Uid = TestConstants.Uid + "more1",
+                Utid = TestConstants.Utid,
+                DisplayableId = TestConstants.DisplayableId,
+                IdentityProvider = TestConstants.IdentityProvider,
+                Name = TestConstants.Name
+            };
+            cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
+            Assert.AreEqual(3, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             users = app.Users;
             Assert.IsNotNull(users);
             Assert.AreEqual(2, users.Count());
