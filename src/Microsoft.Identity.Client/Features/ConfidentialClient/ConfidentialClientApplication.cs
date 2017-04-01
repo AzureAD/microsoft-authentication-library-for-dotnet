@@ -27,7 +27,6 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
 

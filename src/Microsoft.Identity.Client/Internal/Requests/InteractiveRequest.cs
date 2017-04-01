@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.LoginHint;
             }
 
-            if (RequestContext != null && !string.IsNullOrEmpty(RequestContext.CorrelationId))
+            if (!string.IsNullOrEmpty(RequestContext?.CorrelationId))
             {
                 authorizationRequestParameters[OAuth2Parameter.CorrelationId] = RequestContext.CorrelationId;
             }
