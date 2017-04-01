@@ -44,19 +44,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
             RefreshToken = response.RefreshToken;
             Environment = environment;
             PopulateIdentifiers(response);
-
-            User = User.Create(DisplayableId, Name, IdentityProvider,
-                GetUserIdentifier());
         }
 
         [DataMember(Name = "environment")]
         public string Environment { get; set; }
-
-        [DataMember(Name = "uid")]
-        public string Uid { get; set; }
-
-        [DataMember(Name = "utid")]
-        public string Utid { get; set; }
 
         [DataMember(Name = "displayable_id")]
         public string DisplayableId { get; internal set; }
@@ -77,28 +68,15 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public void PopulateIdentifiers(TokenResponse response)
         {
-            ClientInfo info = ClientInfo.Parse(response.ClientInfo);
             IdToken idToken = IdToken.Parse(response.IdToken);
-            if (info != null)
-            {
-                Uid = info.UniqueIdentifier;
-                Utid = info.UniqueTenantIdentifier;
-            }
-            else
-            {
-                Uid = idToken.GetUniqueId();
-                Utid = idToken.TenantId;
-            }
+            ClientInfo = ClientInfo.Parse(response.ClientInfo);
 
             DisplayableId = idToken.PreferredUsername;
             Name = idToken.Name;
             IdentityProvider = idToken.Issuer;
-        }
 
-        internal sealed override string GetUserIdentifier()
-        {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", MsalHelpers.EncodeToBase64Url(Uid),
-                MsalHelpers.EncodeToBase64Url(Utid));
+            User = User.Create(DisplayableId, Name, IdentityProvider,
+                GetUserIdentifier());
         }
 
         // This method is called after the object 
@@ -106,6 +84,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         [OnDeserialized]
         void OnDeserialized(StreamingContext context)
         {
+            ClientInfo = ClientInfo.Parse(RawClientInfo);
             User = User.Create(DisplayableId, Name, IdentityProvider,
                 GetUserIdentifier());
         }

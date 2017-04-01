@@ -80,7 +80,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
                 RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
-                RawClientInfo = MockHelpers.DefaultClientInfo,
+                RawClientInfo = MockHelpers.CreateClientInfo(),
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
                 ScopeSet = TestConstants.Scope

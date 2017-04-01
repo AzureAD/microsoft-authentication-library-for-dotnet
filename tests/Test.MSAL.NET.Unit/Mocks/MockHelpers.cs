@@ -53,14 +53,24 @@ namespace Test.MSAL.NET.Unit.Mocks
                                              "ZXIiOiIyLjAifQ." +
                                              "AD4-sdfsfsdf";
 
-        public static readonly string DefaultClientInfo = Base64UrlEncoder.Encode("{\"uid\":\"" + TestConstants.Uid + "\",\"utid\":\"" + TestConstants.Utid + "\"}");
-
         public static readonly string DefaultAccessTokenResponse =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
             "\"some-scope1 some-scope2\",\"access_token\":\"some-access-token\"" +
             ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
-            ":\"" + DefaultClientInfo + "\",\"id_token\"" +
+            ":\"" + CreateClientInfo() + "\",\"id_token\"" +
             ":\""+DefaultIdToken+"\",\"id_token_expires_in\":\"3600\"}";
+
+
+        public static string CreateClientInfo()
+        {
+            return CreateClientInfo(TestConstants.Uid, TestConstants.Utid);
+        }
+
+        public static string CreateClientInfo(string uid, string utid)
+        {
+            return Base64UrlEncoder.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");
+        }
+
         public static Stream GenerateStreamFromString(string s)
         {
             MemoryStream stream = new MemoryStream();

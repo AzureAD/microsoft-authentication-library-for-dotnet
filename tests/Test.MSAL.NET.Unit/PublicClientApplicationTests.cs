@@ -114,7 +114,7 @@ namespace Test.MSAL.NET.Unit
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp((DateTime.UtcNow + TimeSpan.FromSeconds(3600))),
                 RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
-                RawClientInfo = MockHelpers.DefaultClientInfo,
+                RawClientInfo = MockHelpers.CreateClientInfo(),
                 ScopeSet = TestConstants.Scope
             };
             item.IdToken = IdToken.Parse(item.RawIdToken);
@@ -129,12 +129,12 @@ namespace Test.MSAL.NET.Unit
                 Environment = TestConstants.ProductionEnvironment,
                 ClientId = TestConstants.ClientId,
                 RefreshToken = "someRT",
-                Uid = TestConstants.Uid + "more",
-                Utid = TestConstants.Utid,
+                RawClientInfo = MockHelpers.CreateClientInfo(TestConstants.Uid + "more", TestConstants.Utid),
                 DisplayableId = TestConstants.DisplayableId,
                 IdentityProvider = TestConstants.IdentityProvider,
                 Name = TestConstants.Name
             };
+            rtItem.ClientInfo = ClientInfo.Parse(rtItem.RawClientInfo);
             cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
             Assert.AreEqual(2, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             users = app.Users;
@@ -147,12 +147,12 @@ namespace Test.MSAL.NET.Unit
                 Environment = TestConstants.SovereignEnvironment,
                 ClientId = TestConstants.ClientId,
                 RefreshToken = "someRT",
-                Uid = TestConstants.Uid + "more1",
-                Utid = TestConstants.Utid,
+                RawClientInfo = MockHelpers.CreateClientInfo(TestConstants.Uid + "more1", TestConstants.Utid),
                 DisplayableId = TestConstants.DisplayableId,
                 IdentityProvider = TestConstants.IdentityProvider,
                 Name = TestConstants.Name
             };
+            rtItem.ClientInfo = ClientInfo.Parse(rtItem.RawClientInfo);
             cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
             Assert.AreEqual(3, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             users = app.Users;

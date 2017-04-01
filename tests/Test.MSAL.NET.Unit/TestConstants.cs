@@ -52,13 +52,18 @@ namespace Test.MSAL.NET.Unit
         public static readonly string Uid = "my-UID";
         public static readonly string Utid= "my-UTID";
 
-        public static readonly string UserIdentifier = GetUserIdentifer();
+        public static readonly string UserIdentifier = CreateUserIdentifer();
 
-        private static string GetUserIdentifer()
+        public static string CreateUserIdentifer()
+        {
+            return CreateUserIdentifer(Uid, Utid);
+        }
+
+        public static string CreateUserIdentifer(string uid, string utid)
         {
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}",
-                MsalHelpers.EncodeToBase64Url(Uid),
-                MsalHelpers.EncodeToBase64Url(Utid));
+                MsalHelpers.EncodeToBase64Url(uid),
+                MsalHelpers.EncodeToBase64Url(utid));
         }
 
         public static readonly User User = new User

@@ -45,7 +45,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
                 RawIdToken = MockHelpers.DefaultIdToken,
-                RawClientInfo = MockHelpers.DefaultClientInfo,
+                RawClientInfo = MockHelpers.CreateClientInfo(),
                 Scope = TestConstants.Scope.AsSingleString(),
                 ScopeSet = TestConstants.Scope
             };
@@ -62,7 +62,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
                 RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId),
-                RawClientInfo = MockHelpers.DefaultClientInfo,
+                RawClientInfo = MockHelpers.CreateClientInfo(),
                 Scope = TestConstants.ScopeForAnotherResource.AsSingleString(),
                 ScopeSet = TestConstants.ScopeForAnotherResource
             };
@@ -77,12 +77,12 @@ namespace Test.MSAL.NET.Unit.Mocks
                 Environment= TestConstants.ProductionEnvironment,
                 ClientId = TestConstants.ClientId,
                 RefreshToken = "someRT",
-                Uid = TestConstants.Uid,
-                Utid = TestConstants.Utid,
+                RawClientInfo = MockHelpers.CreateClientInfo(),
                 DisplayableId = TestConstants.DisplayableId,
                 IdentityProvider = TestConstants.IdentityProvider,
                 Name = TestConstants.Name
             };
+            rtItem.ClientInfo = ClientInfo.Parse(rtItem.RawClientInfo);
             accessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
         }
     }

@@ -73,9 +73,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
         [DataMember(Name = "id_token")]
         public string RawIdToken { get; set; }
 
-        [DataMember(Name = "client_info")]
-        public string RawClientInfo { get; set; }
-
         [DataMember(Name = "expires_on")]
         public long ExpiresOnUnixTimestamp { get; set; }
 
@@ -90,15 +87,13 @@ namespace Microsoft.Identity.Client.Internal.Cache
         /// </summary>
         [DataMember(Name = "scope")]
         public string Scope { get; set; }
-        
-        public SortedSet<string> ScopeSet { get; set; }
 
         [DataMember(Name = "user_assertion_hash")]
         public string UserAssertionHash { get; set; }
 
-        public IdToken IdToken { get; set; }
+        public SortedSet<string> ScopeSet { get; set; }
 
-        public ClientInfo ClientInfo { get; set; }
+        public IdToken IdToken { get; set; }
 
         public DateTimeOffset ExpiresOn
         {
@@ -117,32 +112,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
             return new AccessTokenCacheKey(Authority, ScopeSet, ClientId, GetUserIdentifier());
         }
-
-        internal sealed override string GetUserIdentifier()
-        {
-            string Uid;
-            string Utid;
-
-            if (ClientInfo == null && IdToken == null)
-            {
-                return null;
-            }
-
-            if (ClientInfo != null)
-            {
-                Uid = ClientInfo.UniqueIdentifier;
-                Utid = ClientInfo.UniqueTenantIdentifier;
-            }
-            else
-            {
-                Uid = IdToken.GetUniqueId();
-                Utid = IdToken.TenantId;
-            }
-
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", MsalHelpers.EncodeToBase64Url(Uid),
-                MsalHelpers.EncodeToBase64Url(Utid));
-        }
-
 
         private void CreateDerivedProperties()
         {

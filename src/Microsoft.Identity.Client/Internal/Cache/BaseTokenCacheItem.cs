@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Globalization;
 using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Client.Internal.Cache
@@ -47,11 +48,20 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
         }
 
+        [DataMember(Name = "client_info")]
+        public string RawClientInfo { get; set; }
+
         [DataMember(Name = "client_id")]
         public string ClientId { get; set; }
 
+        public ClientInfo ClientInfo { get; set; }
+
         public User User { get; set; }
 
-        internal abstract string GetUserIdentifier();
+        internal string GetUserIdentifier()
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", MsalHelpers.EncodeToBase64Url(ClientInfo?.UniqueIdentifier),
+                MsalHelpers.EncodeToBase64Url(ClientInfo?.UniqueTenantIdentifier));
+        }
     }
 }
