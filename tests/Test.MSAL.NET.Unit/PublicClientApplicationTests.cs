@@ -37,6 +37,7 @@ using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.Http;
 using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 using Test.MSAL.NET.Unit.Mocks;
 
 namespace Test.MSAL.NET.Unit
@@ -60,6 +61,49 @@ namespace Test.MSAL.NET.Unit
         {
             cache.TokenCacheAccessor.AccessTokenCacheDictionary.Clear();
             cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Clear();
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        [Description("Tests the public interfaces can be mocked")]
+        public void MockPublicClientApplication()
+        {
+            // Setup up a public client application that returns a dummy result
+            // The caller asks for two scopes, but only one is returned
+            var mockResult = Substitute.For<IAuthenticationResult>();
+            mockResult.IdToken.Returns("id token");
+            mockResult.Scope.Returns(new string[] { "scope1" });
+
+            var mockApp = Substitute.For<IPublicClientApplication>();
+            mockApp.AcquireTokenAsync(new string[] { "scope1", "scope2" }).ReturnsForAnyArgs(mockResult);
+
+            // Now call the substitute with the args to get the substitute result
+            IAuthenticationResult actualResult = mockApp.AcquireTokenAsync(new string[] { "scope1" }).Result;
+            Assert.IsNotNull(actualResult);
+            Assert.AreEqual("id token", actualResult.IdToken, "Mock result failed to return the expected id token");
+
+            // Check the users properties returns the dummy users
+            IEnumerable<string> scopes = actualResult.Scope;
+            Assert.IsNotNull(scopes);
+            CollectionAssert.AreEqual(new string[] { "scope1" }, actualResult.Scope.ToArray());
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        [Description("Tests the public application interfaces can be mocked to throw MSAL exceptions")]
+        public void MockPublicClientApplication_Exception()
+        {
+            // Setup up a confidential client application that returns throws
+            var mockApp = Substitute.For<IPublicClientApplication>();
+            mockApp
+                .WhenForAnyArgs(x => x.AcquireTokenAsync(Arg.Any<string[]>()))
+                .Do(x => { throw new MsalServiceException("my error code", "my message"); });
+
+
+            // Now call the substitute and check the exception is thrown
+            MsalServiceException ex = AssertException.Throws<MsalServiceException>(() => mockApp.AcquireTokenAsync(new string[] { "scope1" }));
+            Assert.AreEqual("my error code", ex.ErrorCode);
+            Assert.AreEqual("my message", ex.Message);
         }
 
         [TestMethod]
