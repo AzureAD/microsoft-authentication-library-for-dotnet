@@ -43,6 +43,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public AccessTokenCacheItem(string authority, string clientId, TokenResponse response)
             : base(clientId)
         {
+
+            TokenType = response.TokenType;
+            Scope = response.Scope;
+            Authority = authority;
             if (response.AccessToken != null)
             {
                 AccessToken = response.AccessToken;
@@ -51,18 +55,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
             RawClientInfo = response.ClientInfo;
             RawIdToken = response.IdToken;
-            IdToken = IdToken.Parse(response.IdToken);
-            ClientInfo = ClientInfo.Parse(response.ClientInfo);
-            if (IdToken != null)
-            {
-                User = User.Create(IdToken.PreferredUsername, IdToken.Name, IdToken.Issuer,
-                    GetUserIdentifier());
-            }
-
-            TokenType = response.TokenType;
-            Scope = response.Scope;
-            ScopeSet = response.Scope.AsSet();
-            Authority = authority;
+            CreateDerivedProperties();
         }
 
         /// <summary>
@@ -125,7 +118,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             return new AccessTokenCacheKey(Authority, ScopeSet, ClientId, GetUserIdentifier());
         }
 
-        public sealed override string GetUserIdentifier()
+        internal sealed override string GetUserIdentifier()
         {
             string Uid;
             string Utid;
@@ -150,10 +143,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 MsalHelpers.EncodeToBase64Url(Utid));
         }
 
-        // This method is called after the object 
-        // is completely deserialized.
-        [OnDeserialized]
-        void OnDeserialized(StreamingContext context)
+
+        private void CreateDerivedProperties()
         {
             ScopeSet = Scope.AsSet();
             IdToken = IdToken.Parse(RawIdToken);
@@ -163,6 +154,14 @@ namespace Microsoft.Identity.Client.Internal.Cache
                 User = User.Create(IdToken.PreferredUsername, IdToken.Name, IdToken.Issuer,
                     GetUserIdentifier());
             }
+        }
+
+        // This method is called after the object 
+        // is completely deserialized.
+        [OnDeserialized]
+        void OnDeserialized(StreamingContext context)
+        {
+            CreateDerivedProperties();
         }
     }
 }

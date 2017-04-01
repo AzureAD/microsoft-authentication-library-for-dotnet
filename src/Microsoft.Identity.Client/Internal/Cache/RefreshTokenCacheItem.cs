@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             IdentityProvider = idToken.Issuer;
         }
 
-        public sealed override string GetUserIdentifier()
+        internal sealed override string GetUserIdentifier()
         {
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", MsalHelpers.EncodeToBase64Url(Uid),
                 MsalHelpers.EncodeToBase64Url(Utid));

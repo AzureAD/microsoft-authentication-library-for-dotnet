@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client
             },
             {
                 (int)NavigateErrorStatusCode.HTTP_STATUS_NOT_FOUND,
-                "The server has not found anything matching the requested URI (Uniform ScopeSet Identifier)."
+                "The server has not found anything matching the requested URI (Uniform Resource Identifier)."
             },
             {
                 (int)NavigateErrorStatusCode.HTTP_STATUS_BAD_METHOD,

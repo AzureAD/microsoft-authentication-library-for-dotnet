@@ -325,17 +325,6 @@ namespace Microsoft.Identity.Client.Internal
             return CreateString(bytes);
         }
 
-        internal static string Base64Encode(string input)
-        {
-            string encodedString = String.Empty;
-            if (!String.IsNullOrEmpty(input))
-            {
-                encodedString = Convert.ToBase64String(Encoding.UTF8.GetBytes(input));
-            }
-
-            return encodedString;
-        }
-
         internal static List<string> SplitWithQuotes(string input, char delimiter)
         {
             List<string> items = new List<string>();

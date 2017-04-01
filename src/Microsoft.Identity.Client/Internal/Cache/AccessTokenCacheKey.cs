@@ -53,60 +53,16 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append(MsalHelpers.Base64Encode(Authority) + "$");
-            stringBuilder.Append(MsalHelpers.Base64Encode(ClientId) + "$");
+            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(Authority));
+            stringBuilder.Append(CacheKeyDelimiter);
+            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(ClientId));
+            stringBuilder.Append(CacheKeyDelimiter);
             // scope is treeSet to guarantee the order of the scopes when converting to string.
-            stringBuilder.Append(MsalHelpers.Base64Encode(Scope.AsSingleString()) + "$");
-            stringBuilder.Append(MsalHelpers.Base64Encode(UserIdentifier) + "$");
+            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(Scope.AsSingleString()));
+            stringBuilder.Append(CacheKeyDelimiter);
+            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(UserIdentifier));
 
             return stringBuilder.ToString();
-        }
-
-        /// <summary>
-        /// Determines whether the specified object is equal to the current object.
-        /// </summary>
-        /// <returns>
-        /// true if the specified object is equal to the current object; otherwise, false.
-        /// </returns>
-        /// <param name="obj">The object to compare with the current object. </param>
-        /// <filterpriority>2</filterpriority>
-        public override bool Equals(object obj)
-        {
-            AccessTokenCacheKey other = obj as AccessTokenCacheKey;
-            return (other != null) && Equals(other);
-        }
-
-        /// <summary>
-        /// Determines whether the specified AccessTokenCacheKey is equal to the current object.
-        /// </summary>
-        /// <returns>
-        /// true if the specified AccessTokenCacheKey is equal to the current object; otherwise, false.
-        /// </returns>
-        /// <param name="other">The AccessTokenCacheKey to compare with the current object. </param>
-        /// <filterpriority>2</filterpriority>
-        public bool Equals(AccessTokenCacheKey other)
-        {
-            return ReferenceEquals(this, other) ||
-                   (other != null
-                    && (other.Authority == Authority)
-                    && ScopeEquals(other.Scope)
-                    && Equals(ClientId, other.ClientId)
-                    && UserIdentifier == other.UserIdentifier);
-        }
-
-        /// <summary>
-        /// Returns the hash code for this AccessTokenCacheKey.
-        /// </summary>
-        /// <returns>
-        /// A 32-bit signed integer hash code.
-        /// </returns>
-        public override int GetHashCode()
-        {
-            const string Delimiter = ":::";
-            return (Authority + Delimiter
-                    + MsalHelpers.AsSingleString(Scope) + Delimiter
-                    + ClientId.ToLowerInvariant() + Delimiter
-                    + UserIdentifier + Delimiter).GetHashCode();
         }
 
         internal bool ScopeEquals(SortedSet<string> otherScope)

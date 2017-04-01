@@ -31,6 +31,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
 {
     internal abstract class TokenCacheKeyBase
     {
+        public const string CacheKeyDelimiter = "$";
+
         public TokenCacheKeyBase(string clientId, string userIdentifier)
         {
             ClientId = clientId;
@@ -41,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public string UserIdentifier { get; set; }
 
-        public bool Equals(string string1, string string2)
+        protected bool Equals(string string1, string string2)
         {
             return (string.Compare(string2, string1, StringComparison.OrdinalIgnoreCase) == 0);
         }

@@ -1,4 +1,31 @@
-﻿using System.Text;
+﻿//----------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
+
+using System.Text;
 
 namespace Microsoft.Identity.Client.Internal.Cache
 {
@@ -18,56 +45,13 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(Environment) + "$");
-            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(ClientId) + "$");
-            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(UserIdentifier) + "$");
+            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(Environment));
+            stringBuilder.Append(CacheKeyDelimiter);
+            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(ClientId));
+            stringBuilder.Append(CacheKeyDelimiter);
+            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(UserIdentifier));
 
             return stringBuilder.ToString();
-        }
-
-        /// <summary>
-        /// Determines whether the specified object is equal to the current object.
-        /// </summary>
-        /// <returns>
-        /// true if the specified object is equal to the current object; otherwise, false.
-        /// </returns>
-        /// <param name="obj">The object to compare with the current object. </param>
-        /// <filterpriority>2</filterpriority>
-        public override bool Equals(object obj)
-        {
-            RefreshTokenCacheKey other = obj as RefreshTokenCacheKey;
-            return (other != null) && Equals(other);
-        }
-
-        /// <summary>
-        /// Determines whether the specified AccessTokenCacheKey is equal to the current object.
-        /// </summary>
-        /// <returns>
-        /// true if the specified AccessTokenCacheKey is equal to the current object; otherwise, false.
-        /// </returns>
-        /// <param name="other">The AccessTokenCacheKey to compare with the current object. </param>
-        /// <filterpriority>2</filterpriority>
-        public bool Equals(RefreshTokenCacheKey other)
-        {
-            return ReferenceEquals(this, other) ||
-                   (other != null
-                    && (other.Environment == Environment)
-                    && Equals(ClientId, other.ClientId)
-                    && UserIdentifier == other.UserIdentifier);
-        }
-
-        /// <summary>
-        /// Returns the hash code for this AccessTokenCacheKey.
-        /// </summary>
-        /// <returns>
-        /// A 32-bit signed integer hash code.
-        /// </returns>
-        public override int GetHashCode()
-        {
-            const string Delimiter = ":::";
-            return (Environment + Delimiter
-                    + ClientId.ToLowerInvariant() + Delimiter
-                    + UserIdentifier).GetHashCode();
         }
     }
 }

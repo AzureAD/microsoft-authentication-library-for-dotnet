@@ -52,6 +52,6 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         public User User { get; set; }
 
-        public abstract string GetUserIdentifier();
+        internal abstract string GetUserIdentifier();
     }
 }

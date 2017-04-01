@@ -48,68 +48,15 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
         [TestMethod]
         [TestCategory("RefreshTokenCacheKeyTests")]
-        public void TestEquals()
+        public void ToStringTest()
         {
-            RefreshTokenCacheKey key1 = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
+            RefreshTokenCacheKey key = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
                 TestConstants.ClientId, TestConstants.UserIdentifier);
 
-            RefreshTokenCacheKey key2 = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
-                TestConstants.ClientId, TestConstants.UserIdentifier);
-            Assert.IsTrue(key1.Equals(key2));
-
-            //environment
-            key2 = new RefreshTokenCacheKey(TestConstants.SovereignEnvironment,
-                TestConstants.ClientId, TestConstants.UserIdentifier);
-            Assert.IsFalse(key1.Equals(key2));
-
-            //null environment
-            key2 = new RefreshTokenCacheKey(null,
-                TestConstants.ClientId, TestConstants.UserIdentifier);
-            Assert.IsFalse(key1.Equals(key2));
-            
-            //client id
-            key2 = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
-                null, TestConstants.UserIdentifier);
-            Assert.IsFalse(key1.Equals(key2));
-
-            key2 = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
-                TestConstants.ClientId + "more", TestConstants.UserIdentifier);
-            Assert.IsFalse(key1.Equals(key2));
-
-            key2 = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
-                TestConstants.ClientId, TestConstants.UserIdentifier + "more");
-            Assert.IsFalse(key1.Equals(key2));
-
-            // mistmatched object
-            Assert.IsFalse(key1.Equals(new object()));
-
-            // null
-            Assert.IsFalse(key1.Equals(null));
-        }
-
-        [TestMethod]
-        [TestCategory("RefreshTokenCacheKeyTests")]
-        public void TestHashCode()
-        {
-            RefreshTokenCacheKey key1 = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
-                TestConstants.ClientId, TestConstants.UserIdentifier);
-
-            RefreshTokenCacheKey key2 = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
-                TestConstants.ClientId, TestConstants.UserIdentifier);
-            Assert.AreEqual(key1.GetHashCode(), key2.GetHashCode());
-
-            //environment
-            key2 = new RefreshTokenCacheKey(TestConstants.SovereignEnvironment,
-                TestConstants.ClientId, TestConstants.UserIdentifier);
-            Assert.AreNotEqual(key1.GetHashCode(), key2.GetHashCode());
-
-            key2 = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
-                TestConstants.ClientId + "more", TestConstants.UserIdentifier);
-            Assert.AreNotEqual(key1.GetHashCode(), key2.GetHashCode());
-
-            key2 = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
-                TestConstants.ClientId, TestConstants.UserIdentifier + "more");
-            Assert.AreNotEqual(key1.GetHashCode(), key2.GetHashCode());
+            Assert.IsNotNull(key);
+            Assert.AreEqual(TestConstants.ProductionEnvironment, key.Environment);
+            Assert.AreEqual(TestConstants.ClientId, key.ClientId);
+            Assert.AreEqual(TestConstants.UserIdentifier, key.UserIdentifier);
         }
     }
 }

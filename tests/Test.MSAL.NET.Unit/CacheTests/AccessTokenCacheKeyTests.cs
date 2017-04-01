@@ -64,64 +64,6 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
         [TestMethod]
         [TestCategory("AccessTokenCacheKeyTests")]
-        public void TestEquals()
-        {
-            AccessTokenCacheKey key1 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId, TestConstants.UserIdentifier);
-
-            AccessTokenCacheKey key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId, TestConstants.UserIdentifier);
-            Assert.IsTrue(key1.Equals(key2));
-
-            //scope
-            key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.ScopeForAnotherResource, TestConstants.ClientId, TestConstants.UserIdentifier);
-            Assert.IsFalse(key1.Equals(key2));
-
-            //different case scope
-            SortedSet<string> uppercaseScope = new SortedSet<string>();
-            foreach (var item in TestConstants.Scope)
-            {
-                uppercaseScope.Add(item.ToUpper(CultureInfo.InvariantCulture));
-            }
-
-            key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                uppercaseScope, TestConstants.ClientId, TestConstants.UserIdentifier);
-            Assert.IsTrue(key1.Equals(key2));
-
-            //authority
-            key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant + "more",
-                TestConstants.Scope, TestConstants.ClientId,  TestConstants.UserIdentifier);
-            Assert.IsFalse(key1.Equals(key2));
-
-            key2 = new AccessTokenCacheKey(null,
-                TestConstants.Scope, TestConstants.ClientId, TestConstants.UserIdentifier);
-            Assert.IsFalse(key1.Equals(key2));
-
-            //null scope
-            key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                null, TestConstants.ClientId, TestConstants.UserIdentifier);
-            Assert.IsFalse(key1.Equals(key2));
-
-            //client id
-            key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, null, TestConstants.UserIdentifier);
-            Assert.IsFalse(key1.Equals(key2));
-
-            key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId + "more",  TestConstants.UserIdentifier);
-            Assert.IsFalse(key1.Equals(key2));
-            
-            key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId, TestConstants.UserIdentifier + "more");
-            Assert.IsFalse(key1.Equals(key2));
-            
-            // mistmatched object
-            Assert.IsFalse(key1.Equals(new object()));
-        }
-
-        [TestMethod]
-        [TestCategory("AccessTokenCacheKeyTests")]
         public void TestScopeEquals()
         {
 
@@ -139,31 +81,6 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
             otherScope.Clear();
             Assert.IsFalse(key.ScopeEquals(otherScope));
-        }
-
-        [TestMethod]
-        [TestCategory("AccessTokenCacheKeyTests")]
-        public void TestHashCode()
-        {
-            AccessTokenCacheKey key1 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId, TestConstants.UserIdentifier);
-
-            AccessTokenCacheKey key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId, TestConstants.UserIdentifier);
-            Assert.AreEqual(key1.GetHashCode(), key2.GetHashCode());
-
-            //environment
-            key2 = new AccessTokenCacheKey(TestConstants.SovereignEnvironment,
-                TestConstants.Scope, TestConstants.ClientId, TestConstants.UserIdentifier);
-            Assert.AreNotEqual(key1.GetHashCode(), key2.GetHashCode());
-
-            key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId + "more", TestConstants.UserIdentifier);
-            Assert.AreNotEqual(key1.GetHashCode(), key2.GetHashCode());
-
-            key2 = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId, TestConstants.UserIdentifier + "more");
-            Assert.AreNotEqual(key1.GetHashCode(), key2.GetHashCode());
         }
     }
 }
