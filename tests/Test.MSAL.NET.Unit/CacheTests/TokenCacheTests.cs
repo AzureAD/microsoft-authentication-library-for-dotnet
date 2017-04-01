@@ -779,7 +779,6 @@ namespace Test.MSAL.NET.Unit.CacheTests
             //item count should not change because old cache entries should have
             //been overriden
 
-
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
 

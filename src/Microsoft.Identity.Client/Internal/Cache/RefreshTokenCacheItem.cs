@@ -69,8 +69,9 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public void PopulateIdentifiers(TokenResponse response)
         {
             IdToken idToken = IdToken.Parse(response.IdToken);
-            ClientInfo = ClientInfo.Parse(response.ClientInfo);
-
+            RawClientInfo = response.ClientInfo;
+            ClientInfo = ClientInfo.Parse(RawClientInfo);
+            
             DisplayableId = idToken.PreferredUsername;
             Name = idToken.Name;
             IdentityProvider = idToken.Issuer;
