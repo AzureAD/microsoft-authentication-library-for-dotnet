@@ -4,4 +4,5 @@ branches:
   master:
     tag: preview
   develop:
+  regex: dev$
     tag: preview
