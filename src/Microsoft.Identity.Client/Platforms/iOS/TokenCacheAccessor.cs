@@ -39,8 +39,8 @@ namespace Microsoft.Identity.Client
         private const string AccessTokenServiceId = "com.microsoft.identity.client.accesstoken";
         private const string RefreshTokenServiceId = "com.microsoft.identity.client.refreshToken";
 
-        private static bool _defaultSyncSetting = false;
-        private static SecAccessible _defaultAccessiblityPolicy = SecAccessible.AfterFirstUnlockThisDeviceOnly;
+        private const bool _defaultSyncSetting = false;
+        private const SecAccessible _defaultAccessiblityPolicy = SecAccessible.AfterFirstUnlockThisDeviceOnly;
 
         private RequestContext _requestContext;
 
