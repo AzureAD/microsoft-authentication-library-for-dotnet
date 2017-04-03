@@ -29,11 +29,18 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
+using Security;
+using Foundation;
 
 namespace Microsoft.Identity.Client
 {
     internal class TokenCacheAccessor : ITokenCacheAccessor
     {
+        private const string AccessTokenServiceId = "com.microsoft.identity.client.accesstoken";
+        private const string RefreshTokenServiceId = "com.microsoft.identity.client.refreshToken";
+
+        private static bool _defaultSyncSetting = false;
+        private static SecAccessible _defaultAccessiblityPolicy = SecAccessible.AfterFirstUnlockThisDeviceOnly;
 
         private RequestContext _requestContext;
 
@@ -48,37 +55,128 @@ namespace Microsoft.Identity.Client
 
         public void SaveAccessToken(string cacheKey, string item)
         {
-            throw new NotImplementedException();
+            SetValueForKey(cacheKey, item, AccessTokenServiceId);
         }
 
         public void SaveRefreshToken(string cacheKey, string item)
         {
-            throw new NotImplementedException();
+            SetValueForKey(cacheKey, item, RefreshTokenServiceId);
         }
 
         public string GetRefreshToken(string refreshTokenKey)
         {
-            throw new NotImplementedException();
+            return GetValue(refreshTokenKey, RefreshTokenServiceId);
         }
 
         public void DeleteAccessToken(string cacheKey)
         {
-            throw new NotImplementedException();
+            Remove(cacheKey, AccessTokenServiceId);
         }
 
         public void DeleteRefreshToken(string cacheKey)
         {
-            throw new NotImplementedException();
+            Remove(cacheKey, RefreshTokenServiceId);
         }
 
         public ICollection<string> GetAllAccessTokensAsString()
         {
-            throw new NotImplementedException();
+            return GetValues(AccessTokenServiceId);
         }
 
         public ICollection<string> GetAllRefreshTokensAsString()
         {
-            throw new NotImplementedException();
+            return GetValues(RefreshTokenServiceId);
+        }
+
+        private string GetValue(string key, string service)
+        {
+            var queryRecord = new SecRecord(SecKind.GenericPassword)
+            {
+                Account = key,
+                Service = service,
+                Label = key
+            };
+
+            var match = SecKeyChain.QueryAsRecord(queryRecord, out SecStatusCode resultCode);
+
+            return (resultCode == SecStatusCode.Success)
+                ? match.ValueData.ToString(NSStringEncoding.UTF8)
+                : String.Empty;
+        }
+
+        private ICollection<string> GetValues(string service)
+        {
+            var queryRecord = new SecRecord(SecKind.GenericPassword)
+            {
+                Service = service
+            };
+
+            SecRecord[] records = SecKeyChain.QueryAsRecord(queryRecord, Int32.MaxValue, out SecStatusCode resultCode);
+
+            ICollection<string> res = new List<string>();
+
+            if (resultCode == SecStatusCode.Success)
+            {
+                foreach (var record in records)
+                {
+                    string str = record.ValueData.ToString(NSStringEncoding.UTF8);
+                    res.Add(str);
+                }
+            }
+
+            return res;
+        }
+
+        private SecStatusCode SetValueForKey(string key, string value, string service)
+        {
+            Remove(key, service);
+
+            var result = SecKeyChain.Add(CreateRecord(key, value, service));
+
+            return result;
+        }
+
+        private SecRecord CreateRecord(string key, string value, string service)
+        {
+            return new SecRecord(SecKind.GenericPassword)
+            {
+                Account = key,
+                Service = service,
+                Label = key,
+                ValueData = NSData.FromString(value, NSStringEncoding.UTF8),
+                Accessible = _defaultAccessiblityPolicy,
+                Synchronizable = _defaultSyncSetting
+            };
+        }
+
+        private SecStatusCode Remove(string key, string service)
+        {
+            var record = new SecRecord(SecKind.GenericPassword)
+            {
+                Account = key,
+                Service = service,
+                Label = key
+            };
+
+            return SecKeyChain.Remove(record);
+        }
+
+        private void RemoveAll(string service)
+        {
+            var queryRecord = new SecRecord(SecKind.GenericPassword)
+            {
+                Service = service
+            };
+
+            SecRecord[] records = SecKeyChain.QueryAsRecord(queryRecord, Int32.MaxValue, out SecStatusCode resultCode);
+
+            if (resultCode == SecStatusCode.Success)
+            {
+                foreach (var record in records)
+                {
+                    SecKeyChain.Remove(record);
+                }
+            }
         }
     }
 }
