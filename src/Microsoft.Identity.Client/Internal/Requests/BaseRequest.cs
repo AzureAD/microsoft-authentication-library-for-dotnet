@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected virtual SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
         {
             SortedSet<string> set = new SortedSet<string>(inputScope.ToArray());
-            set.UnionWith(OAuth2Value.ReservedScopes.CreateSetFromArray());
+            set.UnionWith(OAuth2Value.ReservedScopes.CreateSetFromEnumerable());
             set.Remove(AuthenticationRequestParameters.ClientId);
             return set;
         }
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected void ValidateScopeInput(SortedSet<string> scopesToValidate)
         {
             //check if scope or additional scope contains client ID.
-            if (scopesToValidate.Intersect(OAuth2Value.ReservedScopes.CreateSetFromArray()).Any())
+            if (scopesToValidate.Intersect(OAuth2Value.ReservedScopes.CreateSetFromEnumerable()).Any())
             {
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,
                     "API does not accept '{0}' value as user-provided scopes",

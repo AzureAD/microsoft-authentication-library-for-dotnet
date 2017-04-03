@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
@@ -42,7 +43,7 @@ namespace Microsoft.Identity.Client
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         Task<IAuthenticationResult> AcquireTokenOnBehalfOfAsync(
-            string[] scope,
+            IEnumerable<string> scope,
             UserAssertion userAssertion);
 
         /// <summary>
@@ -53,20 +54,20 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         Task<IAuthenticationResult> AcquireTokenOnBehalfOfAsync(
-            string[] scope,
+            IEnumerable<string> scope,
             UserAssertion userAssertion,
             string authority);
 
         /// <summary>
         /// Acquires security token from the authority using authorization code previously received.
-        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="ClientApplicationBase.AcquireTokenSilentAsync(string[], Microsoft.Identity.Client.User)"/>.
+        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, User)"/>.
         /// </summary>
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         Task<IAuthenticationResult> AcquireTokenByAuthorizationCodeAsync(
             string authorizationCode,
-            string[] scope);
+            IEnumerable<string> scope);
 
         /// <summary>
         /// Acquires token from the service for the confidential client. This method attempts to look up valid access token in the cache.
@@ -74,7 +75,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
         Task<IAuthenticationResult> AcquireTokenForClientAsync(
-            string[] scope);
+            IEnumerable<string> scope);
 
         /// <summary>
         /// Acquires token from the service for the confidential client. This method attempts to look up valid access token in the cache.
@@ -83,7 +84,7 @@ namespace Microsoft.Identity.Client
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using client credentials</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
         Task<IAuthenticationResult> AcquireTokenForClientAsync(
-            string[] scope,
+            IEnumerable<string> scope,
             bool forceRefresh);
 
         /// <summary>
@@ -94,7 +95,7 @@ namespace Microsoft.Identity.Client
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
         Task<Uri> GetAuthorizationRequestUrlAsync(
-            string[] scope,
+            IEnumerable<string> scope,
             string loginHint,
             string extraQueryParameters);
 
@@ -109,9 +110,9 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
         Task<Uri> GetAuthorizationRequestUrlAsync(
-            string[] scope,
+            IEnumerable<string> scope,
             string redirectUri,
             string loginHint,
-            string extraQueryParameters, string[] additionalScope, string authority);
+            string extraQueryParameters, IEnumerable<string> additionalScope, string authority);
     }
 }

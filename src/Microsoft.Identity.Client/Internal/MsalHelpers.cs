@@ -88,20 +88,13 @@ namespace Microsoft.Identity.Client.Internal
             return singleString.Split(new[] { " " }, StringSplitOptions.None);
         }
 
-        internal static SortedSet<string> CreateSetFromArray(this string[] arrayStrings)
+        internal static SortedSet<string> CreateSetFromEnumerable(this IEnumerable<string> input)
         {
-            SortedSet<string> set = new SortedSet<string>();
-            if (arrayStrings == null || arrayStrings.Length == 0)
+            if (input == null || !input.Any())
             {
-                return set;
+                return new SortedSet<string>();
             }
-
-            foreach (string str in arrayStrings)
-            {
-                set.Add(str);
-            }
-
-            return set;
+            return new SortedSet<string>(input);
         }
         
         internal static bool IsNullOrEmpty(IEnumerable<string> input)
