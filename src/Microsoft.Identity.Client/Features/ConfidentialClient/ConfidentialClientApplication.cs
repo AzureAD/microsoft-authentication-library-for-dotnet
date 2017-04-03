@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
-        public async Task<IAuthenticationResult> AcquireTokenOnBehalfOfAsync(string[] scope, UserAssertion userAssertion)
+        public async Task<IAuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scope, UserAssertion userAssertion)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
-        public async Task<IAuthenticationResult> AcquireTokenOnBehalfOfAsync(string[] scope, UserAssertion userAssertion,
+        public async Task<IAuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scope, UserAssertion userAssertion,
             string authority)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
@@ -108,12 +108,12 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Acquires security token from the authority using authorization code previously received.
-        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="ClientApplicationBase.AcquireTokenSilentAsync(string[], Microsoft.Identity.Client.User)"/>.
+        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(IEnumerable{string}, User)"/>.
         /// </summary>
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
-        public async Task<IAuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, string[] scope)
+        public async Task<IAuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, IEnumerable<string> scope)
         {
             return
                 await
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
-        public async Task<IAuthenticationResult> AcquireTokenForClientAsync(string[] scope)
+        public async Task<IAuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scope)
         {
             return
                 await
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using client credentials</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
-        public async Task<IAuthenticationResult> AcquireTokenForClientAsync(string[] scope, bool forceRefresh)
+        public async Task<IAuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scope, bool forceRefresh)
         {
             return
                 await
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Client
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string loginHint,
+        public async Task<Uri> GetAuthorizationRequestUrlAsync(IEnumerable<string> scope, string loginHint,
             string extraQueryParameters)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
@@ -176,8 +176,8 @@ namespace Microsoft.Identity.Client
         /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        public async Task<Uri> GetAuthorizationRequestUrlAsync(string[] scope, string redirectUri, string loginHint,
-            string extraQueryParameters, string[] additionalScope, string authority)
+        public async Task<Uri> GetAuthorizationRequestUrlAsync(IEnumerable<string> scope, string redirectUri, string loginHint,
+            string extraQueryParameters, IEnumerable<string> additionalScope, string authority)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
             var requestParameters = CreateRequestParameters(authorityInstance, scope, null,
@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client
 
         internal TokenCache AppTokenCache { get; }
 
-        private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(string[] scope)
+        private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(IEnumerable<string> scope)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             AuthenticationRequestParameters parameters = CreateRequestParameters(authority, scope, null,
@@ -205,7 +205,7 @@ namespace Microsoft.Identity.Client
         }
 
         private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(Authority authority,
-            string[] scope, UserAssertion userAssertion)
+            IEnumerable<string> scope, UserAssertion userAssertion)
         {
             var requestParams = CreateRequestParameters(authority, scope, null, UserTokenCache);
             requestParams.UserAssertion = userAssertion;
@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Client
         }
 
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode,
-            string[] scope, Uri redirectUri)
+            IEnumerable<string> scope, Uri redirectUri)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             var requestParams = CreateRequestParameters(authority, scope, null, UserTokenCache);
@@ -225,7 +225,7 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, string[] scope, User user, TokenCache cache)
+        internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, IEnumerable<string> scope, User user, TokenCache cache)
         {
             AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scope, user, cache);
             parameters.ClientId = ClientId;

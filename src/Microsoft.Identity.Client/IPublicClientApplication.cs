@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing token of the user</returns>
-        Task<IAuthenticationResult> AcquireTokenAsync(string[] scope);
+        Task<IAuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope);
 
         /// <summary>
         /// Interactive request to acquire token. 
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<IAuthenticationResult> AcquireTokenAsync(
-            string[] scope,
+            IEnumerable<string> scope,
             string loginHint);
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<IAuthenticationResult> AcquireTokenAsync(
-            string[] scope,
+            IEnumerable<string> scope,
             string loginHint,
             UIBehavior behavior,
             string extraQueryParameters);
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<IAuthenticationResult> AcquireTokenAsync(
-            string[] scope,
+            IEnumerable<string> scope,
             User user,
             UIBehavior behavior,
             string extraQueryParameters);
@@ -97,11 +97,12 @@ namespace Microsoft.Identity.Client
         /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user</returns>
-        Task<IAuthenticationResult> AcquireTokenAsync(string[] scope,
+        Task<IAuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scope,
             string loginHint,
             UIBehavior behavior,
             string extraQueryParameters,
-            string[] additionalScope, string authority);
+            IEnumerable<string> additionalScope, string authority);
 
         /// <summary>
         /// Interactive request to acquire token. 
@@ -114,11 +115,11 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<IAuthenticationResult> AcquireTokenAsync(
-            string[] scope,
+            IEnumerable<string> scope,
             User user,
             UIBehavior behavior,
             string extraQueryParameters,
-            string[] additionalScope,
+            IEnumerable<string> additionalScope,
             string authority);
     }
 }

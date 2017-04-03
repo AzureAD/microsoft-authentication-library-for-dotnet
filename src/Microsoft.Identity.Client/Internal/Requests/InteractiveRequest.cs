@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private string _state;
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            string[] additionalScope, UIBehavior UIBehavior, IWebUI webUI)
+            IEnumerable<string> additionalScope, UIBehavior UIBehavior, IWebUI webUI)
             : this(
                 authenticationRequestParameters, additionalScope, authenticationRequestParameters.User?.DisplayableId,
                 UIBehavior, webUI)
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            string[] additionalScope, string loginHint,
+            IEnumerable<string> additionalScope, string loginHint,
             UIBehavior UIBehavior, IWebUI webUI)
             : base(authenticationRequestParameters)
         {
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _additionalScope = new SortedSet<string>();
             if (!MsalHelpers.IsNullOrEmpty(additionalScope))
             {
-                _additionalScope = additionalScope.CreateSetFromArray();
+                _additionalScope = additionalScope.CreateSetFromEnumerable();
             }
 
             ValidateScopeInput(_additionalScope);
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.LoginHint;
             }
 
-            if (RequestContext != null && !string.IsNullOrEmpty(RequestContext.CorrelationId))
+            if (!string.IsNullOrEmpty(RequestContext?.CorrelationId))
             {
                 authorizationRequestParameters[OAuth2Parameter.CorrelationId] = RequestContext.CorrelationId;
             }
