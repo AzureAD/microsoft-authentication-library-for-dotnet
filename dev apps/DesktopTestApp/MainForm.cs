@@ -105,7 +105,7 @@ namespace DesktopTestApp
                 if (userList.SelectedIndex != -1)
                 {
                     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
-                        (User)userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
+                        (User) userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
                 }
                 else
                 {
@@ -125,6 +125,7 @@ namespace DesktopTestApp
                 }
 
                 output = exc.Message + Environment.NewLine + exc.StackTrace;
+                SetErrorPageInfo(output);
             }
             finally
             {
