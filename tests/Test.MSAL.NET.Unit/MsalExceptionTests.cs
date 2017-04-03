@@ -34,6 +34,7 @@ namespace Test.MSAL.NET.Unit.PublicApi
     public class MsalExceptionTests
     {
         [TestMethod]
+        [TestCategory("MsalExceptionTests")]
         public void ExceptionsArePubliclyCreatable_MsalException()
         {
             var innerEx = new Exception();
@@ -45,6 +46,7 @@ namespace Test.MSAL.NET.Unit.PublicApi
         }
    
         [TestMethod]
+        [TestCategory("MsalExceptionTests")]
         public void ExceptionsArePubliclyCreatable_ServiceException()
         {
             var ex = new MsalServiceException("code1", "msg1");
@@ -55,6 +57,7 @@ namespace Test.MSAL.NET.Unit.PublicApi
         }
 
         [TestMethod]
+        [TestCategory("MsalExceptionTests")]
         public void ExceptionsArePubliclyCreatable_MsalSilentTokenAcquisitionException()
         {
             var ex = new MsalSilentTokenAcquisitionException();

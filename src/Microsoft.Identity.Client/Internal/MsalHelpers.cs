@@ -88,20 +88,13 @@ namespace Microsoft.Identity.Client.Internal
             return singleString.Split(new[] { " " }, StringSplitOptions.None);
         }
 
-        internal static SortedSet<string> CreateSetFromArray(this string[] arrayStrings)
+        internal static SortedSet<string> CreateSetFromEnumerable(this IEnumerable<string> input)
         {
-            SortedSet<string> set = new SortedSet<string>();
-            if (arrayStrings == null || arrayStrings.Length == 0)
+            if (input == null || !input.Any())
             {
-                return set;
+                return new SortedSet<string>();
             }
-
-            foreach (string str in arrayStrings)
-            {
-                set.Add(str);
-            }
-
-            return set;
+            return new SortedSet<string>(input);
         }
         
         internal static bool IsNullOrEmpty(IEnumerable<string> input)
@@ -323,28 +316,6 @@ namespace Microsoft.Identity.Client.Internal
             }
             byte[] bytes = Convert.FromBase64String(incoming);
             return CreateString(bytes);
-        }
-
-        internal static string Base64Decode(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-            {
-                return input;
-            }
-
-            byte[] bytes = Convert.FromBase64String(input);
-            return CreateString(bytes);
-        }
-
-        internal static string Base64Encode(string input)
-        {
-            string encodedString = String.Empty;
-            if (!String.IsNullOrEmpty(input))
-            {
-                encodedString = Convert.ToBase64String(Encoding.UTF8.GetBytes(input));
-            }
-
-            return encodedString;
         }
 
         internal static List<string> SplitWithQuotes(string input, char delimiter)

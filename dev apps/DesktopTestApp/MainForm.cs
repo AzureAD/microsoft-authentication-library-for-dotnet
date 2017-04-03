@@ -57,6 +57,7 @@ namespace DesktopTestApp
             PiiLogging();
             userList.DataSource = new PublicClientApplication(
                     "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
+
             { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
         }
 
@@ -105,7 +106,7 @@ namespace DesktopTestApp
                 if (userList.SelectedIndex != -1)
                 {
                     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
-                        (User) userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
+                        (User)userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
                 }
                 else
                 {
@@ -125,6 +126,7 @@ namespace DesktopTestApp
                 }
 
                 output = exc.Message + Environment.NewLine + exc.StackTrace;
+
                 SetErrorPageInfo(output);
             }
             finally
@@ -223,7 +225,7 @@ namespace DesktopTestApp
             if (!string.IsNullOrEmpty(overriddenAuthority.Text))
             {
                 _confidentialClientApplication = new ConfidentialClientApplication("5a434691-ccb2-4fd1-b97b-b64bcfbc03fc", _confidentialClientApplication.RedirectUri, _confidentialClientApplication.ClientCredential,
-                    _confidentialClientApplication.UserTokenCache, _confidentialClientApplication.AppTokenCache);
+                _confidentialClientApplication.UserTokenCache, _confidentialClientApplication.AppTokenCache);
             }
             /*se
             {
@@ -247,6 +249,7 @@ namespace DesktopTestApp
             userList.DataSource = new PublicClientApplication(
                     "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
             { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
+
         }
 
         #region App logic

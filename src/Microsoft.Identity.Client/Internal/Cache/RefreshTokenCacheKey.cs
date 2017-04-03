@@ -25,34 +25,33 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Globalization;
-using System.Runtime.Serialization;
+using System.Text;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.Cache
 {
-    internal class ClientInfoClaim
+    class RefreshTokenCacheKey : TokenCacheKeyBase
     {
-        public const string UniqueIdentifier = "uid";
-        public const string UnqiueTenantIdentifier = "utid";
-    }
 
-    [DataContract]
-    internal class ClientInfo
-    {
-        [DataMember(Name = ClientInfoClaim.UniqueIdentifier, IsRequired = false)]
-        public string UniqueIdentifier { get; set; }
-
-        [DataMember(Name = ClientInfoClaim.UnqiueTenantIdentifier, IsRequired = false)]
-        public string UniqueTenantIdentifier { get; set; }
-
-        public static ClientInfo Parse(string clientInfo)
+        public RefreshTokenCacheKey(string environment, string clientId, string userIdentifier) : base(clientId, userIdentifier)
         {
-            if (string.IsNullOrEmpty(clientInfo))
-            {
-                return null;
-            }
-            
-            return JsonHelper.DeserializeFromJson<ClientInfo>(Base64UrlEncoder.DecodeBytes(clientInfo));
+            Environment = environment;
+        }
+
+        public string Environment { get; }
+
+        /// <summary>
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(Environment));
+            stringBuilder.Append(CacheKeyDelimiter);
+            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(ClientId));
+            stringBuilder.Append(CacheKeyDelimiter);
+            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(UserIdentifier));
+
+            return stringBuilder.ToString();
         }
     }
 }

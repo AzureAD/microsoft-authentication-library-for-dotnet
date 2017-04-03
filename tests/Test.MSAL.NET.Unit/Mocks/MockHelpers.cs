@@ -52,15 +52,25 @@ namespace Test.MSAL.NET.Unit.Mocks
                                              "zNkNTFkZC1mMGU1LTQ5NTktYjRlYS1hODBjNGUzNmZlNWUiLCJ2" +
                                              "ZXIiOiIyLjAifQ." +
                                              "AD4-sdfsfsdf";
+
         public static readonly string DefaultAccessTokenResponse =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
             "\"some-scope1 some-scope2\",\"access_token\":\"some-access-token\"" +
-            ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\"" +
-            ":\""+DefaultIdToken+"\",\"id_token_expires_in\":\"3600\",\"client_info\"" +
-            ":\"eyJ2ZXIiOiIxLjAiLCJuYW1lIjoiTWFyaW8gUm9zc2kiLCJwcmVmZXJyZWRfdXNlcm5hbW" +
-            "UiOiJtYXJpb0BkZXZlbG9wZXJ0ZW5hbnQub25taWNyb3NvZnQuY29tIiwic3ViIjoiSzRfU0d" +
-            "HeEtxVzFTeFVBbWhnNkMxRjZWUGlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM2Q1MWRk" +
-            "LWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZSJ9\"}";
+            ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
+            ":\"" + CreateClientInfo() + "\",\"id_token\"" +
+            ":\""+DefaultIdToken+"\",\"id_token_expires_in\":\"3600\"}";
+
+
+        public static string CreateClientInfo()
+        {
+            return CreateClientInfo(TestConstants.Uid, TestConstants.Utid);
+        }
+
+        public static string CreateClientInfo(string uid, string utid)
+        {
+            return Base64UrlEncoder.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");
+        }
+
         public static Stream GenerateStreamFromString(string s)
         {
             MemoryStream stream = new MemoryStream();
@@ -94,20 +104,6 @@ namespace Test.MSAL.NET.Unit.Mocks
             return responseMessage;
         }
 
-        public static HttpResponseMessage CreateSuccessIdTokenResponseMessage()
-        {
-            return CreateSuccessResponseMessage("{\"token_type\":\"Bearer\"," +
-                                                "\"refresh_token\":\"OAAsomethingencryptedQwgAA\"" +
-                                                ",\"id_token\":\""+DefaultIdToken+"\"," +
-                                                "\"id_token_expires_in\":\"3600\"," +
-                                                "\"profile_info\":\"eyJ2ZXIiOiIxLjAiLCJuYW1lIjoi" +
-                                                "TWFyaW8gUm9zc2kiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ" +
-                                                "tYXJpb0BkZXZlbG9wZXJ0ZW5hbnQub25taWNyb3NvZnQuY2" +
-                                                "9tIiwic3ViIjoiSzRfU0dHeEtxVzFTeFVBbWhnNkMxRjZWU" +
-                                                "GlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM2Q1MWRk" +
-                                                "LWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZSJ9\"}");
-        }
-
         internal static HttpResponseMessage CreateFailureMessage(HttpStatusCode code, string message)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(code);
@@ -139,9 +135,9 @@ namespace Test.MSAL.NET.Unit.Mocks
                 "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"header.payload.signature\"}");
         }
 
-        public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string homeObjectId, string[] scope)
+        public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string[] scope)
         {
-            string idToken = CreateIdToken(uniqueId, displayableId, homeObjectId);
+            string idToken = CreateIdToken(uniqueId, displayableId);
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
             HttpContent content =
                 new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":\"" +
@@ -153,7 +149,7 @@ namespace Test.MSAL.NET.Unit.Mocks
             return responseMessage;
         }
 
-        public static string CreateIdToken(string uniqueId, string displayableId, string homeObjectId)
+        public static string CreateIdToken(string uniqueId, string displayableId)
         {
             string id = "{\"aud\": \"e854a4a7-6c34-449c-b237-fc7a28093d84\"," +
                         "\"iss\": \"https://login.microsoftonline.com/6c3d51dd-f0e5-4959-b4ea-a80c4e36fe5e/v2.0/\"," +
@@ -161,12 +157,11 @@ namespace Test.MSAL.NET.Unit.Mocks
                         "\"nbf\": 1455833828," +
                         "\"exp\": 1455837728," +
                         "\"ipaddr\": \"131.107.159.117\"," +
-                        "\"name\": \"Mario Rossi\"," +
-                        "\"home_oid\": \"" + homeObjectId + "\"," +
+                        "\"name\": \"Marrrrrio Bossy\"," +
                         "\"oid\": \"" + uniqueId + "\"," +
                         "\"preferred_username\": \"" + displayableId + "\"," +
                         "\"sub\": \"K4_SGGxKqW1SxUAmhg6C1F6VPiFzcx-Qd80ehIEdFus\"," +
-                        "\"tid\": \"6c3d51dd-f0e5-4959-b4ea-a80c4e36fe5e\"," +
+                        "\"tid\": \""+ TestConstants.IdentityProvider + "\"," +
                         "\"ver\": \"2.0\"}";
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlEncoder.Encode(id));
         }

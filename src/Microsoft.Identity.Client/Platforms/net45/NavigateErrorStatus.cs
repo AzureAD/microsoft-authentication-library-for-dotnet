@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client
             },
             {
                 (int)NavigateErrorStatusCode.HTTP_STATUS_NOT_FOUND,
-                "The server has not found anything matching the requested URI (Uniform Scope Identifier)."
+                "The server has not found anything matching the requested URI (Uniform Resource Identifier)."
             },
             {
                 (int)NavigateErrorStatusCode.HTTP_STATUS_BAD_METHOD,
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Client
             },
             {
                 (int)NavigateErrorStatusCode.HTTP_STATUS_URI_TOO_LONG,
-                "The server is refusing to service the request because the request URI (Uniform Scope Identifier) is longer than the server is willing to interpret."
+                "The server is refusing to service the request because the request URI (Uniform ScopeSet Identifier) is longer than the server is willing to interpret."
             },
             {
                 (int)NavigateErrorStatusCode.HTTP_STATUS_UNSUPPORTED_MEDIA,

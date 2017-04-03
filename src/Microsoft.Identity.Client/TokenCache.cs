@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client
                         AccessTokenCacheItem accessTokenItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessTokenString);
                         if (accessTokenItem.ClientId.Equals(ClientId) &&
                             accessTokenItem.Authority.Equals(requestParams.Authority.CanonicalAuthority) &&
-                            accessTokenItem.Scope.ScopeIntersects(accessTokenCacheItem.Scope))
+                            accessTokenItem.ScopeSet.ScopeIntersects(accessTokenCacheItem.ScopeSet))
                         {
                             accessTokenItemList.Add(accessTokenItem);
                         }
@@ -146,26 +146,26 @@ namespace Microsoft.Identity.Client
                         //filter by home_oid of the user instead
                         accessTokenItemList =
                             accessTokenItemList.Where(
-                                    item => item.HomeObjectId.Equals(accessTokenCacheItem.User?.HomeObjectId))
+                                    item => item.GetUserIdentifier().Equals(accessTokenCacheItem.GetUserIdentifier()))
                                 .ToList();
                     }
 
                     foreach (var cacheItem in accessTokenItemList)
                     {
-                        TokenCacheAccessor.DeleteAccessToken(cacheItem.GetTokenCacheKey().ToString());
+                        TokenCacheAccessor.DeleteAccessToken(cacheItem.GetAccessTokenItemKey().ToString());
                     }
 
-                    TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem.GetTokenCacheKey().ToString(),
+                    TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString(),
                         JsonHelper.SerializeToJson(accessTokenCacheItem));
 
                     // if server returns the refresh token back, save it in the cache.
                     if (response.RefreshToken != null)
                     {
                         // create the refresh token cache item
-                        RefreshTokenCacheItem refreshTokenCacheItem = new RefreshTokenCacheItem(null,
+                        RefreshTokenCacheItem refreshTokenCacheItem = new RefreshTokenCacheItem(requestParams.Authority.Host, 
                             requestParams.ClientId,
                             response);
-                        TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem.GetTokenCacheKey().ToString(),
+                        TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(),
                             JsonHelper.SerializeToJson(refreshTokenCacheItem));
                     }
                     OnAfterAccess(args);
@@ -201,11 +201,11 @@ namespace Microsoft.Identity.Client
                         item =>
                             item.Authority.Equals(requestParam.Authority.CanonicalAuthority) &&
                             item.ClientId.Equals(requestParam.ClientId) &&
-                            item.Scope.ScopeContains(requestParam.Scope))
+                            item.ScopeSet.ScopeContains(requestParam.Scope))
                         .ToList();
 
                 // this is OBO flow. match the cache entry with assertion hash,
-                // Authority, Scope and client Id.
+                // Authority, ScopeSet and client Id.
                 if (requestParam.UserAssertion != null)
                 {
                     tokenCacheItems =
@@ -224,7 +224,7 @@ namespace Microsoft.Identity.Client
                     {
                         //filter by home_oid of the user instead
                         tokenCacheItems =
-                            tokenCacheItems.Where(item => item.HomeObjectId.Equals(requestParam.User?.HomeObjectId))
+                            tokenCacheItems.Where(item => item.GetUserIdentifier().Equals(requestParam.User?.Identifier))
                                 .ToList();
                     }
                 }
@@ -260,7 +260,9 @@ namespace Microsoft.Identity.Client
         {
             lock (LockObject)
             {
-                TokenCacheKey key = new TokenCacheKey(null, null, requestParam.ClientId, requestParam.User?.HomeObjectId);
+                RefreshTokenCacheKey key = new RefreshTokenCacheKey(
+                    requestParam.Authority.Host, requestParam.ClientId,
+                    requestParam.User?.Identifier);
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,
@@ -290,7 +292,7 @@ namespace Microsoft.Identity.Client
 
                     OnBeforeAccess(args);
                     OnBeforeWrite(args);
-                    TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetTokenCacheKey().ToString());
+                    TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString());
                     OnAfterAccess(args);
                 }
                 finally
@@ -300,13 +302,8 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal ICollection<User> GetUsers(string clientId)
+        internal ICollection<User> GetUsers(string environment)
         {
-            if (string.IsNullOrEmpty(clientId))
-            {
-                throw new ArgumentNullException(nameof(clientId));
-            }
-
             lock (LockObject)
             {
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
@@ -323,8 +320,12 @@ namespace Microsoft.Identity.Client
                 IDictionary<string, User> allUsers = new Dictionary<string, User>();
                 foreach (RefreshTokenCacheItem item in tokenCacheItems)
                 {
-                    User user = new User(item.User);
-                    allUsers[item.HomeObjectId] = user;
+                    if (environment.Equals(
+                        item.Environment, StringComparison.OrdinalIgnoreCase))
+                    {
+                        User user = new User(item.User);
+                        allUsers[item.GetUserIdentifier()] = user;
+                    }
                 }
 
                 return allUsers.Values;
@@ -383,20 +384,20 @@ namespace Microsoft.Identity.Client
                     OnBeforeAccess(args);
                     OnBeforeWrite(args);
                     IList<RefreshTokenCacheItem> allRefreshTokens = GetAllRefreshTokensForClient()
-                        .Where(item => item.HomeObjectId.Equals(user.HomeObjectId))
+                        .Where(item => item.GetUserIdentifier().Equals(user.Identifier))
                         .ToList();
                     foreach (RefreshTokenCacheItem refreshTokenCacheItem in allRefreshTokens)
                     {
-                        TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetTokenCacheKey().ToString());
+                        TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString());
                     }
 
                     IList<AccessTokenCacheItem> allAccessTokens = GetAllAccessTokensForClient()
-                        .Where(item => item.HomeObjectId.Equals(user.HomeObjectId))
+                        .Where(item => item.GetUserIdentifier().Equals(user.Identifier))
                         .ToList();
 
                     foreach (AccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
                     {
-                        TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetTokenCacheKey().ToString());
+                        TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString());
                     }
 
                     OnAfterAccess(args);
@@ -438,7 +439,7 @@ namespace Microsoft.Identity.Client
             // delegates because serialize itself is called from delegates
             lock (LockObject)
             {
-                TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem.GetTokenCacheKey().ToString(), JsonHelper.SerializeToJson(accessTokenCacheItem));
+                TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString(), JsonHelper.SerializeToJson(accessTokenCacheItem));
             }
         }
 
@@ -448,7 +449,7 @@ namespace Microsoft.Identity.Client
             // delegates because serialize itself is called from delegates
             lock (LockObject)
             {
-                TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem.GetTokenCacheKey().ToString(), JsonHelper.SerializeToJson(refreshTokenCacheItem));
+                TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(), JsonHelper.SerializeToJson(refreshTokenCacheItem));
             }
         }
     }

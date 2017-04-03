@@ -122,12 +122,12 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 Authority = authority,
                 ClientId = TestConstants.ClientId,
-                Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
+                Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromEnumerable(),
                 TokenCache = cache,
                 RequestContext = new RequestContext(Guid.Empty),
                 User = new User()
                 {
-                    HomeObjectId = TestConstants.HomeObjectId,
+                    Identifier = TestConstants.UserIdentifier,
                     DisplayableId = TestConstants.DisplayableId
                 }
             };
@@ -177,7 +177,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 Authority = authority,
                 ClientId = TestConstants.ClientId,
-                Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromArray(),
+                Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromEnumerable(),
                 TokenCache = cache,
                 User = new User(),
                 RequestContext = new RequestContext(Guid.Empty)

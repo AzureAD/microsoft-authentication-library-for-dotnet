@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Globalization;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
@@ -33,21 +34,60 @@ namespace Microsoft.Identity.Client.Internal.Cache
     [DataContract]
     internal class RefreshTokenCacheItem : BaseTokenCacheItem
     {
+
         public RefreshTokenCacheItem()
         {
         }
 
-        public RefreshTokenCacheItem(string authority, string clientId, TokenResponse response) : base(authority, clientId, response)
+        public RefreshTokenCacheItem(string environment, string clientId, TokenResponse response) : base(clientId)
         {
             RefreshToken = response.RefreshToken;
+            Environment = environment;
+            PopulateIdentifiers(response);
         }
+
+        [DataMember(Name = "environment")]
+        public string Environment { get; set; }
+
+        [DataMember(Name = "displayable_id")]
+        public string DisplayableId { get; internal set; }
+
+        [DataMember(Name = "name")]
+        public string Name { get; internal set; }
+
+        [DataMember(Name = "identity_provider")]
+        public string IdentityProvider { get; internal set; }
 
         [DataMember (Name = "refresh_token")]
         public string RefreshToken { get; set; }
 
-        public override TokenCacheKey GetTokenCacheKey()
+        public RefreshTokenCacheKey GetRefreshTokenItemKey()
         {
-            return new TokenCacheKey(null, null, ClientId, User.HomeObjectId);
+            return new RefreshTokenCacheKey(Environment, ClientId, GetUserIdentifier());
+        }
+
+        public void PopulateIdentifiers(TokenResponse response)
+        {
+            IdToken idToken = IdToken.Parse(response.IdToken);
+            RawClientInfo = response.ClientInfo;
+            ClientInfo = ClientInfo.Parse(RawClientInfo);
+            
+            DisplayableId = idToken.PreferredUsername;
+            Name = idToken.Name;
+            IdentityProvider = idToken.Issuer;
+
+            User = User.Create(DisplayableId, Name, IdentityProvider,
+                GetUserIdentifier());
+        }
+
+        // This method is called after the object 
+        // is completely deserialized.
+        [OnDeserialized]
+        void OnDeserialized(StreamingContext context)
+        {
+            ClientInfo = ClientInfo.Parse(RawClientInfo);
+            User = User.Create(DisplayableId, Name, IdentityProvider,
+                GetUserIdentifier());
         }
     }
 }

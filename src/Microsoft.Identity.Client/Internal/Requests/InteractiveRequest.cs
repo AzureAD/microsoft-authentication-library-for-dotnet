@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private string _state;
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            string[] additionalScope, UIBehavior UIBehavior, IWebUI webUI)
+            IEnumerable<string> additionalScope, UIBehavior UIBehavior, IWebUI webUI)
             : this(
                 authenticationRequestParameters, additionalScope, authenticationRequestParameters.User?.DisplayableId,
                 UIBehavior, webUI)
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            string[] additionalScope, string loginHint,
+            IEnumerable<string> additionalScope, string loginHint,
             UIBehavior UIBehavior, IWebUI webUI)
             : base(authenticationRequestParameters)
         {
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _additionalScope = new SortedSet<string>();
             if (!MsalHelpers.IsNullOrEmpty(additionalScope))
             {
-                _additionalScope = additionalScope.CreateSetFromArray();
+                _additionalScope = additionalScope.CreateSetFromEnumerable();
             }
 
             ValidateScopeInput(_additionalScope);
@@ -127,9 +127,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (addVerifier)
             {
                 _codeVerifier = PlatformPlugin.CryptographyHelper.GenerateCodeVerifier();
-                string codeVerifierHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(_codeVerifier);
+                string codeVerifierHash = MsalHelpers.EncodeToBase64Url(
+                    Convert.FromBase64String(PlatformPlugin.CryptographyHelper.CreateSha256Hash(_codeVerifier)));
 
-                requestParameters[OAuth2Parameter.CodeChallenge] = MsalHelpers.EncodeToBase64Url(Convert.FromBase64String(codeVerifierHash));
+                requestParameters[OAuth2Parameter.CodeChallenge] = codeVerifierHash;
                 requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
             }
 
