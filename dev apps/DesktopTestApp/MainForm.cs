@@ -57,7 +57,7 @@ namespace DesktopTestApp
             PiiLogging();
             userList.DataSource = new PublicClientApplication(
                     "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
-                {UserTokenCache = TokenCacheHelper.GetCache()}.Users.ToList();
+            { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
         }
 
         #region UI Controls
@@ -94,6 +94,7 @@ namespace DesktopTestApp
         private async void acquireTokenInteractive_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
+            callResult.SendToBack();
 
             PublicClientApplication clientApplication = CreateClientApplication();
             string output = string.Empty;
@@ -104,7 +105,7 @@ namespace DesktopTestApp
                 if (userList.SelectedIndex != -1)
                 {
                     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
-                        (User) userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
+                        (User)userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
                 }
                 else
                 {
@@ -135,6 +136,7 @@ namespace DesktopTestApp
         private async void acquireTokenSilent_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
+            callResult.SendToBack();
 
             string output = string.Empty;
             callResult.Text = output;
@@ -155,6 +157,7 @@ namespace DesktopTestApp
                 }
 
                 output = exc.Message + Environment.NewLine + exc.StackTrace;
+                SetErrorPageInfo(output);
             }
             finally
             {
@@ -218,7 +221,7 @@ namespace DesktopTestApp
             if (_confidentialClientApplication != null) return _confidentialClientApplication;
             if (!string.IsNullOrEmpty(overriddenAuthority.Text))
             {
-                _confidentialClientApplication = new ConfidentialClientApplication("5a434691-ccb2-4fd1-b97b-b64bcfbc03fc", _confidentialClientApplication.RedirectUri, _confidentialClientApplication.ClientCredential, 
+                _confidentialClientApplication = new ConfidentialClientApplication("5a434691-ccb2-4fd1-b97b-b64bcfbc03fc", _confidentialClientApplication.RedirectUri, _confidentialClientApplication.ClientCredential,
                     _confidentialClientApplication.UserTokenCache, _confidentialClientApplication.AppTokenCache);
             }
             /*se
@@ -242,7 +245,7 @@ namespace DesktopTestApp
             msalLogs.Text = myCallback.DrainLogs();
             userList.DataSource = new PublicClientApplication(
                     "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
-                {UserTokenCache = TokenCacheHelper.GetCache()}.Users.ToList();
+            { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
         }
 
         #region App logic
@@ -258,6 +261,13 @@ namespace DesktopTestApp
             UserResultInCache.Text = authenticationResult.User.DisplayableId;
             IdTokenResult.Text = authenticationResult.IdToken;
             ScopeResult.DataSource = authenticationResult.Scope;
+        }
+
+        private void SetErrorPageInfo(string errorMessage)
+        {
+            callResult.BringToFront();
+
+            callResult.Text = errorMessage;
         }
 
         private void ClearResultPageInfo()
