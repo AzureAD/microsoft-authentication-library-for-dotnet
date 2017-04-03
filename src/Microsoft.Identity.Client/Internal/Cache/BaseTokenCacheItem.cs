@@ -25,8 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Globalization;
 using System.Runtime.Serialization;
-using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Cache
 {
@@ -36,78 +36,32 @@ namespace Microsoft.Identity.Client.Internal.Cache
     [DataContract]
     internal abstract class BaseTokenCacheItem
     {
-        protected RequestContext RequestContext;
-
         /// <summary>
         /// Default constructor.
         /// </summary>
-        internal BaseTokenCacheItem(string authority, string clientId, TokenResponse response)
+        public BaseTokenCacheItem(string clientId)
         {
-
-            if (response.IdToken!=null)
-            {
-                RawIdToken = response.IdToken;
-                IdToken idToken = IdToken.Parse(response.IdToken, RequestContext);
-                User = User.CreateFromIdToken(idToken);
-            }
-            
-            Authority = authority;
             ClientId = clientId;
         }
 
-        internal BaseTokenCacheItem()
+        public BaseTokenCacheItem()
         {
         }
 
-        internal IdToken IdToken { get; set; }
+        [DataMember(Name = "client_info")]
+        public string RawClientInfo { get; set; }
 
-        /// <summary>
-        /// Gets the ClientId.
-        /// </summary>
         [DataMember(Name = "client_id")]
         public string ClientId { get; set; }
 
-        /// <summary>
-        /// Gets the Authority.
-        /// </summary>
-        [DataMember(Name = "authority")]
-        public string Authority { get; set; }
+        public ClientInfo ClientInfo { get; set; }
 
-        public string HomeObjectId { get { return User?.HomeObjectId; } }
-
-        public string UniqueId { get; set; }
-
-        /// <summary>
-        /// Gets the user's displayable Id.
-        /// </summary>
-        public string DisplayableId { get { return User?.DisplayableId; } }
-
-        [DataMember(Name = "id_token")]
-        public string RawIdToken { get; set; }
-
-        /// <summary>
-        /// Gets the entire Profile Info if returned by the service or null if no Id Token is returned.
-        /// </summary>
         public User User { get; set; }
 
-        public abstract TokenCacheKey GetTokenCacheKey();
-
-        // This method is called after the object 
-        // is completely deserialized.
-        [OnDeserialized]
-        void OnDeserialized(StreamingContext context)
+        internal string GetUserIdentifier()
         {
-            if (RawIdToken != null)
-            {
-                IdToken = IdToken.Parse(RawIdToken, RequestContext);
-                UniqueId = IdToken.ObjectId;
-                if (UniqueId == null)
-                {
-                    UniqueId = IdToken.Subject;
-                }
-
-                User = User.CreateFromIdToken(IdToken);
-            }
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", MsalHelpers.EncodeToBase64Url(ClientInfo?.UniqueIdentifier),
+                MsalHelpers.EncodeToBase64Url(ClientInfo?.UniqueTenantIdentifier));
         }
     }
 }

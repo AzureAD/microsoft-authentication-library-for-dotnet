@@ -27,6 +27,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
@@ -37,12 +39,13 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.MSAL.NET.Unit.Mocks;
 
-namespace Test.MSAL.NET.Unit
+namespace Test.MSAL.NET.Unit.CacheTests
 {
     [TestClass]
     public class TokenCacheTests
     {
         public static long ValidExpiresIn = 3600;
+
         // Passing a seed to make repro possible
         private static readonly Random Rand = new Random(42);
 
@@ -75,14 +78,18 @@ namespace Test.MSAL.NET.Unit
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
                 TokenType = "Bearer",
-                Scope = TestConstants.Scope,
-                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow+TimeSpan.FromHours(1)),
-                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId)
+                ScopeSet = TestConstants.Scope,
+                Scope = TestConstants.Scope.AsSingleString(),
+                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromHours(1)),
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                RawClientInfo = MockHelpers.CreateClientInfo(),
             };
+            atItem.IdToken = IdToken.Parse(atItem.RawIdToken);
+            atItem.ClientInfo = ClientInfo.Parse(atItem.RawClientInfo);
 
             // create key out of access token cache item and then
             // set it as the value of the access token.
-            TokenCacheKey atKey = atItem.GetTokenCacheKey();
+            AccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
             atItem.AccessToken = atKey.ToString();
 
             cache.TokenCacheAccessor.AccessTokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
@@ -91,12 +98,7 @@ namespace Test.MSAL.NET.Unit
                 ClientId = TestConstants.ClientId,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 Scope = TestConstants.Scope,
-                User =
-                    new User()
-                    {
-                        DisplayableId = TestConstants.DisplayableId,
-                        HomeObjectId = TestConstants.HomeObjectId
-                    }
+                User = TestConstants.User
             });
 
             Assert.IsNotNull(item);
@@ -116,14 +118,18 @@ namespace Test.MSAL.NET.Unit
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
                 TokenType = "Bearer",
-                Scope = TestConstants.Scope,
+                ScopeSet = TestConstants.Scope,
+                Scope = TestConstants.Scope.AsSingleString(),
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromHours(1)),
-                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId)
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                RawClientInfo = MockHelpers.CreateClientInfo(),
             };
+            atItem.IdToken = IdToken.Parse(atItem.RawIdToken);
+            atItem.ClientInfo = ClientInfo.Parse(atItem.RawClientInfo);
 
             // create key out of access token cache item and then
             // set it as the value of the access token.
-            TokenCacheKey atKey = atItem.GetTokenCacheKey();
+            AccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
             atItem.AccessToken = atKey.ToString();
 
             cache.TokenCacheAccessor.AccessTokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
@@ -132,12 +138,7 @@ namespace Test.MSAL.NET.Unit
                 ClientId = TestConstants.ClientId,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 Scope = new SortedSet<string>(),
-                User =
-                    new User()
-                    {
-                        DisplayableId = TestConstants.DisplayableId,
-                        HomeObjectId = TestConstants.HomeObjectId
-                    }
+                User = TestConstants.User
             };
 
             param.Scope.Add("r1/scope1");
@@ -160,14 +161,14 @@ namespace Test.MSAL.NET.Unit
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
                 TokenType = "Bearer",
-                Scope = TestConstants.Scope,
+                ScopeSet = TestConstants.Scope,
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromHours(1)),
-                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId)
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId)
             };
 
             // create key out of access token cache item and then
             // set it as the value of the access token.
-            TokenCacheKey atKey = atItem.GetTokenCacheKey();
+            AccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
             atItem.AccessToken = atKey.ToString();
             cache.TokenCacheAccessor.AccessTokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
 
@@ -180,7 +181,7 @@ namespace Test.MSAL.NET.Unit
                     new User()
                     {
                         DisplayableId = TestConstants.DisplayableId,
-                        HomeObjectId = TestConstants.HomeObjectId
+                        Identifier = TestConstants.UserIdentifier
                     }
             };
 
@@ -200,20 +201,25 @@ namespace Test.MSAL.NET.Unit
             {
                 ClientId = TestConstants.ClientId
             };
-            
-            AccessTokenCacheItem atItem = new AccessTokenCacheItem()
+
+            AccessTokenCacheItem item = new AccessTokenCacheItem()
             {
                 Authority = TestConstants.AuthorityHomeTenant,
-                Scope = TestConstants.Scope,
                 ClientId = TestConstants.ClientId,
                 TokenType = "Bearer",
-                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId),
-                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow)
+                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow),
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                RawClientInfo = MockHelpers.CreateClientInfo(),
+                ScopeSet = TestConstants.Scope
             };
+            item.IdToken = IdToken.Parse(item.RawIdToken);
+            item.ClientInfo = ClientInfo.Parse(item.RawClientInfo);
+            item.AccessToken = item.GetAccessTokenItemKey().ToString();
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary[item.GetAccessTokenItemKey().ToString()] =
+                JsonHelper.SerializeToJson(item);
 
-            atItem.AccessToken = atItem.GetTokenCacheKey().ToString();
-
-            cache.TokenCacheAccessor.AccessTokenCacheDictionary[atItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(atItem);
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary[item.GetAccessTokenItemKey().ToString()] =
+                JsonHelper.SerializeToJson(item);
 
             Assert.IsNull(cache.FindAccessToken(new AuthenticationRequestParameters()
             {
@@ -224,7 +230,7 @@ namespace Test.MSAL.NET.Unit
                     new User()
                     {
                         DisplayableId = TestConstants.DisplayableId,
-                        HomeObjectId = TestConstants.HomeObjectId
+                        Identifier = TestConstants.UserIdentifier
                     }
             }));
         }
@@ -243,14 +249,15 @@ namespace Test.MSAL.NET.Unit
             {
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
-                Scope = TestConstants.Scope,
-                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId),
+                ScopeSet = TestConstants.Scope,
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromMinutes(4))
             };
 
-            atItem.AccessToken = atItem.GetTokenCacheKey().ToString();
-            cache.TokenCacheAccessor.AccessTokenCacheDictionary[atItem.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(atItem);
+            atItem.AccessToken = atItem.GetAccessTokenItemKey().ToString();
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary[atItem.GetAccessTokenItemKey().ToString()] =
+                JsonHelper.SerializeToJson(atItem);
 
             Assert.IsNull(cache.FindAccessToken(new AuthenticationRequestParameters()
             {
@@ -261,7 +268,7 @@ namespace Test.MSAL.NET.Unit
                     new User()
                     {
                         DisplayableId = TestConstants.DisplayableId,
-                        HomeObjectId = TestConstants.HomeObjectId
+                        Identifier = TestConstants.UserIdentifier
                     }
             }));
         }
@@ -276,47 +283,68 @@ namespace Test.MSAL.NET.Unit
             };
             RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
             {
-                Authority = TestConstants.AuthorityHomeTenant,
+                Environment = TestConstants.ProductionEnvironment,
                 ClientId = TestConstants.ClientId,
                 RefreshToken = "someRT",
-                RawIdToken = MockHelpers.DefaultIdToken,
-                User = new User
-                {
-                    DisplayableId = TestConstants.DisplayableId,
-                    HomeObjectId = TestConstants.HomeObjectId
-                }
+                RawClientInfo = MockHelpers.CreateClientInfo(),
+                DisplayableId = TestConstants.DisplayableId,
+                IdentityProvider = TestConstants.IdentityProvider,
+                Name = TestConstants.Name
             };
+            rtItem.ClientInfo = ClientInfo.Parse(rtItem.RawClientInfo);
 
-            TokenCacheKey rtKey = rtItem.GetTokenCacheKey();
+            RefreshTokenCacheKey rtKey = rtItem.GetRefreshTokenItemKey();
             cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
-            Assert.IsNotNull(cache.FindRefreshToken(new AuthenticationRequestParameters()
+            var authParams = new AuthenticationRequestParameters()
             {
                 ClientId = TestConstants.ClientId,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 Scope = TestConstants.Scope,
-                User =
-                    new User()
-                    {
-                        DisplayableId = TestConstants.DisplayableId,
-                        HomeObjectId = TestConstants.HomeObjectId
-                    }
-            }));
+                User = TestConstants.User
+            };
+            Assert.IsNotNull(cache.FindRefreshToken(authParams));
 
-            // RT is stored only by client id and home object id as index.
-            // any change to authority, uniqueid and displyableid will not 
-            // outcome of cache look up.
+            // RT is stored by environment, client id and userIdentifier as index.
+            // any change to authority (within same environment), uniqueid and displyableid will not 
+            // change the outcome of cache look up.
             Assert.IsNotNull(cache.FindRefreshToken(new AuthenticationRequestParameters()
             {
                 ClientId = TestConstants.ClientId,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant + "more", false),
                 Scope = TestConstants.Scope,
-                User =
-                    new User()
-                    {
-                        DisplayableId = TestConstants.DisplayableId + "more",
-                        HomeObjectId = TestConstants.HomeObjectId
-                    }
+                User = TestConstants.User
             }));
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void GetRefreshTokenDifferentEnvironmentTest()
+        {
+            TokenCache cache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
+            RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
+            {
+                Environment = TestConstants.SovereignEnvironment,
+                ClientId = TestConstants.ClientId,
+                RefreshToken = "someRT",
+                RawClientInfo = MockHelpers.CreateClientInfo(),
+                DisplayableId = TestConstants.DisplayableId,
+                IdentityProvider = TestConstants.IdentityProvider,
+                Name = TestConstants.Name
+            };
+
+            RefreshTokenCacheKey rtKey = rtItem.GetRefreshTokenItemKey();
+            cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
+            var authParams = new AuthenticationRequestParameters()
+            {
+                ClientId = TestConstants.ClientId,
+                Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
+                Scope = TestConstants.Scope,
+                User = TestConstants.User
+            };
+            Assert.IsNull(cache.FindRefreshToken(authParams));
         }
 
         [TestMethod]
@@ -335,22 +363,25 @@ namespace Test.MSAL.NET.Unit
                 ExpiresOnUnixTimestamp =
                     MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
                 RawIdToken = null,
+                RawClientInfo = null,
                 User = null,
-                Scope = TestConstants.Scope
+                Scope = TestConstants.Scope.AsSingleString(),
+                ScopeSet = TestConstants.Scope
             };
-            item.AccessToken = item.GetTokenCacheKey().ToString();
-            cache.TokenCacheAccessor.AccessTokenCacheDictionary[item.GetTokenCacheKey().ToString()] = JsonHelper.SerializeToJson(item);
+            item.AccessToken = item.GetAccessTokenItemKey().ToString();
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary[item.GetAccessTokenItemKey().ToString()] =
+                JsonHelper.SerializeToJson(item);
 
             AccessTokenCacheItem cacheItem = cache.FindAccessToken(new AuthenticationRequestParameters()
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 ClientId = TestConstants.ClientId,
-                ClientCredential= TestConstants.CredentialWithSecret,
+                ClientCredential = TestConstants.CredentialWithSecret,
                 Scope = TestConstants.Scope
             });
 
             Assert.IsNotNull(cacheItem);
-            Assert.AreEqual(item.GetTokenCacheKey(), cacheItem.GetTokenCacheKey());
+            Assert.AreEqual(item.GetAccessTokenItemKey().ToString(), cacheItem.GetAccessTokenItemKey().ToString());
         }
 
         [TestMethod]
@@ -366,14 +397,14 @@ namespace Test.MSAL.NET.Unit
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
                 TokenType = "Bearer",
-                Scope = TestConstants.Scope,
+                ScopeSet = TestConstants.Scope,
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromHours(1)),
-                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId)
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId)
             };
 
             // create key out of access token cache item and then
             // set it as the value of the access token.
-            TokenCacheKey atKey = atItem.GetTokenCacheKey();
+            AccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
             atItem.AccessToken = atKey.ToString();
 
             cache.TokenCacheAccessor.AccessTokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
@@ -384,7 +415,7 @@ namespace Test.MSAL.NET.Unit
                 Scope = TestConstants.Scope,
                 UserAssertion = new UserAssertion(new CryptographyHelper().CreateSha256Hash(atKey.ToString()))
             };
-            
+
             AccessTokenCacheItem item = cache.FindAccessToken(param);
 
             //cache lookup should fail because there was no userassertion hash in the matched
@@ -406,14 +437,14 @@ namespace Test.MSAL.NET.Unit
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
                 TokenType = "Bearer",
-                Scope = TestConstants.Scope,
+                ScopeSet = TestConstants.Scope,
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromHours(1)),
-                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId)
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId)
             };
 
             // create key out of access token cache item and then
             // set it as the value of the access token.
-            TokenCacheKey atKey = atItem.GetTokenCacheKey();
+            AccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
             atItem.AccessToken = atKey.ToString();
             atItem.UserAssertionHash = new CryptographyHelper().CreateSha256Hash(atKey.ToString());
 
@@ -446,14 +477,15 @@ namespace Test.MSAL.NET.Unit
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
                 TokenType = "Bearer",
-                Scope = TestConstants.Scope,
+                ScopeSet = TestConstants.Scope,
+                Scope = TestConstants.Scope.AsSingleString(),
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromHours(1)),
-                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId)
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId)
             };
 
             // create key out of access token cache item and then
             // set it as the value of the access token.
-            TokenCacheKey atKey = atItem.GetTokenCacheKey();
+            AccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
             atItem.AccessToken = atKey.ToString();
             atItem.UserAssertionHash = PlatformPlugin.CryptographyHelper.CreateSha256Hash(atKey.ToString());
 
@@ -483,8 +515,7 @@ namespace Test.MSAL.NET.Unit
             };
 
             TokenResponse response = new TokenResponse();
-            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId,
-                TestConstants.HomeObjectId);
+            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
             response.AccessToken = "access-token";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
@@ -514,8 +545,7 @@ namespace Test.MSAL.NET.Unit
             };
 
             TokenResponse response = new TokenResponse();
-            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId,
-                TestConstants.HomeObjectId);
+            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
             response.AccessToken = "access-token";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
@@ -535,8 +565,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
 
             response = new TokenResponse();
-            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId,
-                TestConstants.HomeObjectId);
+            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
             response.AccessToken = "access-token-2";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
@@ -563,8 +592,7 @@ namespace Test.MSAL.NET.Unit
             };
 
             TokenResponse response = new TokenResponse();
-            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId,
-                TestConstants.HomeObjectId);
+            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
             response.AccessToken = "access-token";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
@@ -580,15 +608,14 @@ namespace Test.MSAL.NET.Unit
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
             response = new TokenResponse();
-            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId,
-                TestConstants.HomeObjectId);
+            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
             response.AccessToken = "access-token-2";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
             response.RefreshToken = "refresh-token-2";
             response.Scope = TestConstants.Scope.First();
             response.TokenType = "Bearer";
-            
+
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
@@ -606,16 +633,18 @@ namespace Test.MSAL.NET.Unit
                 ClientId = TestConstants.ClientId
             };
 
-            TokenResponse response = new TokenResponse();
-            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId,
-                TestConstants.HomeObjectId);
-            response.AccessToken = "access-token";
-            response.ExpiresIn = 3599;
-            response.CorrelationId = "correlation-id";
-            response.RefreshToken = "refresh-token";
-            response.Scope = TestConstants.Scope.AsSingleString();
-            response.TokenType = "Bearer";
-            
+            TokenResponse response = new TokenResponse
+            {
+                IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                AccessToken = "access-token",
+                ClientInfo = MockHelpers.CreateClientInfo(),
+                ExpiresIn = 3599,
+                CorrelationId = "correlation-id",
+                RefreshToken = "refresh-token",
+                Scope = TestConstants.Scope.AsSingleString(),
+                TokenType = "Bearer"
+            };
+
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
@@ -624,15 +653,17 @@ namespace Test.MSAL.NET.Unit
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
-            response = new TokenResponse();
-            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId,
-                TestConstants.HomeObjectId);
-            response.AccessToken = "access-token-2";
-            response.ExpiresIn = 3599;
-            response.CorrelationId = "correlation-id";
-            response.RefreshToken = "refresh-token-2";
-            response.Scope = TestConstants.Scope.First() + " random-scope";
-            response.TokenType = "Bearer";
+            response = new TokenResponse
+            {
+                IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                ClientInfo = MockHelpers.CreateClientInfo(),
+                AccessToken = "access-token-2",
+                ExpiresIn = 3599,
+                CorrelationId = "correlation-id",
+                RefreshToken = "refresh-token-2",
+                Scope = TestConstants.Scope.First() + " random-scope",
+                TokenType = "Bearer"
+            };
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
@@ -653,15 +684,14 @@ namespace Test.MSAL.NET.Unit
             };
 
             TokenResponse response = new TokenResponse();
-            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId,
-                TestConstants.HomeObjectId);
+            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
             response.AccessToken = "access-token";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
             response.RefreshToken = "refresh-token";
             response.Scope = TestConstants.Scope.AsSingleString();
             response.TokenType = "Bearer";
-            
+
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
@@ -671,8 +701,7 @@ namespace Test.MSAL.NET.Unit
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
             response = new TokenResponse();
-            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId,
-                TestConstants.HomeObjectId);
+            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
             response.AccessToken = "access-token-2";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
@@ -695,11 +724,12 @@ namespace Test.MSAL.NET.Unit
 
             Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokensForClient().First().RefreshToken);
         }
-        
+
         private void AfterAccessChangedNotification(TokenCacheNotificationArgs args)
         {
             Assert.IsTrue(args.TokenCache.HasStateChanged);
         }
+
         private void AfterAccessNoChangeNotification(TokenCacheNotificationArgs args)
         {
             Assert.IsFalse(args.TokenCache.HasStateChanged);
@@ -715,8 +745,8 @@ namespace Test.MSAL.NET.Unit
             };
 
             TokenResponse response = new TokenResponse();
-            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId,
-                TestConstants.HomeObjectId);
+            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
+            response.ClientInfo = MockHelpers.CreateClientInfo();
             response.AccessToken = "access-token";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
@@ -732,7 +762,7 @@ namespace Test.MSAL.NET.Unit
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
             byte[] serializedCache = cache.Serialize();
-            
+
             cache.TokenCacheAccessor.AccessTokenCacheDictionary.Clear();
             cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Clear();
 
@@ -749,7 +779,6 @@ namespace Test.MSAL.NET.Unit
             //item count should not change because old cache entries should have
             //been overriden
 
-
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
 
@@ -758,18 +787,14 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.AuthorityHomeTenant, atItem.Authority);
             Assert.AreEqual(TestConstants.ClientId, atItem.ClientId);
             Assert.AreEqual(response.TokenType, atItem.TokenType);
-            Assert.AreEqual(response.Scope, atItem.Scope.AsSingleString());
-            Assert.AreEqual(TestConstants.UniqueId, atItem.UniqueId);
-            Assert.AreEqual(TestConstants.DisplayableId, atItem.DisplayableId);
-            Assert.AreEqual(TestConstants.HomeObjectId, atItem.HomeObjectId);
+            Assert.AreEqual(response.Scope, atItem.ScopeSet.AsSingleString());
             Assert.AreEqual(response.IdToken, atItem.RawIdToken);
 
             RefreshTokenCacheItem rtItem = cache.GetAllRefreshTokensForClient().First();
             Assert.AreEqual(response.RefreshToken, rtItem.RefreshToken);
-            Assert.AreEqual(response.IdToken, rtItem.RawIdToken);
             Assert.AreEqual(TestConstants.ClientId, rtItem.ClientId);
-            Assert.AreEqual(TestConstants.HomeObjectId, rtItem.HomeObjectId);
-            Assert.IsNull(rtItem.Authority);
+            Assert.AreEqual(TestConstants.UserIdentifier, rtItem.GetUserIdentifier());
+            Assert.AreEqual(TestConstants.ProductionEnvironment, rtItem.Environment);
         }
     }
 }

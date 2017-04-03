@@ -61,6 +61,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
         protected Authority(string authority, bool validateAuthority)
         {
             Uri authorityUri = new Uri(authority);
+            this.Host = authorityUri.Host;
             string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
             CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Host,
@@ -84,6 +85,8 @@ namespace Microsoft.Identity.Client.Internal.Instance
         public string EndSessionEndpoint { get; set; }
 
         public string SelfSignedJwtAudience { get; set; }
+
+        public string Host { get; set; }
 
         public static void ValidateAsUri(string authority)
         {

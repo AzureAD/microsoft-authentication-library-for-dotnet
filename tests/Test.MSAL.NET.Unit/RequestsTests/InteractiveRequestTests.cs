@@ -79,13 +79,15 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
-                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId, TestConstants.HomeObjectId),
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                RawClientInfo = MockHelpers.CreateClientInfo(),
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
-                Scope = TestConstants.Scope
+                ScopeSet = TestConstants.Scope
             };
-
-            TokenCacheKey atKey = atItem.GetTokenCacheKey();
+            atItem.IdToken = IdToken.Parse(atItem.RawIdToken);
+            atItem.ClientInfo = ClientInfo.Parse(atItem.RawClientInfo);
+            AccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
             atItem.AccessToken = atKey.ToString();
             cache.TokenCacheAccessor.AccessTokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
 

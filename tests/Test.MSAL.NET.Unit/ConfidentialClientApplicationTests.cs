@@ -38,6 +38,7 @@ using Test.MSAL.NET.Unit.Mocks;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Internal.Http;
 using Microsoft.Identity.Client.Internal.Instance;
+using NSubstitute;
 
 namespace Test.MSAL.NET.Unit
 {
@@ -56,6 +57,49 @@ namespace Test.MSAL.NET.Unit
             Authority.ValidatedAuthorities.Clear();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
+        }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        [Description("Tests the public interfaces can be mocked")]
+        public void MockConfidentialClientApplication()
+        {
+            // Setup up a confidential client application that returns a dummy result
+            var mockResult = Substitute.For<IAuthenticationResult>();
+            mockResult.IdToken.Returns("id token");
+            mockResult.Scope.Returns(new string[] { "scope1", "scope2" });
+
+            var mockApp = Substitute.For<IConfidentialClientApplication>();
+            mockApp.AcquireTokenByAuthorizationCodeAsync("123", null).Returns(mockResult);
+
+            // Now call the substitute with the args to get the substitute result
+            IAuthenticationResult actualResult = mockApp.AcquireTokenByAuthorizationCodeAsync("123", null).Result;
+            Assert.IsNotNull(actualResult);
+            Assert.AreEqual("id token", mockResult.IdToken, "Mock result failed to return the expected id token");
+
+            // Check the scope property
+            IEnumerable<string> scopes = actualResult.Scope;
+            Assert.IsNotNull(scopes);
+            Assert.AreEqual("scope1", scopes.First());
+            Assert.AreEqual("scope2", scopes.Last());
+        }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        [Description("Tests the public application interfaces can be mocked to throw MSAL exceptions")]
+        public void MockConfidentialClientApplication_Exception()
+        {
+            // Setup up a confidential client application that returns throws
+            var mockApp = Substitute.For<IConfidentialClientApplication>();
+            mockApp
+                .WhenForAnyArgs(x => x.AcquireTokenForClientAsync(Arg.Any<string[]>()))
+                .Do(x => { throw new MsalServiceException("my error code", "my message"); });
+
+
+            // Now call the substitute and check the exception is thrown
+            MsalServiceException ex = AssertException.Throws<MsalServiceException>(() => mockApp.AcquireTokenForClientAsync(new string[] { "scope1" }));
+            Assert.AreEqual("my error code", ex.ErrorCode);
+            Assert.AreEqual("my message", ex.Message);
         }
 
         [TestMethod]

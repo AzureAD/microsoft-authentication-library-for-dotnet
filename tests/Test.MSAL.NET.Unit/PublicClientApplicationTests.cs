@@ -36,7 +36,6 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Client.Internal.Http;
 using Microsoft.Identity.Client.Internal.Instance;
-using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Test.MSAL.NET.Unit.Mocks;
@@ -62,6 +61,49 @@ namespace Test.MSAL.NET.Unit
         {
             cache.TokenCacheAccessor.AccessTokenCacheDictionary.Clear();
             cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Clear();
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        [Description("Tests the public interfaces can be mocked")]
+        public void MockPublicClientApplication()
+        {
+            // Setup up a public client application that returns a dummy result
+            // The caller asks for two scopes, but only one is returned
+            var mockResult = Substitute.For<IAuthenticationResult>();
+            mockResult.IdToken.Returns("id token");
+            mockResult.Scope.Returns(new string[] { "scope1" });
+
+            var mockApp = Substitute.For<IPublicClientApplication>();
+            mockApp.AcquireTokenAsync(new string[] { "scope1", "scope2" }).ReturnsForAnyArgs(mockResult);
+
+            // Now call the substitute with the args to get the substitute result
+            IAuthenticationResult actualResult = mockApp.AcquireTokenAsync(new string[] { "scope1" }).Result;
+            Assert.IsNotNull(actualResult);
+            Assert.AreEqual("id token", actualResult.IdToken, "Mock result failed to return the expected id token");
+
+            // Check the users properties returns the dummy users
+            IEnumerable<string> scopes = actualResult.Scope;
+            Assert.IsNotNull(scopes);
+            CollectionAssert.AreEqual(new string[] { "scope1" }, actualResult.Scope.ToArray());
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        [Description("Tests the public application interfaces can be mocked to throw MSAL exceptions")]
+        public void MockPublicClientApplication_Exception()
+        {
+            // Setup up a confidential client application that returns throws
+            var mockApp = Substitute.For<IPublicClientApplication>();
+            mockApp
+                .WhenForAnyArgs(x => x.AcquireTokenAsync(Arg.Any<string[]>()))
+                .Do(x => { throw new MsalServiceException("my error code", "my message"); });
+
+
+            // Now call the substitute and check the exception is thrown
+            MsalServiceException ex = AssertException.Throws<MsalServiceException>(() => mockApp.AcquireTokenAsync(new string[] { "scope1" }));
+            Assert.AreEqual("my error code", ex.ErrorCode);
+            Assert.AreEqual("my message", ex.Message);
         }
 
         [TestMethod]
@@ -108,46 +150,55 @@ namespace Test.MSAL.NET.Unit
             users = app.Users;
             Assert.IsNotNull(users);
             Assert.AreEqual(1, users.Count());
-
-            // another cache entry for different home object id. user count should be 2.
-            TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
-                TestConstants.HomeObjectId + "more");
-
-
+            
             AccessTokenCacheItem item = new AccessTokenCacheItem()
             {
-                AccessToken = key.ToString(),
+                Authority = TestConstants.AuthorityHomeTenant,
+                ClientId = TestConstants.ClientId,
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp((DateTime.UtcNow + TimeSpan.FromSeconds(3600))),
-                User = new User
-                {
-                    DisplayableId = TestConstants.DisplayableId,
-                    HomeObjectId = TestConstants.HomeObjectId
-                },
-                Scope = TestConstants.Scope
+                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                RawClientInfo = MockHelpers.CreateClientInfo(),
+                ScopeSet = TestConstants.Scope
             };
-            cache.TokenCacheAccessor.AccessTokenCacheDictionary[key.ToString()] = JsonHelper.SerializeToJson(item);
+            item.IdToken = IdToken.Parse(item.RawIdToken);
+            item.ClientInfo = ClientInfo.Parse(item.RawClientInfo);
+            item.AccessToken = item.GetAccessTokenItemKey().ToString();
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary[item.GetAccessTokenItemKey().ToString()] = JsonHelper.SerializeToJson(item);
 
 
-            // another cache entry for different home object id. user count should be 2.
-            TokenCacheKey rtKey = new TokenCacheKey(null, null, TestConstants.ClientId,
-                TestConstants.HomeObjectId + "more");
-
+            // another cache entry for different uid. user count should be 2.
             RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
             {
+                Environment = TestConstants.ProductionEnvironment,
                 ClientId = TestConstants.ClientId,
                 RefreshToken = "someRT",
-                RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId, TestConstants.HomeObjectId + "more"),
-                User = new User
-                {
-                    DisplayableId = TestConstants.DisplayableId,
-                    HomeObjectId = TestConstants.HomeObjectId + "more"
-                }
+                RawClientInfo = MockHelpers.CreateClientInfo(TestConstants.Uid + "more", TestConstants.Utid),
+                DisplayableId = TestConstants.DisplayableId,
+                IdentityProvider = TestConstants.IdentityProvider,
+                Name = TestConstants.Name
             };
-            cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtKey.ToString()] = JsonHelper.SerializeToJson(rtItem);
+            rtItem.ClientInfo = ClientInfo.Parse(rtItem.RawClientInfo);
+            cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
+            Assert.AreEqual(2, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
+            users = app.Users;
+            Assert.IsNotNull(users);
+            Assert.AreEqual(2, users.Count());
 
-
+            // another cache entry for different environment. user count should still be 2. Sovereign cloud user must not be returned
+            rtItem = new RefreshTokenCacheItem()
+            {
+                Environment = TestConstants.SovereignEnvironment,
+                ClientId = TestConstants.ClientId,
+                RefreshToken = "someRT",
+                RawClientInfo = MockHelpers.CreateClientInfo(TestConstants.Uid + "more1", TestConstants.Utid),
+                DisplayableId = TestConstants.DisplayableId,
+                IdentityProvider = TestConstants.IdentityProvider,
+                Name = TestConstants.Name
+            };
+            rtItem.ClientInfo = ClientInfo.Parse(rtItem.RawClientInfo);
+            cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
+            Assert.AreEqual(3, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             users = app.Users;
             Assert.IsNotNull(users);
             Assert.AreEqual(2, users.Count());
@@ -197,14 +248,14 @@ namespace Test.MSAL.NET.Unit
 
             app.UserTokenCache = cache;
             TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
-            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Remove(new TokenCacheKey(TestConstants.AuthorityGuestTenant,
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Remove(new AccessTokenCacheKey(TestConstants.AuthorityGuestTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
-                TestConstants.HomeObjectId).ToString());
+                TestConstants.UserIdentifier).ToString());
 
             Task<IAuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), new User()
             {
                 DisplayableId = TestConstants.DisplayableId,
-                HomeObjectId = TestConstants.HomeObjectId,
+                Identifier = TestConstants.UserIdentifier,
             }, app.Authority, false);
             IAuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
@@ -243,7 +294,7 @@ namespace Test.MSAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage =
                     MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.UniqueId,
-                        TestConstants.DisplayableId, TestConstants.HomeObjectId,
+                        TestConstants.DisplayableId,
                         TestConstants.Scope.Union(TestConstants.ScopeForAnotherResource).ToArray())
             });
 
@@ -251,7 +302,7 @@ namespace Test.MSAL.NET.Unit
                 new User()
                 {
                     DisplayableId = TestConstants.DisplayableId,
-                    HomeObjectId = TestConstants.HomeObjectId,
+                    Identifier = TestConstants.UserIdentifier,
                 }, app.Authority, true);
             IAuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
@@ -299,7 +350,7 @@ namespace Test.MSAL.NET.Unit
                         new User()
                         {
                             DisplayableId = TestConstants.DisplayableId,
-                            HomeObjectId = TestConstants.HomeObjectId,
+                            Identifier = TestConstants.UserIdentifier,
                         }, app.Authority, false);
                 IAuthenticationResult result = task.Result;
                 Assert.Fail("AdalSilentTokenAcquisitionException was expected");

@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal
         [DataMember(Name = IdTokenClaim.HomeObjectId, IsRequired = false)]
         public string HomeObjectId { get; set; }
 
-        public static IdToken Parse(string idToken, RequestContext requestContext)
+        public static IdToken Parse(string idToken)
         {
             IdToken idTokenBody = null;
             if (!string.IsNullOrWhiteSpace(idToken))
@@ -81,29 +81,21 @@ namespace Microsoft.Identity.Client.Internal
                 // If Id token format is invalid, we silently ignore the id token
                 if (idTokenSegments.Length == 3)
                 {
-                    try
+                    byte[] idTokenBytes = Base64UrlEncoder.DecodeBytes(idTokenSegments[1]);
+                    using (var stream = new MemoryStream(idTokenBytes))
                     {
-                        byte[] idTokenBytes = Base64UrlEncoder.DecodeBytes(idTokenSegments[1]);
-                        using (var stream = new MemoryStream(idTokenBytes))
-                        {
-                            var serializer = new DataContractJsonSerializer(typeof (IdToken));
-                            idTokenBody = (IdToken) serializer.ReadObject(stream);
-                        }
-                    }
-                    catch (SerializationException ex)
-                    {
-                        requestContext.Logger.Warning(ex.Message);
-                        // We silently ignore the id token if exception occurs.   
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        requestContext.Logger.Warning(ex.Message);
-                        // Again, we silently ignore the id token if exception occurs.   
+                        var serializer = new DataContractJsonSerializer(typeof(IdToken));
+                        idTokenBody = (IdToken) serializer.ReadObject(stream);
                     }
                 }
             }
 
             return idTokenBody;
+        }
+
+        public string GetUniqueId()
+        {
+            return ObjectId ?? Subject;
         }
     }
 }

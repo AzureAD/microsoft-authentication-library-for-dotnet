@@ -81,14 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 RequestContext.Logger.Verbose("Refreshing access token...");
                 await base.SendTokenRequestAsync().ConfigureAwait(false);
-
-                if (Response.IdToken == null)
-                {
-                    // If Id token is not returned by token endpoint when refresh token is redeemed, 
-                    // we should copy tenant and user information from the cached token.
-                    Response.IdToken = _refreshTokenItem.RawIdToken;
-                }
-
+                
                 if (Response.RefreshToken == null)
                 {
                     Response.RefreshToken = _refreshTokenItem.RefreshToken;
