@@ -81,18 +81,11 @@ namespace Microsoft.Identity.Client.Internal
                 // If Id token format is invalid, we silently ignore the id token
                 if (idTokenSegments.Length == 3)
                 {
-                    try
+                    byte[] idTokenBytes = Base64UrlEncoder.DecodeBytes(idTokenSegments[1]);
+                    using (var stream = new MemoryStream(idTokenBytes))
                     {
-                        byte[] idTokenBytes = Base64UrlEncoder.DecodeBytes(idTokenSegments[1]);
-                        using (var stream = new MemoryStream(idTokenBytes))
-                        {
-                            var serializer = new DataContractJsonSerializer(typeof (IdToken));
-                            idTokenBody = (IdToken) serializer.ReadObject(stream);
-                        }
-                    }
-                    catch (SerializationException)
-                    {
-                        // We silently ignore the id token if exception occurs.   
+                        var serializer = new DataContractJsonSerializer(typeof(IdToken));
+                        idTokenBody = (IdToken) serializer.ReadObject(stream);
                     }
                 }
             }

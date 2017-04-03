@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client
                     if (response.RefreshToken != null)
                     {
                         // create the refresh token cache item
-                        RefreshTokenCacheItem refreshTokenCacheItem = new RefreshTokenCacheItem(new Uri(requestParams.Authority.CanonicalAuthority).Host, 
+                        RefreshTokenCacheItem refreshTokenCacheItem = new RefreshTokenCacheItem(requestParams.Authority.Host, 
                             requestParams.ClientId,
                             response);
                         TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(),
@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Client
             lock (LockObject)
             {
                 RefreshTokenCacheKey key = new RefreshTokenCacheKey(
-                    new Uri(requestParam.Authority.CanonicalAuthority).Host, requestParam.ClientId,
+                    requestParam.Authority.Host, requestParam.ClientId,
                     requestParam.User?.Identifier);
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
