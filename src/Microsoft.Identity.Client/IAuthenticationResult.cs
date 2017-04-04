@@ -54,10 +54,10 @@ namespace Microsoft.Identity.Client
         string TenantId { get; }
 
         /// <summary>
-        /// Gets User object. Some elements in User might be null if not returned by the
+        /// Gets the user object. Some elements in User might be null if not returned by the
         /// service. It can be passed back in some API overloads to identify which user should be used.
         /// </summary>
-        User User { get; }
+        IUser User { get; }
 
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.

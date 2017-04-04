@@ -368,7 +368,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void Remove(User user)
+        internal void Remove(IUser user)
         {
             lock (LockObject)
             {

@@ -89,24 +89,29 @@ namespace Test.MSAL.NET.Unit
         [Description("Tests the public interfaces can be mocked")]
         public void MockConfidentialClientApplication_Users()
         {
-            // This test is of limited use; since this test project can see the internals of the
-            // product assembly, we can't be sure we're actually testing the public API.
-
-            // Setup up a confidential client application
+            // Setup up a confidential client application with mocked users
             var mockApp = Substitute.For<IConfidentialClientApplication>();
-            IList<User> users = new List<User>();
-            users.Add(new User("id1", "disp1", "name1", "provider1"));
-            users.Add(new User("id2", "disp2", "name2", "provider2"));
+            IList<IUser> users = new List<IUser>();
+
+            IUser mockUser1 = Substitute.For<IUser>();
+            mockUser1.Name.Returns("Name1");
+
+            IUser mockUser2 = Substitute.For<IUser>();
+            mockUser2.Name.Returns("Name2");
+
+            users.Add(mockUser1);
+            users.Add(mockUser2);
             mockApp.Users.Returns(users);
 
             // Now call the substitute
-            IEnumerable<User> actualUsers = mockApp.Users;
+            IEnumerable<IUser> actualUsers = mockApp.Users;
 
             // Check the users property
             Assert.IsNotNull(actualUsers);
             Assert.AreEqual(2, actualUsers.Count());
 
-            Assert.AreEqual("name1", users.First().Name);
+            Assert.AreEqual("Name1", users.First().Name);
+            Assert.AreEqual("Name2", users.Last().Name);
         }
 
         [TestMethod]

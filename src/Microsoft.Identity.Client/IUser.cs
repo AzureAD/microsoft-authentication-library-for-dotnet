@@ -32,48 +32,26 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Contains information of a single user. This information is used for token cache lookup and enforcing the user session on STS authorize endpont.
     /// </summary>
-    internal sealed class User: IUser
+    public interface IUser
     {
-        public User()
-        {
-        }
-
-        internal User(User other)
-        {
-            DisplayableId = other.DisplayableId;
-            Identifier = other.Identifier;
-            Name = other.Name;
-            IdentityProvider = other.IdentityProvider;
-        }
-
-        public User(string identifier, string displayableId, string name, string identityProvider)
-        {
-            if (string.IsNullOrWhiteSpace(identifier))
-            {
-                throw new ArgumentNullException(nameof(identifier));
-            }
-
-            DisplayableId = displayableId;
-            Name = name;
-            IdentityProvider = identityProvider;
-            Identifier = identifier;
-        }
-
         /// <summary>
         /// Gets a displayable value in UserPrincipalName (UPN) format. The value can be null.
         /// </summary>
-        public string DisplayableId { get; internal set; }
+        string DisplayableId { get; }
 
         /// <summary>
         /// Gets given name of the user if provided by the service. If not, the value is null.
         /// </summary>
-        public string Name { get; internal set; }
+        string Name { get; }
 
         /// <summary>
         /// Gets identity provider if returned by the service. If not, the value is null.
         /// </summary>
-        public string IdentityProvider { get; internal set; }
+        string IdentityProvider { get; }
 
-        public string Identifier { get; internal set; }
+        /// <summary>
+        /// Gets an identifier for the user for the given <see cref="IdentityProvider"/>. Cannot be null.
+        /// </summary>
+        string Identifier { get; }
    }
 }
