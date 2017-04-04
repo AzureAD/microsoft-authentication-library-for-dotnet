@@ -114,6 +114,7 @@ namespace DesktopTestApp
                 }
                 CurrentUser = result.User;
                 SetResultPageInfo(result);
+                SetCacheInfoPage(result);
             }
             catch (Exception exc)
             {
@@ -163,14 +164,6 @@ namespace DesktopTestApp
             {
                 RefreshUI();
             }
-        }
-
-        private void ExpireAccessTokenBtn_Click(object sender, EventArgs e)
-        {
-            _publicClientApplication.Remove(CurrentUser);
-            AccessTokenResultInCache.Text = @"The Access Token for " + CurrentUser.DisplayableId + @" has been removed";
-            ClearResultPageInfo();
-            callResult.Text = @"The Access Token has expired";
         }
 
         #endregion
@@ -308,10 +301,15 @@ namespace DesktopTestApp
                               @"Tenant Id: " + authenticationResult.TenantId + Environment.NewLine + @"User: " +
                               authenticationResult.User.DisplayableId + Environment.NewLine +
                               @"Id Token: " + authenticationResult.IdToken;
+        }
 
-            AccessTokenResultInCache.Text = authenticationResult.AccessToken;
-            ExpiresOnResultInCache.Text = authenticationResult.ExpiresOn.ToString();
-            UserResultInCache.Text = authenticationResult.User.DisplayableId;
+        private void SetCacheInfoPage(IAuthenticationResult authenticationResult)
+        {
+            userUpnResult.Text = authenticationResult.User.DisplayableId;
+            idTokenAT1Result.Text = authenticationResult.IdToken;
+            expiresOnAT1Result.Text = authenticationResult.ExpiresOn.ToString();
+            tenantIdAT1Result.Text = authenticationResult.TenantId;
+            scopesAT1Result.DataSource = authenticationResult.Scope;
         }
 
         private void SetErrorPageInfo(string errorMessage)
@@ -365,8 +363,20 @@ namespace DesktopTestApp
             Logger.PiiLoggingEnabled = false;
         }
 
-        private void publicClientTabPage_Click(object sender, EventArgs e)
+        private void expireAT1Btn_Click(object sender, EventArgs e)
         {
+            
+        }
+
+        private void deleteAT1Btn_Click(object sender, EventArgs e)
+        {
+           
+        }
+
+        private void signOutUserBtn_Click(object sender, EventArgs e)
+        {
+            _publicClientApplication.Remove(CurrentUser);
+            idTokenAT1Result.Text = @"The user: " + CurrentUser.DisplayableId + @" has been signed out";
         }
     }
 }
