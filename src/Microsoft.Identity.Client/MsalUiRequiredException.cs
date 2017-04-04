@@ -26,23 +26,38 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class MsalUiRequiredException : MsalException
     {
-        internal MsalUiRequiredException(string errorCode) : base(errorCode)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="errorCode"></param>
+        public MsalUiRequiredException(string errorCode) : base(errorCode)
         {
         }
 
-        internal MsalUiRequiredException(string errorCode, string errorMessage):base(errorCode, errorMessage)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="errorCode"></param>
+        /// <param name="errorMessage"></param>
+        public MsalUiRequiredException(string errorCode, string errorMessage):base(errorCode, errorMessage)
         {
         }
 
-        internal MsalUiRequiredException(string errorCode, string errorMessage, Exception innerException):base(errorCode, errorMessage, innerException)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="errorCode"></param>
+        /// <param name="errorMessage"></param>
+        /// <param name="innerException"></param>
+        public MsalUiRequiredException(string errorCode, string errorMessage, Exception innerException):base(errorCode, errorMessage, innerException)
         {
         }
     }

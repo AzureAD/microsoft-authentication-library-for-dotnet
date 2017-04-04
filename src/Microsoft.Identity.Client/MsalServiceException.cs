@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
         /// can rely on for exception handling.
         /// </param>
         /// <param name="message">The error message that explains the reason for the exception.</param>
-        internal MsalServiceException(string errorCode, string message)
+        public MsalServiceException(string errorCode, string message)
             : base(
                 errorCode, message)
         {
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <param name="message">The error message that explains the reason for the exception.</param>
         /// <param name="statusCode">Status code of the resposne received from the service.</param>
-        internal MsalServiceException(string errorCode, string message, int statusCode)
+        public MsalServiceException(string errorCode, string message, int statusCode)
             : this(errorCode, message)
         {
             StatusCode = statusCode;
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified. It may especially contain the actual error message returned by the service.
         /// </param>
-        internal MsalServiceException(string errorCode, string message,
+        public MsalServiceException(string errorCode, string message,
             Exception innerException)
             : base(
                 errorCode, message, innerException)
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified. It may especially contain the actual error message returned by the service.
         /// </param>
-        internal MsalServiceException(string errorCode, string message, int statusCode,
+        public MsalServiceException(string errorCode, string message, int statusCode,
             Exception innerException)
             : base(
                 errorCode, message, innerException)
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified. It may especially contain the actual error message returned by the service.
         /// </param>
-        internal MsalServiceException(string errorCode, string message, int statusCode, string claims,
+        public MsalServiceException(string errorCode, string message, int statusCode, string claims,
             Exception innerException)
             : this(
                 errorCode, message, statusCode, innerException)

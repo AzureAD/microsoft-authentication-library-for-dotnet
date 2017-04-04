@@ -64,16 +64,31 @@ namespace Microsoft.Identity.Client
             [MsalError.GetUserNameFailed] = MsalErrorMessage.GetUserNameFailed,
             // MsalErrorMessage.Unknown will be set as the default error message in GetErrorMessage(string errorCode).
         };
-        
-        internal MsalClientException(string errorCode) : base(errorCode)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="errorCode"></param>
+        public MsalClientException(string errorCode) : base(errorCode)
         {
         }
 
-        internal MsalClientException(string errorCode, string errorMessage):base(errorCode, errorMessage)
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="errorCode"></param>
+        /// <param name="errorMessage"></param>
+        public MsalClientException(string errorCode, string errorMessage):base(errorCode, errorMessage)
         {
         }
 
-        internal MsalClientException(string errorCode, string errorMessage, Exception innerException):base(errorCode, errorMessage, innerException)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="errorCode"></param>
+        /// <param name="errorMessage"></param>
+        /// <param name="innerException"></param>
+        public MsalClientException(string errorCode, string errorMessage, Exception innerException):base(errorCode, errorMessage, innerException)
         {
         }
 
