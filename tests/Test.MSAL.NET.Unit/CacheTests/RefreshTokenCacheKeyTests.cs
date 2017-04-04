@@ -25,34 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Globalization;
-using System.Runtime.Serialization;
+using Microsoft.Identity.Client.Internal.Cache;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Test.MSAL.NET.Unit.CacheTests
 {
-    internal class ClientInfoClaim
+    [TestClass]
+    public class RefreshTokenCacheKeyTests
     {
-        public const string UniqueIdentifier = "uid";
-        public const string UnqiueTenantIdentifier = "utid";
-    }
-
-    [DataContract]
-    internal class ClientInfo
-    {
-        [DataMember(Name = ClientInfoClaim.UniqueIdentifier, IsRequired = false)]
-        public string UniqueIdentifier { get; set; }
-
-        [DataMember(Name = ClientInfoClaim.UnqiueTenantIdentifier, IsRequired = false)]
-        public string UniqueTenantIdentifier { get; set; }
-
-        public static ClientInfo Parse(string clientInfo)
+        [TestMethod]
+        [TestCategory("RefreshTokenCacheKeyTests")]
+        public void ConstructorTest()
         {
-            if (string.IsNullOrEmpty(clientInfo))
-            {
-                return null;
-            }
-            
-            return JsonHelper.DeserializeFromJson<ClientInfo>(Base64UrlEncoder.DecodeBytes(clientInfo));
+            RefreshTokenCacheKey key = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
+                TestConstants.ClientId, TestConstants.UserIdentifier);
+
+            Assert.IsNotNull(key);
+            Assert.AreEqual(TestConstants.ProductionEnvironment, key.Environment);
+            Assert.AreEqual(TestConstants.ClientId, key.ClientId);
+            Assert.AreEqual(TestConstants.UserIdentifier, key.UserIdentifier);
+        }
+
+        [TestMethod]
+        [TestCategory("RefreshTokenCacheKeyTests")]
+        public void ToStringTest()
+        {
+            RefreshTokenCacheKey key = new RefreshTokenCacheKey(TestConstants.ProductionEnvironment,
+                TestConstants.ClientId, TestConstants.UserIdentifier);
+
+            Assert.IsNotNull(key);
+            Assert.AreEqual(TestConstants.ProductionEnvironment, key.Environment);
+            Assert.AreEqual(TestConstants.ClientId, key.ClientId);
+            Assert.AreEqual(TestConstants.UserIdentifier, key.UserIdentifier);
         }
     }
 }

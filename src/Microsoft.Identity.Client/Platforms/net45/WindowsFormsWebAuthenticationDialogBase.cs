@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Client
             }
 
             if (!readyToClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) &&
-                !url.AbsoluteUri.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) && !url.AbsoluteUri.Equals("javascript", StringComparison.CurrentCultureIgnoreCase))
+                !url.AbsoluteUri.Equals("about:blank", StringComparison.OrdinalIgnoreCase) && !url.Scheme.Equals("javascript", StringComparison.OrdinalIgnoreCase))
             {
                 Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
                 {
