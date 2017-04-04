@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client
             catch (Exception ex)
             {
                 requestContext.Logger.Error(ex);
-                throw new MsalException(MsalError.AuthenticationUiFailed, ex);
+                throw new MsalException(MsalError.AuthenticationUiFailed, "WAB authentication failed" ,ex);
             }
 
             AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult, requestContext);

@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client
             catch (Exception ex)
             {
                 requestContext.Logger.Error(ex);
-                throw new MsalException(MsalError.AuthenticationUiFailed, ex);
+                throw new MsalException(MsalError.AuthenticationUiFailed, "AuthenticationActivity failed to start", ex);
             }
 
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
