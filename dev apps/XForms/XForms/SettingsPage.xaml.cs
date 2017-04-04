@@ -42,5 +42,16 @@ namespace XForms
         {
             InitializeComponent();
         }
+
+        protected override void OnAppearing()
+        {
+            authority.Text = App.Authority;
+        }
+
+        private void OnSaveClicked(object sender, EventArgs e)
+        {
+            App.Authority = authority.Text;
+            App.InitPublicClient();
+        }
     }
 }

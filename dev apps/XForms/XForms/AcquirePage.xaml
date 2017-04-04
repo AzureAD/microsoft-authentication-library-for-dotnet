@@ -12,6 +12,18 @@
 
     <StackLayout Padding="10,0">
 
+        <Label Text="Acquire" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" Margin="5" />
+
+        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+            <Label Text="Authority:" HorizontalTextAlignment="Center"  Margin="5"/>
+            <Label x:Name="authority" Text="" HorizontalTextAlignment="Center"  Margin="5"/>
+        </StackLayout>
+
+        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+            <Label Text="Validate Authority" HorizontalTextAlignment="Center"  Margin="5"/>
+            <Switch x:Name="validateAuthority" Toggled="OnValidateAuthorityToggled"/>
+        </StackLayout>
+
         <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
             <Label Text="User" HorizontalTextAlignment="Center"  Margin="5"/>
             <Entry x:Name="UserEntry" Text="user@msdevex.onmicrosoft.com"  HorizontalOptions="FillAndExpand"/>
