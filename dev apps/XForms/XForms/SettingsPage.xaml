@@ -3,8 +3,24 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="XForms.SettingsPage">
 
-    <Label Text="Settings Page" 
-           VerticalOptions="Center" 
-           HorizontalOptions="Center" />
-    
+    <ContentPage.Padding>
+        <OnPlatform x:TypeArguments="Thickness">
+            <OnPlatform.iOS>0,20,0,0</OnPlatform.iOS>
+        </OnPlatform>
+    </ContentPage.Padding>
+
+    <StackLayout Padding="10,0">
+        <Label Text="Settings" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" Margin="5" />
+
+        <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand">
+            <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+                <Label Text="Authority:" HorizontalTextAlignment="Start"  Margin="5"/>
+                <Entry x:Name="authority" Text=""  HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+        </StackLayout>
+
+        <Button  Text="Save"  Clicked="OnSaveClicked" TextColor="Blue" Font="Bold,15"/>
+
+    </StackLayout>
+
 </ContentPage>
