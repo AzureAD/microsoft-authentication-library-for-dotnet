@@ -33,22 +33,11 @@
             this.environmentQP = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.publicClientTabPage = new System.Windows.Forms.TabPage();
-            this.IdTokenResult = new System.Windows.Forms.TextBox();
-            this.accessTokenResult = new System.Windows.Forms.TextBox();
-            this.label12 = new System.Windows.Forms.Label();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.PiiLoggingDisabled = new System.Windows.Forms.RadioButton();
             this.PiiLoggingEnabled = new System.Windows.Forms.RadioButton();
+            this.label12 = new System.Windows.Forms.Label();
             this.PiiLoggingLabel = new System.Windows.Forms.Label();
-            this.ScopeResult = new System.Windows.Forms.ListBox();
-            this.Scope = new System.Windows.Forms.Label();
-            this.IdToken = new System.Windows.Forms.Label();
-            this.UserResult = new System.Windows.Forms.Label();
-            this.User = new System.Windows.Forms.Label();
-            this.TenantIdResult = new System.Windows.Forms.Label();
-            this.TenantId = new System.Windows.Forms.Label();
-            this.ExpiresOnResult = new System.Windows.Forms.Label();
-            this.ExpiresOn = new System.Windows.Forms.Label();
-            this.AccessToken = new System.Windows.Forms.Label();
             this.scopes = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -89,11 +78,24 @@
             this.label1 = new System.Windows.Forms.Label();
             this.msalLogs = new System.Windows.Forms.TextBox();
             this.confidentialClientTabPage = new System.Windows.Forms.TabPage();
+            this.confClientTextBox = new System.Windows.Forms.TextBox();
+            this.listBox1 = new System.Windows.Forms.ListBox();
+            this.confClientCredential = new System.Windows.Forms.Label();
+            this.confClientUserList = new System.Windows.Forms.ComboBox();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.confClientPiiDisabledButton = new System.Windows.Forms.RadioButton();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.ConfClientConsentButton = new System.Windows.Forms.RadioButton();
+            this.ConfClientForceLoginButton = new System.Windows.Forms.RadioButton();
+            this.ConfClientSelectAccountButton = new System.Windows.Forms.RadioButton();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.ConfClientValidateAuthorityDisabled = new System.Windows.Forms.RadioButton();
+            this.ConfClientValidateAuthorityEnabled = new System.Windows.Forms.RadioButton();
+            this.confClientScopesTextBox = new System.Windows.Forms.TextBox();
             this.confClientIdTokenResult = new System.Windows.Forms.TextBox();
             this.confClientAcquireTokenSilentBtn = new System.Windows.Forms.Button();
             this.confClientAcquireTokenBtn = new System.Windows.Forms.Button();
             this.confClientPiiEnabledButton = new System.Windows.Forms.RadioButton();
-            this.confClientPiiDisabledButton = new System.Windows.Forms.RadioButton();
             this.confClientPiiEnabledLabel = new System.Windows.Forms.Label();
             this.confClientScopesResult = new System.Windows.Forms.ListBox();
             this.conClientScopesLabel = new System.Windows.Forms.Label();
@@ -112,12 +114,7 @@
             this.ConfClientLoginHintBox = new System.Windows.Forms.TextBox();
             this.ConfClientLoginHintLabel = new System.Windows.Forms.Label();
             this.ConfClientNeverButton = new System.Windows.Forms.RadioButton();
-            this.ConfClientConsentButton = new System.Windows.Forms.RadioButton();
-            this.ConfClientForceLoginButton = new System.Windows.Forms.RadioButton();
-            this.ConfClientSelectAccountButton = new System.Windows.Forms.RadioButton();
             this.ConfClientUiBehaviorLabel = new System.Windows.Forms.Label();
-            this.ConfClientValidateAuthorityDisabled = new System.Windows.Forms.RadioButton();
-            this.ConfClientValidateAuthorityEnabled = new System.Windows.Forms.RadioButton();
             this.ConfClientValidateAuthorityLabel = new System.Windows.Forms.Label();
             this.ConfClientOverrideAuthority = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
@@ -128,27 +125,18 @@
             this.cache = new System.Windows.Forms.Button();
             this.logs = new System.Windows.Forms.Button();
             this.confidentialClient = new System.Windows.Forms.Button();
-            this.confClientScopesTextBox = new System.Windows.Forms.TextBox();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.groupBox6 = new System.Windows.Forms.GroupBox();
-            this.confClientUserList = new System.Windows.Forms.ComboBox();
-            this.confClientCredential = new System.Windows.Forms.Label();
-            this.listBox1 = new System.Windows.Forms.ListBox();
-            this.confClientTextBox = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.publicClientTabPage.SuspendLayout();
+            this.groupBox6.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.settingsTabPage.SuspendLayout();
             this.cacheTabPage.SuspendLayout();
             this.logsTabPage.SuspendLayout();
             this.confidentialClientTabPage.SuspendLayout();
-            this.groupBox3.SuspendLayout();
-            this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
-            this.groupBox6.SuspendLayout();
+            this.groupBox4.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // authority
@@ -194,20 +182,8 @@
             // 
             this.publicClientTabPage.BackColor = System.Drawing.SystemColors.Control;
             this.publicClientTabPage.Controls.Add(this.groupBox6);
-            this.publicClientTabPage.Controls.Add(this.IdTokenResult);
-            this.publicClientTabPage.Controls.Add(this.accessTokenResult);
             this.publicClientTabPage.Controls.Add(this.label12);
             this.publicClientTabPage.Controls.Add(this.PiiLoggingLabel);
-            this.publicClientTabPage.Controls.Add(this.ScopeResult);
-            this.publicClientTabPage.Controls.Add(this.Scope);
-            this.publicClientTabPage.Controls.Add(this.IdToken);
-            this.publicClientTabPage.Controls.Add(this.UserResult);
-            this.publicClientTabPage.Controls.Add(this.User);
-            this.publicClientTabPage.Controls.Add(this.TenantIdResult);
-            this.publicClientTabPage.Controls.Add(this.TenantId);
-            this.publicClientTabPage.Controls.Add(this.ExpiresOnResult);
-            this.publicClientTabPage.Controls.Add(this.ExpiresOn);
-            this.publicClientTabPage.Controls.Add(this.AccessToken);
             this.publicClientTabPage.Controls.Add(this.authority);
             this.publicClientTabPage.Controls.Add(this.scopes);
             this.publicClientTabPage.Controls.Add(this.label9);
@@ -233,31 +209,15 @@
             this.publicClientTabPage.Text = "publicClientTabPage";
             this.publicClientTabPage.Click += new System.EventHandler(this.publicClientTabPage_Click);
             // 
-            // IdTokenResult
+            // groupBox6
             // 
-            this.IdTokenResult.Location = new System.Drawing.Point(131, 586);
-            this.IdTokenResult.Multiline = true;
-            this.IdTokenResult.Name = "IdTokenResult";
-            this.IdTokenResult.Size = new System.Drawing.Size(481, 40);
-            this.IdTokenResult.TabIndex = 34;
-            // 
-            // accessTokenResult
-            // 
-            this.accessTokenResult.Location = new System.Drawing.Point(130, 417);
-            this.accessTokenResult.Multiline = true;
-            this.accessTokenResult.Name = "accessTokenResult";
-            this.accessTokenResult.Size = new System.Drawing.Size(483, 92);
-            this.accessTokenResult.TabIndex = 33;
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label12.Location = new System.Drawing.Point(11, 361);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(101, 13);
-            this.label12.TabIndex = 32;
-            this.label12.Text = "Pii Logging Enabled";
+            this.groupBox6.Controls.Add(this.PiiLoggingDisabled);
+            this.groupBox6.Controls.Add(this.PiiLoggingEnabled);
+            this.groupBox6.Location = new System.Drawing.Point(257, 351);
+            this.groupBox6.Name = "groupBox6";
+            this.groupBox6.Size = new System.Drawing.Size(189, 42);
+            this.groupBox6.TabIndex = 35;
+            this.groupBox6.TabStop = false;
             // 
             // PiiLoggingDisabled
             // 
@@ -281,6 +241,16 @@
             this.PiiLoggingEnabled.Text = "Enabled";
             this.PiiLoggingEnabled.UseVisualStyleBackColor = true;
             // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label12.Location = new System.Drawing.Point(11, 361);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(101, 13);
+            this.label12.TabIndex = 32;
+            this.label12.Text = "Pii Logging Enabled";
+            // 
             // PiiLoggingLabel
             // 
             this.PiiLoggingLabel.AutoSize = true;
@@ -288,95 +258,6 @@
             this.PiiLoggingLabel.Name = "PiiLoggingLabel";
             this.PiiLoggingLabel.Size = new System.Drawing.Size(0, 13);
             this.PiiLoggingLabel.TabIndex = 29;
-            // 
-            // ScopeResult
-            // 
-            this.ScopeResult.FormattingEnabled = true;
-            this.ScopeResult.Location = new System.Drawing.Point(130, 632);
-            this.ScopeResult.Name = "ScopeResult";
-            this.ScopeResult.Size = new System.Drawing.Size(150, 30);
-            this.ScopeResult.TabIndex = 28;
-            // 
-            // Scope
-            // 
-            this.Scope.AutoSize = true;
-            this.Scope.Location = new System.Drawing.Point(34, 632);
-            this.Scope.Name = "Scope";
-            this.Scope.Size = new System.Drawing.Size(38, 13);
-            this.Scope.TabIndex = 27;
-            this.Scope.Text = "Scope";
-            // 
-            // IdToken
-            // 
-            this.IdToken.AutoSize = true;
-            this.IdToken.Location = new System.Drawing.Point(34, 592);
-            this.IdToken.Name = "IdToken";
-            this.IdToken.Size = new System.Drawing.Size(50, 13);
-            this.IdToken.TabIndex = 25;
-            this.IdToken.Text = "Id Token";
-            // 
-            // UserResult
-            // 
-            this.UserResult.AutoSize = true;
-            this.UserResult.Location = new System.Drawing.Point(127, 568);
-            this.UserResult.Name = "UserResult";
-            this.UserResult.Size = new System.Drawing.Size(88, 13);
-            this.UserResult.TabIndex = 24;
-            this.UserResult.Text = "User Placeholder";
-            // 
-            // User
-            // 
-            this.User.AutoSize = true;
-            this.User.Location = new System.Drawing.Point(34, 568);
-            this.User.Name = "User";
-            this.User.Size = new System.Drawing.Size(29, 13);
-            this.User.TabIndex = 23;
-            this.User.Text = "User";
-            // 
-            // TenantIdResult
-            // 
-            this.TenantIdResult.AutoSize = true;
-            this.TenantIdResult.Location = new System.Drawing.Point(127, 542);
-            this.TenantIdResult.Name = "TenantIdResult";
-            this.TenantIdResult.Size = new System.Drawing.Size(112, 13);
-            this.TenantIdResult.TabIndex = 22;
-            this.TenantIdResult.Text = "Tenant Id Placeholder";
-            // 
-            // TenantId
-            // 
-            this.TenantId.AutoSize = true;
-            this.TenantId.Location = new System.Drawing.Point(34, 542);
-            this.TenantId.Name = "TenantId";
-            this.TenantId.Size = new System.Drawing.Size(53, 13);
-            this.TenantId.TabIndex = 21;
-            this.TenantId.Text = "Tenant Id";
-            // 
-            // ExpiresOnResult
-            // 
-            this.ExpiresOnResult.AutoSize = true;
-            this.ExpiresOnResult.Location = new System.Drawing.Point(127, 512);
-            this.ExpiresOnResult.Name = "ExpiresOnResult";
-            this.ExpiresOnResult.Size = new System.Drawing.Size(117, 13);
-            this.ExpiresOnResult.TabIndex = 20;
-            this.ExpiresOnResult.Text = "Expires On Placeholder";
-            // 
-            // ExpiresOn
-            // 
-            this.ExpiresOn.AutoSize = true;
-            this.ExpiresOn.Location = new System.Drawing.Point(34, 512);
-            this.ExpiresOn.Name = "ExpiresOn";
-            this.ExpiresOn.Size = new System.Drawing.Size(58, 13);
-            this.ExpiresOn.TabIndex = 19;
-            this.ExpiresOn.Text = "Expires On";
-            // 
-            // AccessToken
-            // 
-            this.AccessToken.AutoSize = true;
-            this.AccessToken.Location = new System.Drawing.Point(32, 420);
-            this.AccessToken.Name = "AccessToken";
-            this.AccessToken.Size = new System.Drawing.Size(76, 13);
-            this.AccessToken.TabIndex = 17;
-            this.AccessToken.Text = "Access Token";
             // 
             // scopes
             // 
@@ -818,6 +699,142 @@
             this.confidentialClientTabPage.Text = "confidentialClientTabPage";
             this.confidentialClientTabPage.UseVisualStyleBackColor = true;
             // 
+            // confClientTextBox
+            // 
+            this.confClientTextBox.Location = new System.Drawing.Point(171, 275);
+            this.confClientTextBox.Name = "confClientTextBox";
+            this.confClientTextBox.Size = new System.Drawing.Size(476, 20);
+            this.confClientTextBox.TabIndex = 44;
+            // 
+            // listBox1
+            // 
+            this.listBox1.FormattingEnabled = true;
+            this.listBox1.Location = new System.Drawing.Point(298, 210);
+            this.listBox1.Name = "listBox1";
+            this.listBox1.Size = new System.Drawing.Size(8, 4);
+            this.listBox1.TabIndex = 43;
+            // 
+            // confClientCredential
+            // 
+            this.confClientCredential.AutoSize = true;
+            this.confClientCredential.Location = new System.Drawing.Point(26, 280);
+            this.confClientCredential.Name = "confClientCredential";
+            this.confClientCredential.Size = new System.Drawing.Size(83, 13);
+            this.confClientCredential.TabIndex = 42;
+            this.confClientCredential.Text = "Client Credential";
+            // 
+            // confClientUserList
+            // 
+            this.confClientUserList.FormattingEnabled = true;
+            this.confClientUserList.Location = new System.Drawing.Point(173, 196);
+            this.confClientUserList.Name = "confClientUserList";
+            this.confClientUserList.Size = new System.Drawing.Size(475, 21);
+            this.confClientUserList.TabIndex = 41;
+            // 
+            // groupBox5
+            // 
+            this.groupBox5.Controls.Add(this.confClientPiiDisabledButton);
+            this.groupBox5.Location = new System.Drawing.Point(169, 296);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(154, 34);
+            this.groupBox5.TabIndex = 40;
+            this.groupBox5.TabStop = false;
+            // 
+            // confClientPiiDisabledButton
+            // 
+            this.confClientPiiDisabledButton.AutoSize = true;
+            this.confClientPiiDisabledButton.Checked = true;
+            this.confClientPiiDisabledButton.Location = new System.Drawing.Point(6, 6);
+            this.confClientPiiDisabledButton.Name = "confClientPiiDisabledButton";
+            this.confClientPiiDisabledButton.Size = new System.Drawing.Size(66, 17);
+            this.confClientPiiDisabledButton.TabIndex = 32;
+            this.confClientPiiDisabledButton.TabStop = true;
+            this.confClientPiiDisabledButton.Text = "Disabled";
+            this.confClientPiiDisabledButton.UseVisualStyleBackColor = true;
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.ConfClientConsentButton);
+            this.groupBox4.Controls.Add(this.ConfClientForceLoginButton);
+            this.groupBox4.Controls.Add(this.ConfClientSelectAccountButton);
+            this.groupBox4.Location = new System.Drawing.Point(166, 109);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(388, 25);
+            this.groupBox4.TabIndex = 39;
+            this.groupBox4.TabStop = false;
+            // 
+            // ConfClientConsentButton
+            // 
+            this.ConfClientConsentButton.AutoSize = true;
+            this.ConfClientConsentButton.Location = new System.Drawing.Point(241, 6);
+            this.ConfClientConsentButton.Name = "ConfClientConsentButton";
+            this.ConfClientConsentButton.Size = new System.Drawing.Size(64, 17);
+            this.ConfClientConsentButton.TabIndex = 10;
+            this.ConfClientConsentButton.Text = "Consent";
+            this.ConfClientConsentButton.UseVisualStyleBackColor = true;
+            // 
+            // ConfClientForceLoginButton
+            // 
+            this.ConfClientForceLoginButton.AutoSize = true;
+            this.ConfClientForceLoginButton.Location = new System.Drawing.Point(130, 6);
+            this.ConfClientForceLoginButton.Name = "ConfClientForceLoginButton";
+            this.ConfClientForceLoginButton.Size = new System.Drawing.Size(81, 17);
+            this.ConfClientForceLoginButton.TabIndex = 9;
+            this.ConfClientForceLoginButton.Text = "Force Login";
+            this.ConfClientForceLoginButton.UseVisualStyleBackColor = true;
+            // 
+            // ConfClientSelectAccountButton
+            // 
+            this.ConfClientSelectAccountButton.AutoSize = true;
+            this.ConfClientSelectAccountButton.Checked = true;
+            this.ConfClientSelectAccountButton.Location = new System.Drawing.Point(10, 6);
+            this.ConfClientSelectAccountButton.Name = "ConfClientSelectAccountButton";
+            this.ConfClientSelectAccountButton.Size = new System.Drawing.Size(98, 17);
+            this.ConfClientSelectAccountButton.TabIndex = 8;
+            this.ConfClientSelectAccountButton.TabStop = true;
+            this.ConfClientSelectAccountButton.Text = "Select Account";
+            this.ConfClientSelectAccountButton.UseVisualStyleBackColor = true;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.ConfClientValidateAuthorityDisabled);
+            this.groupBox3.Controls.Add(this.ConfClientValidateAuthorityEnabled);
+            this.groupBox3.Location = new System.Drawing.Point(167, 65);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(188, 37);
+            this.groupBox3.TabIndex = 38;
+            this.groupBox3.TabStop = false;
+            // 
+            // ConfClientValidateAuthorityDisabled
+            // 
+            this.ConfClientValidateAuthorityDisabled.AutoSize = true;
+            this.ConfClientValidateAuthorityDisabled.Location = new System.Drawing.Point(114, 8);
+            this.ConfClientValidateAuthorityDisabled.Name = "ConfClientValidateAuthorityDisabled";
+            this.ConfClientValidateAuthorityDisabled.Size = new System.Drawing.Size(66, 17);
+            this.ConfClientValidateAuthorityDisabled.TabIndex = 6;
+            this.ConfClientValidateAuthorityDisabled.Text = "Disabled";
+            this.ConfClientValidateAuthorityDisabled.UseVisualStyleBackColor = true;
+            // 
+            // ConfClientValidateAuthorityEnabled
+            // 
+            this.ConfClientValidateAuthorityEnabled.AutoSize = true;
+            this.ConfClientValidateAuthorityEnabled.Checked = true;
+            this.ConfClientValidateAuthorityEnabled.Location = new System.Drawing.Point(9, 8);
+            this.ConfClientValidateAuthorityEnabled.Name = "ConfClientValidateAuthorityEnabled";
+            this.ConfClientValidateAuthorityEnabled.Size = new System.Drawing.Size(64, 17);
+            this.ConfClientValidateAuthorityEnabled.TabIndex = 5;
+            this.ConfClientValidateAuthorityEnabled.TabStop = true;
+            this.ConfClientValidateAuthorityEnabled.Text = "Enabled";
+            this.ConfClientValidateAuthorityEnabled.UseVisualStyleBackColor = true;
+            // 
+            // confClientScopesTextBox
+            // 
+            this.confClientScopesTextBox.Location = new System.Drawing.Point(174, 242);
+            this.confClientScopesTextBox.Name = "confClientScopesTextBox";
+            this.confClientScopesTextBox.Size = new System.Drawing.Size(465, 20);
+            this.confClientScopesTextBox.TabIndex = 37;
+            this.confClientScopesTextBox.Text = "mail.write";
+            // 
             // confClientIdTokenResult
             // 
             this.confClientIdTokenResult.Location = new System.Drawing.Point(143, 589);
@@ -854,18 +871,6 @@
             this.confClientPiiEnabledButton.TabIndex = 33;
             this.confClientPiiEnabledButton.Text = "Enabled";
             this.confClientPiiEnabledButton.UseVisualStyleBackColor = true;
-            // 
-            // confClientPiiDisabledButton
-            // 
-            this.confClientPiiDisabledButton.AutoSize = true;
-            this.confClientPiiDisabledButton.Checked = true;
-            this.confClientPiiDisabledButton.Location = new System.Drawing.Point(6, 6);
-            this.confClientPiiDisabledButton.Name = "confClientPiiDisabledButton";
-            this.confClientPiiDisabledButton.Size = new System.Drawing.Size(66, 17);
-            this.confClientPiiDisabledButton.TabIndex = 32;
-            this.confClientPiiDisabledButton.TabStop = true;
-            this.confClientPiiDisabledButton.Text = "Disabled";
-            this.confClientPiiDisabledButton.UseVisualStyleBackColor = true;
             // 
             // confClientPiiEnabledLabel
             // 
@@ -1025,38 +1030,6 @@
             this.ConfClientNeverButton.Text = "Never";
             this.ConfClientNeverButton.UseVisualStyleBackColor = true;
             // 
-            // ConfClientConsentButton
-            // 
-            this.ConfClientConsentButton.AutoSize = true;
-            this.ConfClientConsentButton.Location = new System.Drawing.Point(241, 6);
-            this.ConfClientConsentButton.Name = "ConfClientConsentButton";
-            this.ConfClientConsentButton.Size = new System.Drawing.Size(64, 17);
-            this.ConfClientConsentButton.TabIndex = 10;
-            this.ConfClientConsentButton.Text = "Consent";
-            this.ConfClientConsentButton.UseVisualStyleBackColor = true;
-            // 
-            // ConfClientForceLoginButton
-            // 
-            this.ConfClientForceLoginButton.AutoSize = true;
-            this.ConfClientForceLoginButton.Location = new System.Drawing.Point(130, 6);
-            this.ConfClientForceLoginButton.Name = "ConfClientForceLoginButton";
-            this.ConfClientForceLoginButton.Size = new System.Drawing.Size(81, 17);
-            this.ConfClientForceLoginButton.TabIndex = 9;
-            this.ConfClientForceLoginButton.Text = "Force Login";
-            this.ConfClientForceLoginButton.UseVisualStyleBackColor = true;
-            // 
-            // ConfClientSelectAccountButton
-            // 
-            this.ConfClientSelectAccountButton.AutoSize = true;
-            this.ConfClientSelectAccountButton.Checked = true;
-            this.ConfClientSelectAccountButton.Location = new System.Drawing.Point(10, 6);
-            this.ConfClientSelectAccountButton.Name = "ConfClientSelectAccountButton";
-            this.ConfClientSelectAccountButton.Size = new System.Drawing.Size(98, 17);
-            this.ConfClientSelectAccountButton.TabIndex = 8;
-            this.ConfClientSelectAccountButton.TabStop = true;
-            this.ConfClientSelectAccountButton.Text = "Select Account";
-            this.ConfClientSelectAccountButton.UseVisualStyleBackColor = true;
-            // 
             // ConfClientUiBehaviorLabel
             // 
             this.ConfClientUiBehaviorLabel.AutoSize = true;
@@ -1065,28 +1038,6 @@
             this.ConfClientUiBehaviorLabel.Size = new System.Drawing.Size(63, 13);
             this.ConfClientUiBehaviorLabel.TabIndex = 7;
             this.ConfClientUiBehaviorLabel.Text = "UI Behavior";
-            // 
-            // ConfClientValidateAuthorityDisabled
-            // 
-            this.ConfClientValidateAuthorityDisabled.AutoSize = true;
-            this.ConfClientValidateAuthorityDisabled.Location = new System.Drawing.Point(114, 8);
-            this.ConfClientValidateAuthorityDisabled.Name = "ConfClientValidateAuthorityDisabled";
-            this.ConfClientValidateAuthorityDisabled.Size = new System.Drawing.Size(66, 17);
-            this.ConfClientValidateAuthorityDisabled.TabIndex = 6;
-            this.ConfClientValidateAuthorityDisabled.Text = "Disabled";
-            this.ConfClientValidateAuthorityDisabled.UseVisualStyleBackColor = true;
-            // 
-            // ConfClientValidateAuthorityEnabled
-            // 
-            this.ConfClientValidateAuthorityEnabled.AutoSize = true;
-            this.ConfClientValidateAuthorityEnabled.Checked = true;
-            this.ConfClientValidateAuthorityEnabled.Location = new System.Drawing.Point(9, 8);
-            this.ConfClientValidateAuthorityEnabled.Name = "ConfClientValidateAuthorityEnabled";
-            this.ConfClientValidateAuthorityEnabled.Size = new System.Drawing.Size(64, 17);
-            this.ConfClientValidateAuthorityEnabled.TabIndex = 5;
-            this.ConfClientValidateAuthorityEnabled.TabStop = true;
-            this.ConfClientValidateAuthorityEnabled.Text = "Enabled";
-            this.ConfClientValidateAuthorityEnabled.UseVisualStyleBackColor = true;
             // 
             // ConfClientValidateAuthorityLabel
             // 
@@ -1181,86 +1132,6 @@
             this.confidentialClient.UseVisualStyleBackColor = true;
             this.confidentialClient.Click += new System.EventHandler(this.confidentialClient_Click);
             // 
-            // confClientScopesTextBox
-            // 
-            this.confClientScopesTextBox.Location = new System.Drawing.Point(174, 242);
-            this.confClientScopesTextBox.Name = "confClientScopesTextBox";
-            this.confClientScopesTextBox.Size = new System.Drawing.Size(465, 20);
-            this.confClientScopesTextBox.TabIndex = 37;
-            this.confClientScopesTextBox.Text = "mail.write";
-            // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.ConfClientValidateAuthorityDisabled);
-            this.groupBox3.Controls.Add(this.ConfClientValidateAuthorityEnabled);
-            this.groupBox3.Location = new System.Drawing.Point(167, 65);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(188, 37);
-            this.groupBox3.TabIndex = 38;
-            this.groupBox3.TabStop = false;
-            // 
-            // groupBox4
-            // 
-            this.groupBox4.Controls.Add(this.ConfClientConsentButton);
-            this.groupBox4.Controls.Add(this.ConfClientForceLoginButton);
-            this.groupBox4.Controls.Add(this.ConfClientSelectAccountButton);
-            this.groupBox4.Location = new System.Drawing.Point(166, 109);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(388, 25);
-            this.groupBox4.TabIndex = 39;
-            this.groupBox4.TabStop = false;
-            // 
-            // groupBox5
-            // 
-            this.groupBox5.Controls.Add(this.confClientPiiDisabledButton);
-            this.groupBox5.Location = new System.Drawing.Point(169, 296);
-            this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(154, 34);
-            this.groupBox5.TabIndex = 40;
-            this.groupBox5.TabStop = false;
-            // 
-            // groupBox6
-            // 
-            this.groupBox6.Controls.Add(this.PiiLoggingDisabled);
-            this.groupBox6.Controls.Add(this.PiiLoggingEnabled);
-            this.groupBox6.Location = new System.Drawing.Point(257, 351);
-            this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(189, 42);
-            this.groupBox6.TabIndex = 35;
-            this.groupBox6.TabStop = false;
-            // 
-            // confClientUserList
-            // 
-            this.confClientUserList.FormattingEnabled = true;
-            this.confClientUserList.Location = new System.Drawing.Point(173, 196);
-            this.confClientUserList.Name = "confClientUserList";
-            this.confClientUserList.Size = new System.Drawing.Size(475, 21);
-            this.confClientUserList.TabIndex = 41;
-            // 
-            // confClientCredential
-            // 
-            this.confClientCredential.AutoSize = true;
-            this.confClientCredential.Location = new System.Drawing.Point(26, 280);
-            this.confClientCredential.Name = "confClientCredential";
-            this.confClientCredential.Size = new System.Drawing.Size(83, 13);
-            this.confClientCredential.TabIndex = 42;
-            this.confClientCredential.Text = "Client Credential";
-            // 
-            // listBox1
-            // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.Location = new System.Drawing.Point(298, 210);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(8, 4);
-            this.listBox1.TabIndex = 43;
-            // 
-            // confClientTextBox
-            // 
-            this.confClientTextBox.Location = new System.Drawing.Point(171, 275);
-            this.confClientTextBox.Name = "confClientTextBox";
-            this.confClientTextBox.Size = new System.Drawing.Size(476, 20);
-            this.confClientTextBox.TabIndex = 44;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1278,6 +1149,8 @@
             this.tabControl1.ResumeLayout(false);
             this.publicClientTabPage.ResumeLayout(false);
             this.publicClientTabPage.PerformLayout();
+            this.groupBox6.ResumeLayout(false);
+            this.groupBox6.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
@@ -1290,14 +1163,12 @@
             this.logsTabPage.PerformLayout();
             this.confidentialClientTabPage.ResumeLayout(false);
             this.confidentialClientTabPage.PerformLayout();
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
-            this.groupBox4.ResumeLayout(false);
-            this.groupBox4.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
-            this.groupBox6.ResumeLayout(false);
-            this.groupBox6.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1347,16 +1218,6 @@
         private System.Windows.Forms.TextBox authority;
         private System.Windows.Forms.TextBox extraQueryParams;
         private System.Windows.Forms.TextBox environmentQP;
-        private System.Windows.Forms.Label AccessToken;
-        private System.Windows.Forms.Label Scope;
-        private System.Windows.Forms.Label IdToken;
-        private System.Windows.Forms.Label UserResult;
-        private System.Windows.Forms.Label User;
-        private System.Windows.Forms.Label TenantIdResult;
-        private System.Windows.Forms.Label TenantId;
-        private System.Windows.Forms.Label ExpiresOnResult;
-        private System.Windows.Forms.Label ExpiresOn;
-        private System.Windows.Forms.ListBox ScopeResult;
         private System.Windows.Forms.Button ExpireAccessTokenBtn;
         private System.Windows.Forms.TextBox AccessTokenResultInCache;
         private System.Windows.Forms.Label ExpiresOnResultInCache;
@@ -1400,8 +1261,6 @@
         private System.Windows.Forms.RadioButton confClientPiiEnabledButton;
         private System.Windows.Forms.RadioButton confClientPiiDisabledButton;
         private System.Windows.Forms.Label confClientPiiEnabledLabel;
-        private System.Windows.Forms.TextBox accessTokenResult;
-        private System.Windows.Forms.TextBox IdTokenResult;
         private System.Windows.Forms.TextBox confClientIdTokenResult;
         private System.Windows.Forms.TextBox confClientScopesTextBox;
         private System.Windows.Forms.GroupBox groupBox6;

@@ -95,7 +95,6 @@ namespace DesktopTestApp
         private async void acquireTokenInteractive_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
-            callResult.SendToBack();
 
             PublicClientApplication clientApplication = CreateClientApplication();
             string output = string.Empty;
@@ -131,7 +130,6 @@ namespace DesktopTestApp
             }
             finally
             {
-                callResult.Text = output;
                 RefreshUI();
             }
         }
@@ -139,7 +137,6 @@ namespace DesktopTestApp
         private async void acquireTokenSilent_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
-            callResult.SendToBack();
 
             string output = string.Empty;
             callResult.Text = output;
@@ -164,7 +161,6 @@ namespace DesktopTestApp
             }
             finally
             {
-                callResult.Text = output;
                 RefreshUI();
             }
         }
@@ -174,7 +170,7 @@ namespace DesktopTestApp
             _publicClientApplication.Remove(CurrentUser);
             AccessTokenResultInCache.Text = @"The Access Token for " + CurrentUser.DisplayableId + @" has been removed";
             ClearResultPageInfo();
-            accessTokenResult.Text = @"The Access Token has expired";
+            callResult.Text = @"The Access Token has expired";
         }
 
         #endregion
@@ -307,32 +303,25 @@ namespace DesktopTestApp
 
         private void SetResultPageInfo(IAuthenticationResult authenticationResult)
         {
-            accessTokenResult.Text = authenticationResult.AccessToken;
+            callResult.Text = @"Access Token: " + authenticationResult.AccessToken + Environment.NewLine +
+                              @"Expires On: " + authenticationResult.ExpiresOn + Environment.NewLine +
+                              @"Tenant Id: " + authenticationResult.TenantId + Environment.NewLine + @"User: " +
+                              authenticationResult.User.DisplayableId + Environment.NewLine +
+                              @"Id Token: " + authenticationResult.IdToken;
+
             AccessTokenResultInCache.Text = authenticationResult.AccessToken;
-            ExpiresOnResult.Text = authenticationResult.ExpiresOn.ToString();
             ExpiresOnResultInCache.Text = authenticationResult.ExpiresOn.ToString();
-            TenantIdResult.Text = authenticationResult.TenantId;
-            UserResult.Text = authenticationResult.User.DisplayableId;
             UserResultInCache.Text = authenticationResult.User.DisplayableId;
-            IdTokenResult.Text = authenticationResult.IdToken;
-            ScopeResult.DataSource = authenticationResult.Scope;
         }
 
         private void SetErrorPageInfo(string errorMessage)
         {
-            callResult.BringToFront();
-
             callResult.Text = errorMessage;
         }
 
         private void ClearResultPageInfo()
         {
-            accessTokenResult.Text = string.Empty;
-            ExpiresOnResult.Text = string.Empty;
-            TenantIdResult.Text = string.Empty;
-            UserResult.Text = string.Empty;
-            IdTokenResult.Text = string.Empty;
-            ScopeResult.DataSource = null;
+            callResult.Text = string.Empty;
         }
 
         private void SetConfidentialClientPageInfo(IAuthenticationResult authenticationResult)
