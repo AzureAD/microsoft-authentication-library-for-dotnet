@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client
             catch (Exception ex)
             {
                 requestContext.Logger.Error(ex);
-                throw new MsalException(MsalError.AuthenticationUiFailed, ex);
+                throw new MsalException(MsalError.AuthenticationUiFailed, "Failed to invoke SFSafariViewController", ex);
             }
         }
 

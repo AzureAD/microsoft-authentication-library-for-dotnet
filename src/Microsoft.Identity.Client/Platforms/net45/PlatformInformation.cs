@@ -49,23 +49,26 @@ namespace Microsoft.Identity.Client
         public override async Task<string> GetUserPrincipalNameAsync()
         {
             return await Task.Factory.StartNew(() =>
-            {
-                const int NameUserPrincipal = 8;
-                uint userNameSize = 0;
-                NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
-                if (userNameSize == 0)
                 {
-                    throw new MsalException(MsalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
-                }
+                    const int NameUserPrincipal = 8;
+                    uint userNameSize = 0;
+                    NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
+                    if (userNameSize == 0)
+                    {
+                        throw new MsalException(MsalError.GetUserNameFailed, "failed to get user from the system",
+                            new Win32Exception(Marshal.GetLastWin32Error()));
+                    }
 
-                StringBuilder sb = new StringBuilder((int) userNameSize);
-                if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
-                {
-                    throw new MsalException(MsalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
-                }
+                    StringBuilder sb = new StringBuilder((int) userNameSize);
+                    if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
+                    {
+                        throw new MsalException(MsalError.GetUserNameFailed, "failed to get user from the system",
+                            new Win32Exception(Marshal.GetLastWin32Error()));
+                    }
 
-                return sb.ToString();
-            }).ConfigureAwait(false);
+                    return sb.ToString();
+                })
+                .ConfigureAwait(false);
         }
 
         public override string GetEnvironmentVariable(string variable)
