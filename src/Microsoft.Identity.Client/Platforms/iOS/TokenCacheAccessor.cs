@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client
 {
     internal class TokenCacheAccessor : ITokenCacheAccessor
     {
-        private const string AccessTokenServiceId = "com.microsoft.identity.client.accesstoken";
+        private const string AccessTokenServiceId = "com.microsoft.identity.client.accessToken";
         private const string RefreshTokenServiceId = "com.microsoft.identity.client.refreshToken";
 
         private const bool _defaultSyncSetting = false;
