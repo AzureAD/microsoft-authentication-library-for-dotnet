@@ -41,16 +41,22 @@ namespace Microsoft.Identity.Client
         private const string Oauth2AuthorizationHeader = "Bearer ";
         private readonly AccessTokenCacheItem _accessTokenCacheItem;
 
-        internal AuthenticationResult(AccessTokenCacheItem accessTokenCacheItem, RequestContext requestContext)
+        public AuthenticationResult() { }
+
+        public AuthenticationResult(AccessTokenCacheItem accessTokenCacheItem)
         {
             _accessTokenCacheItem = accessTokenCacheItem;
-            User = User.CreateFromIdToken(Internal.IdToken.Parse(accessTokenCacheItem.RawIdToken, requestContext));
         }
 
         /// <summary>
         /// Gets the Access Token requested.
         /// </summary>
         public string AccessToken => _accessTokenCacheItem.AccessToken;
+
+        /// <summary>
+        /// Gets the Unique Id of the user.
+        /// </summary>
+        public string UniqueId => _accessTokenCacheItem.IdToken?.GetUniqueId();
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the Token property ceases to be valid.
@@ -63,13 +69,13 @@ namespace Microsoft.Identity.Client
         /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is
         /// not returned by the service.
         /// </summary>
-        public string TenantId => _accessTokenCacheItem.TenantId;
+        public string TenantId => _accessTokenCacheItem.IdToken?.TenantId;
 
         /// <summary>
         /// Gets User object. Some elements in User might be null if not returned by the
         /// service. It can be passed back in some API overloads to identify which user should be used.
         /// </summary>
-        public User User { get; internal set; }
+        public User User => _accessTokenCacheItem.User;
 
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
@@ -79,7 +85,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the scope values returned from the service.
         /// </summary>
-        public IEnumerable<string> Scope => _accessTokenCacheItem.Scope.AsArray();
+        public IEnumerable<string> Scope => _accessTokenCacheItem.ScopeSet.AsArray();
 
         /// <summary>
         /// Creates authorization header from authentication result.

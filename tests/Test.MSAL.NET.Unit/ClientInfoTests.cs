@@ -25,34 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Globalization;
-using System.Runtime.Serialization;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Test.MSAL.NET.Unit
 {
-    internal class ClientInfoClaim
+    [TestClass]
+    public class ClientInfoTests
     {
-        public const string UniqueIdentifier = "uid";
-        public const string UnqiueTenantIdentifier = "utid";
-    }
-
-    [DataContract]
-    internal class ClientInfo
-    {
-        [DataMember(Name = ClientInfoClaim.UniqueIdentifier, IsRequired = false)]
-        public string UniqueIdentifier { get; set; }
-
-        [DataMember(Name = ClientInfoClaim.UnqiueTenantIdentifier, IsRequired = false)]
-        public string UniqueTenantIdentifier { get; set; }
-
-        public static ClientInfo Parse(string clientInfo)
+        [TestMethod]
+        [TestCategory("ClientInfoTests")]
+        public void ParseTest()
         {
-            if (string.IsNullOrEmpty(clientInfo))
-            {
-                return null;
-            }
-            
-            return JsonHelper.DeserializeFromJson<ClientInfo>(Base64UrlEncoder.DecodeBytes(clientInfo));
+            ClientInfo clientInfo = ClientInfo.Parse("eyJ1aWQiOiJteS1VSUQiLCJ1dGlkIjoibXktVVRJRCJ9");
+            Assert.IsNotNull(clientInfo);
+            Assert.AreEqual(TestConstants.Uid, clientInfo.UniqueIdentifier);
+            Assert.AreEqual(TestConstants.Utid, clientInfo.UniqueTenantIdentifier);
         }
     }
 }

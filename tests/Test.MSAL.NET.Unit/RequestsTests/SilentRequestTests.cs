@@ -127,7 +127,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 RequestContext = new RequestContext(Guid.Empty),
                 User = new User()
                 {
-                    HomeObjectId = TestConstants.HomeObjectId,
+                    Identifier = TestConstants.UserIdentifier,
                     DisplayableId = TestConstants.DisplayableId
                 }
             };

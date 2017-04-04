@@ -70,7 +70,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
                 foreach (var cachenoise in _cacheNoise)
                 {
-                    TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                    AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                         TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                         cachenoise + TestConstants.UniqueId, cachenoise + TestConstants.DisplayableId);
                     //cache entry has no user assertion hash
@@ -131,7 +131,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
                 foreach (var cachenoise in _cacheNoise)
                 {
-                    TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                    AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                         TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                         cachenoise + TestConstants.UniqueId, cachenoise + TestConstants.DisplayableId);
                     //cache entry has no user assertion hash
@@ -193,7 +193,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
                 foreach (var cachenoise in _cacheNoise)
                 {
-                    TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                    AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                         TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                         cachenoise + TestConstants.UniqueId, cachenoise + TestConstants.DisplayableId);
                     //cache entry has no user assertion hash
@@ -264,7 +264,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
                 foreach (var cachenoise in _cacheNoise)
                 {
-                    TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                    AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                         TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                         cachenoise + TestConstants.UniqueId, cachenoise + TestConstants.DisplayableId);
 
@@ -314,7 +314,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
                 foreach (var cachenoise in _cacheNoise)
                 {
-                    TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                    AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                         TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                         cachenoise + TestConstants.UniqueId, cachenoise + TestConstants.DisplayableId);
                     context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
@@ -375,7 +375,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 string tokenInCache = "obo-access-token";
                 foreach (var cachenoise in _cacheNoise)
                 {
-                    TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                    AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                         TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                         cachenoise + TestConstants.UniqueId, cachenoise + TestConstants.DisplayableId);
 
@@ -428,7 +428,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 string tokenInCache = "obo-access-token";
                 foreach (var cachenoise in _cacheNoise)
                 {
-                    TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                    AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                         TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                         cachenoise + TestConstants.UniqueId, cachenoise + TestConstants.DisplayableId);
 
@@ -486,7 +486,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 var context = new AuthenticationContext(TestConstants.AuthorityHomeTenant, new TokenCache());
                 string accessToken = "access-token";
-                TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                     TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                     TestConstants.UniqueId, TestConstants.DisplayableId);
                 //cache entry has no user assertion hash
@@ -543,7 +543,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 var context = new AuthenticationContext(TestConstants.AuthorityHomeTenant, new TokenCache());
                 string accessToken = "access-token";
-                TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                     TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                     TestConstants.UniqueId, TestConstants.DisplayableId);
                 //cache entry has no user assertion hash
@@ -601,7 +601,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 var context = new AuthenticationContext(TestConstants.AuthorityHomeTenant, new TokenCache());
                 string accessToken = "access-token";
-                TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                     TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                     TestConstants.UniqueId, TestConstants.DisplayableId);
                 //cache entry has no user assertion hash
@@ -667,7 +667,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 var context = new AuthenticationContext(TestConstants.AuthorityHomeTenant, new TokenCache());
                 string accessToken = "access-token";
-                TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                     TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                     TestConstants.UniqueId, TestConstants.DisplayableId);
 
@@ -717,7 +717,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 var context = new AuthenticationContext(TestConstants.AuthorityHomeTenant, new TokenCache());
                 string accessToken = "access-token";
-                TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                     TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                     TestConstants.UniqueId, TestConstants.DisplayableId);
 
@@ -780,7 +780,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 var context = new AuthenticationContext(TestConstants.AuthorityHomeTenant, new TokenCache());
                 string accessToken = "access-token";
-                TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                     TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                     TestConstants.UniqueId, TestConstants.DisplayableId);
 
@@ -830,7 +830,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 var context = new AuthenticationContext(TestConstants.AuthorityHomeTenant, new TokenCache());
                 string accessToken = "access-token";
-                TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                     TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.User,
                     TestConstants.UniqueId, TestConstants.DisplayableId);
 
@@ -892,7 +892,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 var context = new AuthenticationContext(TestConstants.AuthorityHomeTenant, new TokenCache());
                 string accessToken = "access-token";
-                TokenCacheKey key = new TokenCacheKey(TestConstants.AuthorityHomeTenant,
+                AccessTokenCacheKey key = new AccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
                     TestConstants.DefaultResource, TestConstants.ClientId, TokenSubjectType.UserPlusClient,
                     TestConstants.UniqueId, TestConstants.DisplayableId);
 
