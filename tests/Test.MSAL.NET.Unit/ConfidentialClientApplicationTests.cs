@@ -62,7 +62,7 @@ namespace Test.MSAL.NET.Unit
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
         [Description("Tests the public interfaces can be mocked")]
-        public void MockConfidentialClientApplication()
+        public void MockConfidentialClientApplication_AcquireToken()
         {
             // Setup up a confidential client application that returns a dummy result
             var mockResult = Substitute.For<IAuthenticationResult>();
@@ -82,6 +82,31 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(scopes);
             Assert.AreEqual("scope1", scopes.First());
             Assert.AreEqual("scope2", scopes.Last());
+        }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        [Description("Tests the public interfaces can be mocked")]
+        public void MockConfidentialClientApplication_Users()
+        {
+            // This test is of limited use; since this test project can see the internals of the
+            // product assembly, we can't be sure we're actually testing the public API.
+
+            // Setup up a confidential client application
+            var mockApp = Substitute.For<IConfidentialClientApplication>();
+            IList<User> users = new List<User>();
+            users.Add(new User("id1", "disp1", "name1", "provider1"));
+            users.Add(new User("id2", "disp2", "name2", "provider2"));
+            mockApp.Users.Returns(users);
+
+            // Now call the substitute
+            IEnumerable<User> actualUsers = mockApp.Users;
+
+            // Check the users property
+            Assert.IsNotNull(actualUsers);
+            Assert.AreEqual(2, actualUsers.Count());
+
+            Assert.AreEqual("name1", users.First().Name);
         }
 
         [TestMethod]

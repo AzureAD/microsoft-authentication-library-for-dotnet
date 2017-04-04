@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
+using System.Linq;
 
 namespace Microsoft.Identity.Client
 {
@@ -112,7 +113,7 @@ namespace Microsoft.Identity.Client
                 {
                     RequestContext requestContext = new RequestContext(CorrelationId);
                     requestContext.Logger.Info("Token cache is null or empty");
-                    return new List<User>();
+                    return Enumerable.Empty<User>();
                 }
 
                 return UserTokenCache.GetUsers(new Uri(Authority).Host);
