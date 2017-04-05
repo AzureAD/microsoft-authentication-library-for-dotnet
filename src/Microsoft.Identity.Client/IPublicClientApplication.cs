@@ -36,6 +36,16 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public interface IPublicClientApplication : IClientApplicationBase
     {
+
+#if WINRT
+        /// <summary>
+        /// 
+        /// </summary>
+        bool UseCorporateNetwork { get; set; }
+#endif
+
+        // expose the interactive API without UIParent only for platforms that 
+        // do not need it to operate like desktop, UWP, iOS.
 #if !ANDROID
         /// <summary>
         /// Interactive request to acquire token. 
@@ -117,7 +127,10 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> additionalScope,
             string authority);
 
-#else
+#endif
+
+        // these API methods should only be exposed on Android and desktop.
+#if ANDROID || DESKTOP
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
@@ -133,7 +146,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user</returns>
         Task<IAuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scope,
-            string loginHint);
+            string loginHint, UIParent parent);
 
         /// <summary>
         /// Interactive request to acquire token. 
@@ -147,7 +160,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scope,
             string loginHint,
             UIBehavior behavior,
-            string extraQueryParameters);
+            string extraQueryParameters, UIParent parent);
 
         /// <summary>
         /// Interactive request to acquire token. 
@@ -161,7 +174,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scope,
             User user,
             UIBehavior behavior,
-            string extraQueryParameters);
+            string extraQueryParameters, UIParent parent);
 
         /// <summary>
         /// Interactive request to acquire token. 
@@ -178,7 +191,7 @@ namespace Microsoft.Identity.Client
             string loginHint,
             UIBehavior behavior,
             string extraQueryParameters,
-            IEnumerable<string> additionalScope, string authority);
+            IEnumerable<string> additionalScope, string authority, UIParent parent);
 
         /// <summary>
         /// Interactive request to acquire token. 
@@ -196,7 +209,7 @@ namespace Microsoft.Identity.Client
             UIBehavior behavior,
             string extraQueryParameters,
             IEnumerable<string> additionalScope,
-            string authority);
+            string authority, UIParent parent);
 #endif
     }
 }

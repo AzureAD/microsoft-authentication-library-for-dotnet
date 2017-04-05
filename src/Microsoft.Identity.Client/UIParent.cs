@@ -51,17 +51,26 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
+#if DESKTOP || WINRT
+        //hidden webview can be used in both WinRT and desktop applications.
+        internal bool UseHiddenBrowser { get; set; }
+
+#if WINRT
+        internal bool UseCorporateNetwork { get; set; }
+#endif
+
 #if DESKTOP
-        internal object Window { get; set; }
+        internal object OwnerWindow { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="window"></param>
-        public UIParent(object window)
+        public UIParent(object ownerWindow)
         {
-            Window = window;
+            OwnerWindow = ownerWindow;
         }
+#endif
 #endif
     }
 }

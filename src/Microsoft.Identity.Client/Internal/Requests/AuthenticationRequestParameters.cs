@@ -59,8 +59,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public UserAssertion UserAssertion { get; set; }
 
-        public IPlatformParameters PlatformParameters { get; set; }
-
 #if DESKTOP || NETSTANDARD1_3
         public ClientCredential ClientCredential { get; set; }
 
