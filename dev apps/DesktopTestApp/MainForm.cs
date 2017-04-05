@@ -104,29 +104,29 @@ namespace DesktopTestApp
                 IAuthenticationResult result;
                 if (userList.SelectedIndex != -1)
                 {
-                    if (modalWebview.Checked)
-                    {
+                    //if (modalWebview.Checked)
+                   // {
                         result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
                             (User)userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text, new UIParent(this));
-                    }
-                    else
-                    {
-                        result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
-                            (User) userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
-                    }
+                   // }
+                   // else
+                  //  {
+                   //     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
+                   //         (User) userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
+                  //  }
                 }
                 else
                 {
-                    if (modalWebview.Checked)
-                    {
-                        result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
-                            GetUIBehavior(), extraQueryParams.Text, new UIParent(this));
-                    }
-                    else
-                    {
+                   // if (modalWebview.Checked)
+                   // {
+                   //     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
+                    //        GetUIBehavior(), extraQueryParams.Text, new UIParent(this));
+                   // }
+                  //  else
+                  //  {
                         result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
                             GetUIBehavior(), extraQueryParams.Text);
-                    }
+                   // }
                 }
 
                 CurrentUser = result.User;
