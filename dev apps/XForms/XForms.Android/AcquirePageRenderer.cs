@@ -54,7 +54,7 @@ namespace XForms.Droid
             base.OnElementChanged(e);
             _page = (AcquirePage)e.NewElement;
             var activity = this.Context as Activity;
-            _page.platformParameters = new PlatformParameters(activity);
+            _page.UIParent = new UIParent(activity);
         }
     }
 }

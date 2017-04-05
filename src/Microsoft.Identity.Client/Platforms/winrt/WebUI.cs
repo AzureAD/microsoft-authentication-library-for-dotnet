@@ -41,15 +41,10 @@ namespace Microsoft.Identity.Client
 
         public RequestContext RequestContext { get; set; }
 
-        public WebUI(IPlatformParameters parameters, RequestContext requestContext)
+        public WebUI(UIParent parent, RequestContext requestContext)
         {
-            if (!(parameters is PlatformParameters))
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(parameters));
-            }
-
-            useCorporateNetwork = ((PlatformParameters) parameters).UseCorporateNetwork;
-            silentMode = ((PlatformParameters) parameters).UseHiddenBrowser;
+            useCorporateNetwork = parent.UseCorporateNetwork;
+            silentMode = parent.UseHiddenBrowser;
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,

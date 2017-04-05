@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,31 +25,58 @@
 //
 //------------------------------------------------------------------------------
 
+#if ANDROID
+using System;
 using Android.App;
+#endif
+
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Additional parameters used in acquiring user's authorization
+    /// 
     /// </summary>
-    public class PlatformParameters : IPlatformParameters
+    public sealed class UIParent
     {
-        /// <summary>
-        /// </summary>
-        public PlatformParameters()
+        public UIParent()
         {
         }
 
-        /// <summary>
-        /// </summary>
-        public PlatformParameters(Activity callerActivity) : this()
+#if ANDROID
+        internal Activity Activity { get; set; }
+
+
+        public UIParent(Activity activity)
         {
-            CallerActivity = callerActivity;
+           if(activity == null)
+           {		
+                throw new ArgumentException("passed in activity is null", nameof(activity));		
+           }	
+           
+            Activity = activity;
         }
+#endif
+
+#if DESKTOP || WINRT
+        //hidden webview can be used in both WinRT and desktop applications.
+        internal bool UseHiddenBrowser { get; set; }
+
+#if WINRT
+        internal bool UseCorporateNetwork { get; set; }
+#endif
+
+#if DESKTOP
+        internal object OwnerWindow { get; set; }
 
         /// <summary>
-        /// Caller Android Activity
+        /// 
         /// </summary>
-        public Activity CallerActivity { get; private set; }
+        /// <param name="window"></param>
+        public UIParent(object ownerWindow)
+        {
+            OwnerWindow = ownerWindow;
+        }
+#endif
+#endif
     }
 }

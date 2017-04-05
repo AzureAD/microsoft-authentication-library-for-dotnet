@@ -89,6 +89,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.msalLogs = new System.Windows.Forms.TextBox();
             this.confidentialClientTabPage = new System.Windows.Forms.TabPage();
+            this.ConfClientIdTokenResult = new System.Windows.Forms.TextBox();
             this.confClientAcquireTokenSilentBtn = new System.Windows.Forms.Button();
             this.confClientAcquireTokenBtn = new System.Windows.Forms.Button();
             this.confClientPiiEnabledButton = new System.Windows.Forms.RadioButton();
@@ -129,7 +130,7 @@
             this.cache = new System.Windows.Forms.Button();
             this.logs = new System.Windows.Forms.Button();
             this.confidentialClient = new System.Windows.Forms.Button();
-            this.ConfClientIdTokenResult = new System.Windows.Forms.TextBox();
+            this.modalWebview = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.publicClientTabPage.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -182,6 +183,7 @@
             // publicClientTabPage
             // 
             this.publicClientTabPage.BackColor = System.Drawing.SystemColors.Control;
+            this.publicClientTabPage.Controls.Add(this.modalWebview);
             this.publicClientTabPage.Controls.Add(this.IdTokenResult);
             this.publicClientTabPage.Controls.Add(this.accessTokenResult);
             this.publicClientTabPage.Controls.Add(this.label12);
@@ -808,6 +810,14 @@
             this.confidentialClientTabPage.Text = "confidentialClientTabPage";
             this.confidentialClientTabPage.UseVisualStyleBackColor = true;
             // 
+            // ConfClientIdTokenResult
+            // 
+            this.ConfClientIdTokenResult.Location = new System.Drawing.Point(143, 589);
+            this.ConfClientIdTokenResult.Multiline = true;
+            this.ConfClientIdTokenResult.Name = "ConfClientIdTokenResult";
+            this.ConfClientIdTokenResult.Size = new System.Drawing.Size(481, 23);
+            this.ConfClientIdTokenResult.TabIndex = 36;
+            // 
             // confClientAcquireTokenSilentBtn
             // 
             this.confClientAcquireTokenSilentBtn.Location = new System.Drawing.Point(451, 700);
@@ -1174,13 +1184,15 @@
             this.confidentialClient.UseVisualStyleBackColor = true;
             this.confidentialClient.Click += new System.EventHandler(this.confidentialClient_Click);
             // 
-            // ConfClientIdTokenResult
+            // modalWebview
             // 
-            this.ConfClientIdTokenResult.Location = new System.Drawing.Point(143, 589);
-            this.ConfClientIdTokenResult.Multiline = true;
-            this.ConfClientIdTokenResult.Name = "ConfClientIdTokenResult";
-            this.ConfClientIdTokenResult.Size = new System.Drawing.Size(481, 23);
-            this.ConfClientIdTokenResult.TabIndex = 36;
+            this.modalWebview.AutoSize = true;
+            this.modalWebview.Location = new System.Drawing.Point(35, 745);
+            this.modalWebview.Name = "modalWebview";
+            this.modalWebview.Size = new System.Drawing.Size(103, 17);
+            this.modalWebview.TabIndex = 36;
+            this.modalWebview.Text = "Modal Webview";
+            this.modalWebview.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -1318,6 +1330,7 @@
         private System.Windows.Forms.TextBox accessTokenResult;
         private System.Windows.Forms.TextBox IdTokenResult;
         private System.Windows.Forms.TextBox ConfClientIdTokenResult;
+        private System.Windows.Forms.CheckBox modalWebview;
     }
 }
 
