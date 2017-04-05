@@ -34,7 +34,7 @@ namespace AutomationApp
     public class TokenHandler
     {
         #region Properties
-        public User CurrentUser { get; set; }
+        public IUser CurrentUser { get; set; }
 
         private PublicClientApplication _publicClientApplication;
         #endregion

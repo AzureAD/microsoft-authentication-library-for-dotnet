@@ -72,10 +72,10 @@ namespace Microsoft.Identity.Client
         public string TenantId => _accessTokenCacheItem.IdToken?.TenantId;
 
         /// <summary>
-        /// Gets User object. Some elements in User might be null if not returned by the
+        /// Gets the user object. Some elements in User might be null if not returned by the
         /// service. It can be passed back in some API overloads to identify which user should be used.
         /// </summary>
-        public User User => _accessTokenCacheItem.User;
+        public IUser User => _accessTokenCacheItem.User;
 
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.

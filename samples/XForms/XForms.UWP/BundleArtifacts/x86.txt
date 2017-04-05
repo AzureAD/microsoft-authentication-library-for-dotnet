@@ -1,0 +1,6 @@
+MainPackage=C:\repos\aad\forks\msal.net\samples\XForms\XForms.UWP\bin\x86\Debug\XForms.UWP_1.0.0.0_x86_Debug.appx
+SymbolPackage=C:\repos\aad\forks\msal.net\samples\XForms\XForms.UWP\AppPackages\XForms.UWP_1.0.0.0_Debug_Test\XForms.UWP_1.0.0.0_x86_Debug.appxsym
+ResourcePack=C:\repos\aad\forks\msal.net\samples\XForms\XForms.UWP\bin\x86\Debug\XForms.UWP_1.0.0.0_scale-100.appx
+ResourcePack=C:\repos\aad\forks\msal.net\samples\XForms\XForms.UWP\bin\x86\Debug\XForms.UWP_1.0.0.0_scale-125.appx
+ResourcePack=C:\repos\aad\forks\msal.net\samples\XForms\XForms.UWP\bin\x86\Debug\XForms.UWP_1.0.0.0_scale-150.appx
+ResourcePack=C:\repos\aad\forks\msal.net\samples\XForms\XForms.UWP\bin\x86\Debug\XForms.UWP_1.0.0.0_scale-400.appx

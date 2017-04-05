@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,26 +25,36 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client
+using Microsoft.Identity.Client;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+
+namespace Test.MSAL.NET.Unit
 {
-    /// <summary>
-    /// Contains parameters used by the MSAL call accessing the cache.
-    /// </summary>
-    public sealed class TokenCacheNotificationArgs
+    [TestClass]
+    public class UserTests
     {
-        /// <summary>
-        /// Gets the TokenCache
-        /// </summary>
-        public TokenCache TokenCache { get; internal set; }
+        [TestMethod]
+        [TestCategory("UserTests")]
+        public void Constructor_IdIsRequired()
+        {
+            // 1. Id is required
+            AssertException.Throws<ArgumentNullException>(() => new User(null, "d", "n", "id"));
 
-        /// <summary>
-        /// Gets the ClientId.
-        /// </summary>
-        public string ClientId { get; internal set; }
+            // 2. Other properties are optional
+            new User("id", null, null, null);
+        }
 
-        /// <summary>
-        /// Gets the user object.
-        /// </summary>
-        public IUser User { get; internal set; }
+        [TestMethod]
+        [TestCategory("UserTests")]
+        public void Constructor_PropertiesSet()
+        {
+            User actual = new User("id", "disp", "name", "idp");
+
+            Assert.AreEqual("id", actual.Identifier);
+            Assert.AreEqual("disp", actual.DisplayableId);
+            Assert.AreEqual("name", actual.Name);
+            Assert.AreEqual("idp", actual.IdentityProvider);
+        }
     }
 }

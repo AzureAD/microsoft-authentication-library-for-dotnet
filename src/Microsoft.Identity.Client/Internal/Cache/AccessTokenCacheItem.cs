@@ -120,8 +120,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             ClientInfo = ClientInfo.Parse(RawClientInfo);
             if (IdToken != null)
             {
-                User = User.Create(IdToken.PreferredUsername, IdToken.Name, IdToken.Issuer,
-                    GetUserIdentifier());
+                User = new User(GetUserIdentifier(), IdToken.PreferredUsername, IdToken.Name, IdToken.Issuer);
             }
         }
 

@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
+using System.Linq;
 
 namespace Microsoft.Identity.Client
 {
@@ -104,7 +105,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the available users in the cache.
         /// </summary>
-        public IEnumerable<User> Users
+        public IEnumerable<IUser> Users
         {
             get
             {
@@ -112,7 +113,7 @@ namespace Microsoft.Identity.Client
                 {
                     RequestContext requestContext = new RequestContext(CorrelationId);
                     requestContext.Logger.Info("Token cache is null or empty");
-                    return new List<User>();
+                    return Enumerable.Empty<User>();
                 }
 
                 return UserTokenCache.GetUsers(new Uri(Authority).Host);
@@ -127,7 +128,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="user">User for which the token is requested. <see cref="User"/></param>
         /// <returns></returns>
-        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, User user)
+        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
@@ -146,7 +147,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using the refresh token if available</param>
         /// <returns></returns>
-        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, User user,
+        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user,
             string authority, bool forceRefresh)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
@@ -158,7 +159,7 @@ namespace Microsoft.Identity.Client
         
         /// <summary>
         /// </summary>
-        public void Remove(User user)
+        public void Remove(IUser user)
         {
             if(user == null || UserTokenCache == null)
             {
@@ -169,7 +170,7 @@ namespace Microsoft.Identity.Client
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
-            IEnumerable<string> scope, User user, bool forceRefresh)
+            IEnumerable<string> scope, IUser user, bool forceRefresh)
         {
             var handler = new SilentRequest(
                 CreateRequestParameters(authority, scope, user, UserTokenCache),
@@ -178,7 +179,7 @@ namespace Microsoft.Identity.Client
         }
 
         internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority, IEnumerable<string> scope,
-            User user, TokenCache cache)
+            IUser user, TokenCache cache)
         {
             return new AuthenticationRequestParameters
             {

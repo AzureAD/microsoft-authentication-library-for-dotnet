@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user</returns>
         Task<IAuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scope,
-            User user,
+            IUser user,
             UIBehavior behavior,
             string extraQueryParameters);
 
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user</returns>
         Task<IAuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scope,
-            User user,
+            IUser user,
             UIBehavior behavior,
             string extraQueryParameters,
             IEnumerable<string> additionalScope,
