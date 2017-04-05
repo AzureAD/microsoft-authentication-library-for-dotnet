@@ -32,9 +32,13 @@ namespace Microsoft.Identity.Client
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters, UIBehavior behavior, RequestContext requestContext)
+        public IWebUI CreateAuthenticationDialog(UIParent parent, RequestContext requestContext)
         {
-            return new WebUI(parameters, requestContext);
+            //there is no need to pass UIParent.
+            return new WebUI()
+            {
+                RequestContext = requestContext
+            };
         }
     }
 }

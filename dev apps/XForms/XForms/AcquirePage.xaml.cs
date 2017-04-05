@@ -38,26 +38,20 @@ namespace XForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class AcquirePage : ContentPage
     {
-        public IPlatformParameters platformParameters { get; set; }
+        public UIParent UIParent { get; set; }
 
         public AcquirePage()
         {
             InitializeComponent();
         }
 
-        private void SetPlatformParameters()
-        {
-            App.MsalPublicClient.PlatformParameters = platformParameters;
-        }
-
         protected override void OnAppearing()
         {
-            SetPlatformParameters();
             authority.Text = App.Authority;
             validateAuthority.IsToggled = App.ValidateAuthority;
         }
 
-        private string ToString(User user)
+        private string ToString(IUser user)
         {
             var sb = new StringBuilder();
 
@@ -83,15 +77,13 @@ namespace XForms
             return sb.ToString();
         }
 
-        private User getUserByDisplayableId(string str)
+        private IUser getUserByDisplayableId(string str)
         {
             return App.MsalPublicClient.Users.FirstOrDefault(user => user.DisplayableId.Equals(str));
         }
 
         private async void OnAcquireSilentlyClicked(object sender, EventArgs e)
         {
-            if (App.MsalPublicClient.PlatformParameters == null)
-                SetPlatformParameters();
             acquireResponseLabel.Text = "Starting silent token acquisition";
             await Task.Delay(700);
 

@@ -39,7 +39,7 @@ namespace DesktopTestApp
 
         #region Properties
 
-        public User CurrentUser { get; set; }
+        public IUser CurrentUser { get; set; }
         private PublicClientApplication _publicClientApplication;
         private ConfidentialClientApplication _confidentialClientApplication;
 
@@ -104,14 +104,31 @@ namespace DesktopTestApp
                 IAuthenticationResult result;
                 if (userList.SelectedIndex != -1)
                 {
-                    result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
-                        (User)userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
+                    if (modalWebview.Checked)
+                    {
+                        result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
+                            (User)userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text, new UIParent(this));
+                    }
+                    else
+                    {
+                        result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
+                            (User) userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
+                    }
                 }
                 else
                 {
-                    result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
-                        GetUIBehavior(), extraQueryParams.Text);
+                    if (modalWebview.Checked)
+                    {
+                        result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
+                            GetUIBehavior(), extraQueryParams.Text, new UIParent(this));
+                    }
+                    else
+                    {
+                        result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
+                            GetUIBehavior(), extraQueryParams.Text);
+                    }
                 }
+
                 CurrentUser = result.User;
                 SetResultPageInfo(result);
                 SetCacheInfoPage(result);

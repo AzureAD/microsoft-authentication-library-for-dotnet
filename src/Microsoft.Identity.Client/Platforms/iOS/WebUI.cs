@@ -33,6 +33,7 @@ using Foundation;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Interfaces;
 using SafariServices;
+using UIKit;
 
 namespace Microsoft.Identity.Client
 {
@@ -40,29 +41,21 @@ namespace Microsoft.Identity.Client
     {
         private static SemaphoreSlim returnedUriReady;
         private static AuthorizationResult authorizationResult;
-        private readonly PlatformParameters parameters;
         private SFSafariViewController safariViewController;
-
-        public WebUI(IPlatformParameters parameters, RequestContext requestContext)
-        {
-            this.parameters = parameters as PlatformParameters;
-            if (this.parameters == null)
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(this.parameters));
-            }
-        }
-
+        
         public RequestContext RequestContext { get; set; }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext)
         {
+            var window = UIApplication.SharedApplication.KeyWindow;
+            var vc = FindCurrentViewController(window.RootViewController);
+            
             returnedUriReady = new SemaphoreSlim(0);
-            Authenticate(authorizationUri, redirectUri, requestContext);
+            Authenticate(authorizationUri, redirectUri, vc, requestContext);
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
-
             //dismiss safariviewcontroller
-            parameters.CallerViewController.InvokeOnMainThread(() =>
+            vc.InvokeOnMainThread(() =>
             { safariViewController.DismissViewController(false, null);
             });
 
@@ -78,15 +71,15 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        public void Authenticate(Uri authorizationUri, Uri redirectUri, UIViewController vc, RequestContext requestContext)
         {
             try
             {
                 safariViewController = new SFSafariViewController(new NSUrl(authorizationUri.AbsoluteUri), false);
                 safariViewController.Delegate = this;
-                parameters.CallerViewController.InvokeOnMainThread(() =>
+                vc.InvokeOnMainThread(() =>
                 {
-                    parameters.CallerViewController.PresentViewController(safariViewController, false, null);
+                    vc.PresentViewController(safariViewController, false, null);
                 });
             }
             catch (Exception ex)
@@ -102,5 +95,29 @@ namespace Microsoft.Identity.Client
             controller.DismissViewController(true, null);
             SetAuthorizationResult(new AuthorizationResult(AuthorizationStatus.UserCancel, null));
         }
+
+        private UIViewController FindCurrentViewController(UIViewController rootViewController)
+        {
+            if (rootViewController is UITabBarController)
+            {
+                UITabBarController tabBarController = (UITabBarController)rootViewController;
+                return FindCurrentViewController(tabBarController.SelectedViewController);
+            }
+            else if (rootViewController is UINavigationController)
+            {
+                UINavigationController navigationController = (UINavigationController)rootViewController;
+                return FindCurrentViewController(navigationController.VisibleViewController);
+            }
+            else if (rootViewController.PresentedViewController != null)
+            {
+                UIViewController presentedViewController = rootViewController.PresentedViewController;
+                return FindCurrentViewController(presentedViewController);
+            }
+            else
+            {
+                return rootViewController;
+            }
+        }
+
     }
 }

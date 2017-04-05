@@ -33,22 +33,14 @@ namespace Microsoft.Identity.Client
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        private PlatformParameters parameters;
-
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters, UIBehavior behavior, RequestContext requestContext)
+        public IWebUI CreateAuthenticationDialog(UIParent parent, RequestContext requestContext)
         {
-            parameters = inputParameters as PlatformParameters;
-            if (parameters == null)
+            if (parent.UseHiddenBrowser)
             {
-                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(parameters));
+                return new SilentWebUI {OwnerWindow = parent?.OwnerWindow, RequestContext = requestContext};
             }
 
-            if (behavior.Equals(UIBehavior.Never))
-            {
-                return new SilentWebUI() {OwnerWindow = parameters.OwnerWindow, RequestContext = requestContext};
-            }
-
-            return new InteractiveWebUI {OwnerWindow = parameters.OwnerWindow, RequestContext = requestContext };
+            return new InteractiveWebUI {OwnerWindow = parent?.OwnerWindow, RequestContext = requestContext};
         }
     }
 }

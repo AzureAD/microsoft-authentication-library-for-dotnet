@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,30 +25,36 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client
+using Microsoft.Identity.Client;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+
+namespace Test.MSAL.NET.Unit
 {
-    /// <summary>
-    /// Additional parameters used in acquiring user's authorization
-    /// </summary>
-    public class PlatformParameters : IPlatformParameters
+    [TestClass]
+    public class UserTests
     {
-        public PlatformParameters()
+        [TestMethod]
+        [TestCategory("UserTests")]
+        public void Constructor_IdIsRequired()
         {
+            // 1. Id is required
+            AssertException.Throws<ArgumentNullException>(() => new User(null, "d", "n", "id"));
+
+            // 2. Other properties are optional
+            new User("id", null, null, null);
         }
 
-        public PlatformParameters(bool useCorporateNetwork)
+        [TestMethod]
+        [TestCategory("UserTests")]
+        public void Constructor_PropertiesSet()
         {
-            UseCorporateNetwork = useCorporateNetwork;
+            User actual = new User("id", "disp", "name", "idp");
+
+            Assert.AreEqual("id", actual.Identifier);
+            Assert.AreEqual("disp", actual.DisplayableId);
+            Assert.AreEqual("name", actual.Name);
+            Assert.AreEqual("idp", actual.IdentityProvider);
         }
-
-        /// <summary>
-        /// Gets or Sets flag to enable logged in user authentication. Note that enabling this flag requires some extra
-        /// application capabilites.
-        /// This flag only works in SSO mode and is ignored otherwise. To enable SSO mode, call AcquireTokenAsync with null or
-        /// application's callback URI as redirectUri.
-        /// </summary>
-        public bool UseCorporateNetwork { get; private set; }
-
-        internal bool UseHiddenBrowser { get; set; }
     }
 }
