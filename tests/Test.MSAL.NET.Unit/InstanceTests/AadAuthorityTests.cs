@@ -246,5 +246,28 @@ namespace Test.MSAL.NET.Unit.InstanceTests
 
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockCount);
         }
-    }
+
+        [TestMethod]
+        [TestCategory("AadAuthorityTests")]
+        public void CanonicalAuthorityInitTest()
+        {
+            const string uriNoPort = "https://login.microsoftonline.in/mytenant.com";
+            const string uriNoPortTailSlash = "https://login.microsoftonline.in/mytenant.com/";
+
+            const string uriDefaultPort = "https://login.microsoftonline.in:443/mytenant.com";
+
+            const string uriCustomPort = "https://login.microsoftonline.in:444/mytenant.com";
+            const string uriCustomPortTailSlash = "https://login.microsoftonline.in:444/mytenant.com/";
+
+            var authority = Authority.CreateAuthority(uriNoPort, false);
+            Assert.AreEqual(uriNoPortTailSlash, authority.CanonicalAuthority);
+
+            authority = Authority.CreateAuthority(uriDefaultPort, false);
+            Assert.AreEqual(uriNoPortTailSlash, authority.CanonicalAuthority);
+
+            authority = Authority.CreateAuthority(uriCustomPort, false);
+            Assert.AreEqual(uriCustomPortTailSlash, authority.CanonicalAuthority);
+        }
+
+}
 }
