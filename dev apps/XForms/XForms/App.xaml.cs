@@ -43,8 +43,12 @@ namespace XForms
             "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
 
         public const string RedirectUriOnIos = "adaliosxformsapp://com.yourcompany.xformsapp";
-        public const string Authority = "https://login.microsoftonline.com/common";
+        public const string DefaultAuthority = "https://login.microsoftonline.com/common";
         public static string[] Scopes = {"User.Read"};
+        public const bool DefaultValidateAuthority = true;
+
+        public static string Authority = DefaultAuthority;
+        public static bool ValidateAuthority = DefaultValidateAuthority;
 
         private class LoggerCallback : ILoggerCallback
         {
@@ -56,14 +60,20 @@ namespace XForms
 
         public App()
         {
-            MsalPublicClient = new PublicClientApplication(ClientId);
+            MainPage = new XForms.MainPage();
+            InitPublicClient();
+
+            Logger.Callback = new LoggerCallback();
+        }
+
+        public static void InitPublicClient()
+        {
+            MsalPublicClient = new PublicClientApplication(ClientId, Authority);
             Device.OnPlatform(Android: () => { MsalPublicClient.RedirectUri = RedirectUriOnAndroid; });
 
             Device.OnPlatform(iOS: () => { MsalPublicClient.RedirectUri = RedirectUriOnIos; });
 
-            MainPage = new XForms.MainPage();
-
-            Logger.Callback = new LoggerCallback();
+            MsalPublicClient.ValidateAuthority = ValidateAuthority;
         }
 
         protected override void OnStart()

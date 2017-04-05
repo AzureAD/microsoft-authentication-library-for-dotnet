@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -54,6 +53,8 @@ namespace XForms
         protected override void OnAppearing()
         {
             SetPlatformParameters();
+            authority.Text = App.Authority;
+            validateAuthority.IsToggled = App.ValidateAuthority;
         }
 
         private string ToString(IUser user)
@@ -90,9 +91,7 @@ namespace XForms
         private async void OnAcquireSilentlyClicked(object sender, EventArgs e)
         {
             if (App.MsalPublicClient.PlatformParameters == null)
-            {
                 SetPlatformParameters();
-            }
             acquireResponseLabel.Text = "Starting silent token acquisition";
             await Task.Delay(700);
 
@@ -121,9 +120,7 @@ namespace XForms
         private async void OnAcquireClicked(object sender, EventArgs e)
         {
             if (App.MsalPublicClient.PlatformParameters == null)
-            {
                 SetPlatformParameters();
-            }
 
             acquireResponseLabel.Text = "Starting token acquisition";
             await Task.Delay(700);
@@ -132,13 +129,9 @@ namespace XForms
             {
                 IAuthenticationResult res;
                 if (LoginHint.IsToggled)
-                {
                     res = await App.MsalPublicClient.AcquireTokenAsync(App.Scopes, UserEntry.Text.Trim());
-                }
                 else
-                {
                     res = await App.MsalPublicClient.AcquireTokenAsync(App.Scopes);
-                }
 
                 acquireResponseLabel.Text = ToString(res);
             }
@@ -155,6 +148,12 @@ namespace XForms
         private void OnClearClicked(object sender, EventArgs e)
         {
             acquireResponseLabel.Text = "";
+        }
+
+        private void OnValidateAuthorityToggled(object sender, ToggledEventArgs args)
+        {
+            App.MsalPublicClient.ValidateAuthority = args.Value;
+            App.ValidateAuthority = args.Value;
         }
     }
 }
