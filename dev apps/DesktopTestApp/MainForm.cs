@@ -305,7 +305,7 @@ namespace DesktopTestApp
 
         private void SetCacheInfoPage(IAuthenticationResult authenticationResult)
         {
-            userUpnResult.Text = authenticationResult.User.DisplayableId;
+            userOneUpnResult.Text = authenticationResult.User.DisplayableId;
             idTokenAT1Result.Text = authenticationResult.IdToken;
             expiresOnAT1Result.Text = authenticationResult.ExpiresOn.ToString();
             tenantIdAT1Result.Text = authenticationResult.TenantId;

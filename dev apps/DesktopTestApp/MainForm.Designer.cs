@@ -88,10 +88,10 @@
             this.expiresOnAT1Label = new System.Windows.Forms.Label();
             this.idTokenAT1Label = new System.Windows.Forms.Label();
             this.accessTokenOneLabel = new System.Windows.Forms.Label();
-            this.signOutUserBtn = new System.Windows.Forms.Button();
-            this.invalidateUserTokenBtn = new System.Windows.Forms.Button();
-            this.userUpnResult = new System.Windows.Forms.Label();
-            this.userLabel = new System.Windows.Forms.Label();
+            this.signOutUserOneBtn = new System.Windows.Forms.Button();
+            this.invalidateUserOneTokenBtn = new System.Windows.Forms.Button();
+            this.userOneUpnResult = new System.Windows.Forms.Label();
+            this.userOneLabel = new System.Windows.Forms.Label();
             this.logsTabPage = new System.Windows.Forms.TabPage();
             this.button1 = new System.Windows.Forms.Button();
             this.msalPIILogs = new System.Windows.Forms.TextBox();
@@ -146,6 +146,33 @@
             this.cache = new System.Windows.Forms.Button();
             this.logs = new System.Windows.Forms.Button();
             this.confidentialClient = new System.Windows.Forms.Button();
+            this.userTwoBox = new System.Windows.Forms.GroupBox();
+            this.deleteAT2User2Btn = new System.Windows.Forms.Button();
+            this.expireAT2User2btn = new System.Windows.Forms.Button();
+            this.scopesAT2User2Result = new System.Windows.Forms.ListBox();
+            this.scopesAT2User2Label = new System.Windows.Forms.Label();
+            this.tenantIdAT2User2Result = new System.Windows.Forms.Label();
+            this.tenantIdAT2User2Label = new System.Windows.Forms.Label();
+            this.expiresOnAT2User2Result = new System.Windows.Forms.Label();
+            this.expiresOnAT2User2Label = new System.Windows.Forms.Label();
+            this.idTokenAT2User2Result = new System.Windows.Forms.TextBox();
+            this.idTokenAT2User2Label = new System.Windows.Forms.Label();
+            this.accessToken2User2label = new System.Windows.Forms.Label();
+            this.deleteAT1User2Btn = new System.Windows.Forms.Button();
+            this.expireAT1User2Btn = new System.Windows.Forms.Button();
+            this.IdTokenAT1User2Result = new System.Windows.Forms.TextBox();
+            this.tenantIdAT1User2Result = new System.Windows.Forms.Label();
+            this.tenantIdAT1User2Label = new System.Windows.Forms.Label();
+            this.scopesAT1User2Box = new System.Windows.Forms.ListBox();
+            this.scopesAT1User2Label = new System.Windows.Forms.Label();
+            this.expiresOnAT1User2Result = new System.Windows.Forms.Label();
+            this.expiresOnAT1User2Label = new System.Windows.Forms.Label();
+            this.IdTokenAT1User2Label = new System.Windows.Forms.Label();
+            this.accessTokenOneUserTwoLabel = new System.Windows.Forms.Label();
+            this.signOutUserTwoBtn = new System.Windows.Forms.Button();
+            this.invalidateUserTwoTokenBtn = new System.Windows.Forms.Button();
+            this.userTwoUpnResult = new System.Windows.Forms.Label();
+            this.userTwoLabel = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.publicClientTabPage.SuspendLayout();
             this.groupBox6.SuspendLayout();
@@ -159,6 +186,7 @@
             this.groupBox5.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.userTwoBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // authority
@@ -544,6 +572,7 @@
             // 
             // cacheTabPage
             // 
+            this.cacheTabPage.Controls.Add(this.userTwoBox);
             this.cacheTabPage.Controls.Add(this.userOneBox);
             this.cacheTabPage.Location = new System.Drawing.Point(4, 22);
             this.cacheTabPage.Name = "cacheTabPage";
@@ -578,10 +607,10 @@
             this.userOneBox.Controls.Add(this.expiresOnAT1Label);
             this.userOneBox.Controls.Add(this.idTokenAT1Label);
             this.userOneBox.Controls.Add(this.accessTokenOneLabel);
-            this.userOneBox.Controls.Add(this.signOutUserBtn);
-            this.userOneBox.Controls.Add(this.invalidateUserTokenBtn);
-            this.userOneBox.Controls.Add(this.userUpnResult);
-            this.userOneBox.Controls.Add(this.userLabel);
+            this.userOneBox.Controls.Add(this.signOutUserOneBtn);
+            this.userOneBox.Controls.Add(this.invalidateUserOneTokenBtn);
+            this.userOneBox.Controls.Add(this.userOneUpnResult);
+            this.userOneBox.Controls.Add(this.userOneLabel);
             this.userOneBox.Location = new System.Drawing.Point(30, 29);
             this.userOneBox.Name = "userOneBox";
             this.userOneBox.Size = new System.Drawing.Size(608, 354);
@@ -790,45 +819,45 @@
             this.accessTokenOneLabel.TabIndex = 4;
             this.accessTokenOneLabel.Text = "Access Token One";
             // 
-            // signOutUserBtn
+            // signOutUserOneBtn
             // 
-            this.signOutUserBtn.BackColor = System.Drawing.Color.CadetBlue;
-            this.signOutUserBtn.Location = new System.Drawing.Point(332, 6);
-            this.signOutUserBtn.Name = "signOutUserBtn";
-            this.signOutUserBtn.Size = new System.Drawing.Size(112, 31);
-            this.signOutUserBtn.TabIndex = 3;
-            this.signOutUserBtn.Text = "Sign Out";
-            this.signOutUserBtn.UseVisualStyleBackColor = false;
-            this.signOutUserBtn.Click += new System.EventHandler(this.signOutUserBtn_Click);
+            this.signOutUserOneBtn.BackColor = System.Drawing.Color.CadetBlue;
+            this.signOutUserOneBtn.Location = new System.Drawing.Point(332, 6);
+            this.signOutUserOneBtn.Name = "signOutUserOneBtn";
+            this.signOutUserOneBtn.Size = new System.Drawing.Size(112, 31);
+            this.signOutUserOneBtn.TabIndex = 3;
+            this.signOutUserOneBtn.Text = "Sign Out";
+            this.signOutUserOneBtn.UseVisualStyleBackColor = false;
+            this.signOutUserOneBtn.Click += new System.EventHandler(this.signOutUserBtn_Click);
             // 
-            // invalidateUserTokenBtn
+            // invalidateUserOneTokenBtn
             // 
-            this.invalidateUserTokenBtn.BackColor = System.Drawing.Color.DarkSeaGreen;
-            this.invalidateUserTokenBtn.Location = new System.Drawing.Point(192, 6);
-            this.invalidateUserTokenBtn.Name = "invalidateUserTokenBtn";
-            this.invalidateUserTokenBtn.Size = new System.Drawing.Size(125, 32);
-            this.invalidateUserTokenBtn.TabIndex = 2;
-            this.invalidateUserTokenBtn.Text = "Invalidate Token";
-            this.invalidateUserTokenBtn.UseVisualStyleBackColor = false;
+            this.invalidateUserOneTokenBtn.BackColor = System.Drawing.Color.DarkSeaGreen;
+            this.invalidateUserOneTokenBtn.Location = new System.Drawing.Point(192, 6);
+            this.invalidateUserOneTokenBtn.Name = "invalidateUserOneTokenBtn";
+            this.invalidateUserOneTokenBtn.Size = new System.Drawing.Size(125, 32);
+            this.invalidateUserOneTokenBtn.TabIndex = 2;
+            this.invalidateUserOneTokenBtn.Text = "Invalidate Token";
+            this.invalidateUserOneTokenBtn.UseVisualStyleBackColor = false;
             // 
-            // userUpnResult
+            // userOneUpnResult
             // 
-            this.userUpnResult.AutoSize = true;
-            this.userUpnResult.Location = new System.Drawing.Point(67, 16);
-            this.userUpnResult.Name = "userUpnResult";
-            this.userUpnResult.Size = new System.Drawing.Size(89, 13);
-            this.userUpnResult.TabIndex = 1;
-            this.userUpnResult.Text = "UPN Placeholder";
+            this.userOneUpnResult.AutoSize = true;
+            this.userOneUpnResult.Location = new System.Drawing.Point(67, 16);
+            this.userOneUpnResult.Name = "userOneUpnResult";
+            this.userOneUpnResult.Size = new System.Drawing.Size(89, 13);
+            this.userOneUpnResult.TabIndex = 1;
+            this.userOneUpnResult.Text = "UPN Placeholder";
             // 
-            // userLabel
+            // userOneLabel
             // 
-            this.userLabel.AutoSize = true;
-            this.userLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.userLabel.Location = new System.Drawing.Point(24, 16);
-            this.userLabel.Name = "userLabel";
-            this.userLabel.Size = new System.Drawing.Size(33, 13);
-            this.userLabel.TabIndex = 0;
-            this.userLabel.Text = "User";
+            this.userOneLabel.AutoSize = true;
+            this.userOneLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.userOneLabel.Location = new System.Drawing.Point(24, 16);
+            this.userOneLabel.Name = "userOneLabel";
+            this.userOneLabel.Size = new System.Drawing.Size(33, 13);
+            this.userOneLabel.TabIndex = 0;
+            this.userOneLabel.Text = "User";
             // 
             // logsTabPage
             // 
@@ -1371,6 +1400,280 @@
             this.confidentialClient.UseVisualStyleBackColor = true;
             this.confidentialClient.Click += new System.EventHandler(this.confidentialClient_Click);
             // 
+            // userTwoBox
+            // 
+            this.userTwoBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.userTwoBox.Controls.Add(this.deleteAT2User2Btn);
+            this.userTwoBox.Controls.Add(this.expireAT2User2btn);
+            this.userTwoBox.Controls.Add(this.scopesAT2User2Result);
+            this.userTwoBox.Controls.Add(this.scopesAT2User2Label);
+            this.userTwoBox.Controls.Add(this.tenantIdAT2User2Result);
+            this.userTwoBox.Controls.Add(this.tenantIdAT2User2Label);
+            this.userTwoBox.Controls.Add(this.expiresOnAT2User2Result);
+            this.userTwoBox.Controls.Add(this.expiresOnAT2User2Label);
+            this.userTwoBox.Controls.Add(this.idTokenAT2User2Result);
+            this.userTwoBox.Controls.Add(this.idTokenAT2User2Label);
+            this.userTwoBox.Controls.Add(this.accessToken2User2label);
+            this.userTwoBox.Controls.Add(this.deleteAT1User2Btn);
+            this.userTwoBox.Controls.Add(this.expireAT1User2Btn);
+            this.userTwoBox.Controls.Add(this.IdTokenAT1User2Result);
+            this.userTwoBox.Controls.Add(this.tenantIdAT1User2Result);
+            this.userTwoBox.Controls.Add(this.tenantIdAT1User2Label);
+            this.userTwoBox.Controls.Add(this.scopesAT1User2Box);
+            this.userTwoBox.Controls.Add(this.scopesAT1User2Label);
+            this.userTwoBox.Controls.Add(this.expiresOnAT1User2Result);
+            this.userTwoBox.Controls.Add(this.expiresOnAT1User2Label);
+            this.userTwoBox.Controls.Add(this.IdTokenAT1User2Label);
+            this.userTwoBox.Controls.Add(this.accessTokenOneUserTwoLabel);
+            this.userTwoBox.Controls.Add(this.signOutUserTwoBtn);
+            this.userTwoBox.Controls.Add(this.invalidateUserTwoTokenBtn);
+            this.userTwoBox.Controls.Add(this.userTwoUpnResult);
+            this.userTwoBox.Controls.Add(this.userTwoLabel);
+            this.userTwoBox.Location = new System.Drawing.Point(30, 409);
+            this.userTwoBox.Name = "userTwoBox";
+            this.userTwoBox.Size = new System.Drawing.Size(608, 354);
+            this.userTwoBox.TabIndex = 7;
+            this.userTwoBox.TabStop = false;
+            // 
+            // deleteAT2User2Btn
+            // 
+            this.deleteAT2User2Btn.BackColor = System.Drawing.Color.PaleTurquoise;
+            this.deleteAT2User2Btn.Location = new System.Drawing.Point(533, 206);
+            this.deleteAT2User2Btn.Name = "deleteAT2User2Btn";
+            this.deleteAT2User2Btn.Size = new System.Drawing.Size(57, 26);
+            this.deleteAT2User2Btn.TabIndex = 25;
+            this.deleteAT2User2Btn.Text = "Delete";
+            this.deleteAT2User2Btn.UseVisualStyleBackColor = false;
+            // 
+            // expireAT2User2btn
+            // 
+            this.expireAT2User2btn.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.expireAT2User2btn.Location = new System.Drawing.Point(445, 207);
+            this.expireAT2User2btn.Name = "expireAT2User2btn";
+            this.expireAT2User2btn.Size = new System.Drawing.Size(64, 25);
+            this.expireAT2User2btn.TabIndex = 24;
+            this.expireAT2User2btn.Text = "Expire";
+            this.expireAT2User2btn.UseVisualStyleBackColor = false;
+            // 
+            // scopesAT2User2Result
+            // 
+            this.scopesAT2User2Result.FormattingEnabled = true;
+            this.scopesAT2User2Result.Location = new System.Drawing.Point(177, 330);
+            this.scopesAT2User2Result.Name = "scopesAT2User2Result";
+            this.scopesAT2User2Result.Size = new System.Drawing.Size(187, 17);
+            this.scopesAT2User2Result.TabIndex = 23;
+            // 
+            // scopesAT2User2Label
+            // 
+            this.scopesAT2User2Label.AutoSize = true;
+            this.scopesAT2User2Label.Location = new System.Drawing.Point(106, 334);
+            this.scopesAT2User2Label.Name = "scopesAT2User2Label";
+            this.scopesAT2User2Label.Size = new System.Drawing.Size(43, 13);
+            this.scopesAT2User2Label.TabIndex = 22;
+            this.scopesAT2User2Label.Text = "Scopes";
+            // 
+            // tenantIdAT2User2Result
+            // 
+            this.tenantIdAT2User2Result.AutoSize = true;
+            this.tenantIdAT2User2Result.Location = new System.Drawing.Point(174, 308);
+            this.tenantIdAT2User2Result.Name = "tenantIdAT2User2Result";
+            this.tenantIdAT2User2Result.Size = new System.Drawing.Size(112, 13);
+            this.tenantIdAT2User2Result.TabIndex = 21;
+            this.tenantIdAT2User2Result.Text = "Tenant Id Placeholder";
+            // 
+            // tenantIdAT2User2Label
+            // 
+            this.tenantIdAT2User2Label.AutoSize = true;
+            this.tenantIdAT2User2Label.Location = new System.Drawing.Point(96, 308);
+            this.tenantIdAT2User2Label.Name = "tenantIdAT2User2Label";
+            this.tenantIdAT2User2Label.Size = new System.Drawing.Size(53, 13);
+            this.tenantIdAT2User2Label.TabIndex = 20;
+            this.tenantIdAT2User2Label.Text = "Tenant Id";
+            // 
+            // expiresOnAT2User2Result
+            // 
+            this.expiresOnAT2User2Result.AutoSize = true;
+            this.expiresOnAT2User2Result.Location = new System.Drawing.Point(174, 284);
+            this.expiresOnAT2User2Result.Name = "expiresOnAT2User2Result";
+            this.expiresOnAT2User2Result.Size = new System.Drawing.Size(117, 13);
+            this.expiresOnAT2User2Result.TabIndex = 19;
+            this.expiresOnAT2User2Result.Text = "Expires On Placeholder";
+            // 
+            // expiresOnAT2User2Label
+            // 
+            this.expiresOnAT2User2Label.AutoSize = true;
+            this.expiresOnAT2User2Label.Location = new System.Drawing.Point(91, 284);
+            this.expiresOnAT2User2Label.Name = "expiresOnAT2User2Label";
+            this.expiresOnAT2User2Label.Size = new System.Drawing.Size(58, 13);
+            this.expiresOnAT2User2Label.TabIndex = 18;
+            this.expiresOnAT2User2Label.Text = "Expires On";
+            // 
+            // idTokenAT2User2Result
+            // 
+            this.idTokenAT2User2Result.Location = new System.Drawing.Point(177, 242);
+            this.idTokenAT2User2Result.Multiline = true;
+            this.idTokenAT2User2Result.Name = "idTokenAT2User2Result";
+            this.idTokenAT2User2Result.Size = new System.Drawing.Size(267, 39);
+            this.idTokenAT2User2Result.TabIndex = 17;
+            // 
+            // idTokenAT2User2Label
+            // 
+            this.idTokenAT2User2Label.AutoSize = true;
+            this.idTokenAT2User2Label.Location = new System.Drawing.Point(99, 242);
+            this.idTokenAT2User2Label.Name = "idTokenAT2User2Label";
+            this.idTokenAT2User2Label.Size = new System.Drawing.Size(50, 13);
+            this.idTokenAT2User2Label.TabIndex = 16;
+            this.idTokenAT2User2Label.Text = "Id Token";
+            // 
+            // accessToken2User2label
+            // 
+            this.accessToken2User2label.AutoSize = true;
+            this.accessToken2User2label.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accessToken2User2label.Location = new System.Drawing.Point(48, 219);
+            this.accessToken2User2label.Name = "accessToken2User2label";
+            this.accessToken2User2label.Size = new System.Drawing.Size(116, 13);
+            this.accessToken2User2label.TabIndex = 15;
+            this.accessToken2User2label.Text = "Access Token Two";
+            // 
+            // deleteAT1User2Btn
+            // 
+            this.deleteAT1User2Btn.BackColor = System.Drawing.Color.PaleTurquoise;
+            this.deleteAT1User2Btn.Location = new System.Drawing.Point(533, 53);
+            this.deleteAT1User2Btn.Name = "deleteAT1User2Btn";
+            this.deleteAT1User2Btn.Size = new System.Drawing.Size(57, 26);
+            this.deleteAT1User2Btn.TabIndex = 14;
+            this.deleteAT1User2Btn.Text = "Delete";
+            this.deleteAT1User2Btn.UseVisualStyleBackColor = false;
+            // 
+            // expireAT1User2Btn
+            // 
+            this.expireAT1User2Btn.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.expireAT1User2Btn.Location = new System.Drawing.Point(448, 54);
+            this.expireAT1User2Btn.Name = "expireAT1User2Btn";
+            this.expireAT1User2Btn.Size = new System.Drawing.Size(64, 25);
+            this.expireAT1User2Btn.TabIndex = 13;
+            this.expireAT1User2Btn.Text = "Expire";
+            this.expireAT1User2Btn.UseVisualStyleBackColor = false;
+            // 
+            // IdTokenAT1User2Result
+            // 
+            this.IdTokenAT1User2Result.Location = new System.Drawing.Point(177, 78);
+            this.IdTokenAT1User2Result.Multiline = true;
+            this.IdTokenAT1User2Result.Name = "IdTokenAT1User2Result";
+            this.IdTokenAT1User2Result.Size = new System.Drawing.Size(267, 45);
+            this.IdTokenAT1User2Result.TabIndex = 12;
+            // 
+            // tenantIdAT1User2Result
+            // 
+            this.tenantIdAT1User2Result.AutoSize = true;
+            this.tenantIdAT1User2Result.Location = new System.Drawing.Point(174, 150);
+            this.tenantIdAT1User2Result.Name = "tenantIdAT1User2Result";
+            this.tenantIdAT1User2Result.Size = new System.Drawing.Size(112, 13);
+            this.tenantIdAT1User2Result.TabIndex = 11;
+            this.tenantIdAT1User2Result.Text = "Tenant Id Placeholder";
+            // 
+            // tenantIdAT1User2Label
+            // 
+            this.tenantIdAT1User2Label.AutoSize = true;
+            this.tenantIdAT1User2Label.Location = new System.Drawing.Point(103, 150);
+            this.tenantIdAT1User2Label.Name = "tenantIdAT1User2Label";
+            this.tenantIdAT1User2Label.Size = new System.Drawing.Size(53, 13);
+            this.tenantIdAT1User2Label.TabIndex = 10;
+            this.tenantIdAT1User2Label.Text = "Tenant Id";
+            // 
+            // scopesAT1User2Box
+            // 
+            this.scopesAT1User2Box.FormattingEnabled = true;
+            this.scopesAT1User2Box.Location = new System.Drawing.Point(177, 175);
+            this.scopesAT1User2Box.Name = "scopesAT1User2Box";
+            this.scopesAT1User2Box.Size = new System.Drawing.Size(187, 17);
+            this.scopesAT1User2Box.TabIndex = 9;
+            // 
+            // scopesAT1User2Label
+            // 
+            this.scopesAT1User2Label.AutoSize = true;
+            this.scopesAT1User2Label.Location = new System.Drawing.Point(113, 179);
+            this.scopesAT1User2Label.Name = "scopesAT1User2Label";
+            this.scopesAT1User2Label.Size = new System.Drawing.Size(43, 13);
+            this.scopesAT1User2Label.TabIndex = 8;
+            this.scopesAT1User2Label.Text = "Scopes";
+            // 
+            // expiresOnAT1User2Result
+            // 
+            this.expiresOnAT1User2Result.AutoSize = true;
+            this.expiresOnAT1User2Result.Location = new System.Drawing.Point(174, 126);
+            this.expiresOnAT1User2Result.Name = "expiresOnAT1User2Result";
+            this.expiresOnAT1User2Result.Size = new System.Drawing.Size(117, 13);
+            this.expiresOnAT1User2Result.TabIndex = 7;
+            this.expiresOnAT1User2Result.Text = "Expires On Placeholder";
+            // 
+            // expiresOnAT1User2Label
+            // 
+            this.expiresOnAT1User2Label.AutoSize = true;
+            this.expiresOnAT1User2Label.Location = new System.Drawing.Point(98, 126);
+            this.expiresOnAT1User2Label.Name = "expiresOnAT1User2Label";
+            this.expiresOnAT1User2Label.Size = new System.Drawing.Size(58, 13);
+            this.expiresOnAT1User2Label.TabIndex = 6;
+            this.expiresOnAT1User2Label.Text = "Expires On";
+            // 
+            // IdTokenAT1User2Label
+            // 
+            this.IdTokenAT1User2Label.AutoSize = true;
+            this.IdTokenAT1User2Label.Location = new System.Drawing.Point(106, 81);
+            this.IdTokenAT1User2Label.Name = "IdTokenAT1User2Label";
+            this.IdTokenAT1User2Label.Size = new System.Drawing.Size(50, 13);
+            this.IdTokenAT1User2Label.TabIndex = 5;
+            this.IdTokenAT1User2Label.Text = "Id Token";
+            // 
+            // accessTokenOneUserTwoLabel
+            // 
+            this.accessTokenOneUserTwoLabel.AutoSize = true;
+            this.accessTokenOneUserTwoLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.accessTokenOneUserTwoLabel.Location = new System.Drawing.Point(49, 57);
+            this.accessTokenOneUserTwoLabel.Name = "accessTokenOneUserTwoLabel";
+            this.accessTokenOneUserTwoLabel.Size = new System.Drawing.Size(115, 13);
+            this.accessTokenOneUserTwoLabel.TabIndex = 4;
+            this.accessTokenOneUserTwoLabel.Text = "Access Token One";
+            // 
+            // signOutUserTwoBtn
+            // 
+            this.signOutUserTwoBtn.BackColor = System.Drawing.Color.CadetBlue;
+            this.signOutUserTwoBtn.Location = new System.Drawing.Point(332, 6);
+            this.signOutUserTwoBtn.Name = "signOutUserTwoBtn";
+            this.signOutUserTwoBtn.Size = new System.Drawing.Size(112, 31);
+            this.signOutUserTwoBtn.TabIndex = 3;
+            this.signOutUserTwoBtn.Text = "Sign Out";
+            this.signOutUserTwoBtn.UseVisualStyleBackColor = false;
+            // 
+            // invalidateUserTwoTokenBtn
+            // 
+            this.invalidateUserTwoTokenBtn.BackColor = System.Drawing.Color.DarkSeaGreen;
+            this.invalidateUserTwoTokenBtn.Location = new System.Drawing.Point(192, 6);
+            this.invalidateUserTwoTokenBtn.Name = "invalidateUserTwoTokenBtn";
+            this.invalidateUserTwoTokenBtn.Size = new System.Drawing.Size(125, 32);
+            this.invalidateUserTwoTokenBtn.TabIndex = 2;
+            this.invalidateUserTwoTokenBtn.Text = "Invalidate Token";
+            this.invalidateUserTwoTokenBtn.UseVisualStyleBackColor = false;
+            // 
+            // userTwoUpnResult
+            // 
+            this.userTwoUpnResult.AutoSize = true;
+            this.userTwoUpnResult.Location = new System.Drawing.Point(67, 16);
+            this.userTwoUpnResult.Name = "userTwoUpnResult";
+            this.userTwoUpnResult.Size = new System.Drawing.Size(89, 13);
+            this.userTwoUpnResult.TabIndex = 1;
+            this.userTwoUpnResult.Text = "UPN Placeholder";
+            // 
+            // userTwoLabel
+            // 
+            this.userTwoLabel.AutoSize = true;
+            this.userTwoLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.userTwoLabel.Location = new System.Drawing.Point(24, 16);
+            this.userTwoLabel.Name = "userTwoLabel";
+            this.userTwoLabel.Size = new System.Drawing.Size(33, 13);
+            this.userTwoLabel.TabIndex = 0;
+            this.userTwoLabel.Text = "User";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1409,6 +1712,8 @@
             this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.userTwoBox.ResumeLayout(false);
+            this.userTwoBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1506,16 +1811,16 @@
         private System.Windows.Forms.TextBox confClientTextBox;
         private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.GroupBox userOneBox;
-        private System.Windows.Forms.Label userUpnResult;
-        private System.Windows.Forms.Label userLabel;
+        private System.Windows.Forms.Label userOneUpnResult;
+        private System.Windows.Forms.Label userOneLabel;
         private System.Windows.Forms.ListBox scopesAT1Result;
         private System.Windows.Forms.Label scopesAT1label;
         private System.Windows.Forms.Label expiresOnAT1Result;
         private System.Windows.Forms.Label expiresOnAT1Label;
         private System.Windows.Forms.Label idTokenAT1Label;
         private System.Windows.Forms.Label accessTokenOneLabel;
-        private System.Windows.Forms.Button signOutUserBtn;
-        private System.Windows.Forms.Button invalidateUserTokenBtn;
+        private System.Windows.Forms.Button signOutUserOneBtn;
+        private System.Windows.Forms.Button invalidateUserOneTokenBtn;
         private System.Windows.Forms.Label tenantIdAT1Result;
         private System.Windows.Forms.Label tenantIdAT1Label;
         private System.Windows.Forms.Button deleteAT2Btn;
@@ -1532,6 +1837,33 @@
         private System.Windows.Forms.Button deleteAT1Btn;
         private System.Windows.Forms.Button expireAT1Btn;
         private System.Windows.Forms.TextBox idTokenAT1Result;
+        private System.Windows.Forms.GroupBox userTwoBox;
+        private System.Windows.Forms.Button deleteAT2User2Btn;
+        private System.Windows.Forms.Button expireAT2User2btn;
+        private System.Windows.Forms.ListBox scopesAT2User2Result;
+        private System.Windows.Forms.Label scopesAT2User2Label;
+        private System.Windows.Forms.Label tenantIdAT2User2Result;
+        private System.Windows.Forms.Label tenantIdAT2User2Label;
+        private System.Windows.Forms.Label expiresOnAT2User2Result;
+        private System.Windows.Forms.Label expiresOnAT2User2Label;
+        private System.Windows.Forms.TextBox idTokenAT2User2Result;
+        private System.Windows.Forms.Label idTokenAT2User2Label;
+        private System.Windows.Forms.Label accessToken2User2label;
+        private System.Windows.Forms.Button deleteAT1User2Btn;
+        private System.Windows.Forms.Button expireAT1User2Btn;
+        private System.Windows.Forms.TextBox IdTokenAT1User2Result;
+        private System.Windows.Forms.Label tenantIdAT1User2Result;
+        private System.Windows.Forms.Label tenantIdAT1User2Label;
+        private System.Windows.Forms.ListBox scopesAT1User2Box;
+        private System.Windows.Forms.Label scopesAT1User2Label;
+        private System.Windows.Forms.Label expiresOnAT1User2Result;
+        private System.Windows.Forms.Label expiresOnAT1User2Label;
+        private System.Windows.Forms.Label IdTokenAT1User2Label;
+        private System.Windows.Forms.Label accessTokenOneUserTwoLabel;
+        private System.Windows.Forms.Button signOutUserTwoBtn;
+        private System.Windows.Forms.Button invalidateUserTwoTokenBtn;
+        private System.Windows.Forms.Label userTwoUpnResult;
+        private System.Windows.Forms.Label userTwoLabel;
     }
 }
 
