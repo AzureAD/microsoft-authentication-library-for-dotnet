@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public string Prompt { get; set; }
 
-        public User User { get; set; }
+        public IUser User { get; set; }
 
         public UserAssertion UserAssertion { get; set; }
 

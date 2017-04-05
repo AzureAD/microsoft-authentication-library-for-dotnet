@@ -76,8 +76,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
             Name = idToken.Name;
             IdentityProvider = idToken.Issuer;
 
-            User = User.Create(DisplayableId, Name, IdentityProvider,
-                GetUserIdentifier());
+            User = new User(GetUserIdentifier(), DisplayableId, Name, IdentityProvider);
         }
 
         // This method is called after the object 
@@ -86,8 +85,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         void OnDeserialized(StreamingContext context)
         {
             ClientInfo = ClientInfo.Parse(RawClientInfo);
-            User = User.Create(DisplayableId, Name, IdentityProvider,
-                GetUserIdentifier());
+            User = new User(GetUserIdentifier(), DisplayableId, Name, IdentityProvider);
         }
     }
 }

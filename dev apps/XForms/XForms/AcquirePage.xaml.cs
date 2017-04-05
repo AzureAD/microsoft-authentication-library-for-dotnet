@@ -51,7 +51,7 @@ namespace XForms
             validateAuthority.IsToggled = App.ValidateAuthority;
         }
 
-        private string ToString(User user)
+        private string ToString(IUser user)
         {
             var sb = new StringBuilder();
 
@@ -77,7 +77,7 @@ namespace XForms
             return sb.ToString();
         }
 
-        private User getUserByDisplayableId(string str)
+        private IUser getUserByDisplayableId(string str)
         {
             return App.MsalPublicClient.Users.FirstOrDefault(user => user.DisplayableId.Equals(str));
         }

@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Returns a user-centric view over the cache that provides a list of all the available users in the cache.
         /// </summary>
-        IEnumerable<User> Users { get; }
+        IEnumerable<IUser> Users { get; }
 
         /// <summary>
         /// Attempts to acquire the access token from cache. Access token is considered a match if it AT LEAST contains all the requested scopes.
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client
         /// <param name="user">User for which the token is requested. <see cref="User"/></param>
         Task<IAuthenticationResult> AcquireTokenSilentAsync(
             IEnumerable<string> scope,
-            User user);
+            IUser user);
 
         /// <summary>
         /// Attempts to acquire the access token from cache. Access token is considered a match if it AT LEAST contains all the requested scopes.
@@ -80,13 +80,13 @@ namespace Microsoft.Identity.Client
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using the refresh token if available</param>
         Task<IAuthenticationResult> AcquireTokenSilentAsync(
             IEnumerable<string> scope,
-            User user,
+            IUser user,
             string authority,
             bool forceRefresh);
 
         /// <summary>
         /// Removes any cached token for the specified user
         /// </summary>
-        void Remove(User user);
+        void Remove(IUser user);
    }
 }
