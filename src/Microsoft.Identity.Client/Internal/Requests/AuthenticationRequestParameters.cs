@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IPlatformParameters PlatformParameters { get; set; }
 
-#if NET45 || NETSTANDARD1_3
+#if DESKTOP || NETSTANDARD1_3
         public ClientCredential ClientCredential { get; set; }
 
         public bool HasCredential => (ClientCredential != null);
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IDictionary<string, string> ToParameters()
         {
             IDictionary<string, string> parameters = new Dictionary<string, string>();
-#if NET45 || NETSTANDARD1_3
+#if DESKTOP || NETSTANDARD1_3
             if (ClientCredential != null)
             {
                 if (!string.IsNullOrEmpty(ClientCredential.Secret))

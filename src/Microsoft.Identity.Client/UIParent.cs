@@ -25,12 +25,43 @@
 //
 //------------------------------------------------------------------------------
 
+#if ANDROID
+using Android.App;
+#endif
+
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Interface for platform specific parameters required for public clients to operate.
+    /// 
     /// </summary>
-    public interface IPlatformParameters
+    public sealed class UIParent
     {
+        public UIParent()
+        {
+        }
+
+#if ANDROID
+        internal Activity Activity { get; set; }
+
+
+        public UIParent(Activity activity)
+        {
+            Activity = activity;
+        }
+#endif
+
+#if DESKTOP
+        internal object Window { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="window"></param>
+        public UIParent(object window)
+        {
+            Window = window;
+        }
+#endif
     }
 }

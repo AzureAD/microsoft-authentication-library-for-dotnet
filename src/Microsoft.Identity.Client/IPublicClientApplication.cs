@@ -36,12 +36,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public interface IPublicClientApplication : IClientApplicationBase
     {
-        /// <summary>
-        /// .NET specific property that allows configuration of platform specific properties. For example, in iOS/Android it
-        /// would include the flag to enable/disable broker.
-        /// </summary>
-        IPlatformParameters PlatformParameters { get; }
-
+#if !ANDROID
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
@@ -121,5 +116,87 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters,
             IEnumerable<string> additionalScope,
             string authority);
+
+#else
+        /// <summary>
+        /// Interactive request to acquire token. 
+        /// </summary>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <returns>Authentication result containing token of the user</returns>
+        Task<IAuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope, UIParent parent);
+
+        /// <summary>
+        /// Interactive request to acquire token. 
+        /// </summary>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
+        /// <returns>Authentication result containing token of the user</returns>
+        Task<IAuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scope,
+            string loginHint);
+
+        /// <summary>
+        /// Interactive request to acquire token. 
+        /// </summary>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
+        /// <param name="behavior">Enumeration to control UI behavior.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <returns>Authentication result containing token of the user</returns>
+        Task<IAuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scope,
+            string loginHint,
+            UIBehavior behavior,
+            string extraQueryParameters);
+
+        /// <summary>
+        /// Interactive request to acquire token. 
+        /// </summary>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
+        /// <param name="behavior">Enumeration to control UI behavior.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <returns>Authentication result containing token of the user</returns>
+        Task<IAuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scope,
+            User user,
+            UIBehavior behavior,
+            string extraQueryParameters);
+
+        /// <summary>
+        /// Interactive request to acquire token. 
+        /// </summary>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
+        /// <param name="behavior">Enumeration to control UI behavior.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
+        /// <returns>Authentication result containing token of the user</returns>
+        Task<IAuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scope,
+            string loginHint,
+            UIBehavior behavior,
+            string extraQueryParameters,
+            IEnumerable<string> additionalScope, string authority);
+
+        /// <summary>
+        /// Interactive request to acquire token. 
+        /// </summary>
+        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
+        /// <param name="behavior">Enumeration to control UI behavior.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
+        /// <returns>Authentication result containing token of the user</returns>
+        Task<IAuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scope,
+            User user,
+            UIBehavior behavior,
+            string extraQueryParameters,
+            IEnumerable<string> additionalScope,
+            string authority);
+#endif
     }
 }
