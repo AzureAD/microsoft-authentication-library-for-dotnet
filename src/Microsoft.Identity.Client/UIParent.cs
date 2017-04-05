@@ -47,6 +47,11 @@ namespace Microsoft.Identity.Client
 
         public UIParent(Activity activity)
         {
+           if(activity == null)
+           {		
+                throw new ArgumentException("passed in activity is null", nameof(activity));		
+           }	
+           
             Activity = activity;
         }
 #endif
