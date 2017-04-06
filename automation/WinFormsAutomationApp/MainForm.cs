@@ -60,10 +60,12 @@ namespace WinFormsAutomationApp
             pageControl1.SelectedTab = dataInputPage;
         }
 
-        private void readCache_Click(object sender, EventArgs e)
+        private async void readCache_Click(object sender, EventArgs e)
         {
-            _commandToRun = AuthenticationHelper.ReadCache;
-            pageControl1.SelectedTab = dataInputPage;
+            string output = await AuthenticationHelper.ReadCache(); ;
+            pageControl1.SelectedTab = resultPage;
+            resultInfo.Text = output;
+            resultLogs.Text = loggerCallback.GetAdalLogs();
         }
 
         private async void clearCache_Click(object sender, EventArgs e)

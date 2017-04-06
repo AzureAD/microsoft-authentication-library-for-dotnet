@@ -124,19 +124,18 @@ namespace WinFormsAutomationApp
             return await myTask.ConfigureAwait(false);
         }
 
-        public static async Task<string> ReadCache(Dictionary<string, string> input)
+        public static async Task<string> ReadCache()
         {
             Task<string> myTask = Task<string>.Factory.StartNew(() =>
             {
 
                 Dictionary<string, object> output = new Dictionary<string, object>();
-                output.Add("total_count", TokenCache.DefaultShared.ReadItems().Count());
-                var list = TokenCache.DefaultShared.tokenCacheDictionary.Where(x => x.Key.ClientId == input["client_id"] && 
-                                                                                    x.Key.DisplayableId == input["user_identifier"]);
-                output.Add("exact_count", list.Count());
-               
+                TokenCache.DefaultShared.ReadItems();
+                var list = TokenCache.DefaultShared.tokenCacheDictionary;
+                
                 if (list.Any())
                 {
+                    output.Add("Count", list.Count());
                     var item = list.FirstOrDefault();
                     output.Add("AccessToken", item.Value.Result.AccessToken);
                     output.Add("expires_on", item.Value.Result.ExpiresOn);
@@ -168,29 +167,20 @@ namespace WinFormsAutomationApp
             Dictionary<string, object> res = new Dictionary<string, object>();
             IWebDriver driver = null;
             AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
+
             try
             {
-                //Get Device Code
-                DeviceCodeResult res1 = await ctx.AcquireDeviceCodeAsync(input["resource"], input["client_id"]);
+                //Fetch values from input and create DeviceCodeResult object
+                DeviceCodeResult deviceCodeResult = new DeviceCodeResult();
+                deviceCodeResult.VerificationUrl = input["verification_url"];
+                deviceCodeResult.UserCode = input["user_code"];
+                deviceCodeResult.DeviceCode = input["device_code"];
+                deviceCodeResult.ClientId = input["client_id"];
+                deviceCodeResult.Resource = input["resource"];
+                deviceCodeResult.ExpiresOn = Convert.ToDateTime(input["expires_on"]);
 
-                //Open Chrome Driver in incognito mode
-                ChromeOptions options = new ChromeOptions();
-                options.AddArgument(@"--incognito");
-                options.AddArgument(@"--start-maximized");
-                driver = new ChromeDriver(options);           
-
-                // Do device auth on chrome
-                driver.Navigate().GoToUrl(res1.VerificationUrl);
-                driver.FindElement(By.Id("code"),15).SendKeys(res1.UserCode);
-                Thread.Sleep(1500);// Threadsleep added to wait until controls loaded.
-                driver.FindElement(By.Id("continueBtn"),15).Click();
-                driver.FindElement(By.Id("cred_userid_inputtext"),15).SendKeys(input["user_identifier"]);
-                driver.FindElement(By.Id("cred_password_inputtext"),15).SendKeys(input["password"]);
-                Thread.Sleep(1500); 
-                driver.FindElement(By.Id("cred_sign_in_button"), 15).Click();
-
-                //Try to get access code for the device code.
-                AuthenticationResult result = await ctx.AcquireTokenByDeviceCodeAsync(res1);
+                //Try to get access token form given device code.
+                AuthenticationResult result = await ctx.AcquireTokenByDeviceCodeAsync(deviceCodeResult);
                 res.Add("unique_id", result.UserInfo.UniqueId);
                 res.Add("access_token", result.AccessToken);
                 res.Add("tenant_id", result.TenantId);               
@@ -210,15 +200,16 @@ namespace WinFormsAutomationApp
         {
             Dictionary<string, object> res = new Dictionary<string, object>();
             AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
+            DeviceCodeResult result;
             try
             {
-                DeviceCodeResult result = await ctx.AcquireDeviceCodeAsync(input["resource"], input["client_id"]);
+                result = await ctx.AcquireDeviceCodeAsync(input["resource"], input["client_id"]);
                 res.Add("device_code", result.DeviceCode);
                 res.Add("verification_url", result.VerificationUrl);
                 res.Add("user_code", result.UserCode);
                 res.Add("client_id", result.ClientId);
                 res.Add("resource", result.Resource);
-                res.Add("expires_on", result.ExpiresOn.DateTime);              
+                res.Add("expires_on", result.ExpiresOn.DateTime);
             }
             catch (Exception exc)
             {
