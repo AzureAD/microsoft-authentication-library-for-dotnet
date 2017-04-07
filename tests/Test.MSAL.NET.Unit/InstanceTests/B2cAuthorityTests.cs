@@ -99,5 +99,27 @@ namespace Test.MSAL.NET.Unit.InstanceTests
                 Assert.AreEqual(MsalErrorMessage.UnsupportedAuthorityValidation, exc.Message);
             }
         }
+
+        [TestMethod]
+        [TestCategory("B2CAuthorityTests")]
+        public void CanonicalAuthorityInitTest()
+        {
+            const string uriNoPort = "https://login.microsoftonline.in/tfp/tenant/policy";
+            const string uriNoPortTailSlash = "https://login.microsoftonline.in/tfp/tenant/policy/";
+
+            const string uriDefaultPort = "https://login.microsoftonline.in:443/tfp/tenant/policy";
+
+            const string uriCustomPort = "https://login.microsoftonline.in:444/tfp/tenant/policy";
+            const string uriCustomPortTailSlash = "https://login.microsoftonline.in:444/tfp/tenant/policy/";
+
+            var authority = new B2CAuthority(uriNoPort, false);
+            Assert.AreEqual(uriNoPortTailSlash, authority.CanonicalAuthority);
+
+            authority = new B2CAuthority(uriDefaultPort, false);
+            Assert.AreEqual(uriNoPortTailSlash, authority.CanonicalAuthority);
+
+            authority = new B2CAuthority(uriCustomPort, false);
+            Assert.AreEqual(uriCustomPortTailSlash, authority.CanonicalAuthority);
+        }
     }
 }
