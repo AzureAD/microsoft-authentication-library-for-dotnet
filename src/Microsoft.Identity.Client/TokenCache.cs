@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client
                             accessTokenItemList.Add(accessTokenItem);
                         }
                     }
-#if NET45 || NETSTANDARD1_3
+#if DESKTOP || NETSTANDARD1_3
 // if there is no credential then it is user flow
 // and not a client credential flow.
                 if (!requestParams.HasCredential)
@@ -216,7 +216,7 @@ namespace Microsoft.Identity.Client
                 }
                 else
                 {
-#if NET45 || NETSTANDARD1_3
+#if DESKTOP || NETSTANDARD1_3
                     // if there is no credential then it is user flow
                     // and not a client credential flow.
                     if (!requestParam.HasCredential)
@@ -368,7 +368,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void Remove(User user)
+        internal void Remove(IUser user)
         {
             lock (LockObject)
             {

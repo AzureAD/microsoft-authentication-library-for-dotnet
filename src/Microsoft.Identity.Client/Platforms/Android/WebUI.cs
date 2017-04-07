@@ -26,10 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
@@ -41,20 +39,11 @@ namespace Microsoft.Identity.Client
     {
         private static SemaphoreSlim returnedUriReady;
         private static AuthorizationResult authorizationResult;
-        private readonly PlatformParameters parameters;
+        private readonly UIParent _parent;
 
-        public WebUI(IPlatformParameters parameters, RequestContext requestContext)
+        public WebUI(UIParent parent)
         {
-            this.parameters = parameters as PlatformParameters;
-            if (this.parameters == null)
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(this.parameters));
-            }
-
-            if (this.parameters.CallerActivity == null)
-            {
-                throw new ArgumentException("CallerActivity should be set in PlatformParameters", nameof(this.parameters.CallerActivity));
-            }
+            _parent = parent;
         }
 
         public RequestContext RequestContext { get; set; }
@@ -65,11 +54,11 @@ namespace Microsoft.Identity.Client
 
             try
             {
-                var agentIntent = new Intent(parameters.CallerActivity, typeof(AuthenticationActivity));
+                var agentIntent = new Intent(_parent.Activity, typeof(AuthenticationActivity));
                 agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
                 agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.AbsoluteUri);
 
-                parameters.CallerActivity.RunOnUiThread(()=> parameters.CallerActivity.StartActivityForResult(agentIntent, 0));
+                _parent.Activity.RunOnUiThread(()=> _parent.Activity.StartActivityForResult(agentIntent, 0));
             }
             catch (Exception ex)
             {

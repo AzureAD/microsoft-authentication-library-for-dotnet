@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
         {
             Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
 
-#if NET45
+#if DESKTOP
             if (certificate.PublicKey. Key.KeySize < MinKeySizeInBits)
             {
                 throw new ArgumentOutOfRangeException(nameof(certificate),

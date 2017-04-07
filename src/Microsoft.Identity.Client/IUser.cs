@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,30 +25,33 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Additional parameters used in acquiring user's authorization
+    /// Contains information of a single user. This information is used for token cache lookup and enforcing the user session on STS authorize endpont.
     /// </summary>
-    public class PlatformParameters : IPlatformParameters
+    public interface IUser
     {
         /// <summary>
+        /// Gets a displayable value in UserPrincipalName (UPN) format. The value can be null.
         /// </summary>
-        public PlatformParameters() : this(null)
-        {
-        }
+        string DisplayableId { get; }
 
         /// <summary>
+        /// Gets given name of the user if provided by the service. If not, the value is null.
         /// </summary>
-        /// <param name="ownerWindow"></param>
-        public PlatformParameters(object ownerWindow)
-        {
-            OwnerWindow = ownerWindow;
-        }
+        string Name { get; }
 
         /// <summary>
-        /// Gets the owner of the browser dialog which pops up for receiving user credentials. It can be null.
+        /// Gets identity provider if returned by the service. If not, the value is null.
         /// </summary>
-        public object OwnerWindow { get; private set; }
-    }
+        string IdentityProvider { get; }
+
+        /// <summary>
+        /// Gets an identifier for the user for the given <see cref="IdentityProvider"/>. Cannot be null.
+        /// </summary>
+        string Identifier { get; }
+   }
 }

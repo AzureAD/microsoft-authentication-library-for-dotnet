@@ -45,6 +45,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the user object.
         /// </summary>
-        public User User { get; internal set; }
+        public IUser User { get; internal set; }
     }
 }

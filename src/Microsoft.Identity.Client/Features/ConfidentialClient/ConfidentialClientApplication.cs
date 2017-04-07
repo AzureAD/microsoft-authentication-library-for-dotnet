@@ -225,7 +225,7 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, IEnumerable<string> scope, User user, TokenCache cache)
+        internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, IEnumerable<string> scope, IUser user, TokenCache cache)
         {
             AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scope, user, cache);
             parameters.ClientId = ClientId;
