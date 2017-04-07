@@ -94,6 +94,19 @@ namespace Microsoft.Identity.Client
                 new ReadOnlyCollection<string>(
                     RefreshTokenCacheDictionary.Values.ToList());
         }
-        
+
+        public ICollection<string> GetAllAccessTokenKeys()
+        {
+            return
+                new ReadOnlyCollection<string>(
+                    AccessTokenCacheDictionary.Keys.ToList());
+        }
+
+        public ICollection<string> GetAllRefreshTokenKeys()
+        {
+            return
+                new ReadOnlyCollection<string>(
+                    RefreshTokenCacheDictionary.Keys.ToList());
+        }
     }
 }

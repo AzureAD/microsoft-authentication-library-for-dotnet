@@ -27,6 +27,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Windows.Storage;
 
@@ -169,6 +170,16 @@ namespace Microsoft.Identity.Client
                 encyptedValueLength - (segmentCount - 1) * MaxCompositeValueLength);
 
             return CryptographyHelper.Decrypt(encryptedValue);
+        }
+
+        public ICollection<string> GetAllAccessTokenKeys()
+        {
+            return new ReadOnlyCollection<string>(_accessTokenContainer.Values.Keys.ToList());
+        }
+
+        public ICollection<string> GetAllRefreshTokenKeys()
+        {
+            return new ReadOnlyCollection<string>(_refreshTokenContainer.Values.Keys.ToList());
         }
     }
 }
