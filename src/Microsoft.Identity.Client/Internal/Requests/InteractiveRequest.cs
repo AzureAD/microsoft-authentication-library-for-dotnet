@@ -57,6 +57,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             UIBehavior UIBehavior, IWebUI webUI)
             : base(authenticationRequestParameters)
         {
+            if (authenticationRequestParameters.RedirectUri == null)
+            {
+                authenticationRequestParameters.RedirectUri =
+                    PlatformPlugin.PlatformInformation.GetDefaultRedirectUri(RequestContext);
+            }
+
             PlatformPlugin.PlatformInformation.ValidateRedirectUri(authenticationRequestParameters.RedirectUri,
                 RequestContext);
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))

@@ -40,6 +40,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.AuthorizationCode));
             }
 
+            if (authenticationRequestParameters.RedirectUri == null)
+            {
+                authenticationRequestParameters.RedirectUri =
+                    PlatformPlugin.PlatformInformation.GetDefaultRedirectUri(RequestContext);
+            }
+
             PlatformPlugin.PlatformInformation.ValidateRedirectUri(authenticationRequestParameters.RedirectUri,
                 RequestContext);
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))

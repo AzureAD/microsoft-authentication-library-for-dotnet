@@ -121,15 +121,10 @@ namespace Microsoft.Identity.Client
             return NetworkInformation.GetHostNames().Any(entry => entry.Type == HostNameType.DomainName);
         }
 
-        public override Uri ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        public override Uri GetDefaultRedirectUri(RequestContext requestContext)
         {
-            if (redirectUri == null)
-            {
-                redirectUri = Constants.SsoPlaceHolderUri;
-                requestContext.Logger.Verbose("ms-app redirect Uri is used");
-            }
-
-            return redirectUri;
+            requestContext.Logger.Verbose("ms-app redirect Uri is used");
+            return Constants.SsoPlaceHolderUri;
         }
 
         public override string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
