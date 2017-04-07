@@ -26,22 +26,30 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Cache;
 
 namespace DesktopTestApp
 {
     public partial class MainForm : Form
     {
-        readonly LoggerCallback myCallback = new LoggerCallback();
+        readonly LoggerCallback _myCallback = new LoggerCallback();
 
         #region Properties
 
-        public IUser CurrentUser { get; set; }
-        private PublicClientApplication _publicClientApplication;
+        private PublicClientApplication _publicClientApplication = new PublicClientApplication(
+            clientId: "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
+        {
+            //UserTokenCache = TokenCacheHelper.GetCache()
+        };
         private ConfidentialClientApplication _confidentialClientApplication;
+
+        public IUser CurrentUser { get; set; }
 
         #endregion
 
@@ -52,15 +60,44 @@ namespace DesktopTestApp
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
 
-            Logger.Callback = myCallback;
+            Logger.Callback = _myCallback;
             Logger.Level = Logger.LogLevel.Info;
             PiiLogging();
-            userList.DataSource = new PublicClientApplication(
-                    "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
 
-            { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
+            ResetUserList(addFakeUsers: false);
         }
 
+        private void ResetUserList(bool addFakeUsers)
+        {
+            List<IUser> userListDataSource = _publicClientApplication.Users.ToList();
+            if (addFakeUsers)
+            {
+                userListDataSource.Add(
+                    new User(
+                        identifier: "fakeId",
+                        displayableId: "Professor Katz",
+                        name: "Xavier Katz",
+                        identityProvider: "idk"
+                    )
+                );
+                userListDataSource.Add(
+                    new User(
+                        identifier: "fakeId",
+                        displayableId: "Rogue Cat",
+                        name: "Brio",
+                        identityProvider: "idk"
+                    )
+                );
+            }
+            
+            userList.DataSource = userListDataSource;
+            usersListBox.DataSource = userListDataSource;
+            userList.Refresh();
+            usersListBox.Refresh();
+
+            // This didn't seem to do anything...
+            //SelectedUserChanged();
+        }
         #region UI Controls
 
         private void acquire_Click(object sender, EventArgs e)
@@ -104,34 +141,36 @@ namespace DesktopTestApp
                 IAuthenticationResult result;
                 if (userList.SelectedIndex != -1)
                 {
-                    //if (modalWebview.Checked)
-                   // {
-                        result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
-                            (User)userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text, new UIParent(this));
-                   // }
-                   // else
-                  //  {
-                   //     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
-                   //         (User) userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
-                  //  }
+                    // if (modalWebview.Checked)
+                    // {
+                    result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
+                        (User)userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text, new UIParent(/*this*/));
+                    // }
+                    // else
+                    //  {
+                    //     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
+                    //         (User) userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
+                    //  }
                 }
                 else
                 {
-                   // if (modalWebview.Checked)
-                   // {
-                   //     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
+                    // if (modalWebview.Checked)
+                    // {
+                    //     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
                     //        GetUIBehavior(), extraQueryParams.Text, new UIParent(this));
-                   // }
-                  //  else
-                  //  {
-                        result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
-                            GetUIBehavior(), extraQueryParams.Text);
-                   // }
+                    // }
+                    //  else
+                    //  {
+                    string[] scopeArray = scopes.Text.Split(' ');
+                    UIBehavior uiBehavior = GetUIBehavior();
+                    result = await clientApplication.AcquireTokenAsync(scopeArray, loginHint.Text, uiBehavior, extraQueryParams.Text);
+                    // }
                 }
 
                 CurrentUser = result.User;
                 SetResultPageInfo(result);
                 SetCacheInfoPage(result);
+                ResetUserList(addFakeUsers: true);
             }
             catch (Exception exc)
             {
@@ -139,11 +178,8 @@ namespace DesktopTestApp
 
                 if (exception != null)
                 {
-                    output = exception.ErrorCode;
+                    output = exc.Message + Environment.NewLine + exc.StackTrace;
                 }
-
-                output = exc.Message + Environment.NewLine + exc.StackTrace;
-
                 SetErrorPageInfo(output);
             }
             finally
@@ -171,10 +207,9 @@ namespace DesktopTestApp
                 MsalServiceException exception = exc as MsalServiceException;
                 if (exception != null)
                 {
-                    output = exception.ErrorCode;
+                    output = exc.Message + Environment.NewLine + exc.StackTrace;
                 }
 
-                output = exc.Message + Environment.NewLine + exc.StackTrace;
                 SetErrorPageInfo(output);
             }
             finally
@@ -301,8 +336,8 @@ namespace DesktopTestApp
 
         private void RefreshUI()
         {
-            msalPIILogs.Text = myCallback.DrainPiiLogs();
-            msalLogs.Text = myCallback.DrainLogs();
+            msalPIILogs.Text = _myCallback.DrainPiiLogs();
+            msalLogs.Text = _myCallback.DrainLogs();
             userList.DataSource = new PublicClientApplication(
                     "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
             { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
@@ -382,18 +417,60 @@ namespace DesktopTestApp
 
         private void expireAT1Btn_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void deleteAT1Btn_Click(object sender, EventArgs e)
         {
-           
+
+            TokenCacheHelper.GetCache().TokenCacheAccessor.DeleteAccessToken(_publicClientApplication.ClientId);
+            idTokenAT1Result.Text = @"The Access Token for: " + _publicClientApplication.ClientId +
+                                    @" has been deleted";
+        }
+
+        private ICollection<string> GetAccessToken()
+        {
+            return _publicClientApplication.UserTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString();
         }
 
         private void signOutUserBtn_Click(object sender, EventArgs e)
         {
             _publicClientApplication.Remove(CurrentUser);
             idTokenAT1Result.Text = @"The user: " + CurrentUser.DisplayableId + @" has been signed out";
+            RefreshUI();
+        }
+
+        private void usersListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SelectedUserChanged();
+        }
+
+        private void SelectedUserChanged()
+        {
+            User selectedUser = (User)usersListBox.SelectedItem;
+
+            //Get all token cache items from TokenCacheAccessor
+            ICollection<string> accessTokens = GetAccessToken();
+
+            ICollection<string> userAccessTokens = new List<string>();
+
+            //Find the token related to the selected user
+            foreach (string accessToken in accessTokens)
+            {
+                AccessTokenCacheItem accessTokenCacheItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessToken);
+                //if (string.Compare(accessTokenCacheItem.User.DisplayableId, selectedUser.DisplayableId, StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (accessTokenCacheItem.User.DisplayableId == selectedUser.DisplayableId)
+                {
+                        userAccessTokens.Add(accessTokenCacheItem.AccessToken);
+                }
+            }
+            //Send result to userTokensListBox
+            userTokensListBox.DataSource = userAccessTokens;
+        }
+
+        private void userTokensListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
