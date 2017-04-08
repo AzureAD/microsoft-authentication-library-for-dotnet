@@ -39,7 +39,7 @@ namespace DesktopTestApp
 {
     public partial class MainForm : Form
     {
-        readonly LoggerCallback _myCallback = new LoggerCallback();
+        readonly LoggerCallback myCallback = new LoggerCallback();
 
         #region Properties
 
@@ -61,7 +61,7 @@ namespace DesktopTestApp
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
 
-            Logger.Callback = _myCallback;
+            Logger.Callback = myCallback;
             Logger.Level = Logger.LogLevel.Info;
             PiiLogging();
 
@@ -71,33 +71,11 @@ namespace DesktopTestApp
         private void ResetUserList(bool addFakeUsers)
         {
             List<IUser> userListDataSource = _publicClientApplication.Users.ToList();
-            if (addFakeUsers)
-            {
-                userListDataSource.Add(
-                    new User(
-                        identifier: "fakeId",
-                        displayableId: "Professor Katz",
-                        name: "Xavier Katz",
-                        identityProvider: "idk"
-                    )
-                );
-                userListDataSource.Add(
-                    new User(
-                        identifier: "fakeId",
-                        displayableId: "Rogue Cat",
-                        name: "Brio",
-                        identityProvider: "idk"
-                    )
-                );
-            }
-
+           
             userList.DataSource = userListDataSource;
             usersListBox.DataSource = userListDataSource;
             userList.Refresh();
             usersListBox.Refresh();
-
-            // This didn't seem to do anything...
-            //SelectedUserChanged();
         }
         #region UI Controls
 
@@ -336,8 +314,8 @@ namespace DesktopTestApp
 
         private void RefreshUI()
         {
-            msalPIILogs.Text = _myCallback.DrainPiiLogs();
-            msalLogs.Text = _myCallback.DrainLogs();
+            msalPIILogs.Text = myCallback.DrainPiiLogs();
+            msalLogs.Text = myCallback.DrainLogs();
             userList.DataSource = new PublicClientApplication(
                     "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
             { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
@@ -408,15 +386,13 @@ namespace DesktopTestApp
 
         private void expireAT1Btn_Click(object sender, EventArgs e)
         {
-
+            //TODO: Expire AccessToken
         }
 
         private void deleteAT1Btn_Click(object sender, EventArgs e)
         {
-
-            TokenCacheHelper.GetCache().TokenCacheAccessor.DeleteAccessToken(_publicClientApplication.ClientId);
-            idTokenAT1Result.Text = @"The Access Token for: " + _publicClientApplication.ClientId +
-                                    @" has been deleted";
+            //TODO: delete AccessToken
+            
         }
 
         private ICollection<string> GetAccessToken()
