@@ -67,25 +67,17 @@ namespace DesktopTestApp
             this.applySettings = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.cacheTabPage = new System.Windows.Forms.TabPage();
+            this.cacheAccessTokenLabel = new System.Windows.Forms.Label();
+            this.cacheUserLabel = new System.Windows.Forms.Label();
+            this.userTokensListBox = new System.Windows.Forms.ListBox();
             this.usersListBox = new System.Windows.Forms.ListBox();
             this.userOneBox = new System.Windows.Forms.GroupBox();
-            this.deleteAT2Btn = new System.Windows.Forms.Button();
-            this.expireAT2Btn = new System.Windows.Forms.Button();
-            this.scopesAT2Result = new System.Windows.Forms.ListBox();
-            this.scopesAT2Label = new System.Windows.Forms.Label();
-            this.tenantIdAT2Result = new System.Windows.Forms.Label();
-            this.tenantIdAT2Label = new System.Windows.Forms.Label();
-            this.expiresOnAT2Result = new System.Windows.Forms.Label();
-            this.expiresOnAT2Label = new System.Windows.Forms.Label();
-            this.idTokenAT2TextBox = new System.Windows.Forms.TextBox();
-            this.idTokenAT2Label = new System.Windows.Forms.Label();
-            this.accessToken2Label = new System.Windows.Forms.Label();
+            this.scopeAT1Result = new System.Windows.Forms.TextBox();
+            this.idTokenAT1Result = new System.Windows.Forms.TextBox();
             this.deleteAT1Btn = new System.Windows.Forms.Button();
             this.expireAT1Btn = new System.Windows.Forms.Button();
-            this.idTokenAT1Result = new System.Windows.Forms.TextBox();
             this.tenantIdAT1Result = new System.Windows.Forms.Label();
             this.tenantIdAT1Label = new System.Windows.Forms.Label();
-            this.scopesAT1Result = new System.Windows.Forms.ListBox();
             this.scopesAT1label = new System.Windows.Forms.Label();
             this.expiresOnAT1Result = new System.Windows.Forms.Label();
             this.expiresOnAT1Label = new System.Windows.Forms.Label();
@@ -149,7 +141,6 @@ namespace DesktopTestApp
             this.cache = new System.Windows.Forms.Button();
             this.logs = new System.Windows.Forms.Button();
             this.confidentialClient = new System.Windows.Forms.Button();
-            this.userTokensListBox = new System.Windows.Forms.ListBox();
             this.tabControl1.SuspendLayout();
             this.publicClientTabPage.SuspendLayout();
             this.groupBox6.SuspendLayout();
@@ -549,6 +540,8 @@ namespace DesktopTestApp
             // 
             // cacheTabPage
             // 
+            this.cacheTabPage.Controls.Add(this.cacheAccessTokenLabel);
+            this.cacheTabPage.Controls.Add(this.cacheUserLabel);
             this.cacheTabPage.Controls.Add(this.userTokensListBox);
             this.cacheTabPage.Controls.Add(this.usersListBox);
             this.cacheTabPage.Controls.Add(this.userOneBox);
@@ -559,6 +552,34 @@ namespace DesktopTestApp
             this.cacheTabPage.TabIndex = 2;
             this.cacheTabPage.Text = "cacheTabPage";
             this.cacheTabPage.UseVisualStyleBackColor = true;
+            // 
+            // cacheAccessTokenLabel
+            // 
+            this.cacheAccessTokenLabel.AutoSize = true;
+            this.cacheAccessTokenLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cacheAccessTokenLabel.Location = new System.Drawing.Point(59, 69);
+            this.cacheAccessTokenLabel.Name = "cacheAccessTokenLabel";
+            this.cacheAccessTokenLabel.Size = new System.Drawing.Size(92, 13);
+            this.cacheAccessTokenLabel.TabIndex = 10;
+            this.cacheAccessTokenLabel.Text = "Access Token:";
+            // 
+            // cacheUserLabel
+            // 
+            this.cacheUserLabel.AutoSize = true;
+            this.cacheUserLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cacheUserLabel.Location = new System.Drawing.Point(109, 20);
+            this.cacheUserLabel.Name = "cacheUserLabel";
+            this.cacheUserLabel.Size = new System.Drawing.Size(47, 13);
+            this.cacheUserLabel.TabIndex = 9;
+            this.cacheUserLabel.Text = "Users: ";
+            // 
+            // userTokensListBox
+            // 
+            this.userTokensListBox.FormattingEnabled = true;
+            this.userTokensListBox.Location = new System.Drawing.Point(162, 69);
+            this.userTokensListBox.Name = "userTokensListBox";
+            this.userTokensListBox.Size = new System.Drawing.Size(483, 82);
+            this.userTokensListBox.TabIndex = 8;
             // 
             // usersListBox
             // 
@@ -572,23 +593,12 @@ namespace DesktopTestApp
             // userOneBox
             // 
             this.userOneBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.userOneBox.Controls.Add(this.deleteAT2Btn);
-            this.userOneBox.Controls.Add(this.expireAT2Btn);
-            this.userOneBox.Controls.Add(this.scopesAT2Result);
-            this.userOneBox.Controls.Add(this.scopesAT2Label);
-            this.userOneBox.Controls.Add(this.tenantIdAT2Result);
-            this.userOneBox.Controls.Add(this.tenantIdAT2Label);
-            this.userOneBox.Controls.Add(this.expiresOnAT2Result);
-            this.userOneBox.Controls.Add(this.expiresOnAT2Label);
-            this.userOneBox.Controls.Add(this.idTokenAT2TextBox);
-            this.userOneBox.Controls.Add(this.idTokenAT2Label);
-            this.userOneBox.Controls.Add(this.accessToken2Label);
+            this.userOneBox.Controls.Add(this.scopeAT1Result);
+            this.userOneBox.Controls.Add(this.idTokenAT1Result);
             this.userOneBox.Controls.Add(this.deleteAT1Btn);
             this.userOneBox.Controls.Add(this.expireAT1Btn);
-            this.userOneBox.Controls.Add(this.idTokenAT1Result);
             this.userOneBox.Controls.Add(this.tenantIdAT1Result);
             this.userOneBox.Controls.Add(this.tenantIdAT1Label);
-            this.userOneBox.Controls.Add(this.scopesAT1Result);
             this.userOneBox.Controls.Add(this.scopesAT1label);
             this.userOneBox.Controls.Add(this.expiresOnAT1Result);
             this.userOneBox.Controls.Add(this.expiresOnAT1Label);
@@ -598,111 +608,26 @@ namespace DesktopTestApp
             this.userOneBox.Controls.Add(this.invalidateUserOneTokenBtn);
             this.userOneBox.Controls.Add(this.userOneUpnResult);
             this.userOneBox.Controls.Add(this.userOneLabel);
-            this.userOneBox.Location = new System.Drawing.Point(37, 417);
+            this.userOneBox.Location = new System.Drawing.Point(27, 551);
             this.userOneBox.Name = "userOneBox";
-            this.userOneBox.Size = new System.Drawing.Size(608, 354);
+            this.userOneBox.Size = new System.Drawing.Size(608, 218);
             this.userOneBox.TabIndex = 6;
             this.userOneBox.TabStop = false;
             // 
-            // deleteAT2Btn
+            // scopeAT1Result
             // 
-            this.deleteAT2Btn.BackColor = System.Drawing.Color.PaleTurquoise;
-            this.deleteAT2Btn.Location = new System.Drawing.Point(533, 206);
-            this.deleteAT2Btn.Name = "deleteAT2Btn";
-            this.deleteAT2Btn.Size = new System.Drawing.Size(57, 26);
-            this.deleteAT2Btn.TabIndex = 25;
-            this.deleteAT2Btn.Text = "Delete";
-            this.deleteAT2Btn.UseVisualStyleBackColor = false;
+            this.scopeAT1Result.Location = new System.Drawing.Point(175, 175);
+            this.scopeAT1Result.Name = "scopeAT1Result";
+            this.scopeAT1Result.Size = new System.Drawing.Size(267, 20);
+            this.scopeAT1Result.TabIndex = 27;
             // 
-            // expireAT2Btn
+            // idTokenAT1Result
             // 
-            this.expireAT2Btn.BackColor = System.Drawing.Color.LightSteelBlue;
-            this.expireAT2Btn.Location = new System.Drawing.Point(445, 207);
-            this.expireAT2Btn.Name = "expireAT2Btn";
-            this.expireAT2Btn.Size = new System.Drawing.Size(64, 25);
-            this.expireAT2Btn.TabIndex = 24;
-            this.expireAT2Btn.Text = "Expire";
-            this.expireAT2Btn.UseVisualStyleBackColor = false;
-            // 
-            // scopesAT2Result
-            // 
-            this.scopesAT2Result.FormattingEnabled = true;
-            this.scopesAT2Result.Location = new System.Drawing.Point(177, 330);
-            this.scopesAT2Result.Name = "scopesAT2Result";
-            this.scopesAT2Result.Size = new System.Drawing.Size(187, 17);
-            this.scopesAT2Result.TabIndex = 23;
-            // 
-            // scopesAT2Label
-            // 
-            this.scopesAT2Label.AutoSize = true;
-            this.scopesAT2Label.Location = new System.Drawing.Point(106, 334);
-            this.scopesAT2Label.Name = "scopesAT2Label";
-            this.scopesAT2Label.Size = new System.Drawing.Size(43, 13);
-            this.scopesAT2Label.TabIndex = 22;
-            this.scopesAT2Label.Text = "Scopes";
-            // 
-            // tenantIdAT2Result
-            // 
-            this.tenantIdAT2Result.AutoSize = true;
-            this.tenantIdAT2Result.Location = new System.Drawing.Point(174, 308);
-            this.tenantIdAT2Result.Name = "tenantIdAT2Result";
-            this.tenantIdAT2Result.Size = new System.Drawing.Size(112, 13);
-            this.tenantIdAT2Result.TabIndex = 21;
-            this.tenantIdAT2Result.Text = "Tenant Id Placeholder";
-            // 
-            // tenantIdAT2Label
-            // 
-            this.tenantIdAT2Label.AutoSize = true;
-            this.tenantIdAT2Label.Location = new System.Drawing.Point(96, 308);
-            this.tenantIdAT2Label.Name = "tenantIdAT2Label";
-            this.tenantIdAT2Label.Size = new System.Drawing.Size(53, 13);
-            this.tenantIdAT2Label.TabIndex = 20;
-            this.tenantIdAT2Label.Text = "Tenant Id";
-            // 
-            // expiresOnAT2Result
-            // 
-            this.expiresOnAT2Result.AutoSize = true;
-            this.expiresOnAT2Result.Location = new System.Drawing.Point(174, 284);
-            this.expiresOnAT2Result.Name = "expiresOnAT2Result";
-            this.expiresOnAT2Result.Size = new System.Drawing.Size(117, 13);
-            this.expiresOnAT2Result.TabIndex = 19;
-            this.expiresOnAT2Result.Text = "Expires On Placeholder";
-            // 
-            // expiresOnAT2Label
-            // 
-            this.expiresOnAT2Label.AutoSize = true;
-            this.expiresOnAT2Label.Location = new System.Drawing.Point(91, 284);
-            this.expiresOnAT2Label.Name = "expiresOnAT2Label";
-            this.expiresOnAT2Label.Size = new System.Drawing.Size(58, 13);
-            this.expiresOnAT2Label.TabIndex = 18;
-            this.expiresOnAT2Label.Text = "Expires On";
-            // 
-            // idTokenAT2TextBox
-            // 
-            this.idTokenAT2TextBox.Location = new System.Drawing.Point(177, 242);
-            this.idTokenAT2TextBox.Multiline = true;
-            this.idTokenAT2TextBox.Name = "idTokenAT2TextBox";
-            this.idTokenAT2TextBox.Size = new System.Drawing.Size(267, 39);
-            this.idTokenAT2TextBox.TabIndex = 17;
-            // 
-            // idTokenAT2Label
-            // 
-            this.idTokenAT2Label.AutoSize = true;
-            this.idTokenAT2Label.Location = new System.Drawing.Point(99, 242);
-            this.idTokenAT2Label.Name = "idTokenAT2Label";
-            this.idTokenAT2Label.Size = new System.Drawing.Size(50, 13);
-            this.idTokenAT2Label.TabIndex = 16;
-            this.idTokenAT2Label.Text = "Id Token";
-            // 
-            // accessToken2Label
-            // 
-            this.accessToken2Label.AutoSize = true;
-            this.accessToken2Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.accessToken2Label.Location = new System.Drawing.Point(48, 219);
-            this.accessToken2Label.Name = "accessToken2Label";
-            this.accessToken2Label.Size = new System.Drawing.Size(116, 13);
-            this.accessToken2Label.TabIndex = 15;
-            this.accessToken2Label.Text = "Access Token Two";
+            this.idTokenAT1Result.Location = new System.Drawing.Point(172, 74);
+            this.idTokenAT1Result.Multiline = true;
+            this.idTokenAT1Result.Name = "idTokenAT1Result";
+            this.idTokenAT1Result.Size = new System.Drawing.Size(271, 42);
+            this.idTokenAT1Result.TabIndex = 26;
             // 
             // deleteAT1Btn
             // 
@@ -726,14 +651,6 @@ namespace DesktopTestApp
             this.expireAT1Btn.UseVisualStyleBackColor = false;
             this.expireAT1Btn.Click += new System.EventHandler(this.expireAT1Btn_Click);
             // 
-            // idTokenAT1Result
-            // 
-            this.idTokenAT1Result.Location = new System.Drawing.Point(177, 78);
-            this.idTokenAT1Result.Multiline = true;
-            this.idTokenAT1Result.Name = "idTokenAT1Result";
-            this.idTokenAT1Result.Size = new System.Drawing.Size(267, 45);
-            this.idTokenAT1Result.TabIndex = 12;
-            // 
             // tenantIdAT1Result
             // 
             this.tenantIdAT1Result.AutoSize = true;
@@ -751,14 +668,6 @@ namespace DesktopTestApp
             this.tenantIdAT1Label.Size = new System.Drawing.Size(53, 13);
             this.tenantIdAT1Label.TabIndex = 10;
             this.tenantIdAT1Label.Text = "Tenant Id";
-            // 
-            // scopesAT1Result
-            // 
-            this.scopesAT1Result.FormattingEnabled = true;
-            this.scopesAT1Result.Location = new System.Drawing.Point(177, 175);
-            this.scopesAT1Result.Name = "scopesAT1Result";
-            this.scopesAT1Result.Size = new System.Drawing.Size(187, 17);
-            this.scopesAT1Result.TabIndex = 9;
             // 
             // scopesAT1label
             // 
@@ -802,9 +711,9 @@ namespace DesktopTestApp
             this.accessTokenOneLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.accessTokenOneLabel.Location = new System.Drawing.Point(49, 57);
             this.accessTokenOneLabel.Name = "accessTokenOneLabel";
-            this.accessTokenOneLabel.Size = new System.Drawing.Size(115, 13);
+            this.accessTokenOneLabel.Size = new System.Drawing.Size(88, 13);
             this.accessTokenOneLabel.TabIndex = 4;
-            this.accessTokenOneLabel.Text = "Access Token One";
+            this.accessTokenOneLabel.Text = "Access Token";
             // 
             // signOutUserOneBtn
             // 
@@ -1387,15 +1296,6 @@ namespace DesktopTestApp
             this.confidentialClient.UseVisualStyleBackColor = true;
             this.confidentialClient.Click += new System.EventHandler(this.confidentialClient_Click);
             // 
-            // userTokensListBox
-            // 
-            this.userTokensListBox.FormattingEnabled = true;
-            this.userTokensListBox.Location = new System.Drawing.Point(162, 69);
-            this.userTokensListBox.Name = "userTokensListBox";
-            this.userTokensListBox.Size = new System.Drawing.Size(483, 43);
-            this.userTokensListBox.TabIndex = 8;
-            this.userTokensListBox.SelectedIndexChanged += new System.EventHandler(this.userTokensListBox_SelectedIndexChanged);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1422,6 +1322,7 @@ namespace DesktopTestApp
             this.settingsTabPage.ResumeLayout(false);
             this.settingsTabPage.PerformLayout();
             this.cacheTabPage.ResumeLayout(false);
+            this.cacheTabPage.PerformLayout();
             this.userOneBox.ResumeLayout(false);
             this.userOneBox.PerformLayout();
             this.logsTabPage.ResumeLayout(false);
@@ -1533,7 +1434,6 @@ namespace DesktopTestApp
         private System.Windows.Forms.GroupBox userOneBox;
         private System.Windows.Forms.Label userOneUpnResult;
         private System.Windows.Forms.Label userOneLabel;
-        private System.Windows.Forms.ListBox scopesAT1Result;
         private System.Windows.Forms.Label scopesAT1label;
         private System.Windows.Forms.Label expiresOnAT1Result;
         private System.Windows.Forms.Label expiresOnAT1Label;
@@ -1543,22 +1443,14 @@ namespace DesktopTestApp
         private System.Windows.Forms.Button invalidateUserOneTokenBtn;
         private System.Windows.Forms.Label tenantIdAT1Result;
         private System.Windows.Forms.Label tenantIdAT1Label;
-        private System.Windows.Forms.Button deleteAT2Btn;
-        private System.Windows.Forms.Button expireAT2Btn;
-        private System.Windows.Forms.ListBox scopesAT2Result;
-        private System.Windows.Forms.Label scopesAT2Label;
-        private System.Windows.Forms.Label tenantIdAT2Result;
-        private System.Windows.Forms.Label tenantIdAT2Label;
-        private System.Windows.Forms.Label expiresOnAT2Result;
-        private System.Windows.Forms.Label expiresOnAT2Label;
-        private System.Windows.Forms.TextBox idTokenAT2TextBox;
-        private System.Windows.Forms.Label idTokenAT2Label;
-        private System.Windows.Forms.Label accessToken2Label;
         private System.Windows.Forms.Button deleteAT1Btn;
         private System.Windows.Forms.Button expireAT1Btn;
-        private System.Windows.Forms.TextBox idTokenAT1Result;
         private ListBox usersListBox;
         private ListBox userTokensListBox;
+        private Label cacheAccessTokenLabel;
+        private Label cacheUserLabel;
+        private TextBox idTokenAT1Result;
+        private TextBox scopeAT1Result;
     }
 }
 

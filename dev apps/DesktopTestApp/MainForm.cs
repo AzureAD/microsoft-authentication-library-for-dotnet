@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -89,7 +90,7 @@ namespace DesktopTestApp
                     )
                 );
             }
-            
+
             userList.DataSource = userListDataSource;
             usersListBox.DataSource = userListDataSource;
             userList.Refresh();
@@ -169,7 +170,6 @@ namespace DesktopTestApp
 
                 CurrentUser = result.User;
                 SetResultPageInfo(result);
-                SetCacheInfoPage(result);
                 ResetUserList(addFakeUsers: true);
             }
             catch (Exception exc)
@@ -355,15 +355,6 @@ namespace DesktopTestApp
                               @"Id Token: " + authenticationResult.IdToken;
         }
 
-        private void SetCacheInfoPage(IAuthenticationResult authenticationResult)
-        {
-            userOneUpnResult.Text = authenticationResult.User.DisplayableId;
-            idTokenAT1Result.Text = authenticationResult.IdToken;
-            expiresOnAT1Result.Text = authenticationResult.ExpiresOn.ToString();
-            tenantIdAT1Result.Text = authenticationResult.TenantId;
-            scopesAT1Result.DataSource = authenticationResult.Scope;
-        }
-
         private void SetErrorPageInfo(string errorMessage)
         {
             callResult.Text = errorMessage;
@@ -444,9 +435,12 @@ namespace DesktopTestApp
         {
             SelectedUserChanged();
         }
-
         private void SelectedUserChanged()
         {
+            // Clear values in cache UI 
+            ClearCacheUIPage();
+
+            // Define the User in the listbox
             User selectedUser = (User)usersListBox.SelectedItem;
 
             //Get all token cache items from TokenCacheAccessor
@@ -461,16 +455,25 @@ namespace DesktopTestApp
                 //if (string.Compare(accessTokenCacheItem.User.DisplayableId, selectedUser.DisplayableId, StringComparison.InvariantCultureIgnoreCase) == 0)
                 if (accessTokenCacheItem.User.DisplayableId == selectedUser.DisplayableId)
                 {
-                        userAccessTokens.Add(accessTokenCacheItem.AccessToken);
+                    userAccessTokens.Add(accessTokenCacheItem.AccessToken);
+                    // Populate the token cache UI page
+                    idTokenAT1Result.Text = accessTokenCacheItem.IdToken.Issuer;
+                    expiresOnAT1Result.Text = accessTokenCacheItem.ExpiresOn.ToString();
+                    tenantIdAT1Result.Text = accessTokenCacheItem.IdToken.TenantId;
+                    scopeAT1Result.Text = accessTokenCacheItem.Scope;
                 }
             }
             //Send result to userTokensListBox
             userTokensListBox.DataSource = userAccessTokens;
+            userOneUpnResult.Text = selectedUser.DisplayableId;
         }
 
-        private void userTokensListBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void ClearCacheUIPage()
         {
-
+            idTokenAT1Result.Text = string.Empty;
+            expiresOnAT1Result.Text = string.Empty;
+            tenantIdAT1Result.Text = string.Empty;
+            scopeAT1Result.Text = string.Empty;
         }
     }
 }
