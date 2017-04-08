@@ -26,10 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -45,13 +41,28 @@ namespace XForms
 
         protected override void OnAppearing()
         {
+            refreshView();
+        }
+
+        private void refreshView()
+        {
             authority.Text = App.Authority;
+            numOfAtItems.Text = App.MsalPublicClient.UserTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString()
+                .Count.ToString();
+            numOfRtItems.Text = App.MsalPublicClient.UserTokenCache.TokenCacheAccessor.GetAllRefreshTokensAsString()
+                .Count.ToString();
         }
 
         private void OnSaveClicked(object sender, EventArgs e)
         {
             App.Authority = authority.Text;
             App.InitPublicClient();
+        }
+
+        private void OnClearCache(object sender, EventArgs e)
+        {
+            App.MsalPublicClient.UserTokenCache.ClearCache();
+            refreshView();
         }
     }
 }

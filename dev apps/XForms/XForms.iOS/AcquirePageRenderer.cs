@@ -51,7 +51,6 @@ namespace XForms.iOS
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-            page.platformParameters = new PlatformParameters(this);
         }
     }
 }

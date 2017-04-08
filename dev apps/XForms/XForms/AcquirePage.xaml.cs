@@ -111,20 +111,19 @@ namespace XForms
 
         private async void OnAcquireClicked(object sender, EventArgs e)
         {
-            if (App.MsalPublicClient.PlatformParameters == null)
-                SetPlatformParameters();
-
-            acquireResponseLabel.Text = "Starting token acquisition";
-            await Task.Delay(700);
+            IAcquireToken at = Device.OS == TargetPlatform.Android ? DependencyService.Get<IAcquireToken>() : new AcquireToken();
 
             try
             {
                 IAuthenticationResult res;
                 if (LoginHint.IsToggled)
-                    res = await App.MsalPublicClient.AcquireTokenAsync(App.Scopes, UserEntry.Text.Trim());
+                {
+                    res = await at.AcquireTokenAsync(App.MsalPublicClient, App.Scopes, UserEntry.Text.Trim(), UIParent);
+                }
                 else
-                    res = await App.MsalPublicClient.AcquireTokenAsync(App.Scopes);
-
+                {
+                    res = await at.AcquireTokenAsync(App.MsalPublicClient, App.Scopes, UIParent);
+                }
                 acquireResponseLabel.Text = ToString(res);
             }
             catch (MsalException exception)

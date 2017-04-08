@@ -62,7 +62,7 @@ namespace XForms
         private void OnClearClicked(object sender, EventArgs e)
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;
-            var users = tokenCache.GetUsers(App.ClientId);
+            var users = tokenCache.GetUsers(new Uri(App.Authority).Host);
             foreach (var user in users)
             {
                 tokenCache.Remove(user);
@@ -87,6 +87,17 @@ namespace XForms
 
             // update entry in the cache
             tokenCache.AddAccessTokenCacheItem(accessTokenCacheItem);
+
+            RefreshCacheView();
+        }
+
+        public void OnAtDelete(object sender, EventArgs e)
+        {
+            var mi = ((MenuItem)sender);
+            var accessTokenCacheItem = (AccessTokenCacheItem)mi.CommandParameter;
+
+            var tokenCache = App.MsalPublicClient.UserTokenCache;
+            tokenCache.DeleteAccessToken(accessTokenCacheItem);
 
             RefreshCacheView();
         }
