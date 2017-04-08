@@ -71,11 +71,6 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        public virtual Uri GetDefaultRedirectUri(RequestContext requestContext)
-        {
-            return null;
-        }
-
         public virtual string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
         {
             return redirectUri.OriginalString;
