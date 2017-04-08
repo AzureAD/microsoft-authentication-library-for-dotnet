@@ -102,5 +102,15 @@ namespace Microsoft.Identity.Client
         {
             return _refreshTokenSharedPreference.All.Values.Cast<string>().ToList();
         }
+
+        public ICollection<string> GetAllAccessTokenKeys()
+        {
+            return _accessTokenSharedPreference.All.Keys.ToList();
+        }
+
+        public ICollection<string> GetAllRefreshTokenKeys()
+        {
+            return _refreshTokenSharedPreference.All.Keys.ToList();
+        }
     }
 }

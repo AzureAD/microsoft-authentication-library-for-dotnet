@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication
     {
-        private const string DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
+        internal const string DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
 
         /// <summary>
         /// Default consutructor of the application. It will use https://login.microsoftonline.com/common as the default authority.

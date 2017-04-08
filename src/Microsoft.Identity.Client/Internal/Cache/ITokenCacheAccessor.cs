@@ -45,5 +45,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         ICollection<string> GetAllRefreshTokensAsString();
 
+        ICollection<string> GetAllAccessTokenKeys();
+
+        ICollection<string> GetAllRefreshTokenKeys();
     }
 }

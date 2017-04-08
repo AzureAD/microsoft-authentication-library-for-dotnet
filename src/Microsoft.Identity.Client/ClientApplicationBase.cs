@@ -41,6 +41,8 @@ namespace Microsoft.Identity.Client
     /// </Summary>
     public abstract class ClientApplicationBase
     {
+        private TokenCache _userTokenCache;
+
         /// <Summary>
         /// DefaultAuthority
         /// </Summary>
@@ -89,7 +91,18 @@ namespace Microsoft.Identity.Client
         /// <Summary>
         /// Token Cache instance for storing User tokens.
         /// </Summary>
-        internal TokenCache UserTokenCache { get; set; }
+        internal TokenCache UserTokenCache
+        {
+            get
+            {
+                return _userTokenCache;
+            }
+            set
+            {
+                _userTokenCache = value;
+                _userTokenCache.ClientId = ClientId;
+            }
+        }
 
 /*        /// <summary>
         /// Gets or sets correlation Id which would be sent to the service with the next request.
