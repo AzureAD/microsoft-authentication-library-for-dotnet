@@ -53,14 +53,14 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(Authority));
+            stringBuilder.Append(Base64UrlHelpers.Encode(Authority));
             stringBuilder.Append(CacheKeyDelimiter);
-            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(ClientId));
+            stringBuilder.Append(Base64UrlHelpers.Encode(ClientId));
             stringBuilder.Append(CacheKeyDelimiter);
             // scope is treeSet to guarantee the order of the scopes when converting to string.
-            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(Scope.AsSingleString()));
+            stringBuilder.Append(Base64UrlHelpers.Encode(Scope.AsSingleString()));
             stringBuilder.Append(CacheKeyDelimiter);
-            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(UserIdentifier));
+            stringBuilder.Append(Base64UrlHelpers.Encode(UserIdentifier));
 
             return stringBuilder.ToString();
         }

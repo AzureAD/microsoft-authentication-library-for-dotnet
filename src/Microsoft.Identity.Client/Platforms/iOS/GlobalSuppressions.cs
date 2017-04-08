@@ -174,7 +174,7 @@
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
-        Target = "Microsoft.Identity.Client.CryptographyHelper.#CreateSha256Hash(System.String)")]
+        Target = "Microsoft.Identity.Client.CryptographyHelper.#CreateBase64UrlEncodedSha256Hash(System.String)")]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",

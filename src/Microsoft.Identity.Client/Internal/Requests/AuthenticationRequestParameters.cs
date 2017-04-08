@@ -33,7 +33,7 @@ using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal partial class AuthenticationRequestParameters
+    internal class AuthenticationRequestParameters
     {
         public RequestContext RequestContext { get; set; }
 
@@ -56,6 +56,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string Prompt { get; set; }
 
         public IUser User { get; set; }
+
+        public ClientInfo ClientInfo { get; set; }
 
         public UserAssertion UserAssertion { get; set; }
 

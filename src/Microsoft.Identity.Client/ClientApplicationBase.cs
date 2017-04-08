@@ -91,11 +91,11 @@ namespace Microsoft.Identity.Client
         /// </Summary>
         internal TokenCache UserTokenCache { get; set; }
 
-        /// <summary>
+/*        /// <summary>
         /// Gets or sets correlation Id which would be sent to the service with the next request.
         /// Correlation Id is to be used for diagnostics purposes.
         /// </summary>
-        public Guid CorrelationId { get; set; }
+        public Guid CorrelationId { get; set; }*/
         
         /// <summary>
         /// Gets a value indicating whether address validation is ON or OFF.
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client
             {
                 if (UserTokenCache == null)
                 {
-                    RequestContext requestContext = new RequestContext(CorrelationId);
+                    RequestContext requestContext = new RequestContext(Guid.Empty);
                     requestContext.Logger.Info("Token cache is null or empty");
                     return Enumerable.Empty<User>();
                 }
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client
                 User = user,
                 Scope = scope.CreateSetFromEnumerable(),
                 RedirectUri = new Uri(RedirectUri),
-                RequestContext = CreateRequestContext(CorrelationId)
+                RequestContext = CreateRequestContext(Guid.Empty)
             };
         }
 

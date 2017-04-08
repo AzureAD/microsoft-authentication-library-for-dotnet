@@ -37,7 +37,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("ClientInfoTests")]
         public void ParseTest()
         {
-            ClientInfo clientInfo = ClientInfo.Parse("eyJ1aWQiOiJteS1VSUQiLCJ1dGlkIjoibXktVVRJRCJ9");
+            ClientInfo clientInfo = ClientInfo.CreateFromJson("eyJ1aWQiOiJteS1VSUQiLCJ1dGlkIjoibXktVVRJRCJ9");
             Assert.IsNotNull(clientInfo);
             Assert.AreEqual(TestConstants.Uid, clientInfo.UniqueIdentifier);
             Assert.AreEqual(TestConstants.Utid, clientInfo.UniqueTenantIdentifier);

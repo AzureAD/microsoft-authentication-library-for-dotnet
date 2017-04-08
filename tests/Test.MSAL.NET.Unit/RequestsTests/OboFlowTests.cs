@@ -118,7 +118,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Assert.AreEqual(2, context.TokenCache.Count);
 
                 //assertion hash should be stored in the cache entry.
-                Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+                Assert.AreEqual(_cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken),
                     context.TokenCache.tokenCacheDictionary.Values.First(x => x.UserAssertionHash != null).UserAssertionHash);
             }
 
@@ -180,7 +180,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Assert.AreEqual(2, context.TokenCache.Count);
 
                 //assertion hash should be stored in the cache entry.
-                Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+                Assert.AreEqual(_cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken),
                     context.TokenCache.tokenCacheDictionary.Values.First(x => x.UserAssertionHash != null).UserAssertionHash);
             }
 
@@ -248,7 +248,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Assert.AreEqual(3, context.TokenCache.Count);
 
                 //assertion hash should be stored in the cache entry.
-                Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+                Assert.AreEqual(_cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken),
                     context.TokenCache.tokenCacheDictionary.Values.First(x => x.UserAssertionHash != null)
                         .UserAssertionHash);
             }
@@ -282,7 +282,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                                         UniqueId = cachenoise + TestConstants.UniqueId
                                     }
                             },
-                        UserAssertionHash = _cryptoHelper.CreateSha256Hash(cachenoise + accessToken)
+                        UserAssertionHash = _cryptoHelper.CreateBase64UrlEncodedSha256Hash(cachenoise + accessToken)
                     };
                 }
 
@@ -331,7 +331,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                                         UniqueId = cachenoise + TestConstants.UniqueId
                                     }
                             },
-                        UserAssertionHash = _cryptoHelper.CreateSha256Hash(cachenoise + accessToken)
+                        UserAssertionHash = _cryptoHelper.CreateBase64UrlEncodedSha256Hash(cachenoise + accessToken)
                     };
                 }
 
@@ -393,7 +393,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                                         UniqueId = cachenoise + TestConstants.UniqueId
                                     }
                             },
-                        UserAssertionHash = _cryptoHelper.CreateSha256Hash(cachenoise + accessToken)
+                        UserAssertionHash = _cryptoHelper.CreateBase64UrlEncodedSha256Hash(cachenoise + accessToken)
                     };
                 }
 
@@ -414,7 +414,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Assert.AreEqual(2, context.TokenCache.Count);
 
                 //assertion hash should be stored in the cache entry.
-                Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+                Assert.AreEqual(_cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken),
                     context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
             }
 
@@ -446,7 +446,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                                         UniqueId = cachenoise + TestConstants.UniqueId
                                     }
                             },
-                        UserAssertionHash = _cryptoHelper.CreateSha256Hash(cachenoise + accessToken)
+                        UserAssertionHash = _cryptoHelper.CreateBase64UrlEncodedSha256Hash(cachenoise + accessToken)
                     };
                 }
 
@@ -533,7 +533,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Assert.AreEqual(1, context.TokenCache.Count);
 
                 //assertion hash should be stored in the cache entry.
-                Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+                Assert.AreEqual(_cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken),
                     context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
             }
 
@@ -591,7 +591,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Assert.AreEqual(1, context.TokenCache.Count);
 
                 //assertion hash should be stored in the cache entry.
-                Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+                Assert.AreEqual(_cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken),
                     context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
             }
 
@@ -655,7 +655,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Assert.AreEqual(2, context.TokenCache.Count);
 
                 //assertion hash should be stored in the cache entry.
-                Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+                Assert.AreEqual(_cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken),
                     context.TokenCache.tokenCacheDictionary.Values.First(
                         s => s.Result.UserInfo != null && s.Result.UserInfo.DisplayableId.Equals(displayableId2))
                         .UserAssertionHash);
@@ -687,7 +687,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                                     UniqueId = TestConstants.UniqueId
                                 }
                         },
-                    UserAssertionHash = _cryptoHelper.CreateSha256Hash(accessToken)
+                    UserAssertionHash = _cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken)
                 };
 
                 ClientCredential clientCredential = new ClientCredential(TestConstants.ClientId,
@@ -707,7 +707,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Assert.AreEqual(1, context.TokenCache.Count);
 
                 //assertion hash should be stored in the cache entry.
-                Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+                Assert.AreEqual(_cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken),
                     context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
             }
 
@@ -737,7 +737,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                                     UniqueId = TestConstants.UniqueId
                                 }
                         },
-                    UserAssertionHash = _cryptoHelper.CreateSha256Hash(accessToken + "different")
+                    UserAssertionHash = _cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken + "different")
                 };
 
                 HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
@@ -769,7 +769,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Assert.AreEqual(1, context.TokenCache.Count);
 
                 //assertion hash should be stored in the cache entry.
-                Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+                Assert.AreEqual(_cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken),
                     context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
             }
 
@@ -800,7 +800,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                                     UniqueId = TestConstants.UniqueId
                                 }
                         },
-                    UserAssertionHash = _cryptoHelper.CreateSha256Hash(accessToken)
+                    UserAssertionHash = _cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken)
                 };
 
                 ClientCredential clientCredential = new ClientCredential(TestConstants.ClientId,
@@ -820,7 +820,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Assert.AreEqual(1, context.TokenCache.Count);
 
                 //assertion hash should be stored in the cache entry.
-                Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+                Assert.AreEqual(_cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken),
                     context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
             }
 
@@ -850,7 +850,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                                     UniqueId = TestConstants.UniqueId
                                 }
                         },
-                    UserAssertionHash = _cryptoHelper.CreateSha256Hash(accessToken + "different")
+                    UserAssertionHash = _cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken + "different")
                 };
 
                 HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
@@ -882,7 +882,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Assert.AreEqual(1, context.TokenCache.Count);
 
                 //assertion hash should be stored in the cache entry.
-                Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+                Assert.AreEqual(_cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken),
                     context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
             }
 
@@ -912,7 +912,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                                     UniqueId = TestConstants.UniqueId
                                 }
                         },
-                    UserAssertionHash = _cryptoHelper.CreateSha256Hash(accessToken)
+                    UserAssertionHash = _cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken)
                 };
                 HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
                 {
@@ -946,7 +946,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 //assertion hash should be stored in the cache entry.
                 foreach (var value in context.TokenCache.tokenCacheDictionary.Values)
                 {
-                    Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken), value.UserAssertionHash);
+                    Assert.AreEqual(_cryptoHelper.CreateBase64UrlEncodedSha256Hash(accessToken), value.UserAssertionHash);
                 }
             }
         }

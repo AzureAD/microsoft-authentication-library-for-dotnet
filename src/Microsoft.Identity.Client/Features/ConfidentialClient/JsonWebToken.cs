@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.Internal
 
         private static string UrlEncodeSegment(byte[] segment)
         {
-            return Base64UrlEncoder.Encode(segment);
+            return Base64UrlHelpers.Encode(segment);
         }
 
         private static string EncodeHeaderToJson(ClientAssertionCertificate credential)

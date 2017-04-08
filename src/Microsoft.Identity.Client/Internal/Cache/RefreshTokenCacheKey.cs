@@ -45,11 +45,11 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(Environment));
+            stringBuilder.Append(Base64UrlHelpers.Encode(Environment));
             stringBuilder.Append(CacheKeyDelimiter);
-            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(ClientId));
+            stringBuilder.Append(Base64UrlHelpers.Encode(ClientId));
             stringBuilder.Append(CacheKeyDelimiter);
-            stringBuilder.Append(MsalHelpers.EncodeToBase64Url(UserIdentifier));
+            stringBuilder.Append(Base64UrlHelpers.Encode(UserIdentifier));
 
             return stringBuilder.ToString();
         }

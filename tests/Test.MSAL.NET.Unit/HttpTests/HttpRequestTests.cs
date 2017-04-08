@@ -65,7 +65,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-            Assert.AreEqual(MockHelpers.DefaultAccessTokenResponse, response.Body);
+            Assert.AreEqual(MockHelpers.DefaultTokenResponse, response.Body);
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
@@ -92,7 +92,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-            Assert.AreEqual(MockHelpers.DefaultAccessTokenResponse, response.Body);
+            Assert.AreEqual(MockHelpers.DefaultTokenResponse, response.Body);
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
@@ -114,7 +114,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-            Assert.AreEqual(MockHelpers.DefaultAccessTokenResponse, response.Body);
+            Assert.AreEqual(MockHelpers.DefaultTokenResponse, response.Body);
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }

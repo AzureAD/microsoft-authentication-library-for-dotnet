@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal
                 return String.Empty;
             }
 
-            return string.Join(" ", input);
+            return String.Join(" ", input);
         }
 
         internal static SortedSet<string> AsSet(this string singleString)
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public static string UrlEncode(string message)
         {
-            if (string.IsNullOrEmpty(message))
+            if (String.IsNullOrEmpty(message))
             {
                 return message;
             }
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public static string UrlDecode(string message)
         {
-            if (string.IsNullOrEmpty(message))
+            if (String.IsNullOrEmpty(message))
             {
                 return message;
             }
@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client.Internal
             {
                 List<string> pair = SplitWithQuotes(queryPair, '=');
 
-                if (pair.Count == 2 && !string.IsNullOrWhiteSpace(pair[0]) && !string.IsNullOrWhiteSpace(pair[1]))
+                if (pair.Count == 2 && !String.IsNullOrWhiteSpace(pair[0]) && !String.IsNullOrWhiteSpace(pair[1]))
                 {
                     string key = pair[0];
                     string value = pair[1];
@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Client.Internal
 
                     if (response.ContainsKey(key))
                     {
-                        requestContext?.Logger.Warning(string.Format(CultureInfo.InvariantCulture,
+                        requestContext?.Logger.Warning(String.Format(CultureInfo.InvariantCulture,
                             "Key/value pair list contains redundant key '{0}'.", key));
                     }
 
@@ -290,39 +290,11 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        public static string EncodeToBase64Url(string input)
-        {
-            return EncodeToBase64Url(ToByteArray(input));
-        }
-
-        public static string EncodeToBase64Url(byte[] input)
-        {
-            return Convert.ToBase64String(input)
-                .TrimEnd('=').Replace('+', '-').Replace('/', '_');
-        }
-
-        public static string DecodeFromBase64Url(string returnValue)
-        {
-            string incoming = returnValue
-                .Replace('_', '/').Replace('-', '+');
-            switch (returnValue.Length % 4)
-            {
-                case 2:
-                    incoming += "==";
-                    break;
-                case 3:
-                    incoming += "=";
-                    break;
-            }
-            byte[] bytes = Convert.FromBase64String(incoming);
-            return CreateString(bytes);
-        }
-
         internal static List<string> SplitWithQuotes(string input, char delimiter)
         {
             List<string> items = new List<string>();
 
-            if (string.IsNullOrWhiteSpace(input))
+            if (String.IsNullOrWhiteSpace(input))
             {
                 return items;
             }
@@ -335,7 +307,7 @@ namespace Microsoft.Identity.Client.Internal
                 if (input[i] == delimiter && !insideString)
                 {
                     item = input.Substring(startIndex, i - startIndex);
-                    if (!string.IsNullOrWhiteSpace(item.Trim()))
+                    if (!String.IsNullOrWhiteSpace(item.Trim()))
                     {
                         items.Add(item);
                     }
@@ -349,17 +321,29 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             item = input.Substring(startIndex);
-            if (!string.IsNullOrWhiteSpace(item.Trim()))
+            if (!String.IsNullOrWhiteSpace(item.Trim()))
             {
                 items.Add(item);
             }
 
             return items;
         }
+        
+        public static string CheckForExtraQueryParameter(string url)
+        {
+            string extraQueryParameter = PlatformPlugin.PlatformInformation.GetEnvironmentVariable("MsalExtraQueryParameter");
+            string delimiter = (url.IndexOf('?') > 0) ? "&" : "?";
+            if (!String.IsNullOrWhiteSpace(extraQueryParameter))
+            {
+                url += String.Concat(delimiter, extraQueryParameter);
+            }
+
+            return url;
+        }
 
         private static void AddKeyValueString(StringBuilder messageBuilder, string key, char[] value)
         {
-            string delimiter = (messageBuilder.Length == 0) ? string.Empty : "&";
+            string delimiter = (messageBuilder.Length == 0) ? String.Empty : "&";
             messageBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}=", delimiter, key);
             messageBuilder.Append(value);
         }

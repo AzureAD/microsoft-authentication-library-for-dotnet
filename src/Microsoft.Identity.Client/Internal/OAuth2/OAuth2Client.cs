@@ -148,19 +148,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
 
             endpointUri.Query += extraQp;
 
-            return new Uri(CheckForExtraQueryParameter(endpointUri.Uri.AbsoluteUri));
-        }
-
-        private static string CheckForExtraQueryParameter(string url)
-        {
-            string extraQueryParameter = PlatformPlugin.PlatformInformation.GetEnvironmentVariable("ExtraQueryParameter");
-            string delimiter = (url.IndexOf('?') > 0) ? "&" : "?";
-            if (!string.IsNullOrWhiteSpace(extraQueryParameter))
-            {
-                url += string.Concat(delimiter, extraQueryParameter);
-            }
-
-            return url;
+            return new Uri(MsalHelpers.CheckForExtraQueryParameter(endpointUri.Uri.AbsoluteUri));
         }
 
         private static void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers, RequestContext requestContext)

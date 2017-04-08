@@ -52,6 +52,8 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
         public const string CodeChallenge = "code_challenge";
         public const string CodeVerifier = "code_verifier";
         // correlation id is not standard oauth2 parameter
+        public const string LoginReq = "login_req";
+        public const string DomainReq = "domain_req";  
 
         public const string Prompt = "prompt"; // prompt is not standard oauth2 parameter
         public const string ClientInfo = "client_info"; // restrict_to_hint is not standard oauth2 parameter
