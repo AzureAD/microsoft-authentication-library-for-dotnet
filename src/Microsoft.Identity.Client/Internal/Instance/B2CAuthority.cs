@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 throw new ArgumentException(MsalErrorMessage.B2cAuthorityUriInvalidPath);
             }
 
-            CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/{2}/{3}/", authorityUri.Host,
+            CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/{2}/{3}/", authorityUri.Authority,
                 pathSegments[0], pathSegments[1], pathSegments[2]);
             AuthorityType = AuthorityType.B2C;
         }

@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             this.Host = authorityUri.Host;
             string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
-            CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Host,
+            CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Authority,
                 pathSegments[0]);
 
             ValidateAuthority = validateAuthority;
