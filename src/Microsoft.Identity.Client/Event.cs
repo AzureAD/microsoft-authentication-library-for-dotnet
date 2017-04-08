@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -36,24 +37,22 @@ namespace Microsoft.Identity.Client
 
         public Event(string eventName) : this(eventName, new Dictionary<string, string>()) {}
 
-        protected static long ToUnixTimeMilliseconds()  // Backport .NET 4.6 DateTimeOffset.Now.ToUnixTimeSeconds()
+        protected static long CurrentUnixTimeMilliseconds()
         {
-            var dateTime = DateTime.Now;
-            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            return (long)(dateTime.ToUniversalTime() - epoch).TotalMilliseconds;
+            return MsalHelpers.DateTimeToUnixTimestampMilliseconds(DateTimeOffset.Now);
         }
 
         public Event(string eventName, IDictionary<string, string> predefined) : base(predefined)
         {
             this["event_name"] = eventName;
-            _startTimestamp = ToUnixTimeMilliseconds();
+            _startTimestamp = CurrentUnixTimeMilliseconds();
             this["start_time"] = _startTimestamp.ToString();
             this["stop_time"] = "-1";
         }
 
         public void Stop()
         {
-            var stopTimestamp = ToUnixTimeMilliseconds();
+            var stopTimestamp = CurrentUnixTimeMilliseconds();
             this["stop_time"] = stopTimestamp.ToString();  // It is a timestamp
             this["elapsed_time"] = (stopTimestamp - _startTimestamp).ToString();  // It is a duration
         }
