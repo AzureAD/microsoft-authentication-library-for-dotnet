@@ -75,5 +75,10 @@ namespace Microsoft.Identity.Client
         public string IdentityProvider { get; internal set; }
 
         public string Identifier { get; internal set; }
-   }
+
+        public override string ToString()
+        {
+            return DisplayableId;
+        }
+    }
 }

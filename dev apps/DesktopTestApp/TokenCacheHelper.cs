@@ -41,7 +41,7 @@ namespace DesktopTestApp
             return cache;
         }
 
-        public static string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location  +"msalcache.txt";
+        public static string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + "msalcache.txt";
 
         private static readonly object FileLock = new object();
 
