@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client
         protected static string GetErrorMessage(string errorCode)
         {
             string message = ErrorMessages.ContainsKey(errorCode) ? ErrorMessages[errorCode] : MsalErrorMessage.Unknown;
-            return String.Format(CultureInfo.InvariantCulture, "{0}: {1}", errorCode, message);
+            return string.Format(CultureInfo.InvariantCulture, "{0}: {1}", errorCode, message);
         }
     }
 }

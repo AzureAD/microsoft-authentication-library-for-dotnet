@@ -301,13 +301,9 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
 
-            var dict = new Dictionary<string, string>();
-            dict[OAuth2Parameter.DomainReq] = TestConstants.Utid;
-            dict[OAuth2Parameter.LoginReq] = TestConstants.Uid;
-
             // repeat interactive call and pass in the same user
             MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
-                app.RedirectUri + "?code=some-code"), dict);
+                app.RedirectUri + "?code=some-code"));
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {

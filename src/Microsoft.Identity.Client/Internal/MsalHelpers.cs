@@ -62,15 +62,15 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (IsNullOrEmpty(input))
             {
-                return String.Empty;
+                return string.Empty;
             }
 
-            return String.Join(" ", input);
+            return string.Join(" ", input);
         }
 
         internal static SortedSet<string> AsSet(this string singleString)
         {
-            if (String.IsNullOrEmpty(singleString))
+            if (string.IsNullOrEmpty(singleString))
             {
                 return new SortedSet<string>();
             }
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Internal
 
         internal static string[] AsArray(this string singleString)
         {
-            if (String.IsNullOrWhiteSpace(singleString))
+            if (string.IsNullOrWhiteSpace(singleString))
             {
                 return new string[] { };
             }
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public static string UrlEncode(string message)
         {
-            if (String.IsNullOrEmpty(message))
+            if (string.IsNullOrEmpty(message))
             {
                 return message;
             }
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public static string UrlDecode(string message)
         {
-            if (String.IsNullOrEmpty(message))
+            if (string.IsNullOrEmpty(message))
             {
                 return message;
             }
@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client.Internal
             {
                 List<string> pair = SplitWithQuotes(queryPair, '=');
 
-                if (pair.Count == 2 && !String.IsNullOrWhiteSpace(pair[0]) && !String.IsNullOrWhiteSpace(pair[1]))
+                if (pair.Count == 2 && !string.IsNullOrWhiteSpace(pair[0]) && !string.IsNullOrWhiteSpace(pair[1]))
                 {
                     string key = pair[0];
                     string value = pair[1];
@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Client.Internal
 
                     if (response.ContainsKey(key))
                     {
-                        requestContext?.Logger.Warning(String.Format(CultureInfo.InvariantCulture,
+                        requestContext?.Logger.Warning(string.Format(CultureInfo.InvariantCulture,
                             "Key/value pair list contains redundant key '{0}'.", key));
                     }
 
@@ -294,7 +294,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             List<string> items = new List<string>();
 
-            if (String.IsNullOrWhiteSpace(input))
+            if (string.IsNullOrWhiteSpace(input))
             {
                 return items;
             }
@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Client.Internal
                 if (input[i] == delimiter && !insideString)
                 {
                     item = input.Substring(startIndex, i - startIndex);
-                    if (!String.IsNullOrWhiteSpace(item.Trim()))
+                    if (!string.IsNullOrWhiteSpace(item.Trim()))
                     {
                         items.Add(item);
                     }
@@ -321,7 +321,7 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             item = input.Substring(startIndex);
-            if (!String.IsNullOrWhiteSpace(item.Trim()))
+            if (!string.IsNullOrWhiteSpace(item.Trim()))
             {
                 items.Add(item);
             }
@@ -333,9 +333,9 @@ namespace Microsoft.Identity.Client.Internal
         {
             string extraQueryParameter = PlatformPlugin.PlatformInformation.GetEnvironmentVariable("MsalExtraQueryParameter");
             string delimiter = (url.IndexOf('?') > 0) ? "&" : "?";
-            if (!String.IsNullOrWhiteSpace(extraQueryParameter))
+            if (!string.IsNullOrWhiteSpace(extraQueryParameter))
             {
-                url += String.Concat(delimiter, extraQueryParameter);
+                url += string.Concat(delimiter, extraQueryParameter);
             }
 
             return url;
@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Client.Internal
 
         private static void AddKeyValueString(StringBuilder messageBuilder, string key, char[] value)
         {
-            string delimiter = (messageBuilder.Length == 0) ? String.Empty : "&";
+            string delimiter = (messageBuilder.Length == 0) ? string.Empty : "&";
             messageBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}=", delimiter, key);
             messageBuilder.Append(value);
         }

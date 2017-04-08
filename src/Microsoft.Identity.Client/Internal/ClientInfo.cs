@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Client.Internal
