@@ -142,10 +142,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
             //add uid/utid values to QP if user object was passed in.
             if(AuthenticationRequestParameters.User != null)
             {
-                requestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.User.DisplayableId;
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.User.DisplayableId))
+                {
+                    requestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.User.DisplayableId;
+                }
+
                 AuthenticationRequestParameters.ClientInfo = ClientInfo.CreateFromEncodedString(AuthenticationRequestParameters.User.Identifier);
-                requestParameters[OAuth2Parameter.LoginReq] = AuthenticationRequestParameters.ClientInfo.UniqueIdentifier;
-                requestParameters[OAuth2Parameter.DomainReq] = AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier;
+
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.ClientInfo.UniqueIdentifier))
+                {
+                    requestParameters[OAuth2Parameter.LoginReq] = AuthenticationRequestParameters.ClientInfo.UniqueIdentifier;
+                }
+
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier))
+                {
+                    requestParameters[OAuth2Parameter.DomainReq] = AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier;
+                }
             }
 
 

@@ -103,12 +103,6 @@ namespace Microsoft.Identity.Client
                 _userTokenCache.ClientId = ClientId;
             }
         }
-
-/*        /// <summary>
-        /// Gets or sets correlation Id which would be sent to the service with the next request.
-        /// Correlation Id is to be used for diagnostics purposes.
-        /// </summary>
-        public Guid CorrelationId { get; set; }*/
         
         /// <summary>
         /// Gets a value indicating whether address validation is ON or OFF.
