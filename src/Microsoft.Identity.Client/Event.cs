@@ -33,6 +33,10 @@ namespace Microsoft.Identity.Client
 {
     internal class Event : Dictionary<string, string>
     {
+        protected const string EventName = "event_name";
+        protected const string StartTime = "start_time";
+        protected const string StopTime = "stop_time";
+        protected const string ElapsedTime = "elapsed_time";
         private readonly long _startTimestamp;
 
         public Event(string eventName) : this(eventName, new Dictionary<string, string>()) {}
@@ -44,17 +48,17 @@ namespace Microsoft.Identity.Client
 
         public Event(string eventName, IDictionary<string, string> predefined) : base(predefined)
         {
-            this["event_name"] = eventName;
+            this[EventName] = eventName;
             _startTimestamp = CurrentUnixTimeMilliseconds();
-            this["start_time"] = _startTimestamp.ToString();
-            this["stop_time"] = "-1";
+            this[StartTime] = _startTimestamp.ToString();
+            this[StopTime] = "-1";
         }
 
         public void Stop()
         {
             var stopTimestamp = CurrentUnixTimeMilliseconds();
-            this["stop_time"] = stopTimestamp.ToString();  // It is a timestamp
-            this["elapsed_time"] = (stopTimestamp - _startTimestamp).ToString();  // It is a duration
+            this[StopTime] = stopTimestamp.ToString();  // It is a timestamp
+            this[ElapsedTime] = (stopTimestamp - _startTimestamp).ToString();  // It is a duration
         }
     }
 }
