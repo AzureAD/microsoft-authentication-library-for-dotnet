@@ -63,14 +63,12 @@ namespace Microsoft.Identity.Client.Internal
             return false;
         }
 
-        public virtual Uri ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        public virtual void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
         {
             if (redirectUri == null)
             {
                 throw new ArgumentNullException(nameof(redirectUri));
             }
-
-            return redirectUri;
         }
 
         public virtual string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
