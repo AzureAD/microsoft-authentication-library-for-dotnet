@@ -127,8 +127,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (addVerifier)
             {
                 _codeVerifier = PlatformPlugin.CryptographyHelper.GenerateCodeVerifier();
-                string codeVerifierHash = MsalHelpers.EncodeToBase64Url(
-                    Convert.FromBase64String(PlatformPlugin.CryptographyHelper.CreateSha256Hash(_codeVerifier)));
+                string codeVerifierHash = PlatformPlugin.CryptographyHelper.CreateBase64UrlEncodedSha256Hash(_codeVerifier);
 
                 requestParameters[OAuth2Parameter.CodeChallenge] = codeVerifierHash;
                 requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
@@ -139,6 +138,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _state = Guid.NewGuid().ToString();
                 requestParameters[OAuth2Parameter.State] = _state;
             }
+
+            //add uid/utid values to QP if user object was passed in.
+            if(AuthenticationRequestParameters.User != null)
+            {
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.User.DisplayableId))
+                {
+                    requestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.User.DisplayableId;
+                }
+
+                AuthenticationRequestParameters.ClientInfo = ClientInfo.CreateFromEncodedString(AuthenticationRequestParameters.User.Identifier);
+
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.ClientInfo.UniqueIdentifier))
+                {
+                    requestParameters[OAuth2Parameter.LoginReq] = AuthenticationRequestParameters.ClientInfo.UniqueIdentifier;
+                }
+
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier))
+                {
+                    requestParameters[OAuth2Parameter.DomainReq] = AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier;
+                }
+            }
+
 
             if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.ExtraQueryParameters))
             {
@@ -164,7 +185,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 qp += "&" + AuthenticationRequestParameters.ExtraQueryParameters;
             }
 
-            return new Uri(new Uri(Authority.AuthorizationEndpoint), "?" + qp);
+            UriBuilder builder = new UriBuilder(new Uri(Authority.AuthorizationEndpoint)) {Query = qp};
+            return new Uri(MsalHelpers.CheckForExtraQueryParameter(builder.ToString()));
+
         }
 
         private Dictionary<string, string> CreateAuthorizationRequestParameters()

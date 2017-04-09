@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
         private const string CacheValueSegmentCount = "SegmentCount";
         private const string CacheValueLength = "Length";
         private const int MaxCompositeValueLength = 1024;
-        private const string LocalSettingsTokenContainerName = "MicrosoftAuthenticationLibrary.Tokens";
+        private const string LocalSettingsTokenContainerName = "MicrosoftAuthenticationLibrary.AccessTokens";
         private const string LocalSettingsRefreshTokenContainerName = "MicrosoftAuthenticationLibrary.RefreshTokens";
         private ApplicationDataContainer _refreshTokenContainer = null;
         private ApplicationDataContainer _accessTokenContainer = null;
@@ -62,41 +62,31 @@ namespace Microsoft.Identity.Client
 
         public void SaveAccessToken(string cacheKey, string item)
         {
-            CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(cacheKey);
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
             SetCacheValue(composite, item);
-            _accessTokenContainer.Values[hashed] = composite;
+            _accessTokenContainer.Values[cacheKey] = composite;
         }
 
         public void SaveRefreshToken(string cacheKey, string item)
         {
-            CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(cacheKey);
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
             SetCacheValue(composite, item);
-            _refreshTokenContainer.Values[hashed] = composite;
+            _refreshTokenContainer.Values[cacheKey] = composite;
         }
 
         public string GetRefreshToken(string refreshTokenKey)
         {
-            CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(refreshTokenKey);
-            return MsalHelpers.ByteArrayToString(GetCacheValue((ApplicationDataCompositeValue)_refreshTokenContainer.Values[hashed]));
+            return MsalHelpers.ByteArrayToString(GetCacheValue((ApplicationDataCompositeValue)_refreshTokenContainer.Values[refreshTokenKey]));
         }
         
         public void DeleteAccessToken(string cacheKey)
         {
-            CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(cacheKey);
-            _accessTokenContainer.Values.Remove(hashed);
+            _accessTokenContainer.Values.Remove(cacheKey);
         }
 
         public void DeleteRefreshToken(string cacheKey)
         {
-            CryptographyHelper helper = new CryptographyHelper();
-            string hashed = helper.CreateSha256Hash(cacheKey);
-            _refreshTokenContainer.Values.Remove(hashed);
+            _refreshTokenContainer.Values.Remove(cacheKey);
         }
 
         public ICollection<string> GetAllAccessTokensAsString()

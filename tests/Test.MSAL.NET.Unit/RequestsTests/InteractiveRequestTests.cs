@@ -86,7 +86,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ScopeSet = TestConstants.Scope
             };
             atItem.IdToken = IdToken.Parse(atItem.RawIdToken);
-            atItem.ClientInfo = ClientInfo.Parse(atItem.RawClientInfo);
+            atItem.ClientInfo = ClientInfo.CreateFromJson(atItem.RawClientInfo);
             AccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
             atItem.AccessToken = atKey.ToString();
             cache.TokenCacheAccessor.AccessTokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);

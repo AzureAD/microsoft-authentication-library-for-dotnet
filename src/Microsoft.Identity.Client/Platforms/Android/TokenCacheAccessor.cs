@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
 {
     internal class TokenCacheAccessor : ITokenCacheAccessor
     {
-        private const string AccessTokenSharedPreferenceName = "com.microsoft.identity.client.token";
+        private const string AccessTokenSharedPreferenceName = "com.microsoft.identity.client.accessToken";
         private const string RefreshTokenSharedPreferenceName = "com.microsoft.identity.client.refreshToken";
         private readonly ISharedPreferences _accessTokenSharedPreference;
         private readonly ISharedPreferences _refreshTokenSharedPreference;

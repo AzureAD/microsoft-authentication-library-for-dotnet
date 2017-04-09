@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
             IdToken idToken = IdToken.Parse(response.IdToken);
             RawClientInfo = response.ClientInfo;
-            ClientInfo = ClientInfo.Parse(RawClientInfo);
+            ClientInfo = ClientInfo.CreateFromJson(RawClientInfo);
             
             DisplayableId = idToken.PreferredUsername;
             Name = idToken.Name;
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.Internal.Cache
         [OnDeserialized]
         void OnDeserialized(StreamingContext context)
         {
-            ClientInfo = ClientInfo.Parse(RawClientInfo);
+            ClientInfo = ClientInfo.CreateFromJson(RawClientInfo);
             User = new User(GetUserIdentifier(), DisplayableId, Name, IdentityProvider);
         }
     }

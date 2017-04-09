@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (IsNullOrEmpty(input))
             {
-                return String.Empty;
+                return string.Empty;
             }
 
             return string.Join(" ", input);
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal
 
         internal static SortedSet<string> AsSet(this string singleString)
         {
-            if (String.IsNullOrEmpty(singleString))
+            if (string.IsNullOrEmpty(singleString))
             {
                 return new SortedSet<string>();
             }
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Internal
 
         internal static string[] AsArray(this string singleString)
         {
-            if (String.IsNullOrWhiteSpace(singleString))
+            if (string.IsNullOrWhiteSpace(singleString))
             {
                 return new string[] { };
             }
@@ -290,34 +290,6 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        public static string EncodeToBase64Url(string input)
-        {
-            return EncodeToBase64Url(ToByteArray(input));
-        }
-
-        public static string EncodeToBase64Url(byte[] input)
-        {
-            return Convert.ToBase64String(input)
-                .TrimEnd('=').Replace('+', '-').Replace('/', '_');
-        }
-
-        public static string DecodeFromBase64Url(string returnValue)
-        {
-            string incoming = returnValue
-                .Replace('_', '/').Replace('-', '+');
-            switch (returnValue.Length % 4)
-            {
-                case 2:
-                    incoming += "==";
-                    break;
-                case 3:
-                    incoming += "=";
-                    break;
-            }
-            byte[] bytes = Convert.FromBase64String(incoming);
-            return CreateString(bytes);
-        }
-
         internal static List<string> SplitWithQuotes(string input, char delimiter)
         {
             List<string> items = new List<string>();
@@ -355,6 +327,18 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             return items;
+        }
+        
+        public static string CheckForExtraQueryParameter(string url)
+        {
+            string extraQueryParameter = PlatformPlugin.PlatformInformation.GetEnvironmentVariable("MsalExtraQueryParameter");
+            string delimiter = (url.IndexOf('?') > 0) ? "&" : "?";
+            if (!string.IsNullOrWhiteSpace(extraQueryParameter))
+            {
+                url += string.Concat(delimiter, extraQueryParameter);
+            }
+
+            return url;
         }
 
         private static void AddKeyValueString(StringBuilder messageBuilder, string key, char[] value)

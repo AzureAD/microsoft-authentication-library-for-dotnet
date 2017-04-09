@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
 {
     internal class CryptographyHelper : ICryptographyHelper
     {
-        public string CreateSha256Hash(string input)
+        public string CreateBase64UrlEncodedSha256Hash(string input)
         {
             return null;
         }

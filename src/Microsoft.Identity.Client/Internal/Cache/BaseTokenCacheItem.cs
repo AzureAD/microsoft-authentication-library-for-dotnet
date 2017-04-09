@@ -60,8 +60,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         internal string GetUserIdentifier()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", MsalHelpers.EncodeToBase64Url(ClientInfo?.UniqueIdentifier),
-                MsalHelpers.EncodeToBase64Url(ClientInfo?.UniqueTenantIdentifier));
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Base64UrlHelpers.Encode(ClientInfo?.UniqueIdentifier),
+                Base64UrlHelpers.Encode(ClientInfo?.UniqueTenantIdentifier));
         }
     }
 }

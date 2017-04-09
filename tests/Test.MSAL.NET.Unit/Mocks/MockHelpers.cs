@@ -26,11 +26,15 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Interfaces;
+using NSubstitute;
 
 namespace Test.MSAL.NET.Unit.Mocks
 {
@@ -53,13 +57,35 @@ namespace Test.MSAL.NET.Unit.Mocks
                                              "ZXIiOiIyLjAifQ." +
                                              "AD4-sdfsfsdf";
 
-        public static readonly string DefaultAccessTokenResponse =
+        public static readonly string TokenResponseTemplate =
+            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
+            "\"{0}\",\"access_token\":\"some-access-token\"" +
+            ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
+            ":\"{2}\",\"id_token\"" +
+            ":\"{1}\",\"id_token_expires_in\":\"3600\"}";
+
+        public static readonly string DefaultTokenResponse =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
             "\"some-scope1 some-scope2\",\"access_token\":\"some-access-token\"" +
             ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
             ":\""+DefaultIdToken+"\",\"id_token_expires_in\":\"3600\"}";
 
+        public static void ConfigureMockWebUI(AuthorizationResult authorizationResult)
+        {
+            ConfigureMockWebUI(authorizationResult, new Dictionary<string, string>());
+        }
+
+        public static void ConfigureMockWebUI(AuthorizationResult authorizationResult, Dictionary<string, string> queryParamsToValidate)
+        {
+            MockWebUI webUi = new MockWebUI();
+            webUi.QueryParamsToValidate = queryParamsToValidate;
+            webUi.MockResult = authorizationResult;
+
+            IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
+            mockFactory.CreateAuthenticationDialog(Arg.Any<UIParent>(), Arg.Any<RequestContext>()).Returns(webUi);
+            PlatformPlugin.WebUIFactory = mockFactory;
+        }
 
         public static string CreateClientInfo()
         {
@@ -68,7 +94,7 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public static string CreateClientInfo(string uid, string utid)
         {
-            return Base64UrlEncoder.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");
+            return Base64UrlHelpers.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");
         }
 
         public static Stream GenerateStreamFromString(string s)
@@ -112,9 +138,20 @@ namespace Test.MSAL.NET.Unit.Mocks
             return responseMessage;
         }
 
+        public static HttpResponseMessage CreateSuccessTokenResponseMessage(string scopes, string idToken, string clientInfo)
+        {
+            return CreateSuccessResponseMessage(string.Format(CultureInfo.InvariantCulture,
+                "{{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
+                "\"{0}\",\"access_token\":\"some-access-token\"" +
+                ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
+                ":\"{2}\",\"id_token\"" +
+                ":\"{1}\",\"id_token_expires_in\":\"3600\"}}",
+                scopes, idToken, clientInfo));
+        }
+
         public static HttpResponseMessage CreateSuccessTokenResponseMessage()
         {
-            return CreateSuccessResponseMessage(DefaultAccessTokenResponse);
+            return CreateSuccessResponseMessage(DefaultTokenResponse);
         }
 
         public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage()
@@ -163,7 +200,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                         "\"sub\": \"K4_SGGxKqW1SxUAmhg6C1F6VPiFzcx-Qd80ehIEdFus\"," +
                         "\"tid\": \""+ TestConstants.IdentityProvider + "\"," +
                         "\"ver\": \"2.0\"}";
-            return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlEncoder.Encode(id));
+            return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
         }
 
         public static HttpResponseMessage CreateSuccessWebFingerResponseMessage(string href)

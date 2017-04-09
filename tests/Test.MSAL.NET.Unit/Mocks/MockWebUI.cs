@@ -44,7 +44,7 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public AuthorizationResult MockResult { get; set; }
 
-        public IDictionary<string, string> QueryParams { get; set; }
+        public IDictionary<string, string> QueryParamsToValidate { get; set; }
 
         public bool AddStateInAuthorizationResult { get; set; }
 
@@ -60,13 +60,13 @@ namespace Test.MSAL.NET.Unit.Mocks
             }
 
             //match QP passed in for validation. 
-            if (QueryParams != null)
+            if (QueryParamsToValidate != null)
             {
                 Assert.IsNotNull(authorizationUri.Query);
-                foreach (var key in QueryParams.Keys)
+                foreach (var key in QueryParamsToValidate.Keys)
                 {
                     Assert.IsTrue(inputQp.ContainsKey(key));
-                    Assert.AreEqual(QueryParams[key], inputQp[key]);
+                    Assert.AreEqual(QueryParamsToValidate[key], inputQp[key]);
                 }
             }
 

@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client
 
             return (resultCode == SecStatusCode.Success)
                 ? match.ValueData.ToString(NSStringEncoding.UTF8)
-                : String.Empty;
+                : string.Empty;
         }
 
         private ICollection<string> GetValues(string service)

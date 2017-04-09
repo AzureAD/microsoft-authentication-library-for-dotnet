@@ -115,9 +115,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult result = null;
             try
             {
-                //authority endpoints resolution and validation 
+                //authority endpoints resolution and validation
                 await PreRunAsync().ConfigureAwait(false);
-                await PreTokenRequest().ConfigureAwait(false);
+
+                await PreTokenRequest().ConfigureAwait(false); // creates AccessTokenItem from cache
                 await SendTokenRequestAsync().ConfigureAwait(false);
                 //save to cache if no access token item found
                 //this means that no cached item was found
@@ -144,6 +145,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private AccessTokenCacheItem SaveTokenResponseToCache()
         {
+            // developer passed in user object.
+            if (AuthenticationRequestParameters.ClientInfo != null)
+            {
+                ClientInfo fromServer = ClientInfo.CreateFromJson(Response.ClientInfo);
+                if (!fromServer.UniqueIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueIdentifier) ||
+                    !fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier))
+                {
+                    //TODO formalize in the exception handling PR
+                    throw new MsalServiceException("user_mismatch", "different user was returned from the server");
+                }
+            }
+
             if (StoreToCache)
             {
                 TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
