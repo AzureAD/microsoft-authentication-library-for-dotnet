@@ -44,7 +44,6 @@ namespace Microsoft.Identity.Client
             [MsalError.AuthenticationCanceled] = MsalErrorMessage.AuthenticationCanceled,
             [MsalError.NetworkNotAvailable] = MsalErrorMessage.NetworkIsNotAvailable,
             [MsalError.AuthenticationUiFailed] = MsalErrorMessage.AuthenticationUiFailed,
-            [MsalError.UserInteractionRequired] = MsalErrorMessage.UserInteractionRequired,
             [MsalError.UnauthorizedResponseExpected] = MsalErrorMessage.UnauthorizedResponseExpected,
             [MsalError.MultipleTokensMatched] = MsalErrorMessage.MultipleTokensMatched
             // MsalErrorMessage.Unknown will be set as the default error message in GetErrorMessage(string errorCode).

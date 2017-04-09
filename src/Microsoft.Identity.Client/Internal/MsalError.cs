@@ -127,16 +127,7 @@ namespace Microsoft.Identity.Client.Internal
         /// The request could not be preformed because of an unknown failure in the UI flow.
         /// </summary>
         public const string AuthenticationUiFailed = "authentication_ui_failed";
-
-        /// <summary>
-        /// One of two conditions was encountered.
-        /// 1. The PromptBehavior.Never flag was passed and but the constraint could not be honored
-        /// because user interaction was required.
-        /// 2. An error occurred during a silent web authentication that prevented the authentication
-        /// flow from completing in a short enough time frame.
-        /// </summary>
-        public const string UserInteractionRequired = "user_interaction_required";
-
+        
         /// <summary>
         /// Failed to refresh token.
         /// </summary>

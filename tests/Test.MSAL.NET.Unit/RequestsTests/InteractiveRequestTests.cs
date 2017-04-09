@@ -207,8 +207,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             }
             catch (Exception exc)
             {
-                Assert.IsTrue(exc.InnerException is MsalException);
-                Assert.AreEqual(MsalError.UserInteractionRequired, ((MsalException) exc.InnerException).ErrorCode);
+                Assert.IsTrue(exc.InnerException is MsalUiRequiredException);
+                Assert.AreEqual(MsalUiRequiredException.NoPromptFailedError, ((MsalUiRequiredException) exc.InnerException).ErrorCode);
             }
 
 

@@ -39,6 +39,15 @@ namespace Microsoft.Identity.Client
         public static readonly string TokenCacheNullError = "token_cache_null";
 
         /// <summary>
+        /// One of two conditions was encountered.
+        /// 1. The PromptBehavior.Never flag was passed and but the constraint could not be honored
+        /// because user interaction was required.
+        /// 2. An error occurred during a silent web authentication that prevented the authentication
+        /// flow from completing in a short enough time frame.
+        /// </summary>
+        public static readonly string NoPromptFailedError = "no_prompt_failed";
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="errorCode"></param>
