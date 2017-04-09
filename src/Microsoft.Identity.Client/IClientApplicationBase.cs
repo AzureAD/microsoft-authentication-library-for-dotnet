@@ -42,12 +42,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         string RedirectUri { get; set; }
 
-/*        /// <summary>
-        /// Gets or sets correlation Id which would be sent to the service with the next request.
-        /// Correlation Id is to be used for diagnostics purposes.
-        /// </summary>
-        Guid CorrelationId { get; set; }*/
-
         /// <summary>
         /// Gets a value indicating whether address validation is ON or OFF.
         /// </summary>
