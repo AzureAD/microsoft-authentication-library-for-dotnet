@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string MissingAuthenticateHeader = "WWW-Authenticate header was expected in the response";
 
         public const string MultipleTokensMatched =
-            "The cache contains multiple tokens satisfying the requirements. Call AcquireToken again providing more requirements (e.g. UserId)";
+            "The cache contains multiple tokens satisfying the requirements. Call AcquireToken again providing more requirements like authority";
 
         public const string NetworkIsNotAvailable = "The network is down so authentication cannot proceed";
         public const string NoDataFromSTS = "No data received from security token service";
@@ -153,10 +153,10 @@ namespace Microsoft.Identity.Client.Internal
         public const string UserMismatch = "User '{0}' returned by service does not match user '{1}' in the request";
         public const string UserCredentialAssertionTypeEmpty = "credential.AssertionType cannot be empty";
 
-        public const string UserInteractionRequired =
+        public const string NoPromptFailedErrorMessage =
             "One of two conditions was encountered: "
             +
-            "1. The PromptBehavior.Never flag was passed, but the constraint could not be honored, because user interaction was required. "
+            "1. The UiBehavior.Never flag was passed, but the constraint could not be honored, because user interaction was required. "
             +
             "2. An error occurred during a silent web authentication that prevented the http authentication flow from completing in a short enough time frame";
 

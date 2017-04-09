@@ -228,7 +228,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (_authorizationResult.Error == OAuth2Error.LoginRequired)
             {
-                throw new MsalException(MsalError.UserInteractionRequired);
+                throw new MsalUiRequiredException(MsalUiRequiredException.NoPromptFailedError,
+                    MsalErrorMessage.NoPromptFailedErrorMessage);
             }
 
             if (_authorizationResult.Status != AuthorizationStatus.Success)

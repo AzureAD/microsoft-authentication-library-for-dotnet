@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client
         private void OnUserInteractionRequired()
         {
             SignalDone(
-                new MsalException(MsalError.UserInteractionRequired));
+                new MsalUiRequiredException(MsalUiRequiredException.NoPromptFailedError, MsalErrorMessage.NoPromptFailedErrorMessage));
         }
 
         /// <summary>

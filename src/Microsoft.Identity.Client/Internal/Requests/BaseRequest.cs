@@ -166,11 +166,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.ClientId, Response);
         }
 
-        protected virtual bool BrokerInvocationRequired()
-        {
-            return false;
-        }
-
         protected virtual Task PostRunAsync(AuthenticationResult result)
         {
             LogReturnedToken(result);

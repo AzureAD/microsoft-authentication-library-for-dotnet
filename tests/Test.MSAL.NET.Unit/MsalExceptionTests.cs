@@ -60,7 +60,7 @@ namespace Test.MSAL.NET.Unit.PublicApi
         [TestCategory("MsalExceptionTests")]
         public void ExceptionsArePubliclyCreatable_MsalSilentTokenAcquisitionException()
         {
-            var ex = new MsalSilentTokenAcquisitionException();
+            var ex = new MsalUiRequiredException(null, null);
 
             Assert.IsNull(ex.InnerException);
         }

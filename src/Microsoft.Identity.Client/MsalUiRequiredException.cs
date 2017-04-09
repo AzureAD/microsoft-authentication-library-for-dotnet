@@ -30,10 +30,23 @@ using System;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
+    /// This exception class is to inform developers that UI interaction is required for authentication to succeed.
     /// </summary>
     public class MsalUiRequiredException : MsalException
     {
+        public static readonly string InvalidGrantError = "invalid_grant";
+        public static readonly string NoTokensFoundError = "no_tokens_found";
+        public static readonly string TokenCacheNullError = "token_cache_null";
+
+        /// <summary>
+        /// One of two conditions was encountered.
+        /// 1. The PromptBehavior.Never flag was passed and but the constraint could not be honored
+        /// because user interaction was required.
+        /// 2. An error occurred during a silent web authentication that prevented the authentication
+        /// flow from completing in a short enough time frame.
+        /// </summary>
+        public static readonly string NoPromptFailedError = "no_prompt_failed";
+
         /// <summary>
         /// 
         /// </summary>

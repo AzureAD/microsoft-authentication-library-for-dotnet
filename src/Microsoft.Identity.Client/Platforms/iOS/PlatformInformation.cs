@@ -48,11 +48,6 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
-        public override Task<string> GetUserPrincipalNameAsync()
-        {
-            return null;
-        }
-
         public override string GetProcessorArchitecture()
         {
             return null;
