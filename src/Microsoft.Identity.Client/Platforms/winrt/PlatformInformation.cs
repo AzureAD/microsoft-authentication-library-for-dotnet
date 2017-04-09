@@ -53,26 +53,6 @@ namespace Microsoft.Identity.Client
             return localSettings.Values.ContainsKey(variable) ? localSettings.Values[variable].ToString() : null;
         }
 
-        public override async Task<string> GetUserPrincipalNameAsync()
-        {
-            if (!UserInformation.NameAccessAllowed)
-            {
-                throw new MsalException(MsalErrorEx.CannotAccessUserInformation,
-                    MsalErrorMessageEx.CannotAccessUserInformation);
-            }
-
-            try
-            {
-                return await UserInformation.GetPrincipalNameAsync().AsTask().ConfigureAwait(false);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                RequestContext.Logger.Error(ex);
-                throw new MsalException(MsalErrorEx.UnauthorizedUserInformationAccess,
-                    MsalErrorMessageEx.UnauthorizedUserInformationAccess, ex);
-            }
-        }
-
         public override string GetProcessorArchitecture()
         {
             return NativeMethods.GetProcessorArchitecture(RequestContext);

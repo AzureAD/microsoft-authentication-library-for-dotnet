@@ -57,8 +57,11 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCleanup]
         public void TestCleanup()
         {
-            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Clear();
-            cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Clear();
+            if (cache != null)
+            {
+                cache.TokenCacheAccessor.AccessTokenCacheDictionary.Clear();
+                cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Clear();
+            }
         }
 
         [TestMethod]
@@ -158,6 +161,45 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
         [TestMethod]
         [TestCategory("SilentRequestTests")]
+        public void SilentRefreshFailedNullCacheTest()
+        {
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
+            cache = null;
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
+            });
+
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
+            {
+                Authority = authority,
+                ClientId = TestConstants.ClientId,
+                Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromEnumerable(),
+                TokenCache = cache,
+                User = new User(),
+                RequestContext = new RequestContext(Guid.Empty)
+            };
+
+            try
+            {
+                SilentRequest request = new SilentRequest(parameters, false);
+                Task<AuthenticationResult> task = request.RunAsync();
+                var authenticationResult = task.Result;
+                Assert.Fail("MsalUiRequiredException should be thrown here");
+            }
+            catch (AggregateException ae)
+            {
+                MsalUiRequiredException exc = ae.InnerException as MsalUiRequiredException;
+                Assert.IsNotNull(exc);
+                Assert.AreEqual(MsalUiRequiredException.TokenCacheNullError, exc.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("SilentRequestTests")]
         public void SilentRefreshFailedNoCacheItemFoundTest()
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
@@ -188,11 +230,13 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 SilentRequest request = new SilentRequest(parameters, false);
                 Task<AuthenticationResult> task = request.RunAsync();
                 var authenticationResult = task.Result;
-                Assert.Fail("MsalSilentTokenAcquisitionException should be thrown here");
+                Assert.Fail("MsalUiRequiredException should be thrown here");
             }
             catch (AggregateException ae)
             {
-                Assert.IsTrue(ae.InnerException is MsalSilentTokenAcquisitionException);
+                MsalUiRequiredException exc = ae.InnerException as MsalUiRequiredException;
+                Assert.IsNotNull(exc);
+                Assert.AreEqual(MsalUiRequiredException.NoTokensFoundError, exc.ErrorCode);
             }
         }
     }

@@ -100,7 +100,10 @@ namespace Microsoft.Identity.Client
             set
             {
                 _userTokenCache = value;
-                _userTokenCache.ClientId = ClientId;
+                if (_userTokenCache != null)
+                {
+                    _userTokenCache.ClientId = ClientId;
+                }
             }
         }
         

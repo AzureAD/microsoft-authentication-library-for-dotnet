@@ -30,10 +30,14 @@ using System;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
+    /// This exception class is to inform developers that UI interaction is required for authentication to succeed.
     /// </summary>
     public class MsalUiRequiredException : MsalException
     {
+        public static readonly string InvalidGrantError = "invalid_grant";
+        public static readonly string NoTokensFoundError = "no_tokens_found";
+        public static readonly string TokenCacheNullError = "token_cache_null";
+
         /// <summary>
         /// 
         /// </summary>

@@ -126,6 +126,14 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             try
             {
                 TokenResponse tokenResponse = JsonHelper.DeserializeFromJson<TokenResponse>(response.Body);
+
+                if (MsalUiRequiredException.InvalidGrantError.Equals(tokenResponse.Error,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new MsalUiRequiredException(MsalUiRequiredException.InvalidGrantError,
+                        tokenResponse.ErrorDescription);
+                }
+
                 serviceEx = new MsalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription);
             }
             catch (SerializationException)

@@ -42,7 +42,6 @@ namespace Microsoft.Identity.Client.Internal
 
         public abstract string GetProductName();
         public abstract string GetEnvironmentVariable(string variable);
-        public abstract Task<string> GetUserPrincipalNameAsync();
         public abstract string GetProcessorArchitecture();
         public abstract string GetOperatingSystem();
         public abstract string GetDeviceModel();

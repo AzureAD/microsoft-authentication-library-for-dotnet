@@ -57,7 +57,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (!LoadFromCache)
             {
-                throw new MsalSilentTokenAcquisitionException(new Exception("Token cache is set to null"));
+                throw new MsalUiRequiredException(MsalUiRequiredException.TokenCacheNullError,
+                    "Token cache is set to null. Silent requests cannot be executed.");
             }
 
             //look for access token first because force refresh is not set
@@ -75,8 +76,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (_refreshTokenItem == null)
                 {
                     RequestContext.Logger.Verbose("No token matching arguments found in the cache");
-                    throw new MsalSilentTokenAcquisitionException(
-                        new Exception("No token matching arguments found in the cache"));
+                    throw new MsalUiRequiredException(MsalUiRequiredException.NoTokensFoundError,
+                        "No token matching arguments found in the cache");
                 }
 
                 RequestContext.Logger.Verbose("Refreshing access token...");

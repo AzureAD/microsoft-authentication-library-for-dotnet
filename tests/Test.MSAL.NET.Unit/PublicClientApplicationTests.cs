@@ -548,9 +548,9 @@ namespace Test.MSAL.NET.Unit
             catch (AggregateException ex)
             {
                 Assert.IsNotNull(ex.InnerException);
-                Assert.IsTrue(ex.InnerException is MsalServiceException);
-                var msalExc = (MsalServiceException)ex.InnerException;
-                Assert.AreEqual(msalExc.ErrorCode, "invalid_grant");
+                Assert.IsTrue(ex.InnerException is MsalUiRequiredException);
+                var msalExc = (MsalUiRequiredException)ex.InnerException;
+                Assert.AreEqual(msalExc.ErrorCode, MsalUiRequiredException.InvalidGrantError);
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
