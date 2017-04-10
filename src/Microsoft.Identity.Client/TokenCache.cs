@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
@@ -43,6 +44,8 @@ namespace Microsoft.Identity.Client
         private const int DefaultExpirationBufferInMinutes = 5;
 
         internal readonly TokenCacheAccessor TokenCacheAccessor = new TokenCacheAccessor();
+
+        internal  RequestContext RequestContext { get; set; }
 
         /// <summary>
         /// Notification for certain token cache interactions during token acquisition.
@@ -231,14 +234,15 @@ namespace Microsoft.Identity.Client
 
                 if (tokenCacheItems.Count == 0)
                 {
-                    // TODO: log access token not found
+                    RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture, "Access Token not found"));
                     return null;
                 }
 
                 // TODO: If user is not provided for silent request, and there is only one item found in the cache. Should we return it?
                 if (tokenCacheItems.Count > 1)
                 {
-                    // TODO: log there are multiple access tokens found, don't know which one to use.
+                    RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture, "Multiple Access Tokens found. Not sure" +
+                                                                                           "which one to use."));
                     return null;
                 }
 
@@ -250,8 +254,9 @@ namespace Microsoft.Identity.Client
                 {
                     return accessTokenCacheItem;
                 }
-
-                //TODO: log the access token found is expired.
+                
+                RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
+                    "The Access Token found is expired."));
                 return null;
             }
         }

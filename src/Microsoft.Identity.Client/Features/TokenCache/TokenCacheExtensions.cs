@@ -25,7 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
 
@@ -73,13 +75,15 @@ namespace Microsoft.Identity.Client
         /// <param name="state"></param>
         public static void Deserialize(this TokenCache tokenCache, byte[] state)
         {
+            RequestContext requestContext = new RequestContext(Guid.Empty);
+
             lock (tokenCache.LockObject)
             {
                 Dictionary<string, IEnumerable<string>> cacheDict = JsonHelper
                     .DeserializeFromJson<Dictionary<string, IEnumerable<string>>>(state);
                 if (cacheDict == null || cacheDict.Count == 0)
                 {
-                    //TODO log about empty cache
+                    requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture, "The cache is empty"));
                     return;
                 }
 

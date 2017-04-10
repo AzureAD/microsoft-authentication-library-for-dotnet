@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -44,10 +43,7 @@ namespace DesktopTestApp
         #region Properties
 
         private PublicClientApplication _publicClientApplication = new PublicClientApplication(
-            clientId: "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
-        {
-            //UserTokenCache = TokenCacheHelper.GetCache()
-        };
+            clientId: "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
         private ConfidentialClientApplication _confidentialClientApplication;
 
         public IUser CurrentUser { get; set; }
@@ -61,9 +57,15 @@ namespace DesktopTestApp
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
 
+            if (PiiLoggingEnabled.Checked)
+            {
+                Logger.Callback = myCallback;
+                Logger.Level = Logger.LogLevel.Info;
+                Logger.PiiLoggingEnabled = true;
+            }
+
             Logger.Callback = myCallback;
             Logger.Level = Logger.LogLevel.Info;
-            PiiLogging();
 
             ResetUserList(addFakeUsers: false);
         }
@@ -260,8 +262,7 @@ namespace DesktopTestApp
                 RefreshUI();
             }
         }
-
-
+        
         #endregion
 
         private UIBehavior GetUIBehavior()
@@ -334,12 +335,11 @@ namespace DesktopTestApp
 
         private void RefreshUI()
         {
-            msalPIILogs.Text = myCallback.DrainPiiLogs();
-            msalLogs.Text = myCallback.DrainLogs();
+            msalPIILogsTextBox.Text = myCallback.DrainPiiLogs();
+            msalLogsTextBox.Text = myCallback.DrainLogs();
             userList.DataSource = new PublicClientApplication(
                     "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
             { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
-
         }
 
         #region App logic
@@ -395,25 +395,22 @@ namespace DesktopTestApp
 
         #endregion
 
-        private void PiiLogging()
-        {
-            if (PiiLoggingEnabled.Checked)
-            {
-                Logger.PiiLoggingEnabled = true;
-            }
-            Logger.PiiLoggingEnabled = false;
-        }
-
         private void expireAT1Btn_Click(object sender, EventArgs e)
         {
             // Expire AccessToken
-            
+
         }
 
         private void deleteAT1Btn_Click(object sender, EventArgs e)
         {
             // Delete AccessToken
             DeleteSelectedAccessToken();
+        }
+
+        private void clearLogsButton_Click(object sender, EventArgs e)
+        {
+            msalLogsTextBox.Text = string.Empty;
+            msalPIILogsTextBox.Text = string.Empty;
         }
 
         private void DeleteSelectedAccessToken()

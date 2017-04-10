@@ -88,11 +88,11 @@ namespace DesktopTestApp
             this.userOneUpnResult = new System.Windows.Forms.Label();
             this.userOneLabel = new System.Windows.Forms.Label();
             this.logsTabPage = new System.Windows.Forms.TabPage();
-            this.button1 = new System.Windows.Forms.Button();
-            this.msalPIILogs = new System.Windows.Forms.TextBox();
+            this.clearLogsButton = new System.Windows.Forms.Button();
+            this.msalPIILogsTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.msalLogs = new System.Windows.Forms.TextBox();
+            this.msalLogsTextBox = new System.Windows.Forms.TextBox();
             this.confidentialClientTabPage = new System.Windows.Forms.TabPage();
             this.confClientTextBox = new System.Windows.Forms.TextBox();
             this.listBox1 = new System.Windows.Forms.ListBox();
@@ -757,11 +757,11 @@ namespace DesktopTestApp
             // 
             // logsTabPage
             // 
-            this.logsTabPage.Controls.Add(this.button1);
-            this.logsTabPage.Controls.Add(this.msalPIILogs);
+            this.logsTabPage.Controls.Add(this.clearLogsButton);
+            this.logsTabPage.Controls.Add(this.msalPIILogsTextBox);
             this.logsTabPage.Controls.Add(this.label2);
             this.logsTabPage.Controls.Add(this.label1);
-            this.logsTabPage.Controls.Add(this.msalLogs);
+            this.logsTabPage.Controls.Add(this.msalLogsTextBox);
             this.logsTabPage.Location = new System.Drawing.Point(4, 22);
             this.logsTabPage.Name = "logsTabPage";
             this.logsTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -770,24 +770,25 @@ namespace DesktopTestApp
             this.logsTabPage.Text = "logsTabPage";
             this.logsTabPage.UseVisualStyleBackColor = true;
             // 
-            // button1
+            // clearLogsButton
             // 
-            this.button1.Location = new System.Drawing.Point(223, 692);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(151, 43);
-            this.button1.TabIndex = 4;
-            this.button1.Text = "Clear Logs";
-            this.button1.UseVisualStyleBackColor = true;
+            this.clearLogsButton.Location = new System.Drawing.Point(223, 692);
+            this.clearLogsButton.Name = "clearLogsButton";
+            this.clearLogsButton.Size = new System.Drawing.Size(151, 43);
+            this.clearLogsButton.TabIndex = 4;
+            this.clearLogsButton.Text = "Clear Logs";
+            this.clearLogsButton.UseVisualStyleBackColor = true;
+            this.clearLogsButton.Click += new System.EventHandler(this.clearLogsButton_Click);
             // 
-            // msalPIILogs
+            // msalPIILogsTextBox
             // 
-            this.msalPIILogs.Location = new System.Drawing.Point(7, 365);
-            this.msalPIILogs.Multiline = true;
-            this.msalPIILogs.Name = "msalPIILogs";
-            this.msalPIILogs.ReadOnly = true;
-            this.msalPIILogs.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.msalPIILogs.Size = new System.Drawing.Size(655, 304);
-            this.msalPIILogs.TabIndex = 3;
+            this.msalPIILogsTextBox.Location = new System.Drawing.Point(7, 365);
+            this.msalPIILogsTextBox.Multiline = true;
+            this.msalPIILogsTextBox.Name = "msalPIILogsTextBox";
+            this.msalPIILogsTextBox.ReadOnly = true;
+            this.msalPIILogsTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.msalPIILogsTextBox.Size = new System.Drawing.Size(655, 304);
+            this.msalPIILogsTextBox.TabIndex = 3;
             // 
             // label2
             // 
@@ -807,15 +808,15 @@ namespace DesktopTestApp
             this.label1.TabIndex = 1;
             this.label1.Text = "========================= PII Logs =========================";
             // 
-            // msalLogs
+            // msalLogsTextBox
             // 
-            this.msalLogs.Location = new System.Drawing.Point(7, 21);
-            this.msalLogs.Multiline = true;
-            this.msalLogs.Name = "msalLogs";
-            this.msalLogs.ReadOnly = true;
-            this.msalLogs.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.msalLogs.Size = new System.Drawing.Size(655, 304);
-            this.msalLogs.TabIndex = 0;
+            this.msalLogsTextBox.Location = new System.Drawing.Point(7, 21);
+            this.msalLogsTextBox.Multiline = true;
+            this.msalLogsTextBox.Name = "msalLogsTextBox";
+            this.msalLogsTextBox.ReadOnly = true;
+            this.msalLogsTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.msalLogsTextBox.Size = new System.Drawing.Size(655, 304);
+            this.msalLogsTextBox.TabIndex = 0;
             // 
             // confidentialClientTabPage
             // 
@@ -1350,10 +1351,10 @@ namespace DesktopTestApp
         private System.Windows.Forms.TabPage cacheTabPage;
         private System.Windows.Forms.TabPage logsTabPage;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox msalLogs;
+        private System.Windows.Forms.TextBox msalLogsTextBox;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox msalPIILogs;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.TextBox msalPIILogsTextBox;
+        private System.Windows.Forms.Button clearLogsButton;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox overriddenAuthority;
