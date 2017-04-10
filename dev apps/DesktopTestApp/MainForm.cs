@@ -421,11 +421,6 @@ namespace DesktopTestApp
             FindAccessTokenForSelectedUser();
         }
 
-        private ICollection<string> GetAccessToken()
-        {
-            return _publicClientApplication.UserTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString();
-        }
-
         private void FindAccessTokenForSelectedUser()
         {
             // Clear values in cache UI 
@@ -459,33 +454,11 @@ namespace DesktopTestApp
             userOneUpnResult.Text = selectedUser.DisplayableId;
         }
 
-        private void expireAT1Btn_Click(object sender, EventArgs e)
-        {
-            //TODO: Expire AccessToken
-        }
-
-        private void deleteAT1Btn_Click(object sender, EventArgs e)
-        {
-            //TODO: delete AccessToken
-            
-        }
-
         private ICollection<string> GetAccessToken()
         {
             return _publicClientApplication.UserTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString();
         }
 
-        private void signOutUserBtn_Click(object sender, EventArgs e)
-        {
-            _publicClientApplication.Remove(CurrentUser);
-            idTokenAT1Result.Text = @"The user: " + CurrentUser.DisplayableId + @" has been signed out";
-            RefreshUI();
-        }
-
-        private void usersListBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            SelectedUserChanged();
-        }
         private void SelectedUserChanged()
         {
             // Clear values in cache UI 
