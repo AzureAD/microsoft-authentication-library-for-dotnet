@@ -58,7 +58,6 @@ namespace Microsoft.Identity.Client.Internal
         /// </summary>
         public const string InvalidOwnerWindowType = "invalid_owner_window_type";
 
-
         /// <summary>
         /// Invalid authority type.
         /// </summary>
@@ -68,7 +67,6 @@ namespace Microsoft.Identity.Client.Internal
         /// Invalid service URL.
         /// </summary>
         public const string InvalidServiceUrl = "invalid_service_url";
-
 
         /// <summary>
         /// Encoded token too long.
@@ -84,12 +82,10 @@ namespace Microsoft.Identity.Client.Internal
         /// User Mismatch.
         /// </summary>
         public const string UserMismatch = "user_mismatch";
-
         
         /// <summary>
         /// Failed to refresh token.
         /// </summary>
-        public const string FailedToRefreshToken = "failed_to_refresh_token";
-        
+        public const string FailedToRefreshToken = "failed_to_refresh_token";        
     }
 }
