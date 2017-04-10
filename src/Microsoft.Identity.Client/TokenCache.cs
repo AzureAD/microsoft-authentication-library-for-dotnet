@@ -307,6 +307,31 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        internal void DeleteAccessToken(AccessTokenCacheItem accessTokenCacheItem)
+        {
+            lock (LockObject)
+            {
+                try
+                {
+                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                    {
+                        TokenCache = this,
+                        ClientId = ClientId,
+                        User = accessTokenCacheItem.User
+                    };
+
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
+                    TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString());
+                    OnAfterAccess(args);
+                }
+                finally
+                {
+                    HasStateChanged = false;
+                }
+            }
+        }
+
         internal ICollection<User> GetUsers(string environment)
         {
             lock (LockObject)
@@ -455,6 +480,43 @@ namespace Microsoft.Identity.Client
             lock (LockObject)
             {
                 TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(), JsonHelper.SerializeToJson(refreshTokenCacheItem));
+            }
+        }
+
+        internal void ClearCache()
+        {
+            lock (LockObject)
+            {
+                try
+                {
+                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                    {
+                        TokenCache = this,
+                        ClientId = ClientId,
+                        User = null
+                    };
+
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
+
+                    var allAccessTokenKeys = TokenCacheAccessor.GetAllAccessTokenKeys();
+                    foreach (var key in allAccessTokenKeys)
+                    {
+                        TokenCacheAccessor.DeleteAccessToken(key);
+                    }
+
+                    var allRefreshTokenKeys = TokenCacheAccessor.GetAllRefreshTokenKeys();
+                    foreach (var key in allRefreshTokenKeys)
+                    {
+                        TokenCacheAccessor.DeleteRefreshToken(key);
+                    }
+
+                    OnAfterAccess(args);
+                }
+                finally
+                {
+                    HasStateChanged = false;
+                }
             }
         }
     }

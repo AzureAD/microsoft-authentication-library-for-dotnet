@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Client
 
             //format log message;
             string correlationId = (CorrelationId.Equals(Guid.Empty))
-                ? String.Empty
+                ? string.Empty
                 : " - " + CorrelationId.ToString();
 
             string log = string.Format(CultureInfo.InvariantCulture, "MSAL {0} {1} {2} [{3}{4}] {5}",

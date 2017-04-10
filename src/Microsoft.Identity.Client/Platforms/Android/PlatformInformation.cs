@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 
@@ -47,11 +48,6 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
-        public override Task<string> GetUserPrincipalNameAsync()
-        {
-            return null;
-        }
-
         public override string GetProcessorArchitecture()
         {
             return null;
@@ -65,6 +61,15 @@ namespace Microsoft.Identity.Client
         public override string GetDeviceModel()
         {
             return null;
+        }
+
+        public override void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        {
+            base.ValidateRedirectUri(redirectUri, requestContext);
+
+            if (PublicClientApplication.DEFAULT_REDIRECT_URI.Equals(redirectUri))
+                throw new MsalException("Default redirect URI - " + PublicClientApplication.DEFAULT_REDIRECT_URI +
+                                        " can not be used on Android platform");
         }
     }
 }

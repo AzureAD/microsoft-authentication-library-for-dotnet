@@ -32,36 +32,20 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// This exception class represents errors that are local to the library or the device.
+    /// </summary>
     public class MsalClientException : MsalException
     {
         private static readonly Dictionary<string, string> ErrorMessages = new Dictionary<string, string>
         {
-            [MsalError.InvalidCredentialType] = MsalErrorMessage.InvalidCredentialType,
-            [MsalError.IdentityProtocolLoginUrlNull] = MsalErrorMessage.IdentityProtocolLoginUrlNull,
-            [MsalError.IdentityProtocolMismatch] = MsalErrorMessage.IdentityProtocolMismatch,
-            [MsalError.EmailAddressSuffixMismatch] = MsalErrorMessage.EmailAddressSuffixMismatch,
-            [MsalError.IdentityProviderRequestFailed] = MsalErrorMessage.IdentityProviderRequestFailed,
-            [MsalError.StsTokenRequestFailed] = MsalErrorMessage.StsTokenRequestFailed,
             [MsalError.EncodedTokenTooLong] = MsalErrorMessage.EncodedTokenTooLong,
-            [MsalError.StsMetadataRequestFailed] = MsalErrorMessage.StsMetadataRequestFailed,
             [MsalError.AuthorityNotInValidList] = MsalErrorMessage.AuthorityNotInValidList,
-            [MsalError.UnsupportedUserType] = MsalErrorMessage.UnsupportedUserType,
-            [MsalError.UnknownUser] = MsalErrorMessage.UnknownUser,
-            [MsalError.UserRealmDiscoveryFailed] = MsalErrorMessage.UserRealmDiscoveryFailed,
-            [MsalError.AccessingWsMetadataExchangeFailed] = MsalErrorMessage.AccessingMetadataDocumentFailed,
-            [MsalError.ParsingWsMetadataExchangeFailed] = MsalErrorMessage.ParsingMetadataDocumentFailed,
-            [MsalError.WsTrustEndpointNotFoundInMetadataDocument] = MsalErrorMessage.WsTrustEndpointNotFoundInMetadataDocument,
-            [MsalError.ParsingWsTrustResponseFailed] = MsalErrorMessage.ParsingWsTrustResponseFailed,
             [MsalError.AuthenticationCanceled] = MsalErrorMessage.AuthenticationCanceled,
             [MsalError.NetworkNotAvailable] = MsalErrorMessage.NetworkIsNotAvailable,
             [MsalError.AuthenticationUiFailed] = MsalErrorMessage.AuthenticationUiFailed,
-            [MsalError.UserInteractionRequired] = MsalErrorMessage.UserInteractionRequired,
-            [MsalError.MissingFederationMetadataUrl] = MsalErrorMessage.MissingFederationMetadataUrl,
-            [MsalError.IntegratedAuthFailed] = MsalErrorMessage.IntegratedAuthFailed,
             [MsalError.UnauthorizedResponseExpected] = MsalErrorMessage.UnauthorizedResponseExpected,
-            [MsalError.MultipleTokensMatched] = MsalErrorMessage.MultipleTokensMatched,
-            [MsalError.PasswordRequiredForManagedUserError] = MsalErrorMessage.PasswordRequiredForManagedUserError,
-            [MsalError.GetUserNameFailed] = MsalErrorMessage.GetUserNameFailed,
+            [MsalError.MultipleTokensMatched] = MsalErrorMessage.MultipleTokensMatched
             // MsalErrorMessage.Unknown will be set as the default error message in GetErrorMessage(string errorCode).
         };
 
@@ -98,7 +82,7 @@ namespace Microsoft.Identity.Client
         protected static string GetErrorMessage(string errorCode)
         {
             string message = ErrorMessages.ContainsKey(errorCode) ? ErrorMessages[errorCode] : MsalErrorMessage.Unknown;
-            return String.Format(CultureInfo.InvariantCulture, "{0}: {1}", errorCode, message);
+            return string.Format(CultureInfo.InvariantCulture, "{0}: {1}", errorCode, message);
         }
     }
 }

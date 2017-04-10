@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client
 {
     internal class CryptographyHelper : ICryptographyHelper
     {
-        public string CreateSha256Hash(string input)
+        public string CreateBase64UrlEncodedSha256Hash(string input)
         {
             if (string.IsNullOrEmpty(input))
             {
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
             using (SHA256Managed sha = new SHA256Managed())
             {
                 UTF8Encoding encoding = new UTF8Encoding();
-                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
+                return Base64UrlHelpers.Encode(sha.ComputeHash(encoding.GetBytes(input)));
             }
         }
 
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
                 randomSource.GetBytes(buffer);
             }
 
-            return MsalHelpers.EncodeToBase64Url(buffer);
+            return Base64UrlHelpers.Encode(buffer);
         }
     }
 }

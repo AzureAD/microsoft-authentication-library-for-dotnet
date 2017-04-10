@@ -31,7 +31,7 @@ using System.Text;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    internal static class Base64UrlEncoder
+    internal static class Base64UrlHelpers
     {
         private const char Base64PadCharacter = '=';
         private const char Base64Character62 = '+';
@@ -54,13 +54,19 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (arg == null)
             {
-                throw new ArgumentNullException(nameof(arg));
+                return null;
             }
 
             return Encode(TextEncoding.GetBytes(arg));
         }
 
-        public static byte[] DecodeBytes(string arg)
+        public static string DecodeToString(string arg)
+        {
+            byte[] decoded = DecodeToBytes(arg);
+            return MsalHelpers.CreateString(decoded);
+        }
+
+        public static byte[] DecodeToBytes(string arg)
         {
             string s = arg;
             s = s.Replace(Base64UrlCharacter62, Base64Character62); // 62nd char of encoding
@@ -88,7 +94,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (arg == null)
             {
-                throw new ArgumentNullException(nameof(arg));
+                return null;
             }
 
             string s = Convert.ToBase64String(arg);

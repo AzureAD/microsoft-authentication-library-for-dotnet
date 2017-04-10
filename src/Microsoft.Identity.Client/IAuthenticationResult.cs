@@ -68,5 +68,10 @@ namespace Microsoft.Identity.Client
         /// Gets the scope values returned from the service.
         /// </summary>
         IEnumerable<string> Scope { get; }
+
+        /// <summary>
+        /// Gets the Unique Id of the returned user.
+        /// </summary>
+        string UniqueId { get; }
     }
 }

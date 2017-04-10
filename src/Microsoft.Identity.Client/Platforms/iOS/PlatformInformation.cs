@@ -28,6 +28,7 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
+using System;
 
 namespace Microsoft.Identity.Client
 {
@@ -43,11 +44,6 @@ namespace Microsoft.Identity.Client
         }
 
         public override string GetEnvironmentVariable(string variable)
-        {
-            return null;
-        }
-
-        public override Task<string> GetUserPrincipalNameAsync()
         {
             return null;
         }
@@ -70,6 +66,15 @@ namespace Microsoft.Identity.Client
         public override string GetAssemblyFileVersionAttribute()
         {
             return typeof (MsalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
+        }
+
+        public override void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        {
+            base.ValidateRedirectUri(redirectUri, requestContext);
+
+            if (PublicClientApplication.DEFAULT_REDIRECT_URI.Equals(redirectUri))
+                throw new MsalException("Default redirect URI - " + PublicClientApplication.DEFAULT_REDIRECT_URI +
+                                        " can not be used on iOS platform");
         }
     }
 }

@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
             AssertionType = assertionType;
             Assertion = assertion;
             AssertionHash =
-                PlatformPlugin.CryptographyHelper.CreateSha256Hash(Assertion);
+                PlatformPlugin.CryptographyHelper.CreateBase64UrlEncodedSha256Hash(Assertion);
         }
 
         /// <summary>

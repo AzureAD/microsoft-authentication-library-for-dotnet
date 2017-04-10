@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client
         private void OnUserInteractionRequired()
         {
             SignalDone(
-                new MsalException(MsalError.UserInteractionRequired));
+                new MsalUiRequiredException(MsalUiRequiredException.NoPromptFailedError, MsalErrorMessage.NoPromptFailedErrorMessage));
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client
                     (
                         from element in doc.GetElementsByTagName("INPUT").Cast<HtmlElement>()
                         where
-                            0 == String.Compare(element.GetAttribute("type"), "password", StringComparison.Ordinal)
+                            0 == string.Compare(element.GetAttribute("type"), "password", StringComparison.Ordinal)
                             && element.Enabled
                             && element.OffsetRectangle.Height > 0
                             && element.OffsetRectangle.Width > 0

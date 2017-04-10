@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Globalization;
 using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Client.Internal
@@ -45,14 +44,34 @@ namespace Microsoft.Identity.Client.Internal
         [DataMember(Name = ClientInfoClaim.UnqiueTenantIdentifier, IsRequired = false)]
         public string UniqueTenantIdentifier { get; set; }
 
-        public static ClientInfo Parse(string clientInfo)
+        public static ClientInfo CreateFromJson(string clientInfo)
         {
             if (string.IsNullOrEmpty(clientInfo))
             {
                 return null;
             }
             
-            return JsonHelper.DeserializeFromJson<ClientInfo>(Base64UrlEncoder.DecodeBytes(clientInfo));
+            return JsonHelper.DeserializeFromJson<ClientInfo>(Base64UrlHelpers.DecodeToBytes(clientInfo));
+        }
+        public static ClientInfo CreateFromEncodedString(string encodedUserIdentiier)
+        {
+            if (string.IsNullOrEmpty(encodedUserIdentiier))
+            {
+                return null;
+            }
+
+            string[] artifacts = encodedUserIdentiier.Split('.');
+
+            if (artifacts.Length == 0)
+            {
+                return null;
+            }
+
+            return new ClientInfo()
+            {
+                UniqueIdentifier = Base64UrlHelpers.DecodeToString(artifacts[0]),
+                UniqueTenantIdentifier = Base64UrlHelpers.DecodeToString(artifacts[1]),
+            };
         }
     }
 }

@@ -86,7 +86,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ScopeSet = TestConstants.Scope
             };
             atItem.IdToken = IdToken.Parse(atItem.RawIdToken);
-            atItem.ClientInfo = ClientInfo.Parse(atItem.RawClientInfo);
+            atItem.ClientInfo = ClientInfo.CreateFromJson(atItem.RawClientInfo);
             AccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
             atItem.AccessToken = atKey.ToString();
             cache.TokenCacheAccessor.AccessTokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
@@ -207,8 +207,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             }
             catch (Exception exc)
             {
-                Assert.IsTrue(exc.InnerException is MsalException);
-                Assert.AreEqual(MsalError.UserInteractionRequired, ((MsalException) exc.InnerException).ErrorCode);
+                Assert.IsTrue(exc.InnerException is MsalUiRequiredException);
+                Assert.AreEqual(MsalUiRequiredException.NoPromptFailedError, ((MsalUiRequiredException) exc.InnerException).ErrorCode);
             }
 
 

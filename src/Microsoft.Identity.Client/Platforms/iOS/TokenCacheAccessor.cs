@@ -88,6 +88,16 @@ namespace Microsoft.Identity.Client
             return GetValues(RefreshTokenServiceId);
         }
 
+        public ICollection<string> GetAllAccessTokenKeys()
+        {
+            return GetKeys(AccessTokenServiceId);
+        }
+
+        public ICollection<string> GetAllRefreshTokenKeys()
+        {
+            return GetKeys(RefreshTokenServiceId);
+        }
+
         private string GetValue(string key, string service)
         {
             var queryRecord = new SecRecord(SecKind.GenericPassword)
@@ -101,7 +111,7 @@ namespace Microsoft.Identity.Client
 
             return (resultCode == SecStatusCode.Success)
                 ? match.ValueData.ToString(NSStringEncoding.UTF8)
-                : String.Empty;
+                : string.Empty;
         }
 
         private ICollection<string> GetValues(string service)
@@ -121,6 +131,28 @@ namespace Microsoft.Identity.Client
                 {
                     string str = record.ValueData.ToString(NSStringEncoding.UTF8);
                     res.Add(str);
+                }
+            }
+
+            return res;
+        }
+
+        private ICollection<string> GetKeys(string service)
+        {
+            var queryRecord = new SecRecord(SecKind.GenericPassword)
+            {
+                Service = service
+            };
+
+            SecRecord[] records = SecKeyChain.QueryAsRecord(queryRecord, Int32.MaxValue, out SecStatusCode resultCode);
+
+            ICollection<string> res = new List<string>();
+
+            if (resultCode == SecStatusCode.Success)
+            {
+                foreach (var record in records)
+                {
+                    res.Add(record.Account);
                 }
             }
 

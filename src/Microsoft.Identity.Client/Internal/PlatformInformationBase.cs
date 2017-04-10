@@ -42,7 +42,6 @@ namespace Microsoft.Identity.Client.Internal
 
         public abstract string GetProductName();
         public abstract string GetEnvironmentVariable(string variable);
-        public abstract Task<string> GetUserPrincipalNameAsync();
         public abstract string GetProcessorArchitecture();
         public abstract string GetOperatingSystem();
         public abstract string GetDeviceModel();
@@ -63,14 +62,12 @@ namespace Microsoft.Identity.Client.Internal
             return false;
         }
 
-        public virtual Uri ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        public virtual void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
         {
             if (redirectUri == null)
             {
                 throw new ArgumentNullException(nameof(redirectUri));
             }
-
-            return redirectUri;
         }
 
         public virtual string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)

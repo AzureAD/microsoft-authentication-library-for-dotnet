@@ -35,7 +35,6 @@ using Windows.Security.Cryptography.DataProtection;
 using Windows.Storage.Streams;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Interfaces;
-using Platform = Windows.Security.Cryptography;
 
 namespace Microsoft.Identity.Client
 {
@@ -44,14 +43,15 @@ namespace Microsoft.Identity.Client
         // This descriptor does not require the enterprise authentication capability.
         private const string ProtectionDescriptor = "LOCAL=user";
 
-        public string CreateSha256Hash(string input)
+        public string CreateBase64UrlEncodedSha256Hash(string input)
         {
             IBuffer inputBuffer = CryptographicBuffer.ConvertStringToBinary(input, BinaryStringEncoding.Utf8);
 
             var hasher = HashAlgorithmProvider.OpenAlgorithm("SHA256");
             IBuffer hashed = hasher.HashData(inputBuffer);
-
-            return CryptographicBuffer.EncodeToBase64String(hashed);
+            DataReader dataReader = DataReader.FromBuffer(hashed);
+            string output = dataReader.ReadString(hashed.Length);
+            return Base64UrlHelpers.Encode(output);
         }
 
         public string GenerateCodeVerifier()
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
             var windowsBuffer = CryptographicBuffer.GenerateRandom((uint)buffer.Length);
             Array.Copy(windowsBuffer.ToArray(), buffer, buffer.Length);
 
-            return MsalHelpers.EncodeToBase64Url(buffer);
+            return Base64UrlHelpers.Encode(buffer);
         }
 
         public static string Encrypt(string message)

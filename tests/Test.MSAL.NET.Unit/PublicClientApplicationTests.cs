@@ -39,6 +39,7 @@ using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Test.MSAL.NET.Unit.Mocks;
+using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Test.MSAL.NET.Unit
 {
@@ -134,6 +135,195 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
+        public void AcquireTokenSameUserTest()
+        {
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
+
+            MockWebUI ui = new MockWebUI()
+            {
+                MockResult = new AuthorizationResult(AuthorizationStatus.Success,
+                    TestConstants.AuthorityHomeTenant + "?code=some-code")
+            };
+
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                app.RedirectUri + "?code=some-code"));
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
+            });
+            
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            });
+
+            IAuthenticationResult result = app.AcquireTokenAsync(TestConstants.Scope).Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.User);
+            Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
+            Assert.AreEqual(TestConstants.CreateUserIdentifer(), result.User.Identifier);
+            Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
+
+            // repeat interactive call and pass in the same user
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                app.RedirectUri + "?code=some-code"));
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            });
+
+            result = app.AcquireTokenAsync(TestConstants.Scope).Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.User);
+            Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
+            Assert.AreEqual(TestConstants.CreateUserIdentifer(), result.User.Identifier);
+            Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void AcquireTokenDifferentUserReturnedFromServiceTest()
+        {
+            cache.ClientId = TestConstants.ClientId;
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId)
+            {
+                UserTokenCache = cache
+            };
+
+            MockWebUI ui = new MockWebUI()
+            {
+                MockResult = new AuthorizationResult(AuthorizationStatus.Success,
+                    TestConstants.AuthorityHomeTenant + "?code=some-code")
+            };
+
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                app.RedirectUri + "?code=some-code"));
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            });
+
+            IAuthenticationResult result = app.AcquireTokenAsync(TestConstants.Scope).Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.User);
+            Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
+            Assert.AreEqual(TestConstants.CreateUserIdentifer(), result.User.Identifier);
+            Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+
+            var dict = new Dictionary<string, string>();
+            dict[OAuth2Parameter.DomainReq] = TestConstants.Utid;
+            dict[OAuth2Parameter.LoginReq] = TestConstants.Uid;
+
+            // repeat interactive call and pass in the same user
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                app.RedirectUri + "?code=some-code"), dict);
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.Scope.AsSingleString(), MockHelpers.DefaultIdToken, MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid + "more"))
+            });
+
+            try
+            {
+                result = app.AcquireTokenAsync(TestConstants.Scope, result.User, UIBehavior.SelectAccount, null).Result;
+                Assert.Fail("API should have failed here");
+            }
+            catch (AggregateException ex)
+            {
+                MsalServiceException exc = (MsalServiceException) ex.InnerException;
+                Assert.IsNotNull(exc);
+                Assert.AreEqual("user_mismatch", exc.ErrorCode);
+            }
+
+            Assert.AreEqual(1, app.Users.Count());
+            Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void AcquireTokenNullUserPassedInAndNewUserReturnedFromServiceTest()
+        {
+            cache.ClientId = TestConstants.ClientId;
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId)
+            {
+                UserTokenCache = cache
+            };
+
+            MockWebUI ui = new MockWebUI()
+            {
+                MockResult = new AuthorizationResult(AuthorizationStatus.Success,
+                    TestConstants.AuthorityHomeTenant + "?code=some-code")
+            };
+
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                app.RedirectUri + "?code=some-code"));
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            });
+
+            IAuthenticationResult result = app.AcquireTokenAsync(TestConstants.Scope).Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.User);
+            Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
+            Assert.AreEqual(TestConstants.CreateUserIdentifer(), result.User.Identifier);
+            Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+
+            // repeat interactive call and pass in the same user
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                app.RedirectUri + "?code=some-code"));
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.Scope.AsSingleString(), MockHelpers.DefaultIdToken, MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid + "more"))
+            });
+
+            result = app.AcquireTokenAsync(TestConstants.Scope, (IUser)null, UIBehavior.SelectAccount, null).Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.User);
+            Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
+            Assert.AreEqual(TestConstants.CreateUserIdentifer(TestConstants.Uid, TestConstants.Utid + "more"), result.User.Identifier);
+            Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
+            Assert.AreEqual(2, app.Users.Count());
+            Assert.AreEqual(2, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
         public void GetUsersTest()
         {
             PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
@@ -162,7 +352,7 @@ namespace Test.MSAL.NET.Unit
                 ScopeSet = TestConstants.Scope
             };
             item.IdToken = IdToken.Parse(item.RawIdToken);
-            item.ClientInfo = ClientInfo.Parse(item.RawClientInfo);
+            item.ClientInfo = ClientInfo.CreateFromJson(item.RawClientInfo);
             item.AccessToken = item.GetAccessTokenItemKey().ToString();
             cache.TokenCacheAccessor.AccessTokenCacheDictionary[item.GetAccessTokenItemKey().ToString()] = JsonHelper.SerializeToJson(item);
 
@@ -178,7 +368,7 @@ namespace Test.MSAL.NET.Unit
                 IdentityProvider = TestConstants.IdentityProvider,
                 Name = TestConstants.Name
             };
-            rtItem.ClientInfo = ClientInfo.Parse(rtItem.RawClientInfo);
+            rtItem.ClientInfo = ClientInfo.CreateFromJson(rtItem.RawClientInfo);
             cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
             Assert.AreEqual(2, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             users = app.Users;
@@ -196,7 +386,7 @@ namespace Test.MSAL.NET.Unit
                 IdentityProvider = TestConstants.IdentityProvider,
                 Name = TestConstants.Name
             };
-            rtItem.ClientInfo = ClientInfo.Parse(rtItem.RawClientInfo);
+            rtItem.ClientInfo = ClientInfo.CreateFromJson(rtItem.RawClientInfo);
             cache.TokenCacheAccessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
             Assert.AreEqual(3, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             users = app.Users;
@@ -358,9 +548,9 @@ namespace Test.MSAL.NET.Unit
             catch (AggregateException ex)
             {
                 Assert.IsNotNull(ex.InnerException);
-                Assert.IsTrue(ex.InnerException is MsalServiceException);
-                var msalExc = (MsalServiceException)ex.InnerException;
-                Assert.AreEqual(msalExc.ErrorCode, "invalid_grant");
+                Assert.IsTrue(ex.InnerException is MsalUiRequiredException);
+                var msalExc = (MsalUiRequiredException)ex.InnerException;
+                Assert.AreEqual(msalExc.ErrorCode, MsalUiRequiredException.InvalidGrantError);
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");

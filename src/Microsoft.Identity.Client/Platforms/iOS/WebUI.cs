@@ -48,8 +48,11 @@ namespace Microsoft.Identity.Client
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext)
         {
-            var window = UIApplication.SharedApplication.KeyWindow;
-            var vc = FindCurrentViewController(window.RootViewController);
+            UIViewController vc = null;
+            InvokeOnMainThread(() => {
+                UIWindow window = UIApplication.SharedApplication.KeyWindow;
+                vc = FindCurrentViewController(window.RootViewController);
+            });
             
             returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, vc, requestContext);

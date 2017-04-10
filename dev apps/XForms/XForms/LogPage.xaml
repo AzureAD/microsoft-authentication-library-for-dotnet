@@ -14,10 +14,11 @@
         <Label Text="Log" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" Margin="5" />
 
         <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
-            <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
-                <Label x:Name="log" Text="" />
-
-            </StackLayout>
+            <Frame OutlineColor="Black" Padding="10">
+                <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
+                    <Editor  x:Name="log" Text="" VerticalOptions="FillAndExpand"/>
+                </StackLayout>
+           </Frame>
         </ScrollView>
 
         <Button  Text="Clear"  Clicked="OnClearClicked" TextColor="Blue" Font="Bold,15"/>

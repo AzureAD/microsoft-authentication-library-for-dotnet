@@ -41,11 +41,6 @@ namespace Microsoft.Identity.Client
             return "MSAL.CoreCLR";
         }
 
-        public override async Task<string> GetUserPrincipalNameAsync()
-        {
-            return await Task.Factory.StartNew(() => string.Empty).ConfigureAwait(false);
-        }
-
         public override string GetEnvironmentVariable(string variable)
         {
             return null;

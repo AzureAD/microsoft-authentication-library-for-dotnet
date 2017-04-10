@@ -50,7 +50,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                 ScopeSet = TestConstants.Scope
             };
             item.IdToken = IdToken.Parse(item.RawIdToken);
-            item.ClientInfo = ClientInfo.Parse(item.RawClientInfo);
+            item.ClientInfo = ClientInfo.CreateFromJson(item.RawClientInfo);
             item.AccessToken = item.GetAccessTokenItemKey().ToString();
             //add access token
             accessor.AccessTokenCacheDictionary[item.GetAccessTokenItemKey().ToString()] = JsonHelper.SerializeToJson(item);
@@ -67,7 +67,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                 ScopeSet = TestConstants.ScopeForAnotherResource
             };
             item.IdToken = IdToken.Parse(item.RawIdToken);
-            item.ClientInfo = ClientInfo.Parse(item.RawClientInfo);
+            item.ClientInfo = ClientInfo.CreateFromJson(item.RawClientInfo);
             item.AccessToken = item.GetAccessTokenItemKey().ToString();
             //add another access token
             accessor.AccessTokenCacheDictionary[item.GetAccessTokenItemKey().ToString()] = JsonHelper.SerializeToJson(item);
@@ -82,7 +82,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                 IdentityProvider = TestConstants.IdentityProvider,
                 Name = TestConstants.Name
             };
-            rtItem.ClientInfo = ClientInfo.Parse(rtItem.RawClientInfo);
+            rtItem.ClientInfo = ClientInfo.CreateFromJson(rtItem.RawClientInfo);
             accessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
         }
     }

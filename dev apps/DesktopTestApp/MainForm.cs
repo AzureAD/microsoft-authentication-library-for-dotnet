@@ -73,27 +73,7 @@ namespace DesktopTestApp
         private void ResetUserList(bool addFakeUsers)
         {
             List<IUser> userListDataSource = _publicClientApplication.Users.ToList();
-
-            if (addFakeUsers)
-            {
-                userListDataSource.Add(
-                    new User(
-                        identifier: "fakeId",
-                        displayableId: "Professor Katz",
-                        name: "Xavier Katz",
-                        identityProvider: "idk"
-                    )
-                );
-                userListDataSource.Add(
-                    new User(
-                        identifier: "fakeId",
-                        displayableId: "Rogue Cat",
-                        name: "Brio",
-                        identityProvider: "idk"
-                    )
-                );
-            }
-
+           
             userList.DataSource = userListDataSource;
             usersListBox.DataSource = userListDataSource;
             userList.Refresh();
@@ -262,7 +242,8 @@ namespace DesktopTestApp
                 RefreshUI();
             }
         }
-        
+
+
         #endregion
 
         private UIBehavior GetUIBehavior()
@@ -446,6 +427,66 @@ namespace DesktopTestApp
         }
 
         private void FindAccessTokenForSelectedUser()
+        {
+            // Clear values in cache UI 
+            ClearCacheUIPage();
+
+            // Define the User in the listbox
+            User selectedUser = (User)usersListBox.SelectedItem;
+
+            //Get all token cache items from TokenCacheAccessor
+            ICollection<string> accessTokens = GetAccessToken();
+
+            ICollection<string> userAccessTokens = new List<string>();
+
+            //Find the token related to the selected user
+            foreach (string accessToken in accessTokens)
+            {
+                AccessTokenCacheItem accessTokenCacheItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessToken);
+                //if (string.Compare(accessTokenCacheItem.User.DisplayableId, selectedUser.DisplayableId, StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (accessTokenCacheItem.User.DisplayableId == selectedUser.DisplayableId)
+                {
+                    userAccessTokens.Add(accessTokenCacheItem.AccessToken);
+                    // Populate the token cache UI page
+                    idTokenAT1Result.Text = accessTokenCacheItem.IdToken.Issuer;
+                    expiresOnAT1Result.Text = accessTokenCacheItem.ExpiresOn.ToString();
+                    tenantIdAT1Result.Text = accessTokenCacheItem.IdToken.TenantId;
+                    scopeAT1Result.Text = accessTokenCacheItem.Scope;
+                }
+            }
+            //Send result to userTokensListBox
+            userTokensListBox.DataSource = userAccessTokens;
+            userOneUpnResult.Text = selectedUser.DisplayableId;
+        }
+
+        private void expireAT1Btn_Click(object sender, EventArgs e)
+        {
+            //TODO: Expire AccessToken
+        }
+
+        private void deleteAT1Btn_Click(object sender, EventArgs e)
+        {
+            //TODO: delete AccessToken
+            
+        }
+
+        private ICollection<string> GetAccessToken()
+        {
+            return _publicClientApplication.UserTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString();
+        }
+
+        private void signOutUserBtn_Click(object sender, EventArgs e)
+        {
+            _publicClientApplication.Remove(CurrentUser);
+            idTokenAT1Result.Text = @"The user: " + CurrentUser.DisplayableId + @" has been signed out";
+            RefreshUI();
+        }
+
+        private void usersListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SelectedUserChanged();
+        }
+        private void SelectedUserChanged()
         {
             // Clear values in cache UI 
             ClearCacheUIPage();

@@ -126,6 +126,14 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             try
             {
                 TokenResponse tokenResponse = JsonHelper.DeserializeFromJson<TokenResponse>(response.Body);
+
+                if (MsalUiRequiredException.InvalidGrantError.Equals(tokenResponse.Error,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new MsalUiRequiredException(MsalUiRequiredException.InvalidGrantError,
+                        tokenResponse.ErrorDescription);
+                }
+
                 serviceEx = new MsalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription);
             }
             catch (SerializationException)
@@ -148,19 +156,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
 
             endpointUri.Query += extraQp;
 
-            return new Uri(CheckForExtraQueryParameter(endpointUri.Uri.AbsoluteUri));
-        }
-
-        private static string CheckForExtraQueryParameter(string url)
-        {
-            string extraQueryParameter = PlatformPlugin.PlatformInformation.GetEnvironmentVariable("ExtraQueryParameter");
-            string delimiter = (url.IndexOf('?') > 0) ? "&" : "?";
-            if (!string.IsNullOrWhiteSpace(extraQueryParameter))
-            {
-                url += string.Concat(delimiter, extraQueryParameter);
-            }
-
-            return url;
+            return new Uri(MsalHelpers.CheckForExtraQueryParameter(endpointUri.Uri.AbsoluteUri));
         }
 
         private static void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers, RequestContext requestContext)

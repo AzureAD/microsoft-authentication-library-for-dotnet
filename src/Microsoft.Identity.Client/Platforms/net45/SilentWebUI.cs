@@ -169,7 +169,8 @@ namespace Microsoft.Identity.Client
 
             if (result == null)
             {
-                throw new MsalException(MsalError.UserInteractionRequired);
+                throw new MsalUiRequiredException(MsalUiRequiredException.NoPromptFailedError,
+                    MsalErrorMessage.NoPromptFailedErrorMessage);
             }
 
             return result;

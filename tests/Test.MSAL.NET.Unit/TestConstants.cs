@@ -62,8 +62,8 @@ namespace Test.MSAL.NET.Unit
         public static string CreateUserIdentifer(string uid, string utid)
         {
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}",
-                MsalHelpers.EncodeToBase64Url(uid),
-                MsalHelpers.EncodeToBase64Url(utid));
+                Base64UrlHelpers.Encode(uid),
+                Base64UrlHelpers.Encode(utid));
         }
 
         public static readonly User User = new User
