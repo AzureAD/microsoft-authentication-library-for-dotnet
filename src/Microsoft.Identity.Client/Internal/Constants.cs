@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string MultipleTokensMatched =
             "The cache contains multiple tokens satisfying the requirements. Call AcquireToken again providing more requirements like authority";
 
-        public const string NetworkIsNotAvailable = "The network is down so authentication cannot proceed";
+        public const string NetworkNotAvailable = "The network is down so authentication cannot proceed";
         public const string NoDataFromSTS = "No data received from security token service";
         public const string NullParameterTemplate = "Parameter '{0}' cannot be null";
         public const string ParsingMetadataDocumentFailed = "Parsing WS metadata exchange failed";

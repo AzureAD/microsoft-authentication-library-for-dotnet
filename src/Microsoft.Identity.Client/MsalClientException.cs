@@ -37,17 +37,70 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class MsalClientException : MsalException
     {
+        /// <summary>
+        /// MultipleTokensMatched were matched.
+        /// </summary>
+        public const string MultipleTokensMatchedError = "multiple_matching_tokens_detected";
+
+        /// <summary>
+        /// The request could not be preformed because the network is down.
+        /// </summary>
+        public const string NetworkNotAvailableError = "network_not_available";
+
+        /// <summary>
+        /// Duplicate query parameter in extraQueryParameters
+        /// </summary>
+        public const string DuplicateQueryParameterError = "duplicate_query_parameter";
+
+
+        /// <summary>
+        /// The request could not be preformed because of a failure in the UI flow.
+        /// </summary>
+        public const string AuthenticationUiFailedError = "authentication_ui_failed";
+
+        /// <summary>
+        /// Authentication canceled.
+        /// </summary>
+        public const string AuthenticationCanceledError = "authentication_canceled";
+
+        /// <summary>
+        /// Authentication canceled.
+        /// </summary>
+        public const string JsonParseError = "json_parse_failed";
+
+
+        /// <summary>
+        /// JWT was invalid
+        /// </summary>
+        public const string InvalidJwtError = "invalid_jwt";
+
+        /// <summary>
+        /// State returned from the STS was different than the one sent.
+        /// </summary>
+        public const string StateMismatchError = "state_mismatch";
+
+        /// <summary>
+        /// Tenant discovery failed.
+        /// </summary>
+        public const string TenantDiscoveryFailedError = "tenant_discovery_failed";
+
+
         private static readonly Dictionary<string, string> ErrorMessages = new Dictionary<string, string>
         {
             [MsalError.EncodedTokenTooLong] = MsalErrorMessage.EncodedTokenTooLong,
-            [MsalError.AuthorityNotInValidList] = MsalErrorMessage.AuthorityNotInValidList,
-            [MsalError.AuthenticationCanceled] = MsalErrorMessage.AuthenticationCanceled,
-            [MsalError.NetworkNotAvailable] = MsalErrorMessage.NetworkIsNotAvailable,
-            [MsalError.AuthenticationUiFailed] = MsalErrorMessage.AuthenticationUiFailed,
-            [MsalError.UnauthorizedResponseExpected] = MsalErrorMessage.UnauthorizedResponseExpected,
-            [MsalError.MultipleTokensMatched] = MsalErrorMessage.MultipleTokensMatched
+            [MsalError.AuthorityNotInValidList] = MsalErrorMessage.AuthorityNotInValidList
             // MsalErrorMessage.Unknown will be set as the default error message in GetErrorMessage(string errorCode).
         };
+
+#if ANDROID
+
+        /// <summary>
+        /// Indicates that chrome is not installed on the device. The sdk uses chrome custom tab for
+        /// authorize request if applicable or fall back to chrome browser.
+        /// </summary>
+        public const string ChromeNotInstalledError = "chrome_not_installed";
+#endif
+
 
         /// <summary>
         /// 

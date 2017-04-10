@@ -31,7 +31,7 @@ using System.Globalization;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// The exception type thrown when user returned by service does not match user in the request.
+    /// The exception type thrown when service returns and error response or other networking errors occur.
     /// </summary>
     public class MsalServiceException : MsalException
     {

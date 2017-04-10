@@ -33,17 +33,6 @@ namespace Microsoft.Identity.Client.Internal
     public static class MsalError
     {
         /// <summary>
-        /// Tenant discovery failed.
-        /// </summary>
-        public const string TenantDiscoveryFailed = "tenant_discovery_failed";
-
-
-        /// <summary>
-        /// Unknown error.
-        /// </summary>
-        public const string Unknown = "unknown_error";
-
-        /// <summary>
         /// Authentication failed.
         /// </summary>
         public const string AuthenticationFailed = "authentication_failed";
@@ -53,20 +42,6 @@ namespace Microsoft.Identity.Client.Internal
         /// </summary>
         public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
 
-        /// <summary>
-        /// Authentication canceled.
-        /// </summary>
-        public const string AuthenticationCanceled = "authentication_canceled";
-
-        /// <summary>
-        /// Invalid credential type.
-        /// </summary>
-        public const string HttpRequestCancelled = "http_request_cancelled";
-
-        /// <summary>
-        /// Unauthorized response expected from resource server.
-        /// </summary>
-        public const string UnauthorizedResponseExpected = "unauthorized_response_expected";
 
         /// <summary>
         /// 'authority' is not in the list of valid addresses.
@@ -83,10 +58,6 @@ namespace Microsoft.Identity.Client.Internal
         /// </summary>
         public const string InvalidOwnerWindowType = "invalid_owner_window_type";
 
-        /// <summary>
-        /// MultipleTokensMatched were matched.
-        /// </summary>
-        public const string MultipleTokensMatched = "multiple_matching_tokens_detected";
 
         /// <summary>
         /// Invalid authority type.
@@ -98,10 +69,6 @@ namespace Microsoft.Identity.Client.Internal
         /// </summary>
         public const string InvalidServiceUrl = "invalid_service_url";
 
-        /// <summary>
-        /// Certificate key size too small.
-        /// </summary>
-        public const string CertificateKeySizeTooSmall = "certificate_key_size_too_small";
 
         /// <summary>
         /// Encoded token too long.
@@ -118,25 +85,11 @@ namespace Microsoft.Identity.Client.Internal
         /// </summary>
         public const string UserMismatch = "user_mismatch";
 
-        /// <summary>
-        /// The request could not be preformed because the network is down.
-        /// </summary>
-        public const string NetworkNotAvailable = "network_not_available";
-
-        /// <summary>
-        /// The request could not be preformed because of an unknown failure in the UI flow.
-        /// </summary>
-        public const string AuthenticationUiFailed = "authentication_ui_failed";
         
         /// <summary>
         /// Failed to refresh token.
         /// </summary>
         public const string FailedToRefreshToken = "failed_to_refresh_token";
-
-        /// <summary>
-        /// Duplicate query parameter in extraQueryParameters
-        /// </summary>
-        public const string DuplicateQueryParameter = "duplicate_query_parameter";
         
     }
 }

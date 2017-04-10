@@ -82,6 +82,12 @@ namespace Test.MSAL.NET.Unit.Mocks
             webUi.QueryParamsToValidate = queryParamsToValidate;
             webUi.MockResult = authorizationResult;
 
+            ConfigureMockWebUI(webUi);
+        }
+
+
+        public static void ConfigureMockWebUI(MockWebUI webUi)
+        {
             IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
             mockFactory.CreateAuthenticationDialog(Arg.Any<UIParent>(), Arg.Any<RequestContext>()).Returns(webUi);
             PlatformPlugin.WebUIFactory = mockFactory;
