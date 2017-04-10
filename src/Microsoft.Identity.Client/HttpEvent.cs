@@ -28,7 +28,7 @@
 
 namespace Microsoft.Identity.Client
 {
-    internal class HttpEvent : Event
+    internal class HttpEvent : EventBase
     {
         public HttpEvent() : base(EventNamePrefix + "http_event") {}
 

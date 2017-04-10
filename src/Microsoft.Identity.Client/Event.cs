@@ -31,7 +31,7 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-    internal class Event : Dictionary<string, string>
+    internal abstract class EventBase : Dictionary<string, string>
     {
         protected const string EventNamePrefix = "Microsoft.MSAL.";
         protected const string EventName = "event_name";
@@ -39,14 +39,14 @@ namespace Microsoft.Identity.Client
         protected const string ElapsedTime = "elapsed_time";
         private readonly long _startTimestamp;
 
-        public Event(string eventName) : this(eventName, new Dictionary<string, string>()) {}
+        public EventBase(string eventName) : this(eventName, new Dictionary<string, string>()) {}
 
         protected static long CurrentUnixTimeMilliseconds()
         {
             return MsalHelpers.DateTimeToUnixTimestampMilliseconds(DateTimeOffset.Now);
         }
 
-        public Event(string eventName, IDictionary<string, string> predefined) : base(predefined)
+        public EventBase(string eventName, IDictionary<string, string> predefined) : base(predefined)
         {
             this[EventName] = eventName;
             _startTimestamp = CurrentUnixTimeMilliseconds();

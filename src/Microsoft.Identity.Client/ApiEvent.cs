@@ -28,7 +28,7 @@
 
 namespace Microsoft.Identity.Client
 {
-    internal class ApiEvent : Event
+    internal class ApiEvent : EventBase
     {
         public ApiEvent() : base(EventNamePrefix + "api_event") {}
 

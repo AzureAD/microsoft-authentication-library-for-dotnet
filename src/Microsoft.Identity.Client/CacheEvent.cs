@@ -28,7 +28,7 @@
 
 namespace Microsoft.Identity.Client
 {
-    internal class CacheEvent : Event
+    internal class CacheEvent : EventBase
     {
         public const string TokenCacheLookup = EventNamePrefix + "token_cache_lookup";
         public const string TokenCacheWrite = EventNamePrefix + "token_cache_write";
