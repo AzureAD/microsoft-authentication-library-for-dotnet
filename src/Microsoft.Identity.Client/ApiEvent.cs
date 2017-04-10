@@ -30,19 +30,47 @@ namespace Microsoft.Identity.Client
 {
     internal class ApiEvent : Event
     {
-        public ApiEvent(string authority, string authorityType, string uiBehavior, string validationStatus, bool loginHint = false) : base("Microsoft.MSAL.api_event")
+        public ApiEvent() : base("Microsoft.MSAL.api_event") {}
+
+        public int ApiId
         {
-            this["authority"] = authority;
-            this["authority_type"] = authorityType;
-            this["ui_behavior"] = uiBehavior;
-            this["validation_status"] = validationStatus;
-            this["login_hint"] = loginHint.ToString();
+            set => this["api_id"] = value.ToString();
         }
 
-        public void Update(string idToken, bool wasSuccessful)
+        public string Authority
         {
-            this["id_token"] = "TODO";  // TODO
-            this["was_successful"] = wasSuccessful.ToString();
+            set => this["authority"] = value;
+        }
+
+        public string AuthorityType
+        {
+            set => this["authority_type"] = value;
+        }
+
+        public string UiBehavior
+        {
+            set => this["ui_behavior"] = value;
+        }
+
+        public string ValidationStatus
+        {
+            set => this["validation_status"] = value;
+        }
+
+        public string LoginHint
+        {
+            set => this["login_hint"] = value;
+        }
+
+        public string IdToken {
+            set {
+                this["tenant_id"] = "TODO";
+                this["user_id"] = "TODO";
+            }
+        }
+        public bool WasSuccessful
+        {
+            set => this["was_successful"] = value.ToString();
         }
     }
 }

@@ -30,11 +30,11 @@ namespace Microsoft.Identity.Client
 {
     internal class UiEvent : Event
     {
-        public const string UserCancelled = "user_cancelled";
+        public UiEvent(): base("Microsoft.MSAL.ui_event") {}
 
-        public UiEvent(bool userCancelled) : base("Microsoft.MSAL.ui_event")
+        public bool UserCancelled
         {
-            this[UserCancelled] = userCancelled.ToString();
+            set => this["user_cancelled"] = value.ToString();
         }
     }
 }

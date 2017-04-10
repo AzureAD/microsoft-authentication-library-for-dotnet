@@ -30,18 +30,35 @@ namespace Microsoft.Identity.Client
 {
     internal class HttpEvent : Event
     {
-        public HttpEvent(string httpPath, string userAgent, string queryParams, string apiVersion="") : base("Microsoft.MSAL.http_event")
+        public HttpEvent() : base("Microsoft.MSAL.http_event") { }
+
+        public string HttpPath
         {
-            this["http_path"] = httpPath;
-            this["user_agent"] = userAgent;
-            this["query_parameters"] = queryParams;
-            this["api_version"] = apiVersion;
+            set => this["http_path"] = value;
         }
 
-        public void Update(int httpResponseStatus, string oAuthErrorCode)
+        public string UserAgent
         {
-            this["response_code"] = httpResponseStatus.ToString();
-            this["oauth_error_code"] = oAuthErrorCode;
+            set => this["user_agent"] = value;
+        }
+
+        public string QueryParams
+        {
+            set => this["query_parameters"] = value;
+        }
+
+        public string ApiVersion {
+            set => this["api_version"] = value;
+        }
+
+        public int HttpResponseStatus
+        {
+            set => this["response_code"] = value.ToString();
+        }
+
+        public string OauthErrorCode
+        {
+            set => this["oauth_error_code"] = value;
         }
     }
 }

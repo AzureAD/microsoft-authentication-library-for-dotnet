@@ -37,17 +37,13 @@ namespace Microsoft.Identity.Client
         public const string TokenCacheBeforeWrite = "token_cache_before_write";
         public const string TokenCacheDelete = "token_cache_delete";
 
-        public const string TokenType = "token_type";
+        public CacheEvent(string eventName) : base(eventName) {}
+
         public const string TokenTypeAT = "AT";
         public const string TokenTypeRT = "RT";
-
-        public CacheEvent(string eventName) : base(eventName)  // Ideally we would like to check the eventName is one of the predefined const strings
+        public string TokenType
         {
-        }
-
-        public void Update(string tokenType)  // Ideally we would like to check the eventName is one of the predefined const strings
-        {
-            this[TokenType] = tokenType;
+            set => this["token_type"] = value;
         }
     }
 }
