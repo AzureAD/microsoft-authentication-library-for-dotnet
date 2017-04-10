@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Client
     {
         protected const string EventName = "event_name";
         protected const string StartTime = "start_time";
-        protected const string StopTime = "stop_time";
         protected const string ElapsedTime = "elapsed_time";
         private readonly long _startTimestamp;
 
@@ -51,14 +50,12 @@ namespace Microsoft.Identity.Client
             this[EventName] = eventName;
             _startTimestamp = CurrentUnixTimeMilliseconds();
             this[StartTime] = _startTimestamp.ToString();
-            this[StopTime] = "-1";
+            this[ElapsedTime] = "-1";
         }
 
         public void Stop()
         {
-            var stopTimestamp = CurrentUnixTimeMilliseconds();
-            this[StopTime] = stopTimestamp.ToString();  // It is a timestamp
-            this[ElapsedTime] = (stopTimestamp - _startTimestamp).ToString();  // It is a duration
+            this[ElapsedTime] = (CurrentUnixTimeMilliseconds() - _startTimestamp).ToString();  // It is a duration
         }
     }
 }
