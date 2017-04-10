@@ -71,7 +71,27 @@ namespace DesktopTestApp
         private void ResetUserList(bool addFakeUsers)
         {
             List<IUser> userListDataSource = _publicClientApplication.Users.ToList();
-           
+
+            if (addFakeUsers)
+            {
+                userListDataSource.Add(
+                    new User(
+                        identifier: "fakeId",
+                        displayableId: "Professor Katz",
+                        name: "Xavier Katz",
+                        identityProvider: "idk"
+                    )
+                );
+                userListDataSource.Add(
+                    new User(
+                        identifier: "fakeId",
+                        displayableId: "Rogue Cat",
+                        name: "Brio",
+                        identityProvider: "idk"
+                    )
+                );
+            }
+
             userList.DataSource = userListDataSource;
             usersListBox.DataSource = userListDataSource;
             userList.Refresh();
@@ -386,18 +406,29 @@ namespace DesktopTestApp
 
         private void expireAT1Btn_Click(object sender, EventArgs e)
         {
-            //TODO: Expire AccessToken
+            // Expire AccessToken
+            
         }
 
         private void deleteAT1Btn_Click(object sender, EventArgs e)
         {
-            //TODO: delete AccessToken
-            
+            // Delete AccessToken
+            DeleteSelectedAccessToken();
         }
 
-        private ICollection<string> GetAccessToken()
+        private void DeleteSelectedAccessToken()
         {
-            return _publicClientApplication.UserTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString();
+            // Define AccessToken in listbox
+            string selectedUserAccessToken = (string)userTokensListBox.SelectedItem;
+
+            // Find the AccessToken for the selected user and delete
+            _publicClientApplication.UserTokenCache.TokenCacheAccessor.DeleteAccessToken(selectedUserAccessToken);
+
+            ICollection<string> deletedAccessToken = GetAccessToken();
+
+            userTokensListBox.DataSource = deletedAccessToken;
+
+            ClearCacheUIPage();
         }
 
         private void signOutUserBtn_Click(object sender, EventArgs e)
@@ -409,9 +440,15 @@ namespace DesktopTestApp
 
         private void usersListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            SelectedUserChanged();
+            FindAccessTokenForSelectedUser();
         }
-        private void SelectedUserChanged()
+
+        private ICollection<string> GetAccessToken()
+        {
+            return _publicClientApplication.UserTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString();
+        }
+
+        private void FindAccessTokenForSelectedUser()
         {
             // Clear values in cache UI 
             ClearCacheUIPage();
