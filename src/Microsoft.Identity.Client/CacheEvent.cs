@@ -30,12 +30,12 @@ namespace Microsoft.Identity.Client
 {
     internal class CacheEvent : Event
     {
-        public const string TokenCacheLookup = "token_cache_lookup";
-        public const string TokenCacheWrite = "token_cache_write";
-        public const string TokenCacheBeforeAccess = "token_cache_before_access";
-        public const string TokenCacheAfterAccess = "token_cache_after_access";
-        public const string TokenCacheBeforeWrite = "token_cache_before_write";
-        public const string TokenCacheDelete = "token_cache_delete";
+        public const string TokenCacheLookup = EventNamePrefix + "token_cache_lookup";
+        public const string TokenCacheWrite = EventNamePrefix + "token_cache_write";
+        public const string TokenCacheBeforeAccess = EventNamePrefix + "token_cache_before_access";
+        public const string TokenCacheAfterAccess = EventNamePrefix + "token_cache_after_access";
+        public const string TokenCacheBeforeWrite = EventNamePrefix + "token_cache_before_write";
+        public const string TokenCacheDelete = EventNamePrefix + "token_cache_delete";
 
         public CacheEvent(string eventName) : base(eventName) {}
 

@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
 {
     internal class UiEvent : Event
     {
-        public UiEvent(): base("Microsoft.MSAL.ui_event") {}
+        public UiEvent(): base(EventNamePrefix + "ui_event") {}
 
         public bool UserCancelled
         {

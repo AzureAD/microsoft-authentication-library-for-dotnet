@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
 {
     internal class ApiEvent : Event
     {
-        public ApiEvent() : base("Microsoft.MSAL.api_event") {}
+        public ApiEvent() : base(EventNamePrefix + "api_event") {}
 
         public int ApiId
         {

@@ -33,6 +33,7 @@ namespace Microsoft.Identity.Client
 {
     internal class Event : Dictionary<string, string>
     {
+        protected const string EventNamePrefix = "Microsoft.MSAL.";
         protected const string EventName = "event_name";
         protected const string StartTime = "start_time";
         protected const string ElapsedTime = "elapsed_time";

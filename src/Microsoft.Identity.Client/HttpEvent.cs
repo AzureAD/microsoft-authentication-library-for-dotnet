@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
 {
     internal class HttpEvent : Event
     {
-        public HttpEvent() : base("Microsoft.MSAL.http_event") { }
+        public HttpEvent() : base(EventNamePrefix + "http_event") {}
 
         public string HttpPath
         {
