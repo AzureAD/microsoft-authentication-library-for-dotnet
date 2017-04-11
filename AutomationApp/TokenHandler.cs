@@ -48,13 +48,13 @@ namespace AutomationApp
                 : new PublicClientApplication(input["client_id"]);
         }
 
-        public async Task<IAuthenticationResult> AcquireToken(Dictionary<string, string> input)
+        public async Task<AuthenticationResult> AcquireToken(Dictionary<string, string> input)
         {
             EnsurePublicClientApplication(input);
 
             string[] scope = { "mail.read" };
 
-            IAuthenticationResult result =
+            AuthenticationResult result =
                 await
                     _publicClientApplication.AcquireTokenAsync(scope)
                         .ConfigureAwait(false);
@@ -62,13 +62,13 @@ namespace AutomationApp
             return result;
         }
 
-        public async Task<IAuthenticationResult> AcquireTokenSilent(Dictionary<string, string> input)
+        public async Task<AuthenticationResult> AcquireTokenSilent(Dictionary<string, string> input)
         {
             EnsurePublicClientApplication(input);
 
             string[] scope = { "mail.read" };
 
-            IAuthenticationResult result = await
+            AuthenticationResult result = await
                 _publicClientApplication.AcquireTokenSilentAsync(scope, CurrentUser)
                 .ConfigureAwait(false);
 

@@ -71,7 +71,7 @@ namespace Test.MSAL.NET.Unit
         {
             // Setup up a public client application that returns a dummy result
             // The caller asks for two scopes, but only one is returned
-            var mockResult = Substitute.For<IAuthenticationResult>();
+            var mockResult = Substitute.For<AuthenticationResult>();
             mockResult.IdToken.Returns("id token");
             mockResult.Scope.Returns(new string[] {"scope1"});
 
@@ -79,7 +79,7 @@ namespace Test.MSAL.NET.Unit
             mockApp.AcquireTokenAsync(new string[] {"scope1", "scope2"}).ReturnsForAnyArgs(mockResult);
 
             // Now call the substitute with the args to get the substitute result
-            IAuthenticationResult actualResult = mockApp.AcquireTokenAsync(new string[] {"scope1"}).Result;
+            AuthenticationResult actualResult = mockApp.AcquireTokenAsync(new string[] {"scope1"}).Result;
             Assert.IsNotNull(actualResult);
             Assert.AreEqual("id token", actualResult.IdToken, "Mock result failed to return the expected id token");
 
@@ -161,7 +161,7 @@ namespace Test.MSAL.NET.Unit
 
             try
             {
-                IAuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope);
+                AuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope);
                 Assert.Fail("API should have failed here");
             }
             catch (MsalClientException exc)
@@ -199,7 +199,7 @@ namespace Test.MSAL.NET.Unit
 
             try
             {
-                IAuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope);
+                AuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope);
                 Assert.Fail("API should have failed here");
             }
             catch (MsalClientException exc)
@@ -241,7 +241,7 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
             });
 
-            IAuthenticationResult result = app.AcquireTokenAsync(TestConstants.Scope).Result;
+            AuthenticationResult result = app.AcquireTokenAsync(TestConstants.Scope).Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.User);
             Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
@@ -300,7 +300,7 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
             });
 
-            IAuthenticationResult result = app.AcquireTokenAsync(TestConstants.Scope).Result;
+            AuthenticationResult result = app.AcquireTokenAsync(TestConstants.Scope).Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.User);
             Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
@@ -375,7 +375,7 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
             });
 
-            IAuthenticationResult result = app.AcquireTokenAsync(TestConstants.Scope).Result;
+            AuthenticationResult result = app.AcquireTokenAsync(TestConstants.Scope).Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.User);
             Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
@@ -533,12 +533,12 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
                 TestConstants.UserIdentifier).ToString());
 
-            Task<IAuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), new User()
+            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), new User()
             {
                 DisplayableId = TestConstants.DisplayableId,
                 Identifier = TestConstants.UserIdentifier,
             }, app.Authority, false);
-            IAuthenticationResult result = task.Result;
+            AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
@@ -579,13 +579,13 @@ namespace Test.MSAL.NET.Unit
                         TestConstants.Scope.Union(TestConstants.ScopeForAnotherResource).ToArray())
             });
 
-            Task<IAuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(),
+            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(),
                 new User()
                 {
                     DisplayableId = TestConstants.DisplayableId,
                     Identifier = TestConstants.UserIdentifier,
                 }, app.Authority, true);
-            IAuthenticationResult result = task.Result;
+            AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
             Assert.AreEqual(
@@ -626,14 +626,14 @@ namespace Test.MSAL.NET.Unit
             HttpMessageHandlerFactory.AddMockHandler(mockHandler);
             try
             {
-                Task<IAuthenticationResult> task =
+                Task<AuthenticationResult> task =
                     app.AcquireTokenSilentAsync(TestConstants.ScopeForAnotherResource.ToArray(),
                         new User()
                         {
                             DisplayableId = TestConstants.DisplayableId,
                             Identifier = TestConstants.UserIdentifier,
                         }, app.Authority, false);
-                IAuthenticationResult result = task.Result;
+                AuthenticationResult result = task.Result;
                 Assert.Fail("AdalSilentTokenAcquisitionException was expected");
             }
             catch (AggregateException ex)
@@ -695,7 +695,7 @@ namespace Test.MSAL.NET.Unit
 
             try
             {
-                IAuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope);
+                AuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope);
                 Assert.Fail("API should have failed here");
             }
             catch (MsalClientException exc)

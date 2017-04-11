@@ -117,7 +117,7 @@ namespace DesktopTestApp
             callResult.Text = output;
             try
             {
-                IAuthenticationResult result;
+                AuthenticationResult result;
                 if (userList.SelectedIndex != -1)
                 {
                     // if (modalWebview.Checked)
@@ -175,7 +175,7 @@ namespace DesktopTestApp
 
             try
             {
-                IAuthenticationResult result =
+                AuthenticationResult result =
                     await _publicClientApplication.AcquireTokenSilentAsync(scopes.Text.Split(' '), CurrentUser);
 
                 SetResultPageInfo(result);
@@ -209,7 +209,7 @@ namespace DesktopTestApp
             callResultConfClient.Text = output;
             try
             {
-                IAuthenticationResult result;
+                AuthenticationResult result;
                 if (confClientUserList.SelectedIndex != -1)
                 {
                     result = await clientApplication.AcquireTokenForClientAsync(confClientScopesTextBox.Text.Split(' '));
@@ -324,7 +324,7 @@ namespace DesktopTestApp
 
         #region App logic
 
-        private void SetResultPageInfo(IAuthenticationResult authenticationResult)
+        private void SetResultPageInfo(AuthenticationResult authenticationResult)
         {
             callResult.Text = @"Access Token: " + authenticationResult.AccessToken + Environment.NewLine +
                               @"Expires On: " + authenticationResult.ExpiresOn + Environment.NewLine +
@@ -343,7 +343,7 @@ namespace DesktopTestApp
             callResult.Text = string.Empty;
         }
 
-        private void SetConfidentialClientPageInfo(IAuthenticationResult authenticationResult)
+        private void SetConfidentialClientPageInfo(AuthenticationResult authenticationResult)
         {
             confClientAccessTokenResult.Text = authenticationResult.AccessToken;
             //TODO: result in cache
