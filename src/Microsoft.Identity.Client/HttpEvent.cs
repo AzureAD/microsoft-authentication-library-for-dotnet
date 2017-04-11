@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,33 +25,40 @@
 //
 //------------------------------------------------------------------------------
 
-using Android.App;
-using Android.Content;
-using Android.OS;
 
 namespace Microsoft.Identity.Client
 {
-    /// <summary>
-    /// BrowserTabActivity to get the redirect with code from authorize endpoint. Intent filter has to be declared in the
-    /// manifest for this activity. When chrome custom tab is launched, and we're redirected back with the redirect
-    /// uri (redirect_uri has to be unique across apps), the os will fire an intent with the redirect,
-    /// and the BrowserTabActivity will be launched.
-    /// </summary>
-    //[Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
-    public class BrowserTabActivity : Activity
+    internal class HttpEvent : EventBase
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="savedInstanceState"></param>
-        protected override void OnCreate(Bundle savedInstanceState)
-        {
-            base.OnCreate(savedInstanceState);
+        public HttpEvent() : base(EventNamePrefix + "http_event") {}
 
-            Intent intent = new Intent(this, typeof (AuthenticationActivity));
-            intent.PutExtra(AndroidConstants.CustomTabRedirect, Intent.DataString);
-            intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
-            StartActivity(intent);
+        public string HttpPath
+        {
+            set => this["http_path"] = value;
+        }
+
+        public string UserAgent
+        {
+            set => this["user_agent"] = value;
+        }
+
+        public string QueryParams
+        {
+            set => this["query_parameters"] = value;
+        }
+
+        public string ApiVersion {
+            set => this["api_version"] = value;
+        }
+
+        public int HttpResponseStatus
+        {
+            set => this["response_code"] = value.ToString();
+        }
+
+        public string OauthErrorCode
+        {
+            set => this["oauth_error_code"] = value;
         }
     }
 }

@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Client.Internal
@@ -50,8 +51,16 @@ namespace Microsoft.Identity.Client.Internal
             {
                 return null;
             }
-            
-            return JsonHelper.DeserializeFromJson<ClientInfo>(Base64UrlHelpers.DecodeToBytes(clientInfo));
+
+            try
+            {
+                return JsonHelper.DeserializeFromJson<ClientInfo>(Base64UrlHelpers.DecodeToBytes(clientInfo));
+            }
+            catch (Exception exc)
+            {
+                throw new MsalClientException(MsalClientException.JsonParseError,
+                    "Failed to parse the returned client info.", exc);
+            }
         }
         public static ClientInfo CreateFromEncodedString(string encodedUserIdentiier)
         {

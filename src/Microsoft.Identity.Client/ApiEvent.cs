@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,33 +25,53 @@
 //
 //------------------------------------------------------------------------------
 
-using Android.App;
-using Android.Content;
-using Android.OS;
+
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-    /// <summary>
-    /// BrowserTabActivity to get the redirect with code from authorize endpoint. Intent filter has to be declared in the
-    /// manifest for this activity. When chrome custom tab is launched, and we're redirected back with the redirect
-    /// uri (redirect_uri has to be unique across apps), the os will fire an intent with the redirect,
-    /// and the BrowserTabActivity will be launched.
-    /// </summary>
-    //[Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
-    public class BrowserTabActivity : Activity
+    internal class ApiEvent : EventBase
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="savedInstanceState"></param>
-        protected override void OnCreate(Bundle savedInstanceState)
-        {
-            base.OnCreate(savedInstanceState);
+        public ApiEvent() : base(EventNamePrefix + "api_event") {}
 
-            Intent intent = new Intent(this, typeof (AuthenticationActivity));
-            intent.PutExtra(AndroidConstants.CustomTabRedirect, Intent.DataString);
-            intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
-            StartActivity(intent);
+        public int ApiId
+        {
+            set => this["api_id"] = value.ToString();
+        }
+
+        public string Authority
+        {
+            set => this["authority"] = value;
+        }
+
+        public string AuthorityType
+        {
+            set => this["authority_type"] = value;
+        }
+
+        public string UiBehavior
+        {
+            set => this["ui_behavior"] = value;
+        }
+
+        public string ValidationStatus
+        {
+            set => this["validation_status"] = value;
+        }
+
+        public string TenantId
+        {
+            set => this["tenant_id"] = PlatformPlugin.CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value);
+        }
+
+        public string UserId
+        {
+            set => this["user_id"] = PlatformPlugin.CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value);
+        }
+
+        public bool WasSuccessful
+        {
+            set => this["was_successful"] = value.ToString();
         }
     }
 }

@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             }
             catch (SerializationException)
             {
-                serviceEx = new MsalServiceException(MsalError.Unknown, response.Body);
+                serviceEx = new MsalServiceException(MsalException.UnknownError, response.Body);
             }
 
             requestContext.Logger.Error(serviceEx);

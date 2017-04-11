@@ -178,21 +178,21 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
                 if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
                 {
-                    throw new MsalServiceException(MsalError.TenantDiscoveryFailed,
+                    throw new MsalClientException(MsalClientException.TenantDiscoveryFailedError,
                         string.Format(CultureInfo.InvariantCulture, "Authorize endpoint was not found at {0}",
                             openIdConfigurationEndpoint));
                 }
 
                 if (string.IsNullOrEmpty(edr.TokenEndpoint))
                 {
-                    throw new MsalServiceException(MsalError.TenantDiscoveryFailed,
+                    throw new MsalClientException(MsalClientException.TenantDiscoveryFailedError,
                         string.Format(CultureInfo.InvariantCulture, "Authorize endpoint was not found at {0}",
                             openIdConfigurationEndpoint));
                 }
 
                 if (string.IsNullOrEmpty(edr.Issuer))
                 {
-                    throw new MsalServiceException(MsalError.TenantDiscoveryFailed,
+                    throw new MsalClientException(MsalClientException.TenantDiscoveryFailedError,
                         string.Format(CultureInfo.InvariantCulture, "Issuer was not found at {0}",
                             openIdConfigurationEndpoint));
                 }
