@@ -359,8 +359,9 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(app.Authority)
             });
 
+            string CustomRedirectUri = "custom://redirect-uri";
             Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(),
-                "custom://redirect-uri", TestConstants.DisplayableId, "extra=qp",
+                CustomRedirectUri, TestConstants.DisplayableId, "extra=qp",
                 TestConstants.ScopeForAnotherResource.AsArray(), TestConstants.AuthorityGuestTenant);
             Uri uri = task.Result;
             Assert.IsNotNull(uri);
@@ -373,7 +374,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2 r2/scope1 r2/scope2", qp["scope"]);
             Assert.AreEqual(TestConstants.ClientId, qp["client_id"]);
             Assert.AreEqual("code", qp["response_type"]);
-            Assert.AreEqual("custom://redirect-uri/", qp["redirect_uri"]);
+            Assert.AreEqual(CustomRedirectUri, qp["redirect_uri"]);
             Assert.AreEqual(TestConstants.DisplayableId, qp["login_hint"]);
             Assert.AreEqual("MSAL.Desktop", qp["x-client-sku"]);
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
