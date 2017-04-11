@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="user">User for which the token is requested. <see cref="User"/></param>
         /// <returns></returns>
-        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using the refresh token if available</param>
         /// <returns></returns>
-        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user,
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user,
             string authority, bool forceRefresh)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
