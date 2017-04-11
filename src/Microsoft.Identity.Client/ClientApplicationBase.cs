@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
     /// <Summary>
     /// Abstract class containing common API methods and properties. Both PublicClientApplication and ConfidentialClientApplication extend this class.
     /// </Summary>
-    public abstract class ClientApplicationBase
+    public abstract class ClientApplicationBase : IClientApplicationBase
     {
         private TokenCache _userTokenCache;
 
@@ -128,6 +128,11 @@ namespace Microsoft.Identity.Client
 
                 return UserTokenCache.GetUsers(new Uri(Authority).Host);
             }
+        }
+
+        public IUser GetUser(string identifier)
+        {
+            return Users.FirstOrDefault(user => user.Identifier.Equals(identifier));
         }
 
         /// <summary>

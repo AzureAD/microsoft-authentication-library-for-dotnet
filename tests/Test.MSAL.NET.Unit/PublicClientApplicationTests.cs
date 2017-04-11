@@ -709,5 +709,41 @@ namespace Test.MSAL.NET.Unit
                 Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
             }
         }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void GetUserTest()
+        {
+            var app = new PublicClientApplication(TestConstants.ClientId);
+            var users = app.Users;
+            Assert.IsNotNull(users);
+            // no users in the cache
+            Assert.AreEqual(0, users.Count());
+
+            var fetchedUser = app.GetUser(null);
+            Assert.IsNull(fetchedUser);
+
+            fetchedUser = app.GetUser("");
+            Assert.IsNull(fetchedUser);
+
+            TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCache.TokenCacheAccessor, TestConstants.Uid,
+                TestConstants.Utid, TestConstants.Name);
+            TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCache.TokenCacheAccessor, TestConstants.Uid + "1",
+                TestConstants.Utid, TestConstants.Name + "1");
+
+            users = app.Users;
+            Assert.IsNotNull(users);
+            // two users in the cache
+            Assert.AreEqual(2, users.Count());
+
+            var userToFind = users.First();
+
+            fetchedUser = app.GetUser(userToFind.Identifier);
+
+            Assert.AreEqual(userToFind.DisplayableId, fetchedUser.DisplayableId);
+            Assert.AreEqual(userToFind.Identifier, fetchedUser.Identifier);
+            Assert.AreEqual(userToFind.IdentityProvider, fetchedUser.IdentityProvider);
+            Assert.AreEqual(userToFind.Name, fetchedUser.Name);
+        }
     }
 }
