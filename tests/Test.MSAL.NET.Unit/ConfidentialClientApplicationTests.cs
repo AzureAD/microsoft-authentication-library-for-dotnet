@@ -359,7 +359,7 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(app.Authority)
             });
 
-            string CustomRedirectUri = "custom://redirect-uri";
+            const string CustomRedirectUri = "custom://redirect-uri";
             Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(),
                 CustomRedirectUri, TestConstants.DisplayableId, "extra=qp",
                 TestConstants.ScopeForAnotherResource.AsArray(), TestConstants.AuthorityGuestTenant);
