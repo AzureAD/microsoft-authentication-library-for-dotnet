@@ -33,6 +33,10 @@
     <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS10'">
+    <DefineConstants>$(DefineConstants);iOS</DefineConstants>
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />

@@ -73,21 +73,32 @@ namespace Microsoft.Identity.Client.Internal
 
         public static IdToken Parse(string idToken)
         {
-            IdToken idTokenBody = null;
-            if (!string.IsNullOrWhiteSpace(idToken))
+            if (string.IsNullOrEmpty(idToken))
             {
-                string[] idTokenSegments = idToken.Split(new[] {'.'});
+                return null;
+            }
 
-                // If Id token format is invalid, we silently ignore the id token
-                if (idTokenSegments.Length == 3)
+            IdToken idTokenBody = null;
+            string[] idTokenSegments = idToken.Split(new[] {'.'});
+
+            if (idTokenSegments.Length < 2)
+            {
+                throw new MsalClientException(MsalClientException.InvalidJwtError, "ID Token must contain at least 2 parts.");
+            }
+
+            try
+            {
+                byte[] idTokenBytes = Base64UrlHelpers.DecodeToBytes(idTokenSegments[1]);
+                using (var stream = new MemoryStream(idTokenBytes))
                 {
-                    byte[] idTokenBytes = Base64UrlHelpers.DecodeToBytes(idTokenSegments[1]);
-                    using (var stream = new MemoryStream(idTokenBytes))
-                    {
-                        var serializer = new DataContractJsonSerializer(typeof(IdToken));
-                        idTokenBody = (IdToken) serializer.ReadObject(stream);
-                    }
+                    var serializer = new DataContractJsonSerializer(typeof(IdToken));
+                    idTokenBody = (IdToken) serializer.ReadObject(stream);
                 }
+            }
+            catch (Exception exc)
+            {
+                throw new MsalClientException(MsalClientException.JsonParseError,
+                    "Failed to parse the returned id token.", exc);
             }
 
             return idTokenBody;

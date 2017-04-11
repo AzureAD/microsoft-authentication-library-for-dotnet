@@ -38,12 +38,17 @@ namespace Microsoft.Identity.Client
     {
 
         /// <summary>
+        /// Unknown Error occured.
+        /// </summary>
+        public const string UnknownError = "unknown_error";
+
+        /// <summary>
         /// Initializes a new instance of the exception class.
         /// </summary>
         public MsalException()
             : base(MsalErrorMessage.Unknown)
         {
-            ErrorCode = MsalError.Unknown;
+            ErrorCode = UnknownError;
         }
 
         /// <summary>

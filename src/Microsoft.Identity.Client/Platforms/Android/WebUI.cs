@@ -29,8 +29,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
+using Android.Net;
 using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Uri = System.Uri;
 
 namespace Microsoft.Identity.Client
 {
@@ -56,14 +58,14 @@ namespace Microsoft.Identity.Client
             {
                 var agentIntent = new Intent(_parent.Activity, typeof(AuthenticationActivity));
                 agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
-                agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.AbsoluteUri);
+                agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.OriginalString);
 
                 _parent.Activity.RunOnUiThread(()=> _parent.Activity.StartActivityForResult(agentIntent, 0));
             }
             catch (Exception ex)
             {
                 requestContext.Logger.Error(ex);
-                throw new MsalException(MsalError.AuthenticationUiFailed, "AuthenticationActivity failed to start", ex);
+                throw new MsalClientException(MsalClientException.AuthenticationUiFailedError, "AuthenticationActivity failed to start", ex);
             }
 
             await returnedUriReady.WaitAsync().ConfigureAwait(false);

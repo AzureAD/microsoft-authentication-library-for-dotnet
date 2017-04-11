@@ -126,6 +126,13 @@ namespace Microsoft.Identity.Client.Internal
             return unixTimestamp;
         }
 
+        public static long DateTimeToUnixTimestampMilliseconds(DateTimeOffset dateTimeOffset)
+        {
+            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            long unixTimestamp = (long)dateTimeOffset.Subtract(dateTime).TotalMilliseconds;
+            return unixTimestamp;
+        }
+
         public static string CreateString(byte[] bytes)
         {
             return Encoding.UTF8.GetString(bytes, 0, bytes.Length);

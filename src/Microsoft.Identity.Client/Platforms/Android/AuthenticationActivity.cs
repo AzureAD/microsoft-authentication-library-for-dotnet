@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client
 
             if (Intent == null)
             {
-                SendError(MsalErrorAndroidEx.InvalidRequest, "Received null data intent from caller");
+                SendError(MsalClientException.UnresolvableIntentError, "Received null data intent from caller");
                 return;
             }
 
@@ -130,8 +130,8 @@ namespace Microsoft.Identity.Client
                 string chromePackage = GetChromePackage();
                 if (string.IsNullOrEmpty(chromePackage))
                 {
-                    throw new MsalException(MsalErrorAndroidEx.ChromeNotInstalled,
-                        "Chrome is not installed on the device, cannot proceed with auth");
+                    throw new MsalClientException(MsalClientException.ChromeNotInstalledError,
+                        "Chrome is not installed on the device, cannot proceed with authentication");
                 }
 
                 Intent browserIntent = new Intent(Intent.ActionView);

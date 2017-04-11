@@ -234,16 +234,13 @@ namespace Microsoft.Identity.Client
                     // TODO: log access token not found
                     return null;
                 }
-
-                // TODO: If user is not provided for silent request, and there is only one item found in the cache. Should we return it?
+                
                 if (tokenCacheItems.Count > 1)
                 {
-                    // TODO: log there are multiple access tokens found, don't know which one to use.
-                    return null;
+                    //TODO: log PII for authorities found.
+                    throw new MsalClientException(MsalClientException.MultipleTokensMatchedError, MsalErrorMessage.MultipleTokensMatched);
                 }
 
-                // Access token lookup needs to be a strict match. In the JSON response from token endpoint, server only returns the scope
-                // the developer requires the token for. We store the token separately for considerations i.e. MFA.
                 AccessTokenCacheItem accessTokenCacheItem = tokenCacheItems.First();
                 if (accessTokenCacheItem.ExpiresOn >
                     DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))

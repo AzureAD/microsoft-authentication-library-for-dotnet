@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,33 +25,41 @@
 //
 //------------------------------------------------------------------------------
 
-using Android.App;
-using Android.Content;
-using Android.OS;
+
+using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client
 {
-    /// <summary>
-    /// BrowserTabActivity to get the redirect with code from authorize endpoint. Intent filter has to be declared in the
-    /// manifest for this activity. When chrome custom tab is launched, and we're redirected back with the redirect
-    /// uri (redirect_uri has to be unique across apps), the os will fire an intent with the redirect,
-    /// and the BrowserTabActivity will be launched.
-    /// </summary>
-    //[Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
-    public class BrowserTabActivity : Activity
+    internal class CacheEvent : EventBase
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="savedInstanceState"></param>
-        protected override void OnCreate(Bundle savedInstanceState)
-        {
-            base.OnCreate(savedInstanceState);
+        public const string TokenCacheLookup = EventNamePrefix + "token_cache_lookup";
+        public const string TokenCacheWrite = EventNamePrefix + "token_cache_write";
+        public const string TokenCacheBeforeAccess = EventNamePrefix + "token_cache_before_access";
+        public const string TokenCacheAfterAccess = EventNamePrefix + "token_cache_after_access";
+        public const string TokenCacheBeforeWrite = EventNamePrefix + "token_cache_before_write";
+        public const string TokenCacheDelete = EventNamePrefix + "token_cache_delete";
 
-            Intent intent = new Intent(this, typeof (AuthenticationActivity));
-            intent.PutExtra(AndroidConstants.CustomTabRedirect, Intent.DataString);
-            intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
-            StartActivity(intent);
+        public CacheEvent(string eventName) : base(eventName)
+        {
+        }
+
+        public enum TokenTypes
+        {
+            AT,
+            RT
+        };
+
+        public TokenTypes TokenType
+        {
+            set
+            {
+                var types = new Dictionary<TokenTypes, string>()
+                {
+                    {TokenTypes.AT, "AT"},
+                    {TokenTypes.RT, "RT"}
+                };
+                this["token_type"] = types[value];
+            }
         }
     }
 }

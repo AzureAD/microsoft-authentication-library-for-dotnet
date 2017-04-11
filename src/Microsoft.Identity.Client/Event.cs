@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,44 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using Microsoft.Identity.Client.Internal;
+
 namespace Microsoft.Identity.Client
 {
-    internal enum UserAuthType
+    internal abstract class EventBase : Dictionary<string, string>
     {
-        IntegratedAuth
-    }
+        protected const string EventNamePrefix = "Microsoft.MSAL.";
+        protected const string EventName = "event_name";
+        protected const string StartTime = "start_time";
+        protected const string ElapsedTime = "elapsed_time";
+        private readonly long _startTimestamp;
 
-    // Disabled Non-Interactive Feature
-    /// <summary>
-    /// Credential used for integrated authentication on domain-joined machines.
-    /// </summary>
-    public sealed class UserCredential
-    {
-        /// <summary>
-        /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in
-        /// user
-        /// and it can only be used in domain joined scenarios.
-        /// </summary>
-        public UserCredential()
+        public EventBase(string eventName) : this(eventName, new Dictionary<string, string>()) {}
+
+        protected static long CurrentUnixTimeMilliseconds()
         {
-            UserAuthType = UserAuthType.IntegratedAuth;
+            return MsalHelpers.DateTimeToUnixTimestampMilliseconds(DateTimeOffset.Now);
         }
 
-        /// <summary>
-        /// Constructor to create credential with client id and secret
-        /// </summary>
-        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        public UserCredential(string userName)
+        public EventBase(string eventName, IDictionary<string, string> predefined) : base(predefined)
         {
-            UserName = userName;
-            UserAuthType = UserAuthType.IntegratedAuth;
+            this[EventName] = eventName;
+            _startTimestamp = CurrentUnixTimeMilliseconds();
+            this[StartTime] = _startTimestamp.ToString();
+            this[ElapsedTime] = "-1";
         }
 
-        /// <summary>
-        /// Gets identifier of the user.
-        /// </summary>
-        public string UserName { get; internal set; }
-
-        internal UserAuthType UserAuthType { get; private set; }
+        public void Stop()
+        {
+            this[ElapsedTime] = (CurrentUnixTimeMilliseconds() - _startTimestamp).ToString();  // It is a duration
+        }
     }
 }

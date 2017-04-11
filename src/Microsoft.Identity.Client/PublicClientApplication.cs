@@ -311,46 +311,6 @@ namespace Microsoft.Identity.Client
             return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parent, requestContext);
         }
 
-        /// <summary>
-        /// .NET specific method for intergrated auth.
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <returns></returns>
-        internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(IEnumerable<string> scope)
-        {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenUsingIntegratedAuthCommonAsync(authority, scope,
-                        new UserCredential()).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// .NET specific method for intergrated auth.
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="authority"></param>
-        /// <returns></returns>
-        internal async Task<AuthenticationResult> AcquireTokenWithIntegratedAuthInternalAsync(IEnumerable<string> scope,
-            string authority)
-        {
-            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenUsingIntegratedAuthCommonAsync(authorityInstance, scope,
-                        new UserCredential()).ConfigureAwait(false);
-        }
-
-        private async Task<AuthenticationResult> AcquireTokenUsingIntegratedAuthCommonAsync(Authority authority,
-            IEnumerable<string> scope, UserCredential userCredential)
-        {
-/*            var requestParams = this.CreateRequestParameters(authority, scope, policy, this.UserTokenCache);
-            var handler = new SilentWebUiRequest(requestParams, userCredential);
-            return await handler.RunAsync().ConfigureAwait(false);*/
-            await Task.Run(() => { throw new NotImplementedException(); });
-            return null;
-        }
-
         private async Task<AuthenticationResult> AcquireTokenCommonAsync(Authority authority, IEnumerable<string> scope,
             IEnumerable<string> additionalScope, string loginHint, UIBehavior behavior,
             string extraQueryParameters, UIParent parent)
