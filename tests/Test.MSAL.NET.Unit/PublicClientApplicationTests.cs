@@ -575,5 +575,27 @@ namespace Test.MSAL.NET.Unit
 
             await app.AcquireTokenAsync(TestConstants.Scope.ToArray());
         }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void GetUserTest()
+        {
+            var app = new PublicClientApplication(TestConstants.ClientId);
+            var users = app.Users;
+            Assert.IsNotNull(users);
+            Assert.AreEqual(0, users.Count());
+
+            TokenCacheHelper.PopulateCache(app.UserTokenCache.TokenCacheAccessor);
+            users = app.Users;
+            Assert.IsNotNull(users);
+            Assert.AreEqual(1, users.Count());
+
+            var user = app.GetUser(users.First().Identifier);
+
+            Assert.AreEqual(users.First().DisplayableId, user.DisplayableId);
+            Assert.AreEqual(users.First().Identifier, user.Identifier);
+            Assert.AreEqual(users.First().IdentityProvider, user.IdentityProvider);
+            Assert.AreEqual(users.First().Name, user.Name);
+        }
     }
 }
