@@ -354,18 +354,18 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// </summary>
-        protected MsalException CreateExceptionForAuthenticationUiFailed(int statusCode)
+        protected MsalClientException CreateExceptionForAuthenticationUiFailed(int statusCode)
         {
             if (NavigateErrorStatus.Messages.ContainsKey(statusCode))
             {
                 string format = "The browser based authentication dialog failed to complete. Reason: {0}";
                 string message = string.Format(CultureInfo.InvariantCulture, format, NavigateErrorStatus.Messages[statusCode]);
-                return new MsalServiceException(MsalError.AuthenticationUiFailed, message, statusCode);
+                return new MsalClientException(MsalClientException.AuthenticationUiFailedError, message);
             }
 
             string formatUnknown = "The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}";
             string messageUnknown = string.Format(CultureInfo.InvariantCulture, formatUnknown, statusCode);
-            return new MsalServiceException(MsalError.AuthenticationUiFailed, messageUnknown, statusCode);
+            return new MsalClientException(MsalClientException.AuthenticationUiFailedError, messageUnknown);
         }
 
         private sealed class WindowsFormsWin32Window : IWin32Window

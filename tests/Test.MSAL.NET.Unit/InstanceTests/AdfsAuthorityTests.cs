@@ -388,9 +388,9 @@ namespace Test.MSAL.NET.Unit.InstanceTests
                 }).GetAwaiter().GetResult();
                 Assert.Fail("validation should have failed here");
             }
-            catch (MsalServiceException exc)
+            catch (MsalClientException exc)
             {
-                Assert.AreEqual(MsalError.TenantDiscoveryFailed, exc.ErrorCode);
+                Assert.AreEqual(MsalClientException.TenantDiscoveryFailedError, exc.ErrorCode);
             }
 
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockCount);

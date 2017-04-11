@@ -47,12 +47,12 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (Status == AuthorizationStatus.UserCancel)
             {
-                Error = MsalError.AuthenticationCanceled;
+                Error = MsalClientException.AuthenticationCanceledError;
                 ErrorDescription = MsalErrorMessage.AuthenticationCanceled;
             }
             else if (Status == AuthorizationStatus.UnknownError)
             {
-                Error = MsalError.Unknown;
+                Error = MsalException.UnknownError;
                 ErrorDescription = MsalErrorMessage.Unknown;
             }
             else
