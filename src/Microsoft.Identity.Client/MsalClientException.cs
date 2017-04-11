@@ -64,10 +64,9 @@ namespace Microsoft.Identity.Client
         public const string AuthenticationCanceledError = "authentication_canceled";
 
         /// <summary>
-        /// Authentication canceled.
+        /// JSON parsing failed.
         /// </summary>
         public const string JsonParseError = "json_parse_failed";
-
 
         /// <summary>
         /// JWT was invalid
@@ -99,6 +98,12 @@ namespace Microsoft.Identity.Client
         /// authorize request if applicable or fall back to chrome browser.
         /// </summary>
         public const string ChromeNotInstalledError = "chrome_not_installed";
+
+        /// <summary>
+        /// The intent to launch AuthenticationActivity is not resolvable by the OS or the intent.
+        /// </summary>
+        public const string UnresolvableIntentError = "unresolvable_intent";
+
 #endif
 
 
