@@ -29,34 +29,30 @@ using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client
 {
-    public class Telemetry
+    internal class EventCollection
     {
-        public delegate void Receiver(List<Dictionary<string, string>> events);
+        protected List<Event> Events = new List<Event> { };
+        protected Telemetry.Receiver Receiver;
 
-        private Receiver _receiver = null;
-
-        public void RegisterReceiver(Receiver r)
+        public EventCollection(Telemetry.Receiver receiver)
         {
-            _receiver = r;
+            Receiver = receiver;
         }
 
-        private static readonly Telemetry Singleton = new Telemetry();
-
-        private Telemetry(){}
-
-        public static Telemetry GetInstance()
+        public void Add(Event e)
         {
-            return Singleton;
+            Events.Add(e);
         }
 
-        internal EventCollection CreateEventCollection()  // An equivalent of CreateRequestID(...)
+        public void Flush()
         {
-            return new EventCollection(_receiver);
-        }
-
-        internal void Flush(EventCollection collection)
-        {
-            collection.Flush();
+            var normalized = new List<Dictionary<string, string>> { };
+            foreach(Event e in Events)
+            {
+                // TODO: This loop converts events into a list of dictionaries
+            }
+            Receiver(normalized);
+            Events = new List<Event> { };
         }
     }
 }
