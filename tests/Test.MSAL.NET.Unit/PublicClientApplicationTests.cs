@@ -583,19 +583,33 @@ namespace Test.MSAL.NET.Unit
             var app = new PublicClientApplication(TestConstants.ClientId);
             var users = app.Users;
             Assert.IsNotNull(users);
+            // no users in the cache
             Assert.AreEqual(0, users.Count());
 
-            TokenCacheHelper.PopulateCache(app.UserTokenCache.TokenCacheAccessor);
+            var fetchedUser = app.GetUser(null);
+            Assert.IsNull(fetchedUser);
+
+            fetchedUser = app.GetUser("");
+            Assert.IsNull(fetchedUser);
+
+            TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCache.TokenCacheAccessor, TestConstants.Uid,
+                TestConstants.Utid, TestConstants.Name);
+            TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCache.TokenCacheAccessor, TestConstants.Uid + "1",
+                TestConstants.Utid, TestConstants.Name + "1");
+
             users = app.Users;
             Assert.IsNotNull(users);
-            Assert.AreEqual(1, users.Count());
+            // two users in the cache
+            Assert.AreEqual(2, users.Count());
 
-            var user = app.GetUser(users.First().Identifier);
+            var userToFind = users.First();
 
-            Assert.AreEqual(users.First().DisplayableId, user.DisplayableId);
-            Assert.AreEqual(users.First().Identifier, user.Identifier);
-            Assert.AreEqual(users.First().IdentityProvider, user.IdentityProvider);
-            Assert.AreEqual(users.First().Name, user.Name);
+            fetchedUser = app.GetUser(userToFind.Identifier);
+
+            Assert.AreEqual(userToFind.DisplayableId, fetchedUser.DisplayableId);
+            Assert.AreEqual(userToFind.Identifier, fetchedUser.Identifier);
+            Assert.AreEqual(userToFind.IdentityProvider, fetchedUser.IdentityProvider);
+            Assert.AreEqual(userToFind.Name, fetchedUser.Name);
         }
     }
 }
