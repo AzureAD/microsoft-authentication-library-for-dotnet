@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 
+using System.Collections.Generic;
+
 namespace Microsoft.Identity.Client
 {
     internal class CacheEvent : EventBase
@@ -37,13 +39,27 @@ namespace Microsoft.Identity.Client
         public const string TokenCacheBeforeWrite = EventNamePrefix + "token_cache_before_write";
         public const string TokenCacheDelete = EventNamePrefix + "token_cache_delete";
 
-        public CacheEvent(string eventName) : base(eventName) {}
-
-        public const string TokenTypeAT = "AT";
-        public const string TokenTypeRT = "RT";
-        public string TokenType
+        public CacheEvent(string eventName) : base(eventName)
         {
-            set => this["token_type"] = value;
+        }
+
+        public enum TokenTypes
+        {
+            AT,
+            RT
+        };
+
+        public TokenTypes TokenType
+        {
+            set
+            {
+                var types = new Dictionary<TokenTypes, string>()
+                {
+                    {TokenTypes.AT, "AT"},
+                    {TokenTypes.RT, "RT"}
+                };
+                this["token_type"] = types[value];
+            }
         }
     }
 }
