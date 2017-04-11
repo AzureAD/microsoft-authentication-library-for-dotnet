@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 
+using Microsoft.Identity.Client.Internal;
+
 namespace Microsoft.Identity.Client
 {
     internal class ApiEvent : EventBase
@@ -57,17 +59,16 @@ namespace Microsoft.Identity.Client
             set => this["validation_status"] = value;
         }
 
-        public string LoginHint
+        public string TenantId
         {
-            set => this["login_hint"] = value;
+            set => this["tenant_id"] = PlatformPlugin.CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value);
         }
 
-        public string IdToken {
-            set {
-                this["tenant_id"] = "TODO";
-                this["user_id"] = "TODO";
-            }
+        public string UserId
+        {
+            set => this["user_id"] = PlatformPlugin.CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value);
         }
+
         public bool WasSuccessful
         {
             set => this["was_successful"] = value.ToString();
