@@ -37,14 +37,14 @@ namespace AutomationApp
     public partial class AutomationUI : Form
     {
         private delegate Task<IAuthenticationResult> Command(Dictionary<string, string> input);
-        private readonly LoggerCallbackImpl _loggerCallback = new LoggerCallbackImpl();
+        private readonly AppLogger _appLogger = new AppLogger();
         private Command _commandToRun;
         private readonly TokenHandler _tokenHandlerApp = new TokenHandler();
 
         public AutomationUI()
         {
             InitializeComponent();
-            Logger.Callback = _loggerCallback;
+            Logger.LogDelegate = _appLogger.Log;
         }
 
         public Dictionary<string, string> CreateDictionaryFromJson(string json)
@@ -96,7 +96,7 @@ namespace AutomationApp
             {
                 exceptionResult.Text = exception.ToString();
             }
-            msalLogs.Text = _loggerCallback.GetMsalLogs();
+            msalLogs.Text = _appLogger.GetMsalLogs();
             pageControl1.SelectedTab = resultPage;
         }
 

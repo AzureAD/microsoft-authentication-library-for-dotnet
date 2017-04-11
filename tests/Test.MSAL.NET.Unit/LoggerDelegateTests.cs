@@ -36,13 +36,16 @@ namespace Test.MSAL.NET.Unit
     [TestClass]
     public class LoggerCallbackTests
     {
-        private static ILoggerCallback _callback;
-        
+        //private static ILoggerCallback _callback;
+        private static LogDelegate _delegate;
+
         [ClassInitialize()]
         public static void ClassInit(TestContext context)
         {
-            _callback = Substitute.For<ILoggerCallback>();
-            Logger.Callback = _callback;
+            //_callback = Substitute.For<ILoggerCallback>();
+            //Logger.Callback = _callback;
+            _delegate = Substitute.For<LogDelegate>();
+            Logger.LogDelegate = _delegate;
         }
 
         [TestMethod()]
@@ -54,19 +57,19 @@ namespace Test.MSAL.NET.Unit
             var counter = 0;
             Logger.Level = Logger.LogLevel.Error;
 
-            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Warning("test message");
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Info("test message");
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Verbose("test message");
             Assert.AreEqual(1, counter);
         }
@@ -80,19 +83,19 @@ namespace Test.MSAL.NET.Unit
             var counter = 0;
             Logger.Level = Logger.LogLevel.Warning;
 
-            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Warning("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Info("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Verbose("test message");
             Assert.AreEqual(2, counter);
         }
@@ -106,19 +109,19 @@ namespace Test.MSAL.NET.Unit
             var counter = 0;
             Logger.Level = Logger.LogLevel.Info;
 
-            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Warning("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Info("test message");
             Assert.AreEqual(3, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Verbose("test message");
             Assert.AreEqual(3, counter);
         }
@@ -132,19 +135,19 @@ namespace Test.MSAL.NET.Unit
             var counter = 0;
             Logger.Level = Logger.LogLevel.Verbose;
 
-            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Warning("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Info("test message");
             Assert.AreEqual(3, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
             requestContext.Logger.Verbose("test message");
             Assert.AreEqual(4, counter);
         }
@@ -159,19 +162,19 @@ namespace Test.MSAL.NET.Unit
             Logger.Level = Logger.LogLevel.Error;
             Logger.PiiLoggingEnabled = true;
 
-            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.WarningPii("test message");
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.InfoPii("test message");
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.VerbosePii("test message");
             Assert.AreEqual(1, counter);
         }
@@ -186,19 +189,19 @@ namespace Test.MSAL.NET.Unit
             Logger.Level = Logger.LogLevel.Warning;
             Logger.PiiLoggingEnabled = true;
 
-            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.WarningPii("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.InfoPii("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.VerbosePii("test message");
             Assert.AreEqual(2, counter);
         }
@@ -213,19 +216,19 @@ namespace Test.MSAL.NET.Unit
             Logger.Level = Logger.LogLevel.Info;
             Logger.PiiLoggingEnabled = true;
 
-            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.WarningPii("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.InfoPii("test message");
             Assert.AreEqual(3, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.VerbosePii("test message");
             Assert.AreEqual(3, counter);
         }
@@ -240,19 +243,19 @@ namespace Test.MSAL.NET.Unit
             Logger.Level = Logger.LogLevel.Verbose;
             Logger.PiiLoggingEnabled = true;
 
-            _callback.When(x => x.Log(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.WarningPii("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.InfoPii("test message");
             Assert.AreEqual(3, counter);
 
-            _callback.When(x => x.Log(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
+            _delegate.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             requestContext.Logger.VerbosePii("test message");
             Assert.AreEqual(4, counter);
         }

@@ -61,7 +61,7 @@
     <Compile Include="AutomationUI.Designer.cs">
       <DependentUpon>AutomationUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="LoggerCallbackImpl.cs" />
+    <Compile Include="AppLogger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TokenCacheDelegates.cs" />
