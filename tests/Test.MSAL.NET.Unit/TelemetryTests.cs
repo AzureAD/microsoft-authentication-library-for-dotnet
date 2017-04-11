@@ -34,13 +34,23 @@ namespace Test.MSAL.NET.Unit
 {
     class MyReceiver
     {
+        public List<Dictionary<string, string>> EventsReceived { get; set; }
+
+        public MyReceiver()
+        {
+            EventsReceived = new List<Dictionary<string, string>>();
+        }
+
         public void OnEvents(List<Dictionary<string, string>> events)
         {
+            EventsReceived = events;
+            Console.WriteLine("{0} event(s) received", events.Count);
             foreach(var e in events)
             {
+                Console.WriteLine("Event: {0}", e.ContainsKey("event_name") ? e["event_name"] : "Default Event");
                 foreach(var entry in e)
                 {
-                    Console.WriteLine("{0}: {1}", entry.Key, entry.Value);
+                    Console.WriteLine("  {0}: {1}", entry.Key, entry.Value);
                 }
             }
         }
@@ -74,6 +84,84 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(t1);
             var t2 = Telemetry.GetInstance();
             Assert.AreEqual(t1, t2);
+        }
+
+        [TestMethod]
+        [TestCategory("TelemetryInternalAPI")]
+        public void TelemetryInternalApiSample()
+        {
+            Telemetry telemetry = Telemetry.GetInstance();
+            var myReceiver = new MyReceiver();
+            telemetry.RegisterReceiver(myReceiver.OnEvents);
+
+            var reqId = telemetry.GenerateNewRequestId();
+            try
+            {
+                var e1 = new ApiEvent() {Authority = "https://login.microsoftonline.com", AuthorityType = "Aad"};
+                telemetry.StartEvent(reqId, e1);
+                // do some stuff...
+                e1.WasSuccessful = true;
+                telemetry.StopEvent(reqId, e1);
+
+                var e2 = new HttpEvent() {HttpPath = "https://bar.com", UserAgent = "Edge", QueryParams = "foo&bar"};
+                telemetry.StartEvent(reqId, e2);
+                // do some stuff...
+                e2.HttpResponseStatus = 200;
+                telemetry.StopEvent(reqId, e2);
+            }
+            finally
+            {
+                telemetry.Flush(reqId);
+            }
+            Assert.IsTrue(myReceiver.EventsReceived.Count > 0);
+        }
+
+        [TestMethod]
+        [TestCategory("TelemetryInternalAPI")]
+        public void TelemetrySkipEventsIfApiEventWasSuccessful()
+        {
+            Telemetry telemetry = Telemetry.GetInstance();
+            telemetry.TelemetryOnFailureOnly = true;
+            var myReceiver = new MyReceiver();
+            telemetry.RegisterReceiver(myReceiver.OnEvents);
+
+            var reqId = telemetry.GenerateNewRequestId();
+            try
+            {
+                var e1 = new ApiEvent() { Authority = "https://login.microsoftonline.com", AuthorityType = "Aad" };
+                telemetry.StartEvent(reqId, e1);
+                // do some stuff...
+                e1.WasSuccessful = true;
+                telemetry.StopEvent(reqId, e1);
+
+                var e2 = new UiEvent() { UserCancelled = false };
+                telemetry.StartEvent(reqId, e2);
+                telemetry.StopEvent(reqId, e2);
+            }
+            finally
+            {
+                telemetry.Flush(reqId);
+            }
+            Assert.AreEqual(0, myReceiver.EventsReceived.Count);
+
+            reqId = telemetry.GenerateNewRequestId();
+            try
+            {
+                var e1 = new ApiEvent() { Authority = "https://login.microsoftonline.com", AuthorityType = "Aad" };
+                telemetry.StartEvent(reqId, e1);
+                // do some stuff...
+                e1.WasSuccessful = false;  // mimic an unsuccessful event, so that this batch should be dispatched
+                telemetry.StopEvent(reqId, e1);
+
+                var e2 = new UiEvent() { UserCancelled = true };
+                telemetry.StartEvent(reqId, e2);
+                telemetry.StopEvent(reqId, e2);
+            }
+            finally
+            {
+                telemetry.Flush(reqId);
+            }
+            Assert.IsTrue(myReceiver.EventsReceived.Count > 0);
         }
     }
 }

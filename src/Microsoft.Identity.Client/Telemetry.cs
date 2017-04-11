@@ -25,7 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -62,6 +65,150 @@ namespace Microsoft.Identity.Client
         public static Telemetry GetInstance()
         {
             return Singleton;
+        }
+
+        public bool TelemetryOnFailureOnly { get; set; }
+
+        private Dictionary<Tuple<string, string>, EventBase> EventsInProgress = new Dictionary<Tuple<string, string>, EventBase>();
+
+        private Dictionary<string, List<EventBase>> CompletedEvents = new Dictionary<string, List<EventBase>>();
+
+        internal string GenerateNewRequestId()
+        {
+            return Guid.NewGuid().ToString();
+        }
+
+        internal void StartEvent(string requestId, EventBase eventToStart)
+        {
+            if (requestId != null)
+            {
+                EventsInProgress[new Tuple<string, string>(requestId, eventToStart["event_name"])] = eventToStart;
+            }
+        }
+
+        internal void StopEvent(string requestId, EventBase eventToStop)
+        {
+            if (requestId == null)
+            {
+                return;
+            }
+            Tuple<string, string> eventKey = new Tuple<string, string>(requestId, eventToStop["event_name"]);
+
+            // Locate the same name event in the EventsInProgress map
+            EventBase eventStarted = null;
+            if (EventsInProgress.ContainsKey(eventKey))
+            {
+                eventStarted = EventsInProgress[eventKey];
+            }
+
+            // If we did not get anything back from the dictionary, most likely its a bug that StopEvent
+            // was called without a corresponding StartEvent
+            if (null == eventStarted)
+            {
+                // Stop Event called without a corresponding start_event.
+                return;
+            }
+
+            // Set execution time properties on the event
+            eventToStop.Stop();
+
+            if (!CompletedEvents.ContainsKey(requestId))
+            {
+                // if this is the first event associated to this
+                // RequestId we need to initialize a new List to hold
+                // all of sibling events
+                List<EventBase> events = new List<EventBase>();
+                events.Add(eventToStop);
+                CompletedEvents[requestId] = events;
+            }
+            else
+            {
+                // if this event shares a RequestId with other events
+                // just add it to the List
+                CompletedEvents[requestId].Add(eventToStop);
+            }
+
+            // Mark this event as no longer in progress
+            EventsInProgress.Remove(eventKey);
+        }
+
+        internal void Flush(string requestId)
+        {
+            if (_receiver == null)
+            {
+                return;
+            }
+
+            // check for orphaned events...
+            List<EventBase> orphanedEvents = CollateOrphanedEvents(requestId);
+            // Add the OrphanedEvents to the completed EventList
+            if (!CompletedEvents.ContainsKey(requestId))
+            {
+                // No completed Events returned for RequestId
+                return;
+            }
+
+            CompletedEvents[requestId].AddRange(orphanedEvents);
+
+            List<EventBase> eventsToFlush = CompletedEvents[requestId];
+            CompletedEvents.Remove(requestId);
+
+            if (TelemetryOnFailureOnly)
+            {
+                // iterate over Events, if the ApiEvent was successful, don't dispatch
+                bool shouldRemoveEvents = false;
+
+                foreach (var anEvent in eventsToFlush)
+                {
+                    var apiEvent = anEvent as ApiEvent;
+                    if (apiEvent != null)
+                    {
+                        shouldRemoveEvents = apiEvent.WasSuccessful;
+                        break;
+                    }
+                }
+
+                if (shouldRemoveEvents)
+                {
+                    eventsToFlush.Clear();
+                }
+            }
+
+            if (eventsToFlush.Count > 0)
+            {
+                var dictionariesToFlush = eventsToFlush.Cast<Dictionary<string, string>>().ToList();
+                dictionariesToFlush.Insert(0, BuildDefaultEvent());
+                _receiver(dictionariesToFlush);
+            }
+        }
+
+        private List<EventBase> CollateOrphanedEvents(String requestId)
+        {
+            var orphanedEvents = new List<EventBase>();
+            foreach (var key in EventsInProgress.Keys)
+            {
+                if (key.Item1 == requestId)
+                {
+                    // The orphaned event already contains its own start time, we simply collect it
+                    orphanedEvents.Add(EventsInProgress[key]);  
+                    EventsInProgress.Remove(key);
+                }
+            }
+            return orphanedEvents;
+        }
+
+        private Dictionary<string, string> BuildDefaultEvent()
+        {
+            return new Dictionary<string, string>()
+            {
+                {"sdk_platform", PlatformPlugin.PlatformInformation.GetProductName()},
+                {"sdk_version", MsalIdHelper.GetMsalVersion()},
+                // TODO: Need to port this implementation: https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/494/files#diff-d39facf37a21ee48789244a9a7bd95dbR37
+                {"application_name", "TODO"},
+                {"application_version", "TODO"},
+                {"client_id", "TODO"},
+                {"device_id", "TODO"}
+            };
         }
     }
 }

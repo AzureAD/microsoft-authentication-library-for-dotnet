@@ -72,6 +72,7 @@ namespace Microsoft.Identity.Client
         public bool WasSuccessful
         {
             set => this["was_successful"] = value.ToString();
+            get => this["was_successful"] == "True";
         }
     }
 }
