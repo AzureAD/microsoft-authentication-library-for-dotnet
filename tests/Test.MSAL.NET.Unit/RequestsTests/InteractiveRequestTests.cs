@@ -275,7 +275,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             catch (Exception exc)
             {
                 Assert.IsTrue(exc.InnerException is MsalException);
-                Assert.AreEqual(MsalError.DuplicateQueryParameter, ((MsalException) exc.InnerException).ErrorCode);
+                Assert.AreEqual(MsalClientException.DuplicateQueryParameterError, ((MsalException) exc.InnerException).ErrorCode);
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");

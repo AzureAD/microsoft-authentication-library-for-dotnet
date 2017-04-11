@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client
         {
             if (!NetworkInterface.GetIsNetworkAvailable())
             {
-                throw new MsalException(MsalError.NetworkNotAvailable);
+                throw new MsalClientException(MsalClientException.NetworkNotAvailableError, MsalErrorMessage.NetworkNotAvailable);
             }
         }
 

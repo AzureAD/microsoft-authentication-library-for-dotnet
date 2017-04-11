@@ -31,6 +31,7 @@ using System.Threading.Tasks;
 using Windows.Security.Authentication.Web;
 using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using Windows.Networking.Connectivity;
 
 namespace Microsoft.Identity.Client
 {
@@ -58,6 +59,7 @@ namespace Microsoft.Identity.Client
                 ? WebAuthenticationOptions.UseCorporateNetwork
                 : WebAuthenticationOptions.None;
 
+            ThrowOnNetworkDown();
             if (silentMode)
             {
                 options |= WebAuthenticationOptions.SilentMode;
@@ -86,12 +88,25 @@ namespace Microsoft.Identity.Client
             catch (Exception ex)
             {
                 requestContext.Logger.Error(ex);
-                throw new MsalException(MsalError.AuthenticationUiFailed, "WAB authentication failed" ,ex);
+                throw new MsalException(MsalClientException.AuthenticationUiFailedError, "WAB authentication failed",
+                    ex);
             }
 
             AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult, requestContext);
 
             return result;
+        }
+
+        private void ThrowOnNetworkDown()
+        {
+            var profile = NetworkInformation.GetInternetConnectionProfile();
+            var isConnected = (profile != null
+                               && profile.GetNetworkConnectivityLevel() ==
+                               NetworkConnectivityLevel.InternetAccess);
+            if (!isConnected)
+            {
+                throw new MsalClientException(MsalClientException.NetworkNotAvailableError, MsalErrorMessage.NetworkNotAvailable);
+            }
         }
 
         private static AuthorizationResult ProcessAuthorizationResult(WebAuthenticationResult webAuthenticationResult,

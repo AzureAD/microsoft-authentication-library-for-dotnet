@@ -42,6 +42,8 @@ namespace Test.MSAL.NET.Unit.Mocks
             AddStateInAuthorizationResult = true;
         }
 
+        public Exception ExceptionToThrow { get; set; }
+
         public AuthorizationResult MockResult { get; set; }
 
         public IDictionary<string, string> QueryParamsToValidate { get; set; }
@@ -52,6 +54,11 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
+            if (ExceptionToThrow != null)
+            {
+                throw ExceptionToThrow;
+            }
+
             IDictionary<string, string> inputQp = MsalHelpers.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);
             Assert.IsNotNull(inputQp[OAuth2Parameter.State]);
             if (AddStateInAuthorizationResult)
