@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.AuthorizationCode);
             client.AddBodyParameter(OAuth2Parameter.Code, _authorizationResult.Code);
-            client.AddBodyParameter(OAuth2Parameter.RedirectUri, AuthenticationRequestParameters.RedirectUri.AbsoluteUri);
+            client.AddBodyParameter(OAuth2Parameter.RedirectUri, AuthenticationRequestParameters.RedirectUri.OriginalString);
             client.AddBodyParameter(OAuth2Parameter.CodeVerifier, _codeVerifier);
         }
 
@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             authorizationRequestParameters[OAuth2Parameter.ClientId] = AuthenticationRequestParameters.ClientId;
             authorizationRequestParameters[OAuth2Parameter.RedirectUri] =
-                AuthenticationRequestParameters.RedirectUri.AbsoluteUri;
+                AuthenticationRequestParameters.RedirectUri.OriginalString;
 
             if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.LoginHint))
             {

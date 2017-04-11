@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client
             {
                 var agentIntent = new Intent(_parent.Activity, typeof(AuthenticationActivity));
                 agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
-                agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.AbsoluteUri);
+                agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.OriginalString);
 
                 _parent.Activity.RunOnUiThread(()=> _parent.Activity.StartActivityForResult(agentIntent, 0));
             }
