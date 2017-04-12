@@ -113,7 +113,7 @@ namespace WinFormsAutomationApp
             IntPtr lpszUrlName);
 
         [STAThread]
-        public static void CleanCoockies()
+        public static void CleanCookies()
         {
             // Indicates that all of the cache groups in the user's system should be enumerated
             const int CACHEGROUP_SEARCH_ALL = 0x0;

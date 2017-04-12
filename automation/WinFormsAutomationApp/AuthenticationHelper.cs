@@ -23,19 +23,21 @@ namespace WinFormsAutomationApp
             try
             {
                 AuthenticationResult result = null;
-                 if (input.ContainsKey("user_identifier") && input.ContainsKey("password"))
+
+                if (!input.ContainsKey("redirect_uri"))
+                {
+                    UserCredential userCred = new UserCredential();
+                    result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], userCred).ConfigureAwait(false);
+                }
+                else if (input.ContainsKey("user_identifier") && input.ContainsKey("password"))
                 {
                     UserPasswordCredential user = new UserPasswordCredential(input["user_identifier"], input["password"]);
-                    result =
-                        await
-                            ctx.AcquireTokenAsync(input["resource"], input["client_id"],user).ConfigureAwait(false);
+                    result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], user).ConfigureAwait(false);
                 }
                 else
                 {
                     string prompt = input.ContainsKey("prompt_behavior") ? input["prompt_behavior"] : null;
-                    result =
-                        await
-                            ctx.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
+                    result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
                                 GetPlatformParametersInstance(prompt)).ConfigureAwait(false);
                 }
                 res = ProcessResult(result, input);
@@ -165,7 +167,6 @@ namespace WinFormsAutomationApp
         public static async Task<string> AcquireTokenUsingDeviceProfile(Dictionary<string, string> input)
         {
             Dictionary<string, object> res = new Dictionary<string, object>();
-            IWebDriver driver = null;
             AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
 
             try
@@ -188,10 +189,6 @@ namespace WinFormsAutomationApp
             catch (Exception exc)
             {
                 res.Add("error", exc.Message);
-            }
-            finally
-            {
-               if(driver != null) driver.Quit();
             }
             return FromDictionaryToJson(res);
         }
@@ -243,16 +240,6 @@ namespace WinFormsAutomationApp
         #endregion
 
         #region Private Methods
-        // This function clears cookies from the browser control used by ADAL.
-        public static void ClearCookies()
-        {
-            const int INTERNET_OPTION_END_BROWSER_SESSION = 42;
-            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_END_BROWSER_SESSION, IntPtr.Zero, 0);
-        }
-
-        [DllImport("wininet.dll", SetLastError = true)]
-        private static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int lpdwBufferLength);
-
         private static string JsonOutputFormat(string result)
         {
             Dictionary<string, string> jsonDictitionary = new Dictionary<string, string>();
