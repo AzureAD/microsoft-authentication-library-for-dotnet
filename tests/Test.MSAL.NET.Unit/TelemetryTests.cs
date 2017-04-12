@@ -47,7 +47,7 @@ namespace Test.MSAL.NET.Unit
             Console.WriteLine("{0} event(s) received", events.Count);
             foreach(var e in events)
             {
-                Console.WriteLine("Event: {0}", e.ContainsKey("event_name") ? e["event_name"] : "Default Event");
+                Console.WriteLine("Event: {0}", e["event_name"]);
                 foreach(var entry in e)
                 {
                     Console.WriteLine("  {0}: {1}", entry.Key, entry.Value);
@@ -94,6 +94,7 @@ namespace Test.MSAL.NET.Unit
             var myReceiver = new MyReceiver();
             telemetry.RegisterReceiver(myReceiver.OnEvents);
 
+            telemetry.ClientId = "a1b3c3d4";
             var reqId = telemetry.GenerateNewRequestId();
             try
             {

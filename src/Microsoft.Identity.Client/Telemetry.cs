@@ -28,7 +28,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -176,9 +175,8 @@ namespace Microsoft.Identity.Client
 
             if (eventsToFlush.Count > 0)
             {
-                var dictionariesToFlush = eventsToFlush.Cast<Dictionary<string, string>>().ToList();
-                dictionariesToFlush.Insert(0, BuildDefaultEvent());
-                _receiver(dictionariesToFlush);
+                eventsToFlush.Insert(0, new DefaultEvent(ClientId));
+                _receiver(eventsToFlush.Cast<Dictionary<string, string>>().ToList());
             }
         }
 
@@ -197,18 +195,6 @@ namespace Microsoft.Identity.Client
             return orphanedEvents;
         }
 
-        private Dictionary<string, string> BuildDefaultEvent()
-        {
-            return new Dictionary<string, string>()
-            {
-                {"sdk_platform", PlatformPlugin.PlatformInformation.GetProductName()},
-                {"sdk_version", MsalIdHelper.GetMsalVersion()},
-                // TODO: Need to port this implementation: https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/494/files#diff-d39facf37a21ee48789244a9a7bd95dbR37
-                {"application_name", "TODO"},
-                {"application_version", "TODO"},
-                {"client_id", "TODO"},
-                {"device_id", "TODO"}
-            };
-        }
+        public string ClientId { get; set; } = "undefined";
     }
 }
