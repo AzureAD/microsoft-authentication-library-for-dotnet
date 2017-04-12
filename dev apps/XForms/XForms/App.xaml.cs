@@ -55,7 +55,7 @@ namespace XForms
             MainPage = new XForms.MainPage();
             InitPublicClient();
 
-            Logger.LogDelegate = delegate(Logger.LogLevel level, string message, bool containsPii)
+            Logger.LogCallback = delegate(Logger.LogLevel level, string message, bool containsPii)
             {
                 Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message); });
             };

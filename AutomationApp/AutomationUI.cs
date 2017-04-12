@@ -44,7 +44,7 @@ namespace AutomationApp
         public AutomationUI()
         {
             InitializeComponent();
-            Logger.LogDelegate = _appLogger.Log;
+            Logger.LogCallback = _appLogger.Log;
         }
 
         public Dictionary<string, string> CreateDictionaryFromJson(string json)

@@ -61,7 +61,7 @@ namespace DesktopTestApp
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
 
-            Logger.LogDelegate = _appLogger.Log;
+            Logger.LogCallback = _appLogger.Log;
             Logger.Level = Logger.LogLevel.Info;
             PiiLogging();
 
