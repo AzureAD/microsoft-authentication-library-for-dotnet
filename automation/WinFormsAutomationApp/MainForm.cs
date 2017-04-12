@@ -14,7 +14,7 @@ namespace WinFormsAutomationApp
 
         public MainForm()
         {
-            DeleteCache.CleanCoockies();
+            DeleteCache.CleanCookies();
             InitializeComponent();
             TokenCache.DefaultShared.AfterAccess += TokenCacheDelegates.AfterAccessNotification;
             TokenCache.DefaultShared.BeforeAccess += TokenCacheDelegates.BeforeAccessNotification;
@@ -29,7 +29,7 @@ namespace WinFormsAutomationApp
 
         private async void requestGo_Click(object sender, EventArgs e)
         {
-            string output = await _commandToRun((AuthenticationHelper.CreateDictionaryFromJson(requestInfo.Text)));
+             string output = await _commandToRun((AuthenticationHelper.CreateDictionaryFromJson(requestInfo.Text)));
             pageControl1.SelectedTab = resultPage;
             resultInfo.Text = output;
             resultLogs.Text = loggerCallback.GetAdalLogs();
