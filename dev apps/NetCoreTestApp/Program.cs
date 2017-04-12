@@ -38,7 +38,7 @@ namespace NetCoreTestApp
             ConfidentialClientApplication app = new ConfidentialClientApplication("<client-id>", "http://localhost", cc, new TokenCache(), new TokenCache());
             try
             {
-                IAuthenticationResult result = app.AcquireTokenForClientAsync(new string[] { "User.Read.All" }).Result;
+                AuthenticationResult result = app.AcquireTokenForClientAsync(new string[] { "User.Read.All" }).Result;
             }
             catch (Exception exc)
             {

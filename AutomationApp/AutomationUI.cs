@@ -36,7 +36,7 @@ namespace AutomationApp
 {
     public partial class AutomationUI : Form
     {
-        private delegate Task<IAuthenticationResult> Command(Dictionary<string, string> input);
+        private delegate Task<AuthenticationResult> Command(Dictionary<string, string> input);
         private readonly AppLogger _appLogger = new AppLogger();
         private Command _commandToRun;
         private readonly TokenHandler _tokenHandlerApp = new TokenHandler();
@@ -88,7 +88,7 @@ namespace AutomationApp
                 }
                 else
                 {
-                    IAuthenticationResult authenticationResult = await _commandToRun(dict);
+                    AuthenticationResult authenticationResult = await _commandToRun(dict);
                     SetResultPageInfo(authenticationResult);
                 }
             }
@@ -106,7 +106,7 @@ namespace AutomationApp
             pageControl1.SelectedTab = mainPage;
         }
 
-        private void SetResultPageInfo(IAuthenticationResult authenticationResult)
+        private void SetResultPageInfo(AuthenticationResult authenticationResult)
         {
             accessTokenResult.Text = authenticationResult.AccessToken;
             expiresOnResult.Text = authenticationResult.ExpiresOn.ToString();
