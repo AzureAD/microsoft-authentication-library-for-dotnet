@@ -32,7 +32,7 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     // A delegate type for processing a log message:
-    public delegate void LogDelegate(Logger.LogLevel level, string message, bool containsPii);
+    public delegate void LogCallback(Logger.LogLevel level, string message, bool containsPii);
 
     /// <summary>
     /// MSAL Logger
@@ -74,23 +74,23 @@ namespace Microsoft.Identity.Client
 
         private static readonly object LockObj = new object();
 
-        private static volatile LogDelegate _logDelegate;
+        private static volatile LogCallback _logCallback;
         /// <summary>
         /// Callback instance
         /// </summary>
-        public static LogDelegate LogDelegate
+        public static LogCallback LogCallback
         {
             set
             {
                 lock (LockObj)
                 {
-                    if (_logDelegate != null)
+                    if (_logCallback != null)
                     {
                         throw new Exception("MSAL logging delegate can only be set once per process and" +
                                             "should never change once set.");
                     }
 
-                    _logDelegate = value;
+                    _logCallback = value;
                 }
             }
         }
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client
         {
             lock (LockObj)
             {
-                _logDelegate?.Invoke(level, message, containsPii);
+                _logCallback?.Invoke(level, message, containsPii);
             }
         }
 
