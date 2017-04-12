@@ -39,7 +39,7 @@ namespace DesktopTestApp
 {
     public partial class MainForm : Form
     {
-        readonly LoggerCallback myCallback = new LoggerCallback();
+        readonly AppLogger _appLogger = new AppLogger();
 
         #region Properties
 
@@ -61,7 +61,7 @@ namespace DesktopTestApp
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
 
-            Logger.Callback = myCallback;
+            Logger.LogCallback = _appLogger.Log;
             Logger.Level = Logger.LogLevel.Info;
             PiiLogging();
 
@@ -314,8 +314,8 @@ namespace DesktopTestApp
 
         private void RefreshUI()
         {
-            msalPIILogs.Text = myCallback.DrainPiiLogs();
-            msalLogs.Text = myCallback.DrainLogs();
+            msalPIILogs.Text = _appLogger.DrainPiiLogs();
+            msalLogs.Text = _appLogger.DrainLogs();
             userList.DataSource = new PublicClientApplication(
                     "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
             { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
