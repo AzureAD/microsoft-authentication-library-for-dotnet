@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
+using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.OAuth2;
 using Microsoft.Identity.Client.Internal.Requests;
 
@@ -183,6 +184,7 @@ namespace Microsoft.Identity.Client
         {
             lock (LockObject)
             {
+                AccessTokenCacheItem accessTokenCacheItem = null;
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,
@@ -191,18 +193,9 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
+                //filtered by client id.
                 ICollection<AccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensForClient();
-
                 OnAfterAccess(args);
-
-                //first filter the list by authority, client id and scopes
-                tokenCacheItems =
-                    tokenCacheItems.Where(
-                        item =>
-                            item.Authority.Equals(requestParam.Authority.CanonicalAuthority) &&
-                            item.ClientId.Equals(requestParam.ClientId) &&
-                            item.ScopeSet.ScopeContains(requestParam.Scope))
-                        .ToList();
 
                 // this is OBO flow. match the cache entry with assertion hash,
                 // Authority, ScopeSet and client Id.
@@ -210,9 +203,10 @@ namespace Microsoft.Identity.Client
                 {
                     tokenCacheItems =
                         tokenCacheItems.Where(
-                            item =>
-                                !string.IsNullOrEmpty(item.UserAssertionHash) &&
-                                item.UserAssertionHash.Equals(requestParam.UserAssertion.AssertionHash)).ToList();
+                                item =>
+                                    !string.IsNullOrEmpty(item.UserAssertionHash) &&
+                                    item.UserAssertionHash.Equals(requestParam.UserAssertion.AssertionHash))
+                            .ToList();
                 }
                 else
                 {
@@ -222,27 +216,87 @@ namespace Microsoft.Identity.Client
                     if (!requestParam.HasCredential)
 #endif
                     {
-                        //filter by home_oid of the user instead
+                        //filter by identifier of the user instead
                         tokenCacheItems =
-                            tokenCacheItems.Where(item => item.GetUserIdentifier().Equals(requestParam.User?.Identifier))
+                            tokenCacheItems
+                                .Where(item => item.GetUserIdentifier().Equals(requestParam.User?.Identifier))
                                 .ToList();
                     }
                 }
 
-                if (tokenCacheItems.Count == 0)
+                //no match found after initial filtering
+                if (!tokenCacheItems.Any())
                 {
-                    // TODO: log access token not found
                     return null;
                 }
-                
-                if (tokenCacheItems.Count > 1)
+
+                IEnumerable<AccessTokenCacheItem> filteredItems =
+                    tokenCacheItems.Where(
+                            item =>
+                                item.ScopeSet.ScopeContains(requestParam.Scope))
+                        .ToList();
+                //no authority passed
+                if (requestParam.Authority == null)
                 {
-                    //TODO: log PII for authorities found.
-                    throw new MsalClientException(MsalClientException.MultipleTokensMatchedError, MsalErrorMessage.MultipleTokensMatched);
+                    //if only one cached token found
+                    if (filteredItems.Count() == 1)
+                    {
+                        accessTokenCacheItem = filteredItems.First();
+                        requestParam.Authority =
+                            Authority.CreateAuthority(accessTokenCacheItem.Authority, requestParam.ValidateAuthority);
+                    }
+                    else if (filteredItems.Count() > 1)
+                    {
+                        //more than 1 match found
+                        //TODO: log PII for authorities found.
+                        throw new MsalClientException(MsalClientException.MultipleTokensMatchedError,
+                            MsalErrorMessage.MultipleTokensMatched);
+                    }
+                    else
+                    {
+                        //no match found. check if there was a single authority used
+                        IEnumerable<string> authorityList = tokenCacheItems.Select(tci => tci.Authority).Distinct();
+                        if (authorityList.Count() > 1)
+                        {
+                            throw new MsalClientException(MsalClientException.MultipleTokensMatchedError,
+                                "Multiple authorities found in the cache. Pass in authority in the API overload.");
+                        }
+
+                        requestParam.Authority =
+                            Authority.CreateAuthority(authorityList.First(), requestParam.ValidateAuthority);
+                    }
+                }
+                else
+                {
+                    //authority was passed in the API
+                    filteredItems =
+                        filteredItems.Where(
+                                item =>
+                                    item.Authority.Equals(requestParam.Authority.CanonicalAuthority))
+                            .ToList();
+                    
+                    //no match
+                    if (!filteredItems.Any())
+                    {
+                        // TODO: log access token not found
+                        return null;
+                    }
+
+                    //if only one cached token found
+                    if (filteredItems.Count() == 1)
+                    {
+                        accessTokenCacheItem = filteredItems.First();
+                    }
+                    else
+                    {
+                        //more than 1 match found
+                        //TODO: log PII for authorities found.
+                        throw new MsalClientException(MsalClientException.MultipleTokensMatchedError,
+                            MsalErrorMessage.MultipleTokensMatched);
+                    }
                 }
 
-                AccessTokenCacheItem accessTokenCacheItem = tokenCacheItems.First();
-                if (accessTokenCacheItem.ExpiresOn >
+                if (accessTokenCacheItem != null && accessTokenCacheItem.ExpiresOn >
                     DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
                 {
                     return accessTokenCacheItem;
@@ -257,6 +311,11 @@ namespace Microsoft.Identity.Client
         {
             lock (LockObject)
             {
+                if (requestParam.Authority == null)
+                {
+                    return null;
+                }
+
                 RefreshTokenCacheKey key = new RefreshTokenCacheKey(
                     requestParam.Authority.Host, requestParam.ClientId,
                     requestParam.User?.Identifier);

@@ -19,7 +19,7 @@
     <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
     <DebugType>full</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
@@ -48,7 +48,7 @@
     <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0011" PrivateAssets="All" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' ">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3'">
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
@@ -84,7 +84,7 @@
     <Compile Include="Features\PublicClient\**\*.cs" />
     <Compile Include="Features\*.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
     <Compile Include="Features\TokenCache\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3' ">
