@@ -48,12 +48,15 @@ namespace Test.MSAL.NET.Unit
     [DeploymentItem("Resources\\OpenidConfiguration-B2C.json")]
     public class ConfidentialClientApplicationTests
     {
+        private readonly MyReceiver _myReceiver = new MyReceiver();
+
         [TestInitialize]
         public void TestInitialize()
         {
             Authority.ValidatedAuthorities.Clear();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
+            Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
         }
 
         [TestMethod]
@@ -308,6 +311,9 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(cachedAssertion, cc.Assertion);
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+
+            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent => // Expect finding such an event
+                anEvent[EventBase.ConstEventName].EndsWith("http_event") && anEvent[HttpEvent.ConstResponseCode] == "200"));
         }
 
         [TestMethod]
