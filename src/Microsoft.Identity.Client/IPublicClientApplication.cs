@@ -129,8 +129,7 @@ namespace Microsoft.Identity.Client
 
 #endif
 
-        // these API methods should only be exposed on Android and desktop.
-#if ANDROID || DESKTOP
+        // these API methods are exposed on other platforms.
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
@@ -210,6 +209,5 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters,
             IEnumerable<string> additionalScope,
             string authority, UIParent parent);
-#endif
     }
 }

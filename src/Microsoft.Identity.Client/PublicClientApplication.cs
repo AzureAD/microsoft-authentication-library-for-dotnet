@@ -178,10 +178,7 @@ namespace Microsoft.Identity.Client
                         behavior, extraQueryParameters, null).ConfigureAwait(false);
         }
 #endif
-
-
-
-#if ANDROID || DESKTOP
+        
 
         /// <summary>
         /// Interactive request to acquire token. 
@@ -287,8 +284,6 @@ namespace Microsoft.Identity.Client
                     AcquireTokenCommonAsync(authorityInstance, scope, additionalScope, user,
                         behavior, extraQueryParameters, parent).ConfigureAwait(false);
         }
-
-#endif
 
 
 
