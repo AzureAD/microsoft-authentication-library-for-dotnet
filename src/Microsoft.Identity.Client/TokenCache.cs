@@ -242,6 +242,8 @@ namespace Microsoft.Identity.Client
                     if (filteredItems.Count() == 1)
                     {
                         accessTokenCacheItem = filteredItems.First();
+                        requestParam.Authority =
+                            Authority.CreateAuthority(accessTokenCacheItem.Authority, requestParam.ValidateAuthority);
                     }
                     else if (filteredItems.Count() > 1)
                     {

@@ -61,11 +61,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     "Token cache is set to null. Silent requests cannot be executed.");
             }
 
-            //look for access token first because force refresh is not set
-            if (!ForceRefresh)
-            {
+            //look for access token.
                 AccessTokenItem
                     = TokenCache.FindAccessToken(AuthenticationRequestParameters);
+            
+            if (ForceRefresh)
+            {
+                AccessTokenItem = null;
             }
 
             await CompletedTask.ConfigureAwait(false);

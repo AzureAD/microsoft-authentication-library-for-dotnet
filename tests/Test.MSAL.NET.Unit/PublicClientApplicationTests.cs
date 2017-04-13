@@ -760,7 +760,7 @@ namespace Test.MSAL.NET.Unit
                 {
                     DisplayableId = TestConstants.DisplayableId,
                     Identifier = TestConstants.UserIdentifier,
-                }, app.Authority, true);
+                }, null, true);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);

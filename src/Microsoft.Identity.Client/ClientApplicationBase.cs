@@ -164,7 +164,12 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user,
             string authority, bool forceRefresh)
         {
-            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
+            Authority authorityInstance = null;
+            if (!string.IsNullOrEmpty(authority))
+            {
+                authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
+            }
+
             return
                 await
                     AcquireTokenSilentCommonAsync(authorityInstance, scope, user,
