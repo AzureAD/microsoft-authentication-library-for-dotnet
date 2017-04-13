@@ -88,8 +88,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal override async Task PreTokenRequest()
         {
             await base.PreTokenRequest().ConfigureAwait(false);
-
-            // We do not have async interactive API in .NET, so we call this synchronous method instead.
+            
             await AcquireAuthorizationAsync().ConfigureAwait(false);
             VerifyAuthorizationResult();
         }
@@ -108,7 +107,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             //this method is used in confidential clients to create authorization URLs.
             RequestContext = requestContext;
-            await Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, RequestContext).ConfigureAwait(false);
+            await AuthenticationRequestParameters.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, RequestContext).ConfigureAwait(false);
             return CreateAuthorizationUri();
         }
 
@@ -116,7 +115,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.AuthorizationCode);
             client.AddBodyParameter(OAuth2Parameter.Code, _authorizationResult.Code);
-            client.AddBodyParameter(OAuth2Parameter.RedirectUri, AuthenticationRequestParameters.RedirectUri.AbsoluteUri);
+            client.AddBodyParameter(OAuth2Parameter.RedirectUri, AuthenticationRequestParameters.RedirectUri.OriginalString);
             client.AddBodyParameter(OAuth2Parameter.CodeVerifier, _codeVerifier);
         }
 
@@ -185,7 +184,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 qp += "&" + AuthenticationRequestParameters.ExtraQueryParameters;
             }
 
-            UriBuilder builder = new UriBuilder(new Uri(Authority.AuthorizationEndpoint)) {Query = qp};
+            UriBuilder builder = new UriBuilder(new Uri(AuthenticationRequestParameters.Authority.AuthorizationEndpoint)) {Query = qp};
             return new Uri(MsalHelpers.CheckForExtraQueryParameter(builder.ToString()));
 
         }
@@ -202,7 +201,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             authorizationRequestParameters[OAuth2Parameter.ClientId] = AuthenticationRequestParameters.ClientId;
             authorizationRequestParameters[OAuth2Parameter.RedirectUri] =
-                AuthenticationRequestParameters.RedirectUri.AbsoluteUri;
+                AuthenticationRequestParameters.RedirectUri.OriginalString;
 
             if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.LoginHint))
             {

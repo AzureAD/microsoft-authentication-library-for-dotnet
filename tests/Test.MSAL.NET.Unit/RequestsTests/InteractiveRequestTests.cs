@@ -128,7 +128,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 UIBehavior.SelectAccount, ui);
             Task<AuthenticationResult> task = request.RunAsync();
             task.Wait();
-            IAuthenticationResult result = task.Result;
+            AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(2, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
@@ -199,7 +199,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(), 
                 (string) null, UIBehavior.ForceLogin, webUi);
-            request.PreRunAsync().Wait();
             try
             {
                 request.PreTokenRequest().Wait();
@@ -220,7 +219,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
                 (string) null, UIBehavior.ForceLogin, webUi);
-            request.PreRunAsync().Wait();
 
             try
             {
@@ -265,7 +263,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
                 null, UIBehavior.ForceLogin, new MockWebUI());
-            request.PreRunAsync().Wait();
 
             try
             {

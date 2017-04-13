@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public static void InitializeByAssemblyDynamicLinking()
         {
-#if !NETSTANDARD1_1
+#if !FACADE
             InjectDependecies(
                 (IWebUIFactory) new WebUIFactory(),
                 (ILogger) new PlatformLogger(),

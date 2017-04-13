@@ -53,13 +53,19 @@ namespace Microsoft.Identity.Client
         IEnumerable<IUser> Users { get; }
 
         /// <summary>
+        /// Get user by identifier from users available in the cache.
+        /// </summary>
+        /// <param name="identifier">user identifier</param>
+        IUser GetUser(string identifier);
+
+        /// <summary>
         /// Attempts to acquire the access token from cache. Access token is considered a match if it AT LEAST contains all the requested scopes.
         /// This means that an access token with more scopes than requested could be returned as well. If access token is expired or 
         /// close to expiration (within 5 minute window), then refresh token (if available) is used to acquire a new access token by making a network call.
         /// </summary>
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="user">User for which the token is requested. <see cref="User"/></param>
-        Task<IAuthenticationResult> AcquireTokenSilentAsync(
+        Task<AuthenticationResult> AcquireTokenSilentAsync(
             IEnumerable<string> scope,
             IUser user);
 
@@ -72,7 +78,7 @@ namespace Microsoft.Identity.Client
         /// <param name="user">User for which the token is requested <see cref="User"/></param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using the refresh token if available</param>
-        Task<IAuthenticationResult> AcquireTokenSilentAsync(
+        Task<AuthenticationResult> AcquireTokenSilentAsync(
             IEnumerable<string> scope,
             IUser user,
             string authority,

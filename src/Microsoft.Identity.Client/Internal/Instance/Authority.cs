@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
     internal abstract class Authority
     {
-        private static readonly string[] TenantlessTenantName = {"common", "organizations", "consumers"};
+        private static readonly string[] TenantlessTenantName = {"common", "organizations"};
         private bool _resolved;
 
         internal static readonly ConcurrentDictionary<string, Authority> ValidatedAuthorities =
@@ -221,15 +221,6 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 await
                     client.ExecuteRequest<TenantDiscoveryResponse>(new Uri(openIdConfigurationEndpoint),
                         HttpMethod.Get, requestContext).ConfigureAwait(false);
-        }
-
-        public static bool IsTenantLessAuthority(string authority)
-        {
-            var authorityUri = new Uri(authority);
-            string path = authorityUri.AbsolutePath.Substring(1);
-            string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-            return
-                TenantlessTenantName.Any(name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         public void UpdateTenantId(string tenantId)

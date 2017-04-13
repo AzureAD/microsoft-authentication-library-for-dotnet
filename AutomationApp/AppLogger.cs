@@ -30,11 +30,11 @@ using Microsoft.Identity.Client;
 
 namespace AutomationApp
 {
-    class LoggerCallbackImpl : ILoggerCallback
+    class AppLogger 
     {
         private readonly StringBuilder _logCollector = new StringBuilder();
 
-        public void Log(Logger.LogLevel level, string message, bool containsPii)
+        public void Log(Microsoft.Identity.Client.Logger.LogLevel level, string message, bool containsPii)
         {
             _logCollector.Append(message);
         }

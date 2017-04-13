@@ -38,7 +38,7 @@ namespace DesktopTestApp
 {
     public partial class MainForm : Form
     {
-        readonly LoggerCallback myCallback = new LoggerCallback();
+        readonly AppLogger _appLogger = new AppLogger();
 
         #region Properties
 
@@ -59,12 +59,9 @@ namespace DesktopTestApp
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
 
-            if (PiiLoggingEnabled.Checked)
-            {
-                Logger.Callback = myCallback;
-                Logger.Level = Logger.LogLevel.Info;
-                Logger.PiiLoggingEnabled = true;
-            }
+            Logger.LogCallback = _appLogger.Log;
+            Logger.Level = Logger.LogLevel.Info;
+            PiiLogging();
 
             Logger.Callback = myCallback;
             Logger.Level = Logger.LogLevel.Info;
@@ -121,7 +118,7 @@ namespace DesktopTestApp
             callResult.Text = output;
             try
             {
-                IAuthenticationResult result;
+                AuthenticationResult result;
                 if (userList.SelectedIndex != -1)
                 {
                     // if (modalWebview.Checked)
@@ -179,7 +176,7 @@ namespace DesktopTestApp
 
             try
             {
-                IAuthenticationResult result =
+                AuthenticationResult result =
                     await _publicClientApplication.AcquireTokenSilentAsync(scopes.Text.Split(' '), CurrentUser);
 
                 SetResultPageInfo(result);
@@ -214,7 +211,7 @@ namespace DesktopTestApp
             callResultConfClient.Text = output;
             try
             {
-                IAuthenticationResult result;
+                AuthenticationResult result;
                 if (confClientUserList.SelectedIndex != -1)
                 {
                     result = await clientApplication.AcquireTokenForClientAsync(confClientScopesTextBox.Text.Split(' '));
@@ -336,8 +333,8 @@ namespace DesktopTestApp
 
         private void RefreshUI()
         {
-            msalPIILogsTextBox.Text = myCallback.DrainPiiLogs();
-            msalLogsTextBox.Text = myCallback.DrainLogs();
+            msalPIILogs.Text = _appLogger.DrainPiiLogs();
+            msalLogs.Text = _appLogger.DrainLogs();
             userList.DataSource = new PublicClientApplication(
                     "0615b6ca-88d4-4884-8729-b178178f7c27")
             { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
@@ -345,7 +342,7 @@ namespace DesktopTestApp
 
         #region App logic
 
-        private void SetResultPageInfo(IAuthenticationResult authenticationResult)
+        private void SetResultPageInfo(AuthenticationResult authenticationResult)
         {
             callResult.Text = @"Access Token: " + authenticationResult.AccessToken + Environment.NewLine +
                               @"Expires On: " + authenticationResult.ExpiresOn + Environment.NewLine +
@@ -364,7 +361,7 @@ namespace DesktopTestApp
             callResult.Text = string.Empty;
         }
 
-        private void SetConfidentialClientPageInfo(IAuthenticationResult authenticationResult)
+        private void SetConfidentialClientPageInfo(AuthenticationResult authenticationResult)
         {
             confClientAccessTokenResult.Text = authenticationResult.AccessToken;
             //TODO: result in cache

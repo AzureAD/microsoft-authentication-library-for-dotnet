@@ -19,12 +19,12 @@ namespace XForms.Droid
 {
     internal class AndroidAcquireToken : IAcquireToken
     {
-        public Task<IAuthenticationResult> AcquireTokenAsync(PublicClientApplication app, string[] scopes, UIParent uiParent)
+        public Task<AuthenticationResult> AcquireTokenAsync(PublicClientApplication app, string[] scopes, UIParent uiParent)
         {
             return app.AcquireTokenAsync(scopes, uiParent);
         }
 
-        public Task<IAuthenticationResult> AcquireTokenAsync(PublicClientApplication app, string[] scopes, string loginHint, UIParent uiParent)
+        public Task<AuthenticationResult> AcquireTokenAsync(PublicClientApplication app, string[] scopes, string loginHint, UIParent uiParent)
         {
             return app.AcquireTokenAsync(scopes, loginHint, uiParent);
         }

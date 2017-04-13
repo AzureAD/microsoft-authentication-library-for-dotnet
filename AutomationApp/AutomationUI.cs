@@ -36,15 +36,15 @@ namespace AutomationApp
 {
     public partial class AutomationUI : Form
     {
-        private delegate Task<IAuthenticationResult> Command(Dictionary<string, string> input);
-        private readonly LoggerCallbackImpl _loggerCallback = new LoggerCallbackImpl();
+        private delegate Task<AuthenticationResult> Command(Dictionary<string, string> input);
+        private readonly AppLogger _appLogger = new AppLogger();
         private Command _commandToRun;
         private readonly TokenHandler _tokenHandlerApp = new TokenHandler();
 
         public AutomationUI()
         {
             InitializeComponent();
-            Logger.Callback = _loggerCallback;
+            Logger.LogCallback = _appLogger.Log;
         }
 
         public Dictionary<string, string> CreateDictionaryFromJson(string json)
@@ -88,7 +88,7 @@ namespace AutomationApp
                 }
                 else
                 {
-                    IAuthenticationResult authenticationResult = await _commandToRun(dict);
+                    AuthenticationResult authenticationResult = await _commandToRun(dict);
                     SetResultPageInfo(authenticationResult);
                 }
             }
@@ -96,7 +96,7 @@ namespace AutomationApp
             {
                 exceptionResult.Text = exception.ToString();
             }
-            msalLogs.Text = _loggerCallback.GetMsalLogs();
+            msalLogs.Text = _appLogger.GetMsalLogs();
             pageControl1.SelectedTab = resultPage;
         }
 
@@ -106,7 +106,7 @@ namespace AutomationApp
             pageControl1.SelectedTab = mainPage;
         }
 
-        private void SetResultPageInfo(IAuthenticationResult authenticationResult)
+        private void SetResultPageInfo(AuthenticationResult authenticationResult)
         {
             accessTokenResult.Text = authenticationResult.AccessToken;
             expiresOnResult.Text = authenticationResult.ExpiresOn.ToString();

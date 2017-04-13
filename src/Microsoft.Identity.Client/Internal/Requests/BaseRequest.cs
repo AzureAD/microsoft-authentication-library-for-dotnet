@@ -40,7 +40,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         protected static readonly Task CompletedTask = Task.FromResult(false);
         internal readonly AuthenticationRequestParameters AuthenticationRequestParameters;
-        internal readonly Authority Authority;
         internal readonly TokenCache TokenCache;
         protected TokenResponse Response;
         protected AccessTokenCacheItem AccessTokenItem;
@@ -57,13 +56,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected BaseRequest(AuthenticationRequestParameters authenticationRequestParameters)
         {
-            Authority = authenticationRequestParameters.Authority;
             RequestContext = authenticationRequestParameters.RequestContext;
             TokenCache = authenticationRequestParameters.TokenCache;
 
             RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
                     "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
-                    Authority.CanonicalAuthority, authenticationRequestParameters.Scope.AsSingleString(),
+                AuthenticationRequestParameters?.Authority?.CanonicalAuthority, authenticationRequestParameters.Scope.AsSingleString(),
                     authenticationRequestParameters.ClientId,
                     (TokenCache != null)
                         ? TokenCache.GetType().FullName
@@ -100,14 +98,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     "API does not accept '{0}' value as user-provided scopes",
                     OAuth2Value.ReservedScopes.AsSingleString()));
             }
-
-            if (scopesToValidate.Contains(AuthenticationRequestParameters.ClientId))
-            {
-                if (scopesToValidate.Count > 1)
-                {
-                    throw new ArgumentException("Client Id can only be provided as a single scope", nameof(AuthenticationRequestParameters.ClientId));
-                }
-            }
         }
 
         public async Task<AuthenticationResult> RunAsync()
@@ -116,18 +106,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             try
             {
                 //authority endpoints resolution and validation
-                await PreRunAsync().ConfigureAwait(false);
-
-                await PreTokenRequest().ConfigureAwait(false); // creates AccessTokenItem from cache
+                await PreTokenRequest().ConfigureAwait(false);
                 await SendTokenRequestAsync().ConfigureAwait(false);
-                //save to cache if no access token item found
-                //this means that no cached item was found
-                if (AccessTokenItem == null)
-                {
-                    AccessTokenItem = SaveTokenResponseToCache();
-                }
 
-                result = PostTokenRequest(AccessTokenItem);
+                result = PostTokenRequest();
                 await PostRunAsync(result).ConfigureAwait(false);
                 return result;
             }
@@ -136,11 +118,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 RequestContext.Logger.Error(ex);
                 throw;
             }
-        }
-
-        internal virtual async Task PreRunAsync()
-        {
-            await Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, RequestContext).ConfigureAwait(false);
         }
 
         private AccessTokenCacheItem SaveTokenResponseToCache()
@@ -157,12 +134,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
+            if (AuthenticationRequestParameters.Authority.IsTenantless)
+            {
+                IdToken idToken = IdToken.Parse(Response.IdToken);
+                AuthenticationRequestParameters.Authority.UpdateTenantId(idToken?.TenantId);
+            }
+
             if (StoreToCache)
             {
                 TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
             }
 
-            return new AccessTokenCacheItem(Authority.CanonicalAuthority,
+            return new AccessTokenCacheItem(AuthenticationRequestParameters.Authority.CanonicalAuthority,
                 AuthenticationRequestParameters.ClientId, Response);
         }
 
@@ -172,14 +155,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return CompletedTask;
         }
 
-        internal virtual Task PreTokenRequest()
+        internal virtual async Task PreTokenRequest()
         {
-            return CompletedTask;
+            await ResolveAuthorityEndpoints().ConfigureAwait(false);
         }
 
-        protected virtual AuthenticationResult PostTokenRequest(AccessTokenCacheItem item)
+
+        internal async Task ResolveAuthorityEndpoints()
         {
-            return new AuthenticationResult(item);
+            await AuthenticationRequestParameters.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, RequestContext).ConfigureAwait(false);
+        }
+
+
+        protected virtual AuthenticationResult PostTokenRequest()
+        {
+            //save to cache if no access token item found
+            //this means that no cached item was found
+            if (AccessTokenItem == null)
+            {
+                AccessTokenItem = SaveTokenResponseToCache();
+            }
+
+            return new AuthenticationResult(AccessTokenItem);
         }
 
         protected abstract void SetAdditionalRequestParameters(OAuth2Client client);
@@ -203,7 +200,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task SendHttpMessageAsync(OAuth2Client client)
         {
             Response =
-                await client.GetToken(new Uri(Authority.TokenEndpoint), RequestContext).ConfigureAwait(false);
+                await client.GetToken(new Uri(AuthenticationRequestParameters.Authority.TokenEndpoint), RequestContext).ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(Response.Scope))
             {

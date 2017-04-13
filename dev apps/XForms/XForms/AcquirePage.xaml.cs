@@ -62,7 +62,7 @@ namespace XForms
             return sb.ToString();
         }
 
-        private string ToString(IAuthenticationResult result)
+        private string ToString(AuthenticationResult result)
         {
             var sb = new StringBuilder();
 
@@ -115,7 +115,7 @@ namespace XForms
 
             try
             {
-                IAuthenticationResult res;
+                AuthenticationResult res;
                 if (LoginHint.IsToggled)
                 {
                     res = await at.AcquireTokenAsync(App.MsalPublicClient, App.Scopes, UserEntry.Text.Trim(), UIParent);

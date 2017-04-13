@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
-        public async Task<IAuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scope, UserAssertion userAssertion)
+        public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scope, UserAssertion userAssertion)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
-        public async Task<IAuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scope, UserAssertion userAssertion,
+        public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scope, UserAssertion userAssertion,
             string authority)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
-        public async Task<IAuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, IEnumerable<string> scope)
+        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, IEnumerable<string> scope)
         {
             return
                 await
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
-        public async Task<IAuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scope)
+        public async Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scope)
         {
             return
                 await
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using client credentials</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
-        public async Task<IAuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scope, bool forceRefresh)
+        public async Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scope, bool forceRefresh)
         {
             return
                 await

@@ -30,7 +30,10 @@ using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
-{  
+{
+    // A delegate type for processing a log message:
+    public delegate void LogCallback(Logger.LogLevel level, string message, bool containsPii);
+
     /// <summary>
     /// MSAL Logger
     /// </summary>
@@ -70,24 +73,24 @@ namespace Microsoft.Identity.Client
         private Guid CorrelationId { get; set; }
 
         private static readonly object LockObj = new object();
-        private static volatile ILoggerCallback _localCallback;
 
+        private static volatile LogCallback _logCallback;
         /// <summary>
         /// Callback instance
         /// </summary>
-        public static ILoggerCallback Callback
+        public static LogCallback LogCallback
         {
             set
             {
                 lock (LockObj)
                 {
-                    if (_localCallback != null)
+                    if (_logCallback != null)
                     {
                         throw new Exception("MSAL logging callback can only be set once per process and" +
                                                    " should never change once set.");
                     }
 
-                    _localCallback = value;
+                    _logCallback = value;
                 }
             }
         }
@@ -106,7 +109,7 @@ namespace Microsoft.Identity.Client
         {
             lock (LockObj)
             {
-                _localCallback?.Log(level, message, containsPii);
+                _logCallback?.Invoke(level, message, containsPii);
             }
         }
 

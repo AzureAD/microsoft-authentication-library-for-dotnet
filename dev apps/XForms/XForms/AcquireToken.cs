@@ -8,12 +8,12 @@ namespace XForms
 {
     class AcquireToken : IAcquireToken
     {
-        public Task<IAuthenticationResult> AcquireTokenAsync(PublicClientApplication app, string[] scopes, UIParent uiParent)
+        public Task<AuthenticationResult> AcquireTokenAsync(PublicClientApplication app, string[] scopes, UIParent uiParent)
         {
             return app.AcquireTokenAsync(scopes);
         }
 
-        public Task<IAuthenticationResult> AcquireTokenAsync(PublicClientApplication app, string[] scopes, string loginHint, UIParent uiParent)
+        public Task<AuthenticationResult> AcquireTokenAsync(PublicClientApplication app, string[] scopes, string loginHint, UIParent uiParent)
         {
             return app.AcquireTokenAsync(scopes, loginHint);
         }

@@ -130,6 +130,11 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        public IUser GetUser(string identifier)
+        {
+            return Users.FirstOrDefault(user => user.Identifier.Equals(identifier));
+        }
+
         /// <summary>
         /// Attempts to acquire the access token from cache. Access token is considered a match if it AT LEAST contains all the requested scopes.
         /// This means that an access token with more scopes than requested could be returned as well. If access token is expired or 
@@ -138,12 +143,11 @@ namespace Microsoft.Identity.Client
         /// <param name="scope">Array of scopes requested for resource</param>
         /// <param name="user">User for which the token is requested. <see cref="User"/></param>
         /// <returns></returns>
-        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user)
         {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenSilentCommonAsync(authority, scope, user, false)
+                    AcquireTokenSilentCommonAsync(null, scope, user, false)
                         .ConfigureAwait(false);
         }
 
@@ -157,10 +161,15 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using the refresh token if available</param>
         /// <returns></returns>
-        public async Task<IAuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user,
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user,
             string authority, bool forceRefresh)
         {
-            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
+            Authority authorityInstance = null;
+            if (!string.IsNullOrEmpty(authority))
+            {
+                authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
+            }
+
             return
                 await
                     AcquireTokenSilentCommonAsync(authorityInstance, scope, user,
@@ -198,7 +207,8 @@ namespace Microsoft.Identity.Client
                 User = user,
                 Scope = scope.CreateSetFromEnumerable(),
                 RedirectUri = new Uri(RedirectUri),
-                RequestContext = CreateRequestContext(Guid.Empty)
+                RequestContext = CreateRequestContext(Guid.Empty),
+                ValidateAuthority = ValidateAuthority
             };
         }
 

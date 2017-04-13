@@ -39,6 +39,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public Authority Authority { get; set; }
 
+        public bool ValidateAuthority { get; set; }
+
         public TokenCache TokenCache { get; set; }
 
         public SortedSet<string> Scope { get; set; }

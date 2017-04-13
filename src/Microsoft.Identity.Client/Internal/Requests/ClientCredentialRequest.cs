@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -40,6 +41,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected override SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
         {
             return inputScope;
+        }
+        
+        internal override Task PreTokenRequest()
+        {
+            // look for access token in the cache first.
+            if (!ForceRefresh)
+            {
+                AccessTokenItem
+                    = TokenCache.FindAccessToken(AuthenticationRequestParameters);
+            }
+
+            return CompletedTask;
+        }
+        protected override async Task SendTokenRequestAsync()
+        {
+            if (AccessTokenItem == null)
+            {
+                await ResolveAuthorityEndpoints().ConfigureAwait(false);
+                await base.SendTokenRequestAsync().ConfigureAwait(false);
+            }
         }
 
         protected override void SetAdditionalRequestParameters(OAuth2Client client)

@@ -50,20 +50,15 @@ namespace XForms
         public static string Authority = DefaultAuthority;
         public static bool ValidateAuthority = DefaultValidateAuthority;
 
-        private class LoggerCallback : ILoggerCallback
-        {
-            public void Log(Logger.LogLevel level, string message, bool containsPii)
-            {
-                Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message); });
-            }
-        }
-
         public App()
         {
             MainPage = new XForms.MainPage();
             InitPublicClient();
 
-            Logger.Callback = new LoggerCallback();
+            Logger.LogCallback = delegate(Logger.LogLevel level, string message, bool containsPii)
+            {
+                Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message); });
+            };
         }
 
         public static void InitPublicClient()

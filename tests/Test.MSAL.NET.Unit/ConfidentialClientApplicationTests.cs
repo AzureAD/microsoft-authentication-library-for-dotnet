@@ -65,7 +65,7 @@ namespace Test.MSAL.NET.Unit
         public void MockConfidentialClientApplication_AcquireToken()
         {
             // Setup up a confidential client application that returns a dummy result
-            var mockResult = Substitute.For<IAuthenticationResult>();
+            var mockResult = Substitute.For<AuthenticationResult>();
             mockResult.IdToken.Returns("id token");
             mockResult.Scope.Returns(new string[] { "scope1", "scope2" });
 
@@ -73,7 +73,7 @@ namespace Test.MSAL.NET.Unit
             mockApp.AcquireTokenByAuthorizationCodeAsync("123", null).Returns(mockResult);
 
             // Now call the substitute with the args to get the substitute result
-            IAuthenticationResult actualResult = mockApp.AcquireTokenByAuthorizationCodeAsync("123", null).Result;
+            AuthenticationResult actualResult = mockApp.AcquireTokenByAuthorizationCodeAsync("123", null).Result;
             Assert.IsNotNull(actualResult);
             Assert.AreEqual("id token", mockResult.IdToken, "Mock result failed to return the expected id token");
 
@@ -184,8 +184,8 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
             });
 
-            Task<IAuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
-            IAuthenticationResult result = task.Result;
+            Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
+            AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull("header.payload.signature", result.AccessToken);
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
@@ -233,8 +233,8 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
             });
 
-            Task<IAuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
-            IAuthenticationResult result = task.Result;
+            Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
+            AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull("header.payload.signature", result.AccessToken);
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
@@ -359,8 +359,9 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(app.Authority)
             });
 
+            const string CustomRedirectUri = "custom://redirect-uri";
             Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(),
-                "custom://redirect-uri", TestConstants.DisplayableId, "extra=qp",
+                CustomRedirectUri, TestConstants.DisplayableId, "extra=qp",
                 TestConstants.ScopeForAnotherResource.AsArray(), TestConstants.AuthorityGuestTenant);
             Uri uri = task.Result;
             Assert.IsNotNull(uri);
@@ -373,7 +374,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2 r2/scope1 r2/scope2", qp["scope"]);
             Assert.AreEqual(TestConstants.ClientId, qp["client_id"]);
             Assert.AreEqual("code", qp["response_type"]);
-            Assert.AreEqual("custom://redirect-uri/", qp["redirect_uri"]);
+            Assert.AreEqual(CustomRedirectUri, qp["redirect_uri"]);
             Assert.AreEqual(TestConstants.DisplayableId, qp["login_hint"]);
             Assert.AreEqual("MSAL.Desktop", qp["x-client-sku"]);
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));

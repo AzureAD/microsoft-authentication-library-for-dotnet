@@ -72,18 +72,25 @@ namespace Test.MSAL.NET.Unit.Mocks
             //add another access token
             accessor.AccessTokenCacheDictionary[item.GetAccessTokenItemKey().ToString()] = JsonHelper.SerializeToJson(item);
 
-            RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
+            AddRefreshTokenToCache(accessor, TestConstants.Uid, TestConstants.Utid, TestConstants.Name);
+        }
+
+        public static void AddRefreshTokenToCache(TokenCacheAccessor accessor, string uid, string utid, string name)
+        {
+            var rtItem = new RefreshTokenCacheItem
             {
-                Environment= TestConstants.ProductionEnvironment,
+                Environment = TestConstants.ProductionEnvironment,
                 ClientId = TestConstants.ClientId,
                 RefreshToken = "someRT",
-                RawClientInfo = MockHelpers.CreateClientInfo(),
+                RawClientInfo = MockHelpers.CreateClientInfo(uid, utid),
                 DisplayableId = TestConstants.DisplayableId,
                 IdentityProvider = TestConstants.IdentityProvider,
-                Name = TestConstants.Name
+                Name = name
             };
             rtItem.ClientInfo = ClientInfo.CreateFromJson(rtItem.RawClientInfo);
-            accessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] = JsonHelper.SerializeToJson(rtItem);
+
+            accessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] =
+                JsonHelper.SerializeToJson(rtItem);
         }
     }
 }
