@@ -43,10 +43,12 @@ namespace DesktopTestApp
         #region Properties
 
         private PublicClientApplication _publicClientApplication = new PublicClientApplication(
-            clientId: "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
+            clientId: "0615b6ca-88d4-4884-8729-b178178f7c27");
         private ConfidentialClientApplication _confidentialClientApplication;
 
         public IUser CurrentUser { get; set; }
+
+        public TokenCache AppTokenCache { get; set; }
 
         #endregion
 
@@ -201,6 +203,7 @@ namespace DesktopTestApp
         #endregion
 
         #region Confidential Client Acquire Token Logic
+        // Acquires token from the service for the confidential client.
         private async void confClientAcquireTokenBtn_Click_1(object sender, EventArgs e)
         {
             ClearConfidentialClientResultPageInfo();
@@ -234,7 +237,7 @@ namespace DesktopTestApp
 
                 output = exc.Message + Environment.NewLine + exc.StackTrace;
 
-                SetConfidentClientErrorPageInfo(output);
+                SetConfidentialClientErrorPageInfo(output);
             }
             finally
             {
@@ -243,6 +246,23 @@ namespace DesktopTestApp
             }
         }
 
+        // Acquires token using On-Behalf-Of flow
+        private void confClientAcquireTokenOnBehalfOf_Click(object sender, EventArgs e)
+        {
+           /* ClearConfidentialClientResultPageInfo();
+            callResultConfClient.SendToBack();
+
+            string output = string.Empty;
+            callResultConfClient.Text = output;
+            try
+            {
+                IAuthenticationResult result;
+                if (confClientUserList.SelectedIndex != -1)
+                {
+                    result = await _confidentialClientApplication.AcquireTokenOnBehalfOfAsync(confClientScopesTextBox.Text.Split(' '), )
+                }
+            }*/
+        }
 
         #endregion
 
@@ -295,16 +315,16 @@ namespace DesktopTestApp
             if (!string.IsNullOrEmpty(overriddenAuthority.Text))
             {
                 _confidentialClientApplication = new ConfidentialClientApplication(
-                    "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc",
-                    "https://localhost:", clientCredential,
-                    TokenCacheHelper.GetCache(), TokenCacheHelper.GetCache());
+                    "0615b6ca-88d4-4884-8729-b178178f7c27",
+                    "urn:ietf:wg:oauth:2.0:oob", clientCredential,
+                    _publicClientApplication.UserTokenCache, AppTokenCache);
             }
             else
             {
                 _confidentialClientApplication = new ConfidentialClientApplication(
-                    "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc", authority.Text,
-                    "https://localhost:", clientCredential,
-                    TokenCacheHelper.GetCache(), TokenCacheHelper.GetCache());
+                    "0615b6ca-88d4-4884-8729-b178178f7c27", authority.Text,
+                    "urn:ietf:wg:oauth:2.0:oob", clientCredential,
+                    _publicClientApplication.UserTokenCache, AppTokenCache);
             }
             return _confidentialClientApplication;
         }
@@ -319,7 +339,7 @@ namespace DesktopTestApp
             msalPIILogsTextBox.Text = myCallback.DrainPiiLogs();
             msalLogsTextBox.Text = myCallback.DrainLogs();
             userList.DataSource = new PublicClientApplication(
-                    "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc")
+                    "0615b6ca-88d4-4884-8729-b178178f7c27")
             { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
         }
 
@@ -357,7 +377,7 @@ namespace DesktopTestApp
             confClientScopesResult.DataSource = authenticationResult.Scope;
         }
 
-        private void SetConfidentClientErrorPageInfo(string errorMessage)
+        private void SetConfidentialClientErrorPageInfo(string errorMessage)
         {
             callResultConfClient.BringToFront();
 
