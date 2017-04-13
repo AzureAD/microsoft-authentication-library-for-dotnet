@@ -41,14 +41,15 @@ namespace DesktopTestApp
         readonly AppLogger _appLogger = new AppLogger();
 
         #region Properties
+        private static string applicationId = "0615b6ca-88d4-4884-8729-b178178f7c27";
 
         private PublicClientApplication _publicClientApplication = new PublicClientApplication(
-            clientId: "0615b6ca-88d4-4884-8729-b178178f7c27");
+            clientId: applicationId);
         private ConfidentialClientApplication _confidentialClientApplication;
-
-        public IUser CurrentUser { get; set; }
-
+        
         public TokenCache AppTokenCache { get; set; }
+
+        public IUser CurrentUser;
 
         #endregion
 
@@ -59,20 +60,19 @@ namespace DesktopTestApp
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
 
+            CurrentUser = (IUser)userList.SelectedItem;
+
             Logger.LogCallback = _appLogger.Log;
             Logger.Level = Logger.LogLevel.Info;
-            PiiLogging();
+            Logger.PiiLoggingEnabled = PiiLoggingEnabled.Checked;
 
-            Logger.Callback = myCallback;
-            Logger.Level = Logger.LogLevel.Info;
-
-            ResetUserList(addFakeUsers: false);
+            ResetUserList();
         }
 
-        private void ResetUserList(bool addFakeUsers)
+        private void ResetUserList()
         {
             List<IUser> userListDataSource = _publicClientApplication.Users.ToList();
-           
+
             userList.DataSource = userListDataSource;
             usersListBox.DataSource = userListDataSource;
             userList.Refresh();
@@ -114,11 +114,11 @@ namespace DesktopTestApp
             ClearResultPageInfo();
 
             PublicClientApplication clientApplication = CreateClientApplication();
-            string output = string.Empty;
-            callResult.Text = output;
+
             try
             {
                 AuthenticationResult result;
+
                 if (userList.SelectedIndex != -1)
                 {
                     // if (modalWebview.Checked)
@@ -149,30 +149,17 @@ namespace DesktopTestApp
 
                 CurrentUser = result.User;
                 SetResultPageInfo(result);
-                ResetUserList(addFakeUsers: true);
+                ResetUserList();
             }
             catch (Exception exc)
             {
-                MsalServiceException exception = exc as MsalServiceException;
-
-                if (exception != null)
-                {
-                    output = exc.Message + Environment.NewLine + exc.StackTrace;
-                }
-                SetErrorPageInfo(output);
-            }
-            finally
-            {
-                RefreshUI();
+                CreateException(exc);
             }
         }
 
         private async void acquireTokenSilent_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
-
-            string output = string.Empty;
-            callResult.Text = output;
 
             try
             {
@@ -183,18 +170,24 @@ namespace DesktopTestApp
             }
             catch (Exception exc)
             {
-                MsalServiceException exception = exc as MsalServiceException;
-                if (exception != null)
-                {
-                    output = exc.Message + Environment.NewLine + exc.StackTrace;
-                }
+                CreateException(exc);
+            }
+        }
 
-                SetErrorPageInfo(output);
-            }
-            finally
+        private void CreateException(Exception ex)
+        {
+            string output = string.Empty;
+           
+            MsalServiceException exception = ex as MsalServiceException;
+
+            if (exception != null)
             {
-                RefreshUI();
+                output = ex.Message + Environment.NewLine + ex.StackTrace;
             }
+
+            SetErrorPageInfo(output);
+
+            RefreshUI();
         }
 
         #endregion
@@ -225,40 +218,26 @@ namespace DesktopTestApp
             }
             catch (Exception exc)
             {
-                MsalServiceException exception = exc as MsalServiceException;
-
-                if (exception != null)
-                {
-                    output = exception.ErrorCode;
-                }
-
-                output = exc.Message + Environment.NewLine + exc.StackTrace;
-
-                SetConfidentialClientErrorPageInfo(output);
-            }
-            finally
-            {
-                callResultConfClient.Text = output;
-                RefreshUI();
+                CreateException(exc);
             }
         }
 
         // Acquires token using On-Behalf-Of flow
         private void confClientAcquireTokenOnBehalfOf_Click(object sender, EventArgs e)
         {
-           /* ClearConfidentialClientResultPageInfo();
-            callResultConfClient.SendToBack();
+            /* ClearConfidentialClientResultPageInfo();
+             callResultConfClient.SendToBack();
 
-            string output = string.Empty;
-            callResultConfClient.Text = output;
-            try
-            {
-                IAuthenticationResult result;
-                if (confClientUserList.SelectedIndex != -1)
-                {
-                    result = await _confidentialClientApplication.AcquireTokenOnBehalfOfAsync(confClientScopesTextBox.Text.Split(' '), )
-                }
-            }*/
+             string output = string.Empty;
+             callResultConfClient.Text = output;
+             try
+             {
+                 IAuthenticationResult result;
+                 if (confClientUserList.SelectedIndex != -1)
+                 {
+                     result = await _confidentialClientApplication.AcquireTokenOnBehalfOfAsync(confClientScopesTextBox.Text.Split(' '), )
+                 }
+             }*/
         }
 
         #endregion
@@ -287,17 +266,16 @@ namespace DesktopTestApp
 
         private PublicClientApplication CreateClientApplication()
         {
-            if (_publicClientApplication != null) return _publicClientApplication;
-
-            if (!string.IsNullOrEmpty(overriddenAuthority.Text))
+            if (string.IsNullOrEmpty(overriddenAuthority.Text))
             {
+                // Use the default autority
                 _publicClientApplication = new PublicClientApplication(
-                    "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
+                    applicationId);
             }
             else
             {
                 _publicClientApplication = new PublicClientApplication(
-                    "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc", authority.Text);
+                    applicationId, overriddenAuthority.Text);
             }
 
             return _publicClientApplication;
@@ -305,22 +283,21 @@ namespace DesktopTestApp
 
         private ConfidentialClientApplication CreateConfidentialClientApplication()
         {
-            if (_confidentialClientApplication != null) return _confidentialClientApplication;
+            string redirectUri = "urn:ietf:wg:oauth:2.0:oob";
 
             ClientCredential clientCredential = new ClientCredential(confClientTextBox.Text);
 
-            if (!string.IsNullOrEmpty(overriddenAuthority.Text))
+            if (string.IsNullOrEmpty(overriddenAuthority.Text))
             {
+                // Use the default authority
                 _confidentialClientApplication = new ConfidentialClientApplication(
-                    "0615b6ca-88d4-4884-8729-b178178f7c27",
-                    "urn:ietf:wg:oauth:2.0:oob", clientCredential,
+                    applicationId, redirectUri, clientCredential,
                     _publicClientApplication.UserTokenCache, AppTokenCache);
             }
             else
             {
                 _confidentialClientApplication = new ConfidentialClientApplication(
-                    "0615b6ca-88d4-4884-8729-b178178f7c27", authority.Text,
-                    "urn:ietf:wg:oauth:2.0:oob", clientCredential,
+                    applicationId, overriddenAuthority.Text, redirectUri, clientCredential,
                     _publicClientApplication.UserTokenCache, AppTokenCache);
             }
             return _confidentialClientApplication;
@@ -333,11 +310,9 @@ namespace DesktopTestApp
 
         private void RefreshUI()
         {
-            msalPIILogs.Text = _appLogger.DrainPiiLogs();
-            msalLogs.Text = _appLogger.DrainLogs();
-            userList.DataSource = new PublicClientApplication(
-                    "0615b6ca-88d4-4884-8729-b178178f7c27")
-            { UserTokenCache = TokenCacheHelper.GetCache() }.Users.ToList();
+            msalPIILogsTextBox.Text = _appLogger.DrainPiiLogs();
+            msalLogsTextBox.Text = _appLogger.DrainLogs();
+            userList.SelectedItem = _publicClientApplication;
         }
 
         #region App logic
