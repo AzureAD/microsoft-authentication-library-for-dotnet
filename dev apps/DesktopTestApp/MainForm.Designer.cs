@@ -56,7 +56,7 @@ namespace DesktopTestApp
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.validateAuthorityDisabled = new System.Windows.Forms.RadioButton();
             this.validateAuthorityEnabled = new System.Windows.Forms.RadioButton();
-            this.loginHint = new System.Windows.Forms.TextBox();
+            this.loginHintTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.overriddenAuthority = new System.Windows.Forms.TextBox();
@@ -99,6 +99,7 @@ namespace DesktopTestApp
             this.confClientUserList = new System.Windows.Forms.ComboBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.confClientPiiDisabledButton = new System.Windows.Forms.RadioButton();
+            this.confClientPiiEnabledButton = new System.Windows.Forms.RadioButton();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.ConfClientValidateAuthorityDisabled = new System.Windows.Forms.RadioButton();
             this.ConfClientValidateAuthorityEnabled = new System.Windows.Forms.RadioButton();
@@ -106,7 +107,6 @@ namespace DesktopTestApp
             this.confClientIdTokenResult = new System.Windows.Forms.TextBox();
             this.confClientAcquireTokenOnBehalfOf = new System.Windows.Forms.Button();
             this.confClientAcquireTokenBtn = new System.Windows.Forms.Button();
-            this.confClientPiiEnabledButton = new System.Windows.Forms.RadioButton();
             this.confClientPiiEnabledLabel = new System.Windows.Forms.Label();
             this.confClientScopesResult = new System.Windows.Forms.ListBox();
             this.conClientScopesLabel = new System.Windows.Forms.Label();
@@ -162,6 +162,7 @@ namespace DesktopTestApp
             this.extraQueryParams.Name = "extraQueryParams";
             this.extraQueryParams.Size = new System.Drawing.Size(352, 20);
             this.extraQueryParams.TabIndex = 21;
+            this.extraQueryParams.TextChanged += new System.EventHandler(this.extraQueryParams_TextChanged);
             // 
             // environmentQP
             // 
@@ -202,7 +203,7 @@ namespace DesktopTestApp
             this.publicClientTabPage.Controls.Add(this.acquireTokenSilent);
             this.publicClientTabPage.Controls.Add(this.acquireTokenInteractive);
             this.publicClientTabPage.Controls.Add(this.groupBox1);
-            this.publicClientTabPage.Controls.Add(this.loginHint);
+            this.publicClientTabPage.Controls.Add(this.loginHintTextBox);
             this.publicClientTabPage.Controls.Add(this.label6);
             this.publicClientTabPage.Controls.Add(this.label5);
             this.publicClientTabPage.Controls.Add(this.overriddenAuthority);
@@ -271,7 +272,7 @@ namespace DesktopTestApp
             this.scopes.Name = "scopes";
             this.scopes.Size = new System.Drawing.Size(352, 20);
             this.scopes.TabIndex = 15;
-            this.scopes.Text = "mail.read";
+            this.scopes.TextChanged += new System.EventHandler(this.scopes_TextChanged);
             // 
             // label9
             // 
@@ -366,6 +367,7 @@ namespace DesktopTestApp
             this.userList.Name = "userList";
             this.userList.Size = new System.Drawing.Size(352, 21);
             this.userList.TabIndex = 12;
+            this.userList.SelectedIndexChanged += new System.EventHandler(this.userList_SelectedIndexChanged);
             // 
             // label7
             // 
@@ -429,12 +431,13 @@ namespace DesktopTestApp
             this.validateAuthorityEnabled.Text = "Enabled";
             this.validateAuthorityEnabled.UseVisualStyleBackColor = true;
             // 
-            // loginHint
+            // loginHintTextBox
             // 
-            this.loginHint.Location = new System.Drawing.Point(256, 226);
-            this.loginHint.Name = "loginHint";
-            this.loginHint.Size = new System.Drawing.Size(352, 20);
-            this.loginHint.TabIndex = 6;
+            this.loginHintTextBox.Location = new System.Drawing.Point(256, 226);
+            this.loginHintTextBox.Name = "loginHintTextBox";
+            this.loginHintTextBox.Size = new System.Drawing.Size(352, 20);
+            this.loginHintTextBox.TabIndex = 6;
+            this.loginHintTextBox.TextChanged += new System.EventHandler(this.loginHint_TextChanged);
             // 
             // label6
             // 
@@ -462,6 +465,7 @@ namespace DesktopTestApp
             this.overriddenAuthority.Name = "overriddenAuthority";
             this.overriddenAuthority.Size = new System.Drawing.Size(352, 20);
             this.overriddenAuthority.TabIndex = 3;
+            this.overriddenAuthority.TextChanged += new System.EventHandler(this.overriddenAuthority_TextChanged);
             // 
             // label4
             // 
@@ -893,6 +897,16 @@ namespace DesktopTestApp
             this.confClientPiiDisabledButton.Text = "Disabled";
             this.confClientPiiDisabledButton.UseVisualStyleBackColor = true;
             // 
+            // confClientPiiEnabledButton
+            // 
+            this.confClientPiiEnabledButton.AutoSize = true;
+            this.confClientPiiEnabledButton.Location = new System.Drawing.Point(84, 0);
+            this.confClientPiiEnabledButton.Name = "confClientPiiEnabledButton";
+            this.confClientPiiEnabledButton.Size = new System.Drawing.Size(64, 17);
+            this.confClientPiiEnabledButton.TabIndex = 33;
+            this.confClientPiiEnabledButton.Text = "Enabled";
+            this.confClientPiiEnabledButton.UseVisualStyleBackColor = true;
+            // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.ConfClientValidateAuthorityDisabled);
@@ -931,7 +945,7 @@ namespace DesktopTestApp
             this.confClientScopesTextBox.Name = "confClientScopesTextBox";
             this.confClientScopesTextBox.Size = new System.Drawing.Size(465, 20);
             this.confClientScopesTextBox.TabIndex = 37;
-            this.confClientScopesTextBox.Text = "mail.read";
+            this.confClientScopesTextBox.Text = "https://graph.microsoft.com/.default";
             // 
             // confClientIdTokenResult
             // 
@@ -959,16 +973,6 @@ namespace DesktopTestApp
             this.confClientAcquireTokenBtn.Text = "Acquire Token For Client Async";
             this.confClientAcquireTokenBtn.UseVisualStyleBackColor = true;
             this.confClientAcquireTokenBtn.Click += new System.EventHandler(this.confClientAcquireTokenBtn_Click_1);
-            // 
-            // confClientPiiEnabledButton
-            // 
-            this.confClientPiiEnabledButton.AutoSize = true;
-            this.confClientPiiEnabledButton.Location = new System.Drawing.Point(84, 0);
-            this.confClientPiiEnabledButton.Name = "confClientPiiEnabledButton";
-            this.confClientPiiEnabledButton.Size = new System.Drawing.Size(64, 17);
-            this.confClientPiiEnabledButton.TabIndex = 33;
-            this.confClientPiiEnabledButton.Text = "Enabled";
-            this.confClientPiiEnabledButton.UseVisualStyleBackColor = true;
             // 
             // confClientPiiEnabledLabel
             // 
@@ -1255,7 +1259,7 @@ namespace DesktopTestApp
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox overriddenAuthority;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox loginHint;
+        private System.Windows.Forms.TextBox loginHintTextBox;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.RadioButton validateAuthorityEnabled;
         private System.Windows.Forms.GroupBox groupBox1;
