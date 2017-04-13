@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.RefreshToken, _refreshTokenItem.RefreshToken);
         }
 
-        protected override async Task SendTokenRequestAsync()
+        internal override async Task PreTokenRequest()
         {
             if (!LoadFromCache)
             {
@@ -65,9 +65,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (!ForceRefresh)
             {
                 AccessTokenItem
-                     = TokenCache.FindAccessToken(AuthenticationRequestParameters);
+                    = TokenCache.FindAccessToken(AuthenticationRequestParameters);
             }
 
+            await CompletedTask.ConfigureAwait(false);
+        }
+
+        protected override async Task SendTokenRequestAsync()
+        {
             if (AccessTokenItem == null)
             {
                 _refreshTokenItem =
@@ -75,12 +80,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (_refreshTokenItem == null)
                 {
-                    RequestContext.Logger.Verbose("No token matching arguments found in the cache");
+                    RequestContext.Logger.Verbose("No Refresh Token was found in the cache");
                     throw new MsalUiRequiredException(MsalUiRequiredException.NoTokensFoundError,
-                        "No token matching arguments found in the cache");
+                        "No Refresh Token found in the cache");
                 }
 
                 RequestContext.Logger.Verbose("Refreshing access token...");
+                await ResolveAuthorityEndpoints().ConfigureAwait(false);
                 await base.SendTokenRequestAsync().ConfigureAwait(false);
                 
                 if (Response.RefreshToken == null)

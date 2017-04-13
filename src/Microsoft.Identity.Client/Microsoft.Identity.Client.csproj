@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid7;Xamarin.iOS10</TargetFrameworks>        
+    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid7;Xamarin.iOS10;portable-net45+win8</TargetFrameworks>        
     <Authors>Microsoft Corp.</Authors>
     <PackageTitle>Microsoft Authentication Library</PackageTitle>
     <PackageLicenseUrl>https://go.microsoft.com/fwlink/?linkid=844762</PackageLicenseUrl>
@@ -19,7 +19,7 @@
     <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
     <DebugType>full</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'portable-net45+win8' ">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
@@ -48,11 +48,11 @@
     <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0011" PrivateAssets="All" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' ">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'portable-net45+win8' ">
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.0" Condition="'$(TargetFramework)' != 'netstandard1.1'" />
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.0" Condition="'$(TargetFramework)' != 'netstandard1.1' and '$(TargetFramework)' != 'portable-net45+win8' " />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System" />
@@ -84,7 +84,7 @@
     <Compile Include="Features\PublicClient\**\*.cs" />
     <Compile Include="Features\*.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'portable-net45+win8'">
     <Compile Include="Features\TokenCache\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3' ">

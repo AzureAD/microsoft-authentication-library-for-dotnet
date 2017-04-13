@@ -42,15 +42,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        protected override async Task SendTokenRequestAsync()
+        internal override async Task PreTokenRequest()
         {
+            await base.PreTokenRequest().ConfigureAwait(false);
+
             // look for access token in the cache first.
             // no access token is found, then it means token does not exist
             // or new assertion has been passed. We should not use Refresh Token
             // for the user because the new incoming token may have updated claims
             // like mfa etc.
             AccessTokenItem
-                 = TokenCache.FindAccessToken(AuthenticationRequestParameters);
+                = TokenCache.FindAccessToken(AuthenticationRequestParameters);
+        }
+
+        protected override async Task SendTokenRequestAsync()
+        {
             if (AccessTokenItem == null)
             {
                 await base.SendTokenRequestAsync().ConfigureAwait(false);

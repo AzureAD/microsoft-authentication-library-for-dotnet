@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
     /// <Summary>
     /// Abstract class containing common API methods and properties. Both PublicClientApplication and ConfidentialClientApplication extend this class.
     /// </Summary>
-    public abstract class ClientApplicationBase : IClientApplicationBase
+    public abstract class ClientApplicationBase
     {
         private TokenCache _userTokenCache;
 
@@ -145,10 +145,9 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user)
         {
-            Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenSilentCommonAsync(authority, scope, user, false)
+                    AcquireTokenSilentCommonAsync(null, scope, user, false)
                         .ConfigureAwait(false);
         }
 
@@ -203,7 +202,8 @@ namespace Microsoft.Identity.Client
                 User = user,
                 Scope = scope.CreateSetFromEnumerable(),
                 RedirectUri = new Uri(RedirectUri),
-                RequestContext = CreateRequestContext(Guid.Empty)
+                RequestContext = CreateRequestContext(Guid.Empty),
+                ValidateAuthority = ValidateAuthority
             };
         }
 

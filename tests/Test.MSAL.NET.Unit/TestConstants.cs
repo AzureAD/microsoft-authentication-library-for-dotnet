@@ -41,6 +41,7 @@ namespace Test.MSAL.NET.Unit
         public static readonly string AuthorityHomeTenant = "https://" + ProductionEnvironment + "/home/";
         public static readonly string AuthorityGuestTenant = "https://" + ProductionEnvironment + "/guest/";
         public static readonly string AuthorityCommonTenant = "https://" + ProductionEnvironment + "/common/";
+        public static readonly string AuthorityOrganizationsTenant = "https://" + ProductionEnvironment + "/organizations/";
         public static readonly string ClientId = "client_id";
         public static readonly string UniqueId = "unique_id";
         public static readonly string IdentityProvider = "my-idp";
