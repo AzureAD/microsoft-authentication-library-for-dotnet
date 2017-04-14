@@ -32,6 +32,7 @@ using Windows.Security.Authentication.Web;
 using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Windows.Networking.Connectivity;
+using Windows.ApplicationModel.Core;
 
 namespace Microsoft.Identity.Client
 {
@@ -67,22 +68,25 @@ namespace Microsoft.Identity.Client
 
             try
             {
-                if (ssoMode)
-                {
-                    webAuthenticationResult =
-                        await
-                            WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri)
-                                .AsTask()
-                                .ConfigureAwait(false);
-                }
-                else
-                {
-                    webAuthenticationResult =
-                        await
-                            WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri, redirectUri)
-                                .AsTask()
-                                .ConfigureAwait(false);
-                }
+                webAuthenticationResult = await CoreApplication.MainView.CoreWindow.Dispatcher.RunTaskAsync(
+                        async () =>
+                        {
+                            if (ssoMode)
+                            {
+                                return await
+                                    WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri)
+                                        .AsTask()
+                                        .ConfigureAwait(false);
+                            }
+                            else
+                            {
+                                return await WebAuthenticationBroker
+                                    .AuthenticateAsync(options, authorizationUri, redirectUri)
+                                    .AsTask()
+                                    .ConfigureAwait(false);
+                            }
+                        })
+                    .ConfigureAwait(false);
             }
 
             catch (Exception ex)
