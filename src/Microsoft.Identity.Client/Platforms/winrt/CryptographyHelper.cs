@@ -53,15 +53,6 @@ namespace Microsoft.Identity.Client
             return Base64UrlHelpers.Encode(Convert.FromBase64String(output));
         }
 
-        public string CreateBase64EncodedSha256Hash(string input)
-        {
-            IBuffer inputBuffer = CryptographicBuffer.ConvertStringToBinary(input, BinaryStringEncoding.Utf8);
-            var hasher = HashAlgorithmProvider.OpenAlgorithm(HashAlgorithmNames.Sha256);
-
-            IBuffer hashed = hasher.HashData(inputBuffer);
-            return CryptographicBuffer.EncodeToBase64String(hashed);
-        }
-
         public string GenerateCodeVerifier()
         {
             byte[] buffer = new byte[Constants.CodeVerifierByteSize];
