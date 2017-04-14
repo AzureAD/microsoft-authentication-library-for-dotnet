@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
     internal abstract class EventBase : Dictionary<string, string>
     {
         protected const string EventNamePrefix = "Microsoft.MSAL.";
-        protected const string EventName = "event_name";
+        public const string EventName = "event_name";
         protected const string StartTime = "start_time";
         protected const string ElapsedTime = "elapsed_time";
         private readonly long _startTimestamp;
