@@ -6,4 +6,4 @@ branches:
     tag: preview
   develop:
     regex: (origin/)?dev(elop)?(ment)?$
-    tag: dev
+    tag: alpha
