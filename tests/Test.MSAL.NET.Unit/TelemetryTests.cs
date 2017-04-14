@@ -34,7 +34,7 @@ namespace Test.MSAL.NET.Unit
 {
     class MyReceiver
     {
-        public List<Dictionary<string, string>> EventsReceived { get; set; }
+        internal List<Dictionary<string, string>> EventsReceived { get; set; }
 
         public MyReceiver()
         {
@@ -43,7 +43,7 @@ namespace Test.MSAL.NET.Unit
 
         public void OnEvents(List<Dictionary<string, string>> events)
         {
-            EventsReceived = events;
+            EventsReceived = events;  // Only for testing purpose
             Console.WriteLine("{0} event(s) received", events.Count);
             foreach(var e in events)
             {
@@ -90,7 +90,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryInternalApiSample()
         {
-            Telemetry telemetry = Telemetry.GetInstance();
+            Telemetry telemetry = new Telemetry();  // To isolate the test environment, we do not use a singleton here
             var myReceiver = new MyReceiver();
             telemetry.RegisterReceiver(myReceiver.OnEvents);
 
@@ -121,7 +121,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetrySkipEventsIfApiEventWasSuccessful()
         {
-            Telemetry telemetry = Telemetry.GetInstance();
+            Telemetry telemetry = new Telemetry();  // To isolate the test environment, we do not use a singleton here
             telemetry.TelemetryOnFailureOnly = true;
             var myReceiver = new MyReceiver();
             telemetry.RegisterReceiver(myReceiver.OnEvents);

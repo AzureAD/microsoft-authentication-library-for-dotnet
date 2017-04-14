@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
 
         private static readonly Telemetry Singleton = new Telemetry();
 
-        private Telemetry(){}
+        internal Telemetry(){}  // This is an internal constructor to build isolated unit test instance
 
         /// <summary>
         /// 
