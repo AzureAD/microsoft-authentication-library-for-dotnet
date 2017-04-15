@@ -53,7 +53,8 @@ namespace Microsoft.Identity.Client.Internal.Instance
             AuthorityType = AuthorityType.Aad;
         }
 
-        protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName, RequestContext requestContext)
+        protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName,
+            RequestContext requestContext)
         {
 
             if (ValidateAuthority && !IsInTrustedHostList(new Uri(CanonicalAuthority).Host))
@@ -62,23 +63,16 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 client.AddQueryParameter("api-version", "1.0");
                 client.AddQueryParameter("authorization_endpoint", CanonicalAuthority + "oauth2/v2.0/authorize");
 
-                try
+                InstanceDiscoveryResponse discoveryResponse =
+                    await
+                        client.DiscoverAadInstance(new Uri(AadInstanceDiscoveryEndpoint), requestContext)
+                            .ConfigureAwait(false);
+                if (discoveryResponse.TenantDiscoveryEndpoint == null)
                 {
-                    InstanceDiscoveryResponse discoveryResponse =
-                        await
-                            client.DiscoverAadInstance(new Uri(AadInstanceDiscoveryEndpoint), requestContext)
-                                .ConfigureAwait(false);
-                    if (discoveryResponse.TenantDiscoveryEndpoint == null)
-                    {
-                        throw new MsalServiceException(discoveryResponse.Error, discoveryResponse.ErrorDescription);
-                    }
+                    throw new MsalServiceException(discoveryResponse.Error, discoveryResponse.ErrorDescription);
+                }
 
-                    return discoveryResponse.TenantDiscoveryEndpoint;
-                }
-                catch (RetryableRequestException exc)
-                {
-                    throw exc.InnerException;
-                }
+                return discoveryResponse.TenantDiscoveryEndpoint;
             }
 
             return GetDefaultOpenIdConfigurationEndpoint();
