@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -68,9 +69,9 @@ namespace Microsoft.Identity.Client
 
         public bool TelemetryOnFailureOnly { get; set; }
 
-        private Dictionary<Tuple<string, string>, EventBase> EventsInProgress = new Dictionary<Tuple<string, string>, EventBase>();
+        private ConcurrentDictionary<Tuple<string, string>, EventBase> EventsInProgress = new ConcurrentDictionary<Tuple<string, string>, EventBase>();
 
-        private Dictionary<string, List<EventBase>> CompletedEvents = new Dictionary<string, List<EventBase>>();
+        private ConcurrentDictionary<string, List<EventBase>> CompletedEvents = new ConcurrentDictionary<string, List<EventBase>>();
 
         internal string GenerateNewRequestId()
         {
@@ -128,7 +129,8 @@ namespace Microsoft.Identity.Client
             }
 
             // Mark this event as no longer in progress
-            EventsInProgress.Remove(eventKey);
+            EventBase dummy = null;
+            EventsInProgress.TryRemove(eventKey, out dummy);
         }
 
         internal void Flush(string requestId)
@@ -149,8 +151,8 @@ namespace Microsoft.Identity.Client
 
             CompletedEvents[requestId].AddRange(orphanedEvents);
 
-            List<EventBase> eventsToFlush = CompletedEvents[requestId];
-            CompletedEvents.Remove(requestId);
+            List<EventBase> eventsToFlush;
+            CompletedEvents.TryRemove(requestId, out eventsToFlush);
 
             if (TelemetryOnFailureOnly)
             {
@@ -188,8 +190,9 @@ namespace Microsoft.Identity.Client
                 if (key.Item1 == requestId)
                 {
                     // The orphaned event already contains its own start time, we simply collect it
-                    orphanedEvents.Add(EventsInProgress[key]);  
-                    EventsInProgress.Remove(key);
+                    EventBase orphan;
+                    EventsInProgress.TryRemove(key, out orphan);
+                    orphanedEvents.Add(orphan);
                 }
             }
             return orphanedEvents;
