@@ -143,20 +143,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
         {
             OAuth2Client client = new OAuth2Client();
             client.AddQueryParameter("api-version", "1.0");
-            return await ExecuteClient<DrsMetadataResponse>(endpoint, client, requestContext).ConfigureAwait(false);
-        }
-
-        private async Task<T> ExecuteClient<T>(string endpoint, OAuth2Client client, RequestContext requestContext)
-        {
-            try
-            {
-                return
-                    await client.ExecuteRequest<T>(new Uri(endpoint), HttpMethod.Get, requestContext).ConfigureAwait(false);
-            }
-            catch (RetryableRequestException exc)
-            {
-                throw exc.InnerException;
-            }
+            return await client.ExecuteRequest<DrsMetadataResponse>(new Uri(endpoint), HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
         private string GetDomainFromUpn(string upn)

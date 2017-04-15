@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Client
             {
                 Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
                 {
-                    Error = MsalError.NonHttpsRedirectNotSupported,
+                    Error = MsalClientException.NonHttpsRedirectNotSupported,
                     ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported
                 };
                 readyToClose = true;

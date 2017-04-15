@@ -46,12 +46,11 @@ namespace Microsoft.Identity.Client
         public string CreateBase64UrlEncodedSha256Hash(string input)
         {
             IBuffer inputBuffer = CryptographicBuffer.ConvertStringToBinary(input, BinaryStringEncoding.Utf8);
+            var hasher = HashAlgorithmProvider.OpenAlgorithm(HashAlgorithmNames.Sha256);
 
-            var hasher = HashAlgorithmProvider.OpenAlgorithm("SHA256");
             IBuffer hashed = hasher.HashData(inputBuffer);
-            DataReader dataReader = DataReader.FromBuffer(hashed);
-            string output = dataReader.ReadString(hashed.Length);
-            return Base64UrlHelpers.Encode(output);
+            string output = CryptographicBuffer.EncodeToBase64String(hashed);
+            return Base64UrlHelpers.Encode(Convert.FromBase64String(output));
         }
 
         public string GenerateCodeVerifier()

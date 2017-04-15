@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Http;
 using Microsoft.Identity.Client.Internal.Instance;
@@ -121,7 +122,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
         
         [TestMethod]
         [TestCategory("HttpRequestTests")]
-        public void TestSendGetWithHttp500TypeFailure()
+        public async Task TestSendGetWithHttp500TypeFailure()
         {
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
@@ -137,14 +138,14 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
             try
             {
-                var msalHttpResponse = HttpRequest.SendGet(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), new RequestContext(Guid.Empty)).Result;
+                var msalHttpResponse = await HttpRequest.SendGet(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                    new Dictionary<string, string>(), new RequestContext(Guid.Empty)).ConfigureAwait(false);
                 Assert.Fail("request should have failed");
             }
-            catch (AggregateException exc)
+            catch (MsalServiceException exc)
             {
                 Assert.IsNotNull(exc);
-                Assert.IsTrue(exc.InnerException is RetryableRequestException);
+                Assert.AreEqual(MsalServiceException.ServiceNotAvailable, exc.ErrorCode);
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -152,7 +153,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
         [TestMethod]
         [TestCategory("HttpRequestTests")]
-        public void TestSendPostWithHttp500TypeFailure()
+        public async Task TestSendPostWithHttp500TypeFailure()
         {
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
@@ -168,14 +169,14 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
             try
             {
-                var msalHttpResponse = HttpRequest.SendPost(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), null, new RequestContext(Guid.Empty)).Result;
+                var msalHttpResponse = await HttpRequest.SendPost(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                    new Dictionary<string, string>(), null, new RequestContext(Guid.Empty)).ConfigureAwait(false);
                 Assert.Fail("request should have failed");
             }
-            catch (AggregateException exc)
+            catch (MsalServiceException exc)
             {
                 Assert.IsNotNull(exc);
-                Assert.IsTrue(exc.InnerException is RetryableRequestException);
+                Assert.AreEqual(MsalServiceException.ServiceNotAvailable, exc.ErrorCode);
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -183,7 +184,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
         [TestMethod]
         [TestCategory("HttpRequestTests")]
-        public void TestSendGetWithRetryOnTimeoutFailure()
+        public async Task TestSendGetWithRetryOnTimeoutFailure()
         {
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
@@ -201,14 +202,15 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
             try
             {
-                var msalHttpResponse = HttpRequest.SendGet(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), new RequestContext(Guid.Empty)).Result;
+                var msalHttpResponse = await HttpRequest.SendGet(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                    new Dictionary<string, string>(), new RequestContext(Guid.Empty)).ConfigureAwait(false);
                 Assert.Fail("request should have failed");
             }
-            catch (AggregateException exc)
+            catch (MsalServiceException exc)
             {
                 Assert.IsNotNull(exc);
-                Assert.IsTrue(exc.InnerException is RetryableRequestException);
+                Assert.AreEqual(MsalServiceException.RequestTimeout, exc.ErrorCode);
+                Assert.IsTrue(exc.InnerException is TaskCanceledException);
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -216,7 +218,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
         [TestMethod]
         [TestCategory("HttpRequestTests")]
-        public void TestSendPostWithRetryOnTimeoutFailure()
+        public async Task TestSendPostWithRetryOnTimeoutFailure()
         {
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
@@ -234,14 +236,15 @@ namespace Test.MSAL.NET.Unit.HttpTests
 
             try
             {
-                var msalHttpResponse = HttpRequest.SendPost(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), new Dictionary<string, string>(), new RequestContext(Guid.Empty)).Result;
+                var msalHttpResponse = await HttpRequest.SendPost(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                    new Dictionary<string, string>(), new Dictionary<string, string>(), new RequestContext(Guid.Empty)).ConfigureAwait(false);
                 Assert.Fail("request should have failed");
             }
-            catch (AggregateException exc)
+            catch (MsalServiceException exc)
             {
                 Assert.IsNotNull(exc);
-                Assert.IsTrue(exc.InnerException is RetryableRequestException);
+                Assert.AreEqual(MsalServiceException.RequestTimeout, exc.ErrorCode);
+                Assert.IsTrue(exc.InnerException is TaskCanceledException);
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");

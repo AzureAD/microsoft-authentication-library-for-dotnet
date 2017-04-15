@@ -225,7 +225,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void VerifyAuthorizationResult()
         {
-            if (!_state.Equals(_authorizationResult.State))
+            if (_authorizationResult.Status == AuthorizationStatus.Success && !_state.Equals(_authorizationResult.State))
             {
                 throw new MsalClientException(MsalClientException.StateMismatchError,
                     string.Format(CultureInfo.InvariantCulture, "Returned state({0}) from authorize endpoint is not the same as the one sent({1})", _authorizationResult.State, _state));

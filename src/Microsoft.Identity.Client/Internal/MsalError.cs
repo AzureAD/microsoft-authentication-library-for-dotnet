@@ -38,12 +38,6 @@ namespace Microsoft.Identity.Client.Internal
         public const string AuthenticationFailed = "authentication_failed";
 
         /// <summary>
-        /// Invalid credential type.
-        /// </summary>
-        public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
-
-
-        /// <summary>
         /// 'authority' is not in the list of valid addresses.
         /// </summary>
         public const string AuthorityNotInValidList = "authority_not_in_valid_list";
@@ -86,6 +80,6 @@ namespace Microsoft.Identity.Client.Internal
         /// <summary>
         /// Failed to refresh token.
         /// </summary>
-        public const string FailedToRefreshToken = "failed_to_refresh_token";        
+        public const string FailedToRefreshToken = "failed_to_refresh_token";
     }
 }

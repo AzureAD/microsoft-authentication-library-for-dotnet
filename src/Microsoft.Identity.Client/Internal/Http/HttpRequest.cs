@@ -76,6 +76,7 @@ namespace Microsoft.Identity.Client.Internal.Http
             Dictionary<string, string> bodyParameters, HttpMethod method,
             RequestContext requestContext, bool retry = true)
         {
+            Exception toThrow = null;
             bool isRetryable = false;
             HttpResponse response = null;
             try
@@ -101,6 +102,7 @@ namespace Microsoft.Identity.Client.Internal.Http
             {
                 requestContext.Logger.Error(exception);
                 isRetryable = true;
+                toThrow = exception;
             }
 
             if (isRetryable)
@@ -108,11 +110,18 @@ namespace Microsoft.Identity.Client.Internal.Http
                 if (retry)
                 {
                     requestContext.Logger.Info("Retrying one more time..");
+                    await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
                     return await ExecuteWithRetry(endpoint, headers, bodyParameters, method, requestContext, false);
                 }
 
                 requestContext.Logger.Info("Request retry failed.");
-                throw new RetryableRequestException();
+                if (toThrow != null)
+                {
+                    throw new MsalServiceException(MsalServiceException.RequestTimeout, "Request to the endpoint timed out.", toThrow);
+                }
+
+                throw new MsalServiceException(MsalServiceException.ServiceNotAvailable,
+                    "Service is unavailable to process the request", (int) response.StatusCode);
             }
 
             return response;
