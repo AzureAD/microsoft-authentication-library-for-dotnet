@@ -45,9 +45,7 @@ namespace Microsoft.Identity.Client
         private const int DefaultExpirationBufferInMinutes = 5;
 
         internal readonly TokenCacheAccessor TokenCacheAccessor = new TokenCacheAccessor();
-
-        internal  RequestContext RequestContext { get; set; }
-
+        
         /// <summary>
         /// Notification for certain token cache interactions during token acquisition.
         /// </summary>
@@ -304,9 +302,8 @@ namespace Microsoft.Identity.Client
                 {
                     return accessTokenCacheItem;
                 }
-                
-                RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
-                    "The Access Token found is expired."));
+
+                //TODO: log the access token found is expired.
                 return null;
             }
         }
