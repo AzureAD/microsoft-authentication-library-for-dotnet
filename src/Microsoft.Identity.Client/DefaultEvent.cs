@@ -36,6 +36,7 @@ namespace Microsoft.Identity.Client
             this["client_id"] = clientId;
             this["sdk_platform"] = PlatformPlugin.PlatformInformation.GetProductName();
             this["sdk_version"] = MsalIdHelper.GetMsalVersion();
+            // TODO: The following implementation will be used after the 3 helpers being implemented (in a separated PR)
             // this["application_name"] = MsalIdHelper.GetApplicationName();  // Not yet implemented
             // this["application_version"] = MsalIdHelper.GetApplicationVersion();  // Not yet implemented
             // this["device_id"] = MsalIdHelper.GetDeviceId();  // Not yet implemented

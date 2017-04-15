@@ -195,6 +195,6 @@ namespace Microsoft.Identity.Client
             return orphanedEvents;
         }
 
-        public string ClientId { get; set; } = "undefined";
+        public string ClientId { get; set; }
     }
 }
