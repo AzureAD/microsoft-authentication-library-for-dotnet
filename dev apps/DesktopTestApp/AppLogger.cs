@@ -34,12 +34,12 @@ using Microsoft.Identity.Client;
 
 namespace DesktopTestApp
 {
-    class AppLogger
+    public class AppLogger
     {
         private StringBuilder logBuilder = new StringBuilder();
         private StringBuilder piiLogBuilder = new StringBuilder();
 
-        public void Log(Microsoft.Identity.Client.Logger.LogLevel level, string message, bool containsPii)
+        public void Log(Logger.LogLevel level, string message, bool containsPii)
         {
             if (containsPii)
             {

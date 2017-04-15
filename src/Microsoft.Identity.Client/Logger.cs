@@ -86,8 +86,8 @@ namespace Microsoft.Identity.Client
                 {
                     if (_logCallback != null)
                     {
-                        throw new Exception("MSAL logging delegate can only be set once per process and" +
-                                            "should never change once set.");
+                        throw new Exception("MSAL logging callback can only be set once per process and" +
+                                                   " should never change once set.");
                     }
 
                     _logCallback = value;
