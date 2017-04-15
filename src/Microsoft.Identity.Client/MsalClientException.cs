@@ -43,6 +43,11 @@ namespace Microsoft.Identity.Client
         public const string MultipleTokensMatchedError = "multiple_matching_tokens_detected";
 
         /// <summary>
+        /// Non HTTPS redirects are not supported.
+        /// </summary>
+        public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
+
+        /// <summary>
         /// The request could not be preformed because the network is down.
         /// </summary>
         public const string NetworkNotAvailableError = "network_not_available";
@@ -140,7 +145,7 @@ namespace Microsoft.Identity.Client
         protected static string GetErrorMessage(string errorCode)
         {
             string message = ErrorMessages.ContainsKey(errorCode) ? ErrorMessages[errorCode] : MsalErrorMessage.Unknown;
-            return string.Format(CultureInfo.InvariantCulture, "{0}: {1}", errorCode, message);
+            return String.Format(CultureInfo.InvariantCulture, "{0}: {1}", errorCode, message);
         }
     }
 }

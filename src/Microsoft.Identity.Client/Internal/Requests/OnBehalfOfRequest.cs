@@ -51,8 +51,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // or new assertion has been passed. We should not use Refresh Token
             // for the user because the new incoming token may have updated claims
             // like mfa etc.
-            AccessTokenItem
-                = TokenCache.FindAccessToken(AuthenticationRequestParameters);
+            if (LoadFromCache)
+            {
+                AccessTokenItem
+                    = TokenCache.FindAccessToken(AuthenticationRequestParameters);
+            }
         }
 
         protected override async Task SendTokenRequestAsync()

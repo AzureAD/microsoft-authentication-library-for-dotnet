@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal override Task PreTokenRequest()
         {
             // look for access token in the cache first.
-            if (!ForceRefresh)
+            if (!ForceRefresh && LoadFromCache)
             {
                 AccessTokenItem
                     = TokenCache.FindAccessToken(AuthenticationRequestParameters);

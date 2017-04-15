@@ -162,6 +162,41 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
+        public void ConfidentialClientUsingSecretNoCacheProvidedTest()
+        {
+            ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
+                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
+                null, null)
+            {
+                ValidateAuthority = false
+            };
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(app.Authority)
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
+            });
+
+            Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
+            AuthenticationResult result = task.Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull("header.payload.signature", result.AccessToken);
+            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
+
+            Assert.IsNull(app.UserTokenCache);
+            Assert.IsNull(app.AppTokenCache);
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
         public void ConfidentialClientUsingSecretTest()
         {
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
@@ -199,6 +234,21 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(0, app.AppTokenCache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count); //no refresh tokens are returned
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+
+            //call AcquireTokenForClientAsync again to get result back from the cache
+            task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
+            result = task.Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull("header.payload.signature", result.AccessToken);
+            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
+
+            //make sure user token cache is empty
+            Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
+
+            //check app token cache count to be 1
+            Assert.AreEqual(1, app.AppTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(0, app.AppTokenCache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count); //no refresh tokens are returned
         }
 
         [TestMethod]

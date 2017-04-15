@@ -134,11 +134,14 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                         tokenResponse.ErrorDescription);
                 }
 
-                serviceEx = new MsalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription);
+                serviceEx = new MsalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, (int)response.StatusCode, tokenResponse.Claims, null)
+                {
+                    ResponseBody =  response.Body
+                };
             }
             catch (SerializationException)
             {
-                serviceEx = new MsalServiceException(MsalException.UnknownError, response.Body);
+                serviceEx = new MsalServiceException(MsalException.UnknownError, response.Body, (int)response.StatusCode);
             }
 
             requestContext.Logger.Error(serviceEx);

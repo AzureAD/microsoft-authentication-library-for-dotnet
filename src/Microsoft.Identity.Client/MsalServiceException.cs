@@ -36,6 +36,16 @@ namespace Microsoft.Identity.Client
     public class MsalServiceException : MsalException
     {
         /// <summary>
+        /// Service is unavailable and returned HTTP error code within the range of 500-599.
+        /// </summary>
+        public const string ServiceNotAvailable = "service_not_available";
+
+        /// <summary>
+        /// Http Request timed out.
+        /// </summary>
+        public const string RequestTimeout = "request_timeout";
+
+        /// <summary>
         /// Initializes a new instance of the exception class with a specified
         /// error code, error message and a reference to the inner exception that is the cause of
         /// this exception.
@@ -146,7 +156,15 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public int StatusCode { get; } = 0;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string Claims { get; }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public string ResponseBody { get; internal set; }
 
         /// <summary>
         /// Creates and returns a string representation of the current exception.
