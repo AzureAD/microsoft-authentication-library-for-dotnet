@@ -32,34 +32,55 @@ namespace DesktopTestApp
 {
     class PublicClientHandler
     {
-        public IUser CurrentUser;
+        #region Properties
+       
+        public TokenCache AppTokenCache { get; set; }
 
-        public PublicClientApplication PublicClientApplication;
+        public string AuthorityOverride { get; set; }
+
+        public string[] Scopes { get; set; }
+
+        public string ExtraQueryParams { get; set; }
+
+        public string LoginHint { get; set; }
+
+        public IUser CurrentUser { get; set; }
+
+        public PublicClientApplication PublicClientApplication { get; set; }
+
+        #endregion
 
         public async Task<AuthenticationResult> AcquireTokenInteractive(string overriddenAuthority, string applicationId, string[] scopes, IUser currentUser,
             UIBehavior uiBehavior, string extraQueryParams, UIParent uiParent, string loginHint)
         {
-            PublicClientApplication publicClientApplication = CreateClientApplication(overriddenAuthority, applicationId);
+            PublicClientApplication = CreatePublicClientApplication(overriddenAuthority, applicationId);
 
             AuthenticationResult result;
             if (currentUser != null)
             {
-                result = await publicClientApplication.AcquireTokenAsync(scopes, CurrentUser, uiBehavior,
+                result = await PublicClientApplication.AcquireTokenAsync(scopes, CurrentUser, uiBehavior,
                     extraQueryParams,
                     uiParent);
             }
             else
             {
                 result =
-                    await publicClientApplication.AcquireTokenAsync(scopes, loginHint, uiBehavior,
+                    await PublicClientApplication.AcquireTokenAsync(scopes, loginHint, uiBehavior,
                         extraQueryParams);
             }
 
             CurrentUser = result.User;
-            return (result);
+            return result;
         }
 
-        private PublicClientApplication CreateClientApplication(string overrriddenAuthority, string applicationId)
+        public async Task<AuthenticationResult> AcquireTokenSilent(string[] scopes, IUser currentUser)
+        {
+            AuthenticationResult result = await PublicClientApplication.AcquireTokenSilentAsync(scopes, currentUser);
+
+            return result;
+        }
+
+        private PublicClientApplication CreatePublicClientApplication(string overrriddenAuthority, string applicationId)
         {
             if (string.IsNullOrEmpty(overrriddenAuthority))
             {

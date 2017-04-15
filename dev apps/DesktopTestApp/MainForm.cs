@@ -38,33 +38,13 @@ namespace DesktopTestApp
 {
     public partial class MainForm : Form
     {
-        readonly AppLogger _appLogger = new AppLogger();
-
-        #region Properties
-
-        private const string ApplicationId = "0615b6ca-88d4-4884-8729-b178178f7c27";
-
-        // private PublicClientApplication _publicClientApplication = new PublicClientApplication(
-        //      clientId: ApplicationId);
-
-        private ConfidentialClientApplication _confidentialClientApplication;
-
-        public TokenCache AppTokenCache { get; set; }
-
-        public IUser CurrentUser;
-
-        public string AuthorityOverride;
-
-        public string[] Scopes;
-
-        public string ExtraQueryParams;
-
-        public string LoginHint;
-
         private readonly PublicClientHandler _publicClientHandler = new PublicClientHandler();
 
+        private readonly ConfidentialClientHandler _confidentialClientHandler = new ConfidentialClientHandler();
 
-        #endregion
+        private readonly AppLogger _appLogger = new AppLogger();
+
+        private const string ApplicationId = "0615b6ca-88d4-4884-8729-b178178f7c27";
 
         public MainForm()
         {
@@ -89,31 +69,31 @@ namespace DesktopTestApp
             userList.Refresh();
             usersListBox.Refresh();
         }
-        #region UI Controls
+        #region PublicClient UI Controls
 
         private void loginHint_TextChanged(object sender, EventArgs e)
         {
-            LoginHint = loginHintTextBox.Text;
+            _publicClientHandler.LoginHint = loginHintTextBox.Text;
         }
 
         private void userList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            CurrentUser = (IUser)userList.SelectedItem;
+            _publicClientHandler.CurrentUser = (IUser)userList.SelectedItem;
         }
 
         private void extraQueryParams_TextChanged(object sender, EventArgs e)
         {
-            ExtraQueryParams = extraQueryParams.Text;
+            _publicClientHandler.ExtraQueryParams = extraQueryParams.Text;
         }
 
         private void scopes_TextChanged(object sender, EventArgs e)
         {
-            Scopes = scopes.Text.Split(' ');
+            _publicClientHandler.Scopes = scopes.Text.Split(' ');
         }
 
         private void overriddenAuthority_TextChanged(object sender, EventArgs e)
         {
-            AuthorityOverride = overriddenAuthority.Text;
+            _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
         }
 
         private void acquire_Click(object sender, EventArgs e)
@@ -143,13 +123,40 @@ namespace DesktopTestApp
 
         #endregion
 
+        #region ConfidentialClient UI Controls
+        private void confClientScopesTextBox_TextChanged(object sender, EventArgs e)
+        {
+            _confidentialClientHandler.ConfClientScopes = scopes.Text.Split(' ');
+        }
+
+        private void ConfClientOverrideAuthority_TextChanged(object sender, EventArgs e)
+        {
+            _confidentialClientHandler.ConfClientOverriddenAuthority = confClientOverrideAuthority.Text;
+        }
+
+        private void clientSecretTxtBox_TextChanged(object sender, EventArgs e)
+        {
+            //   ClientCredential = clientSecretTxtBox.Text;
+        }
+
+        private void forceRefreshGroupBox_Enter(object sender, EventArgs e)
+        {
+            if (forceRefreshFalseBtn.Checked)
+            {
+                _confidentialClientHandler.ForceRefresh = false;
+            }
+            _confidentialClientHandler.ForceRefresh = true;
+        }
+        #endregion
+
+        #region PublicClientApplication Acquire Token
         private async void acquireTokenInteractive_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
             try
             {
-                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractive(AuthorityOverride, ApplicationId, Scopes, CurrentUser,
-                 GetUIBehavior(), ExtraQueryParams, new UIParent(/*this*/), LoginHint);
+                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractive(_publicClientHandler.AuthorityOverride, ApplicationId, _publicClientHandler.Scopes,
+                    _publicClientHandler.CurrentUser, GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent(/*this*/), _publicClientHandler.LoginHint);
 
                 // if (modalWebview.Checked)
                 // {
@@ -180,70 +187,21 @@ namespace DesktopTestApp
         }
 
         private async void acquireTokenSilent_Click(object sender, EventArgs e)
-        {/*
+        {
             ClearResultPageInfo();
 
             try
             {
-                AuthenticationResult result =
-                    await _publicClientApplication.AcquireTokenSilentAsync(scopes.Text.Split(' '), CurrentUser);
+                AuthenticationResult authenticationResult =
+                    await _publicClientHandler.AcquireTokenSilent(_publicClientHandler.Scopes, _publicClientHandler.CurrentUser);
 
-                SetResultPageInfo(result);
+                SetResultPageInfo(authenticationResult);
             }
             catch (Exception exc)
             {
                 CreateException(exc);
-            }*/
-        }
-
-        #region Confidential Client Acquire Token Logic
-        // Acquires token from the service for the confidential client.
-        private async void confClientAcquireTokenBtn_Click_1(object sender, EventArgs e)
-        {/*
-            ClearConfidentialClientResultPageInfo();
-            callResultConfClient.SendToBack();
-
-            ConfidentialClientApplication clientApplication = CreateConfidentialClientApplication();
-            string output = string.Empty;
-            callResultConfClient.Text = output;
-            try
-            {
-                AuthenticationResult result;
-                if (confClientUserList.SelectedIndex != -1)
-                {
-                    result = await clientApplication.AcquireTokenForClientAsync(confClientScopesTextBox.Text.Split(' '));
-                }
-                else
-                {
-                    result = await clientApplication.AcquireTokenForClientAsync(confClientScopesTextBox.Text.Split(' '), true);
-                }
-                CurrentUser = result.User;
-                SetConfidentialClientPageInfo(result);
             }
-            catch (Exception exc)
-            {
-                CreateException(exc);
-            }*/
         }
-
-        // Acquires token using On-Behalf-Of flow
-        private void confClientAcquireTokenOnBehalfOf_Click(object sender, EventArgs e)
-        {
-            /* ClearConfidentialClientResultPageInfo();
-             callResultConfClient.SendToBack();
-
-             string output = string.Empty;
-             callResultConfClient.Text = output;
-             try
-             {
-                 IAuthenticationResult result;
-                 if (confClientUserList.SelectedIndex != -1)
-                 {
-                     result = await _confidentialClientApplication.AcquireTokenOnBehalfOfAsync(confClientScopesTextBox.Text.Split(' '), )
-                 }
-             }*/
-        }
-
         #endregion
 
         private void CreateException(Exception ex)
@@ -287,28 +245,6 @@ namespace DesktopTestApp
 
             return behavior;
         }
-
-        /* private ConfidentialClientApplication CreateConfidentialClientApplication()
-         {
-             string redirectUri = "urn:ietf:wg:oauth:2.0:oob";
-
-             ClientCredential clientCredential = new ClientCredential(confClientTextBox.Text);
-
-             if (string.IsNullOrEmpty(overriddenAuthority.Text))
-             {
-                 // Use the default authority
-                 _confidentialClientApplication = new ConfidentialClientApplication(
-                     ApplicationId, redirectUri, clientCredential,
-                     _publicClientApplication.UserTokenCache, AppTokenCache);
-             }
-             else
-             {
-                 _confidentialClientApplication = new ConfidentialClientApplication(
-                     ApplicationId, overriddenAuthority.Text, redirectUri, clientCredential,
-                     _publicClientApplication.UserTokenCache, AppTokenCache);
-             }
-             return _confidentialClientApplication;
-         }*/
 
         private void applySettings_Click(object sender, EventArgs e)
         {
@@ -401,7 +337,7 @@ namespace DesktopTestApp
             // Find the AccessToken for the selected user and delete
             _publicClientHandler.PublicClientApplication.UserTokenCache.TokenCacheAccessor.DeleteAccessToken(selectedUserAccessToken);
 
-            ICollection<string> deletedAccessToken = GetAccessToken();
+            ICollection<string> deletedAccessToken = GetAccessTokens();
 
             userTokensListBox.DataSource = deletedAccessToken;
 
@@ -410,8 +346,8 @@ namespace DesktopTestApp
 
         private void signOutUserBtn_Click(object sender, EventArgs e)
         {
-            _publicClientHandler.PublicClientApplication.Remove(CurrentUser);
-            idTokenAT1Result.Text = @"The user: " + CurrentUser.DisplayableId + @" has been signed out";
+            _publicClientHandler.PublicClientApplication.Remove(_publicClientHandler.CurrentUser);
+            idTokenAT1Result.Text = @"The user: " + _publicClientHandler.CurrentUser.DisplayableId + @" has been signed out";
             RefreshUI();
         }
 
@@ -425,11 +361,8 @@ namespace DesktopTestApp
             // Clear values in cache UI 
             ClearCacheUIPage();
 
-            // Define the User in the listbox
-            User selectedUser = (User)usersListBox.SelectedItem;
-
             //Get all token cache items from TokenCacheAccessor
-            ICollection<string> accessTokens = GetAccessToken();
+            ICollection<string> accessTokens = GetAccessTokens();
 
             ICollection<string> userAccessTokens = new List<string>();
 
@@ -438,7 +371,7 @@ namespace DesktopTestApp
             {
                 AccessTokenCacheItem accessTokenCacheItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessToken);
                 //if (string.Compare(accessTokenCacheItem.User.DisplayableId, selectedUser.DisplayableId, StringComparison.InvariantCultureIgnoreCase) == 0)
-                if (accessTokenCacheItem.User.DisplayableId == selectedUser.DisplayableId)
+                if (accessTokenCacheItem.User.DisplayableId == _publicClientHandler.CurrentUser.DisplayableId)
                 {
                     userAccessTokens.Add(accessTokenCacheItem.AccessToken);
                     // Populate the token cache UI page
@@ -450,45 +383,12 @@ namespace DesktopTestApp
             }
             //Send result to userTokensListBox
             userTokensListBox.DataSource = userAccessTokens;
-            userOneUpnResult.Text = selectedUser.DisplayableId;
+            userOneUpnResult.Text = _publicClientHandler.CurrentUser.DisplayableId;
         }
 
-        private ICollection<string> GetAccessToken()
+        private ICollection<string> GetAccessTokens()
         {
             return _publicClientHandler.PublicClientApplication.UserTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString();
-        }
-
-        private void SelectedUserChanged()
-        {
-            // Clear values in cache UI 
-            ClearCacheUIPage();
-
-            // Define the User in the listbox
-            User selectedUser = (User)usersListBox.SelectedItem;
-
-            //Get all token cache items from TokenCacheAccessor
-            ICollection<string> accessTokens = GetAccessToken();
-
-            ICollection<string> userAccessTokens = new List<string>();
-
-            //Find the token related to the selected user
-            foreach (string accessToken in accessTokens)
-            {
-                AccessTokenCacheItem accessTokenCacheItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessToken);
-                //if (string.Compare(accessTokenCacheItem.User.DisplayableId, selectedUser.DisplayableId, StringComparison.InvariantCultureIgnoreCase) == 0)
-                if (accessTokenCacheItem.User.DisplayableId == selectedUser.DisplayableId)
-                {
-                    userAccessTokens.Add(accessTokenCacheItem.AccessToken);
-                    // Populate the token cache UI page
-                    idTokenAT1Result.Text = accessTokenCacheItem.IdToken.Issuer;
-                    expiresOnAT1Result.Text = accessTokenCacheItem.ExpiresOn.ToString();
-                    tenantIdAT1Result.Text = accessTokenCacheItem.IdToken.TenantId;
-                    scopeAT1Result.Text = accessTokenCacheItem.Scope;
-                }
-            }
-            //Send result to userTokensListBox
-            userTokensListBox.DataSource = userAccessTokens;
-            userOneUpnResult.Text = selectedUser.DisplayableId;
         }
 
         private void ClearCacheUIPage()
@@ -497,6 +397,11 @@ namespace DesktopTestApp
             expiresOnAT1Result.Text = string.Empty;
             tenantIdAT1Result.Text = string.Empty;
             scopeAT1Result.Text = string.Empty;
+        }
+
+        private void forceRefreshTrueBtn_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
 
     }

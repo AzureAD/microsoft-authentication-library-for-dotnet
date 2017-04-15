@@ -75,15 +75,13 @@ namespace Microsoft.Identity.Client
         /// <param name="state"></param>
         public static void Deserialize(this TokenCache tokenCache, byte[] state)
         {
-            RequestContext requestContext = new RequestContext(Guid.Empty);
-
             lock (tokenCache.LockObject)
             {
                 Dictionary<string, IEnumerable<string>> cacheDict = JsonHelper
                     .DeserializeFromJson<Dictionary<string, IEnumerable<string>>>(state);
                 if (cacheDict == null || cacheDict.Count == 0)
                 {
-                    requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture, "The cache is empty"));
+                    //TODO log about empty cache
                     return;
                 }
 
