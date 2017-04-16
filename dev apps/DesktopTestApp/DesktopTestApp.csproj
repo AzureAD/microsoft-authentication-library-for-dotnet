@@ -55,7 +55,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppLogger.cs" />
     <Compile Include="ConfidentialClientHandler.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

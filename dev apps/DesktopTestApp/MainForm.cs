@@ -40,11 +40,7 @@ namespace DesktopTestApp
     {
         private const string ApplicationId = "0615b6ca-88d4-4884-8729-b178178f7c27";
         private readonly PublicClientHandler _publicClientHandler = new PublicClientHandler(ApplicationId);
-
         private readonly ConfidentialClientHandler _confidentialClientHandler = new ConfidentialClientHandler(ApplicationId);
-
-        private readonly AppLogger _appLogger = new AppLogger();
-
 
         public MainForm()
         {
@@ -52,19 +48,50 @@ namespace DesktopTestApp
             tabControl1.Appearance = TabAppearance.FlatButtons;
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
+            tabControl1.Selecting += TabControl1_Selecting;
 
-            Logger.LogCallback = _appLogger.Log;
+
+            logLevel.SelectedIndex = logLevel.Items.Count - 1;
+            Logger.LogCallback = LogDelegate;
             Logger.Level = Logger.LogLevel.Info;
             Logger.PiiLoggingEnabled = PiiLoggingEnabled.Checked;
 
             RefreshUserList();
         }
 
+        public void LogDelegate(Logger.LogLevel level, string message, bool containsPii)
+        {
+            Action action = null;
+
+            if (containsPii)
+            {
+                action = () =>
+                {
+                    msalPIILogsTextBox.AppendText(message + Environment.NewLine);
+                };
+            }
+            else
+            {
+                action = () =>
+                {
+                    msalLogsTextBox.AppendText(message + Environment.NewLine);
+                };
+            }
+
+            this.BeginInvoke(new MethodInvoker(action));
+        }
+
+
         public void RefreshUserList()
         {
             List<IUser> userListDataSource = _publicClientHandler.PublicClientApplication.Users.ToList();
+            if (userListDataSource.Count > 0)
+            {
+                userListDataSource.Insert(0, new User(){DisplayableId = string.Empty});    
+            }
 
             userList.DataSource = userListDataSource;
+            userList.DisplayMember = "DisplayableId";
             userList.Refresh();
         }
 
@@ -79,17 +106,7 @@ namespace DesktopTestApp
         {
             _publicClientHandler.CurrentUser = (IUser)userList.SelectedItem;
         }
-
-        private void extraQueryParams_TextChanged(object sender, EventArgs e)
-        {
-            _publicClientHandler.ExtraQueryParams = extraQueryParams.Text;
-        }
-
-        private void scopes_TextChanged(object sender, EventArgs e)
-        {
-            _publicClientHandler.Scopes = scopes.Text.Split(' ');
-        }
-
+        
         private void overriddenAuthority_TextChanged(object sender, EventArgs e)
         {
             _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
@@ -175,7 +192,7 @@ namespace DesktopTestApp
             try
             {
                 AuthenticationResult authenticationResult =
-                    await _publicClientHandler.AcquireTokenSilent(_publicClientHandler.Scopes, _publicClientHandler.CurrentUser);
+                    await _publicClientHandler.AcquireTokenSilent(scopes.Text.AsArray(), _publicClientHandler.CurrentUser);
 
                 SetResultPageInfo(authenticationResult);
             }
@@ -188,22 +205,24 @@ namespace DesktopTestApp
 
         private void CreateException(Exception ex)
         {
-            string output;
-
-            MsalServiceException exception = ex as MsalServiceException;
+            string output = string.Empty;
+            MsalException exception = ex as MsalException;
 
             if (exception != null)
             {
-                output = ex.Message + Environment.NewLine + ex.StackTrace;
+                if (exception is MsalServiceException)
+                {
+                    string.Format("Status Code - {0}" + Environment.NewLine, ((MsalServiceException)exception).StatusCode);
+                }
+
+                output += string.Format("Error Code - {0}" + Environment.NewLine + "Message - {1}" + Environment.NewLine, exception.ErrorCode, exception.Message);
             }
             else
             {
-                output = ex.Message;
+                output = ex.Message + Environment.NewLine + ex.StackTrace;
             }
 
             SetErrorPageInfo(output);
-
-            RefreshUI();
         }
 
         private UIBehavior GetUIBehavior()
@@ -227,19 +246,7 @@ namespace DesktopTestApp
 
             return behavior;
         }
-
-        private void applySettings_Click(object sender, EventArgs e)
-        {
-            Environment.SetEnvironmentVariable("MsalExtraQueryParameter", environmentQP.Text);
-        }
-
-        public void RefreshUI()
-        {
-            msalPIILogsTextBox.Text = _appLogger.DrainPiiLogs();
-            msalLogsTextBox.Text = _appLogger.DrainLogs();
-            userList.SelectedItem = _publicClientHandler.PublicClientApplication;
-        }
-
+        
         #region App logic
 
         public void SetResultPageInfo(AuthenticationResult authenticationResult)
@@ -299,6 +306,7 @@ namespace DesktopTestApp
             msalPIILogsTextBox.Text = string.Empty;
         }
 
+#region Cache Tab Operations
         private void LoadCacheTabPage()
         {
           while (cachePageTableLayout.Controls.Count > 0)
@@ -341,13 +349,30 @@ namespace DesktopTestApp
                 rs.Height = ctl.Height;
             }
         }
+        #endregion
 
-        private void forceRefreshTrueBtn_CheckedChanged(object sender, EventArgs e)
+
+        #region Settings Tab Operations
+        private void TabControl1_Selecting(object sender, TabControlCancelEventArgs e)
         {
+            //tab page is not settings tab. Apply values from settings page.
+            if (tabControl1.SelectedIndex != 2)
+            {
+                _publicClientHandler.ExtraQueryParams = extraQueryParams.Text;
+                Environment.SetEnvironmentVariable("MsalExtraQueryParameter", environmentQP.Text);
 
+                Logger.Level = (Logger.LogLevel)Enum.Parse(typeof(Logger.LogLevel), (string)logLevel.SelectedItem);
+                Logger.PiiLoggingEnabled = PiiLoggingEnabled.Checked;
+            }
         }
 
-        private void userOneBox_Enter(object sender, EventArgs e)
+
+
+        #endregion
+        
+
+
+        private void forceRefreshTrueBtn_CheckedChanged(object sender, EventArgs e)
         {
 
         }
