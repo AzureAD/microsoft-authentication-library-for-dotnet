@@ -571,5 +571,72 @@ namespace Microsoft.Identity.Client
                 }
             }
         }
+        
+        /// <summary>
+        /// Only used by dev test apps
+        /// </summary>
+        /// <param name="accessTokenCacheItem"></param>
+        internal void SaveAccesTokenCacheItem(AccessTokenCacheItem accessTokenCacheItem)
+        {
+            lock (LockObject)
+            {
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                {
+                    TokenCache = this,
+                    ClientId = ClientId,
+                    User = accessTokenCacheItem.User
+                };
+
+                try
+                {
+                    HasStateChanged = true;
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
+
+                    TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString(),
+                        JsonHelper.SerializeToJson(accessTokenCacheItem));
+                    
+                    
+                }
+                finally
+                {
+                    OnAfterAccess(args);
+                    HasStateChanged = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Only used by dev test apps
+        /// </summary>
+        /// <param name="refreshTokenCacheItem"></param>
+        internal void SaveRefreshTokenCacheItem(RefreshTokenCacheItem refreshTokenCacheItem)
+        {
+            lock (LockObject)
+            {
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                {
+                    TokenCache = this,
+                    ClientId = ClientId,
+                    User = refreshTokenCacheItem.User
+                };
+
+                try
+                {
+                    HasStateChanged = true;
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
+
+                        TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(),
+                            JsonHelper.SerializeToJson(refreshTokenCacheItem));
+                }
+                finally
+            {
+                OnAfterAccess(args);
+                HasStateChanged = false;
+                }
+            }
+        }
+
     }
 }

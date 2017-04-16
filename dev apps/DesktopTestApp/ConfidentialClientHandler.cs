@@ -32,7 +32,13 @@ namespace DesktopTestApp
 {
     class ConfidentialClientHandler
     {
-        #region ConfidentialClient Properties
+        public ConfidentialClientHandler(string clientId)
+        {
+            ApplicationId = clientId;
+        }
+
+        #region Properties
+        public string ApplicationId { get; set; }
 
         private ClientCredential ClientCredential { get; set; }
 

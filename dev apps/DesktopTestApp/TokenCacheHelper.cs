@@ -33,12 +33,15 @@ namespace DesktopTestApp
 {
     static class TokenCacheHelper
     {
-        public static TokenCache GetCache()
+        public static readonly TokenCache UsertokenCache = new TokenCache()
         {
-            TokenCache cache = new TokenCache();
-            cache.SetBeforeAccess(BeforeAccessNotification);
-            cache.SetAfterAccess(AfterAccessNotification);
-            return cache;
+            BeforeAccess = BeforeAccessNotification,
+            AfterAccess = AfterAccessNotification
+        };
+
+        public static TokenCache GetUserCache()
+        {
+            return UsertokenCache;
         }
 
         public static string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + "msalcache.txt";
@@ -50,7 +53,7 @@ namespace DesktopTestApp
             lock (FileLock)
             {
                 args.TokenCache.Deserialize(File.Exists(CacheFilePath)
-                    ? ProtectedData.Unprotect(File.ReadAllBytes(CacheFilePath), null, DataProtectionScope.CurrentUser)
+                    ? File.ReadAllBytes(CacheFilePath)
                     : null);
             }
         }
@@ -63,7 +66,7 @@ namespace DesktopTestApp
                 lock (FileLock)
                 {
                     // reflect changesgs in the persistent store
-                    File.WriteAllBytes(CacheFilePath, ProtectedData.Protect(args.TokenCache.Serialize(), null, DataProtectionScope.CurrentUser));
+                    File.WriteAllBytes(CacheFilePath, args.TokenCache.Serialize());
                     // once the write operationtakes place restore the HasStateChanged bit to filse
                     args.TokenCache.HasStateChanged = false;
                 }

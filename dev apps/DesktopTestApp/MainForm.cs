@@ -38,13 +38,13 @@ namespace DesktopTestApp
 {
     public partial class MainForm : Form
     {
-        private readonly PublicClientHandler _publicClientHandler = new PublicClientHandler();
+        private const string ApplicationId = "0615b6ca-88d4-4884-8729-b178178f7c27";
+        private readonly PublicClientHandler _publicClientHandler = new PublicClientHandler(ApplicationId);
 
-        private readonly ConfidentialClientHandler _confidentialClientHandler = new ConfidentialClientHandler();
+        private readonly ConfidentialClientHandler _confidentialClientHandler = new ConfidentialClientHandler(ApplicationId);
 
         private readonly AppLogger _appLogger = new AppLogger();
 
-        private const string ApplicationId = "0615b6ca-88d4-4884-8729-b178178f7c27";
 
         public MainForm()
         {
@@ -57,18 +57,17 @@ namespace DesktopTestApp
             Logger.Level = Logger.LogLevel.Info;
             Logger.PiiLoggingEnabled = PiiLoggingEnabled.Checked;
 
-            // ResetUserList();
+            RefreshUserList();
         }
 
-        public void ResetUserList()
+        public void RefreshUserList()
         {
             List<IUser> userListDataSource = _publicClientHandler.PublicClientApplication.Users.ToList();
 
             userList.DataSource = userListDataSource;
-            usersListBox.DataSource = userListDataSource;
             userList.Refresh();
-            usersListBox.Refresh();
         }
+
         #region PublicClient UI Controls
 
         private void loginHint_TextChanged(object sender, EventArgs e)
@@ -109,6 +108,7 @@ namespace DesktopTestApp
         private void cache_Click(object sender, EventArgs e)
         {
             tabControl1.SelectedTab = cacheTabPage;
+            LoadCacheTabPage();
         }
 
         private void logs_Click(object sender, EventArgs e)
@@ -155,30 +155,11 @@ namespace DesktopTestApp
             ClearResultPageInfo();
             try
             {
-                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractive(_publicClientHandler.AuthorityOverride, ApplicationId, _publicClientHandler.Scopes,
-                    _publicClientHandler.CurrentUser, GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent(/*this*/), _publicClientHandler.LoginHint);
-
-                // if (modalWebview.Checked)
-                // {
-
-                // }
-                // else
-                //  {
-                //     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '),
-                //         (User) userList.SelectedItem, GetUIBehavior(), extraQueryParams.Text);
-                //  }
-
-                // if (modalWebview.Checked)
-                // {
-                //     result = await clientApplication.AcquireTokenAsync(scopes.Text.Split(' '), loginHint.Text,
-                //        GetUIBehavior(), extraQueryParams.Text, new UIParent(this));
-                // }
-                //  else
-                //  {
-
-                // }
+                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractive(_publicClientHandler.AuthorityOverride, _publicClientHandler.Scopes,
+                    _publicClientHandler.CurrentUser, GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent(), _publicClientHandler.LoginHint);
+                
                 SetResultPageInfo(authenticationResult);
-                ResetUserList();
+                RefreshUserList();
             }
             catch (Exception exc)
             {
@@ -248,7 +229,7 @@ namespace DesktopTestApp
 
         private void applySettings_Click(object sender, EventArgs e)
         {
-            Environment.SetEnvironmentVariable("ExtraQueryParameters", environmentQP.Text);
+            Environment.SetEnvironmentVariable("MsalExtraQueryParameters", environmentQP.Text);
         }
 
         public void RefreshUI()
@@ -310,93 +291,54 @@ namespace DesktopTestApp
         }
 
         #endregion
-
-        private void expireAT1Btn_Click(object sender, EventArgs e)
-        {
-            // Expire AccessToken
-
-        }
-
-        private void deleteAT1Btn_Click(object sender, EventArgs e)
-        {
-            // Delete AccessToken
-            DeleteSelectedAccessToken();
-        }
-
+        
         private void clearLogsButton_Click(object sender, EventArgs e)
         {
             msalLogsTextBox.Text = string.Empty;
             msalPIILogsTextBox.Text = string.Empty;
         }
 
-        private void DeleteSelectedAccessToken()
+        private void LoadCacheTabPage()
         {
-            // Define AccessToken in listbox
-            string selectedUserAccessToken = (string)userTokensListBox.SelectedItem;
-
-            // Find the AccessToken for the selected user and delete
-            _publicClientHandler.PublicClientApplication.UserTokenCache.TokenCacheAccessor.DeleteAccessToken(selectedUserAccessToken);
-
-            ICollection<string> deletedAccessToken = GetAccessTokens();
-
-            userTokensListBox.DataSource = deletedAccessToken;
-
-            ClearCacheUIPage();
-        }
-
-        private void signOutUserBtn_Click(object sender, EventArgs e)
-        {
-            _publicClientHandler.PublicClientApplication.Remove(_publicClientHandler.CurrentUser);
-            idTokenAT1Result.Text = @"The user: " + _publicClientHandler.CurrentUser.DisplayableId + @" has been signed out";
-            RefreshUI();
-        }
-
-        private void usersListBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            FindAccessTokenForSelectedUser();
-        }
-
-        private void FindAccessTokenForSelectedUser()
-        {
-            // Clear values in cache UI 
-            ClearCacheUIPage();
-
-            //Get all token cache items from TokenCacheAccessor
-            ICollection<string> accessTokens = GetAccessTokens();
-
-            ICollection<string> userAccessTokens = new List<string>();
-
-            //Find the token related to the selected user
-            foreach (string accessToken in accessTokens)
+          while (cachePageTableLayout.Controls.Count > 0)
             {
-                AccessTokenCacheItem accessTokenCacheItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessToken);
-                //if (string.Compare(accessTokenCacheItem.User.DisplayableId, selectedUser.DisplayableId, StringComparison.InvariantCultureIgnoreCase) == 0)
-                if (accessTokenCacheItem.User.DisplayableId == _publicClientHandler.CurrentUser.DisplayableId)
+                cachePageTableLayout.Controls[0].Dispose();
+            }
+
+            cachePageTableLayout.RowCount = 0;
+            foreach (RefreshTokenCacheItem rtItem in _publicClientHandler.PublicClientApplication.UserTokenCache
+                .GetAllRefreshTokensForClient())
+            {
+                AddControlToCachePageTableLayout(
+                    new MsalUserRefreshTokenControl(_publicClientHandler.PublicClientApplication.UserTokenCache, rtItem)
+                    {
+                        RefreshViewDelegate = LoadCacheTabPage
+                    });
+
+                foreach (AccessTokenCacheItem atItem in _publicClientHandler.PublicClientApplication.UserTokenCache
+                    .GetAllAccessTokensForClient())
                 {
-                    userAccessTokens.Add(accessTokenCacheItem.AccessToken);
-                    // Populate the token cache UI page
-                    idTokenAT1Result.Text = accessTokenCacheItem.IdToken.Issuer;
-                    expiresOnAT1Result.Text = accessTokenCacheItem.ExpiresOn.ToString();
-                    tenantIdAT1Result.Text = accessTokenCacheItem.IdToken.TenantId;
-                    scopeAT1Result.Text = accessTokenCacheItem.Scope;
+                    AddControlToCachePageTableLayout(
+                        new MsalUserAccessTokenControl(_publicClientHandler.PublicClientApplication.UserTokenCache,
+                            atItem)
+                        {
+                            RefreshViewDelegate = LoadCacheTabPage
+                        });
                 }
             }
-            //Send result to userTokensListBox
-            userTokensListBox.DataSource = userAccessTokens;
-            userOneUpnResult.Text = _publicClientHandler.CurrentUser.DisplayableId;
         }
 
-        private ICollection<string> GetAccessTokens()
+        private void AddControlToCachePageTableLayout(Control ctl)
         {
-            return _publicClientHandler.PublicClientApplication.UserTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString();
-        }
-
-        private void ClearCacheUIPage()
-        {
-            idTokenAT1Result.Text = string.Empty;
-            expiresOnAT1Result.Text = string.Empty;
-            tenantIdAT1Result.Text = string.Empty;
-            scopeAT1Result.Text = string.Empty;
+            cachePageTableLayout.RowCount += 1;
+            cachePageTableLayout.RowStyles.Add(
+                new RowStyle(SizeType.AutoSize, ctl.Height));
+            ctl.Dock = DockStyle.Fill;
+            cachePageTableLayout.Controls.Add(ctl, 0, cachePageTableLayout.RowCount - 1);
+            foreach (RowStyle rs in cachePageTableLayout.RowStyles)
+            {
+                rs.Height = ctl.Height;
+            }
         }
 
         private void forceRefreshTrueBtn_CheckedChanged(object sender, EventArgs e)
@@ -404,5 +346,9 @@ namespace DesktopTestApp
 
         }
 
+        private void userOneBox_Enter(object sender, EventArgs e)
+        {
+
+        }
     }
 }

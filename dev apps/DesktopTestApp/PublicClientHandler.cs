@@ -32,9 +32,18 @@ namespace DesktopTestApp
 {
     class PublicClientHandler
     {
+
+        public PublicClientHandler(string clientId)
+        {
+            ApplicationId = clientId;
+            PublicClientApplication = new PublicClientApplication(ApplicationId)
+            {
+                UserTokenCache = TokenCacheHelper.GetUserCache()
+            };
+        }
+
         #region Properties
-       
-        public TokenCache AppTokenCache { get; set; }
+        public string ApplicationId { get; set; }
 
         public string AuthorityOverride { get; set; }
 
@@ -50,10 +59,10 @@ namespace DesktopTestApp
 
         #endregion
 
-        public async Task<AuthenticationResult> AcquireTokenInteractive(string overriddenAuthority, string applicationId, string[] scopes, IUser currentUser,
+        public async Task<AuthenticationResult> AcquireTokenInteractive(string overriddenAuthority, string[] scopes, IUser currentUser,
             UIBehavior uiBehavior, string extraQueryParams, UIParent uiParent, string loginHint)
         {
-            PublicClientApplication = CreatePublicClientApplication(overriddenAuthority, applicationId);
+            PublicClientApplication = CreatePublicClientApplication(overriddenAuthority, ApplicationId);
 
             AuthenticationResult result;
             if (currentUser != null)
@@ -85,12 +94,18 @@ namespace DesktopTestApp
             if (string.IsNullOrEmpty(overrriddenAuthority))
             {
                 // Use default authority
-                PublicClientApplication = new PublicClientApplication(applicationId);
+                PublicClientApplication = new PublicClientApplication(applicationId)
+                {
+                    UserTokenCache = TokenCacheHelper.UsertokenCache
+                };
             }
             else
             {
                 // Use the override authority provided
-                PublicClientApplication = new PublicClientApplication(applicationId, overrriddenAuthority);
+                PublicClientApplication = new PublicClientApplication(applicationId, overrriddenAuthority)
+                {
+                    UserTokenCache = TokenCacheHelper.UsertokenCache
+                };
             }
             return PublicClientApplication;
         }
