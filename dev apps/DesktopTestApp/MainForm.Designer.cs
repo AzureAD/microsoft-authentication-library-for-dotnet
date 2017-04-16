@@ -158,6 +158,7 @@ namespace DesktopTestApp
             this.environmentQP.Name = "environmentQP";
             this.environmentQP.Size = new System.Drawing.Size(352, 20);
             this.environmentQP.TabIndex = 18;
+            this.environmentQP.Text = "Slice=testslice&uid=true";
             // 
             // tabControl1
             // 

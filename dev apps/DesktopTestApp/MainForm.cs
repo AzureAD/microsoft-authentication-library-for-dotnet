@@ -98,6 +98,7 @@ namespace DesktopTestApp
         private void acquire_Click(object sender, EventArgs e)
         {
             tabControl1.SelectedTab = publicClientTabPage;
+            RefreshUserList();
         }
 
         private void settings_Click(object sender, EventArgs e)
@@ -155,7 +156,7 @@ namespace DesktopTestApp
             ClearResultPageInfo();
             try
             {
-                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractive(_publicClientHandler.AuthorityOverride, _publicClientHandler.Scopes,
+                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractive(_publicClientHandler.AuthorityOverride, scopes.Text.AsArray(),
                     _publicClientHandler.CurrentUser, GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent(), _publicClientHandler.LoginHint);
                 
                 SetResultPageInfo(authenticationResult);
@@ -229,7 +230,7 @@ namespace DesktopTestApp
 
         private void applySettings_Click(object sender, EventArgs e)
         {
-            Environment.SetEnvironmentVariable("MsalExtraQueryParameters", environmentQP.Text);
+            Environment.SetEnvironmentVariable("MsalExtraQueryParameter", environmentQP.Text);
         }
 
         public void RefreshUI()
