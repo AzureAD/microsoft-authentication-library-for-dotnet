@@ -45,9 +45,9 @@ namespace DesktopTestApp
         #region Properties
         public string ApplicationId { get; set; }
 
-        public string AuthorityOverride { get; set; }
+        public string InteractiveAuthority { get; set; }
 
-        public string[] Scopes { get; set; }
+        public string AuthorityOverride { get; set; }
 
         public string ExtraQueryParams { get; set; }
 
@@ -59,13 +59,12 @@ namespace DesktopTestApp
 
         #endregion
 
-        public async Task<AuthenticationResult> AcquireTokenInteractive(string overriddenAuthority, string[] scopes, IUser currentUser,
-            UIBehavior uiBehavior, string extraQueryParams, UIParent uiParent, string loginHint)
+        public async Task<AuthenticationResult> AcquireTokenInteractive(string[] scopes, UIBehavior uiBehavior, string extraQueryParams, UIParent uiParent)
         {
-            PublicClientApplication = CreatePublicClientApplication(overriddenAuthority, ApplicationId);
+            CreatePublicClientApplication(InteractiveAuthority, ApplicationId);
 
             AuthenticationResult result;
-            if (currentUser != null)
+            if (CurrentUser != null)
             {
                 result = await PublicClientApplication.AcquireTokenAsync(scopes, CurrentUser, uiBehavior,
                     extraQueryParams,
@@ -74,7 +73,7 @@ namespace DesktopTestApp
             else
             {
                 result =
-                    await PublicClientApplication.AcquireTokenAsync(scopes, loginHint, uiBehavior,
+                    await PublicClientApplication.AcquireTokenAsync(scopes, LoginHint, uiBehavior,
                         extraQueryParams);
             }
 
@@ -82,16 +81,15 @@ namespace DesktopTestApp
             return result;
         }
 
-        public async Task<AuthenticationResult> AcquireTokenSilent(string[] scopes, IUser currentUser)
+        public async Task<AuthenticationResult> AcquireTokenSilent(string[] scopes)
         {
-            AuthenticationResult result = await PublicClientApplication.AcquireTokenSilentAsync(scopes, currentUser);
-
-            return result;
+            return await PublicClientApplication.AcquireTokenSilentAsync(scopes, CurrentUser, AuthorityOverride,
+                        false);
         }
 
-        private PublicClientApplication CreatePublicClientApplication(string overrriddenAuthority, string applicationId)
+        private void CreatePublicClientApplication(string interactiveAuthority, string applicationId)
         {
-            if (string.IsNullOrEmpty(overrriddenAuthority))
+            if (string.IsNullOrEmpty(interactiveAuthority))
             {
                 // Use default authority
                 PublicClientApplication = new PublicClientApplication(applicationId)
@@ -102,12 +100,11 @@ namespace DesktopTestApp
             else
             {
                 // Use the override authority provided
-                PublicClientApplication = new PublicClientApplication(applicationId, overrriddenAuthority)
+                PublicClientApplication = new PublicClientApplication(applicationId, interactiveAuthority)
                 {
                     UserTokenCache = TokenCacheHelper.UsertokenCache
                 };
             }
-            return PublicClientApplication;
         }
     }
 }

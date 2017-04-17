@@ -171,10 +171,23 @@ namespace DesktopTestApp
         private async void acquireTokenInteractive_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
+            _publicClientHandler.LoginHint = loginHintTextBox.Text;
+            _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
+            _publicClientHandler.InteractiveAuthority = authority.Text;
+
+            if (userList.SelectedIndex == 0)
+            {
+                _publicClientHandler.CurrentUser = null;
+            }
+            else
+            {
+                _publicClientHandler.CurrentUser = userList.SelectedItem as User;
+            }
+
+
             try
             {
-                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractive(_publicClientHandler.AuthorityOverride, scopes.Text.AsArray(),
-                    _publicClientHandler.CurrentUser, GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent(), _publicClientHandler.LoginHint);
+                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractive(scopes.Text.AsArray(), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
                 
                 SetResultPageInfo(authenticationResult);
                 RefreshUserList();
@@ -189,10 +202,20 @@ namespace DesktopTestApp
         {
             ClearResultPageInfo();
 
+            _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
+            if (userList.SelectedIndex == 0)
+            {
+                _publicClientHandler.CurrentUser = null;
+            }
+            else
+            {
+                _publicClientHandler.CurrentUser = userList.SelectedItem as User;
+            }
+
             try
             {
                 AuthenticationResult authenticationResult =
-                    await _publicClientHandler.AcquireTokenSilent(scopes.Text.AsArray(), _publicClientHandler.CurrentUser);
+                    await _publicClientHandler.AcquireTokenSilent(scopes.Text.AsArray());
 
                 SetResultPageInfo(authenticationResult);
             }
@@ -327,12 +350,15 @@ namespace DesktopTestApp
                 foreach (AccessTokenCacheItem atItem in _publicClientHandler.PublicClientApplication.UserTokenCache
                     .GetAllAccessTokensForClient())
                 {
-                    AddControlToCachePageTableLayout(
-                        new MsalUserAccessTokenControl(_publicClientHandler.PublicClientApplication.UserTokenCache,
-                            atItem)
-                        {
-                            RefreshViewDelegate = LoadCacheTabPage
-                        });
+                    if (atItem.User.Identifier.Equals(rtItem.User.Identifier))
+                    {
+                        AddControlToCachePageTableLayout(
+                            new MsalUserAccessTokenControl(_publicClientHandler.PublicClientApplication.UserTokenCache,
+                                atItem)
+                            {
+                                RefreshViewDelegate = LoadCacheTabPage
+                            });
+                    }
                 }
             }
         }
