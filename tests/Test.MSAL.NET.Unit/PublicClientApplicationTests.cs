@@ -599,7 +599,8 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual(MsalUiRequiredException.NoTokensFoundError, exc.ErrorCode);
             }
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.ConstEventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"));
+                anEvent[EventBase.ConstEventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"
+                && anEvent[ApiEvent.ConstApiId] == "30"));
         }
 
         [TestMethod]
@@ -786,6 +787,9 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
+            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
+                anEvent[EventBase.ConstEventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "true"
+                && anEvent[ApiEvent.ConstApiId] == "31"));
         }
 
         [TestMethod]

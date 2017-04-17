@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal readonly TokenCache TokenCache;
         protected TokenResponse Response;
         protected AccessTokenCacheItem AccessTokenItem;
-        protected int ApiId;
+        public ApiEvent.ApiIds ApiId { get; set; }
 
         protected bool SupportADFS { get; set; }
 

@@ -42,11 +42,17 @@ namespace Microsoft.Identity.Client
         public const string ConstUserId = EventNamePrefix + "user_id";
         public const string ConstWasSuccessful = EventNamePrefix + "was_successful";
 
+        public enum ApiIds
+        {
+            AcquireTokenSilentWithAuthority = 31,
+            AcquireTokenSilentWithoutAuthority = 30
+        }
+
         public ApiEvent() : base(EventNamePrefix + "api_event") {}
 
-        public int ApiId
+        public ApiIds ApiId
         {
-            set => this[ConstApiId] = value.ToString();
+            set => this[ConstApiId] = ((int)value).ToString();
         }
 
         public Uri Authority
