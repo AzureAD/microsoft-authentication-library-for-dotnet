@@ -88,13 +88,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string TenantDiscoveryFailedError = "tenant_discovery_failed";
 
-
-        private static readonly Dictionary<string, string> ErrorMessages = new Dictionary<string, string>
-        {
-            [MsalError.EncodedTokenTooLong] = MsalErrorMessage.EncodedTokenTooLong,
-            [MsalError.AuthorityNotInValidList] = MsalErrorMessage.AuthorityNotInValidList
-            // MsalErrorMessage.Unknown will be set as the default error message in GetErrorMessage(string errorCode).
-        };
+        /// <summary>
+        /// 'authority' is not in the list of valid addresses.
+        /// </summary>
+        public const string DeprecatedAuthorityError = "deprecated_authority";
 
 #if ANDROID
 
@@ -137,15 +134,6 @@ namespace Microsoft.Identity.Client
         /// <param name="innerException"></param>
         public MsalClientException(string errorCode, string errorMessage, Exception innerException):base(errorCode, errorMessage, innerException)
         {
-        }
-
-        /// <summary>
-        /// Gets the Error Message
-        /// </summary>
-        protected static string GetErrorMessage(string errorCode)
-        {
-            string message = ErrorMessages.ContainsKey(errorCode) ? ErrorMessages[errorCode] : MsalErrorMessage.Unknown;
-            return String.Format(CultureInfo.InvariantCulture, "{0}: {1}", errorCode, message);
         }
     }
 }

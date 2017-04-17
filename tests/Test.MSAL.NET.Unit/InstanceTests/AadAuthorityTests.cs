@@ -89,9 +89,11 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
             Task.Run(async () =>
-            {
-                await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid()));
-            }).GetAwaiter().GetResult();
+                {
+                    await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid()));
+                })
+                .GetAwaiter()
+                .GetResult();
 
             Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/authorize",
                 instance.AuthorizationEndpoint);
@@ -118,9 +120,11 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
             Task.Run(async () =>
-            {
-                await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid()));
-            }).GetAwaiter().GetResult();
+                {
+                    await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid()));
+                })
+                .GetAwaiter()
+                .GetResult();
 
             Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/authorize",
                 instance.AuthorizationEndpoint);
@@ -165,9 +169,11 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             try
             {
                 Task.Run(async () =>
-                {
-                    await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid()));
-                }).GetAwaiter().GetResult();
+                    {
+                        await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid()));
+                    })
+                    .GetAwaiter()
+                    .GetResult();
                 Assert.Fail("validation should have failed here");
             }
             catch (Exception exc)
@@ -202,9 +208,11 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             try
             {
                 Task.Run(async () =>
-                {
-                    await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid()));
-                }).GetAwaiter().GetResult();
+                    {
+                        await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid()));
+                    })
+                    .GetAwaiter()
+                    .GetResult();
                 Assert.Fail("validation should have failed here");
             }
             catch (Exception exc)
@@ -234,9 +242,11 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             try
             {
                 Task.Run(async () =>
-                {
-                    await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid()));
-                }).GetAwaiter().GetResult();
+                    {
+                        await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid()));
+                    })
+                    .GetAwaiter()
+                    .GetResult();
                 Assert.Fail("validation should have failed here");
             }
             catch (MsalClientException exc)
@@ -269,5 +279,32 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             Assert.AreEqual(uriCustomPortTailSlash, authority.CanonicalAuthority);
         }
 
-}
+        [TestMethod]
+        [TestCategory("AadAuthorityTests")]
+        public void DeprecatedAuthorityTest()
+        {
+            const string uriNoPort = "https://login.windows.net/mytenant.com";
+            const string uriCustomPort = "https://login.windows.net:444/mytenant.com/";
+
+            try
+            {
+                var authority = Authority.CreateAuthority(uriNoPort, false);
+                Assert.Fail("MsalClientException should have been thrown");
+            }
+            catch (MsalClientException exc)
+            {
+                Assert.AreEqual(MsalClientException.DeprecatedAuthorityError, exc.ErrorCode);
+            }
+            
+            try
+            {
+                var authority = Authority.CreateAuthority(uriCustomPort, false);
+                Assert.Fail("MsalClientException should have been thrown");
+            }
+            catch (MsalClientException exc)
+            {
+                Assert.AreEqual(MsalClientException.DeprecatedAuthorityError, exc.ErrorCode);
+            }
+        }
+    }
 }

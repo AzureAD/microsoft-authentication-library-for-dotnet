@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string AuthenticationUiFailed = "The browser based authentication dialog failed to complete";
         public const string AuthorityInvalidUriFormat = "'authority' should be in Uri format";
         public const string AuthorityNotSupported = "'authority' is not supported";
-        public const string AuthorityNotInValidList = "'authority' is not in the list of valid addresses";
+        public const string DeprecatedAuthorityError = "login.windows.net has been deprecated. Use login.microsoftonline.com instead.";
         public const string AuthorityValidationFailed = "Authority validation failed";
         public const string AuthorityUriInsecure = "'authority' should use the 'https' scheme";
 

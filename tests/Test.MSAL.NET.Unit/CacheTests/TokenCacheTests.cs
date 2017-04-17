@@ -556,7 +556,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
-                ClientId = TestConstants.ClientId
+                ClientId = TestConstants.ClientId,
+                TenantUpdatedCanonicalAuthority = TestConstants.AuthorityHomeTenant
             };
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
@@ -602,7 +603,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
-                ClientId = TestConstants.ClientId
+                ClientId = TestConstants.ClientId,
+                TenantUpdatedCanonicalAuthority = TestConstants.AuthorityHomeTenant
             };
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
@@ -648,7 +650,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
-                ClientId = TestConstants.ClientId
+                ClientId = TestConstants.ClientId,
+                TenantUpdatedCanonicalAuthority = TestConstants.AuthorityHomeTenant
             };
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
@@ -695,7 +698,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
-                ClientId = TestConstants.ClientId
+                ClientId = TestConstants.ClientId,
+                TenantUpdatedCanonicalAuthority = TestConstants.AuthorityHomeTenant
             };
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
@@ -712,7 +716,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
             requestParams = new AuthenticationRequestParameters()
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityGuestTenant, false),
-                ClientId = TestConstants.ClientId
+                ClientId = TestConstants.ClientId,
+                TenantUpdatedCanonicalAuthority = TestConstants.AuthorityGuestTenant
             };
 
             cache.SetAfterAccess(AfterAccessChangedNotification);
@@ -757,7 +762,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
-                ClientId = TestConstants.ClientId
+                ClientId = TestConstants.ClientId,
+                TenantUpdatedCanonicalAuthority = TestConstants.AuthorityHomeTenant
             };
 
             cache.SaveAccessAndRefreshToken(requestParams, response);

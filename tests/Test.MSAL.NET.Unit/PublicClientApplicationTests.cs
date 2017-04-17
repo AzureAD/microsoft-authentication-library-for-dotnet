@@ -270,6 +270,68 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
+        public void AcquireTokenAddTwoUsersTest()
+        {
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
+
+            MockWebUI ui = new MockWebUI()
+            {
+                MockResult = new AuthorizationResult(AuthorizationStatus.Success,
+                    TestConstants.AuthorityHomeTenant + "?code=some-code")
+            };
+
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                app.RedirectUri + "?code=some-code"));
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
+            });
+            
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            });
+
+            AuthenticationResult result = app.AcquireTokenAsync(TestConstants.Scope).Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.User);
+            Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
+            Assert.AreEqual(TestConstants.CreateUserIdentifer(), result.User.Identifier);
+            Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
+            Assert.AreEqual(TestConstants.IdentityProvider, result.TenantId);
+
+            // repeat interactive call and pass in the same user
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                app.RedirectUri + "?code=some-code"));
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.Scope.ToString(),
+                    MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId + "more",
+                        TestConstants.IdentityProvider + "more"),
+                    MockHelpers.CreateClientInfo(TestConstants.Uid + "more",
+                        TestConstants.IdentityProvider + "more"))
+            });
+
+            result = app.AcquireTokenAsync(TestConstants.Scope).Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.User);
+            Assert.AreEqual(TestConstants.UniqueId + "more", result.UniqueId);
+            Assert.AreEqual(TestConstants.CreateUserIdentifer(TestConstants.Uid + "more",
+                TestConstants.IdentityProvider + "more"), result.User.Identifier);
+            Assert.AreEqual(TestConstants.DisplayableId + "more", result.User.DisplayableId);
+            Assert.AreEqual(TestConstants.IdentityProvider + "more", result.TenantId);
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenDifferentUserReturnedFromServiceTest()
         {
             cache.ClientId = TestConstants.ClientId;
@@ -321,7 +383,7 @@ namespace Test.MSAL.NET.Unit
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.Scope.AsSingleString(),
-                    MockHelpers.DefaultIdToken,
+                    MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
                     MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid + "more"))
             });
 
@@ -391,7 +453,7 @@ namespace Test.MSAL.NET.Unit
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.Scope.AsSingleString(),
-                    MockHelpers.DefaultIdToken,
+                    MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
                     MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid + "more"))
             });
 
