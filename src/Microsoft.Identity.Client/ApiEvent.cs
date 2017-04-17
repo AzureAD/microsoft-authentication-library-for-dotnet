@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 
+using System;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
@@ -48,9 +49,9 @@ namespace Microsoft.Identity.Client
             set => this[ConstApiId] = value.ToString();
         }
 
-        public string Authority
+        public Uri Authority
         {
-            set => this[ConstAuthority] = value?.ToLower();
+            set => this[ConstAuthority] = ScrubTenant(value)?.ToLower();
         }
 
         public string AuthorityType

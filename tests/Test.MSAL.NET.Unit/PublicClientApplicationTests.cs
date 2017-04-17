@@ -47,6 +47,7 @@ namespace Test.MSAL.NET.Unit
     public class PublicClientApplicationTests
     {
         TokenCache cache;
+        private MyReceiver _myReceiver = new MyReceiver();
 
         [TestInitialize]
         public void TestInitialize()
@@ -55,6 +56,7 @@ namespace Test.MSAL.NET.Unit
             Authority.ValidatedAuthorities.Clear();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
+            Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
         }
 
         [TestCleanup]
@@ -596,6 +598,8 @@ namespace Test.MSAL.NET.Unit
             {
                 Assert.AreEqual(MsalUiRequiredException.NoTokensFoundError, exc.ErrorCode);
             }
+            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
+                anEvent[EventBase.ConstEventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"));
         }
 
         [TestMethod]
