@@ -45,7 +45,15 @@ namespace Microsoft.Identity.Client
         public enum ApiIds
         {
             AcquireTokenSilentWithAuthority = 31,
-            AcquireTokenSilentWithoutAuthority = 30
+            AcquireTokenSilentWithoutAuthority = 30,
+
+            AcquireTokenWithScope = 170,
+            AcquireTokenWithScopeHint = 171,
+            AcquireTokenWithScopeHintBehavior = 172,
+            AcquireTokenWithScopeHintBehaviorAuthority = 173,
+            AcquireTokenWithScopeUser = 176,
+            AcquireTokenWithScopeUserBehavior = 174,
+            AcquireTokenWithScopeUserBehaviorAuthority = 175
         }
 
         public ApiEvent() : base(EventNamePrefix + "api_event") {}

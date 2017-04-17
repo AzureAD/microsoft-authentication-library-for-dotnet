@@ -175,6 +175,9 @@ namespace Test.MSAL.NET.Unit
             {
                 Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
             }
+            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
+                anEvent[EventBase.ConstEventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"
+                && anEvent[ApiEvent.ConstApiId] == "170"));
         }
 
         [TestMethod]
@@ -400,6 +403,9 @@ namespace Test.MSAL.NET.Unit
                 Assert.IsNotNull(exc);
                 Assert.AreEqual("user_mismatch", exc.ErrorCode);
             }
+            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
+                anEvent[EventBase.ConstEventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"
+                && anEvent[ApiEvent.ConstApiId] == "174"));
 
             Assert.AreEqual(1, app.Users.Count());
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
