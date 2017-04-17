@@ -814,7 +814,7 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage =
                     MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.UniqueId,
                         TestConstants.DisplayableId,
-                        TestConstants.Scope.Union(TestConstants.ScopeForAnotherResource).ToArray())
+                        TestConstants.Scope.ToArray())
             });
 
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(),
@@ -827,8 +827,11 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
             Assert.AreEqual(
-                TestConstants.Scope.Union(TestConstants.ScopeForAnotherResource).ToArray().AsSingleString(),
+                TestConstants.Scope.ToArray().AsSingleString(),
                 result.Scope.AsSingleString());
+
+            Assert.AreEqual(2, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }

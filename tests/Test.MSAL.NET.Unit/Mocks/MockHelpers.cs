@@ -171,7 +171,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                                   scope.AsSingleString() +
                                   "\",\"access_token\":\"some-access-token\",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\":\"" +
                                   idToken +
-                                  "\",\"id_token_expires_in\":\"3600\",\"client_info\":\"eyJ2ZXIiOiIxLjAiLCJuYW1lIjoiTWFyaW8gUm9zc2kiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJtYXJpb0BkZXZlbG9wZXJ0ZW5hbnQub25taWNyb3NvZnQuY29tIiwic3ViIjoiSzRfU0dHeEtxVzFTeFVBbWhnNkMxRjZWUGlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM2Q1MWRkLWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZSJ9\"}");
+                                  "\",\"id_token_expires_in\":\"3600\",\"client_info\":\""+ CreateClientInfo() + "\"}");
             responseMessage.Content = content;
             return responseMessage;
         }
