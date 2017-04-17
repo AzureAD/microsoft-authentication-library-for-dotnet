@@ -138,8 +138,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 requestParameters[OAuth2Parameter.State] = _state;
             }
 
+            requestParameters["slice"] = "testslice";
+            requestParameters["uid"] = "true";
+
             //add uid/utid values to QP if user object was passed in.
-            if(AuthenticationRequestParameters.User != null)
+            if (AuthenticationRequestParameters.User != null)
             {
                 if (!string.IsNullOrEmpty(AuthenticationRequestParameters.User.DisplayableId))
                 {

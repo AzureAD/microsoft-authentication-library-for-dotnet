@@ -37,10 +37,6 @@ namespace Microsoft.Identity.Client.Internal
         /// </summary>
         public const string AuthenticationFailed = "authentication_failed";
 
-        /// <summary>
-        /// 'authority' is not in the list of valid addresses.
-        /// </summary>
-        public const string AuthorityNotInValidList = "authority_not_in_valid_list";
 
         /// <summary>
         /// Authority validation failed.

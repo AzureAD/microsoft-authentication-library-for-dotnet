@@ -74,7 +74,31 @@ namespace DesktopTestApp
             {
                 result =
                     await PublicClientApplication.AcquireTokenAsync(scopes, LoginHint, uiBehavior,
-                        extraQueryParams);
+                        extraQueryParams,
+                        uiParent);
+            }
+
+            CurrentUser = result.User;
+            return result;
+        }
+
+        public async Task<AuthenticationResult> AcquireTokenInteractiveWithAuthority(string[] scopes, UIBehavior uiBehavior, string extraQueryParams, UIParent uiParent)
+        {
+            CreatePublicClientApplication(InteractiveAuthority, ApplicationId);
+
+            AuthenticationResult result;
+            if (CurrentUser != null)
+            {
+                result = await PublicClientApplication.AcquireTokenAsync(scopes, CurrentUser, uiBehavior,
+                    extraQueryParams, null, AuthorityOverride,
+                    uiParent);
+            }
+            else
+            {
+                result =
+                    await PublicClientApplication.AcquireTokenAsync(scopes, LoginHint, uiBehavior,
+                        extraQueryParams, null, AuthorityOverride,
+                        uiParent);
             }
 
             CurrentUser = result.User;

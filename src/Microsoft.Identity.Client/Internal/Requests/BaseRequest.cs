@@ -127,25 +127,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 ClientInfo fromServer = ClientInfo.CreateFromJson(Response.ClientInfo);
                 if (!fromServer.UniqueIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueIdentifier) ||
-                    !fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier))
+                    !fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.ClientInfo
+                        .UniqueTenantIdentifier))
                 {
                     //TODO formalize in the exception handling PR
                     throw new MsalServiceException("user_mismatch", "different user was returned from the server");
                 }
             }
 
-            if (AuthenticationRequestParameters.Authority.IsTenantless)
-            {
-                IdToken idToken = IdToken.Parse(Response.IdToken);
-                AuthenticationRequestParameters.Authority.UpdateTenantId(idToken?.TenantId);
-            }
+            IdToken idToken = IdToken.Parse(Response.IdToken);
+            AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority = Authority.UpdateTenantId(AuthenticationRequestParameters.Authority.CanonicalAuthority, idToken?.TenantId);
 
             if (StoreToCache)
             {
-                TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
+                return TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
             }
 
-            return new AccessTokenCacheItem(AuthenticationRequestParameters.Authority.CanonicalAuthority,
+            return new AccessTokenCacheItem(AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority,
                 AuthenticationRequestParameters.ClientId, Response);
         }
 
@@ -200,7 +198,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task SendHttpMessageAsync(OAuth2Client client)
         {
             Response =
-                await client.GetToken(new Uri(AuthenticationRequestParameters.Authority.TokenEndpoint), RequestContext).ConfigureAwait(false);
+                await client.GetToken(new Uri(AuthenticationRequestParameters.Authority.TokenEndpoint + "?slice=testslice&uid=true"), RequestContext).ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(Response.Scope))
             {

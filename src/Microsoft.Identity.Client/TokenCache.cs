@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client
                 {
                     // create the access token cache item
                     AccessTokenCacheItem accessTokenCacheItem =
-                        new AccessTokenCacheItem(requestParams.Authority.CanonicalAuthority, requestParams.ClientId,
+                        new AccessTokenCacheItem(requestParams.TenantUpdatedCanonicalAuthority, requestParams.ClientId,
                             response)
                         { UserAssertionHash = requestParams.UserAssertion?.AssertionHash };
 
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client
                     {
                         AccessTokenCacheItem accessTokenItem = JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(accessTokenString);
                         if (accessTokenItem.ClientId.Equals(ClientId) &&
-                            accessTokenItem.Authority.Equals(requestParams.Authority.CanonicalAuthority) &&
+                            accessTokenItem.Authority.Equals(requestParams.TenantUpdatedCanonicalAuthority) &&
                             accessTokenItem.ScopeSet.ScopeIntersects(accessTokenCacheItem.ScopeSet))
                         {
                             accessTokenItemList.Add(accessTokenItem);

@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
@@ -45,7 +46,8 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
     internal abstract class Authority
     {
-        private static readonly string[] TenantlessTenantName = {"common", "organizations"};
+        private static readonly HashSet<string> TenantlessTenantNames =
+            new HashSet<string>(new[] {"common", "organizations"});
         private bool _resolved;
 
         internal static readonly ConcurrentDictionary<string, Authority> ValidatedAuthorities =
@@ -61,7 +63,14 @@ namespace Microsoft.Identity.Client.Internal.Instance
         protected Authority(string authority, bool validateAuthority)
         {
             Uri authorityUri = new Uri(authority);
-            this.Host = authorityUri.Host;
+            Host = authorityUri.Host;
+
+            if (Host.Equals("login.windows.net", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new MsalClientException(MsalClientException.DeprecatedAuthorityError,
+                    MsalErrorMessage.DeprecatedAuthorityError);
+            }
+
             string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
             CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Authority,
@@ -149,7 +158,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 string path = authorityUri.AbsolutePath.Substring(1);
                 string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
                 IsTenantless =
-                    TenantlessTenantName.Any(
+                    TenantlessTenantNames.Any(
                         name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
 
                 if (ExistsInValidatedAuthorityCache(userPrincipalName))
@@ -223,12 +232,18 @@ namespace Microsoft.Identity.Client.Internal.Instance
                         HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
-        public void UpdateTenantId(string tenantId)
+        public static string UpdateTenantId(string authority, string replacementTenantId)
         {
-            if (IsTenantless && !string.IsNullOrWhiteSpace(tenantId))
+            Uri authUri = new Uri(authority);
+            string[] pathSegments = authUri.AbsolutePath.Substring(1).Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (TenantlessTenantNames.Contains(pathSegments[0]) && !string.IsNullOrWhiteSpace(replacementTenantId))
             {
-                ReplaceTenantlessTenant(tenantId);
+                return string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authUri.Authority,
+                    replacementTenantId);
             }
+
+            return authority;
         }
 
         public static string CanonicalizeUri(string uri)
@@ -239,15 +254,6 @@ namespace Microsoft.Identity.Client.Internal.Instance
             }
 
             return uri.ToLowerInvariant();
-        }
-
-        private void ReplaceTenantlessTenant(string tenantId)
-        {
-            foreach (var name in TenantlessTenantName)
-            {
-                var regex = new Regex(Regex.Escape(name), RegexOptions.IgnoreCase);
-                CanonicalAuthority = regex.Replace(CanonicalAuthority, tenantId, 1);
-            }
         }
     }
 }

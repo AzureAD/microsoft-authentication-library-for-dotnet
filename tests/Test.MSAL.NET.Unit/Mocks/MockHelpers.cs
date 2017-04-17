@@ -40,23 +40,6 @@ namespace Test.MSAL.NET.Unit.Mocks
 {
     internal static class MockHelpers
     {
-        public const string DefaultIdToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6I" +
-                                             "k1uQ19WWmNBVGZNNXBPWWlKSE1iYTlnb0VLWSIsImtpZCI" +
-                                             "6Ik1uQ19WWmNBVGZNNXBPWWlKSE1iYTlnb0VLWSJ9." +
-                                             "eyJhdWQiOiJlODU0YTRhNy02YzM0LTQ0OWMtYjIzNy1mYzd" +
-                                             "hMjgwOTNkODQiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc" +
-                                             "29mdG9ubGluZS5jb20vNmMzZDUxZGQtZjBlNS00OTU5LWI0ZW" +
-                                             "EtYTgwYzRlMzZmZTVlL3YyLjAvIiwiaWF0IjoxNDU1ODMzODI" +
-                                             "4LCJuYmYiOjE0NTU4MzM4MjgsImV4cCI6MTQ1NTgzNzcyOCwia" +
-                                             "XBhZGRyIjoiMTMxLjEwNy4xNTkuMTE3IiwibmFtZSI6Ik1hcml" +
-                                             "vIFJvc3NpIiwiaG9tZV9vaWQiOiJob21lX29pZCIsIm9pZCI6In" +
-                                             "VuaXF1ZV9pZCIsInByZWZlcnJlZF91c2VybmFtZSI6ImRpc3Bs" +
-                                             "YXlhYmxlQGlkLmNvbSIsInN1YiI6Iks0X1NHR3hLcVcxU3hVQW1" +
-                                             "oZzZDMUY2VlBpRnpjeC1RZDgwZWhJRWRGdXMiLCJ0aWQiOiI2Y" +
-                                             "zNkNTFkZC1mMGU1LTQ5NTktYjRlYS1hODBjNGUzNmZlNWUiLCJ2" +
-                                             "ZXIiOiIyLjAifQ." +
-                                             "AD4-sdfsfsdf";
-
         public static readonly string TokenResponseTemplate =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
             "\"{0}\",\"access_token\":\"some-access-token\"" +
@@ -69,7 +52,8 @@ namespace Test.MSAL.NET.Unit.Mocks
             "\"some-scope1 some-scope2\",\"access_token\":\"some-access-token\"" +
             ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
-            ":\""+DefaultIdToken+"\",\"id_token_expires_in\":\"3600\"}";
+            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
+            "\",\"id_token_expires_in\":\"3600\"}";
 
         public static void ConfigureMockWebUI(AuthorizationResult authorizationResult)
         {
@@ -180,19 +164,24 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string[] scope)
         {
-            string idToken = CreateIdToken(uniqueId, displayableId);
+            string idToken = CreateIdToken(uniqueId, displayableId, TestConstants.IdentityProvider);
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
             HttpContent content =
                 new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":\"" +
                                   scope.AsSingleString() +
                                   "\",\"access_token\":\"some-access-token\",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\":\"" +
                                   idToken +
-                                  "\",\"id_token_expires_in\":\"3600\",\"client_info\":\"eyJ2ZXIiOiIxLjAiLCJuYW1lIjoiTWFyaW8gUm9zc2kiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJtYXJpb0BkZXZlbG9wZXJ0ZW5hbnQub25taWNyb3NvZnQuY29tIiwic3ViIjoiSzRfU0dHeEtxVzFTeFVBbWhnNkMxRjZWUGlGemN4LVFkODBlaElFZEZ1cyIsInRpZCI6IjZjM2Q1MWRkLWYwZTUtNDk1OS1iNGVhLWE4MGM0ZTM2ZmU1ZSJ9\"}");
+                                  "\",\"id_token_expires_in\":\"3600\",\"client_info\":\""+ CreateClientInfo() + "\"}");
             responseMessage.Content = content;
             return responseMessage;
         }
 
         public static string CreateIdToken(string uniqueId, string displayableId)
+        {
+            return CreateIdToken(uniqueId, displayableId, TestConstants.IdentityProvider);
+        }
+
+        public static string CreateIdToken(string uniqueId, string displayableId, string tenantId)
         {
             string id = "{\"aud\": \"e854a4a7-6c34-449c-b237-fc7a28093d84\"," +
                         "\"iss\": \"https://login.microsoftonline.com/6c3d51dd-f0e5-4959-b4ea-a80c4e36fe5e/v2.0/\"," +
@@ -204,7 +193,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                         "\"oid\": \"" + uniqueId + "\"," +
                         "\"preferred_username\": \"" + displayableId + "\"," +
                         "\"sub\": \"K4_SGGxKqW1SxUAmhg6C1F6VPiFzcx-Qd80ehIEdFus\"," +
-                        "\"tid\": \""+ TestConstants.IdentityProvider + "\"," +
+                        "\"tid\": \""+ tenantId + "\"," +
                         "\"ver\": \"2.0\"}";
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
         }

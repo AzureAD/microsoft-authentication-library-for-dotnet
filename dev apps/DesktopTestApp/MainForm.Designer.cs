@@ -153,7 +153,6 @@ namespace DesktopTestApp
             this.environmentQP.Name = "environmentQP";
             this.environmentQP.Size = new System.Drawing.Size(352, 20);
             this.environmentQP.TabIndex = 18;
-            this.environmentQP.Text = "Slice=testslice&uid=true";
             // 
             // tabControl1
             // 
@@ -214,6 +213,7 @@ namespace DesktopTestApp
             this.acquireTokenInteractiveAuthority.TabIndex = 30;
             this.acquireTokenInteractiveAuthority.Text = "Acquire Token Interactive with Authority Override";
             this.acquireTokenInteractiveAuthority.UseVisualStyleBackColor = true;
+            this.acquireTokenInteractiveAuthority.Click += new System.EventHandler(this.acquireTokenInteractiveAuthority_Click);
             // 
             // PiiLoggingLabel
             // 
