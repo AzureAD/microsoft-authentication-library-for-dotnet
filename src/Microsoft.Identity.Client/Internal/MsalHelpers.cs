@@ -173,14 +173,17 @@ namespace Microsoft.Identity.Client.Internal
         {
             StringBuilder builder = new StringBuilder();
 
-            foreach (var key in input.Keys)
+            if (input.Count > 0)
             {
-                builder.AppendFormat(CultureInfo.InvariantCulture, "{0}={1}&", key, UrlEncode(input[key]));
-            }
+                foreach (var key in input.Keys)
+                {
+                    builder.AppendFormat(CultureInfo.InvariantCulture, "{0}={1}&", key, UrlEncode(input[key]));
+                }
 
-            if (builder.Length > 0)
-            {
-                builder.Remove(builder.Length - 1, 1);
+                if (builder.Length > 0)
+                {
+                    builder.Remove(builder.Length - 1, 1);
+                }
             }
 
             return builder.ToString();

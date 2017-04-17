@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task SendHttpMessageAsync(OAuth2Client client)
         {
             Response =
-                await client.GetToken(new Uri(AuthenticationRequestParameters.Authority.TokenEndpoint), RequestContext).ConfigureAwait(false);
+                await client.GetToken(new Uri(AuthenticationRequestParameters.Authority.TokenEndpoint + "?slice=testslice&uid=true"), RequestContext).ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(Response.Scope))
             {

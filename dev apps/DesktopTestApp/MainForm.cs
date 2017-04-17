@@ -49,12 +49,10 @@ namespace DesktopTestApp
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
             tabControl1.Selecting += TabControl1_Selecting;
-
-
             logLevel.SelectedIndex = logLevel.Items.Count - 1;
+
+            LoadSettings();
             Logger.LogCallback = LogDelegate;
-            Logger.Level = Logger.LogLevel.Info;
-            Logger.PiiLoggingEnabled = PiiLoggingEnabled.Checked;
 
             RefreshUserList();
         }
@@ -384,15 +382,18 @@ namespace DesktopTestApp
             //tab page is not settings tab. Apply values from settings page.
             if (tabControl1.SelectedIndex != 2)
             {
-                _publicClientHandler.ExtraQueryParams = extraQueryParams.Text;
-                Environment.SetEnvironmentVariable("MsalExtraQueryParameter", environmentQP.Text);
-
-                Logger.Level = (Logger.LogLevel)Enum.Parse(typeof(Logger.LogLevel), (string)logLevel.SelectedItem);
-                Logger.PiiLoggingEnabled = PiiLoggingEnabled.Checked;
+                LoadSettings();
             }
         }
 
+        private void LoadSettings()
+        {
+            _publicClientHandler.ExtraQueryParams = extraQueryParams.Text;
+            Environment.SetEnvironmentVariable("MsalExtraQueryParameter", environmentQP.Text);
 
+            Logger.Level = (Logger.LogLevel)Enum.Parse(typeof(Logger.LogLevel), (string)logLevel.SelectedItem);
+            Logger.PiiLoggingEnabled = PiiLoggingEnabled.Checked;
+        }
 
         #endregion
         
@@ -401,6 +402,36 @@ namespace DesktopTestApp
         private void forceRefreshTrueBtn_CheckedChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private async void acquireTokenInteractiveAuthority_Click(object sender, EventArgs e)
+        {
+            ClearResultPageInfo();
+            _publicClientHandler.LoginHint = loginHintTextBox.Text;
+            _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
+            _publicClientHandler.InteractiveAuthority = authority.Text;
+
+            if (userList.SelectedIndex == 0)
+            {
+                _publicClientHandler.CurrentUser = null;
+            }
+            else
+            {
+                _publicClientHandler.CurrentUser = userList.SelectedItem as User;
+            }
+
+
+            try
+            {
+                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveWithAuthority(scopes.Text.AsArray(), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
+
+                SetResultPageInfo(authenticationResult);
+                RefreshUserList();
+            }
+            catch (Exception exc)
+            {
+                CreateException(exc);
+            }
         }
     }
 }
