@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client
         public const string TenantDiscoveryFailedError = "tenant_discovery_failed";
 
         /// <summary>
-        /// 'authority' is not in the list of valid addresses.
+        /// 'authority' has been deprecated.
         /// </summary>
         public const string DeprecatedAuthorityError = "deprecated_authority";
 
