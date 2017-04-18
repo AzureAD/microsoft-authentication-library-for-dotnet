@@ -551,17 +551,7 @@ namespace Microsoft.Identity.Client
                     OnBeforeAccess(args);
                     OnBeforeWrite(args);
 
-                    var allAccessTokenKeys = TokenCacheAccessor.GetAllAccessTokenKeys();
-                    foreach (var key in allAccessTokenKeys)
-                    {
-                        TokenCacheAccessor.DeleteAccessToken(key);
-                    }
-
-                    var allRefreshTokenKeys = TokenCacheAccessor.GetAllRefreshTokenKeys();
-                    foreach (var key in allRefreshTokenKeys)
-                    {
-                        TokenCacheAccessor.DeleteRefreshToken(key);
-                    }
+                    TokenCacheAccessor.Clear();
 
                     OnAfterAccess(args);
                 }
