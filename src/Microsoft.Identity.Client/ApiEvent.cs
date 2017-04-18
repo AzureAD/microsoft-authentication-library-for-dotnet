@@ -53,7 +53,10 @@ namespace Microsoft.Identity.Client
             AcquireTokenWithScopeHintBehaviorAuthority = 173,
             AcquireTokenWithScopeUser = 176,
             AcquireTokenWithScopeUserBehavior = 174,
-            AcquireTokenWithScopeUserBehaviorAuthority = 175
+            AcquireTokenWithScopeUserBehaviorAuthority = 175,
+
+            AcquireTokenOnBehalfOfWithScopeUser = 520,
+            AcquireTokenOnBehalfOfWithScopeUserAuthority = 521,
         }
 
         public ApiEvent() : base(EventNamePrefix + "api_event") {}

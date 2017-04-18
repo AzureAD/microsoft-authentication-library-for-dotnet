@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenOnBehalfCommonAsync(authority, scope, userAssertion)
+                    AcquireTokenOnBehalfCommonAsync(authority, scope, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUser)
                         .ConfigureAwait(false);
         }
 
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenOnBehalfCommonAsync(authorityInstance, scope, userAssertion)
+                    AcquireTokenOnBehalfCommonAsync(authorityInstance, scope, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUserAuthority)
                         .ConfigureAwait(false);
         }
 
@@ -211,11 +211,11 @@ namespace Microsoft.Identity.Client
         }
 
         private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(Authority authority,
-            IEnumerable<string> scope, UserAssertion userAssertion)
+            IEnumerable<string> scope, UserAssertion userAssertion, ApiEvent.ApiIds apiId)
         {
             var requestParams = CreateRequestParameters(authority, scope, null, UserTokenCache);
             requestParams.UserAssertion = userAssertion;
-            var handler = new OnBehalfOfRequest(requestParams);
+            var handler = new OnBehalfOfRequest(requestParams){ApiId = apiId};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
