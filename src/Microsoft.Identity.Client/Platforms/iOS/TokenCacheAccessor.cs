@@ -210,5 +210,18 @@ namespace Microsoft.Identity.Client
                 }
             }
         }
+
+        public void Clear()
+        {
+            foreach (var key in GetAllAccessTokenKeys())
+            {
+                DeleteAccessToken(key);
+            }
+
+            foreach (var key in GetAllRefreshTokenKeys())
+            {
+                DeleteRefreshToken(key);
+            }
+        }
     }
 }
