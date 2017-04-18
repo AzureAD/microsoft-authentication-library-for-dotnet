@@ -33,10 +33,10 @@ namespace Microsoft.Identity.Client
 {
     internal abstract class EventBase : Dictionary<string, string>
     {
-        protected const string EventNamePrefix = "Microsoft.MSAL.";
-        public const string EventName = "event_name";
-        protected const string StartTime = "start_time";
-        protected const string ElapsedTime = "elapsed_time";
+        protected const string EventNamePrefix = "msal.";
+        public const string ConstEventName = EventNamePrefix + "event_name";
+        protected const string StartTime = EventNamePrefix + "start_time";
+        protected const string ElapsedTime = EventNamePrefix + "elapsed_time";
         private readonly long _startTimestamp;
 
         public EventBase(string eventName) : this(eventName, new Dictionary<string, string>()) {}
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
 
         public EventBase(string eventName, IDictionary<string, string> predefined) : base(predefined)
         {
-            this[EventName] = eventName;
+            this[ConstEventName] = eventName;
             _startTimestamp = CurrentUnixTimeMilliseconds();
             this[StartTime] = _startTimestamp.ToString();
             this[ElapsedTime] = "-1";
