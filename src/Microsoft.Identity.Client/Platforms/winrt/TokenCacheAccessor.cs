@@ -76,7 +76,9 @@ namespace Microsoft.Identity.Client
 
         public string GetRefreshToken(string refreshTokenKey)
         {
-            return MsalHelpers.ByteArrayToString(GetCacheValue((ApplicationDataCompositeValue)_refreshTokenContainer.Values[_cryptographyHelper.CreateBase64UrlEncodedSha256Hash(refreshTokenKey)]));
+            return MsalHelpers.ByteArrayToString(
+                GetCacheValue((ApplicationDataCompositeValue) _refreshTokenContainer.Values[
+                    _cryptographyHelper.CreateBase64UrlEncodedSha256Hash(refreshTokenKey)]));
         }
         
         public void DeleteAccessToken(string cacheKey)
@@ -170,6 +172,18 @@ namespace Microsoft.Identity.Client
         public ICollection<string> GetAllRefreshTokenKeys()
         {
             return new ReadOnlyCollection<string>(_refreshTokenContainer.Values.Keys.ToList());
+        }
+
+        public void Clear()
+        {
+            foreach (string atKey in _accessTokenContainer.Values.Keys)
+            {
+                _accessTokenContainer.Values.Remove(atKey);
+            }
+            foreach (string rtKey in _refreshTokenContainer.Values.Keys)
+            {
+                _refreshTokenContainer.Values.Remove(rtKey);
+            }
         }
     }
 }
