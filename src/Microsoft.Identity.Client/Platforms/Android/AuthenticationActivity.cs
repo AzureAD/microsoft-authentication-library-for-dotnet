@@ -44,16 +44,14 @@ namespace Microsoft.Identity.Client
     [Android.Runtime.Preserve(AllMembers = true)]
     public class AuthenticationActivity : Activity
     {
-        private RequestContext RequestContext { get; } 
+        internal static RequestContext RequestContext { get; set; } 
 
+        /// <summary>
+        /// Default Constructor
+        /// </summary>
         public AuthenticationActivity()
         { }
-
-        private AuthenticationActivity(RequestContext requestContext)
-        {
-            RequestContext = requestContext;
-        }
-
+        
         private readonly string _customTabsServiceAction =
             "android.support.customtabs.action.CustomTabsService";
         private readonly string[] _chromePackages =

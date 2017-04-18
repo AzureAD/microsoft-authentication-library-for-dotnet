@@ -38,8 +38,6 @@ namespace XForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class AcquirePage : ContentPage
     {
-        public UIParent UIParent { get; set; }
-
         public AcquirePage()
         {
             InitializeComponent();
@@ -111,18 +109,16 @@ namespace XForms
 
         private async void OnAcquireClicked(object sender, EventArgs e)
         {
-            IAcquireToken at = Device.OS == TargetPlatform.Android ? DependencyService.Get<IAcquireToken>() : new AcquireToken();
-
             try
             {
                 AuthenticationResult res;
                 if (LoginHint.IsToggled)
                 {
-                    res = await at.AcquireTokenAsync(App.MsalPublicClient, App.Scopes, UserEntry.Text.Trim(), UIParent);
+                    res = await App.MsalPublicClient.AcquireTokenAsync(App.Scopes, UserEntry.Text.Trim(), App.UIParent);
                 }
                 else
                 {
-                    res = await at.AcquireTokenAsync(App.MsalPublicClient, App.Scopes, UIParent);
+                    res = await App.MsalPublicClient.AcquireTokenAsync(App.Scopes, App.UIParent);
                 }
                 acquireResponseLabel.Text = ToString(res);
             }

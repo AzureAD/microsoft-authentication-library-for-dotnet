@@ -38,7 +38,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Token cache class used by <see cref="ConfidentialClientApplication"/> and <see cref="PublicClientApplication"/> to store access and refresh tokens.
+    /// Token cache class used by ConfidentialClientApplication and PublicClientApplication to store access and refresh tokens.
     /// </summary>
     public sealed class TokenCache
     {
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Notification method called before any library method writes to the cache. This notification can be used to reload
         /// the cache state from a row in database and lock that row. That database row can then be unlocked in
-        /// <see cref="AfterAccess" /> notification.
+        /// AfterAccess notification.
         /// </summary>
         internal TokenCacheNotification BeforeWrite { get; set; }
 

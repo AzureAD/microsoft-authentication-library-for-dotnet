@@ -29,9 +29,13 @@ namespace Microsoft.Identity.Client
 {
     public sealed partial class PublicClientApplication : ClientApplicationBase
     {
-        
+
         /// <summary>
+        /// Constructor to create application instance. This constructor is only available for Dekstop and NetCore apps
         /// </summary>
+        /// <param name="clientId">Client id of the application</param>
+        /// <param name="authority">Default authority to be used for the application</param>
+        /// <param name="userTokenCache">Instance of TokenCache.</param>
         public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache) : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
         {
             UserTokenCache = userTokenCache;

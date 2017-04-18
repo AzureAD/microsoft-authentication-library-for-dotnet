@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client
         /// close to expiration (within 5 minute window), then refresh token (if available) is used to acquire a new access token by making a network call.
         /// </summary>
         /// <param name="scope">Array of scopes requested for resource</param>
-        /// <param name="user">User for which the token is requested. <see cref="User"/></param>
+        /// <param name="user">User for which the token is requested. <see cref="IUser"/></param>
         Task<AuthenticationResult> AcquireTokenSilentAsync(
             IEnumerable<string> scope,
             IUser user);
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client
         /// close to expiration (within 5 minute window), then refresh token (if available) is used to acquire a new access token by making a network call.
         /// </summary>
         /// <param name="scope">Array of scopes requested for resource</param>
-        /// <param name="user">User for which the token is requested <see cref="User"/></param>
+        /// <param name="user">User for which the token is requested <see cref="IUser"/></param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using the refresh token if available</param>
         Task<AuthenticationResult> AcquireTokenSilentAsync(
@@ -85,8 +85,9 @@ namespace Microsoft.Identity.Client
             bool forceRefresh);
 
         /// <summary>
-        /// Removes any cached token for the specified user
+        /// Removes all cached tokens for the specified user.
         /// </summary>
+        /// <param name="user">instance of the user that needs to be removed</param>
         void Remove(IUser user);
    }
 }

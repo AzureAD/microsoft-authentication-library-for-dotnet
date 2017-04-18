@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client
         string IdentityProvider { get; }
 
         /// <summary>
-        /// Gets an identifier for the user for the given <see cref="IdentityProvider"/>. Cannot be null.
+        /// Gets an identifier for the user that is used by the library and the service as a strong handle to user identity. Cannot be null.
         /// </summary>
         string Identifier { get; }
    }

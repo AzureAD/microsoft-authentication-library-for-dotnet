@@ -38,6 +38,9 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed class UIParent
     {
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public UIParent()
         {
         }
@@ -45,7 +48,10 @@ namespace Microsoft.Identity.Client
 #if ANDROID
         internal Activity Activity { get; set; }
 
-
+        /// <summary>
+        /// Initializes an instance for a provided activity.
+        /// </summary>
+        /// <param name="activity">parent activity for the call. REQUIRED.</param>
         public UIParent(Activity activity)
         {
            if(activity == null)
@@ -69,9 +75,9 @@ namespace Microsoft.Identity.Client
         internal object OwnerWindow { get; set; }
 
         /// <summary>
-        /// 
+        /// Initializes an instance for a provided parent window.
         /// </summary>
-        /// <param name="window"></param>
+        /// <param name="ownerWindow">Parent window object reference. OPTIONAL.</param>
         public UIParent(object ownerWindow)
         {
             OwnerWindow = ownerWindow;
