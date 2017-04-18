@@ -33,13 +33,13 @@ namespace Microsoft.Identity.Client
     {
         public DefaultEvent(string clientId) : base((string) (EventBase.EventNamePrefix + "default_event"))
         {
-            this["client_id"] = clientId;
-            this["sdk_platform"] = PlatformPlugin.PlatformInformation.GetProductName();
-            this["sdk_version"] = MsalIdHelper.GetMsalVersion();
+            this[EventNamePrefix + "client_id"] = clientId;
+            this[EventNamePrefix + "sdk_platform"] = PlatformPlugin.PlatformInformation.GetProductName();
+            this[EventNamePrefix + "sdk_version"] = MsalIdHelper.GetMsalVersion();
             // TODO: The following implementation will be used after the 3 helpers being implemented (in a separated PR)
-            // this["application_name"] = MsalIdHelper.GetApplicationName();  // Not yet implemented
-            // this["application_version"] = MsalIdHelper.GetApplicationVersion();  // Not yet implemented
-            // this["device_id"] = MsalIdHelper.GetDeviceId();  // Not yet implemented
+            // this[EventNamePrefix + "application_name"] = MsalIdHelper.GetApplicationName();  // Not yet implemented
+            // this[EventNamePrefix + "application_version"] = MsalIdHelper.GetApplicationVersion();  // Not yet implemented
+            // this[EventNamePrefix + "device_id"] = MsalIdHelper.GetDeviceId();  // Not yet implemented
         }
     }
 }

@@ -39,6 +39,8 @@ namespace Microsoft.Identity.Client
         public const string TokenCacheBeforeWrite = EventNamePrefix + "token_cache_before_write";
         public const string TokenCacheDelete = EventNamePrefix + "token_cache_delete";
 
+        public const string ConstTokenType = EventNamePrefix + "token_type";
+
         public CacheEvent(string eventName) : base(eventName)
         {
         }
@@ -55,10 +57,10 @@ namespace Microsoft.Identity.Client
             {
                 var types = new Dictionary<TokenTypes, string>()
                 {
-                    {TokenTypes.AT, "AT"},
-                    {TokenTypes.RT, "RT"}
+                    {TokenTypes.AT, "at"},
+                    {TokenTypes.RT, "rt"}
                 };
-                this["token_type"] = types[value];
+                this[ConstTokenType] = types[value];
             }
         }
     }
