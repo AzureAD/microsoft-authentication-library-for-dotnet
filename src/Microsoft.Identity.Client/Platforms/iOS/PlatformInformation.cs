@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetProductName()
         {
-            return "MSAL.iOS";
+            return "MSAL.Xamarin.iOS";
         }
 
         public override string GetEnvironmentVariable(string variable)

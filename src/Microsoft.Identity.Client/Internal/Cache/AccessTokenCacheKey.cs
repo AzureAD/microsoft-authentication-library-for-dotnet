@@ -33,7 +33,7 @@ using System.Text;
 namespace Microsoft.Identity.Client.Internal.Cache
 {
     /// <summary>
-    /// <see cref="AccessTokenCacheKey" /> can be used with Linq to access items from the TokenCache dictionary.
+    /// 
     /// </summary>
     internal class AccessTokenCacheKey : TokenCacheKeyBase
     {

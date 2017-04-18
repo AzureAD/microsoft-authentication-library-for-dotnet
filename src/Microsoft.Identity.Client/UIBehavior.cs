@@ -67,19 +67,42 @@ namespace Microsoft.Identity.Client
             PromptValue = promptValue;
         }
 
+        /// <summary>
+        /// Equals method override to compare UIBehavior structs
+        /// </summary>
+        /// <param name="obj">object to compare against</param>
+        /// <returns>true if object are equal.</returns>
         public override bool Equals(object obj)
         {
             return obj is UIBehavior && this == (UIBehavior)obj;
         }
+
+        /// <summary>
+        /// Override to compute hashcode
+        /// </summary>
+        /// <returns>hash code of the PromptValue</returns>
         public override int GetHashCode()
         {
             return PromptValue.GetHashCode();
         }
+
+        /// <summary>
+        /// operator overload to equality check
+        /// </summary>
+        /// <param name="x">first value</param>
+        /// <param name="y">second value</param>
+        /// <returns>true if the object are equal</returns>
         public static bool operator ==(UIBehavior x, UIBehavior y)
         {
             return x.PromptValue == y.PromptValue;
         }
 
+        /// <summary>
+        /// operator overload to equality check
+        /// </summary>
+        /// <param name="x">first value</param>
+        /// <param name="y">second value</param>
+        /// <returns>true if the object are not equal</returns>
         public static bool operator !=(UIBehavior x, UIBehavior y)
         {
             return !(x == y);

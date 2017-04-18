@@ -44,13 +44,17 @@ namespace Microsoft.Identity.Client
         private TokenCache _userTokenCache;
 
         /// <Summary>
-        /// DefaultAuthority
+        /// Default Authority used for interactive calls.
         /// </Summary>
         protected const string DefaultAuthority = "https://login.microsoftonline.com/common/";
-        
-        /// <Summary>
-        /// ClientApplicationBase
-        /// </Summary>
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authority"></param>
+        /// <param name="clientId"></param>
+        /// <param name="redirectUri"></param>
+        /// <param name="validateAuthority"></param>
         protected ClientApplicationBase(string authority, string clientId, string redirectUri,
             bool validateAuthority)
         {
@@ -83,8 +87,9 @@ namespace Microsoft.Identity.Client
         internal string ClientId { get; }
 
         /// <summary>
-        /// Redirect Uri configured in the portal. Will have a default value. Not required, if the developer is using the
-        /// default client Id.
+        /// Redirect Uri configured in the app registration portal. PublicClientApplication has a default value of 
+        /// urn:ietf:wg:oauth:2.0:oob.This default does not apply to iOS and Android as the library needs to leverage 
+        /// system webview for authentication.
         /// </summary>
         public string RedirectUri { get; set; }
 
@@ -93,10 +98,7 @@ namespace Microsoft.Identity.Client
         /// </Summary>
         internal TokenCache UserTokenCache
         {
-            get
-            {
-                return _userTokenCache;
-            }
+            get { return _userTokenCache; }
             set
             {
                 _userTokenCache = value;
@@ -106,14 +108,15 @@ namespace Microsoft.Identity.Client
                 }
             }
         }
-        
+
         /// <summary>
-        /// Gets a value indicating whether address validation is ON or OFF.
+        /// Gets/sets a value indicating whether authority validation is ON or OFF. Value is true by default. 
+        /// It should be set to false by the deveopers for B2C applications.
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
         /// <summary>
-        /// Returns a User centric view over the cache that provides a list of all the available users in the cache.
+        /// Returns a User centric view over the cache that provides a list of all the available users in the cache for the application.
         /// </summary>
         public IEnumerable<IUser> Users
         {
@@ -130,6 +133,10 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        /// <summary>
+        /// Get user by identifier from users available in the cache.
+        /// </summary>
+        /// <param name="identifier">user identifier</param>
         public IUser GetUser(string identifier)
         {
             return Users.FirstOrDefault(user => user.Identifier.Equals(identifier));
@@ -141,7 +148,7 @@ namespace Microsoft.Identity.Client
         /// close to expiration (within 5 minute window), then refresh token (if available) is used to acquire a new access token by making a network call.
         /// </summary>
         /// <param name="scope">Array of scopes requested for resource</param>
-        /// <param name="user">User for which the token is requested. <see cref="User"/></param>
+        /// <param name="user">User for which the token is requested. <see cref="IUser"/></param>
         /// <returns></returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user)
         {
@@ -173,14 +180,17 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenSilentCommonAsync(authorityInstance, scope, user,
-                        forceRefresh).ConfigureAwait(false);
+                            forceRefresh)
+                        .ConfigureAwait(false);
         }
-        
+
         /// <summary>
+        /// Removes all cached tokens for the specified user.
         /// </summary>
+        /// <param name="user">instance of the user that needs to be removed</param>
         public void Remove(IUser user)
         {
-            if(user == null || UserTokenCache == null)
+            if (user == null || UserTokenCache == null)
             {
                 return;
             }
@@ -197,7 +207,8 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority, IEnumerable<string> scope,
+        internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority,
+            IEnumerable<string> scope,
             IUser user, TokenCache cache)
         {
             return new AuthenticationRequestParameters

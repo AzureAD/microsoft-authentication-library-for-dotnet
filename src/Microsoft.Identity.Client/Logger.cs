@@ -28,14 +28,21 @@
 using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Internal;
+using Exception = System.Exception;
 
 namespace Microsoft.Identity.Client
 {
-    // A delegate type for processing a log message:
+    /// <summary>
+    /// Callback delegate that allows the developer to consume logs handle them in a custom manner.
+    /// </summary>
+    /// <param name="level">Log level of the message</param>
+    /// <param name="message">Pre-formatted log message</param>
+    /// <param name="containsPii">Indicates if the log message contains PII. If Logger.PiiLoggingEnabled is set to 
+    /// false then this value is always false.</param>
     public delegate void LogCallback(Logger.LogLevel level, string message, bool containsPii);
 
     /// <summary>
-    /// MSAL Logger
+    /// MSAL Logger class that allows developers to configure log level, configure callbacks etc.
     /// </summary>
     public sealed class Logger
     {
@@ -76,7 +83,8 @@ namespace Microsoft.Identity.Client
 
         private static volatile LogCallback _logCallback;
         /// <summary>
-        /// Callback instance
+        /// Callback instance that can be provided by the developer to consume and publish logs in a custom manner. 
+        /// The property can only be set once and it will throw an ArgumentException if called twice.
         /// </summary>
         public static LogCallback LogCallback
         {
@@ -86,7 +94,7 @@ namespace Microsoft.Identity.Client
                 {
                     if (_logCallback != null)
                     {
-                        throw new Exception("MSAL logging callback can only be set once per process and" +
+                        throw new ArgumentException("MSAL logging callback can only be set once per process and" +
                                                    " should never change once set.");
                     }
 
@@ -96,14 +104,21 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// The default log level is set to info.
+        /// Configurable log level. Default value is Info.
         /// </summary>
         public static LogLevel Level { get; set; } = LogLevel.Info;
 
         /// <summary>
-        /// Pii logging default is set to false
+        /// Flag to enable/disable logging of PII data. PII logs are never written to default outputs like Console, Logcat or NSLog.
+        /// Default is set to false.
         /// </summary>
         public static bool PiiLoggingEnabled { get; set; } = false;
+
+        /// <summary>
+        /// Flag to enable/disable logging to platform defaults. In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
+        /// In android, logcat is used.
+        /// </summary>
+        public static bool DefaultLoggingEnabled { get; set; } = true;
 
         internal static void ExecuteCallback(Logger.LogLevel level, string message, bool containsPii)
         {
@@ -112,12 +127,12 @@ namespace Microsoft.Identity.Client
                 _logCallback?.Invoke(level, message, containsPii);
             }
         }
-
+        
         #region LogMessages
         /// <summary>
         /// Method for error logging
         /// </summary>
-        public void Error(string message)
+        internal void Error(string message)
         {
             LogMessage(message, LogLevel.Error, false);
         }
@@ -125,7 +140,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Method for error logging of Pii 
         /// </summary>
-        public void ErrorPii(string message)
+        internal void ErrorPii(string message)
         {
             LogMessage(message, LogLevel.Error, true);
         }
@@ -133,7 +148,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Method for warning logging
         /// </summary>
-        public void Warning(string message)
+        internal void Warning(string message)
         {
             LogMessage(message, LogLevel.Warning, false);
         }
@@ -141,7 +156,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Method for warning logging of Pii 
         /// </summary>
-        public void WarningPii(string message)
+        internal void WarningPii(string message)
         {
             LogMessage(message, LogLevel.Warning, true);
         }
@@ -149,7 +164,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Method for information logging
         /// </summary>
-        public void Info(string message)
+        internal void Info(string message)
         {
             LogMessage(message, LogLevel.Info, false);
         }
@@ -157,7 +172,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Method for information logging for Pii
         /// </summary>
-        public void InfoPii(string message)
+        internal void InfoPii(string message)
         {
             LogMessage(message, LogLevel.Info, true);
         }
@@ -165,7 +180,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Method for verbose logging
         /// </summary>
-        public void Verbose(string message)
+        internal void Verbose(string message)
         {
             LogMessage(message, LogLevel.Verbose, false);
         }
@@ -173,7 +188,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Method for verbose logging for Pii
         /// </summary>
-        public void VerbosePii(string message)
+        internal void VerbosePii(string message)
         {
             LogMessage(message, LogLevel.Verbose, true);
         }
@@ -181,7 +196,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Method for error exception logging
         /// </summary>
-        public void Error(Exception ex)
+        internal void Error(Exception ex)
         {
             Error(ex.ToString());
         }
@@ -189,7 +204,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Method for error exception logging for Pii
         /// </summary>
-        public void ErrorPii(Exception ex)
+        internal void ErrorPii(Exception ex)
         {
             ErrorPii(ex.ToString());
         }
@@ -206,14 +221,17 @@ namespace Microsoft.Identity.Client
             //format log message;
             string correlationId = (CorrelationId.Equals(Guid.Empty))
                 ? string.Empty
-                : " - " + CorrelationId.ToString();
+                : " - " + CorrelationId;
 
             string log = string.Format(CultureInfo.InvariantCulture, "MSAL {0} {1} {2} [{3}{4}] {5}",
                 MsalIdHelper.GetMsalVersion(),
                 PlatformPlugin.PlatformInformation.GetOperatingSystem(),
-                MsalIdParameter.OS, DateTime.UtcNow, correlationId, logMessage);
+                MsalIdHelper.GetMsalIdParameters()[MsalIdParameter.OS], DateTime.UtcNow, correlationId, logMessage);
 
-            PlatformPlugin.LogMessage(logLevel, log);
+            if (DefaultLoggingEnabled)
+            {
+                PlatformPlugin.LogMessage(logLevel, log);
+            }
 
             ExecuteCallback(logLevel, log, containsPii);
         }

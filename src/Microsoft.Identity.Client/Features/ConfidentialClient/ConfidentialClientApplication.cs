@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Acquires security token from the authority using authorization code previously received.
-        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(IEnumerable{string}, User)"/>.
+        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(IEnumerable{string}, IUser)"/>.
         /// </summary>
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="scope">Array of scopes requested for resource</param>

@@ -31,7 +31,7 @@ using Windows.UI.Core;
 
 namespace Microsoft.Identity.Client
 {
-    public static class DispatcherTaskExtensions
+    internal static class DispatcherTaskExtensions
     {
         public static async Task<T> RunTaskAsync<T>(this CoreDispatcher dispatcher,
             Func<Task<T>> func, CoreDispatcherPriority priority = CoreDispatcherPriority.High)

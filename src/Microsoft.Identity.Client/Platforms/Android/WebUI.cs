@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
                 var agentIntent = new Intent(_parent.Activity, typeof(AuthenticationActivity));
                 agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
                 agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.OriginalString);
-
+                AuthenticationActivity.RequestContext = RequestContext;
                 _parent.Activity.RunOnUiThread(()=> _parent.Activity.StartActivityForResult(agentIntent, 0));
             }
             catch (Exception ex)

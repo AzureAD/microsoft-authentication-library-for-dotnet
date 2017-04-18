@@ -29,12 +29,23 @@ using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Telemetry
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="events"></param>
         public delegate void Receiver(List<Dictionary<string, string>> events);
 
         private Receiver _receiver = null;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="r"></param>
         public void RegisterReceiver(Receiver r)
         {
             _receiver = r;
@@ -44,6 +55,10 @@ namespace Microsoft.Identity.Client
 
         private Telemetry(){}
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public static Telemetry GetInstance()
         {
             return Singleton;

@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed class ClientCredential
     {
-#if !NETSTANDARD1_1
+#if !FACADE
         /// <summary>
         /// Constructor provide client assertion certificate
         /// </summary>

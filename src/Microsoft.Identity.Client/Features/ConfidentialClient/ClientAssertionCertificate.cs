@@ -68,18 +68,14 @@ namespace Microsoft.Identity.Client
         /// Gets the certificate used as credential.
         /// </summary>
         public X509Certificate2 Certificate { get; }
-
-        /// <summary>
-        /// </summary>
-        public byte[] Sign(string message)
+        
+        internal byte[] Sign(string message)
         {
             CryptographyHelper helper = new CryptographyHelper();
             return helper.SignWithCertificate(message, Certificate);
         }
-
-        /// <summary>
-        /// </summary>
-        public string Thumbprint
+        
+        internal string Thumbprint
         {
             // Thumbprint should be url encoded
             get { return Base64UrlHelpers.Encode(Certificate.GetCertHash()); }

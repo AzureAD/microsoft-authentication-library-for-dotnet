@@ -37,6 +37,7 @@ namespace XForms
     public partial class App : Application
     {
         public static PublicClientApplication MsalPublicClient;
+        public static UIParent UIParent { get; set; }
         public const string ClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
 
         public const string RedirectUriOnAndroid =
@@ -59,6 +60,8 @@ namespace XForms
             {
                 Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message); });
             };
+
+            Logger.Level = Logger.LogLevel.Verbose;
         }
 
         public static void InitPublicClient()

@@ -29,7 +29,6 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Microsoft.Identity.Client
 {
@@ -40,9 +39,7 @@ namespace Microsoft.Identity.Client
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
         private readonly AccessTokenCacheItem _accessTokenCacheItem;
-
-        public AuthenticationResult() { }
-
+        
         internal AuthenticationResult(AccessTokenCacheItem accessTokenCacheItem)
         {
             _accessTokenCacheItem = accessTokenCacheItem;
