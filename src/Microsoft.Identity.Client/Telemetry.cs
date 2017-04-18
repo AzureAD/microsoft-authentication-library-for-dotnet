@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client
 
         internal void StartEvent(string requestId, EventBase eventToStart)
         {
-            if (requestId != null)
+            if (_receiver != null && requestId != null)
             {
                 EventsInProgress[new Tuple<string, string>(requestId, eventToStart[EventBase.ConstEventName])] = eventToStart;
             }
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client
 
         internal void StopEvent(string requestId, EventBase eventToStop)
         {
-            if (requestId == null)
+            if (_receiver == null || requestId == null)
             {
                 return;
             }
