@@ -39,7 +39,11 @@ namespace Microsoft.Identity.Client
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
         private readonly AccessTokenCacheItem _accessTokenCacheItem;
-        
+
+        internal AuthenticationResult()
+        {
+        }
+
         internal AuthenticationResult(AccessTokenCacheItem accessTokenCacheItem)
         {
             _accessTokenCacheItem = accessTokenCacheItem;
