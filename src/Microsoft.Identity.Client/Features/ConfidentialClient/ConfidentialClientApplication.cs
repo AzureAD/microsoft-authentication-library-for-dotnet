@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client
         {
             return
                 await
-                    AcquireTokenForClientCommonAsync(scope, false).ConfigureAwait(false);
+                    AcquireTokenForClientCommonAsync(scope, false, ApiEvent.ApiIds.AcquireTokenForClientWithScope).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client
         {
             return
                 await
-                    AcquireTokenForClientCommonAsync(scope, forceRefresh).ConfigureAwait(false);
+                    AcquireTokenForClientCommonAsync(scope, forceRefresh, ApiEvent.ApiIds.AcquireTokenForClientWithScopeRefresh).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -200,13 +200,13 @@ namespace Microsoft.Identity.Client
 
         internal TokenCache AppTokenCache { get; }
 
-        private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(IEnumerable<string> scope, bool forceRefresh)
+        private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(IEnumerable<string> scope, bool forceRefresh, ApiEvent.ApiIds apiId)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             AuthenticationRequestParameters parameters = CreateRequestParameters(authority, scope, null,
                 AppTokenCache);
             parameters.IsClientCredentialRequest = true;
-            var handler = new Internal.Requests.ClientCredentialRequest(parameters, forceRefresh);
+            var handler = new ClientCredentialRequest(parameters, forceRefresh){ApiId = apiId};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
