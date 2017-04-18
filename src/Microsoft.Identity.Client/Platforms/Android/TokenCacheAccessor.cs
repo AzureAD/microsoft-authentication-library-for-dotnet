@@ -29,6 +29,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace Microsoft.Identity.Client
 {
@@ -111,6 +112,19 @@ namespace Microsoft.Identity.Client
         public ICollection<string> GetAllRefreshTokenKeys()
         {
             return _refreshTokenSharedPreference.All.Keys.ToList();
+        }
+
+        public void Clear()
+        {
+            foreach (var key in GetAllAccessTokenKeys())
+            {
+                DeleteAccessToken(key);
+            }
+
+            foreach (var key in GetAllRefreshTokenKeys())
+            {
+                DeleteRefreshToken(key);
+            }
         }
     }
 }

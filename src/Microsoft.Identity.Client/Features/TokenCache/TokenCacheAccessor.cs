@@ -108,5 +108,18 @@ namespace Microsoft.Identity.Client
                 new ReadOnlyCollection<string>(
                     RefreshTokenCacheDictionary.Keys.ToList());
         }
+
+        public void Clear()
+        {
+            foreach (var key in GetAllAccessTokenKeys())
+            {
+                DeleteAccessToken(key);
+            }
+
+            foreach (var key in GetAllRefreshTokenKeys())
+            {
+                DeleteRefreshToken(key);
+            }
+        }
     }
 }
