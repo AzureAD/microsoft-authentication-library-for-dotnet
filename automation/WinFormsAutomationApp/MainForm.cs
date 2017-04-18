@@ -14,6 +14,7 @@ namespace WinFormsAutomationApp
 
         public MainForm()
         {
+            DeleteCache.CleanCookies();
             InitializeComponent();
             TokenCache.DefaultShared.AfterAccess += TokenCacheDelegates.AfterAccessNotification;
             TokenCache.DefaultShared.BeforeAccess += TokenCacheDelegates.BeforeAccessNotification;
@@ -28,10 +29,10 @@ namespace WinFormsAutomationApp
 
         private async void requestGo_Click(object sender, EventArgs e)
         {
-            string output = await _commandToRun((AuthenticationHelper.CreateDictionaryFromJson(requestInfo.Text)));
+             string output = await _commandToRun((AuthenticationHelper.CreateDictionaryFromJson(requestInfo.Text)));
             pageControl1.SelectedTab = resultPage;
             resultInfo.Text = output;
-            adalLogs.Text = loggerCallback.GetAdalLogs();
+            resultLogs.Text = loggerCallback.GetAdalLogs();
         }
 
         private void resultDone_Click(object sender, EventArgs e)
@@ -59,10 +60,12 @@ namespace WinFormsAutomationApp
             pageControl1.SelectedTab = dataInputPage;
         }
 
-        private void readCache_Click(object sender, EventArgs e)
+        private async void readCache_Click(object sender, EventArgs e)
         {
-            _commandToRun = AuthenticationHelper.ReadCache;
-            pageControl1.SelectedTab = dataInputPage;
+            string output = await AuthenticationHelper.ReadCache(); ;
+            pageControl1.SelectedTab = resultPage;
+            resultInfo.Text = output;
+            resultLogs.Text = loggerCallback.GetAdalLogs();
         }
 
         private async void clearCache_Click(object sender, EventArgs e)
@@ -70,7 +73,7 @@ namespace WinFormsAutomationApp
             string output = await AuthenticationHelper.ClearCache(null);
             pageControl1.SelectedTab = resultPage;
             resultInfo.Text = output;
-            adalLogs.Text = loggerCallback.GetAdalLogs();
+            resultLogs.Text = loggerCallback.GetAdalLogs();
         }
 
         private void acquireTokenDeviceProfile_Click(object sender, EventArgs e)
@@ -78,5 +81,11 @@ namespace WinFormsAutomationApp
             _commandToRun = AuthenticationHelper.AcquireTokenUsingDeviceProfile;
             pageControl1.SelectedTab = dataInputPage;
         }
+
+        private void acquireDeviceCode_Click(object sender, EventArgs e)
+        {
+            _commandToRun = AuthenticationHelper.AcquireDeviceCode;
+            pageControl1.SelectedTab = dataInputPage;
+        }        
     }
 }
