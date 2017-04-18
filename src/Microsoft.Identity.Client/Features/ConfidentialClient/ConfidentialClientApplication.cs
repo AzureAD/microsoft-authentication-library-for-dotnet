@@ -122,7 +122,9 @@ namespace Microsoft.Identity.Client
         {
             return
                 await
-                    AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, scope, new Uri(RedirectUri)).ConfigureAwait(false);
+                    AcquireTokenByAuthorizationCodeCommonAsync(
+                        authorizationCode, scope, new Uri(RedirectUri),
+                        ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -220,14 +222,14 @@ namespace Microsoft.Identity.Client
         }
 
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode,
-            IEnumerable<string> scope, Uri redirectUri)
+            IEnumerable<string> scope, Uri redirectUri, ApiEvent.ApiIds apiId)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             var requestParams = CreateRequestParameters(authority, scope, null, UserTokenCache);
             requestParams.AuthorizationCode = authorizationCode;
             requestParams.RedirectUri = redirectUri;
             var handler =
-                new AuthorizationCodeRequest(requestParams);
+                new AuthorizationCodeRequest(requestParams){ApiId = apiId};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
