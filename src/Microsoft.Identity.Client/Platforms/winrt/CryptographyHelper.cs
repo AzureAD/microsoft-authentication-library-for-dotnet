@@ -45,6 +45,11 @@ namespace Microsoft.Identity.Client
 
         public static string CreateBase64UrlEncodedSha256Hash(string input)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return null;
+            }
+
             IBuffer inputBuffer = CryptographicBuffer.ConvertStringToBinary(input, BinaryStringEncoding.Utf8);
             var hasher = HashAlgorithmProvider.OpenAlgorithm(HashAlgorithmNames.Sha256);
 

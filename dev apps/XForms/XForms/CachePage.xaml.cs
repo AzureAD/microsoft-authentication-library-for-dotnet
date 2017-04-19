@@ -33,6 +33,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -49,9 +50,9 @@ namespace XForms
         private void RefreshCacheView()
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;
-            accessTokenCacheItems.ItemsSource = tokenCache.GetAllAccessTokensForClient();
+            accessTokenCacheItems.ItemsSource = tokenCache.GetAllAccessTokensForClient(new RequestContext(Guid.Empty));
 
-            refreshTokenCacheItems.ItemsSource = tokenCache.GetAllRefreshTokensForClient();
+            refreshTokenCacheItems.ItemsSource = tokenCache.GetAllRefreshTokensForClient(new RequestContext(Guid.Empty));
         }
 
         protected override void OnAppearing()
@@ -62,10 +63,10 @@ namespace XForms
         private void OnClearClicked(object sender, EventArgs e)
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;
-            var users = tokenCache.GetUsers(new Uri(App.Authority).Host);
+            var users = tokenCache.GetUsers(new Uri(App.Authority).Host, new RequestContext(Guid.Empty));
             foreach (var user in users)
             {
-                tokenCache.Remove(user);
+                tokenCache.Remove(user, new RequestContext(Guid.Empty));
             }
 
             RefreshCacheView();
