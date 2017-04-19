@@ -25,23 +25,40 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Internal.Interfaces;
+using System;
+using System.Globalization;
+using Microsoft.Identity.Client.Internal;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace Microsoft.Identity.Client
 {
-    internal class CryptographyHelper : ICryptographyHelper
+    internal class CryptographyHelper
     {
-        public string CreateBase64UrlEncodedSha256Hash(string input)
+        public static string CreateBase64UrlEncodedSha256Hash(string input)
         {
-            return null;
+            if (string.IsNullOrEmpty(input))
+            {
+                return null;
+            }
+
+            using (SHA256 sha = SHA256.Create())
+            {
+                UTF8Encoding encoding = new UTF8Encoding();
+                return Base64UrlHelpers.Encode(sha.ComputeHash(encoding.GetBytes(input)));
+            }
         }
 
-        public string GenerateCodeVerifier()
+        public static string GenerateCodeVerifier()
         {
-            return null;
+            byte[] buffer = new byte[Constants.CodeVerifierByteSize];
+            using (var randomSource = RandomNumberGenerator.Create())
+            {
+                randomSource.GetBytes(buffer);
+            }
+
+            return Base64UrlHelpers.Encode(buffer);
         }
 
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)

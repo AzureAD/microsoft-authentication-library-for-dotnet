@@ -29,13 +29,12 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
-    internal class CryptographyHelper : ICryptographyHelper
+    internal class CryptographyHelper
     {
-        public string CreateBase64UrlEncodedSha256Hash(string input)
+        public static string CreateBase64UrlEncodedSha256Hash(string input)
         {
             if (string.IsNullOrEmpty(input))
             {
@@ -49,7 +48,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        public string GenerateCodeVerifier()
+        public static string GenerateCodeVerifier()
         {
             byte[] buffer = new byte[Constants.CodeVerifierByteSize];
             using (RNGCryptoServiceProvider randomSource = new RNGCryptoServiceProvider())
