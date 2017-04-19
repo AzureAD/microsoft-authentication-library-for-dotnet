@@ -285,26 +285,14 @@ namespace Test.MSAL.NET.Unit.InstanceTests
         {
             const string uriNoPort = "https://login.windows.net/mytenant.com";
             const string uriCustomPort = "https://login.windows.net:444/mytenant.com/";
-
-            try
-            {
-                var authority = Authority.CreateAuthority(uriNoPort, false);
-                Assert.Fail("MsalClientException should have been thrown");
-            }
-            catch (MsalClientException exc)
-            {
-                Assert.AreEqual(MsalClientException.DeprecatedAuthorityError, exc.ErrorCode);
-            }
-            
-            try
-            {
-                var authority = Authority.CreateAuthority(uriCustomPort, false);
-                Assert.Fail("MsalClientException should have been thrown");
-            }
-            catch (MsalClientException exc)
-            {
-                Assert.AreEqual(MsalClientException.DeprecatedAuthorityError, exc.ErrorCode);
-            }
+            var authority = Authority.CreateAuthority(uriNoPort, false);
+            Assert.AreEqual("https://login.microsoftonline.com/mytenant.com/", authority.CanonicalAuthority);
+            authority = Authority.CreateAuthority(uriCustomPort, false);
+            Assert.AreEqual("https://login.microsoftonline.com:444/mytenant.com/", authority.CanonicalAuthority);
+            authority = Authority.CreateAuthority("https://login.windows.net/tfp/tenant/policy", false);
+            Assert.AreEqual("https://login.microsoftonline.com/tfp/tenant/policy/", authority.CanonicalAuthority);
+            authority = Authority.CreateAuthority("https://login.windows.net:444/tfp/tenant/policy", false);
+            Assert.AreEqual("https://login.microsoftonline.com:444/tfp/tenant/policy/", authority.CanonicalAuthority);
         }
     }
 }

@@ -44,8 +44,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected TokenResponse Response;
         protected AccessTokenCacheItem AccessTokenItem;
 
-        internal RequestContext RequestContext { get; set; }
-
         protected bool SupportADFS { get; set; }
 
         protected bool LoadFromCache { get; set; }
@@ -56,22 +54,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected RequestBase(AuthenticationRequestParameters authenticationRequestParameters)
         {
-            RequestContext = authenticationRequestParameters.RequestContext;
             TokenCache = authenticationRequestParameters.TokenCache;
 
-            RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
-                "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
+            authenticationRequestParameters.RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
+                "=== Token Acquisition ({4}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCache Provided: {3}",
                 CryptographyHelper.CreateBase64UrlEncodedSha256Hash(AuthenticationRequestParameters?.Authority
                     ?.CanonicalAuthority), authenticationRequestParameters.Scope.AsSingleString(),
                 authenticationRequestParameters.ClientId,
-                (TokenCache != null)
-                    ? TokenCache.GetType().FullName
-                    : null));
-            RequestContext.Logger.InfoPii(string.Format(CultureInfo.InvariantCulture,
-                    "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCache Provided: {3}",
-                AuthenticationRequestParameters?.Authority?.CanonicalAuthority, authenticationRequestParameters.Scope.AsSingleString(),
-                    authenticationRequestParameters.ClientId,
-                    TokenCache != null));
+                TokenCache != null, this.GetType().Name));
+            authenticationRequestParameters.RequestContext.Logger.InfoPii(string.Format(CultureInfo.InvariantCulture,
+                "=== Token Acquisition ({4}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCache Provided: {3}",
+                AuthenticationRequestParameters?.Authority?.CanonicalAuthority,
+                authenticationRequestParameters.Scope.AsSingleString(),
+                authenticationRequestParameters.ClientId,
+                TokenCache != null, this.GetType().Name));
 
             AuthenticationRequestParameters = authenticationRequestParameters;
             if (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0)
@@ -125,7 +121,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             catch (Exception ex)
             {
-                RequestContext.Logger.Error(ex);
+                AuthenticationRequestParameters.RequestContext.Logger.Error(ex);
                 throw;
             }
         }
@@ -140,13 +136,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     !fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.ClientInfo
                         .UniqueTenantIdentifier))
                 {
-                    //TODO formalize in the exception handling PR
-                    throw new MsalServiceException("user_mismatch", "different user was returned from the server");
+                    AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(String.Format(
+                        CultureInfo.InvariantCulture,
+                        "Returned user identifiers (uid:{0} utid:{1}) does not meatch the sent user identifier (uid:{2} utid:{3})",
+                        fromServer.UniqueIdentifier, fromServer.UniqueTenantIdentifier,
+                        AuthenticationRequestParameters.ClientInfo.UniqueIdentifier,
+                        AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier));
+                    throw new MsalServiceException("user_mismatch", "Returned user identifier does not match the sent user identifier");
                 }
             }
 
             IdToken idToken = IdToken.Parse(Response.IdToken);
-            AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority = Authority.UpdateTenantId(AuthenticationRequestParameters.Authority.CanonicalAuthority, idToken?.TenantId);
+            AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority = Authority.UpdateTenantId(
+                AuthenticationRequestParameters.Authority.CanonicalAuthority, idToken?.TenantId);
 
             if (StoreToCache)
             {
@@ -171,7 +173,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async Task ResolveAuthorityEndpoints()
         {
-            await AuthenticationRequestParameters.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, RequestContext).ConfigureAwait(false);
+            await AuthenticationRequestParameters.Authority
+                .ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint,
+                    AuthenticationRequestParameters.RequestContext)
+                .ConfigureAwait(false);
         }
 
 
@@ -208,12 +213,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task SendHttpMessageAsync(OAuth2Client client)
         {
             Response =
-                await client.GetToken(new Uri(AuthenticationRequestParameters.Authority.TokenEndpoint + "?slice=testslice&uid=true"), RequestContext).ConfigureAwait(false);
+                await client
+                    .GetToken(
+                        new Uri(AuthenticationRequestParameters.Authority.TokenEndpoint + "?slice=testslice&uid=true"),
+                        AuthenticationRequestParameters.RequestContext)
+                    .ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(Response.Scope))
             {
                 Response.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
-                RequestContext.Logger.Info("ScopeSet was missing from the token response, so using developer provided scopes in the result");
+                AuthenticationRequestParameters.RequestContext.Logger.Info(
+                    "ScopeSet was missing from the token response, so using developer provided scopes in the result");
             }
         }
 
@@ -221,8 +231,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (result.AccessToken != null)
             {
-                RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
-                    "=== Token Acquisition finished successfully. An access token was retuned with Expiration Time: {0}",
+                AuthenticationRequestParameters.RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
+                    "=== Token Acquisition finished successfully. An access token was retuned with Expiration Time: {0} ===",
                     result.ExpiresOn));
             }
         }

@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.User));
             }
-            
+
             ForceRefresh = forceRefresh;
         }
 
@@ -62,9 +62,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             //look for access token.
-                AccessTokenItem
-                    = TokenCache.FindAccessToken(AuthenticationRequestParameters);
-            
+            AccessTokenItem
+                = TokenCache.FindAccessToken(AuthenticationRequestParameters);
+
             if (ForceRefresh)
             {
                 AccessTokenItem = null;
@@ -82,19 +82,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (_refreshTokenItem == null)
                 {
-                    RequestContext.Logger.Verbose("No Refresh Token was found in the cache");
+                    AuthenticationRequestParameters.RequestContext.Logger.Verbose(
+                        "No Refresh Token was found in the cache");
                     throw new MsalUiRequiredException(MsalUiRequiredException.NoTokensFoundError,
                         "No Refresh Token found in the cache");
                 }
 
-                RequestContext.Logger.Verbose("Refreshing access token...");
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
                 await ResolveAuthorityEndpoints().ConfigureAwait(false);
                 await base.SendTokenRequestAsync().ConfigureAwait(false);
-                
+
                 if (Response.RefreshToken == null)
                 {
                     Response.RefreshToken = _refreshTokenItem.RefreshToken;
-                    RequestContext.Logger.Info("Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+                    AuthenticationRequestParameters.RequestContext.Logger.Info(
+                        "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
                 }
             }
         }

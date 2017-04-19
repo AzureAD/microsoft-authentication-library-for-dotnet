@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client
 
             var handler =
                 new InteractiveRequest(requestParameters, null, loginHint, UIBehavior.SelectAccount, null);
-            return await handler.CreateAuthorizationUriAsync(CreateRequestContext(Guid.Empty)).ConfigureAwait(false);
+            return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client
 
             var handler =
                 new InteractiveRequest(requestParameters, additionalScope, loginHint, UIBehavior.SelectAccount, null);
-            return await handler.CreateAuthorizationUriAsync(CreateRequestContext(Guid.Empty)).ConfigureAwait(false);
+            return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
         }
 
         internal ClientCredential ClientCredential { get; }

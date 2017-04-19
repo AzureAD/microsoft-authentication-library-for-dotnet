@@ -119,15 +119,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Validate Authority? - " + ValidateAuthority);
             builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("User provided? - " + (User != null));
-            builder.AppendLine("Validate Authority? - " + ValidateAuthority);
             var dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
             builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
 #if DESKTOP || NETSTANDARD1_3
             builder.AppendLine("Confidential Client? - " + HasCredential);
-            builder.AppendLine("Client Certificate Provided? - " + (ClientCredential.Certificate!=null));
+            if(HasCredential)
+            {
+                builder.AppendLine("Client Certificate Provided? - " + (ClientCredential.Certificate!=null));
+            }
 #endif
-
-
+            RequestContext.Logger.Info(builder.ToString());
 
         }
     }

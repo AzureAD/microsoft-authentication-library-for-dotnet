@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             : base(authenticationRequestParameters)
         {
             PlatformPlugin.PlatformInformation.ValidateRedirectUri(authenticationRequestParameters.RedirectUri,
-                RequestContext);
+                authenticationRequestParameters.RequestContext);
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))
             {
                 throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, nameof(authenticationRequestParameters.RedirectUri));
@@ -83,12 +83,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _webUi = webUI;
             _UIBehavior = UIBehavior;
             LoadFromCache = false; //no cache lookup and refresh for interactive.
+            AuthenticationRequestParameters.RequestContext.Logger.Info("Additional scopes - " + _additionalScope.AsSingleString() + ";" + "UIBehavior - " + _UIBehavior.PromptValue);
         }
 
         internal override async Task PreTokenRequest()
         {
             await base.PreTokenRequest().ConfigureAwait(false);
-            
             await AcquireAuthorizationAsync().ConfigureAwait(false);
             VerifyAuthorizationResult();
         }
@@ -99,15 +99,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _authorizationResult =
                 await
                     _webUi.AcquireAuthorizationAsync(authorizationUri, AuthenticationRequestParameters.RedirectUri,
-                        RequestContext)
+                        AuthenticationRequestParameters.RequestContext)
                         .ConfigureAwait(false);
         }
 
-        internal async Task<Uri> CreateAuthorizationUriAsync(RequestContext requestContext)
+        internal async Task<Uri> CreateAuthorizationUriAsync()
         {
             //this method is used in confidential clients to create authorization URLs.
-            RequestContext = requestContext;
-            await AuthenticationRequestParameters.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, RequestContext).ConfigureAwait(false);
+            await AuthenticationRequestParameters.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
             return CreateAuthorizationUri();
         }
 
@@ -168,7 +167,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // Checks for _extraQueryParameters duplicating standard parameters
                 Dictionary<string, string> kvps =
                     MsalHelpers.ParseKeyValueList(AuthenticationRequestParameters.ExtraQueryParameters, '&', false,
-                        RequestContext);
+                        AuthenticationRequestParameters.RequestContext);
 
                 foreach (KeyValuePair<string, string> kvp in kvps)
                 {
@@ -211,9 +210,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.LoginHint;
             }
 
-            if (!string.IsNullOrEmpty(RequestContext?.CorrelationId))
+            if (!string.IsNullOrEmpty(AuthenticationRequestParameters.RequestContext?.CorrelationId))
             {
-                authorizationRequestParameters[OAuth2Parameter.CorrelationId] = RequestContext.CorrelationId;
+                authorizationRequestParameters[OAuth2Parameter.CorrelationId] = AuthenticationRequestParameters.RequestContext.CorrelationId;
             }
 
             IDictionary<string, string> adalIdParameters = MsalIdHelper.GetMsalIdParameters();

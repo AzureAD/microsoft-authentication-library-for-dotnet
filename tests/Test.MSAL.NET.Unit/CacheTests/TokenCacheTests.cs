@@ -524,6 +524,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             response.TokenType = "Bearer";
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
+                RequestContext = new RequestContext(Guid.Empty),
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 ClientId = TestConstants.ClientId
             };
