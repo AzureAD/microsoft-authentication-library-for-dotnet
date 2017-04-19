@@ -35,7 +35,7 @@ using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class InteractiveRequest : BaseRequest
+    internal class InteractiveRequest : RequestBase
     {
         private readonly SortedSet<string> _additionalScope;
         private readonly UIBehavior _UIBehavior;

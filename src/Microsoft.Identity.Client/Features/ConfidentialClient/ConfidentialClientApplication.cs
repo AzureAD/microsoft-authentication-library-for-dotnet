@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Client
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             AuthenticationRequestParameters parameters = CreateRequestParameters(authority, scope, null,
                 AppTokenCache);
-            var handler = new ClientCredentialRequest(parameters);
+            var handler = new Internal.Requests.ClientCredentialRequest(parameters);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

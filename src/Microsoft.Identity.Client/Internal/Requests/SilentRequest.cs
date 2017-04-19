@@ -32,7 +32,7 @@ using Microsoft.Identity.Client.Internal.Cache;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class SilentRequest : BaseRequest
+    internal class SilentRequest : RequestBase
     {
         private RefreshTokenCacheItem _refreshTokenItem;
 

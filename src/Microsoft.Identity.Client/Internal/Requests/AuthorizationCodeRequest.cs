@@ -30,7 +30,7 @@ using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class AuthorizationCodeRequest : BaseRequest
+    internal class AuthorizationCodeRequest : RequestBase
     {
         public AuthorizationCodeRequest(AuthenticationRequestParameters authenticationRequestParameters)
             : base(authenticationRequestParameters)

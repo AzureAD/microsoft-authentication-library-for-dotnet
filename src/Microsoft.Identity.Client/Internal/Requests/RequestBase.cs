@@ -36,7 +36,7 @@ using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal abstract class BaseRequest
+    internal abstract class RequestBase
     {
         protected static readonly Task CompletedTask = Task.FromResult(false);
         internal readonly AuthenticationRequestParameters AuthenticationRequestParameters;
@@ -54,38 +54,43 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected bool StoreToCache { get; set; }
 
-        protected BaseRequest(AuthenticationRequestParameters authenticationRequestParameters)
+        protected RequestBase(AuthenticationRequestParameters authenticationRequestParameters)
         {
             RequestContext = authenticationRequestParameters.RequestContext;
             TokenCache = authenticationRequestParameters.TokenCache;
 
             RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
-                    "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
+                "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCacheType: {3}",
+                CryptographyHelper.CreateBase64UrlEncodedSha256Hash(AuthenticationRequestParameters?.Authority
+                    ?.CanonicalAuthority), authenticationRequestParameters.Scope.AsSingleString(),
+                authenticationRequestParameters.ClientId,
+                (TokenCache != null)
+                    ? TokenCache.GetType().FullName
+                    : null));
+            RequestContext.Logger.InfoPii(string.Format(CultureInfo.InvariantCulture,
+                    "=== Token Acquisition started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCache Provided: {3}",
                 AuthenticationRequestParameters?.Authority?.CanonicalAuthority, authenticationRequestParameters.Scope.AsSingleString(),
                     authenticationRequestParameters.ClientId,
-                    (TokenCache != null)
-                        ? TokenCache.GetType().FullName
-                        : null));
+                    TokenCache != null));
 
             AuthenticationRequestParameters = authenticationRequestParameters;
-
             if (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0)
             {
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.Scope));
             }
 
             ValidateScopeInput(authenticationRequestParameters.Scope);
-
             LoadFromCache = (TokenCache != null);
             StoreToCache = (TokenCache != null);
-            SupportADFS = true;
+            SupportADFS = false;
+
+            AuthenticationRequestParameters.LogState();
         }
 
         protected virtual SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
         {
             SortedSet<string> set = new SortedSet<string>(inputScope.ToArray());
             set.UnionWith(OAuth2Value.ReservedScopes.CreateSetFromEnumerable());
-            set.Remove(AuthenticationRequestParameters.ClientId);
             return set;
         }
 
@@ -97,6 +102,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,
                     "API does not accept '{0}' value as user-provided scopes",
                     OAuth2Value.ReservedScopes.AsSingleString()));
+            }
+
+            if (scopesToValidate.Contains(AuthenticationRequestParameters.ClientId))
+            {
+                throw new ArgumentException("API does not accept client id as a user-provided scope");
             }
         }
 
