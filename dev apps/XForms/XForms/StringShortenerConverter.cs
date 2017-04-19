@@ -35,16 +35,20 @@ namespace XForms
 {
     internal class StringShortenerConverter : IValueConverter
     {
+        internal static string GetShortStr(string str, int length)
+        {
+            if (str.Length > length)
+            {
+                return str.Substring(0, Length) + "...";
+            }
+            return str;
+        }
+
         private const int Length = 30;
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var str = (string)value;
-            if (str.Length > Length)
-            {
-                str = str.Substring(0, Length) + "...";
-            }
-
-            return str;
+            return GetShortStr((string)value, Length);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -13,13 +13,18 @@
     <DelaySign>False</DelaySign>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="AccessTokenCacheItemDetails.xaml" />
     <None Remove="AcquirePage.xaml" />
     <None Remove="CachePage.xaml" />
     <None Remove="LogPage.xaml" />
     <None Remove="MainPage.xaml" />
+    <None Remove="RefreshTokenCacheItemDetails.xaml" />
     <None Remove="SettingsPage.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="AccessTokenCacheItemDetails.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Include="AcquirePage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
@@ -32,18 +37,24 @@
     <EmbeddedResource Include="MainPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
+    <EmbeddedResource Include="RefreshTokenCacheItemDetails.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Include="SettingsPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="StrongNamer" Version="0.0.3" />
-    <PackageReference Include="Xamarin.Forms" Version="2.3.3.193" />
+    <PackageReference Include="Xamarin.Forms" Version="2.3.4.231" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="AccessTokenCacheItemDetails.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="AcquirePage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -54,6 +65,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="MainPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="RefreshTokenCacheItemDetails.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="SettingsPage.xaml.cs">

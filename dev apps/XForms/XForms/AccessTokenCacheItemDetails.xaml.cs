@@ -25,52 +25,33 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
+using Microsoft.Identity.Client.Internal.Cache;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace XForms
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class SettingsPage : ContentPage
+    public partial class AccessTokenCacheItemDetails : ContentPage
     {
-        public SettingsPage()
+        internal AccessTokenCacheItemDetails(AccessTokenCacheItem accessTokenCacheItem)
         {
             InitializeComponent();
-        }
 
-        protected override void OnAppearing()
-        {
-            RefreshView();
-        }
+            authorityLabel.Text = accessTokenCacheItem.Authority;
+            clientIdLabel.Text = accessTokenCacheItem.ClientId;
 
-        private void RefreshView()
-        {
-            authority.Text = App.Authority;
-            numOfAtItems.Text = App.MsalPublicClient.UserTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString()
-                .Count.ToString();
-            numOfRtItems.Text = App.MsalPublicClient.UserTokenCache.TokenCacheAccessor.GetAllRefreshTokensAsString()
-                .Count.ToString();
+            userDisplayableIdLabel.Text = accessTokenCacheItem.User.DisplayableId;
+            userNameLabel.Text = accessTokenCacheItem.User.Name;
+            userIdentityProviderLabel.Text = accessTokenCacheItem.User.IdentityProvider;
 
-            validateAuthority.IsToggled = App.ValidateAuthority;
-        }
+            expiresOnLabel.Text = accessTokenCacheItem.ExpiresOn.ToString();
+            scopesLabel.Text = accessTokenCacheItem.Scope;
 
-        private void OnSaveClicked(object sender, EventArgs e)
-        {
-            App.Authority = authority.Text;
-            App.InitPublicClient();
-        }
+            clientInfoUniqueIdentifierLabel.Text = accessTokenCacheItem.ClientInfo.UniqueIdentifier;
+            clientInfoUniqueTenantIdentifierLabel.Text = accessTokenCacheItem.ClientInfo.UniqueTenantIdentifier;
 
-        private void OnClearCache(object sender, EventArgs e)
-        {
-            App.MsalPublicClient.UserTokenCache.ClearCache();
-            RefreshView();
-        }
-
-        private void OnValidateAuthorityToggled(object sender, ToggledEventArgs args)
-        {
-            App.MsalPublicClient.ValidateAuthority = args.Value;
-            App.ValidateAuthority = args.Value;
+            accessTokenLabel.Text = StringShortenerConverter.GetShortStr(accessTokenCacheItem.AccessToken, 100);
         }
     }
 }

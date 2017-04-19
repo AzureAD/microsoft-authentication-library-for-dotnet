@@ -41,6 +41,7 @@ namespace XForms
         public MainPage()
         {
             InitializeComponent();
+            NavigationPage.SetHasNavigationBar(this, false);
         }
     }
 }

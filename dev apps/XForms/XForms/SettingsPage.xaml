@@ -14,13 +14,16 @@
 
         <Frame OutlineColor="Black" Padding="10">
             <StackLayout Orientation="Vertical"  VerticalOptions="FillAndExpand">
-                <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-                    <Label Text="Authority:" HorizontalTextAlignment="Start"  Margin="5"/>
-                    <Entry x:Name="authority" Text=""  HorizontalOptions="FillAndExpand"/>
-                </StackLayout>
+                <Label Text="Authority:" HorizontalTextAlignment="Start"  Margin="5" Font="Bold,13"/>
+                <Entry x:Name="authority" Text=""  HorizontalOptions="FillAndExpand"/>
                 <Button  Text="Save"  Clicked="OnSaveClicked" TextColor="Blue" Font="Bold,15"/>
             </StackLayout>
         </Frame>
+        
+        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+            <Label Text="Validate Authority" HorizontalTextAlignment="Center"  Margin="5" Font="Bold,13"/>
+            <Switch x:Name="validateAuthority" Toggled="OnValidateAuthorityToggled"/>
+        </StackLayout>
 
         <Frame OutlineColor="Black" Padding="10">
             <StackLayout Orientation="Vertical"  VerticalOptions="FillAndExpand">

@@ -15,33 +15,46 @@
         <Label Text="Acquire" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" Margin="5" />
 
         <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-            <Label Text="Authority:" HorizontalTextAlignment="Center"  Margin="5"/>
-            <Label x:Name="authority" Text="" HorizontalTextAlignment="Center"  Margin="5"/>
+            <Label Text="Scopes" HorizontalTextAlignment="Center"  Margin="5" Font="Bold,13"/>
+            <Entry x:Name="ScopesEntry" Text="User.Read"  HorizontalOptions="FillAndExpand"/>
         </StackLayout>
 
         <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-            <Label Text="Validate Authority" HorizontalTextAlignment="Center"  Margin="5"/>
-            <Switch x:Name="validateAuthority" Toggled="OnValidateAuthorityToggled"/>
+            <Label Text="Users" HorizontalTextAlignment="Center" Margin="5" Font="Bold,13"/>
+            <Picker x:Name="usersPicker" HorizontalOptions="FillAndExpand"/>
         </StackLayout>
 
-        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-            <Label Text="User" HorizontalTextAlignment="Center"  Margin="5"/>
-            <Entry x:Name="UserEntry" Text="user@msdevex.onmicrosoft.com"  HorizontalOptions="FillAndExpand"/>
-        </StackLayout>
-        
-        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-            <Label Text="Login hint" HorizontalTextAlignment="Center"  Margin="5"/>
-            <Switch x:Name="LoginHint"/>
-        </StackLayout>
+        <Frame OutlineColor="Black" Padding="10">
+            <StackLayout Orientation="Vertical">
+                <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+                    <Label Text="UIBehavior" HorizontalTextAlignment="Center"  Margin="5" Font="Bold,13"/>
+                    <Picker x:Name="UIBehaviorPicker"/>
+                </StackLayout>
+                
+                <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+                    <Label Text="Login hint" HorizontalTextAlignment="Center" Margin="5" Font="Bold,13"/>
+                    <Switch x:Name="LoginHintSwitch"/>
+                    <Entry x:Name="LoginHintEntry" Text="user@msdevex.onmicrosoft.com"/>
+                </StackLayout>
 
-        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-            <StackLayout Orientation="Vertical" HorizontalOptions="FillAndExpand" >
-                <Button  Text="Acquire"  Clicked="OnAcquireClicked" BorderColor="Black" HorizontalOptions="FillAndExpand"  BackgroundColor="Gray"/>
+                <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+                    <Label Text="ExtraQueryParameters" HorizontalTextAlignment="Start"  Margin="5" Font="Bold,13"/>
+                    <Entry x:Name="ExtraQueryParametersEntry" Text=""  HorizontalOptions="FillAndExpand"/>
+                </StackLayout>
+
+                <Button  Text="Acquire" Clicked="OnAcquireClicked" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center"/>
             </StackLayout>
-            <StackLayout Orientation="Vertical" HorizontalOptions="FillAndExpand" >
-                <Button  Text="AcquireSilently"  Clicked="OnAcquireSilentlyClicked" BorderColor="Black" HorizontalOptions="FillAndExpand" BackgroundColor="Gray"/>
+        </Frame>
+
+        <Frame OutlineColor="Black" Padding="10">
+            <StackLayout Orientation="Vertical"  >
+                <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+                    <Label Text="Force Refresh" HorizontalTextAlignment="Center" Margin="5" Font="Bold,13"/>
+                    <Switch x:Name="ForceRefreshSwitch"/>
+                </StackLayout>
+                <Button  Text="AcquireSilently" Clicked="OnAcquireSilentlyClicked" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center"/>
             </StackLayout>
-        </StackLayout>
+        </Frame>
 
         <Label Text="Result:" Font="Bold,15"/>
         

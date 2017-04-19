@@ -39,7 +39,10 @@ namespace XForms
     public partial class LogPage : ContentPage
     {
         private static readonly StringBuilder Sb = new StringBuilder();
+        private static readonly StringBuilder SbPii = new StringBuilder();
         private static readonly object BufferLock = new object();
+        private static readonly object BufferLockPii = new object();
+
 
         public LogPage()
         {
@@ -57,6 +60,10 @@ namespace XForms
             {
                 log.Text = Sb.ToString();
             }
+            lock (BufferLockPii)
+            {
+                logPii.Text = SbPii.ToString();
+            }
         }
 
         private void OnClearClicked(object sender, EventArgs e)
@@ -65,15 +72,25 @@ namespace XForms
             {
                 Sb.Clear();
             }
+            lock (BufferLockPii)
+            {
+                SbPii.Clear();
+            }
             ShowLog();
         }
 
-        public static void AddToLog(string str)
+        public static void AddToLog(string str, bool containsPii)
         {
-            lock (BufferLock)
-            {
-                Sb.AppendLine(str);
-            }
+            if (containsPii)
+                lock (BufferLockPii)
+                {
+                    SbPii.AppendLine(str);
+                }
+            else
+                lock (BufferLock)
+                {
+                    Sb.AppendLine(str);
+                }
         }
     }
 }

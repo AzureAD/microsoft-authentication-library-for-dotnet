@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="XForms.MainPage"
              xmlns:pages="clr-namespace:XForms;assembly=XForms"
-             Title="TabbedPage">
+             Title="Main Page">
 
     <pages:AcquirePage Title="Acquire"/>
     <pages:SettingsPage Title="Settings"/>
