@@ -223,10 +223,16 @@ namespace Microsoft.Identity.Client
                 ? string.Empty
                 : " - " + CorrelationId;
 
+            string os = "N/A";
+            if (MsalIdHelper.GetMsalIdParameters().ContainsKey(MsalIdParameter.OS))
+            {
+                os = MsalIdHelper.GetMsalIdParameters()[MsalIdParameter.OS];
+            }
+
             string log = string.Format(CultureInfo.InvariantCulture, "MSAL {0} {1} {2} [{3}{4}] {5}",
                 MsalIdHelper.GetMsalVersion(),
                 PlatformPlugin.PlatformInformation.GetOperatingSystem(),
-                MsalIdHelper.GetMsalIdParameters()[MsalIdParameter.OS], DateTime.UtcNow, correlationId, logMessage);
+                os, DateTime.UtcNow, correlationId, logMessage);
 
             if (DefaultLoggingEnabled)
             {
