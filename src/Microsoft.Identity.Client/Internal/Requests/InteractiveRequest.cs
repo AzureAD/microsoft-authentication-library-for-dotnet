@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class InteractiveRequest : RequestBase
     {
         private readonly SortedSet<string> _additionalScope;
-        private readonly UIBehavior _UIBehavior;
+        public readonly UIBehavior _UIBehavior;
         private readonly IWebUI _webUi;
         private AuthorizationResult _authorizationResult;
         private string _codeVerifier;
