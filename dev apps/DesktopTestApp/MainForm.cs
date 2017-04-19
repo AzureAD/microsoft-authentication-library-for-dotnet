@@ -337,7 +337,7 @@ namespace DesktopTestApp
 
             cachePageTableLayout.RowCount = 0;
             foreach (RefreshTokenCacheItem rtItem in _publicClientHandler.PublicClientApplication.UserTokenCache
-                .GetAllRefreshTokensForClient())
+                .GetAllRefreshTokensForClient(new RequestContext(Guid.Empty)))
             {
                 AddControlToCachePageTableLayout(
                     new MsalUserRefreshTokenControl(_publicClientHandler.PublicClientApplication.UserTokenCache, rtItem)
@@ -346,7 +346,7 @@ namespace DesktopTestApp
                     });
 
                 foreach (AccessTokenCacheItem atItem in _publicClientHandler.PublicClientApplication.UserTokenCache
-                    .GetAllAccessTokensForClient())
+                    .GetAllAccessTokensForClient(new RequestContext(Guid.Empty)))
                 {
                     if (atItem.User.Identifier.Equals(rtItem.User.Identifier))
                     {

@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.OAuth2;
 
@@ -57,8 +58,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public string ExtraQueryParameters { get; set; }
 
-        public string Prompt { get; set; }
-
         public IUser User { get; set; }
 
         public ClientInfo ClientInfo { get; set; }
@@ -66,11 +65,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public UserAssertion UserAssertion { get; set; }
 
 #if DESKTOP || NETSTANDARD1_3
-        public ClientCredential ClientCredential { get; set; }
+        public Client.ClientCredential ClientCredential { get; set; }
 
         public bool HasCredential => (ClientCredential != null);
 
 #endif
+
         public IDictionary<string, string> ToParameters()
         {
             IDictionary<string, string> parameters = new Dictionary<string, string>();
@@ -88,7 +88,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         bool assertionNearExpiry = (ClientCredential.ValidTo <=
                                                     JsonWebToken.ConvertToTimeT(DateTime.UtcNow +
                                                                                 TimeSpan.FromMinutes(
-                                                                                    Constants.ExpirationMarginInMinutes)));
+                                                                                    Constants
+                                                                                        .ExpirationMarginInMinutes)));
                         if (assertionNearExpiry)
                         {
                             JsonWebToken jwtToken = new JsonWebToken(ClientId,
@@ -104,6 +105,31 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 #endif
             return parameters;
+        }
+
+        public void LogState()
+        {
+            StringBuilder builder = new StringBuilder(Environment.NewLine + "=== Request Data ===" +
+                                                      Environment.NewLine +
+                                                      "Authority Provided? - " + (Authority != null) +
+                                                      Environment.NewLine);
+            builder.AppendLine("Client Id - " + ClientId);
+            builder.AppendLine("Scopes - " + Scope?.AsSingleString());
+            builder.AppendLine("Redirect Uri - " + RedirectUri?.OriginalString);
+            builder.AppendLine("Validate Authority? - " + ValidateAuthority);
+            builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
+            builder.AppendLine("User provided? - " + (User != null));
+            var dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
+            builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
+#if DESKTOP || NETSTANDARD1_3
+            builder.AppendLine("Confidential Client? - " + HasCredential);
+            if(HasCredential)
+            {
+                builder.AppendLine("Client Certificate Provided? - " + (ClientCredential.Certificate!=null));
+            }
+#endif
+            RequestContext.Logger.Info(builder.ToString());
+
         }
     }
 }

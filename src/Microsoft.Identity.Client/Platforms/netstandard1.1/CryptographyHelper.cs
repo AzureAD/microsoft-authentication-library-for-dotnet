@@ -25,12 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.Internal.Interfaces
-{
-    internal interface ICryptographyHelper
-    {
-        string CreateBase64UrlEncodedSha256Hash(string input);
+using System;
 
-        string GenerateCodeVerifier();
+namespace Microsoft.Identity.Client
+{
+    internal class CryptographyHelper
+    {
+        public static string CreateBase64UrlEncodedSha256Hash(string input)
+        {
+            return null;
+        }
+
+        public static string GenerateCodeVerifier()
+        {
+            return null;
+        }
     }
 }

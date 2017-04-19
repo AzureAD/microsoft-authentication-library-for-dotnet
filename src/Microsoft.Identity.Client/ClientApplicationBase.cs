@@ -69,7 +69,6 @@ namespace Microsoft.Identity.Client
             }
 
             RequestContext requestContext = new RequestContext(Guid.Empty);
-
             requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
                 "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
                 PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
@@ -122,14 +121,14 @@ namespace Microsoft.Identity.Client
         {
             get
             {
+                RequestContext requestContext = new RequestContext(Guid.Empty);
                 if (UserTokenCache == null)
                 {
-                    RequestContext requestContext = new RequestContext(Guid.Empty);
-                    requestContext.Logger.Info("Token cache is null or empty");
+                    requestContext.Logger.Info("Token cache is null or empty. Returning empty list of users.");
                     return Enumerable.Empty<User>();
                 }
 
-                return UserTokenCache.GetUsers(new Uri(Authority).Host);
+                return UserTokenCache.GetUsers(new Uri(Authority).Host, requestContext);
             }
         }
 
@@ -190,12 +189,13 @@ namespace Microsoft.Identity.Client
         /// <param name="user">instance of the user that needs to be removed</param>
         public void Remove(IUser user)
         {
+            RequestContext requestContext = CreateRequestContext(Guid.Empty);
             if (user == null || UserTokenCache == null)
             {
                 return;
             }
 
-            UserTokenCache.Remove(user);
+            UserTokenCache.Remove(user, requestContext);
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,

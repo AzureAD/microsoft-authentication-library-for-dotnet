@@ -56,7 +56,6 @@ namespace Microsoft.Identity.Client.Internal
         
         public static ILogger PlatformLogger { get; set; }
         public static PlatformInformationBase PlatformInformation { get; set; }
-        public static ICryptographyHelper CryptographyHelper { get; set; }
 
         public static void InitializeByAssemblyDynamicLinking()
         {
@@ -64,19 +63,17 @@ namespace Microsoft.Identity.Client.Internal
             InjectDependecies(
                 (IWebUIFactory) new WebUIFactory(),
                 (ILogger) new PlatformLogger(),
-                (PlatformInformationBase) new PlatformInformation(new RequestContext(Guid.Empty)),
-                (ICryptographyHelper) new CryptographyHelper());
+                (PlatformInformationBase) new PlatformInformation(new RequestContext(Guid.Empty)));
 #endif
         }
 
         public static void InjectDependecies(IWebUIFactory webUIFactory,
             ILogger platformlogger,
-            PlatformInformationBase platformInformation, ICryptographyHelper cryptographyHelper)
+            PlatformInformationBase platformInformation)
         {
             WebUIFactory = webUIFactory;
             PlatformLogger = platformlogger;
             PlatformInformation = platformInformation;
-            CryptographyHelper = cryptographyHelper;
         }
 
         public static void LogMessage(Logger.LogLevel logLevel, string formattedMessage)

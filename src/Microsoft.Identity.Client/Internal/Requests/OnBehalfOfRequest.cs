@@ -31,7 +31,7 @@ using Microsoft.Identity.Client.Internal.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class OnBehalfOfRequest : BaseRequest
+    internal class OnBehalfOfRequest : RequestBase
     {
         public OnBehalfOfRequest(AuthenticationRequestParameters authenticationRequestParameters)
             : base(authenticationRequestParameters)

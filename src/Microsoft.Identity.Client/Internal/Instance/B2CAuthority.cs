@@ -45,6 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/{2}/{3}/", authorityUri.Authority,
                 pathSegments[0], pathSegments[1], pathSegments[2]);
             AuthorityType = AuthorityType.B2C;
+            UpdateCanonicalAuthority();
         }
 
         protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName, RequestContext requestContext)

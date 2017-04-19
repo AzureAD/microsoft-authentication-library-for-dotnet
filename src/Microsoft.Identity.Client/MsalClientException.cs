@@ -88,11 +88,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string TenantDiscoveryFailedError = "tenant_discovery_failed";
 
-        /// <summary>
-        /// 'authority' has been deprecated.
-        /// </summary>
-        public const string DeprecatedAuthorityError = "deprecated_authority";
-
 #if ANDROID
 
         /// <summary>

@@ -29,14 +29,13 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
     [Android.Runtime.Preserve(AllMembers = true)]
-    internal class CryptographyHelper : ICryptographyHelper
+    internal class CryptographyHelper
     {
-        public string CreateBase64UrlEncodedSha256Hash(string input)
+        public static string CreateBase64UrlEncodedSha256Hash(string input)
         {
             using (SHA256Managed sha = new SHA256Managed())
             {
@@ -45,7 +44,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        public string GenerateCodeVerifier()
+        public static string GenerateCodeVerifier()
         {
             byte[] buffer = new byte[Internal.Constants.CodeVerifierByteSize];
             using (RNGCryptoServiceProvider randomSource = new RNGCryptoServiceProvider())
