@@ -359,9 +359,13 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             if (builder.Query.Length > 1)
+            {
                 builder.Query = builder.Query.Substring(1) + "&" + queryParams;
+            }
             else
+            {
                 builder.Query = queryParams;
+            }
         }
 
         private static void AddKeyValueString(StringBuilder messageBuilder, string key, char[] value)
