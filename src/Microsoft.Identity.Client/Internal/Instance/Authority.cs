@@ -204,8 +204,6 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
                 AddToValidatedAuthorities(userPrincipalName);
             }
-
-            requestContext.Logger.Info("");
         }
 
         protected abstract bool ExistsInValidatedAuthorityCache(string userPrincipalName);
