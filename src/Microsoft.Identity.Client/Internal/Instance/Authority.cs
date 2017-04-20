@@ -144,6 +144,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         public async Task ResolveEndpointsAsync(string userPrincipalName, RequestContext requestContext)
         {
+            requestContext.Logger.Info("Resolving authority endpoints... Already resolved? - " + _resolved);
             if (!_resolved)
             {
                 var authorityUri = new Uri(CanonicalAuthority);

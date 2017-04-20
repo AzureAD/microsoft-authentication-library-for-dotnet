@@ -95,9 +95,9 @@ namespace Test.MSAL.NET.Unit.InstanceTests
                 .GetAwaiter()
                 .GetResult();
 
-            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/authorize",
+            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
                 instance.AuthorizationEndpoint);
-            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/token",
+            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
                 instance.TokenEndpoint);
             Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/",
                 instance.SelfSignedJwtAudience);
@@ -126,9 +126,9 @@ namespace Test.MSAL.NET.Unit.InstanceTests
                 .GetAwaiter()
                 .GetResult();
 
-            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/authorize",
+            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
                 instance.AuthorizationEndpoint);
-            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/token",
+            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
                 instance.TokenEndpoint);
             Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/",
                 instance.SelfSignedJwtAudience);
