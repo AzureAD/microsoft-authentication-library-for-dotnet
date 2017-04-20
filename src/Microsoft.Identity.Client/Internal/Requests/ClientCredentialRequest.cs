@@ -33,9 +33,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class ClientCredentialRequest : RequestBase
     {
-        public ClientCredentialRequest(AuthenticationRequestParameters authenticationRequestParameters)
+        public ClientCredentialRequest(AuthenticationRequestParameters authenticationRequestParameters, bool forceRefresh)
             : base(authenticationRequestParameters)
         {
+            ForceRefresh = forceRefresh;
         }
 
         protected override SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
