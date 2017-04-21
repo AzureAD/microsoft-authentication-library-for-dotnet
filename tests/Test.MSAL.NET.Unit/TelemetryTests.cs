@@ -104,7 +104,7 @@ namespace Test.MSAL.NET.Unit
                 e1.WasSuccessful = true;
                 telemetry.StopEvent(reqId, e1);
 
-                var e2 = new HttpEvent() {HttpPath = "https://contoso.com", UserAgent = "Edge", QueryParams = "a&b"};
+                var e2 = new HttpEvent() {HttpPath = "https://contoso.com", UserAgent = "SomeUserAgent", QueryParams = "a&b"};
                 telemetry.StartEvent(reqId, e2);
                 // do some stuff...
                 e2.HttpResponseStatus = 200;
