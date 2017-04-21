@@ -73,7 +73,6 @@ namespace Test.MSAL.NET.Unit
             AuthenticationResult actualResult = mockApp.AcquireTokenByAuthorizationCodeAsync("123", null).Result;
             Assert.IsNotNull(actualResult);
             Assert.AreEqual("id token", mockResult.IdToken, "Mock result failed to return the expected id token");
-
             // Check the scope property
             IEnumerable<string> scopes = actualResult.Scope;
             Assert.IsNotNull(scopes);
