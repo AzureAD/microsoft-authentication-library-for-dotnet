@@ -85,7 +85,7 @@ namespace DesktopTestApp
             List<IUser> userListDataSource = _publicClientHandler.PublicClientApplication.Users.ToList();
             if (userListDataSource.Count > 0)
             {
-                userListDataSource.Insert(0, new User(){DisplayableId = string.Empty});    
+                userListDataSource.Insert(0, new User() { DisplayableId = string.Empty });
             }
 
             userList.DataSource = userListDataSource;
@@ -104,7 +104,7 @@ namespace DesktopTestApp
         {
             _publicClientHandler.CurrentUser = (IUser)userList.SelectedItem;
         }
-        
+
         private void overriddenAuthority_TextChanged(object sender, EventArgs e)
         {
             _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
@@ -139,32 +139,6 @@ namespace DesktopTestApp
 
         #endregion
 
-        #region ConfidentialClient UI Controls
-        private void confClientScopesTextBox_TextChanged(object sender, EventArgs e)
-        {
-            _confidentialClientHandler.ConfClientScopes = scopes.Text.Split(' ');
-        }
-
-        private void ConfClientOverrideAuthority_TextChanged(object sender, EventArgs e)
-        {
-            _confidentialClientHandler.ConfClientOverriddenAuthority = confClientOverrideAuthority.Text;
-        }
-
-        private void clientSecretTxtBox_TextChanged(object sender, EventArgs e)
-        {
-            //   ClientCredential = clientSecretTxtBox.Text;
-        }
-
-        private void forceRefreshGroupBox_Enter(object sender, EventArgs e)
-        {
-            if (forceRefreshFalseBtn.Checked)
-            {
-                _confidentialClientHandler.ForceRefresh = false;
-            }
-            _confidentialClientHandler.ForceRefresh = true;
-        }
-        #endregion
-
         #region PublicClientApplication Acquire Token
         private async void acquireTokenInteractive_Click(object sender, EventArgs e)
         {
@@ -186,7 +160,7 @@ namespace DesktopTestApp
             try
             {
                 AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractive(scopes.Text.AsArray(), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
-                
+
                 SetResultPageInfo(authenticationResult);
                 RefreshUserList();
             }
@@ -221,6 +195,62 @@ namespace DesktopTestApp
             {
                 CreateException(exc);
             }
+        }
+
+        private async void acquireTokenInteractiveAuthority_Click(object sender, EventArgs e)
+        {
+            ClearResultPageInfo();
+            _publicClientHandler.LoginHint = loginHintTextBox.Text;
+            _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
+            _publicClientHandler.InteractiveAuthority = authority.Text;
+
+            if (userList.SelectedIndex == 0)
+            {
+                _publicClientHandler.CurrentUser = null;
+            }
+            else
+            {
+                _publicClientHandler.CurrentUser = userList.SelectedItem as User;
+            }
+
+
+            try
+            {
+                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveWithAuthority(scopes.Text.AsArray(), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
+
+                SetResultPageInfo(authenticationResult);
+                RefreshUserList();
+            }
+            catch (Exception exc)
+            {
+                CreateException(exc);
+            }
+        }
+        #endregion
+
+        #region ConfidentialClient UI Controls
+        private void confClientScopesTextBox_TextChanged(object sender, EventArgs e)
+        {
+            _confidentialClientHandler.ConfClientScopes = scopes.Text.Split(' ');
+        }
+
+        private void ConfClientOverrideAuthority_TextChanged(object sender, EventArgs e)
+        {
+            _confidentialClientHandler.ConfClientOverriddenAuthority = confClientOverrideAuthority.Text;
+        }
+
+        private void clientSecretTxtBox_TextChanged(object sender, EventArgs e)
+        {
+            //   ClientCredential = clientSecretTxtBox.Text;
+        }
+
+        private void forceRefreshGroupBox_Enter(object sender, EventArgs e)
+        {
+            if (forceRefreshFalseBtn.Checked)
+            {
+                _confidentialClientHandler.ForceRefresh = false;
+            }
+            _confidentialClientHandler.ForceRefresh = true;
         }
         #endregion
 
@@ -267,7 +297,7 @@ namespace DesktopTestApp
 
             return behavior;
         }
-        
+
         #region App logic
 
         public void SetResultPageInfo(AuthenticationResult authenticationResult)
@@ -320,17 +350,17 @@ namespace DesktopTestApp
         }
 
         #endregion
-        
+
         private void clearLogsButton_Click(object sender, EventArgs e)
         {
             msalLogsTextBox.Text = string.Empty;
             msalPIILogsTextBox.Text = string.Empty;
         }
 
-#region Cache Tab Operations
+        #region Cache Tab Operations
         private void LoadCacheTabPage()
         {
-          while (cachePageTableLayout.Controls.Count > 0)
+            while (cachePageTableLayout.Controls.Count > 0)
             {
                 cachePageTableLayout.Controls[0].Dispose();
             }
@@ -396,42 +426,11 @@ namespace DesktopTestApp
         }
 
         #endregion
-        
 
 
         private void forceRefreshTrueBtn_CheckedChanged(object sender, EventArgs e)
         {
 
-        }
-
-        private async void acquireTokenInteractiveAuthority_Click(object sender, EventArgs e)
-        {
-            ClearResultPageInfo();
-            _publicClientHandler.LoginHint = loginHintTextBox.Text;
-            _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
-            _publicClientHandler.InteractiveAuthority = authority.Text;
-
-            if (userList.SelectedIndex == 0)
-            {
-                _publicClientHandler.CurrentUser = null;
-            }
-            else
-            {
-                _publicClientHandler.CurrentUser = userList.SelectedItem as User;
-            }
-
-
-            try
-            {
-                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveWithAuthority(scopes.Text.AsArray(), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
-
-                SetResultPageInfo(authenticationResult);
-                RefreshUserList();
-            }
-            catch (Exception exc)
-            {
-                CreateException(exc);
-            }
         }
     }
 }
