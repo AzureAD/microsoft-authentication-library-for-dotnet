@@ -129,8 +129,10 @@ namespace Microsoft.Identity.Client
             }
 
             // Mark this event as no longer in progress
-            EventBase dummy = null;
+            EventBase dummy = null; // The TryRemove(...) next line requires an out parameter, even though we don't actually use it
             EventsInProgress.TryRemove(eventKey, out dummy);
+            // We could use the following one-liner instead, but we believe it is less readable:
+            // ((IDictionary<Tuple<string, string>, EventBase>)EventsInProgress).Remove(eventKey);
         }
 
         internal void Flush(string requestId)
