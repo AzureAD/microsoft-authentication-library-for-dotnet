@@ -79,7 +79,6 @@ namespace DesktopTestApp
             this.BeginInvoke(new MethodInvoker(action));
         }
 
-
         public void RefreshUserList()
         {
             List<IUser> userListDataSource = _publicClientHandler.PublicClientApplication.Users.ToList();
@@ -91,6 +90,19 @@ namespace DesktopTestApp
             userList.DataSource = userListDataSource;
             userList.DisplayMember = "DisplayableId";
             userList.Refresh();
+        }
+
+        public void RefreshConfClientUserList()
+        {
+            List<IUser> userListDataSource = _confidentialClientHandler.ConfidentialClientApplication.Users.ToList();
+            if (userListDataSource.Count > 0)
+            {
+                userListDataSource.Insert(0, new User() {DisplayableId = string.Empty});
+            }
+
+            confClientUserList.DataSource = userListDataSource;
+            confClientUserList.DisplayMember = "DisplayableId";
+            confClientUserList.Refresh();
         }
 
         #region PublicClient UI Controls
@@ -156,7 +168,6 @@ namespace DesktopTestApp
                 _publicClientHandler.CurrentUser = userList.SelectedItem as User;
             }
 
-
             try
             {
                 AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractive(scopes.Text.AsArray(), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
@@ -213,13 +224,12 @@ namespace DesktopTestApp
                 _publicClientHandler.CurrentUser = userList.SelectedItem as User;
             }
 
-
             try
             {
                 AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveWithAuthority(scopes.Text.AsArray(), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
 
                 SetResultPageInfo(authenticationResult);
-                RefreshUserList();
+                RefreshConfClientUserList();
             }
             catch (Exception exc)
             {
@@ -254,6 +264,38 @@ namespace DesktopTestApp
         }
         #endregion
 
+        #region ConfidentialClient Acquire Token
+        private async void confClientAcquireTokenBtn_Click(object sender, EventArgs e)
+        {
+            ClearConfidentialClientResultPageInfo();
+            _confidentialClientHandler.ClientCredential = new ClientCredential(clientSecretTxtBox.Text);
+            _confidentialClientHandler.ConfClientOverriddenAuthority = confClientOverrideAuthority.Text;
+
+            if (confClientUserList.SelectedIndex == 0)
+            {
+                _confidentialClientHandler.CurrentUser = null;
+            }
+            else
+            {
+                _confidentialClientHandler.CurrentUser = confClientUserList.SelectedItem as User;
+            }
+
+            try
+            {
+                AuthenticationResult authenticationResult = await _confidentialClientHandler.AcquireTokenForClientAsync(
+                    confClientScopesTextBox.Text.AsArray(), forceRefreshTrueBtn.Checked,
+                    _confidentialClientHandler.ConfClientOverriddenAuthority, ApplicationId);
+
+                SetConfidentialClientResultPageInfo(authenticationResult);
+                RefreshConfClientUserList();
+            }
+            catch (Exception ex)
+            {
+                CreateException(ex);
+            }
+        }
+        #endregion
+
         private void CreateException(Exception ex)
         {
             string output = string.Empty;
@@ -273,7 +315,15 @@ namespace DesktopTestApp
                 output = ex.Message + Environment.NewLine + ex.StackTrace;
             }
 
-            SetErrorPageInfo(output);
+            if (tabControl1.SelectedTab == publicClientTabPage)
+            {
+                SetErrorPageInfo(output);
+            }
+            else
+            {
+                SetConfClientErrorPageInfo(output);
+            }
+            
         }
 
         private UIBehavior GetUIBehavior()
@@ -304,8 +354,8 @@ namespace DesktopTestApp
         {
             callResult.Text = @"Access Token: " + authenticationResult.AccessToken + Environment.NewLine +
                               @"Expires On: " + authenticationResult.ExpiresOn + Environment.NewLine +
-                              @"Tenant Id: " + authenticationResult.TenantId + Environment.NewLine + @"User: " +
-                              authenticationResult.User.DisplayableId + Environment.NewLine +
+                              @"Tenant Id: " + authenticationResult.TenantId + Environment.NewLine +
+                              @"User: " + authenticationResult.User.DisplayableId + Environment.NewLine +
                               @"Id Token: " + authenticationResult.IdToken;
         }
 
@@ -319,43 +369,23 @@ namespace DesktopTestApp
             callResult.Text = string.Empty;
         }
 
-        private void SetConfidentialClientPageInfo(AuthenticationResult authenticationResult)
+        private void SetConfidentialClientResultPageInfo(AuthenticationResult authenticationResult)
         {
-            confClientAccessTokenResult.Text = authenticationResult.AccessToken;
-            //TODO: result in cache
-            confClientExpiresOnResult.Text = authenticationResult.ExpiresOn.ToString();
-            //TODO: Expires on in cache
-            confClientTenantIdResult.Text = authenticationResult.TenantId;
-            //TODO: User result in cache
-            confClientUserResult.Text = authenticationResult.User.DisplayableId;
-            confClientIdTokenResult.Text = authenticationResult.IdToken;
-            confClientScopesResult.DataSource = authenticationResult.Scope;
+            callResultConfClient.Text = @"Access Token: " + authenticationResult.AccessToken + Environment.NewLine +
+                                        @"Expires On: " + authenticationResult.ExpiresOn + Environment.NewLine;
         }
 
-        private void SetConfidentialClientErrorPageInfo(string errorMessage)
+        public void SetConfClientErrorPageInfo(string errorMessage)
         {
-            callResultConfClient.BringToFront();
-
             callResultConfClient.Text = errorMessage;
         }
 
         private void ClearConfidentialClientResultPageInfo()
         {
-            confClientAccessTokenResult.Text = string.Empty;
-            confClientExpiresOnResult.Text = string.Empty;
-            confClientTenantIdResult.Text = string.Empty;
-            confClientUserResult.Text = string.Empty;
-            confClientIdTokenResult.Text = string.Empty;
-            confClientScopesResult.DataSource = null;
+            callResultConfClient.Text = string.Empty;
         }
 
         #endregion
-
-        private void clearLogsButton_Click(object sender, EventArgs e)
-        {
-            msalLogsTextBox.Text = string.Empty;
-            msalPIILogsTextBox.Text = string.Empty;
-        }
 
         #region Cache Tab Operations
         private void LoadCacheTabPage()
@@ -405,7 +435,6 @@ namespace DesktopTestApp
         }
         #endregion
 
-
         #region Settings Tab Operations
         private void TabControl1_Selecting(object sender, TabControlCancelEventArgs e)
         {
@@ -427,10 +456,15 @@ namespace DesktopTestApp
 
         #endregion
 
-
         private void forceRefreshTrueBtn_CheckedChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void clearLogsButton_Click(object sender, EventArgs e)
+        {
+            msalLogsTextBox.Text = string.Empty;
+            msalPIILogsTextBox.Text = string.Empty;
         }
     }
 }

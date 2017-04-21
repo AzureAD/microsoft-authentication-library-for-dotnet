@@ -40,7 +40,11 @@ namespace DesktopTestApp
         #region Properties
         public string ApplicationId { get; set; }
 
-        private ClientCredential ClientCredential { get; set; }
+        public ClientCredential ClientCredential { get; set; }
+
+        public TokenCache UserTokenCache { get; set; }
+
+        public TokenCache AppTokenCache { get; set; }
 
         public string[] ConfClientScopes { get; set; }
 
@@ -54,19 +58,19 @@ namespace DesktopTestApp
 
         #endregion
 
-        public async Task<AuthenticationResult> AcquireTokenForClientAsync(string[] scopes, bool forceRefresh, string overriddenAuthority, string applicationId, ClientCredential clientCredential,
-            TokenCache userTokenCache, TokenCache appTokenCache)
+        public async Task<AuthenticationResult> AcquireTokenForClientAsync(string[] scopes, bool forceRefresh, string overriddenAuthority, string applicationId)
         {
             ConfidentialClientApplication = CreateConfidentialClientApplication(
-                overriddenAuthority, applicationId, clientCredential, userTokenCache, appTokenCache);
+                overriddenAuthority, applicationId, ClientCredential, UserTokenCache, AppTokenCache);
+
             AuthenticationResult result;
-            if (CurrentUser != null)
+            if (forceRefresh)
             {
                 result = await ConfidentialClientApplication.AcquireTokenForClientAsync(scopes);
             }
             else
             {
-                result = await ConfidentialClientApplication.AcquireTokenForClientAsync(scopes, forceRefresh);
+                result = await ConfidentialClientApplication.AcquireTokenForClientAsync(scopes, false);
             }
             return (result);
         }
