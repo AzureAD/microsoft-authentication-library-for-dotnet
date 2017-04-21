@@ -30,35 +30,42 @@ namespace Microsoft.Identity.Client
 {
     internal class HttpEvent : EventBase
     {
+        public const string ConstHttpPath = EventNamePrefix + "http_path";
+        public const string ConstUserAgent = EventNamePrefix + "user_agent";
+        public const string ConstQueryParameters = EventNamePrefix + "query_parameters";
+        public const string ConstApiVersion = EventNamePrefix + "api_version";
+        public const string ConstResponseCode = EventNamePrefix + "response_code";
+        public const string ConstOauthErrorCode = EventNamePrefix + "oauth_error_code";
+
         public HttpEvent() : base(EventNamePrefix + "http_event") {}
 
         public string HttpPath
         {
-            set => this["http_path"] = value;
+            set => this[ConstHttpPath] = value;  // http path is case-sensitive
         }
 
         public string UserAgent
         {
-            set => this["user_agent"] = value;
+            set => this[ConstUserAgent] = value;
         }
 
         public string QueryParams
         {
-            set => this["query_parameters"] = value;
+            set => this[ConstQueryParameters] = value;  // query parameters are case-sensitive
         }
 
         public string ApiVersion {
-            set => this["api_version"] = value;
+            set => this[ConstApiVersion] = value?.ToLower();
         }
 
         public int HttpResponseStatus
         {
-            set => this["response_code"] = value.ToString();
+            set => this[ConstResponseCode] = value.ToString();
         }
 
         public string OauthErrorCode
         {
-            set => this["oauth_error_code"] = value;
+            set => this[ConstOauthErrorCode] = value;
         }
     }
 }
