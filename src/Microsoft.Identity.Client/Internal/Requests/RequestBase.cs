@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal readonly AuthenticationRequestParameters AuthenticationRequestParameters;
         internal readonly TokenCache TokenCache;
         protected TokenResponse Response;
-        internal AccessTokenCacheItem AccessTokenItem;
+        protected AccessTokenCacheItem AccessTokenItem;
 
         protected bool SupportADFS { get; set; }
 
