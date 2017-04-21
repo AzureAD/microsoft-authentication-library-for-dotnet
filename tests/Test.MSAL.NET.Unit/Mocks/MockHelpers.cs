@@ -158,8 +158,13 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage()
         {
+            return CreateSuccessfulClientCredentialTokenResponseMessage("header.payload.signature");
+        }
+
+        public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage(string token)
+        {
             return CreateSuccessResponseMessage(
-                "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"header.payload.signature\"}");
+                "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"" + token + "\"}");
         }
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string[] scope)

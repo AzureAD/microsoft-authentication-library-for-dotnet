@@ -497,5 +497,84 @@ namespace Test.MSAL.NET.Unit
 
             await app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
         }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public void ForceRefreshParameterFalseTestAsync()
+        {
+            var cache = new TokenCache();
+            TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
+
+            var authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false).CanonicalAuthority;
+            var app = new ConfidentialClientApplication(TestConstants.ClientId, authority,
+                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
+                null, cache)
+            {
+                ValidateAuthority = false
+            };
+
+            var accessTokens = cache.GetAllAccessTokensForClient(new RequestContext(new Guid()));
+            var accessTokenInCache = accessTokens.Where(
+                    item =>
+                        item.ScopeSet.ScopeContains(TestConstants.Scope))
+                .ToList()
+                .FirstOrDefault();
+
+            //add mock to fail in case of network call
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExceptionToThrow = new AssertFailedException("Unexpected Network Call")
+            });
+
+            var task = app.AcquireTokenForClientAsync(TestConstants.Scope, false);
+            var result = task.Result;
+
+            Assert.AreEqual(accessTokenInCache?.AccessToken, result.AccessToken);
+        }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public async Task ForceRefreshParameterTrueTestAsync()
+        {
+            var cache = new TokenCache();
+            TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
+
+            var authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false).CanonicalAuthority;
+            var app = new ConfidentialClientApplication(TestConstants.ClientId, authority,
+                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
+                null, cache)
+            {
+                ValidateAuthority = false
+            };
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(app.Authority)
+            });
+
+            //add mock response for successful token retrival
+            const string tokenRetrievedFromNetCall = "token retrieved from network call";
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage =
+                    MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(tokenRetrievedFromNetCall)
+            });
+
+            var result = await app.AcquireTokenForClientAsync(TestConstants.Scope, true);
+            Assert.AreEqual(tokenRetrievedFromNetCall, result.AccessToken);
+
+            // make sure token in Cache was updated
+            var accessTokens = cache.GetAllAccessTokensForClient(new RequestContext(new Guid()));
+            var accessTokenInCache = accessTokens.Where(
+                    item =>
+                        item.ScopeSet.ScopeContains(TestConstants.Scope))
+                .ToList()
+                .FirstOrDefault();
+
+            Assert.AreEqual(tokenRetrievedFromNetCall, accessTokenInCache?.AccessToken);
+        }
     }
 }
