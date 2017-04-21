@@ -68,7 +68,6 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
             CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Uri.Authority,
                 pathSegments[0]);
-
             ValidateAuthority = validateAuthority;
         }
 

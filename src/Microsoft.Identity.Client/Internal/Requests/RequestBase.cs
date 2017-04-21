@@ -114,7 +114,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 //authority endpoints resolution and validation
                 await PreTokenRequest().ConfigureAwait(false);
                 await SendTokenRequestAsync().ConfigureAwait(false);
-
                 result = PostTokenRequest();
                 await PostRunAsync(result).ConfigureAwait(false);
                 return result;
@@ -152,6 +151,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (StoreToCache)
             {
+                AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
                 return TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
             }
 
