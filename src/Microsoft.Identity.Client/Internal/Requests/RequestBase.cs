@@ -152,6 +152,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (StoreToCache)
             {
+                AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
                 return TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
             }
 
