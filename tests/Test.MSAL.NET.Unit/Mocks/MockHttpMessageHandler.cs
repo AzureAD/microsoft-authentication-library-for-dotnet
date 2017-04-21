@@ -55,6 +55,12 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+
+            if (ExceptionToThrow != null)
+            {
+                throw ExceptionToThrow;
+            }
+
             Assert.AreEqual(Method, request.Method);
 
             Uri uri = request.RequestUri;
@@ -101,11 +107,6 @@ namespace Test.MSAL.NET.Unit.Mocks
                     Assert.IsTrue(requestPostDataPairs.ContainsKey(key));
                     Assert.AreEqual(PostData[key], requestPostDataPairs[key]);
                 }
-            }
-
-            if (ExceptionToThrow != null)
-            {
-                throw ExceptionToThrow;
             }
 
             return new TaskFactory().StartNew(() => ResponseMessage, cancellationToken);

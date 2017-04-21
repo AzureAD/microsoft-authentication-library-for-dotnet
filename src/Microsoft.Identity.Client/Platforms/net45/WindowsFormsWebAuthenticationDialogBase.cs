@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Client
             {
                 string urlDecode = MsalHelpers.UrlDecode(e.Url.ToString());
                 string message = string.Format(CultureInfo.InvariantCulture, "Navigating to '{0}'.", urlDecode);
-                RequestContext.Logger.Verbose(message);
+                RequestContext.Logger.VerbosePii(message);
             }
         }
 
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Client
 
             string urlDecode = MsalHelpers.UrlDecode(e.Url.ToString());
             string message = string.Format(CultureInfo.InvariantCulture, "Navigated to '{0}'.", urlDecode);
-            RequestContext.Logger.Verbose(message);
+            RequestContext.Logger.VerbosePii(message);
         }
 
         /// <summary>
@@ -210,6 +210,7 @@ namespace Microsoft.Identity.Client
             if (url.Authority.Equals(_desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) &&
                 url.AbsolutePath.Equals(_desiredCallbackUri.AbsolutePath))
             {
+                RequestContext.Logger.Info("Redirect Uri was reached. Stopping webview navigation...");
                 Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
                 readyToClose = true;
             }
@@ -217,6 +218,8 @@ namespace Microsoft.Identity.Client
             if (!readyToClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) &&
                 !url.AbsoluteUri.Equals("about:blank", StringComparison.OrdinalIgnoreCase) && !url.Scheme.Equals("javascript", StringComparison.OrdinalIgnoreCase))
             {
+                RequestContext.Logger.Error(string.Format(CultureInfo.InvariantCulture,
+                    "Redirection to non-HTTPS scheme ({0}) found! Webview will fail...", url.Scheme));
                 Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
                 {
                     Error = MsalClientException.NonHttpsRedirectNotSupported,

@@ -64,11 +64,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public UserAssertion UserAssertion { get; set; }
 
+        public bool IsClientCredentialRequest { get; set; } = false;
+
 #if DESKTOP || NETSTANDARD1_3
         public Client.ClientCredential ClientCredential { get; set; }
-
-        public bool HasCredential => (ClientCredential != null);
-
 #endif
 
         public IDictionary<string, string> ToParameters()
@@ -92,10 +91,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                                                         .ExpirationMarginInMinutes)));
                         if (assertionNearExpiry)
                         {
+                            RequestContext.Logger.Info("Client Assertion does not exist or near expiry.");
                             JsonWebToken jwtToken = new JsonWebToken(ClientId,
                                 Authority.SelfSignedJwtAudience);
                             ClientCredential.Assertion = jwtToken.Sign(ClientCredential.Certificate);
                             ClientCredential.ValidTo = jwtToken.Payload.ValidTo;
+                        } else 
+                        {
+                            RequestContext.Logger.Info("Reusing the unexpired Client Assertion...");
                         }
                     }
 
@@ -122,10 +125,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
             builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
 #if DESKTOP || NETSTANDARD1_3
-            builder.AppendLine("Confidential Client? - " + HasCredential);
-            if(HasCredential)
+            builder.AppendLine("Confidential Client? - " + (ClientCredential != null));
+            builder.AppendLine("Client Credential Request? - " + IsClientCredentialRequest);
+            if(IsClientCredentialRequest)
             {
-                builder.AppendLine("Client Certificate Provided? - " + (ClientCredential.Certificate!=null));
+                builder.AppendLine("Client Certificate Provided? - " + (ClientCredential.Certificate != null));
             }
 #endif
             RequestContext.Logger.Info(builder.ToString());
