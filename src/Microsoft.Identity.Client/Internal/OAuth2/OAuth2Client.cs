@@ -152,10 +152,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
         {
             UriBuilder endpointUri = new UriBuilder(endPoint);
             string extraQp = _queryParameters.ToQueryParameter();
-            if (!string.IsNullOrEmpty(extraQp))
-            {
-                endpointUri.Query += extraQp;
-            }
+            endpointUri.AppendQueryParameters(extraQp);
             
             return new Uri(MsalHelpers.CheckForExtraQueryParameter(endpointUri.Uri.AbsoluteUri));
         }

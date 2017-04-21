@@ -186,9 +186,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 qp += "&" + AuthenticationRequestParameters.ExtraQueryParameters;
             }
 
-            UriBuilder builder = new UriBuilder(new Uri(AuthenticationRequestParameters.Authority.AuthorizationEndpoint)) {Query = qp};
+            UriBuilder builder =
+                new UriBuilder(new Uri(AuthenticationRequestParameters.Authority.AuthorizationEndpoint));
+            builder.AppendQueryParameters(qp);
             return new Uri(MsalHelpers.CheckForExtraQueryParameter(builder.ToString()));
-
         }
 
         private Dictionary<string, string> CreateAuthorizationRequestParameters()

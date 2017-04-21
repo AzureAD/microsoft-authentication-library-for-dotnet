@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -44,13 +45,9 @@ namespace Test.MSAL.NET.Unit
 {
     [TestClass]
     [DeploymentItem(@"Resources\valid_cert.pfx")]
+    [DeploymentItem("Resources\\OpenidConfiguration-B2C.json")]
     public class ConfidentialClientApplicationTests
     {
-        private const string AssertionType = "urn:ietf:params:oauth:grant-type:jwt-bearer";
-        //The following string is hash code for a mocked Access Token
-        //[SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine")]
-        private const string HashAccessToken = "nC2j5wL7iN83cU5DJsDXnt11TdEObirkKTVKari51Ps=";
-
         [TestInitialize]
         public void TestInitialize()
         {
@@ -354,6 +351,46 @@ namespace Test.MSAL.NET.Unit
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public void GetAuthorizationRequestUrlB2CTest()
+        {
+            ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
+                TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
+                new TokenCache(), new TokenCache())
+            {
+                ValidateAuthority = false
+            };
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(@"OpenidConfiguration-B2C.json"))
+            });
+
+            Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(),
+                TestConstants.DisplayableId, null);
+            Uri uri = task.Result;
+            Assert.IsNotNull(uri);
+            Dictionary<string, string> qp = MsalHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+            Assert.IsNotNull(qp);
+            Assert.AreEqual(14, qp.Count);
+            Assert.AreEqual("my-policy", qp["p"]);
+            Assert.IsTrue(qp.ContainsKey("client-request-id"));
+            Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2", qp["scope"]);
+            Assert.AreEqual(TestConstants.ClientId, qp["client_id"]);
+            Assert.AreEqual("code", qp["response_type"]);
+            Assert.AreEqual(TestConstants.RedirectUri, qp["redirect_uri"]);
+            Assert.AreEqual(TestConstants.DisplayableId, qp["login_hint"]);
+            Assert.AreEqual(UIBehavior.SelectAccount.PromptValue, qp["prompt"]);
+            Assert.AreEqual("MSAL.Desktop", qp["x-client-sku"]);
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
 
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
