@@ -53,24 +53,31 @@ namespace XForms
 
         public App()
         {
-            MainPage = new XForms.MainPage();
+            MainPage = new NavigationPage(new XForms.MainPage());
+
             InitPublicClient();
 
             Logger.LogCallback = delegate(Logger.LogLevel level, string message, bool containsPii)
             {
-                Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message); });
+                Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, containsPii); });
             };
-
             Logger.Level = Logger.LogLevel.Verbose;
+            Logger.PiiLoggingEnabled = true;
         }
 
         public static void InitPublicClient()
         {
             MsalPublicClient = new PublicClientApplication(ClientId, Authority);
-            Device.OnPlatform(Android: () => { MsalPublicClient.RedirectUri = RedirectUriOnAndroid; });
-
-            Device.OnPlatform(iOS: () => { MsalPublicClient.RedirectUri = RedirectUriOnIos; });
-
+            switch (Device.RuntimePlatform)
+            {
+                case "iOS":
+                    MsalPublicClient.RedirectUri = RedirectUriOnIos;
+                    break;
+                case "Android":
+                    MsalPublicClient.RedirectUri = RedirectUriOnAndroid;
+                    break;
+            }
+            
             MsalPublicClient.ValidateAuthority = ValidateAuthority;
         }
 

@@ -21,6 +21,16 @@
            </Frame>
         </ScrollView>
 
+        <Label Text="PiiLog" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" Margin="5" />
+
+        <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
+            <Frame OutlineColor="Black" Padding="10">
+                <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
+                    <Editor  x:Name="logPii" Text="" VerticalOptions="FillAndExpand"/>
+                </StackLayout>
+            </Frame>
+        </ScrollView>
+
         <Button  Text="Clear"  Clicked="OnClearClicked" TextColor="Blue" Font="Bold,15"/>
 
     </StackLayout>

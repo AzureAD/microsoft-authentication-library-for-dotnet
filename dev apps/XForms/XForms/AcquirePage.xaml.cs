@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,15 +39,57 @@ namespace XForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class AcquirePage : ContentPage
     {
+        private const string UserNotSelected = "not selected";
+
         public AcquirePage()
         {
             InitializeComponent();
+            InitUIBehaviorPicker();
         }
 
         protected override void OnAppearing()
         {
-            authority.Text = App.Authority;
-            validateAuthority.IsToggled = App.ValidateAuthority;
+            RefreshUsers();
+        }
+
+        private void RefreshUsers()
+        {
+            var userIds = App.MsalPublicClient.Users.Select(x => x.DisplayableId)
+                .ToList();
+
+            userIds.Add(UserNotSelected);
+            usersPicker.ItemsSource = userIds;
+            usersPicker.SelectedIndex = 0;
+        }
+
+        private void InitUIBehaviorPicker()
+        {
+            var options = new List<string>
+            {
+                UIBehavior.SelectAccount.PromptValue,
+                UIBehavior.ForceLogin.PromptValue,
+                UIBehavior.Consent.PromptValue
+            };
+
+            UIBehaviorPicker.ItemsSource = options;
+            UIBehaviorPicker.SelectedItem = UIBehavior.SelectAccount.PromptValue;
+        }
+
+        private UIBehavior GetUIBehavior()
+        {
+            var selectedUIBehavior = UIBehaviorPicker.SelectedItem as string;
+
+            if (UIBehavior.ForceLogin.PromptValue.Equals(selectedUIBehavior))
+                return UIBehavior.ForceLogin;
+            if (UIBehavior.Consent.PromptValue.Equals(selectedUIBehavior))
+                return UIBehavior.Consent;
+
+            return UIBehavior.SelectAccount;
+        }
+
+        private string GetExtraQueryParams()
+        {
+            return ExtraQueryParametersEntry.Text.Trim();
         }
 
         private string ToString(IUser user)
@@ -77,7 +120,20 @@ namespace XForms
 
         private IUser getUserByDisplayableId(string str)
         {
-            return App.MsalPublicClient.Users.FirstOrDefault(user => user.DisplayableId.Equals(str));
+            return string.IsNullOrWhiteSpace(str) ? null : App.MsalPublicClient.Users.FirstOrDefault(user => user.DisplayableId.Equals(str));
+        }
+
+        private string[] GetScopes()
+        {
+            return ScopesEntry.Text.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        private string GetSelectedUserId()
+        {
+            if (usersPicker.SelectedIndex == -1) return null;
+
+            var selectedUserId = usersPicker.SelectedItem as string;
+            return UserNotSelected.Equals(selectedUserId) ? null : selectedUserId;
         }
 
         private async void OnAcquireSilentlyClicked(object sender, EventArgs e)
@@ -87,23 +143,24 @@ namespace XForms
 
             try
             {
-                var user = getUserByDisplayableId(UserEntry.Text.Trim());
-                if (user == null)
+                var selectedUser = GetSelectedUserId();
+                if (selectedUser == null)
                 {
-                    acquireResponseLabel.Text = "User - \"" + UserEntry.Text.Trim() + "\" was not found in the cache";
+                    acquireResponseLabel.Text = "User was not selected";
                     return;
                 }
-                var res = await App.MsalPublicClient.AcquireTokenSilentAsync(App.Scopes, user);
+                var res = await App.MsalPublicClient.AcquireTokenSilentAsync(GetScopes(),
+                    getUserByDisplayableId(selectedUser), App.Authority, ForceRefreshSwitch.IsToggled);
 
                 acquireResponseLabel.Text = ToString(res);
             }
             catch (MsalException exception)
             {
-                acquireResponseLabel.Text = "MsalException - " + exception;
+                acquireResponseLabel.Text = "MsalException - " + exception.Message;
             }
             catch (Exception exception)
             {
-                acquireResponseLabel.Text = "Exception - " + exception;
+                acquireResponseLabel.Text = "Exception - " + exception.Message;
             }
         }
 
@@ -112,35 +169,37 @@ namespace XForms
             try
             {
                 AuthenticationResult res;
-                if (LoginHint.IsToggled)
+                if (LoginHintSwitch.IsToggled)
                 {
-                    res = await App.MsalPublicClient.AcquireTokenAsync(App.Scopes, UserEntry.Text.Trim(), App.UIParent);
+                    var loginHint = LoginHintEntry.Text.Trim();
+                    res =
+                        await App.MsalPublicClient.AcquireTokenAsync(GetScopes(), loginHint, GetUIBehavior(),
+                            GetExtraQueryParams(),
+                            App.UIParent);
                 }
                 else
                 {
-                    res = await App.MsalPublicClient.AcquireTokenAsync(App.Scopes, App.UIParent);
+                    var user = getUserByDisplayableId(GetSelectedUserId());
+                    res = await App.MsalPublicClient.AcquireTokenAsync(GetScopes(), user, GetUIBehavior(),
+                        GetExtraQueryParams(), App.UIParent);
                 }
+
                 acquireResponseLabel.Text = ToString(res);
+                RefreshUsers();
             }
             catch (MsalException exception)
             {
-                acquireResponseLabel.Text = "MsalException - " + exception;
+                acquireResponseLabel.Text = "MsalException - " + exception.Message;
             }
             catch (Exception exception)
             {
-                acquireResponseLabel.Text = "Exception - " + exception;
+                acquireResponseLabel.Text = "Exception - " + exception.Message;
             }
         }
 
         private void OnClearClicked(object sender, EventArgs e)
         {
             acquireResponseLabel.Text = "";
-        }
-
-        private void OnValidateAuthorityToggled(object sender, ToggledEventArgs args)
-        {
-            App.MsalPublicClient.ValidateAuthority = args.Value;
-            App.ValidateAuthority = args.Value;
         }
     }
 }
