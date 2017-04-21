@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             Uri endpointUri = CreateFullEndpointUri(endPoint);
             var httpEvent = new HttpEvent()
             {
-                HttpPath = endpointUri.AbsolutePath,
+                HttpPath = EventBase.ScrubTenant(endpointUri),
                 QueryParams = String.Join("&", MsalHelpers.ParseKeyValueList(endpointUri.Query, '&', false, true, requestContext).Keys)
             };
             Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, httpEvent);

@@ -33,6 +33,8 @@ namespace Microsoft.Identity.Client.Internal.Instance
 {
     internal class B2CAuthority : AadAuthority
     {
+        public const string Prefix = "tfp"; // The http path of B2C authority looks like "/tfp/<your_tenant_name>/..."
+
         public B2CAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
         {
             Uri authorityUri = new Uri(authority);

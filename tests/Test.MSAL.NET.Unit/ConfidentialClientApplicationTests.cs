@@ -313,7 +313,9 @@ namespace Test.MSAL.NET.Unit
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
 
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent => // Expect finding such an event
-                anEvent[EventBase.ConstEventName].EndsWith("http_event") && anEvent[HttpEvent.ConstResponseCode] == "200"));
+                anEvent[EventBase.ConstEventName].EndsWith("http_event") && anEvent[HttpEvent.ConstResponseCode] == "200"
+                && anEvent[HttpEvent.ConstHttpPath].Contains(EventBase.TenantPlaceHolder) // The tenant info is expected to be replaced by a holder
+                ));
         }
 
         [TestMethod]

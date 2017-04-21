@@ -164,5 +164,24 @@ namespace Test.MSAL.NET.Unit
             }
             Assert.IsTrue(myReceiver.EventsReceived.Count > 0);
         }
+
+        [TestMethod]
+        [TestCategory("TelemetryInternalAPI")]
+        public void TelemetryScrubTenantFromUri()
+        {
+            Assert.AreEqual("https://login.microsoftonline.com/<tenant>/oauth2/v2.0/token",
+                EventBase.ScrubTenant(new Uri("https://login.microsoftonline.com/common/oauth2/v2.0/token")));
+
+            Assert.AreEqual("https://login.microsoftonline.com/tfp/<tenant>/oauth2/v2.0/token",
+                EventBase.ScrubTenant(new Uri("https://login.microsoftonline.com/tfp/contoso/oauth2/v2.0/token")));
+
+            Assert.AreEqual("https://login.microsoftonline.com/<tenant>",
+                EventBase.ScrubTenant(new Uri("https://login.microsoftonline.com/common")));
+
+            Assert.AreEqual("https://login.microsoftonline.com/tfp/<tenant>",
+                EventBase.ScrubTenant(new Uri("https://login.microsoftonline.com/tfp/contoso")));
+
+            Assert.AreEqual(null, EventBase.ScrubTenant(new Uri("https://login.contoso.com/adfs")));
+        }
     }
 }

@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Instance;
 
 namespace Microsoft.Identity.Client
 {
@@ -38,6 +39,8 @@ namespace Microsoft.Identity.Client
         protected const string StartTime = EventNamePrefix + "start_time";
         protected const string ElapsedTime = EventNamePrefix + "elapsed_time";
         private readonly long _startTimestamp;
+
+        public const string TenantPlaceHolder = "<tenant>"; // It is used to replace the real tenant in telemetry info
 
         public EventBase(string eventName) : this(eventName, new Dictionary<string, string>()) {}
 
@@ -57,6 +60,32 @@ namespace Microsoft.Identity.Client
         public void Stop()
         {
             this[ElapsedTime] = (CurrentUnixTimeMilliseconds() - _startTimestamp).ToString();  // It is a duration
+        }
+
+        public static string ScrubTenant(Uri uri) // Note: There is also a Unit Test case for this helper
+        {
+            if (!uri.IsAbsoluteUri)
+            {
+                throw new ArgumentException("Requires an absolute uri");
+            }
+            // only collect telemetry for well-known hosts, // omit B2C ???
+            if (!AadAuthority.IsInTrustedHostList(uri.Host)) // || uri.AbsolutePath.StartsWith("/" + B2CAuthority.Prefix))
+            {
+                return null;
+            }
+
+            var pieces = uri.AbsolutePath.Split('/'); // It looks like {"", "common", "oauth2", "v2.0", "token"}
+            if (pieces.Length >= 2)
+            {
+                int tenantPosition = pieces[1] == B2CAuthority.Prefix ? 2 : 1;
+                if (tenantPosition < pieces.Length)
+                {
+                    // Replace it rather than remove it. Otherwise the end result would misleadingly look like a complete URL while it is actually not.
+                    pieces[tenantPosition] = TenantPlaceHolder;
+                }
+            }
+            string scrubbedPath = String.Join("/", pieces);
+            return uri.Scheme + "://" + uri.Authority + scrubbedPath;
         }
     }
 }
