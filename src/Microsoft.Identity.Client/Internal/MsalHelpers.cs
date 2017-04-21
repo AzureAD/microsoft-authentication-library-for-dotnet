@@ -351,6 +351,23 @@ namespace Microsoft.Identity.Client.Internal
             return url;
         }
 
+        public static void AppendQueryParameters(this UriBuilder builder, string queryParams)
+        {
+            if (builder == null || string.IsNullOrEmpty(queryParams))
+            {
+                return;
+            }
+
+            if (builder.Query.Length > 1)
+            {
+                builder.Query = builder.Query.Substring(1) + "&" + queryParams;
+            }
+            else
+            {
+                builder.Query = queryParams;
+            }
+        }
+
         private static void AddKeyValueString(StringBuilder messageBuilder, string key, char[] value)
         {
             string delimiter = (messageBuilder.Length == 0) ? string.Empty : "&";

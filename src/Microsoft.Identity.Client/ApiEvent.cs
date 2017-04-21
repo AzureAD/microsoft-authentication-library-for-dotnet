@@ -61,12 +61,12 @@ namespace Microsoft.Identity.Client
 
         public string TenantId
         {
-            set => this["tenant_id"] = PlatformPlugin.CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value);
+            set => this["tenant_id"] = CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value);
         }
 
         public string UserId
         {
-            set => this["user_id"] = PlatformPlugin.CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value);
+            set => this["user_id"] = CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value);
         }
 
         public bool WasSuccessful

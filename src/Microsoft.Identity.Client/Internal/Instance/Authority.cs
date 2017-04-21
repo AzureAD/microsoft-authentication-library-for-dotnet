@@ -62,18 +62,11 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         protected Authority(string authority, bool validateAuthority)
         {
-            Uri authorityUri = new Uri(authority);
+            UriBuilder authorityUri = new UriBuilder(authority);
             Host = authorityUri.Host;
+            string[] pathSegments = authorityUri.Uri.AbsolutePath.Substring(1).Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
-            if (Host.Equals("login.windows.net", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new MsalClientException(MsalClientException.DeprecatedAuthorityError,
-                    MsalErrorMessage.DeprecatedAuthorityError);
-            }
-
-            string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-
-            CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Authority,
+            CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Uri.Authority,
                 pathSegments[0]);
 
             ValidateAuthority = validateAuthority;
@@ -151,18 +144,18 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         public async Task ResolveEndpointsAsync(string userPrincipalName, RequestContext requestContext)
         {
+            requestContext.Logger.Info("Resolving authority endpoints... Already resolved? - " + _resolved);
             if (!_resolved)
             {
                 var authorityUri = new Uri(CanonicalAuthority);
                 string host = authorityUri.Authority;
                 string path = authorityUri.AbsolutePath.Substring(1);
                 string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-                IsTenantless =
-                    TenantlessTenantNames.Any(
-                        name => string.Compare(tenant, name, StringComparison.OrdinalIgnoreCase) == 0);
-
+                IsTenantless = TenantlessTenantNames.Contains(tenant.ToLowerInvariant());
+                requestContext.Logger.Info("Is Authority tenantless? - " + IsTenantless);
                 if (ExistsInValidatedAuthorityCache(userPrincipalName))
                 {
+                    requestContext.Logger.Info("Authority found in validated authority cache");
                     Authority authority = ValidatedAuthorities[CanonicalAuthority];
                     AuthorityType = authority.AuthorityType;
                     CanonicalAuthority = authority.CanonicalAuthority;
@@ -188,22 +181,19 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
                 {
                     throw new MsalClientException(MsalClientException.TenantDiscoveryFailedError,
-                        string.Format(CultureInfo.InvariantCulture, "Authorize endpoint was not found at {0}",
-                            openIdConfigurationEndpoint));
+                        "Authorize endpoint was not found in the openid configuration");
                 }
 
                 if (string.IsNullOrEmpty(edr.TokenEndpoint))
                 {
                     throw new MsalClientException(MsalClientException.TenantDiscoveryFailedError,
-                        string.Format(CultureInfo.InvariantCulture, "Authorize endpoint was not found at {0}",
-                            openIdConfigurationEndpoint));
+                        "Token endpoint was not found in the openid configuration");
                 }
 
                 if (string.IsNullOrEmpty(edr.Issuer))
                 {
                     throw new MsalClientException(MsalClientException.TenantDiscoveryFailedError,
-                        string.Format(CultureInfo.InvariantCulture, "Issuer was not found at {0}",
-                            openIdConfigurationEndpoint));
+                        "Issuer was not found in the openid configuration");
                 }
 
                 AuthorizationEndpoint = edr.AuthorizationEndpoint.Replace("{tenant}", tenant);

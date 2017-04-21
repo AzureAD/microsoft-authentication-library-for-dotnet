@@ -413,7 +413,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 ClientId = TestConstants.ClientId,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 Scope = TestConstants.Scope,
-                UserAssertion = new UserAssertion(new CryptographyHelper().CreateBase64UrlEncodedSha256Hash(atKey.ToString()))
+                UserAssertion = new UserAssertion(CryptographyHelper.CreateBase64UrlEncodedSha256Hash(atKey.ToString()))
             };
 
             AccessTokenCacheItem item = cache.FindAccessToken(param);
@@ -446,7 +446,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             // set it as the value of the access token.
             AccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
             atItem.AccessToken = atKey.ToString();
-            atItem.UserAssertionHash = new CryptographyHelper().CreateBase64UrlEncodedSha256Hash(atKey.ToString());
+            atItem.UserAssertionHash = CryptographyHelper.CreateBase64UrlEncodedSha256Hash(atKey.ToString());
 
             cache.TokenCacheAccessor.AccessTokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
             var param = new AuthenticationRequestParameters()
@@ -487,7 +487,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             // set it as the value of the access token.
             AccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
             atItem.AccessToken = atKey.ToString();
-            atItem.UserAssertionHash = PlatformPlugin.CryptographyHelper.CreateBase64UrlEncodedSha256Hash(atKey.ToString());
+            atItem.UserAssertionHash = CryptographyHelper.CreateBase64UrlEncodedSha256Hash(atKey.ToString());
 
             cache.TokenCacheAccessor.AccessTokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
             var param = new AuthenticationRequestParameters()
@@ -524,6 +524,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             response.TokenType = "Bearer";
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
+                RequestContext = new RequestContext(Guid.Empty),
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 ClientId = TestConstants.ClientId
             };
@@ -553,8 +554,10 @@ namespace Test.MSAL.NET.Unit.CacheTests
             response.Scope = TestConstants.Scope.AsSingleString();
             response.TokenType = "Bearer";
 
+            RequestContext requestContext = new RequestContext(Guid.NewGuid());
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
+                RequestContext = requestContext,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 ClientId = TestConstants.ClientId,
                 TenantUpdatedCanonicalAuthority = TestConstants.AuthorityHomeTenant
@@ -579,8 +582,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
 
-            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokensForClient().First().RefreshToken);
-            Assert.AreEqual("access-token-2", cache.GetAllAccessTokensForClient().First().AccessToken);
+            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokensForClient(requestContext).First().RefreshToken);
+            Assert.AreEqual("access-token-2", cache.GetAllAccessTokensForClient(requestContext).First().AccessToken);
         }
 
         [TestMethod]
@@ -600,8 +603,11 @@ namespace Test.MSAL.NET.Unit.CacheTests
             response.RefreshToken = "refresh-token";
             response.Scope = TestConstants.Scope.AsSingleString();
             response.TokenType = "Bearer";
+
+            RequestContext requestContext = new RequestContext(Guid.NewGuid());
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
+                RequestContext = requestContext,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 ClientId = TestConstants.ClientId,
                 TenantUpdatedCanonicalAuthority = TestConstants.AuthorityHomeTenant
@@ -622,8 +628,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
-            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokensForClient().First().RefreshToken);
-            Assert.AreEqual("access-token-2", cache.GetAllAccessTokensForClient().First().AccessToken);
+            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokensForClient(requestContext).First().RefreshToken);
+            Assert.AreEqual("access-token-2", cache.GetAllAccessTokensForClient(requestContext).First().AccessToken);
         }
 
         [TestMethod]
@@ -647,8 +653,10 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
+            RequestContext requestContext = new RequestContext(Guid.NewGuid());
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
+                RequestContext = requestContext,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 ClientId = TestConstants.ClientId,
                 TenantUpdatedCanonicalAuthority = TestConstants.AuthorityHomeTenant
@@ -673,8 +681,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
 
-            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokensForClient().First().RefreshToken);
-            Assert.AreEqual("access-token-2", cache.GetAllAccessTokensForClient().First().AccessToken);
+            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokensForClient(requestContext).First().RefreshToken);
+            Assert.AreEqual("access-token-2", cache.GetAllAccessTokensForClient(requestContext).First().AccessToken);
         }
 
         [TestMethod]
@@ -694,9 +702,11 @@ namespace Test.MSAL.NET.Unit.CacheTests
             response.RefreshToken = "refresh-token";
             response.Scope = TestConstants.Scope.AsSingleString();
             response.TokenType = "Bearer";
-
+            
+            RequestContext requestContext = new RequestContext(Guid.NewGuid());
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
+                RequestContext = requestContext,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 ClientId = TestConstants.ClientId,
                 TenantUpdatedCanonicalAuthority = TestConstants.AuthorityHomeTenant
@@ -713,8 +723,11 @@ namespace Test.MSAL.NET.Unit.CacheTests
             response.Scope = TestConstants.Scope.AsSingleString() + " another-scope";
             response.TokenType = "Bearer";
 
+
+            requestContext = new RequestContext(Guid.NewGuid());
             requestParams = new AuthenticationRequestParameters()
             {
+                RequestContext = requestContext,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityGuestTenant, false),
                 ClientId = TestConstants.ClientId,
                 TenantUpdatedCanonicalAuthority = TestConstants.AuthorityGuestTenant
@@ -727,7 +740,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(2, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
 
-            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokensForClient().First().RefreshToken);
+            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokensForClient(requestContext).First().RefreshToken);
         }
 
         private void AfterAccessChangedNotification(TokenCacheNotificationArgs args)
@@ -758,9 +771,11 @@ namespace Test.MSAL.NET.Unit.CacheTests
             response.RefreshToken = "refresh-token";
             response.Scope = TestConstants.Scope.AsSingleString();
             response.TokenType = "Bearer";
-
+            
+            RequestContext requestContext = new RequestContext(Guid.NewGuid());
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
+                RequestContext = requestContext,
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
                 ClientId = TestConstants.ClientId,
                 TenantUpdatedCanonicalAuthority = TestConstants.AuthorityHomeTenant
@@ -788,7 +803,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
 
-            AccessTokenCacheItem atItem = cache.GetAllAccessTokensForClient().First();
+            AccessTokenCacheItem atItem = cache.GetAllAccessTokensForClient(requestContext).First();
             Assert.AreEqual(response.AccessToken, atItem.AccessToken);
             Assert.AreEqual(TestConstants.AuthorityHomeTenant, atItem.Authority);
             Assert.AreEqual(TestConstants.ClientId, atItem.ClientId);
@@ -796,7 +811,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             Assert.AreEqual(response.Scope, atItem.ScopeSet.AsSingleString());
             Assert.AreEqual(response.IdToken, atItem.RawIdToken);
 
-            RefreshTokenCacheItem rtItem = cache.GetAllRefreshTokensForClient().First();
+            RefreshTokenCacheItem rtItem = cache.GetAllRefreshTokensForClient(requestContext).First();
             Assert.AreEqual(response.RefreshToken, rtItem.RefreshToken);
             Assert.AreEqual(TestConstants.ClientId, rtItem.ClientId);
             Assert.AreEqual(TestConstants.UserIdentifier, rtItem.GetUserIdentifier());

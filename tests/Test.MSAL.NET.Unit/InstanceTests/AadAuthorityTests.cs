@@ -95,9 +95,9 @@ namespace Test.MSAL.NET.Unit.InstanceTests
                 .GetAwaiter()
                 .GetResult();
 
-            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/authorize",
+            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
                 instance.AuthorizationEndpoint);
-            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/token",
+            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
                 instance.TokenEndpoint);
             Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/",
                 instance.SelfSignedJwtAudience);
@@ -126,9 +126,9 @@ namespace Test.MSAL.NET.Unit.InstanceTests
                 .GetAwaiter()
                 .GetResult();
 
-            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/authorize",
+            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
                 instance.AuthorizationEndpoint);
-            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/token",
+            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
                 instance.TokenEndpoint);
             Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/",
                 instance.SelfSignedJwtAudience);
@@ -285,26 +285,14 @@ namespace Test.MSAL.NET.Unit.InstanceTests
         {
             const string uriNoPort = "https://login.windows.net/mytenant.com";
             const string uriCustomPort = "https://login.windows.net:444/mytenant.com/";
-
-            try
-            {
-                var authority = Authority.CreateAuthority(uriNoPort, false);
-                Assert.Fail("MsalClientException should have been thrown");
-            }
-            catch (MsalClientException exc)
-            {
-                Assert.AreEqual(MsalClientException.DeprecatedAuthorityError, exc.ErrorCode);
-            }
-            
-            try
-            {
-                var authority = Authority.CreateAuthority(uriCustomPort, false);
-                Assert.Fail("MsalClientException should have been thrown");
-            }
-            catch (MsalClientException exc)
-            {
-                Assert.AreEqual(MsalClientException.DeprecatedAuthorityError, exc.ErrorCode);
-            }
+            var authority = Authority.CreateAuthority(uriNoPort, false);
+            Assert.AreEqual("https://login.microsoftonline.com/mytenant.com/", authority.CanonicalAuthority);
+            authority = Authority.CreateAuthority(uriCustomPort, false);
+            Assert.AreEqual("https://login.microsoftonline.com:444/mytenant.com/", authority.CanonicalAuthority);
+            authority = Authority.CreateAuthority("https://login.windows.net/tfp/tenant/policy", false);
+            Assert.AreEqual("https://login.microsoftonline.com/tfp/tenant/policy/", authority.CanonicalAuthority);
+            authority = Authority.CreateAuthority("https://login.windows.net:444/tfp/tenant/policy", false);
+            Assert.AreEqual("https://login.microsoftonline.com:444/tfp/tenant/policy/", authority.CanonicalAuthority);
         }
     }
 }

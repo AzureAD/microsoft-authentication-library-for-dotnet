@@ -38,13 +38,18 @@ using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
-    internal class CryptographyHelper : ICryptographyHelper
+    internal class CryptographyHelper
     {
         // This descriptor does not require the enterprise authentication capability.
         private const string ProtectionDescriptor = "LOCAL=user";
 
-        public string CreateBase64UrlEncodedSha256Hash(string input)
+        public static string CreateBase64UrlEncodedSha256Hash(string input)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return null;
+            }
+
             IBuffer inputBuffer = CryptographicBuffer.ConvertStringToBinary(input, BinaryStringEncoding.Utf8);
             var hasher = HashAlgorithmProvider.OpenAlgorithm(HashAlgorithmNames.Sha256);
 
@@ -53,7 +58,7 @@ namespace Microsoft.Identity.Client
             return Base64UrlHelpers.Encode(Convert.FromBase64String(output));
         }
 
-        public string GenerateCodeVerifier()
+        public static string GenerateCodeVerifier()
         {
             byte[] buffer = new byte[Constants.CodeVerifierByteSize];
             var windowsBuffer = CryptographicBuffer.GenerateRandom((uint)buffer.Length);

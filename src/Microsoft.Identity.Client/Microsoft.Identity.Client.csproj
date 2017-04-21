@@ -85,6 +85,7 @@
     <Compile Include="Features\*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
+    <Compile Include="Platforms\netstandard1.1\*.cs" />
     <Compile Include="Features\TokenCache\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3' ">

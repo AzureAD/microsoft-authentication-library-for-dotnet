@@ -37,8 +37,6 @@ namespace Microsoft.Identity.Client.Internal.Instance
     internal class AadAuthority : Authority
     {
         private const string AadInstanceDiscoveryEndpoint = "https://login.microsoftonline.com/common/discovery/instance";
-
-
         private static readonly HashSet<string> TrustedHostList = new HashSet<string>()
         {
             "login.windows.net",
@@ -51,6 +49,18 @@ namespace Microsoft.Identity.Client.Internal.Instance
         public AadAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
         {
             AuthorityType = AuthorityType.Aad;
+            UpdateCanonicalAuthority();
+        }
+
+        protected void UpdateCanonicalAuthority()
+        {
+            UriBuilder uriBuilder = new UriBuilder(CanonicalAuthority);
+            if (uriBuilder.Host.Equals("login.windows.net", StringComparison.OrdinalIgnoreCase))
+            {
+                uriBuilder.Host = "login.microsoftonline.com";
+            }
+
+            CanonicalAuthority = uriBuilder.Uri.AbsoluteUri;
         }
 
         protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName,
