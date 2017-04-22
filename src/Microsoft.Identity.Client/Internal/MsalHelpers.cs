@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             foreach (string otherString in otherScope)
             {
-                if (!scope.Contains(otherString))
+                if (!scope.Contains(otherString, StringComparer.OrdinalIgnoreCase))
                 {
                     return false;
                 }

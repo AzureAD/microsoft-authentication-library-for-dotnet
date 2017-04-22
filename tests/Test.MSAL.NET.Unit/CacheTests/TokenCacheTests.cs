@@ -717,7 +717,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             response.RefreshToken = "refresh-token";
             response.Scope = TestConstants.Scope.AsSingleString();
             response.TokenType = "Bearer";
-            
+
             RequestContext requestContext = new RequestContext(Guid.NewGuid());
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
@@ -786,7 +786,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             response.RefreshToken = "refresh-token";
             response.Scope = TestConstants.Scope.AsSingleString();
             response.TokenType = "Bearer";
-            
+
             RequestContext requestContext = new RequestContext(Guid.NewGuid());
             AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
             {
@@ -831,6 +831,37 @@ namespace Test.MSAL.NET.Unit.CacheTests
             Assert.AreEqual(TestConstants.ClientId, rtItem.ClientId);
             Assert.AreEqual(TestConstants.UserIdentifier, rtItem.GetUserIdentifier());
             Assert.AreEqual(TestConstants.ProductionEnvironment, rtItem.Environment);
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void FindAccessToken_ScopeCaseInsensitive()
+        {
+            var tokenCache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
+
+            TokenCacheHelper.PopulateCache(tokenCache.TokenCacheAccessor);
+
+            var param = new AuthenticationRequestParameters()
+            {
+                RequestContext = new RequestContext(Guid.Empty),
+                ClientId = TestConstants.ClientId,
+                Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
+                Scope = new SortedSet<string>(),
+                User = TestConstants.User
+            };
+
+            var scopeInCache = TestConstants.Scope.FirstOrDefault();
+
+            var upperCaseScope = scopeInCache.ToUpper();
+            param.Scope.Add(upperCaseScope);
+
+            var item = tokenCache.FindAccessToken(param);
+
+            Assert.IsNotNull(item);
+            Assert.IsTrue(item.ScopeSet.Contains(scopeInCache));
         }
     }
 }
