@@ -203,9 +203,6 @@ namespace Microsoft.Identity.Client
             return orphanedEvents;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public string ClientId { get; set; }
+        internal string ClientId { get; set; }
     }
 }
