@@ -32,7 +32,6 @@ namespace DesktopTestApp
 {
     class PublicClientHandler
     {
-
         public PublicClientHandler(string clientId)
         {
             ApplicationId = clientId;
