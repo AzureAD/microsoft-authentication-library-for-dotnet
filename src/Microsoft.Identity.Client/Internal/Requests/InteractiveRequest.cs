@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             ValidateScopeInput(_additionalScope);
-            
+
             authenticationRequestParameters.LoginHint = loginHint;
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ExtraQueryParameters) &&
                 authenticationRequestParameters.ExtraQueryParameters[0] == '&')
@@ -96,11 +96,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async Task AcquireAuthorizationAsync()
         {
             Uri authorizationUri = CreateAuthorizationUri(true, true);
-            _authorizationResult =
-                await
+            var uiEvent = new UiEvent();
+            Telemetry.GetInstance().StartEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, uiEvent);
+            try
+            {
+                _authorizationResult = await
                     _webUi.AcquireAuthorizationAsync(authorizationUri, AuthenticationRequestParameters.RedirectUri,
                         AuthenticationRequestParameters.RequestContext)
                         .ConfigureAwait(false);
+                uiEvent.UserCancelled = _authorizationResult.Status == AuthorizationStatus.UserCancel;
+            }
+            finally
+            {
+                Telemetry.GetInstance().StopEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, uiEvent);
+            }
         }
 
         internal async Task<Uri> CreateAuthorizationUriAsync()

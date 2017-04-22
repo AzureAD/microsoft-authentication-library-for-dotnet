@@ -48,6 +48,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
     public class InteractiveRequestTests
     {
         TokenCache cache;
+        private readonly MyReceiver _myReceiver = new MyReceiver();
 
         [TestInitialize]
         public void TestInitialize()
@@ -56,6 +57,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Authority.ValidatedAuthorities.Clear();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
+            Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
         }
 
         [TestCleanup]
@@ -135,6 +137,9 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Assert.AreEqual(result.AccessToken, "some-access-token");
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+
+            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
+                anEvent[EventBase.ConstEventName].EndsWith("ui_event") && anEvent[UiEvent.ConstUserCancelled] == "false"));
         }
         
         [TestMethod]
