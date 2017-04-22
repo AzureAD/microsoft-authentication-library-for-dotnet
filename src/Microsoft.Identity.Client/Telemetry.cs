@@ -67,6 +67,9 @@ namespace Microsoft.Identity.Client
             return Singleton;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool TelemetryOnFailureOnly { get; set; }
 
         private ConcurrentDictionary<Tuple<string, string>, EventBase> EventsInProgress = new ConcurrentDictionary<Tuple<string, string>, EventBase>();
@@ -200,6 +203,6 @@ namespace Microsoft.Identity.Client
             return orphanedEvents;
         }
 
-        public string ClientId { get; set; }
+        internal string ClientId { get; set; }
     }
 }
