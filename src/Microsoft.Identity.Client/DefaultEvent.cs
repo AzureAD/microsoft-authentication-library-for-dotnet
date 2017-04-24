@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,38 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-    internal abstract class EventBase : Dictionary<string, string>
+    internal class DefaultEvent : EventBase
     {
-        protected const string EventNamePrefix = "msal.";
-        public const string ConstEventName = EventNamePrefix + "event_name";
-        protected const string StartTime = EventNamePrefix + "start_time";
-        protected const string ElapsedTime = EventNamePrefix + "elapsed_time";
-        private readonly long _startTimestamp;
-
-        public EventBase(string eventName) : this(eventName, new Dictionary<string, string>()) {}
-
-        protected static long CurrentUnixTimeMilliseconds()
+        public DefaultEvent(string clientId) : base((string) (EventBase.EventNamePrefix + "default_event"))
         {
-            return MsalHelpers.DateTimeToUnixTimestampMilliseconds(DateTimeOffset.Now);
-        }
-
-        public EventBase(string eventName, IDictionary<string, string> predefined) : base(predefined)
-        {
-            this[ConstEventName] = eventName;
-            _startTimestamp = CurrentUnixTimeMilliseconds();
-            this[StartTime] = _startTimestamp.ToString();
-            this[ElapsedTime] = "-1";
-        }
-
-        public void Stop()
-        {
-            this[ElapsedTime] = (CurrentUnixTimeMilliseconds() - _startTimestamp).ToString();  // It is a duration
+            this[EventNamePrefix + "client_id"] = clientId;
+            this[EventNamePrefix + "sdk_platform"] = PlatformPlugin.PlatformInformation.GetProductName();
+            this[EventNamePrefix + "sdk_version"] = MsalIdHelper.GetMsalVersion();
+            // TODO: The following implementation will be used after the 3 helpers being implemented (in a separated PR)
+            // this[EventNamePrefix + "application_name"] = MsalIdHelper.GetApplicationName();  // Not yet implemented
+            // this[EventNamePrefix + "application_version"] = MsalIdHelper.GetApplicationVersion();  // Not yet implemented
+            // this[EventNamePrefix + "device_id"] = MsalIdHelper.GetDeviceId();  // Not yet implemented
         }
     }
 }

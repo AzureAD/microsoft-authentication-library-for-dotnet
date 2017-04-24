@@ -32,46 +32,56 @@ namespace Microsoft.Identity.Client
 {
     internal class ApiEvent : EventBase
     {
+        public const string ConstApiId = EventNamePrefix + "api_id";
+        public const string ConstAuthority = EventNamePrefix + "authority";
+        public const string ConstAuthorityType = EventNamePrefix + "authority_type";
+        public const string ConstUiBehavior = EventNamePrefix + "ui_behavior";
+        public const string ConstValidationStatus = EventNamePrefix + "validation_status";
+        public const string ConstTenantId = EventNamePrefix + "tenant_id";
+        public const string ConstUserId = EventNamePrefix + "user_id";
+        public const string ConstWasSuccessful = EventNamePrefix + "was_successful";
+
         public ApiEvent() : base(EventNamePrefix + "api_event") {}
 
         public int ApiId
         {
-            set => this["api_id"] = value.ToString();
+            set => this[ConstApiId] = value.ToString();
         }
 
         public string Authority
         {
-            set => this["authority"] = value;
+            set => this[ConstAuthority] = value?.ToLower();
         }
 
         public string AuthorityType
         {
-            set => this["authority_type"] = value;
+            set => this[ConstAuthorityType] = value?.ToLower();
         }
 
         public string UiBehavior
         {
-            set => this["ui_behavior"] = value;
+            set => this[ConstUiBehavior] = value?.ToLower();
         }
 
         public string ValidationStatus
         {
-            set => this["validation_status"] = value;
+            set => this[ConstValidationStatus] = value?.ToLower();
         }
 
         public string TenantId
         {
-            set => this["tenant_id"] = CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value);
+            set => this[ConstTenantId] = (value != null) ? CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value) : null;
         }
 
         public string UserId
         {
-            set => this["user_id"] = CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value);
+            set => this[ConstUserId] = value != null ? CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value) : null;
         }
 
         public bool WasSuccessful
         {
-            set => this["was_successful"] = value.ToString();
+            set => this[ConstWasSuccessful] = value.ToString().ToLower();
+            get => this[ConstWasSuccessful] == true.ToString().ToLower();
         }
     }
 }

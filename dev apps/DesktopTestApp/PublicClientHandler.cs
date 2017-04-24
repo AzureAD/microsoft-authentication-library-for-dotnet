@@ -32,7 +32,6 @@ namespace DesktopTestApp
 {
     class PublicClientHandler
     {
-
         public PublicClientHandler(string clientId)
         {
             ApplicationId = clientId;
@@ -118,7 +117,7 @@ namespace DesktopTestApp
                 // Use default authority
                 PublicClientApplication = new PublicClientApplication(applicationId)
                 {
-                    UserTokenCache = TokenCacheHelper.UsertokenCache
+                    UserTokenCache = TokenCacheHelper.GetUserCache()
                 };
             }
             else
@@ -126,7 +125,7 @@ namespace DesktopTestApp
                 // Use the override authority provided
                 PublicClientApplication = new PublicClientApplication(applicationId, interactiveAuthority)
                 {
-                    UserTokenCache = TokenCacheHelper.UsertokenCache
+                    UserTokenCache = TokenCacheHelper.GetUserCache()
                 };
             }
         }

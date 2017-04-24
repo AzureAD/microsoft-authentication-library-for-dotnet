@@ -35,11 +35,11 @@ msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:r
 ExitOnError
 
 Log ("Building product code...")
-msbuild "$sourcePath\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" /m /t:build /p:Configuration=$configuration $appVeyorLogger
+msbuild "$sourcePath\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" /m /t:build /p:Configuration=$configuration /p:TreatWarningsAsErrors=true $appVeyorLogger
 ExitOnError
 
 Log("Building tests...")
-msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:build /p:Configuration=$configuration $appVeyorLogger
+msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:build /p:Configuration=$configuration /p:TreatWarningsAsErrors=true $appVeyorLogger
 ExitOnError
 
 

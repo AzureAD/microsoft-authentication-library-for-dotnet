@@ -81,6 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             SupportADFS = false;
 
             AuthenticationRequestParameters.LogState();
+            Telemetry.GetInstance().ClientId = AuthenticationRequestParameters.ClientId;
         }
 
         protected virtual SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
@@ -109,6 +110,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public async Task<AuthenticationResult> RunAsync()
         {
             AuthenticationResult result = null;
+            //this method is the common entrance for all token requests, so it is a good place to put the generic Telemetry logic here
+            AuthenticationRequestParameters.RequestContext.TelemetryRequestId = Telemetry.GetInstance().GenerateNewRequestId();
             try
             {
                 //authority endpoints resolution and validation
@@ -122,6 +125,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Error(ex);
                 throw;
+            }
+            finally
+            {
+                Telemetry.GetInstance().Flush(AuthenticationRequestParameters.RequestContext.TelemetryRequestId);
             }
         }
 

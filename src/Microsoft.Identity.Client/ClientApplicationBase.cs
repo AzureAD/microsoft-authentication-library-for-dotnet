@@ -76,14 +76,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <Summary>
-        /// Authority provided by the developer
+        /// Authority provided by the developer or default authority used by the library.
         /// </Summary>
-        internal string Authority { get; }
+        public string Authority { get; }
 
         /// <summary>
         /// Will be a default value. Can be overridden by the developer. Once set, application will bind to the client Id.
         /// </summary>
-        internal string ClientId { get; }
+        public string ClientId { get; }
 
         /// <summary>
         /// Redirect Uri configured in the app registration portal. PublicClientApplication has a default value of 

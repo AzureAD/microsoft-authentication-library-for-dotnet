@@ -67,6 +67,11 @@ namespace Microsoft.Identity.Client
         {
             ClientCredential = clientCredential;
             UserTokenCache = userTokenCache;
+            if (UserTokenCache != null)
+            {
+                UserTokenCache.ClientId = clientId;
+            }
+
             AppTokenCache = appTokenCache;
             if (AppTokenCache != null)
             {
