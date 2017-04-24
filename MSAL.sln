@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34FFBC9F-C270-4B10-98C8-F6882606DDFE}"
 EndProject
@@ -30,6 +30,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.UWP", "dev apps\XForms\XForms.UWP\XForms.UWP.csproj", "{0B22271B-163F-429B-A472-4C7BF531CEE9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.iOS", "dev apps\XForms\XForms.iOS\XForms.iOS.csproj", "{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ConfidentialClient", "ConfidentialClient", "{25438CD7-E62B-4DA2-840F-E21081FFEA86}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -666,5 +668,6 @@ Global
 		{6120F6A0-59BA-4065-B0F4-92690D9BE1E2} = {F9CCBE99-562C-443F-9474-7BEC49D068C2}
 		{0B22271B-163F-429B-A472-4C7BF531CEE9} = {F9CCBE99-562C-443F-9474-7BEC49D068C2}
 		{146ECCB6-C3F1-4E97-BC52-20FEB7785C62} = {F9CCBE99-562C-443F-9474-7BEC49D068C2}
+		{25438CD7-E62B-4DA2-840F-E21081FFEA86} = {A3C8C4E2-8090-4D24-A118-C32C973AECE7}
 	EndGlobalSection
 EndGlobal
