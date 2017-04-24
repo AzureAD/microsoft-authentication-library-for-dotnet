@@ -47,17 +47,21 @@ namespace XForms
         private void RefreshView()
         {
             authority.Text = App.Authority;
+            clientIdEntry.Text = App.ClientId;
+
             numOfAtItems.Text = App.MsalPublicClient.UserTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString()
                 .Count.ToString();
             numOfRtItems.Text = App.MsalPublicClient.UserTokenCache.TokenCacheAccessor.GetAllRefreshTokensAsString()
                 .Count.ToString();
 
             validateAuthority.IsToggled = App.ValidateAuthority;
+            RedirectUriLabel.Text = App.MsalPublicClient.RedirectUri;
         }
 
         private void OnSaveClicked(object sender, EventArgs e)
         {
             App.Authority = authority.Text;
+            App.ClientId = clientIdEntry.Text;
             App.InitPublicClient();
         }
 
@@ -71,6 +75,24 @@ namespace XForms
         {
             App.MsalPublicClient.ValidateAuthority = args.Value;
             App.ValidateAuthority = args.Value;
+        }
+
+        private void OnB2cSwitchToggled(object sender, ToggledEventArgs args)
+        {
+            if (b2cSwitch.IsToggled)
+            {
+                App.Authority = App.B2cAuthority;
+                App.Scopes = App.B2cScopes;
+                App.ClientId = App.B2cClientId;
+            }
+            else
+            {
+                App.Authority = App.DefaultAuthority;
+                App.Scopes = App.DefaultScopes;
+                App.ClientId = App.DefaultClientId;
+            }
+            App.InitPublicClient();
+            RefreshView();
         }
     }
 }

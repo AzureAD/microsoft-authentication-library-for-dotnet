@@ -50,6 +50,7 @@ namespace XForms
         protected override void OnAppearing()
         {
             RefreshUsers();
+            ScopesEntry.Text = string.Join("", App.Scopes);
         }
 
         private void RefreshUsers()
@@ -149,8 +150,11 @@ namespace XForms
                     acquireResponseLabel.Text = "User was not selected";
                     return;
                 }
+
+                var authority = PassAuthoritySwitch.IsToggled ? App.Authority : null;
+
                 var res = await App.MsalPublicClient.AcquireTokenSilentAsync(GetScopes(),
-                    getUserByDisplayableId(selectedUser), App.Authority, ForceRefreshSwitch.IsToggled);
+                    getUserByDisplayableId(selectedUser), authority, ForceRefreshSwitch.IsToggled);
 
                 acquireResponseLabel.Text = ToString(res);
             }
