@@ -10,7 +10,7 @@ Build status of the dev branch
 ## Available Releases
  Stable (`master` branch)    | Nightly (`dev` branch)
 -----------------------------|-------------------------
- [![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client-green.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/) | [![MyGet](https://img.shields.io/myget/aad-clients-nightly/vpre/Microsoft.Identity.Client.svg?style=flat-square&label=myget&colorB=ff0000)](https://www.myget.org/feed/aad-clients-nightly/package/nuget/Microsoft.Identity.Client)
+ [![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/) | [![MyGet](https://img.shields.io/myget/aad-clients-nightly/vpre/Microsoft.Identity.Client.svg?style=flat-square&label=myget&colorB=ff0000)](https://www.myget.org/feed/aad-clients-nightly/package/nuget/Microsoft.Identity.Client)
 
 Microsoft Authentication Library (MSAL) provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Azure Active Directory v2 (serves Microsoft Account and AAD) and B2C.
 Here you can find the source code for the library. You can find the corresponding releases on the NuGet gallery at [https://www.nuget.org/packages/Microsoft.Identity.Client/](https://www.nuget.org/packages/Microsoft.Identity.Client/).
