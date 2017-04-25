@@ -68,8 +68,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentException("Requires an absolute uri");
             }
-            // only collect telemetry for well-known hosts, // omit B2C ???
-            if (!AadAuthority.IsInTrustedHostList(uri.Host)) // || uri.AbsolutePath.StartsWith("/" + B2CAuthority.Prefix))
+            if (!AadAuthority.IsInTrustedHostList(uri.Host)) // only collect telemetry for well-known hosts
             {
                 return null;
             }
