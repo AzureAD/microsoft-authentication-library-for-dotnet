@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -27,26 +27,29 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 
-namespace ConflidentialClientWebApp
+
+
+namespace ConflidentialClientWebApp.Controllers
 {
-    public class Program
+    public class AccountController : Controller
     {
-        public static void Main(string[] args)
+        // Get: /Account/Login
+        [HttpGet]
+        public async Task Login(string returnUrl = null)
         {
-            var host = new WebHostBuilder()
-                .UseKestrel()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
-                .UseStartup<Startup>()
-                .UseApplicationInsights()
-                .Build();
+            if (HttpContext.User == null || !HttpContext.User.Identity.IsAuthenticated)
+            {
+                
+            }
+        }
 
-            host.Run();
+        public IActionResult Index()
+        {
+            return View();
         }
     }
 }
