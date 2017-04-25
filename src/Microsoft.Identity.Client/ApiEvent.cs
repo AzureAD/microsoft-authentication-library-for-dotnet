@@ -41,6 +41,8 @@ namespace Microsoft.Identity.Client
         public const string ConstTenantId = EventNamePrefix + "tenant_id";
         public const string ConstUserId = EventNamePrefix + "user_id";
         public const string ConstWasSuccessful = EventNamePrefix + "was_successful";
+        public const string ConstCorrelationId = EventNamePrefix + "correlation_id";
+        public const string ConstRequestId = EventNamePrefix + "request_id";
 
         public enum ApiIds
         {
@@ -105,6 +107,16 @@ namespace Microsoft.Identity.Client
         {
             set => this[ConstWasSuccessful] = value.ToString().ToLower();
             get => this[ConstWasSuccessful] == true.ToString().ToLower();
+        }
+
+        public string CorrelationId
+        {
+            set => this[ConstCorrelationId] = value;
+        }
+
+        public string RequestId
+        {
+            set => this[ConstRequestId] = value;
         }
     }
 }
