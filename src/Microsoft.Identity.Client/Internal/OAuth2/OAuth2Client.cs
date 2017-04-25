@@ -88,18 +88,30 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             }
 
             HttpResponse response = null;
+            Uri endpointUri = CreateFullEndpointUri(endPoint);
+            var httpEvent = new HttpEvent(){HttpPath = endpointUri, QueryParams = endpointUri.Query};
+            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, httpEvent);
+            try
+            {
+                if (method == HttpMethod.Post)
+                {
+                    response = await HttpRequest.SendPost(endpointUri, _headers, _bodyParameters, requestContext);
+                }
+                else
+                {
+                    response = await HttpRequest.SendGet(endpointUri, _headers, requestContext);
+                }
 
-            if (method == HttpMethod.Post)
-            {
-                response = await
-                    HttpRequest.SendPost(CreateFullEndpointUri(endPoint), _headers, _bodyParameters,
-                        requestContext);
+                httpEvent.HttpResponseStatus = (int) response.StatusCode;
+                httpEvent.UserAgent = response.UserAgent;
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    httpEvent.OauthErrorCode = JsonHelper.DeserializeFromJson<TokenResponse>(response.Body).Error;
+                }
             }
-            else
+            finally
             {
-                response =
-                    await
-                        HttpRequest.SendGet(CreateFullEndpointUri(endPoint), _headers, requestContext);
+                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, httpEvent);
             }
 
             return CreateResponse<T>(response, requestContext, addCorrelationId);

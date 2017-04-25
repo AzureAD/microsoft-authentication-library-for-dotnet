@@ -145,7 +145,9 @@ namespace Microsoft.Identity.Client.Internal.Http
                 using (HttpResponseMessage responseMessage =
                     await client.SendAsync(requestMessage).ConfigureAwait(false))
                 {
-                    return await CreateResponseAsync(responseMessage).ConfigureAwait(false);
+                    HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
+                    returnValue.UserAgent = client.DefaultRequestHeaders.UserAgent.ToString();
+                    return returnValue;
                 }
             }
         }

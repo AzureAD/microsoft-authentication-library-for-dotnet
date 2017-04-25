@@ -26,6 +26,9 @@
 //------------------------------------------------------------------------------
 
 
+using Microsoft.Identity.Client.Internal;
+using System;
+
 namespace Microsoft.Identity.Client
 {
     internal class HttpEvent : EventBase
@@ -39,9 +42,9 @@ namespace Microsoft.Identity.Client
 
         public HttpEvent() : base(EventNamePrefix + "http_event") {}
 
-        public string HttpPath
+        public Uri HttpPath
         {
-            set => this[ConstHttpPath] = value;  // http path is case-sensitive
+            set => this[ConstHttpPath] = ScrubTenant(value); // http path is case-sensitive
         }
 
         public string UserAgent
@@ -51,7 +54,8 @@ namespace Microsoft.Identity.Client
 
         public string QueryParams
         {
-            set => this[ConstQueryParameters] = value;  // query parameters are case-sensitive
+            set => this[ConstQueryParameters] = String.Join( // query parameters are case-sensitive
+                "&", MsalHelpers.ParseKeyValueList(value, '&', false, true, null).Keys); // It turns out ParseKeyValueList(..., null) is valid
         }
 
         public string ApiVersion {
