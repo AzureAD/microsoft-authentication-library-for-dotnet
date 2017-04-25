@@ -9,14 +9,13 @@
         </OnPlatform>
     </ContentPage.Padding>
 
-
     <StackLayout Padding="10,0">
 
         <Label Text="Acquire" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" Margin="5" />
 
         <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
             <Label Text="Scopes" HorizontalTextAlignment="Center"  Margin="5" Font="Bold,13"/>
-            <Entry x:Name="ScopesEntry" Text="User.Read"  HorizontalOptions="FillAndExpand"/>
+            <Entry x:Name="ScopesEntry" Text=""  HorizontalOptions="FillAndExpand"/>
         </StackLayout>
 
         <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
@@ -30,7 +29,7 @@
                     <Label Text="UIBehavior" HorizontalTextAlignment="Center"  Margin="5" Font="Bold,13"/>
                     <Picker x:Name="UIBehaviorPicker"/>
                 </StackLayout>
-                
+
                 <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
                     <Label Text="Login hint" HorizontalTextAlignment="Center" Margin="5" Font="Bold,13"/>
                     <Switch x:Name="LoginHintSwitch"/>
@@ -48,11 +47,21 @@
 
         <Frame OutlineColor="Black" Padding="10">
             <StackLayout Orientation="Vertical"  >
-                <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-                    <Label Text="Force Refresh" HorizontalTextAlignment="Center" Margin="5" Font="Bold,13"/>
-                    <Switch x:Name="ForceRefreshSwitch"/>
+                <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand">
+
+                    <StackLayout Orientation="Horizontal"  HorizontalOptions="Start">
+                        <Label Text="Force Refresh" Margin="5" Font="Bold,13"/>
+                        <Switch x:Name="ForceRefreshSwitch" />
+                    </StackLayout>
+
+                    <StackLayout Orientation="Horizontal"  HorizontalOptions="Start">
+                        <Label Text="Pass Authority" Margin="5" Font="Bold,13"/>
+                        <Switch x:Name="PassAuthoritySwitch"/>
+                    </StackLayout>
+
                 </StackLayout>
                 <Button  Text="AcquireSilently" Clicked="OnAcquireSilentlyClicked" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center"/>
+
             </StackLayout>
         </Frame>
 
