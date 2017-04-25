@@ -104,7 +104,7 @@ namespace Test.MSAL.NET.Unit
                 e1.WasSuccessful = true;
                 telemetry.StopEvent(reqId, e1);
 
-                var e2 = new HttpEvent() {HttpPath = "https://contoso.com", UserAgent = "SomeUserAgent", QueryParams = "a&b"};
+                var e2 = new HttpEvent() {HttpPath = new Uri("https://contoso.com"), UserAgent = "SomeUserAgent", QueryParams = "?a=1&b=2"};
                 telemetry.StartEvent(reqId, e2);
                 // do some stuff...
                 e2.HttpResponseStatus = 200;
@@ -163,6 +163,25 @@ namespace Test.MSAL.NET.Unit
                 telemetry.Flush(reqId);
             }
             Assert.IsTrue(myReceiver.EventsReceived.Count > 0);
+        }
+
+        [TestMethod]
+        [TestCategory("TelemetryInternalAPI")]
+        public void TelemetryScrubTenantFromUri()
+        {
+            Assert.AreEqual("https://login.microsoftonline.com/<tenant>/oauth2/v2.0/token",
+                EventBase.ScrubTenant(new Uri("https://login.microsoftonline.com/common/oauth2/v2.0/token")));
+
+            Assert.AreEqual("https://login.microsoftonline.com/tfp/<tenant>/oauth2/v2.0/token",
+                EventBase.ScrubTenant(new Uri("https://login.microsoftonline.com/tfp/contoso/oauth2/v2.0/token")));
+
+            Assert.AreEqual("https://login.microsoftonline.com/<tenant>",
+                EventBase.ScrubTenant(new Uri("https://login.microsoftonline.com/common")));
+
+            Assert.AreEqual("https://login.microsoftonline.com/tfp/<tenant>",
+                EventBase.ScrubTenant(new Uri("https://login.microsoftonline.com/tfp/contoso")));
+
+            Assert.AreEqual(null, EventBase.ScrubTenant(new Uri("https://login.contoso.com/adfs")));
         }
     }
 }

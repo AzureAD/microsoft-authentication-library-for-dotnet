@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             return CanonicalAuthority + "v2.0/.well-known/openid-configuration";
         }
 
-        internal bool IsInTrustedHostList(string host)
+        internal static bool IsInTrustedHostList(string host)
         {
             return
                 !string.IsNullOrEmpty(

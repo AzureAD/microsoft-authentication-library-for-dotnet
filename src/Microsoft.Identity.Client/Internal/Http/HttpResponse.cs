@@ -37,5 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Http
         public string Body { get; set; }
 
         public HttpStatusCode StatusCode { get; set; }
+
+        public string UserAgent { get; set; }
     }
 }

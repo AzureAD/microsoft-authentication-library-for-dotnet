@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             ValidateAsUri(authority);
             string[] pathSegments = new Uri(authority).AbsolutePath.Substring(1).Split('/');
             bool isAdfsAuthority = string.Compare(pathSegments[0], "adfs", StringComparison.OrdinalIgnoreCase) == 0;
-            bool isB2CAuthority = string.Compare(pathSegments[0], "tfp", StringComparison.OrdinalIgnoreCase) == 0;
+            bool isB2CAuthority = string.Compare(pathSegments[0], B2CAuthority.Prefix, StringComparison.OrdinalIgnoreCase) == 0;
 
             if (isAdfsAuthority)
             {
