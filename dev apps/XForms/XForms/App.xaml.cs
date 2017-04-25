@@ -38,18 +38,27 @@ namespace XForms
     {
         public static PublicClientApplication MsalPublicClient;
         public static UIParent UIParent { get; set; }
-        public const string ClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
+        public const string DefaultClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
+        public const string B2cClientId = "750a8822-a6d4-4127-bc0b-efbfacccbc28";
 
         public const string RedirectUriOnAndroid =
             "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
-
         public const string RedirectUriOnIos = "adaliosxformsapp://com.yourcompany.xformsapp";
+
         public const string DefaultAuthority = "https://login.microsoftonline.com/common";
-        public static string[] Scopes = {"User.Read"};
+        public const string B2cAuthority = "https://login.microsoftonline.com/tfp/panwariusb2c.onmicrosoft.com/B2C_1_signup_signin/";
+
+        public static string[] DefaultScopes = {"User.Read"};
+        public static string[] B2cScopes = { "https://panwariusb2c.onmicrosoft.com/fail/wtf" };
+
         public const bool DefaultValidateAuthority = true;
 
         public static string Authority = DefaultAuthority;
         public static bool ValidateAuthority = DefaultValidateAuthority;
+
+        public static string ClientId = DefaultClientId;
+
+        public static string[] Scopes = DefaultScopes;
 
         public App()
         {
