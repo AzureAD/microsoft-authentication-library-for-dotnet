@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters parameters = CreateRequestParameters(authority, scope, null,
                 AppTokenCache);
             parameters.IsClientCredentialRequest = true;
-            var handler = new ClientCredentialRequest(parameters, forceRefresh){ApiId = apiId};
+            var handler = new ClientCredentialRequest(parameters, forceRefresh){ApiId = apiId, IsConfidentialClient = true};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Client
         {
             var requestParams = CreateRequestParameters(authority, scope, null, UserTokenCache);
             requestParams.UserAssertion = userAssertion;
-            var handler = new OnBehalfOfRequest(requestParams){ApiId = apiId};
+            var handler = new OnBehalfOfRequest(requestParams){ApiId = apiId, IsConfidentialClient = true};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Client
             requestParams.AuthorizationCode = authorizationCode;
             requestParams.RedirectUri = redirectUri;
             var handler =
-                new AuthorizationCodeRequest(requestParams){ApiId = apiId};
+                new AuthorizationCodeRequest(requestParams){ApiId = apiId, IsConfidentialClient = true};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

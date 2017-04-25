@@ -44,6 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected TokenResponse Response;
         protected AccessTokenCacheItem AccessTokenItem;
         public ApiEvent.ApiIds ApiId { get; set; }
+        public bool IsConfidentialClient { get; set; }
 
         protected bool SupportADFS { get; set; }
 
@@ -119,6 +120,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 UserId = AuthenticationRequestParameters.User != null ? AuthenticationRequestParameters.User.Identifier : "",
                 CorrelationId = AuthenticationRequestParameters.RequestContext.CorrelationId,
                 RequestId = AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
+                IsConfidentialClient = IsConfidentialClient,
                 WasSuccessful = false
             };
 

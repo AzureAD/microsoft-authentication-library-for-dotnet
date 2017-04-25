@@ -43,6 +43,7 @@ namespace Microsoft.Identity.Client
         public const string ConstWasSuccessful = EventNamePrefix + "was_successful";
         public const string ConstCorrelationId = EventNamePrefix + "correlation_id";
         public const string ConstRequestId = EventNamePrefix + "request_id";
+        public const string ConstIsConfidentialClient = EventNamePrefix + "is_confidential_client";
 
         public enum ApiIds
         {
@@ -117,6 +118,11 @@ namespace Microsoft.Identity.Client
         public string RequestId
         {
             set => this[ConstRequestId] = value;
+        }
+
+        public bool IsConfidentialClient
+        {
+            set => this[ConstIsConfidentialClient] = value.ToString().ToLower();
         }
     }
 }
