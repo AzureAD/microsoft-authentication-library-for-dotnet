@@ -45,6 +45,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected AccessTokenCacheItem AccessTokenItem;
         public ApiEvent.ApiIds ApiId { get; set; }
         public bool IsConfidentialClient { get; set; }
+        protected virtual string GetUIBehaviorPromptValue()
+        {
+            return null;
+        }
 
         protected bool SupportADFS { get; set; }
 
@@ -121,6 +125,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 CorrelationId = AuthenticationRequestParameters.RequestContext.CorrelationId,
                 RequestId = AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
                 IsConfidentialClient = IsConfidentialClient,
+                UiBehavior = GetUIBehaviorPromptValue(),
                 WasSuccessful = false
             };
 
@@ -130,11 +135,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.AuthorityType = AuthenticationRequestParameters.Authority.AuthorityType.ToString();
             }
 
-            var thisInteractiveRequest = this as InteractiveRequest;
-            if (thisInteractiveRequest != null)
-            {
-                apiEvent.UiBehavior = thisInteractiveRequest._UIBehavior.PromptValue;
-            }
             Telemetry.GetInstance().StartEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, apiEvent);
 
             try

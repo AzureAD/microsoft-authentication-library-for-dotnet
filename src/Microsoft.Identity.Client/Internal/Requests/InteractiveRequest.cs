@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class InteractiveRequest : RequestBase
     {
         private readonly SortedSet<string> _additionalScope;
-        public readonly UIBehavior _UIBehavior;
+        private readonly UIBehavior _UIBehavior;
         private readonly IWebUI _webUi;
         private AuthorizationResult _authorizationResult;
         private string _codeVerifier;
@@ -84,6 +84,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _UIBehavior = UIBehavior;
             LoadFromCache = false; //no cache lookup and refresh for interactive.
             AuthenticationRequestParameters.RequestContext.Logger.Info("Additional scopes - " + _additionalScope.AsSingleString() + ";" + "UIBehavior - " + _UIBehavior.PromptValue);
+        }
+
+        protected override string GetUIBehaviorPromptValue()
+        {
+            return _UIBehavior.PromptValue;
         }
 
         internal override async Task PreTokenRequest()
