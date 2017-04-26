@@ -1,0 +1,41 @@
+﻿@model IEnumerable<TodoListWebApp.Models.TodoItem>
+
+@{
+    ViewBag.Title = "To Do List";
+}
+
+<h3>Add an Item</h3>
+
+@if (ViewBag.ErrorMessage == null)
+{
+    <form name="input" action="Todo" method="post">
+        New Item: <input type="text" name="item">
+        <input type="submit" value="Submit">
+    </form>
+}
+
+<table class="table table-bordered table-striped">
+
+    <tr>
+        <th>Item Name</th>
+    </tr>
+
+    @foreach (var i in Model)
+    {
+        <tr>
+            <td>@i.Title</td>
+        </tr>
+    }
+
+</table>
+
+@if (ViewBag.ErrorMessage == "AuthorizationRequired")
+{
+    <p>You have to sign-in to see your to do list. Click @Html.ActionLink("here", "Index", "Todo", new { reauth = true }, null) to sign-in.</p>
+
+}
+
+@if (ViewBag.ErrorMessage == "UnexpectedError")
+{
+    <p>An unexpected error occurred while retrieving your to do list.  Please try again.  You may need to sign-in.</p>
+}
