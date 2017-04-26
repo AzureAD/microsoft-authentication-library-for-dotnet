@@ -193,6 +193,20 @@ namespace Microsoft.Identity.Client
 
         internal AccessTokenCacheItem FindAccessToken(AuthenticationRequestParameters requestParams)
         {
+            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.AT };
+            Telemetry.GetInstance().StartEvent(requestParams.RequestContext.TelemetryRequestId, cacheEvent);
+            try
+            {
+                return FindAccessTokenCommon(requestParams);
+            }
+            finally
+            {
+                Telemetry.GetInstance().StopEvent(requestParams.RequestContext.TelemetryRequestId, cacheEvent);
+            }
+        }
+
+        private AccessTokenCacheItem FindAccessTokenCommon(AuthenticationRequestParameters requestParams)
+        {
             lock (LockObject)
             {
                 requestParams.RequestContext.Logger.Info("Looking up access token in the cache..");
@@ -345,7 +359,21 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal RefreshTokenCacheItem FindRefreshToken(AuthenticationRequestParameters requestParam)
+        internal RefreshTokenCacheItem FindRefreshToken(AuthenticationRequestParameters requestParams)
+        {
+            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT };
+            Telemetry.GetInstance().StartEvent(requestParams.RequestContext.TelemetryRequestId, cacheEvent);
+            try
+            {
+                return FindRefreshTokenCommon(requestParams);
+            }
+            finally
+            {
+                Telemetry.GetInstance().StopEvent(requestParams.RequestContext.TelemetryRequestId, cacheEvent);
+            }
+        }
+
+        private RefreshTokenCacheItem FindRefreshTokenCommon(AuthenticationRequestParameters requestParam)
         {
             lock (LockObject)
             {
