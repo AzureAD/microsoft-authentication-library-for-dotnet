@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId"></param>
         /// <param name="redirectUri"></param>
         /// <param name="validateAuthority"></param>
-        protected ClientApplicationBase(string authority, string clientId, string redirectUri,
+        protected ClientApplicationBase(string clientId, string authority, string redirectUri,
             bool validateAuthority)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, validateAuthority);
