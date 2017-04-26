@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId">Client id of the application</param>
         /// <param name="authority">Default authority to be used for the application</param>
         public PublicClientApplication(string clientId, string authority)
-            : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
+            : base(clientId, authority, DEFAULT_REDIRECT_URI, true)
         {
             UserTokenCache = new TokenCache()
             {
