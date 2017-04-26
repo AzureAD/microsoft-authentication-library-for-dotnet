@@ -51,16 +51,16 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="authority"></param>
         /// <param name="clientId"></param>
+        /// <param name="authority"></param>
         /// <param name="redirectUri"></param>
         /// <param name="validateAuthority"></param>
         protected ClientApplicationBase(string clientId, string authority, string redirectUri,
             bool validateAuthority)
         {
+            ClientId = clientId;
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, validateAuthority);
             Authority = authorityInstance.CanonicalAuthority;
-            ClientId = clientId;
             RedirectUri = redirectUri;
             ValidateAuthority = validateAuthority;
             if (UserTokenCache != null)
@@ -202,7 +202,8 @@ namespace Microsoft.Identity.Client
         {
             var handler = new SilentRequest(
                 CreateRequestParameters(authority, scope, user, UserTokenCache),
-                forceRefresh) {ApiId = apiId};
+                forceRefresh)
+            { ApiId = apiId };
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
         /// <param name="appTokenCache">Token cache for saving application/client tokens. OPTIONAL.</param>
         public ConfidentialClientApplication(string clientId, string authority, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
-            : base(authority, clientId, redirectUri, true)
+            : base(clientId, authority, redirectUri, true)
         {
             ClientCredential = clientCredential;
             UserTokenCache = userTokenCache;
