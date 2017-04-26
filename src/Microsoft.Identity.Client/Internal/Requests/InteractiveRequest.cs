@@ -86,6 +86,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.RequestContext.Logger.Info("Additional scopes - " + _additionalScope.AsSingleString() + ";" + "UIBehavior - " + _UIBehavior.PromptValue);
         }
 
+        protected override string GetUIBehaviorPromptValue()
+        {
+            return _UIBehavior.PromptValue;
+        }
+
         internal override async Task PreTokenRequest()
         {
             await base.PreTokenRequest().ConfigureAwait(false);

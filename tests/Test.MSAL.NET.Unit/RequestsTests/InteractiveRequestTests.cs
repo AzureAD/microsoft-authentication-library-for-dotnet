@@ -140,8 +140,10 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
                 anEvent[EventBase.ConstEventName].EndsWith("ui_event") && anEvent[UiEvent.ConstUserCancelled] == "false"));
+            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
+                anEvent[EventBase.ConstEventName].EndsWith("api_event") && anEvent[ApiEvent.ConstUiBehavior] == "select_account"));
         }
-        
+
         [TestMethod]
         [TestCategory("InteractiveRequestTests")]
         public void RedirectUriContainsFragmentErrorTest()

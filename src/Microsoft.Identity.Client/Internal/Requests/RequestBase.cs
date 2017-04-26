@@ -43,6 +43,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal readonly TokenCache TokenCache;
         protected TokenResponse Response;
         protected AccessTokenCacheItem AccessTokenItem;
+        public ApiEvent.ApiIds ApiId { get; set; }
+        public bool IsConfidentialClient { get; set; }
+        protected virtual string GetUIBehaviorPromptValue()
+        {
+            return null;
+        }
 
         protected bool SupportADFS { get; set; }
 
@@ -109,16 +115,39 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<AuthenticationResult> RunAsync()
         {
-            AuthenticationResult result = null;
             //this method is the common entrance for all token requests, so it is a good place to put the generic Telemetry logic here
             AuthenticationRequestParameters.RequestContext.TelemetryRequestId = Telemetry.GetInstance().GenerateNewRequestId();
+            var apiEvent = new ApiEvent()
+            {
+                ApiId = ApiId,
+                ValidationStatus = AuthenticationRequestParameters.ValidateAuthority.ToString(),
+                UserId = AuthenticationRequestParameters.User != null ? AuthenticationRequestParameters.User.Identifier : "",
+                CorrelationId = AuthenticationRequestParameters.RequestContext.CorrelationId,
+                RequestId = AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
+                IsConfidentialClient = IsConfidentialClient,
+                UiBehavior = GetUIBehaviorPromptValue(),
+                WasSuccessful = false
+            };
+
+            if (AuthenticationRequestParameters.Authority != null)
+            {
+                apiEvent.Authority = new Uri(AuthenticationRequestParameters.Authority.CanonicalAuthority);
+                apiEvent.AuthorityType = AuthenticationRequestParameters.Authority.AuthorityType.ToString();
+            }
+
+            Telemetry.GetInstance().StartEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, apiEvent);
+
             try
             {
                 //authority endpoints resolution and validation
                 await PreTokenRequest().ConfigureAwait(false);
                 await SendTokenRequestAsync().ConfigureAwait(false);
-                result = PostTokenRequest();
+                AuthenticationResult result = PostTokenRequest();
                 await PostRunAsync(result).ConfigureAwait(false);
+
+                apiEvent.TenantId = result.TenantId;
+                apiEvent.UserId = result.UniqueId;
+                apiEvent.WasSuccessful = true;
                 return result;
             }
             catch (Exception ex)
@@ -128,6 +157,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             finally
             {
+                Telemetry.GetInstance().StopEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, apiEvent);
                 Telemetry.GetInstance().Flush(AuthenticationRequestParameters.RequestContext.TelemetryRequestId);
             }
         }

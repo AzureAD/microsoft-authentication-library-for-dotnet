@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client
         {
             return
                 await
-                    AcquireTokenSilentCommonAsync(null, scope, user, false)
+                    AcquireTokenSilentCommonAsync(null, scope, user, false, ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority)
                         .ConfigureAwait(false);
         }
 
@@ -179,8 +179,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenSilentCommonAsync(authorityInstance, scope, user,
-                            forceRefresh)
-                        .ConfigureAwait(false);
+                        forceRefresh, ApiEvent.ApiIds.AcquireTokenSilentWithAuthority).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -199,11 +198,11 @@ namespace Microsoft.Identity.Client
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
-            IEnumerable<string> scope, IUser user, bool forceRefresh)
+            IEnumerable<string> scope, IUser user, bool forceRefresh, ApiEvent.ApiIds apiId)
         {
             var handler = new SilentRequest(
                 CreateRequestParameters(authority, scope, user, UserTokenCache),
-                forceRefresh);
+                forceRefresh) {ApiId = apiId};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

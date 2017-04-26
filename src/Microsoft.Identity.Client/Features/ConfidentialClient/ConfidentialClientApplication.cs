@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenOnBehalfCommonAsync(authority, scope, userAssertion)
+                    AcquireTokenOnBehalfCommonAsync(authority, scope, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUser)
                         .ConfigureAwait(false);
         }
 
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenOnBehalfCommonAsync(authorityInstance, scope, userAssertion)
+                    AcquireTokenOnBehalfCommonAsync(authorityInstance, scope, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUserAuthority)
                         .ConfigureAwait(false);
         }
 
@@ -122,7 +122,9 @@ namespace Microsoft.Identity.Client
         {
             return
                 await
-                    AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, scope, new Uri(RedirectUri)).ConfigureAwait(false);
+                    AcquireTokenByAuthorizationCodeCommonAsync(
+                        authorizationCode, scope, new Uri(RedirectUri),
+                        ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -134,7 +136,7 @@ namespace Microsoft.Identity.Client
         {
             return
                 await
-                    AcquireTokenForClientCommonAsync(scope, false).ConfigureAwait(false);
+                    AcquireTokenForClientCommonAsync(scope, false, ApiEvent.ApiIds.AcquireTokenForClientWithScope).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -147,7 +149,7 @@ namespace Microsoft.Identity.Client
         {
             return
                 await
-                    AcquireTokenForClientCommonAsync(scope, forceRefresh).ConfigureAwait(false);
+                    AcquireTokenForClientCommonAsync(scope, forceRefresh, ApiEvent.ApiIds.AcquireTokenForClientWithScopeRefresh).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -200,34 +202,34 @@ namespace Microsoft.Identity.Client
 
         internal TokenCache AppTokenCache { get; }
 
-        private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(IEnumerable<string> scope, bool forceRefresh)
+        private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(IEnumerable<string> scope, bool forceRefresh, ApiEvent.ApiIds apiId)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             AuthenticationRequestParameters parameters = CreateRequestParameters(authority, scope, null,
                 AppTokenCache);
             parameters.IsClientCredentialRequest = true;
-            var handler = new Internal.Requests.ClientCredentialRequest(parameters, forceRefresh);
+            var handler = new ClientCredentialRequest(parameters, forceRefresh){ApiId = apiId, IsConfidentialClient = true};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(Authority authority,
-            IEnumerable<string> scope, UserAssertion userAssertion)
+            IEnumerable<string> scope, UserAssertion userAssertion, ApiEvent.ApiIds apiId)
         {
             var requestParams = CreateRequestParameters(authority, scope, null, UserTokenCache);
             requestParams.UserAssertion = userAssertion;
-            var handler = new OnBehalfOfRequest(requestParams);
+            var handler = new OnBehalfOfRequest(requestParams){ApiId = apiId, IsConfidentialClient = true};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode,
-            IEnumerable<string> scope, Uri redirectUri)
+            IEnumerable<string> scope, Uri redirectUri, ApiEvent.ApiIds apiId)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             var requestParams = CreateRequestParameters(authority, scope, null, UserTokenCache);
             requestParams.AuthorizationCode = authorizationCode;
             requestParams.RedirectUri = redirectUri;
             var handler =
-                new AuthorizationCodeRequest(requestParams);
+                new AuthorizationCodeRequest(requestParams){ApiId = apiId, IsConfidentialClient = true};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
