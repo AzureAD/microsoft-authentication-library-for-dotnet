@@ -37,6 +37,25 @@ using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client
 {
+    internal class TelemetryTokenCacheAccessor : TokenCacheAccessor
+    {
+        // The content of this class has to be placed outside of its base class TokenCacheAccessor,
+        // otherwise we would have to modify multiple implementations of TokenCacheAccessor on different platforms.
+        public void SaveAccessToken(string cacheKey, string item, RequestContext requestContext)
+        {
+            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.AT };
+            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
+            try
+            {
+                SaveAccessToken(cacheKey, item);
+            }
+            finally
+            {
+                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
+            }
+        }
+    }
+
     /// <summary>
     /// Token cache class used by ConfidentialClientApplication and PublicClientApplication to store access and refresh tokens.
     /// </summary>
@@ -44,7 +63,7 @@ namespace Microsoft.Identity.Client
     {
         private const int DefaultExpirationBufferInMinutes = 5;
 
-        internal readonly TokenCacheAccessor TokenCacheAccessor = new TokenCacheAccessor();
+        internal readonly TelemetryTokenCacheAccessor TokenCacheAccessor = new TelemetryTokenCacheAccessor();
 
         /// <summary>
         /// Notification for certain token cache interactions during token acquisition.
@@ -166,7 +185,7 @@ namespace Microsoft.Identity.Client
                     }
 
                     TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString(),
-                        JsonHelper.SerializeToJson(accessTokenCacheItem));
+                        JsonHelper.SerializeToJson(accessTokenCacheItem), requestParams.RequestContext);
 
                     // if server returns the refresh token back, save it in the cache.
                     if (response.RefreshToken != null)

@@ -319,6 +319,8 @@ namespace Test.MSAL.NET.Unit
 
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent => // Expect finding such an event
                 anEvent[EventBase.ConstEventName].EndsWith("token_cache_lookup") && anEvent[CacheEvent.ConstTokenType] == "at"));
+            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent => // Expect finding such an event
+                anEvent[EventBase.ConstEventName].EndsWith("token_cache_write") && anEvent[CacheEvent.ConstTokenType] == "at"));
         }
 
         [TestMethod]
