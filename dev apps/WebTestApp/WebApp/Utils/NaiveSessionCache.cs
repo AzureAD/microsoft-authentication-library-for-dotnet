@@ -32,7 +32,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace TodoListWebApp
+namespace WebApp
 {
     public class NaiveSessionCache : TokenCache
     {
