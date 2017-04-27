@@ -27,27 +27,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Builder;
 
-namespace TodoListService
+namespace WebApi.Models
 {
-    public class Program
+    public class TodoItem
     {
-        // Entry point for the application.
-        public static void Main(string[] args)
-        {
-            var host = new WebHostBuilder()
-                .UseKestrel()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
-                .UseStartup<Startup>()
-                .Build();
-
-            host.Run();
-        }
+        public string Owner { get; set; }
+        public string Title { get; set; }
     }
 }

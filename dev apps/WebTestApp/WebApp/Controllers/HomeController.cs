@@ -29,12 +29,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
-namespace TodoListService.Models
+namespace WebApp.Controllers
 {
-    public class TodoItem
+    public class HomeController : Controller
     {
-        public string Owner { get; set; }
-        public string Title { get; set; }
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Error(string message)
+        {
+            ViewBag.Message = message;
+            return View("~/Views/Shared/Error.cshtml");
+        }
     }
 }
