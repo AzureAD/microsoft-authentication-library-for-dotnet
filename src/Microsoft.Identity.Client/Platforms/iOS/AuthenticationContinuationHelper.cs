@@ -40,9 +40,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="url"></param>
         /// <param name="sourceApplication"></param>
-        public static void SetAuthenticationContinuationEventArgs(NSUrl url, string sourceApplication)
+        public static bool SetAuthenticationContinuationEventArgs(NSUrl url, string sourceApplication)
         {
-            WebUI.SetAuthorizationResult(new AuthorizationResult(AuthorizationStatus.Success, url.AbsoluteString));
+            return WebUI.ContinueAuthentication(url.AbsoluteString);
         }
     }
 }
