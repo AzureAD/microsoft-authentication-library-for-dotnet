@@ -54,6 +54,20 @@ namespace Microsoft.Identity.Client
                 Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
+
+        public void SaveRefreshToken(string cacheKey, string item, RequestContext requestContext)
+        {
+            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.RT };
+            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
+            try
+            {
+                SaveRefreshToken(cacheKey, item);
+            }
+            finally
+            {
+                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
+            }
+        }
     }
 
     /// <summary>
@@ -197,7 +211,7 @@ namespace Microsoft.Identity.Client
                             response);
                         requestParams.RequestContext.Logger.Info("Saving RT in cache...");
                         TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(),
-                            JsonHelper.SerializeToJson(refreshTokenCacheItem));
+                            JsonHelper.SerializeToJson(refreshTokenCacheItem), requestParams.RequestContext);
                     }
 
                     OnAfterAccess(args);
