@@ -113,10 +113,19 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void OnBeforeWrite(TokenCacheNotificationArgs args)
+        internal void OnBeforeWrite(TokenCacheNotificationArgs args, RequestContext requestContext, CacheEvent.TokenTypes tokenType)
         {
-            HasStateChanged = true;
-            BeforeWrite?.Invoke(args);
+            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheBeforeWrite) { TokenType = tokenType };
+            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
+            try
+            {
+                HasStateChanged = true;
+                BeforeWrite?.Invoke(args);
+            }
+            finally
+            {
+                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
+            }
         }
 
         internal AccessTokenCacheItem SaveAccessAndRefreshToken(AuthenticationRequestParameters requestParams,
@@ -141,7 +150,7 @@ namespace Microsoft.Identity.Client
 
                     HasStateChanged = true;
                     OnBeforeAccess(args, requestParams.RequestContext, CacheEvent.TokenTypes.AT);
-                    OnBeforeWrite(args);
+                    OnBeforeWrite(args, requestParams.RequestContext, CacheEvent.TokenTypes.AT);
 
                     //delete all cache entries with intersecting scopes.
                     //this should not happen but we have this as a safe guard
@@ -436,7 +445,7 @@ namespace Microsoft.Identity.Client
                     };
 
                     OnBeforeAccess(args, null, CacheEvent.TokenTypes.RT);
-                    OnBeforeWrite(args);
+                    OnBeforeWrite(args, null, CacheEvent.TokenTypes.RT);
                     TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString());
                     OnAfterAccess(args, null, CacheEvent.TokenTypes.RT);
                 }
@@ -461,7 +470,7 @@ namespace Microsoft.Identity.Client
                     };
 
                     OnBeforeAccess(args, null, CacheEvent.TokenTypes.AT);
-                    OnBeforeWrite(args);
+                    OnBeforeWrite(args, null, CacheEvent.TokenTypes.AT);
                     TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString());
                     OnAfterAccess(args, null, CacheEvent.TokenTypes.AT);
                 }
@@ -555,7 +564,7 @@ namespace Microsoft.Identity.Client
                     };
 
                     OnBeforeAccess(args, requestContext, CacheEvent.TokenTypes.AT);
-                    OnBeforeWrite(args);
+                    OnBeforeWrite(args, requestContext, CacheEvent.TokenTypes.AT);
                     IList<RefreshTokenCacheItem> allRefreshTokens = GetAllRefreshTokensForClient(requestContext)
                         .Where(item => item.GetUserIdentifier().Equals(user.Identifier))
                         .ToList();
@@ -644,7 +653,7 @@ namespace Microsoft.Identity.Client
                     };
 
                     OnBeforeAccess(args, null, CacheEvent.TokenTypes.RT);
-                    OnBeforeWrite(args);
+                    OnBeforeWrite(args, null, CacheEvent.TokenTypes.RT);
 
                     TokenCacheAccessor.Clear();
 
@@ -676,7 +685,7 @@ namespace Microsoft.Identity.Client
                 {
                     HasStateChanged = true;
                     OnBeforeAccess(args, null, CacheEvent.TokenTypes.AT);
-                    OnBeforeWrite(args);
+                    OnBeforeWrite(args, null, CacheEvent.TokenTypes.AT);
 
                     TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString(),
                         JsonHelper.SerializeToJson(accessTokenCacheItem));
@@ -708,7 +717,7 @@ namespace Microsoft.Identity.Client
                 {
                     HasStateChanged = true;
                     OnBeforeAccess(args, null, CacheEvent.TokenTypes.RT);
-                    OnBeforeWrite(args);
+                    OnBeforeWrite(args, null, CacheEvent.TokenTypes.RT);
 
                     TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(),
                         JsonHelper.SerializeToJson(refreshTokenCacheItem));
