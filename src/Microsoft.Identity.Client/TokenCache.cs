@@ -68,6 +68,20 @@ namespace Microsoft.Identity.Client
                 Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
+
+        public void DeleteAccessToken(string cacheKey, RequestContext requestContext)
+        {
+            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete){TokenType = CacheEvent.TokenTypes.AT};
+            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
+            try
+            {
+                DeleteAccessToken(cacheKey);
+            }
+            finally
+            {
+                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
+            }
+        }
     }
 
     /// <summary>
@@ -195,7 +209,7 @@ namespace Microsoft.Identity.Client
 
                     foreach (var cacheItem in accessTokenItemList)
                     {
-                        TokenCacheAccessor.DeleteAccessToken(cacheItem.GetAccessTokenItemKey().ToString());
+                        TokenCacheAccessor.DeleteAccessToken(cacheItem.GetAccessTokenItemKey().ToString(), requestParams.RequestContext);
                     }
 
                     TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString(),
@@ -587,7 +601,7 @@ namespace Microsoft.Identity.Client
 
                     foreach (AccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
                     {
-                        TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString());
+                        TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString(), requestContext);
                     }
 
                     requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
