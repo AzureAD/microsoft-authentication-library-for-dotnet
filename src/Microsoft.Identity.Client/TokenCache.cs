@@ -82,6 +82,20 @@ namespace Microsoft.Identity.Client
                 Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
+
+        public void DeleteRefreshToken(string cacheKey, RequestContext requestContext)
+        {
+            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.RT };
+            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
+            try
+            {
+                DeleteRefreshToken(cacheKey);
+            }
+            finally
+            {
+                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
+            }
+        }
     }
 
     /// <summary>
@@ -590,8 +604,7 @@ namespace Microsoft.Identity.Client
                         .ToList();
                     foreach (RefreshTokenCacheItem refreshTokenCacheItem in allRefreshTokens)
                     {
-                        TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey()
-                            .ToString());
+                        TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(), requestContext);
                     }
 
                     requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
