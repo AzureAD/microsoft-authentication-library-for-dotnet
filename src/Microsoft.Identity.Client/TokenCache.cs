@@ -85,9 +85,18 @@ namespace Microsoft.Identity.Client
             set { _hasStateChanged = value; }
         }
 
-        internal void OnAfterAccess(TokenCacheNotificationArgs args)
+        internal void OnAfterAccess(TokenCacheNotificationArgs args, RequestContext requestContext, CacheEvent.TokenTypes tokenType)
         {
-            AfterAccess?.Invoke(args);
+            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheAfterAccess) { TokenType = tokenType };
+            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
+            try
+            {
+                AfterAccess?.Invoke(args);
+            }
+            finally
+            {
+                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
+            }
         }
 
         internal void OnBeforeAccess(TokenCacheNotificationArgs args, RequestContext requestContext, CacheEvent.TokenTypes tokenType)
@@ -190,7 +199,7 @@ namespace Microsoft.Identity.Client
                             JsonHelper.SerializeToJson(refreshTokenCacheItem), requestParams.RequestContext);
                     }
 
-                    OnAfterAccess(args);
+                    OnAfterAccess(args, requestParams.RequestContext, CacheEvent.TokenTypes.AT);
                     return accessTokenCacheItem;
                 }
                 finally
@@ -230,7 +239,7 @@ namespace Microsoft.Identity.Client
                 OnBeforeAccess(args, requestParams.RequestContext, CacheEvent.TokenTypes.AT);
                 //filtered by client id.
                 ICollection<AccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensForClient(requestParams.RequestContext);
-                OnAfterAccess(args);
+                OnAfterAccess(args, requestParams.RequestContext, CacheEvent.TokenTypes.AT);
 
                 // this is OBO flow. match the cache entry with assertion hash,
                 // Authority, ScopeSet and client Id.
@@ -406,7 +415,7 @@ namespace Microsoft.Identity.Client
                 RefreshTokenCacheItem refreshTokenCacheItem =
                     JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(
                         TokenCacheAccessor.GetRefreshToken(key.ToString()));
-                OnAfterAccess(args);
+                OnAfterAccess(args, requestParam.RequestContext, CacheEvent.TokenTypes.RT);
 
                 requestParam.RequestContext.Logger.Info("Refresh token found in the cache? - " + (refreshTokenCacheItem!=null));
                 return refreshTokenCacheItem;
@@ -429,7 +438,7 @@ namespace Microsoft.Identity.Client
                     OnBeforeAccess(args, null, CacheEvent.TokenTypes.RT);
                     OnBeforeWrite(args);
                     TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString());
-                    OnAfterAccess(args);
+                    OnAfterAccess(args, null, CacheEvent.TokenTypes.RT);
                 }
                 finally
                 {
@@ -454,7 +463,7 @@ namespace Microsoft.Identity.Client
                     OnBeforeAccess(args, null, CacheEvent.TokenTypes.AT);
                     OnBeforeWrite(args);
                     TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString());
-                    OnAfterAccess(args);
+                    OnAfterAccess(args, null, CacheEvent.TokenTypes.AT);
                 }
                 finally
                 {
@@ -476,7 +485,7 @@ namespace Microsoft.Identity.Client
 
                 OnBeforeAccess(args, requestContext, CacheEvent.TokenTypes.RT);
                 ICollection<RefreshTokenCacheItem> tokenCacheItems = GetAllRefreshTokensForClient(requestContext);
-                OnAfterAccess(args);
+                OnAfterAccess(args, requestContext, CacheEvent.TokenTypes.RT);
 
                 IDictionary<string, User> allUsers = new Dictionary<string, User>();
                 foreach (RefreshTokenCacheItem item in tokenCacheItems)
@@ -566,7 +575,7 @@ namespace Microsoft.Identity.Client
                     }
 
                     requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
-                    OnAfterAccess(args);
+                    OnAfterAccess(args, requestContext, CacheEvent.TokenTypes.AT);
                 }
                 finally
                 {
@@ -639,7 +648,7 @@ namespace Microsoft.Identity.Client
 
                     TokenCacheAccessor.Clear();
 
-                    OnAfterAccess(args);
+                    OnAfterAccess(args, null, CacheEvent.TokenTypes.RT);
                 }
                 finally
                 {
@@ -674,7 +683,7 @@ namespace Microsoft.Identity.Client
                 }
                 finally
                 {
-                    OnAfterAccess(args);
+                    OnAfterAccess(args, null, CacheEvent.TokenTypes.AT);
                     HasStateChanged = false;
                 }
             }
@@ -706,7 +715,7 @@ namespace Microsoft.Identity.Client
                 }
                 finally
                 {
-                    OnAfterAccess(args);
+                    OnAfterAccess(args, null, CacheEvent.TokenTypes.RT);
                     HasStateChanged = false;
                 }
             }
