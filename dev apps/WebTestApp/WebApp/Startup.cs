@@ -40,7 +40,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
-namespace TodoListWebApp
+namespace WebApp
 {
     public class Startup
     {

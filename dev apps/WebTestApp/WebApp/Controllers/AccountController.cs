@@ -37,7 +37,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace TodoListWebApp.Controllers
+namespace WebApp.Controllers
 {
     public class AccountController : Controller
     {

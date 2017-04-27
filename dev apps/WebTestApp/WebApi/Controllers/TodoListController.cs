@@ -33,11 +33,11 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TodoListService.Models;
+using WebApi.Models;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace TodoListService.Controllers
+namespace WebApi.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
