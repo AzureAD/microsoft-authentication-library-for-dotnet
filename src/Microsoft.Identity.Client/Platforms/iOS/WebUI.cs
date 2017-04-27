@@ -65,13 +65,16 @@ namespace Microsoft.Identity.Client
             return authorizationResult;
         }
 
-        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
+        public static bool ContinueAuthentication(string url)
         {
             if (returnedUriReady != null)
             {
-                authorizationResult = authorizationResultInput;
-                returnedUriReady.Release();
+                return false;
             }
+
+            authorizationResult = new AuthorizationResult(AuthorizationStatus.Success, url);
+            returnedUriReady.Release();
+            return true;
         }
 
         public void Authenticate(Uri authorizationUri, Uri redirectUri, UIViewController vc, RequestContext requestContext)
@@ -96,7 +99,12 @@ namespace Microsoft.Identity.Client
         public void DidFinish(SFSafariViewController controller)
         {
             controller.DismissViewController(true, null);
-            SetAuthorizationResult(new AuthorizationResult(AuthorizationStatus.UserCancel, null));
+
+            if (returnedUriReady != null)
+            {
+                authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+                returnedUriReady.Release();
+            }
         }
 
         private UIViewController FindCurrentViewController(UIViewController rootViewController)
