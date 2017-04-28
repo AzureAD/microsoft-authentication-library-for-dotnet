@@ -50,9 +50,9 @@ namespace XForms
         private void RefreshCacheView()
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;
-            accessTokenCacheItems.ItemsSource = tokenCache.GetAllAccessTokensForClient(new RequestContext(Guid.Empty));
+            accessTokenCacheItems.ItemsSource = tokenCache.GetAllAccessTokensForClient(new RequestContext(Guid.Empty, null));
 
-            refreshTokenCacheItems.ItemsSource = tokenCache.GetAllRefreshTokensForClient(new RequestContext(Guid.Empty));
+            refreshTokenCacheItems.ItemsSource = tokenCache.GetAllRefreshTokensForClient(new RequestContext(Guid.Empty, null));
         }
 
         protected override void OnAppearing()
@@ -63,10 +63,10 @@ namespace XForms
         private void OnClearClicked(object sender, EventArgs e)
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;
-            var users = tokenCache.GetUsers(new Uri(App.Authority).Host, new RequestContext(Guid.Empty));
+            var users = tokenCache.GetUsers(new Uri(App.Authority).Host, new RequestContext(Guid.Empty, null));
             foreach (var user in users)
             {
-                tokenCache.Remove(user, new RequestContext(Guid.Empty));
+                tokenCache.Remove(user, new RequestContext(Guid.Empty, null));
             }
 
             RefreshCacheView();

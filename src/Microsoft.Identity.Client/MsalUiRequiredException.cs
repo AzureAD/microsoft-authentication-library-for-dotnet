@@ -47,6 +47,12 @@ namespace Microsoft.Identity.Client
         public static readonly string NoTokensFoundError = "no_tokens_found";
 
         /// <summary>
+        /// This error code comes back from AcquireTokenSilent calls when null user is 
+        /// passed into AcquireTokenSilent calls.
+        /// </summary>
+        public static readonly string UserNullError = "user_null";
+
+        /// <summary>
         /// This error code comes back from AcquireTokenSilent calls when null token cache reference 
         /// is passed into the application constructor
         /// </summary>

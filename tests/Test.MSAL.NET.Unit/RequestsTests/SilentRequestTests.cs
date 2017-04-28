@@ -84,11 +84,11 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             try
             {
                 new SilentRequest(parameters, false);
-                Assert.Fail("ArgumentNullException should have been thrown here");
+                Assert.Fail("MsalUiRequiredException should have been thrown here");
             }
-            catch (ArgumentNullException exc)
+            catch (MsalUiRequiredException exc)
             {
-                Assert.AreEqual(exc.ParamName, "User");
+                Assert.AreEqual(exc.ErrorCode, MsalUiRequiredException.UserNullError);
             }
 
             parameters.User = new User()
