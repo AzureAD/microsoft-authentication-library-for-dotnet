@@ -37,67 +37,6 @@ using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client
 {
-    internal class TelemetryTokenCacheAccessor : TokenCacheAccessor
-    {
-        // The content of this class has to be placed outside of its base class TokenCacheAccessor,
-        // otherwise we would have to modify multiple implementations of TokenCacheAccessor on different platforms.
-        public void SaveAccessToken(string cacheKey, string item, RequestContext requestContext)
-        {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.AT };
-            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
-            {
-                SaveAccessToken(cacheKey, item);
-            }
-            finally
-            {
-                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
-            }
-        }
-
-        public void SaveRefreshToken(string cacheKey, string item, RequestContext requestContext)
-        {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.RT };
-            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
-            {
-                SaveRefreshToken(cacheKey, item);
-            }
-            finally
-            {
-                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
-            }
-        }
-
-        public void DeleteAccessToken(string cacheKey, RequestContext requestContext)
-        {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete){TokenType = CacheEvent.TokenTypes.AT};
-            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
-            {
-                DeleteAccessToken(cacheKey);
-            }
-            finally
-            {
-                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
-            }
-        }
-
-        public void DeleteRefreshToken(string cacheKey, RequestContext requestContext)
-        {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.RT };
-            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
-            {
-                DeleteRefreshToken(cacheKey);
-            }
-            finally
-            {
-                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
-            }
-        }
-    }
-
     /// <summary>
     /// Token cache class used by ConfidentialClientApplication and PublicClientApplication to store access and refresh tokens.
     /// </summary>
