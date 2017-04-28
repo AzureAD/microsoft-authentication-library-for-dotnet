@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetProcessorArchitecture()
         {
-            if (Android.OS.Build.VERSION.SdkInt < Android.OS.Build.VERSION.Sdk.V.Lollipop)
+            if (Android.OS.Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.Lollipop)
             {
                 return Android.OS.Build.CpuAbi;
             }
