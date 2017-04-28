@@ -220,6 +220,51 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
+        public async Task AcquireTokenNoClientInfoReturnedTest()
+        {
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
+
+            MockWebUI ui = new MockWebUI()
+            {
+                MockResult = new AuthorizationResult(AuthorizationStatus.Success,
+                    TestConstants.AuthorityHomeTenant + "?code=some-code")
+            };
+
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                app.RedirectUri + "?code=some-code"));
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage("some-scope1 some-scope2",
+                    MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId), string.Empty)
+            });
+
+            try
+            {
+                AuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope).ConfigureAwait(false);
+            }
+            catch (MsalClientException exc)
+            {
+                Assert.IsNotNull(exc);
+                Assert.AreEqual(MsalClientException.JsonParseError, exc.ErrorCode);
+                Assert.AreEqual("client info is null", exc.Message);
+            }
+            finally
+            {
+                Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSameUserTest()
         {
             PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);

@@ -117,7 +117,12 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
             ScopeSet = Scope.AsSet();
             IdToken = IdToken.Parse(RawIdToken);
-            ClientInfo = ClientInfo.CreateFromJson(RawClientInfo);
+            if (!string.IsNullOrEmpty(RawClientInfo))
+            {
+                // this should only happen for client credentials.
+                ClientInfo = ClientInfo.CreateFromJson(RawClientInfo);
+            }
+
             if (IdToken != null)
             {
                 User = new User(GetUserIdentifier(), IdToken.PreferredUsername, IdToken.Name, IdToken.Issuer);

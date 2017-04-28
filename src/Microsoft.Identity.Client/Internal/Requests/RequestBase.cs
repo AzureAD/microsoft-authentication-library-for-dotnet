@@ -165,9 +165,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private AccessTokenCacheItem SaveTokenResponseToCache()
         {
             // developer passed in user object.
-            if (AuthenticationRequestParameters.ClientInfo != null)
+            AuthenticationRequestParameters.RequestContext.Logger.Info("checking client info returned from the server..");
+            ClientInfo fromServer = null;
+
+            if (!AuthenticationRequestParameters.IsClientCredentialRequest)
             {
-                ClientInfo fromServer = ClientInfo.CreateFromJson(Response.ClientInfo);
+                //client_info is not returned from client credential flows because there is no user present.
+                fromServer = ClientInfo.CreateFromJson(Response.ClientInfo);
+            }
+
+            if (fromServer!= null && AuthenticationRequestParameters.ClientInfo != null)
+            {
                 if (!fromServer.UniqueIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueIdentifier) ||
                     !fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.ClientInfo
                         .UniqueTenantIdentifier))

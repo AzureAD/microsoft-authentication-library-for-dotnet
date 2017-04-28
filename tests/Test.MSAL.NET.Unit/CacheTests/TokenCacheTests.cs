@@ -532,6 +532,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             TokenResponse response = new TokenResponse();
             response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
             response.AccessToken = "access-token";
+            response.ClientInfo = MockHelpers.CreateClientInfo();
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
             response.RefreshToken = "refresh-token";
@@ -562,6 +563,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
             TokenResponse response = new TokenResponse();
             response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
+            response.ClientInfo = MockHelpers.CreateClientInfo();
             response.AccessToken = "access-token";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
@@ -585,6 +587,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
             response = new TokenResponse();
             response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
+            response.ClientInfo = MockHelpers.CreateClientInfo();
             response.AccessToken = "access-token-2";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
@@ -612,6 +615,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
             TokenResponse response = new TokenResponse();
             response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
+            response.ClientInfo = MockHelpers.CreateClientInfo();
             response.AccessToken = "access-token";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
@@ -632,6 +636,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
             response = new TokenResponse();
             response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
+            response.ClientInfo = MockHelpers.CreateClientInfo();
             response.AccessToken = "access-token-2";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
@@ -711,6 +716,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
             TokenResponse response = new TokenResponse();
             response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
+            response.ClientInfo = MockHelpers.CreateClientInfo();
             response.AccessToken = "access-token";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";
@@ -731,6 +737,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
             response = new TokenResponse();
             response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
+            response.ClientInfo = MockHelpers.CreateClientInfo();
             response.AccessToken = "access-token-2";
             response.ExpiresIn = 3599;
             response.CorrelationId = "correlation-id";

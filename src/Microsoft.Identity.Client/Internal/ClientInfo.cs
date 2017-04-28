@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (string.IsNullOrEmpty(clientInfo))
             {
-                return null;
+                throw new MsalClientException(MsalClientException.JsonParseError, "client info is null");
             }
 
             try
