@@ -29,6 +29,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using System;
+using UIKit;
 
 namespace Microsoft.Identity.Client
 {
@@ -55,12 +56,12 @@ namespace Microsoft.Identity.Client
 
         public override string GetOperatingSystem()
         {
-            return null;
+            return UIDevice.CurrentDevice.SystemVersion;
         }
 
         public override string GetDeviceModel()
         {
-            return null;
+            return UIDevice.CurrentDevice.Model;
         }
 
         public override string GetAssemblyFileVersionAttribute()
