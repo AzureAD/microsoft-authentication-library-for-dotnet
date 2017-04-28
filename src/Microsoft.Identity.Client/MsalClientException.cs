@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client
         /// Authentication canceled.
         /// </summary>
         public const string AuthenticationCanceledError = "authentication_canceled";
-
+        
         /// <summary>
         /// JSON parsing failed.
         /// </summary>

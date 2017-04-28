@@ -84,7 +84,11 @@ namespace Microsoft.Identity.Client.Internal.Cache
         [OnDeserialized]
         void OnDeserialized(StreamingContext context)
         {
-            ClientInfo = ClientInfo.CreateFromJson(RawClientInfo);
+            if (!string.IsNullOrEmpty(RawClientInfo))
+            {
+                ClientInfo = ClientInfo.CreateFromJson(RawClientInfo);
+            }
+
             User = new User(GetUserIdentifier(), DisplayableId, Name, IdentityProvider);
         }
     }
