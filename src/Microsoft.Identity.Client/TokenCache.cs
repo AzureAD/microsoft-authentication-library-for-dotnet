@@ -85,47 +85,20 @@ namespace Microsoft.Identity.Client
             set { _hasStateChanged = value; }
         }
 
-        internal void OnAfterAccess(TokenCacheNotificationArgs args, RequestContext requestContext, CacheEvent.TokenTypes tokenType)
+        internal void OnAfterAccess(TokenCacheNotificationArgs args)
         {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheAfterAccess) { TokenType = tokenType };
-            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
-            {
-                AfterAccess?.Invoke(args);
-            }
-            finally
-            {
-                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
-            }
+            AfterAccess?.Invoke(args);
         }
 
-        internal void OnBeforeAccess(TokenCacheNotificationArgs args, RequestContext requestContext, CacheEvent.TokenTypes tokenType)
+        internal void OnBeforeAccess(TokenCacheNotificationArgs args)
         {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheBeforeAccess) { TokenType = tokenType };
-            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
-            {
-                BeforeAccess?.Invoke(args);
-            }
-            finally
-            {
-                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
-            }
+            BeforeAccess?.Invoke(args);
         }
 
-        internal void OnBeforeWrite(TokenCacheNotificationArgs args, RequestContext requestContext, CacheEvent.TokenTypes tokenType)
+        internal void OnBeforeWrite(TokenCacheNotificationArgs args)
         {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheBeforeWrite) { TokenType = tokenType };
-            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
-            {
-                HasStateChanged = true;
-                BeforeWrite?.Invoke(args);
-            }
-            finally
-            {
-                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
-            }
+            HasStateChanged = true;
+            BeforeWrite?.Invoke(args);
         }
 
         internal AccessTokenCacheItem SaveAccessAndRefreshToken(AuthenticationRequestParameters requestParams,
@@ -149,8 +122,8 @@ namespace Microsoft.Identity.Client
                     };
 
                     HasStateChanged = true;
-                    OnBeforeAccess(args, requestParams.RequestContext, CacheEvent.TokenTypes.AT);
-                    OnBeforeWrite(args, requestParams.RequestContext, CacheEvent.TokenTypes.AT);
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
 
                     //delete all cache entries with intersecting scopes.
                     //this should not happen but we have this as a safe guard
@@ -208,7 +181,7 @@ namespace Microsoft.Identity.Client
                             JsonHelper.SerializeToJson(refreshTokenCacheItem), requestParams.RequestContext);
                     }
 
-                    OnAfterAccess(args, requestParams.RequestContext, CacheEvent.TokenTypes.AT);
+                    OnAfterAccess(args);
                     return accessTokenCacheItem;
                 }
                 finally
@@ -245,10 +218,10 @@ namespace Microsoft.Identity.Client
                     User = requestParams.User
                 };
 
-                OnBeforeAccess(args, requestParams.RequestContext, CacheEvent.TokenTypes.AT);
+                OnBeforeAccess(args);
                 //filtered by client id.
                 ICollection<AccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensForClient(requestParams.RequestContext);
-                OnAfterAccess(args, requestParams.RequestContext, CacheEvent.TokenTypes.AT);
+                OnAfterAccess(args);
 
                 // this is OBO flow. match the cache entry with assertion hash,
                 // Authority, ScopeSet and client Id.
@@ -420,11 +393,11 @@ namespace Microsoft.Identity.Client
                     User = requestParam.User
                 };
 
-                OnBeforeAccess(args, requestParam.RequestContext, CacheEvent.TokenTypes.RT);
+                OnBeforeAccess(args);
                 RefreshTokenCacheItem refreshTokenCacheItem =
                     JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(
                         TokenCacheAccessor.GetRefreshToken(key.ToString()));
-                OnAfterAccess(args, requestParam.RequestContext, CacheEvent.TokenTypes.RT);
+                OnAfterAccess(args);
 
                 requestParam.RequestContext.Logger.Info("Refresh token found in the cache? - " + (refreshTokenCacheItem!=null));
                 return refreshTokenCacheItem;
@@ -444,10 +417,10 @@ namespace Microsoft.Identity.Client
                         User = refreshTokenCacheItem.User
                     };
 
-                    OnBeforeAccess(args, null, CacheEvent.TokenTypes.RT);
-                    OnBeforeWrite(args, null, CacheEvent.TokenTypes.RT);
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
                     TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString());
-                    OnAfterAccess(args, null, CacheEvent.TokenTypes.RT);
+                    OnAfterAccess(args);
                 }
                 finally
                 {
@@ -469,10 +442,10 @@ namespace Microsoft.Identity.Client
                         User = accessTokenCacheItem.User
                     };
 
-                    OnBeforeAccess(args, null, CacheEvent.TokenTypes.AT);
-                    OnBeforeWrite(args, null, CacheEvent.TokenTypes.AT);
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
                     TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString());
-                    OnAfterAccess(args, null, CacheEvent.TokenTypes.AT);
+                    OnAfterAccess(args);
                 }
                 finally
                 {
@@ -492,9 +465,9 @@ namespace Microsoft.Identity.Client
                     User = null
                 };
 
-                OnBeforeAccess(args, requestContext, CacheEvent.TokenTypes.RT);
+                OnBeforeAccess(args);
                 ICollection<RefreshTokenCacheItem> tokenCacheItems = GetAllRefreshTokensForClient(requestContext);
-                OnAfterAccess(args, requestContext, CacheEvent.TokenTypes.RT);
+                OnAfterAccess(args);
 
                 IDictionary<string, User> allUsers = new Dictionary<string, User>();
                 foreach (RefreshTokenCacheItem item in tokenCacheItems)
@@ -563,8 +536,8 @@ namespace Microsoft.Identity.Client
                         User = null
                     };
 
-                    OnBeforeAccess(args, requestContext, CacheEvent.TokenTypes.AT);
-                    OnBeforeWrite(args, requestContext, CacheEvent.TokenTypes.AT);
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
                     IList<RefreshTokenCacheItem> allRefreshTokens = GetAllRefreshTokensForClient(requestContext)
                         .Where(item => item.GetUserIdentifier().Equals(user.Identifier))
                         .ToList();
@@ -584,7 +557,7 @@ namespace Microsoft.Identity.Client
                     }
 
                     requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
-                    OnAfterAccess(args, requestContext, CacheEvent.TokenTypes.AT);
+                    OnAfterAccess(args);
                 }
                 finally
                 {
@@ -652,12 +625,12 @@ namespace Microsoft.Identity.Client
                         User = null
                     };
 
-                    OnBeforeAccess(args, null, CacheEvent.TokenTypes.RT);
-                    OnBeforeWrite(args, null, CacheEvent.TokenTypes.RT);
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
 
                     TokenCacheAccessor.Clear();
 
-                    OnAfterAccess(args, null, CacheEvent.TokenTypes.RT);
+                    OnAfterAccess(args);
                 }
                 finally
                 {
@@ -684,15 +657,15 @@ namespace Microsoft.Identity.Client
                 try
                 {
                     HasStateChanged = true;
-                    OnBeforeAccess(args, null, CacheEvent.TokenTypes.AT);
-                    OnBeforeWrite(args, null, CacheEvent.TokenTypes.AT);
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
 
                     TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString(),
                         JsonHelper.SerializeToJson(accessTokenCacheItem));
                 }
                 finally
                 {
-                    OnAfterAccess(args, null, CacheEvent.TokenTypes.AT);
+                    OnAfterAccess(args);
                     HasStateChanged = false;
                 }
             }
@@ -716,15 +689,15 @@ namespace Microsoft.Identity.Client
                 try
                 {
                     HasStateChanged = true;
-                    OnBeforeAccess(args, null, CacheEvent.TokenTypes.RT);
-                    OnBeforeWrite(args, null, CacheEvent.TokenTypes.RT);
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
 
                     TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(),
                         JsonHelper.SerializeToJson(refreshTokenCacheItem));
                 }
                 finally
                 {
-                    OnAfterAccess(args, null, CacheEvent.TokenTypes.RT);
+                    OnAfterAccess(args);
                     HasStateChanged = false;
                 }
             }
