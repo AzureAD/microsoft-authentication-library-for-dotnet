@@ -51,16 +51,16 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="authority"></param>
         /// <param name="clientId"></param>
+        /// <param name="authority"></param>
         /// <param name="redirectUri"></param>
         /// <param name="validateAuthority"></param>
-        protected ClientApplicationBase(string authority, string clientId, string redirectUri,
+        protected ClientApplicationBase(string clientId, string authority, string redirectUri,
             bool validateAuthority)
         {
+            ClientId = clientId;
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, validateAuthority);
             Authority = authorityInstance.CanonicalAuthority;
-            ClientId = clientId;
             RedirectUri = redirectUri;
             ValidateAuthority = validateAuthority;
             if (UserTokenCache != null)
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client
         {
             return
                 await
-                    AcquireTokenSilentCommonAsync(null, scope, user, false)
+                    AcquireTokenSilentCommonAsync(null, scope, user, false, ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority)
                         .ConfigureAwait(false);
         }
 
@@ -184,8 +184,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenSilentCommonAsync(authorityInstance, scope, user,
-                            forceRefresh)
-                        .ConfigureAwait(false);
+                        forceRefresh, ApiEvent.ApiIds.AcquireTokenSilentWithAuthority).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -204,11 +203,12 @@ namespace Microsoft.Identity.Client
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
-            IEnumerable<string> scope, IUser user, bool forceRefresh)
+            IEnumerable<string> scope, IUser user, bool forceRefresh, ApiEvent.ApiIds apiId)
         {
             var handler = new SilentRequest(
                 CreateRequestParameters(authority, scope, user, UserTokenCache),
-                forceRefresh);
+                forceRefresh)
+            { ApiId = apiId };
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

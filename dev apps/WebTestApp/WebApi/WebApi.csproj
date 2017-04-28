@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
+    <AssemblyName>WebApi</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PackageId>WebApi</PackageId>
+    <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
+    <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;dnxcore50;portable-net45+win8</PackageTargetFallback>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="Views\**\*">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.IISIntegration" Version="1.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="1.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="1.0.2" />
+  </ItemGroup>
+
+  <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish">
+    <Exec Command="npm install" />
+    <Exec Command="bower install" />
+    <Exec Command="gulp clean" />
+    <Exec Command="gulp min" />
+  </Target>
+
+</Project>

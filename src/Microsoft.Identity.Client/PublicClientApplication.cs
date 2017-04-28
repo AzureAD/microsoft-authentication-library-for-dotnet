@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId">Client id of the application</param>
         /// <param name="authority">Default authority to be used for the application</param>
         public PublicClientApplication(string clientId, string authority)
-            : base(authority, clientId, DEFAULT_REDIRECT_URI, true)
+            : base(clientId, authority, DEFAULT_REDIRECT_URI, true)
         {
             UserTokenCache = new TokenCache()
             {
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scope, null, null,
-                        UIBehavior.SelectAccount, null, null).ConfigureAwait(false);
+                        UIBehavior.SelectAccount, null, null, ApiEvent.ApiIds.AcquireTokenWithScope).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scope, null, loginHint,
-                        UIBehavior.SelectAccount, null, null).ConfigureAwait(false);
+                        UIBehavior.SelectAccount, null, null, ApiEvent.ApiIds.AcquireTokenWithScopeHint).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scope, null, user,
-                        UIBehavior.SelectAccount, null, null).ConfigureAwait(false);
+                        UIBehavior.SelectAccount, null, null, ApiEvent.ApiIds.AcquireTokenWithScopeUser).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scope, null, loginHint,
-                        behavior, extraQueryParameters, null).ConfigureAwait(false);
+                        behavior, extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehavior).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scope, null, user, behavior,
-                        extraQueryParameters, null).ConfigureAwait(false);
+                        extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehavior).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authorityInstance, scope, additionalScope,
-                        loginHint, behavior, extraQueryParameters, null).ConfigureAwait(false);
+                        loginHint, behavior, extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehaviorAuthority).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForUserCommonAsync(authorityInstance, scope, additionalScope, user,
-                        behavior, extraQueryParameters, null).ConfigureAwait(false);
+                        behavior, extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehaviorAuthority).ConfigureAwait(false);
         }
 #endif
 
@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scope, null, null,
-                        UIBehavior.SelectAccount, null, parent).ConfigureAwait(false);
+                        UIBehavior.SelectAccount, null, parent, ApiEvent.ApiIds.AcquireTokenWithScope).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -224,7 +224,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scope, null, loginHint,
-                        UIBehavior.SelectAccount, null, parent).ConfigureAwait(false);
+                        UIBehavior.SelectAccount, null, parent, ApiEvent.ApiIds.AcquireTokenWithScopeHint).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scope, null, user,
-                        UIBehavior.SelectAccount, null, parent).ConfigureAwait(false);
+                        UIBehavior.SelectAccount, null, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUser).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scope, null, loginHint,
-                        behavior, extraQueryParameters, parent).ConfigureAwait(false);
+                        behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehavior).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scope, null, user, behavior,
-                        extraQueryParameters, parent).ConfigureAwait(false);
+                        extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehavior).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -301,7 +301,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authorityInstance, scope, additionalScope,
-                        loginHint, behavior, extraQueryParameters, parent).ConfigureAwait(false);
+                        loginHint, behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehaviorAuthority).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -322,7 +322,7 @@ namespace Microsoft.Identity.Client
             return
                 await
                     AcquireTokenForUserCommonAsync(authorityInstance, scope, additionalScope, user,
-                        behavior, extraQueryParameters, parent).ConfigureAwait(false);
+                        behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehaviorAuthority).ConfigureAwait(false);
         }
 
 
@@ -348,18 +348,18 @@ namespace Microsoft.Identity.Client
 
         private async Task<AuthenticationResult> AcquireTokenForLoginHintCommonAsync(Authority authority, IEnumerable<string> scope,
             IEnumerable<string> additionalScope, string loginHint, UIBehavior behavior,
-            string extraQueryParameters, UIParent parent)
+            string extraQueryParameters, UIParent parent, ApiEvent.ApiIds apiId)
         {
             var requestParams = CreateRequestParameters(authority, scope, null, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
             var handler =
                 new InteractiveRequest(requestParams, additionalScope, loginHint, behavior,
-                    CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext));
+                    CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext)){ApiId = apiId};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> AcquireTokenForUserCommonAsync(Authority authority, IEnumerable<string> scope,
-            IEnumerable<string> additionalScope, IUser user, UIBehavior behavior, string extraQueryParameters, UIParent parent)
+            IEnumerable<string> additionalScope, IUser user, UIBehavior behavior, string extraQueryParameters, UIParent parent, ApiEvent.ApiIds apiId)
         {
 
             var requestParams = CreateRequestParameters(authority, scope, user, UserTokenCache);
@@ -367,7 +367,7 @@ namespace Microsoft.Identity.Client
 
             var handler =
                 new InteractiveRequest(requestParams, additionalScope, behavior,
-                    CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext));
+                    CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext)){ApiId = apiId};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

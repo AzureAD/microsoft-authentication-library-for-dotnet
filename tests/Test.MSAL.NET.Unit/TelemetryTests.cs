@@ -98,7 +98,7 @@ namespace Test.MSAL.NET.Unit
             var reqId = telemetry.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent() {Authority = "https://login.microsoftonline.com", AuthorityType = "Aad"};
+                var e1 = new ApiEvent() {Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad"};
                 telemetry.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -129,7 +129,7 @@ namespace Test.MSAL.NET.Unit
             var reqId = telemetry.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent() { Authority = "https://login.microsoftonline.com", AuthorityType = "Aad" };
+                var e1 = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 telemetry.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -148,7 +148,7 @@ namespace Test.MSAL.NET.Unit
             reqId = telemetry.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent() { Authority = "https://login.microsoftonline.com", AuthorityType = "Aad" };
+                var e1 = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 telemetry.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = false;  // mimic an unsuccessful event, so that this batch should be dispatched

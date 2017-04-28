@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 
+using System;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
@@ -40,17 +41,42 @@ namespace Microsoft.Identity.Client
         public const string ConstTenantId = EventNamePrefix + "tenant_id";
         public const string ConstUserId = EventNamePrefix + "user_id";
         public const string ConstWasSuccessful = EventNamePrefix + "was_successful";
+        public const string ConstCorrelationId = EventNamePrefix + "correlation_id";
+        public const string ConstRequestId = EventNamePrefix + "request_id";
+        public const string ConstIsConfidentialClient = EventNamePrefix + "is_confidential_client";
+
+        public enum ApiIds
+        {
+            AcquireTokenSilentWithAuthority = 31,
+            AcquireTokenSilentWithoutAuthority = 30,
+
+            AcquireTokenWithScope = 170,
+            AcquireTokenWithScopeHint = 171,
+            AcquireTokenWithScopeHintBehavior = 172,
+            AcquireTokenWithScopeHintBehaviorAuthority = 173,
+            AcquireTokenWithScopeUser = 176,
+            AcquireTokenWithScopeUserBehavior = 174,
+            AcquireTokenWithScopeUserBehaviorAuthority = 175,
+
+            AcquireTokenOnBehalfOfWithScopeUser = 520,
+            AcquireTokenOnBehalfOfWithScopeUserAuthority = 521,
+
+            AcquireTokenForClientWithScope = 726,
+            AcquireTokenForClientWithScopeRefresh = 727,
+
+            AcquireTokenByAuthorizationCodeWithCodeScope = 830,
+        }
 
         public ApiEvent() : base(EventNamePrefix + "api_event") {}
 
-        public int ApiId
+        public ApiIds ApiId
         {
-            set => this[ConstApiId] = value.ToString();
+            set => this[ConstApiId] = ((int)value).ToString();
         }
 
-        public string Authority
+        public Uri Authority
         {
-            set => this[ConstAuthority] = value?.ToLower();
+            set => this[ConstAuthority] = ScrubTenant(value)?.ToLower();
         }
 
         public string AuthorityType
@@ -82,6 +108,21 @@ namespace Microsoft.Identity.Client
         {
             set => this[ConstWasSuccessful] = value.ToString().ToLower();
             get => this[ConstWasSuccessful] == true.ToString().ToLower();
+        }
+
+        public string CorrelationId
+        {
+            set => this[ConstCorrelationId] = value;
+        }
+
+        public string RequestId
+        {
+            set => this[ConstRequestId] = value;
+        }
+
+        public bool IsConfidentialClient
+        {
+            set => this[ConstIsConfidentialClient] = value.ToString().ToLower();
         }
     }
 }
