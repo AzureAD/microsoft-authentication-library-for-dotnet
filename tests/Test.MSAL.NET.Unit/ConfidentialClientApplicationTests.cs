@@ -250,12 +250,8 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(0, app.AppTokenCache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count); //no refresh tokens are returned
         }
 
-        [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
-        public void ConfidentialClientUsingCertificateTest()
+        private ConfidentialClientApplication CreateConfidentialClient(ClientCredential cc)
         {
-            ClientCredential cc =
-                new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid_cert.pfx", "password")));
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
                 TestConstants.RedirectUri, cc, new TokenCache(),
                 new TokenCache())
@@ -281,6 +277,16 @@ namespace Test.MSAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
             });
+            return app;
+        }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public void ConfidentialClientUsingCertificateTest()
+        {
+            ClientCredential cc =
+                new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid_cert.pfx", "password")));
+            var app = CreateConfidentialClient(cc);
 
             Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
             AuthenticationResult result = task.Result;
@@ -316,7 +322,17 @@ namespace Test.MSAL.NET.Unit
                 anEvent[EventBase.ConstEventName].EndsWith("http_event") && anEvent[HttpEvent.ConstResponseCode] == "200"
                 && anEvent[HttpEvent.ConstHttpPath].Contains(EventBase.TenantPlaceHolder) // The tenant info is expected to be replaced by a holder
                 ));
+        }
 
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public void ConfidentialClientUsingCertificateTelemetryTest()
+        {
+            ClientCredential cc =
+                new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid_cert.pfx", "password")));
+            var app = CreateConfidentialClient(cc);
+            Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
+            AuthenticationResult result = task.Result;
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent => // Expect finding such an event
                 anEvent[EventBase.ConstEventName].EndsWith("token_cache_lookup") && anEvent[CacheEvent.ConstTokenType] == "at"));
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent => // Expect finding such an event
