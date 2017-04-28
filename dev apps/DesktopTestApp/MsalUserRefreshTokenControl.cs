@@ -39,7 +39,7 @@ namespace DesktopTestApp
 
         private void signOutUserOneBtn_Click(object sender, System.EventArgs e)
         {
-            _cache.Remove(_item.User, new RequestContext(Guid.Empty));
+            _cache.Remove(_item.User, new RequestContext(Guid.Empty, null));
             RefreshViewDelegate?.Invoke();
         }
     }

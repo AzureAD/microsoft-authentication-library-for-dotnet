@@ -520,7 +520,7 @@ namespace Test.MSAL.NET.Unit
                 ValidateAuthority = false
             };
 
-            var accessTokens = cache.GetAllAccessTokensForClient(new RequestContext(new Guid()));
+            var accessTokens = cache.GetAllAccessTokensForClient(new RequestContext(Guid.NewGuid(), null));
             var accessTokenInCache = accessTokens.Where(
                     item =>
                         item.ScopeSet.ScopeContains(TestConstants.Scope))
@@ -574,7 +574,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(tokenRetrievedFromNetCall, result.AccessToken);
 
             // make sure token in Cache was updated
-            var accessTokens = cache.GetAllAccessTokensForClient(new RequestContext(new Guid()));
+            var accessTokens = cache.GetAllAccessTokensForClient(new RequestContext(Guid.NewGuid(), null));
             var accessTokenInCache = accessTokens.Where(
                     item =>
                         item.ScopeSet.ScopeContains(TestConstants.Scope))

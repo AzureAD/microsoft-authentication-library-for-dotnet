@@ -93,6 +93,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AcquirePageRenderer.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
     <None Include="Entitlements.plist" />
@@ -145,7 +146,6 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
-
   <!-- Import the Xamarin targets workaround -->
   <Import Project="..\Patch.Xamarin.Common.targets" />
 </Project>

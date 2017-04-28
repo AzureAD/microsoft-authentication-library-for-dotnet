@@ -68,12 +68,17 @@ namespace Microsoft.Identity.Client
                 UserTokenCache.ClientId = clientId;
             }
 
-            RequestContext requestContext = new RequestContext(Guid.Empty);
+            RequestContext requestContext = new RequestContext(Guid.Empty, null);
             requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
                 "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
                 PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
                 MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
         }
+
+        /// <summary>
+        /// Identifier of the component consuming MSAL and it is intended for libraries/SDKs that consume MSAL. This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
+        /// </summary>
+        public string Component { get; set; }
 
         /// <Summary>
         /// Authority provided by the developer or default authority used by the library.
@@ -121,7 +126,7 @@ namespace Microsoft.Identity.Client
         {
             get
             {
-                RequestContext requestContext = new RequestContext(Guid.Empty);
+                RequestContext requestContext = new RequestContext(Guid.Empty, null);
                 if (UserTokenCache == null)
                 {
                     requestContext.Logger.Info("Token cache is null or empty. Returning empty list of users.");
@@ -214,6 +219,7 @@ namespace Microsoft.Identity.Client
             return new AuthenticationRequestParameters
             {
                 Authority = authority,
+                ClientId =  ClientId,
                 TokenCache = cache,
                 User = user,
                 Scope = scope.CreateSetFromEnumerable(),
@@ -226,7 +232,7 @@ namespace Microsoft.Identity.Client
         internal RequestContext CreateRequestContext(Guid correlationId)
         {
             correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
-            return new RequestContext(correlationId);
+            return new RequestContext(correlationId, Component);
         }
     }
 }

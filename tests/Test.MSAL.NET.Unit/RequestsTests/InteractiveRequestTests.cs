@@ -118,7 +118,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientId = TestConstants.ClientId,
                 Scope = TestConstants.Scope,
                 TokenCache = cache, 
-                RequestContext = new RequestContext(Guid.Empty)
+                RequestContext = new RequestContext(Guid.Empty, null)
             };
 
             parameters.RedirectUri = new Uri("some://uri");
@@ -157,7 +157,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     ClientId = TestConstants.ClientId,
                     Scope = TestConstants.Scope,
                     TokenCache = null,
-                    RequestContext = new RequestContext(Guid.Empty)
+                    RequestContext = new RequestContext(Guid.Empty, null)
                 };
 
                 parameters.RedirectUri = new Uri("some://uri#fragment=not-so-good");
@@ -197,7 +197,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientId = TestConstants.ClientId,
                 Scope = TestConstants.Scope,
                 TokenCache = null,
-                RequestContext = new RequestContext(Guid.Empty)
+                RequestContext = new RequestContext(Guid.Empty, null)
             };
 
             parameters.RedirectUri = new Uri("some://uri");
@@ -254,7 +254,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientId = TestConstants.ClientId,
                 Scope = TestConstants.Scope,
                 TokenCache = null,
-                RequestContext = new RequestContext(Guid.Empty)
+                RequestContext = new RequestContext(Guid.Empty, null)
             };
 
             parameters.RedirectUri = new Uri("some://uri");

@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client
             string authority);
 
 #endif
-
+        
         // these API methods are exposed on other platforms.
         /// <summary>
         /// Interactive request to acquire token. 

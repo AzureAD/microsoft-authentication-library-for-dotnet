@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
-            RequestContext requestContext = new RequestContext(Guid.Empty);
+            RequestContext requestContext = new RequestContext(Guid.Empty, null);
 
             requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
             AuthorizationResult authorizationResult = null;

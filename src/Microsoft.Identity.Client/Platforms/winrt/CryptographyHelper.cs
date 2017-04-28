@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client
 
         private static T RunAsyncTaskAndWait<T>(Task<T> task)
         {
-            RequestContext requestContext = new RequestContext(Guid.Empty);
+            RequestContext requestContext = new RequestContext(Guid.Empty, null);
 
             try
             {
