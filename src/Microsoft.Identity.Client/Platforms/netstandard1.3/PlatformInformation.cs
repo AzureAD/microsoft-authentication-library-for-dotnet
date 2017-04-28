@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetOperatingSystem()
         {
-            return null;
+            return System.Runtime.InteropServices.RuntimeInformation.OSDescription;
         }
 
         public override string GetDeviceModel()
