@@ -41,7 +41,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (authenticationRequestParameters.User == null)
             {
-                throw new ArgumentNullException(nameof(authenticationRequestParameters.User));
+                throw new MsalUiRequiredException(MsalUiRequiredException.UserNullError, "Null user was passed in AcquiretokenSilent API. Pass in " +
+                                                                                         "a user object or call acquireToken authenticate.");
             }
 
             ForceRefresh = forceRefresh;
