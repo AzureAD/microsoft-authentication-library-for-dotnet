@@ -139,7 +139,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
             try
             {
                 var msalHttpResponse = await HttpRequest.SendGet(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), new RequestContext(Guid.Empty)).ConfigureAwait(false);
+                    new Dictionary<string, string>(), new RequestContext(Guid.Empty, null)).ConfigureAwait(false);
                 Assert.Fail("request should have failed");
             }
             catch (MsalServiceException exc)
@@ -170,7 +170,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
             try
             {
                 var msalHttpResponse = await HttpRequest.SendPost(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), null, new RequestContext(Guid.Empty)).ConfigureAwait(false);
+                    new Dictionary<string, string>(), null, new RequestContext(Guid.Empty, null)).ConfigureAwait(false);
                 Assert.Fail("request should have failed");
             }
             catch (MsalServiceException exc)
@@ -203,7 +203,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
             try
             {
                 var msalHttpResponse = await HttpRequest.SendGet(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), new RequestContext(Guid.Empty)).ConfigureAwait(false);
+                    new Dictionary<string, string>(), new RequestContext(Guid.Empty, null)).ConfigureAwait(false);
                 Assert.Fail("request should have failed");
             }
             catch (MsalServiceException exc)
@@ -237,7 +237,7 @@ namespace Test.MSAL.NET.Unit.HttpTests
             try
             {
                 var msalHttpResponse = await HttpRequest.SendPost(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), new Dictionary<string, string>(), new RequestContext(Guid.Empty)).ConfigureAwait(false);
+                    new Dictionary<string, string>(), new Dictionary<string, string>(), new RequestContext(Guid.Empty, null)).ConfigureAwait(false);
                 Assert.Fail("request should have failed");
             }
             catch (MsalServiceException exc)

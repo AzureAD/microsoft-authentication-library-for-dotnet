@@ -72,10 +72,19 @@ namespace Microsoft.Identity.Client
             Verbose = 3
         }
 
-        internal Logger(Guid correlationId)
+        internal Logger(Guid correlationId, string component)
         {
             CorrelationId = correlationId;
+
+            Component = string.Empty;
+            if (!string.IsNullOrEmpty(component))
+            {
+                //space is intentional for formatting of the message
+                Component = string.Format(CultureInfo.InvariantCulture, " ({0})", component);
+            }
         }
+
+        internal string Component { get; set; }
 
         private Guid CorrelationId { get; set; }
 
@@ -229,10 +238,11 @@ namespace Microsoft.Identity.Client
                 os = MsalIdHelper.GetMsalIdParameters()[MsalIdParameter.OS];
             }
 
-            string log = string.Format(CultureInfo.InvariantCulture, "MSAL {0} {1} {2} [{3}{4}] {5}",
+
+            string log = string.Format(CultureInfo.InvariantCulture, "MSAL {0} {1} {2} [{3}{4}]{5} {6}",
                 MsalIdHelper.GetMsalVersion(),
-                PlatformPlugin.PlatformInformation.GetOperatingSystem(),
-                os, DateTime.UtcNow, correlationId, logMessage);
+                MsalIdHelper.GetMsalIdParameters()[MsalIdParameter.Product],
+                os, DateTime.UtcNow, correlationId, Component, logMessage);
 
             if (DefaultLoggingEnabled)
             {

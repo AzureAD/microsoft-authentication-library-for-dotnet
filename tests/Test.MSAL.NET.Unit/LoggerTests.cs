@@ -34,7 +34,7 @@ using NSubstitute;
 namespace Test.MSAL.NET.Unit
 {
     [TestClass]
-    public class LoggerCallbackTests
+    public class LoggerTests
     {
         //private static ILoggerCallback _callback;
         private static LogCallback _callback;
@@ -47,216 +47,224 @@ namespace Test.MSAL.NET.Unit
             _callback = Substitute.For<LogCallback>();
             Logger.LogCallback = _callback;
         }
+        
+        [TestMethod()]
+        [TestCategory("LoggerTests")]
+        public void ConstructorComponentTest()
+        {
+            Logger logger = new Logger(Guid.Empty, null);
+            Assert.AreEqual(string.Empty, logger.Component);
+            logger = new Logger(Guid.Empty, "comp1");
+            Assert.AreEqual(" (comp1)", logger.Component);
+        }
 
         [TestMethod()]
-        [TestCategory("LoggerCallbackTests")]
-        public void CallbackTestError()
+        [TestCategory("LoggerTests")]
+        public void CallbackTestErrorTest()
         {
-            RequestContext requestContext = new RequestContext(Guid.Empty);
-
+            Logger logger = new Logger(Guid.Empty, null);
             var counter = 0;
             Logger.Level = Logger.LogLevel.Error;
 
             _callback.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Error(new Exception("test message"));
+            logger.Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Warning("test message");
+            logger.Warning("test message");
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Info("test message");
+            logger.Info("test message");
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Verbose("test message");
+            logger.Verbose("test message");
             Assert.AreEqual(1, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerCallbackTests")]
+        [TestCategory("LoggerTests")]
         public void CallbackTestWarning()
         {
-            RequestContext requestContext = new RequestContext(Guid.Empty);
-
+            Logger logger = new Logger(Guid.Empty, null);
             var counter = 0;
             Logger.Level = Logger.LogLevel.Warning;
 
             _callback.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Error(new Exception("test message"));
+            logger.Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Warning("test message");
+            logger.Warning("test message");
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Info("test message");
+            logger.Info("test message");
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Verbose("test message");
+            logger.Verbose("test message");
             Assert.AreEqual(2, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerCallbackTests")]
+        [TestCategory("LoggerTests")]
         public void CallbackTestInfo()
         {
-            RequestContext requestContext = new RequestContext(Guid.Empty);
+            Logger logger = new Logger(Guid.Empty, null);
 
             var counter = 0;
             Logger.Level = Logger.LogLevel.Info;
 
             _callback.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Error(new Exception("test message"));
+            logger.Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Warning("test message");
+            logger.Warning("test message");
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Info("test message");
+            logger.Info("test message");
             Assert.AreEqual(3, counter);
 
             _callback.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Verbose("test message");
+            logger.Verbose("test message");
             Assert.AreEqual(3, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerCallbackTests")]
+        [TestCategory("LoggerTests")]
         public void CallbackTestVerbose()
         {
-            RequestContext requestContext = new RequestContext(Guid.Empty);
+            Logger logger = new Logger(Guid.Empty, null);
 
             var counter = 0;
             Logger.Level = Logger.LogLevel.Verbose;
 
             _callback.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Error(new Exception("test message"));
+            logger.Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Warning("test message");
+            logger.Warning("test message");
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Info("test message");
+            logger.Info("test message");
             Assert.AreEqual(3, counter);
 
             _callback.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
-            requestContext.Logger.Verbose("test message");
+            logger.Verbose("test message");
             Assert.AreEqual(4, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerCallbackTests")]
+        [TestCategory("LoggerTests")]
         public void CallbackTestErrorPii()
         {
-            RequestContext requestContext = new RequestContext(Guid.Empty);
+            Logger logger = new Logger(Guid.Empty, null);
 
             var counter = 0;
             Logger.Level = Logger.LogLevel.Error;
             Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.ErrorPii(new Exception("test message"));
+            logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.WarningPii("test message");
+            logger.WarningPii("test message");
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.InfoPii("test message");
+            logger.InfoPii("test message");
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.VerbosePii("test message");
+            logger.VerbosePii("test message");
             Assert.AreEqual(1, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerCallbackTests")]
+        [TestCategory("LoggerTests")]
         public void CallbackTestWarningPii()
         {
-            RequestContext requestContext = new RequestContext(Guid.Empty);
+            Logger logger = new Logger(Guid.Empty, null);
 
             var counter = 0;
             Logger.Level = Logger.LogLevel.Warning;
             Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.ErrorPii(new Exception("test message"));
+            logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.WarningPii("test message");
+            logger.WarningPii("test message");
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.InfoPii("test message");
+            logger.InfoPii("test message");
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.VerbosePii("test message");
+            logger.VerbosePii("test message");
             Assert.AreEqual(2, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerCallbackTests")]
+        [TestCategory("LoggerTests")]
         public void CallbackTestInfoPii()
         {
-            RequestContext requestContext = new RequestContext(Guid.Empty);
+            Logger logger = new Logger(Guid.Empty, null);
 
             var counter = 0;
             Logger.Level = Logger.LogLevel.Info;
             Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.ErrorPii(new Exception("test message"));
+            logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.WarningPii("test message");
+            logger.WarningPii("test message");
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.InfoPii("test message");
+            logger.InfoPii("test message");
             Assert.AreEqual(3, counter);
 
             _callback.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.VerbosePii("test message");
+            logger.VerbosePii("test message");
             Assert.AreEqual(3, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerCallbackTests")]
+        [TestCategory("LoggerTests")]
         public void CallbackTestVerbosePii()
         {
-            RequestContext requestContext = new RequestContext(Guid.Empty);
+            Logger logger = new Logger(Guid.Empty, null);
 
             var counter = 0;
             Logger.Level = Logger.LogLevel.Verbose;
             Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.ErrorPii(new Exception("test message"));
+            logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.WarningPii("test message");
+            logger.WarningPii("test message");
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(Logger.LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.InfoPii("test message");
+            logger.InfoPii("test message");
             Assert.AreEqual(3, counter);
 
             _callback.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
-            requestContext.Logger.VerbosePii("test message");
+            logger.VerbosePii("test message");
             Assert.AreEqual(4, counter);
         }
     }

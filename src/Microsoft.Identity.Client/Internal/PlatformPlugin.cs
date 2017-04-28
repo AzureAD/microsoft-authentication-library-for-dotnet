@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Internal
             InjectDependecies(
                 (IWebUIFactory) new WebUIFactory(),
                 (ILogger) new PlatformLogger(),
-                (PlatformInformationBase) new PlatformInformation(new RequestContext(Guid.Empty)));
+                (PlatformInformationBase) new PlatformInformation(new RequestContext(Guid.Empty, null)));
 #endif
         }
 

@@ -196,7 +196,6 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
@@ -376,7 +375,6 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scope, IUser user, TokenCache cache)
         {
             AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scope, user, cache);
-            parameters.ClientId = ClientId;
             return parameters;
         }
     }
