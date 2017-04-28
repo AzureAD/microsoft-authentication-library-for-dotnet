@@ -28,6 +28,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
+using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client
 {
@@ -50,17 +51,28 @@ namespace Microsoft.Identity.Client
 
         public override string GetProcessorArchitecture()
         {
+            if (Android.OS.Build.VERSION.SdkInt < Android.OS.Build.VERSION.Sdk.V.Lollipop)
+            {
+                return Android.OS.Build.CpuAbi;
+            }
+
+            IList<string> supportedABIs = Android.OS.Build.SupportedAbis;
+            if (supportedABIs != null && supportedABIs.Count > 0)
+            {
+                return supportedABIs[0];
+            }
+
             return null;
         }
 
         public override string GetOperatingSystem()
         {
-            return null;
+            return Android.OS.Build.VERSION.Sdk;
         }
 
         public override string GetDeviceModel()
         {
-            return null;
+            return Android.OS.Build.Model;
         }
 
         public override void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
