@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
     {
         private const int DefaultExpirationBufferInMinutes = 5;
 
-        internal readonly TokenCacheAccessor TokenCacheAccessor = new TokenCacheAccessor();
+        internal readonly TelemetryTokenCacheAccessor TokenCacheAccessor = new TelemetryTokenCacheAccessor();
 
         /// <summary>
         /// Notification for certain token cache interactions during token acquisition.
@@ -162,11 +162,11 @@ namespace Microsoft.Identity.Client
 
                     foreach (var cacheItem in accessTokenItemList)
                     {
-                        TokenCacheAccessor.DeleteAccessToken(cacheItem.GetAccessTokenItemKey().ToString());
+                        TokenCacheAccessor.DeleteAccessToken(cacheItem.GetAccessTokenItemKey().ToString(), requestParams.RequestContext);
                     }
 
                     TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString(),
-                        JsonHelper.SerializeToJson(accessTokenCacheItem));
+                        JsonHelper.SerializeToJson(accessTokenCacheItem), requestParams.RequestContext);
 
                     // if server returns the refresh token back, save it in the cache.
                     if (response.RefreshToken != null)
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client
                             response);
                         requestParams.RequestContext.Logger.Info("Saving RT in cache...");
                         TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(),
-                            JsonHelper.SerializeToJson(refreshTokenCacheItem));
+                            JsonHelper.SerializeToJson(refreshTokenCacheItem), requestParams.RequestContext);
                     }
 
                     OnAfterAccess(args);
@@ -192,6 +192,20 @@ namespace Microsoft.Identity.Client
         }
 
         internal AccessTokenCacheItem FindAccessToken(AuthenticationRequestParameters requestParams)
+        {
+            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.AT };
+            Telemetry.GetInstance().StartEvent(requestParams.RequestContext.TelemetryRequestId, cacheEvent);
+            try
+            {
+                return FindAccessTokenCommon(requestParams);
+            }
+            finally
+            {
+                Telemetry.GetInstance().StopEvent(requestParams.RequestContext.TelemetryRequestId, cacheEvent);
+            }
+        }
+
+        private AccessTokenCacheItem FindAccessTokenCommon(AuthenticationRequestParameters requestParams)
         {
             lock (LockObject)
             {
@@ -345,7 +359,21 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal RefreshTokenCacheItem FindRefreshToken(AuthenticationRequestParameters requestParam)
+        internal RefreshTokenCacheItem FindRefreshToken(AuthenticationRequestParameters requestParams)
+        {
+            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT };
+            Telemetry.GetInstance().StartEvent(requestParams.RequestContext.TelemetryRequestId, cacheEvent);
+            try
+            {
+                return FindRefreshTokenCommon(requestParams);
+            }
+            finally
+            {
+                Telemetry.GetInstance().StopEvent(requestParams.RequestContext.TelemetryRequestId, cacheEvent);
+            }
+        }
+
+        private RefreshTokenCacheItem FindRefreshTokenCommon(AuthenticationRequestParameters requestParam)
         {
             lock (LockObject)
             {
@@ -515,8 +543,7 @@ namespace Microsoft.Identity.Client
                         .ToList();
                     foreach (RefreshTokenCacheItem refreshTokenCacheItem in allRefreshTokens)
                     {
-                        TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey()
-                            .ToString());
+                        TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(), requestContext);
                     }
 
                     requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
@@ -526,7 +553,7 @@ namespace Microsoft.Identity.Client
 
                     foreach (AccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
                     {
-                        TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString());
+                        TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString(), requestContext);
                     }
 
                     requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
