@@ -35,6 +35,16 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal static class MsalHelpers
     {
+        public static string ToStringInvariant(this int val)
+        {
+            return val.ToString(CultureInfo.InvariantCulture);
+        }
+        
+        public static string ToStringInvariant(this long val)
+        {
+            return val.ToString(CultureInfo.InvariantCulture);
+        }
+
         public static bool ScopeContains(this SortedSet<string> scope, SortedSet<string> otherScope)
         {
             foreach (string otherString in otherScope)

@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client
 
         public bool UserCancelled
         {
-            set => this[ConstUserCancelled] = value.ToString().ToLower();
+            set => this[ConstUserCancelled] = value.ToString().ToLowerInvariant();
         }
     }
 }

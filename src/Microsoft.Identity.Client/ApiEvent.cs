@@ -71,27 +71,27 @@ namespace Microsoft.Identity.Client
 
         public ApiIds ApiId
         {
-            set => this[ConstApiId] = ((int)value).ToString();
+            set => this[ConstApiId] = ((int)value).ToStringInvariant();
         }
 
         public Uri Authority
         {
-            set => this[ConstAuthority] = ScrubTenant(value)?.ToLower();
+            set => this[ConstAuthority] = ScrubTenant(value)?.ToLowerInvariant();
         }
 
         public string AuthorityType
         {
-            set => this[ConstAuthorityType] = value?.ToLower();
+            set => this[ConstAuthorityType] = value?.ToLowerInvariant();
         }
 
         public string UiBehavior
         {
-            set => this[ConstUiBehavior] = value?.ToLower();
+            set => this[ConstUiBehavior] = value?.ToLowerInvariant();
         }
 
         public string ValidationStatus
         {
-            set => this[ConstValidationStatus] = value?.ToLower();
+            set => this[ConstValidationStatus] = value?.ToLowerInvariant();
         }
 
         public string TenantId
@@ -106,8 +106,8 @@ namespace Microsoft.Identity.Client
 
         public bool WasSuccessful
         {
-            set => this[ConstWasSuccessful] = value.ToString().ToLower();
-            get => this[ConstWasSuccessful] == true.ToString().ToLower();
+            set => this[ConstWasSuccessful] = value.ToString().ToLowerInvariant();
+            get => this[ConstWasSuccessful] == true.ToString().ToLowerInvariant();
         }
 
         public string CorrelationId
@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client
 
         public bool IsConfidentialClient
         {
-            set => this[ConstIsConfidentialClient] = value.ToString().ToLower();
+            set => this[ConstIsConfidentialClient] = value.ToString().ToLowerInvariant();
         }
     }
 }

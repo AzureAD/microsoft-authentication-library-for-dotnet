@@ -53,13 +53,13 @@ namespace Microsoft.Identity.Client
         {
             this[ConstEventName] = eventName;
             _startTimestamp = CurrentUnixTimeMilliseconds();
-            this[StartTime] = _startTimestamp.ToString();
+            this[StartTime] = _startTimestamp.ToStringInvariant();
             this[ElapsedTime] = "-1";
         }
 
         public void Stop()
         {
-            this[ElapsedTime] = (CurrentUnixTimeMilliseconds() - _startTimestamp).ToString();  // It is a duration
+            this[ElapsedTime] = (CurrentUnixTimeMilliseconds() - _startTimestamp).ToStringInvariant();  // It is a duration
         }
 
         public static string ScrubTenant(Uri uri) // Note: There is also a Unit Test case for this helper
