@@ -59,12 +59,12 @@ namespace Microsoft.Identity.Client
         }
 
         public string ApiVersion {
-            set => this[ConstApiVersion] = value?.ToLower();
+            set => this[ConstApiVersion] = value?.ToLowerInvariant();
         }
 
         public int HttpResponseStatus
         {
-            set => this[ConstResponseCode] = value.ToString();
+            set => this[ConstResponseCode] = value.ToStringInvariant();
         }
 
         public string OauthErrorCode
