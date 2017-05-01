@@ -26,10 +26,9 @@
 //------------------------------------------------------------------------------
 
 
-using Microsoft.Identity.Client.Internal;
 using System;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal.Telemetry
 {
     internal class HttpEvent : EventBase
     {

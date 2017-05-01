@@ -25,9 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Internal;
-
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal.Telemetry
 {
     internal class TelemetryTokenCacheAccessor : TokenCacheAccessor
     {
@@ -36,56 +34,56 @@ namespace Microsoft.Identity.Client
         public void SaveAccessToken(string cacheKey, string item, RequestContext requestContext)
         {
             var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.AT };
-            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
+            Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
             try
             {
                 SaveAccessToken(cacheKey, item);
             }
             finally
             {
-                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
+                Client.Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
 
         public void SaveRefreshToken(string cacheKey, string item, RequestContext requestContext)
         {
             var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.RT };
-            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
+            Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
             try
             {
                 SaveRefreshToken(cacheKey, item);
             }
             finally
             {
-                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
+                Client.Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
 
         public void DeleteAccessToken(string cacheKey, RequestContext requestContext)
         {
             var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.AT };
-            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
+            Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
             try
             {
                 DeleteAccessToken(cacheKey);
             }
             finally
             {
-                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
+                Client.Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
 
         public void DeleteRefreshToken(string cacheKey, RequestContext requestContext)
         {
             var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.RT };
-            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
+            Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
             try
             {
                 DeleteRefreshToken(cacheKey);
             }
             finally
             {
-                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
+                Client.Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
     }
