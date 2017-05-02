@@ -36,6 +36,7 @@ using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.Http;
 using Microsoft.Identity.Client.Internal.Instance;
+using Microsoft.Identity.Client.Internal.Telemetry;
 
 namespace Microsoft.Identity.Client.Internal.OAuth2
 {
@@ -90,7 +91,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             HttpResponse response = null;
             Uri endpointUri = CreateFullEndpointUri(endPoint);
             var httpEvent = new HttpEvent(){HttpPath = endpointUri, QueryParams = endpointUri.Query};
-            Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, httpEvent);
+            Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, httpEvent);
             try
             {
                 if (method == HttpMethod.Post)
@@ -111,7 +112,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             }
             finally
             {
-                Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, httpEvent);
+                Client.Telemetry.GetInstance().StopEvent(requestContext.TelemetryRequestId, httpEvent);
             }
 
             return CreateResponse<T>(response, requestContext, addCorrelationId);

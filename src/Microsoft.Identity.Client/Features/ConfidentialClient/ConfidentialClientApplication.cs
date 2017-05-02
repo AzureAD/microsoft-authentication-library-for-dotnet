@@ -27,6 +27,7 @@
 
 using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.Internal.Telemetry;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -29,6 +29,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Identity.Client.Internal.Telemetry;
 
 namespace Microsoft.Identity.Client
 {

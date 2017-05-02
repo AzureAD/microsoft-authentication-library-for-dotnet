@@ -29,7 +29,7 @@
 using System;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal.Telemetry
 {
     internal class ApiEvent : EventBase
     {
