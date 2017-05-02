@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client
 
         public static bool ContinueAuthentication(string url)
         {
-            if (returnedUriReady != null)
+            if (returnedUriReady == null)
             {
                 return false;
             }
