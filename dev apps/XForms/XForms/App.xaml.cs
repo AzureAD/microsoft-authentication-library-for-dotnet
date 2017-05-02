@@ -49,7 +49,7 @@ namespace XForms
         public const string B2cAuthority = "https://login.microsoftonline.com/tfp/panwariusb2c.onmicrosoft.com/B2C_1_signup_signin/";
 
         public static string[] DefaultScopes = {"User.Read"};
-        public static string[] B2cScopes = { "https://panwariusb2c.onmicrosoft.com/fail/wtf" };
+        public static string[] B2cScopes = { "https://sometenant.onmicrosoft.com/some/scope" };
 
         public const bool DefaultValidateAuthority = true;
 
