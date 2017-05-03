@@ -68,7 +68,7 @@ namespace Test.MSAL.NET.Unit
             // Setup up a confidential client application that returns a dummy result
             var mockResult = Substitute.For<AuthenticationResult>();
             mockResult.IdToken.Returns("id token");
-            mockResult.Scope.Returns(new string[] { "scope1", "scope2" });
+            mockResult.Scopes.Returns(new string[] { "scope1", "scope2" });
 
             var mockApp = Substitute.For<IConfidentialClientApplication>();
             mockApp.AcquireTokenByAuthorizationCodeAsync("123", null).Returns(mockResult);
@@ -78,7 +78,7 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(actualResult);
             Assert.AreEqual("id token", mockResult.IdToken, "Mock result failed to return the expected id token");
             // Check the scope property
-            IEnumerable<string> scopes = actualResult.Scope;
+            IEnumerable<string> scopes = actualResult.Scopes;
             Assert.IsNotNull(scopes);
             Assert.AreEqual("scope1", scopes.First());
             Assert.AreEqual("scope2", scopes.Last());
@@ -188,7 +188,7 @@ namespace Test.MSAL.NET.Unit
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull("header.payload.signature", result.AccessToken);
-            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
+            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
 
             Assert.IsNull(app.UserTokenCache);
             Assert.IsNull(app.AppTokenCache);
@@ -223,7 +223,7 @@ namespace Test.MSAL.NET.Unit
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull("header.payload.signature", result.AccessToken);
-            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
+            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
 
             //make sure user token cache is empty
             Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
@@ -240,7 +240,7 @@ namespace Test.MSAL.NET.Unit
             result = task.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull("header.payload.signature", result.AccessToken);
-            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
+            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
 
             //make sure user token cache is empty
             Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
@@ -293,7 +293,7 @@ namespace Test.MSAL.NET.Unit
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull("header.payload.signature", result.AccessToken);
-            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
+            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
 
             //make sure user token cache is empty
             Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);

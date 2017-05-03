@@ -50,40 +50,40 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope);
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             string loginHint);
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             IUser user);
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             string loginHint,
             UIBehavior behavior,
             string extraQueryParameters);
@@ -91,13 +91,13 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             IUser user,
             UIBehavior behavior,
             string extraQueryParameters);
@@ -105,36 +105,36 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="extraScopesToConsent">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             string loginHint,
             UIBehavior behavior,
             string extraQueryParameters,
-            IEnumerable<string> additionalScope, string authority);
+            IEnumerable<string> extraScopesToConsent, string authority);
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="extraScopesToConsent">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             IUser user,
             UIBehavior behavior,
             string extraQueryParameters,
-            IEnumerable<string> additionalScope,
+            IEnumerable<string> extraScopesToConsent,
             string authority);
 
 #endif
@@ -143,44 +143,44 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
-        Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope, UIParent parent);
+        Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, UIParent parent);
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             string loginHint, UIParent parent);
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             IUser user, UIParent parent);
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             string loginHint,
             UIBehavior behavior,
             string extraQueryParameters, UIParent parent);
@@ -188,14 +188,14 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             IUser user,
             UIBehavior behavior,
             string extraQueryParameters, UIParent parent);
@@ -203,38 +203,38 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="extraScopesToConsent">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             string loginHint,
             UIBehavior behavior,
             string extraQueryParameters,
-            IEnumerable<string> additionalScope, string authority, UIParent parent);
+            IEnumerable<string> extraScopesToConsent, string authority, UIParent parent);
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="extraScopesToConsent">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             IUser user,
             UIBehavior behavior,
             string extraQueryParameters,
-            IEnumerable<string> additionalScope,
+            IEnumerable<string> extraScopesToConsent,
             string authority, UIParent parent);
     }
 }

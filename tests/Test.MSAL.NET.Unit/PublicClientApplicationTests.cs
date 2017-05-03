@@ -76,7 +76,7 @@ namespace Test.MSAL.NET.Unit
             // The caller asks for two scopes, but only one is returned
             var mockResult = Substitute.For<AuthenticationResult>();
             mockResult.IdToken.Returns("id token");
-            mockResult.Scope.Returns(new string[] {"scope1"});
+            mockResult.Scopes.Returns(new string[] {"scope1"});
 
             var mockApp = Substitute.For<IPublicClientApplication>();
             mockApp.AcquireTokenAsync(new string[] {"scope1", "scope2"}).ReturnsForAnyArgs(mockResult);
@@ -87,9 +87,9 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual("id token", actualResult.IdToken, "Mock result failed to return the expected id token");
 
             // Check the users properties returns the dummy users
-            IEnumerable<string> scopes = actualResult.Scope;
+            IEnumerable<string> scopes = actualResult.Scopes;
             Assert.IsNotNull(scopes);
-            CollectionAssert.AreEqual(new string[] {"scope1"}, actualResult.Scope.ToArray());
+            CollectionAssert.AreEqual(new string[] {"scope1"}, actualResult.Scopes.ToArray());
         }
 
         [TestMethod]
@@ -737,7 +737,7 @@ namespace Test.MSAL.NET.Unit
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
-            Assert.AreEqual(TestConstants.ScopeForAnotherResource.AsSingleString(), result.Scope.AsSingleString());
+            Assert.AreEqual(TestConstants.ScopeForAnotherResource.AsSingleString(), result.Scopes.AsSingleString());
             Assert.AreEqual(2, cache.TokenCacheAccessor.GetAllAccessTokensAsString().Count());
         }
 
@@ -771,7 +771,7 @@ namespace Test.MSAL.NET.Unit
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
-            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
+            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
         }
 
         [TestMethod]
@@ -804,7 +804,7 @@ namespace Test.MSAL.NET.Unit
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
-            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
+            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
         }
 
         [TestMethod]
@@ -838,7 +838,7 @@ namespace Test.MSAL.NET.Unit
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
-            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scope.AsSingleString());
+            Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
                 anEvent[EventBase.ConstEventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "true"
                 && anEvent[ApiEvent.ConstApiId] == "31"));
@@ -888,7 +888,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
             Assert.AreEqual(
                 TestConstants.Scope.ToArray().AsSingleString(),
-                result.Scope.AsSingleString());
+                result.Scopes.AsSingleString());
 
             Assert.AreEqual(2, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);

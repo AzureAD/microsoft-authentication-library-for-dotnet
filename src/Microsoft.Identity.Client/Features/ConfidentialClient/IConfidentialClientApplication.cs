@@ -39,22 +39,22 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Acquires token using On-Behalf-Of flow.
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             UserAssertion userAssertion);
 
         /// <summary>
         /// Acquires token using On-Behalf-Of flow.
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             UserAssertion userAssertion,
             string authority);
 
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
         /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IUser)"/>.
         /// </summary>
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(
             string authorizationCode,
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Acquires token from the service for the confidential client. This method attempts to look up valid access token in the cache.
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
         Task<AuthenticationResult> AcquireTokenForClientAsync(
             IEnumerable<string> scope);
@@ -80,39 +80,39 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Acquires token from the service for the confidential client. This method attempts to look up valid access token in the cache.
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using client credentials</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
         Task<AuthenticationResult> AcquireTokenForClientAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             bool forceRefresh);
 
         /// <summary>
         /// Gets URL of the authorize endpoint including the query parameters.
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
         Task<Uri> GetAuthorizationRequestUrlAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             string loginHint,
             string extraQueryParameters);
 
         /// <summary>
         /// Gets URL of the authorize endpoint including the query parameters.
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="extraScopesToConsent">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
         Task<Uri> GetAuthorizationRequestUrlAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             string redirectUri,
             string loginHint,
-            string extraQueryParameters, IEnumerable<string> additionalScope, string authority);
+            string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority);
     }
 }

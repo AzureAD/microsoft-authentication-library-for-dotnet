@@ -152,10 +152,10 @@ namespace Microsoft.Identity.Client
         /// This means that an access token with more scopes than requested could be returned as well. If access token is expired or 
         /// close to expiration (within 5 minute window), then refresh token (if available) is used to acquire a new access token by making a network call.
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User for which the token is requested. <see cref="IUser"/></param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IUser user)
         {
             return
                 await
@@ -168,12 +168,12 @@ namespace Microsoft.Identity.Client
         /// This means that an access token with more scopes than requested could be returned as well. If access token is expired or 
         /// close to expiration (within 5 minute window), then refresh token (if available) is used to acquire a new access token by making a network call.
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User for which the token is requested <see cref="User"/></param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using the refresh token if available</param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scope, IUser user,
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IUser user,
             string authority, bool forceRefresh)
         {
             Authority authorityInstance = null;
@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Client
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
-            IEnumerable<string> scope, IUser user, bool forceRefresh, ApiEvent.ApiIds apiId)
+            IEnumerable<string> scopes, IUser user, bool forceRefresh, ApiEvent.ApiIds apiId)
         {
             var handler = new SilentRequest(
                 CreateRequestParameters(authority, scope, user, UserTokenCache),
@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Client
         }
 
         internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority,
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             IUser user, TokenCache cache)
         {
             return new AuthenticationRequestParameters

@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the scope values returned from the service.
         /// </summary>
-        public virtual IEnumerable<string> Scope => _accessTokenCacheItem.ScopeSet.AsArray();
+        public virtual IEnumerable<string> Scopes => _accessTokenCacheItem.ScopeSet.AsArray();
 
         /// <summary>
         /// Creates authorization header from authentication result.
