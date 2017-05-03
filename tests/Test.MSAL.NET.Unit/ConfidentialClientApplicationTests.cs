@@ -44,7 +44,7 @@ using NSubstitute;
 namespace Test.MSAL.NET.Unit
 {
     [TestClass]
-    [DeploymentItem(@"Resources\valid_cert.pfx")]
+    [DeploymentItem(@"Resources\valid.crtfile")]
     [DeploymentItem("Resources\\OpenidConfiguration-B2C.json")]
     public class ConfidentialClientApplicationTests
     {
@@ -285,7 +285,7 @@ namespace Test.MSAL.NET.Unit
         public void ConfidentialClientUsingCertificateTest()
         {
             ClientCredential cc =
-                new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid_cert.pfx", "password")));
+                new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid.crtfile", "password")));
             var app = CreateConfidentialClient(cc);
 
             Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
@@ -329,7 +329,7 @@ namespace Test.MSAL.NET.Unit
         public void ConfidentialClientUsingCertificateTelemetryTest()
         {
             ClientCredential cc =
-                new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid_cert.pfx", "password")));
+                new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid.crtfile", "password")));
             var app = CreateConfidentialClient(cc);
             Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
             AuthenticationResult result = task.Result;
