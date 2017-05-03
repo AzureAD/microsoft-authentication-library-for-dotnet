@@ -364,7 +364,7 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(uri);
             Dictionary<string, string> qp = MsalHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
             Assert.IsNotNull(qp);
-            Assert.AreEqual(13, qp.Count);
+            Assert.AreEqual(11, qp.Count);
             Assert.IsTrue(qp.ContainsKey("client-request-id"));
             Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2", qp["scope"]);
             Assert.AreEqual(TestConstants.ClientId, qp["client_id"]);
@@ -404,7 +404,7 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(uri);
             Dictionary<string, string> qp = MsalHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
             Assert.IsNotNull(qp);
-            Assert.AreEqual(14, qp.Count);
+            Assert.AreEqual(12, qp.Count);
             Assert.AreEqual("my-policy", qp["p"]);
             Assert.IsTrue(qp.ContainsKey("client-request-id"));
             Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2", qp["scope"]);
@@ -484,7 +484,7 @@ namespace Test.MSAL.NET.Unit
             Assert.IsTrue(uri.AbsoluteUri.StartsWith(TestConstants.AuthorityGuestTenant, StringComparison.CurrentCulture));
             Dictionary<string, string> qp = MsalHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
             Assert.IsNotNull(qp);
-            Assert.AreEqual(14, qp.Count);
+            Assert.AreEqual(12, qp.Count);
             Assert.IsTrue(qp.ContainsKey("client-request-id"));
             Assert.IsFalse(qp.ContainsKey("client_secret"));
             Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2 r2/scope1 r2/scope2", qp["scope"]);
