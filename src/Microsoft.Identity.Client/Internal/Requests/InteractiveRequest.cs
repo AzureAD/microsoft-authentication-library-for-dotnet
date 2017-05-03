@@ -32,6 +32,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal.OAuth2;
+using Microsoft.Identity.Client.Internal.Telemetry;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -102,7 +103,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             Uri authorizationUri = CreateAuthorizationUri(true, true);
             var uiEvent = new UiEvent();
-            Telemetry.GetInstance().StartEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, uiEvent);
+            Client.Telemetry.GetInstance().StartEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, uiEvent);
             try
             {
                 _authorizationResult = await
@@ -113,7 +114,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             finally
             {
-                Telemetry.GetInstance().StopEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, uiEvent);
+                Client.Telemetry.GetInstance().StopEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, uiEvent);
             }
         }
 
