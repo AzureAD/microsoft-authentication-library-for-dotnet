@@ -64,10 +64,11 @@
     </Content>
     <None Include="Resources\valid_cert.cer">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\valid_cert.pfx">
+    </None>    
+	<None Include="Resources\valid.crtfile">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\drs-response-missing-field.json">
@@ -91,7 +92,7 @@
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="Resources\invalid_cert.pfx">
+    <None Update="Resources\invalid.crtfile">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
