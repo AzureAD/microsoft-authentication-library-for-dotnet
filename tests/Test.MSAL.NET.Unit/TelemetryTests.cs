@@ -184,5 +184,28 @@ namespace Test.MSAL.NET.Unit
 
             Assert.AreEqual(null, EventBase.ScrubTenant(new Uri("https://login.contoso.com/adfs")));
         }
+
+        [TestMethod]
+        [TestCategory("TelemetryInternalAPI")]
+        public void TelemetryContainsDefaultEventAsFirstEvent()
+        {
+            Telemetry telemetry = new Telemetry() { ClientId = "a1b2c3d4" };  // To isolate the test environment, we do not use a singleton here
+            var myReceiver = new MyReceiver();
+            telemetry.RegisterReceiver(myReceiver.OnEvents);
+            var reqId = telemetry.GenerateNewRequestId();
+            try
+            {
+                var anEvent = new UiEvent();
+                telemetry.StartEvent(reqId, anEvent);
+                telemetry.StopEvent(reqId, anEvent);
+            }
+            finally
+            {
+                telemetry.Flush(reqId);
+            }
+            Assert.IsTrue(myReceiver.EventsReceived[0][EventBase.EventNameKey].EndsWith("default_event"));
+            Assert.IsTrue(myReceiver.EventsReceived[1][EventBase.EventNameKey].EndsWith("ui_event"));
+            Assert.AreNotEqual(myReceiver.EventsReceived[1][EventBase.ElapsedTimeKey], "-1");
+        }
     }
 }
