@@ -77,122 +77,122 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing token of the user</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope)
+        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForLoginHintCommonAsync(authority, scope, null, null,
+                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, null,
                         UIBehavior.SelectAccount, null, null, ApiEvent.ApiIds.AcquireTokenWithScope).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <returns>Authentication result containing token of the user</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope, string loginHint)
+        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForLoginHintCommonAsync(authority, scope, null, loginHint,
+                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
                         UIBehavior.SelectAccount, null, null, ApiEvent.ApiIds.AcquireTokenWithScopeHint).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
         /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             IUser user)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForUserCommonAsync(authority, scope, null, user,
+                    AcquireTokenForUserCommonAsync(authority, scopes, null, user,
                         UIBehavior.SelectAccount, null, null, ApiEvent.ApiIds.AcquireTokenWithScopeUser).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>Authentication result containing token of the user</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope, string loginHint,
+        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
             UIBehavior behavior, string extraQueryParameters)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForLoginHintCommonAsync(authority, scope, null, loginHint,
+                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
                         behavior, extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehavior).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>Authentication result containing token of the user</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope, IUser user,
+        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IUser user,
             UIBehavior behavior, string extraQueryParameters)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForUserCommonAsync(authority, scope, null, user, behavior,
+                    AcquireTokenForUserCommonAsync(authority, scopes, null, user, behavior,
                         extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehavior).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="extraScopesToConsent">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope, string loginHint,
-            UIBehavior behavior, string extraQueryParameters, IEnumerable<string> additionalScope, string authority)
+        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
+            UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForLoginHintCommonAsync(authorityInstance, scope, additionalScope,
+                    AcquireTokenForLoginHintCommonAsync(authorityInstance, scopes, extraScopesToConsent,
                         loginHint, behavior, extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehaviorAuthority).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="extraScopesToConsent">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope, IUser user,
-            UIBehavior behavior, string extraQueryParameters, IEnumerable<string> additionalScope, string authority)
+        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IUser user,
+            UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForUserCommonAsync(authorityInstance, scope, additionalScope, user,
+                    AcquireTokenForUserCommonAsync(authorityInstance, scopes, extraScopesToConsent, user,
                         behavior, extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehaviorAuthority).ConfigureAwait(false);
         }
 #endif
@@ -200,129 +200,129 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope, UIParent parent)
+        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, UIParent parent)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForLoginHintCommonAsync(authority, scope, null, null,
+                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, null,
                         UIBehavior.SelectAccount, null, parent, ApiEvent.ApiIds.AcquireTokenWithScope).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope, string loginHint, UIParent parent)
+        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint, UIParent parent)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForLoginHintCommonAsync(authority, scope, null, loginHint,
+                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
                         UIBehavior.SelectAccount, null, parent, ApiEvent.ApiIds.AcquireTokenWithScopeHint).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(
-            IEnumerable<string> scope,
+            IEnumerable<string> scopes,
             IUser user, UIParent parent)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForUserCommonAsync(authority, scope, null, user,
+                    AcquireTokenForUserCommonAsync(authority, scopes, null, user,
                         UIBehavior.SelectAccount, null, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUser).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope, string loginHint,
+        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
             UIBehavior behavior, string extraQueryParameters, UIParent parent)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForLoginHintCommonAsync(authority, scope, null, loginHint,
+                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
                         behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehavior).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope, IUser user,
+        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IUser user,
             UIBehavior behavior, string extraQueryParameters, UIParent parent)
         {
             Authority authority = Internal.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForUserCommonAsync(authority, scope, null, user, behavior,
+                    AcquireTokenForUserCommonAsync(authority, scopes, null, user, behavior,
                         extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehavior).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="extraScopesToConsent">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope, string loginHint,
-            UIBehavior behavior, string extraQueryParameters, IEnumerable<string> additionalScope, string authority, UIParent parent)
+        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
+            UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForLoginHintCommonAsync(authorityInstance, scope, additionalScope,
+                    AcquireTokenForLoginHintCommonAsync(authorityInstance, scopes, extraScopesToConsent,
                         loginHint, behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehaviorAuthority).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Interactive request to acquire token. 
         /// </summary>
-        /// <param name="scope">Array of scopes requested for resource</param>
+        /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User object to enforce the same user to be authenticated in the web UI.</param>
         /// <param name="behavior">Enumeration to control UI behavior.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <param name="additionalScope">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="extraScopesToConsent">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object contains reference to parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing token of the user</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope, IUser user,
-            UIBehavior behavior, string extraQueryParameters, IEnumerable<string> additionalScope, string authority, UIParent parent)
+        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IUser user,
+            UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
         {
             Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
             return
                 await
-                    AcquireTokenForUserCommonAsync(authorityInstance, scope, additionalScope, user,
+                    AcquireTokenForUserCommonAsync(authorityInstance, scopes, extraScopesToConsent, user,
                         behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehaviorAuthority).ConfigureAwait(false);
         }
 
@@ -347,35 +347,35 @@ namespace Microsoft.Identity.Client
             return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parent, requestContext);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenForLoginHintCommonAsync(Authority authority, IEnumerable<string> scope,
-            IEnumerable<string> additionalScope, string loginHint, UIBehavior behavior,
+        private async Task<AuthenticationResult> AcquireTokenForLoginHintCommonAsync(Authority authority, IEnumerable<string> scopes,
+            IEnumerable<string> extraScopesToConsent, string loginHint, UIBehavior behavior,
             string extraQueryParameters, UIParent parent, ApiEvent.ApiIds apiId)
         {
-            var requestParams = CreateRequestParameters(authority, scope, null, UserTokenCache);
+            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
             var handler =
-                new InteractiveRequest(requestParams, additionalScope, loginHint, behavior,
+                new InteractiveRequest(requestParams, extraScopesToConsent, loginHint, behavior,
                     CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext)){ApiId = apiId};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenForUserCommonAsync(Authority authority, IEnumerable<string> scope,
-            IEnumerable<string> additionalScope, IUser user, UIBehavior behavior, string extraQueryParameters, UIParent parent, ApiEvent.ApiIds apiId)
+        private async Task<AuthenticationResult> AcquireTokenForUserCommonAsync(Authority authority, IEnumerable<string> scopes,
+            IEnumerable<string> extraScopesToConsent, IUser user, UIBehavior behavior, string extraQueryParameters, UIParent parent, ApiEvent.ApiIds apiId)
         {
 
-            var requestParams = CreateRequestParameters(authority, scope, user, UserTokenCache);
+            var requestParams = CreateRequestParameters(authority, scopes, user, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
-                new InteractiveRequest(requestParams, additionalScope, behavior,
+                new InteractiveRequest(requestParams, extraScopesToConsent, behavior,
                     CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext)){ApiId = apiId};
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
         internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority,
-            IEnumerable<string> scope, IUser user, TokenCache cache)
+            IEnumerable<string> scopes, IUser user, TokenCache cache)
         {
-            AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scope, user, cache);
+            AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scopes, user, cache);
             return parameters;
         }
     }

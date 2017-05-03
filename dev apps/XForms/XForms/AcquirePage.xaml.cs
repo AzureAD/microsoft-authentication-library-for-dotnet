@@ -112,7 +112,7 @@ namespace XForms
             sb.AppendLine("IdToken : " + result.IdToken);
             sb.AppendLine("ExpiresOn : " + result.ExpiresOn);
             sb.AppendLine("TenantId : " + result.TenantId);
-            sb.AppendLine("Scope : " + string.Join(",", result.Scope));
+            sb.AppendLine("Scope : " + string.Join(",", result.Scopes));
             sb.AppendLine("User :");
             sb.Append(ToString(result.User));
 

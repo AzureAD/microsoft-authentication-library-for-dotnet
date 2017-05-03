@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class InteractiveRequest : RequestBase
     {
-        private readonly SortedSet<string> _additionalScope;
+        private readonly SortedSet<string> _extraScopesToConsent;
         private readonly UIBehavior _UIBehavior;
         private readonly IWebUI _webUi;
         private AuthorizationResult _authorizationResult;
@@ -46,15 +46,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private string _state;
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            IEnumerable<string> additionalScope, UIBehavior UIBehavior, IWebUI webUI)
+            IEnumerable<string> extraScopesToConsent, UIBehavior UIBehavior, IWebUI webUI)
             : this(
-                authenticationRequestParameters, additionalScope, authenticationRequestParameters.User?.DisplayableId,
+                authenticationRequestParameters, extraScopesToConsent, authenticationRequestParameters.User?.DisplayableId,
                 UIBehavior, webUI)
         {
         }
 
         public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
-            IEnumerable<string> additionalScope, string loginHint,
+            IEnumerable<string> extraScopesToConsent, string loginHint,
             UIBehavior UIBehavior, IWebUI webUI)
             : base(authenticationRequestParameters)
         {
@@ -65,13 +65,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new ArgumentException(MsalErrorMessage.RedirectUriContainsFragment, nameof(authenticationRequestParameters.RedirectUri));
             }
 
-            _additionalScope = new SortedSet<string>();
-            if (!MsalHelpers.IsNullOrEmpty(additionalScope))
+            _extraScopesToConsent = new SortedSet<string>();
+            if (!MsalHelpers.IsNullOrEmpty(extraScopesToConsent))
             {
-                _additionalScope = additionalScope.CreateSetFromEnumerable();
+                _extraScopesToConsent = extraScopesToConsent.CreateSetFromEnumerable();
             }
 
-            ValidateScopeInput(_additionalScope);
+            ValidateScopeInput(_extraScopesToConsent);
 
             authenticationRequestParameters.LoginHint = loginHint;
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ExtraQueryParameters) &&
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _webUi = webUI;
             _UIBehavior = UIBehavior;
             LoadFromCache = false; //no cache lookup and refresh for interactive.
-            AuthenticationRequestParameters.RequestContext.Logger.Info("Additional scopes - " + _additionalScope.AsSingleString() + ";" + "UIBehavior - " + _UIBehavior.PromptValue);
+            AuthenticationRequestParameters.RequestContext.Logger.Info("Additional scopes - " + _extraScopesToConsent.AsSingleString() + ";" + "UIBehavior - " + _UIBehavior.PromptValue);
         }
 
         protected override string GetUIBehaviorPromptValue()
@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             SortedSet<string> unionScope =
                 GetDecoratedScope(
-                    new SortedSet<string>(AuthenticationRequestParameters.Scope.Union(_additionalScope)));
+                    new SortedSet<string>(AuthenticationRequestParameters.Scope.Union(_extraScopesToConsent)));
 
             Dictionary<string, string> authorizationRequestParameters = new Dictionary<string, string>();
             authorizationRequestParameters[OAuth2Parameter.Scope] = unionScope.AsSingleString();

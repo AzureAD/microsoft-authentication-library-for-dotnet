@@ -113,7 +113,7 @@ namespace AutomationApp
             tenantIdResult.Text = authenticationResult.TenantId;
             userResult.Text = authenticationResult.User.DisplayableId;
             idTokenResult.Text = authenticationResult.IdToken;
-            scopeResult.DataSource = authenticationResult.Scope;
+            scopeResult.DataSource = authenticationResult.Scopes;
         }
 
         private void ClearResultPageInfo()

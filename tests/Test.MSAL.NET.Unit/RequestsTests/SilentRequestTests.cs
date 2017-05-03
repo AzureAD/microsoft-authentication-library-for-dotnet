@@ -151,7 +151,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
-            Assert.AreEqual("some-scope1 some-scope2", result.Scope.AsSingleString());
+            Assert.AreEqual("some-scope1 some-scope2", result.Scopes.AsSingleString());
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
