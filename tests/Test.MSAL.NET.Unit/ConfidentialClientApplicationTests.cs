@@ -286,7 +286,7 @@ namespace Test.MSAL.NET.Unit
         public void ConfidentialClientUsingCertificateTest()
         {
             ClientCredential cc =
-                new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid.crtfile", "password")));
+                new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid.crtfile", "something")));
             var app = CreateConfidentialClient(cc);
 
             Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
@@ -330,7 +330,7 @@ namespace Test.MSAL.NET.Unit
         public void ConfidentialClientUsingCertificateTelemetryTest()
         {
             ClientCredential cc =
-                new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid.crtfile", "password")));
+                new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid.crtfile", "something")));
             var app = CreateConfidentialClient(cc);
             Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
             AuthenticationResult result = task.Result;
