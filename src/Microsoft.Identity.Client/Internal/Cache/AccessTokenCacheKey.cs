@@ -37,10 +37,10 @@ namespace Microsoft.Identity.Client.Internal.Cache
     /// </summary>
     internal class AccessTokenCacheKey : TokenCacheKeyBase
     {
-        public AccessTokenCacheKey(string authority, SortedSet<string> scope, string clientId, string userIdentifier) : base(clientId, userIdentifier)
+        public AccessTokenCacheKey(string authority, SortedSet<string> scopes, string clientId, string userIdentifier) : base(clientId, userIdentifier)
         {
             Authority = authority;
-            Scope = scope ?? new SortedSet<string>();
+            Scope = scopes ?? new SortedSet<string>();
         }
 
         public string Authority { get; }

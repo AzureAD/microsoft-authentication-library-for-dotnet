@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Client
         {
             return
                 await
-                    AcquireTokenSilentCommonAsync(null, scope, user, false, ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority)
+                    AcquireTokenSilentCommonAsync(null, scopes, user, false, ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority)
                         .ConfigureAwait(false);
         }
 
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client
 
             return
                 await
-                    AcquireTokenSilentCommonAsync(authorityInstance, scope, user,
+                    AcquireTokenSilentCommonAsync(authorityInstance, scopes, user,
                         forceRefresh, ApiEvent.ApiIds.AcquireTokenSilentWithAuthority).ConfigureAwait(false);
         }
 
@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes, IUser user, bool forceRefresh, ApiEvent.ApiIds apiId)
         {
             var handler = new SilentRequest(
-                CreateRequestParameters(authority, scope, user, UserTokenCache),
+                CreateRequestParameters(authority, scopes, user, UserTokenCache),
                 forceRefresh)
             { ApiId = apiId };
             return await handler.RunAsync().ConfigureAwait(false);
@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Client
                 ClientId =  ClientId,
                 TokenCache = cache,
                 User = user,
-                Scope = scope.CreateSetFromEnumerable(),
+                Scope = scopes.CreateSetFromEnumerable(),
                 RedirectUri = new Uri(RedirectUri),
                 RequestContext = CreateRequestContext(Guid.Empty),
                 ValidateAuthority = ValidateAuthority

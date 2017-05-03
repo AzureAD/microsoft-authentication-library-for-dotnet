@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(
             string authorizationCode,
-            IEnumerable<string> scope);
+            IEnumerable<string> scopes);
 
         /// <summary>
         /// Acquires token from the service for the confidential client. This method attempts to look up valid access token in the cache.
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
         Task<AuthenticationResult> AcquireTokenForClientAsync(
-            IEnumerable<string> scope);
+            IEnumerable<string> scopes);
 
         /// <summary>
         /// Acquires token from the service for the confidential client. This method attempts to look up valid access token in the cache.

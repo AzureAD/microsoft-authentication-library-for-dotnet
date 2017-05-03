@@ -45,11 +45,11 @@ namespace Microsoft.Identity.Client.Internal
             return val.ToString(CultureInfo.InvariantCulture);
         }
 
-        public static bool ScopeContains(this SortedSet<string> scope, SortedSet<string> otherScope)
+        public static bool ScopeContains(this SortedSet<string> scopes, SortedSet<string> otherScope)
         {
             foreach (string otherString in otherScope)
             {
-                if (!scope.Contains(otherString, StringComparer.OrdinalIgnoreCase))
+                if (!scopes.Contains(otherString, StringComparer.OrdinalIgnoreCase))
                 {
                     return false;
                 }
@@ -58,9 +58,9 @@ namespace Microsoft.Identity.Client.Internal
             return true;
         }
 
-        public static bool ScopeIntersects(this SortedSet<string> scope, SortedSet<string> otherScope)
+        public static bool ScopeIntersects(this SortedSet<string> scopes, SortedSet<string> otherScope)
         {
-            return scope.Overlaps(otherScope);
+            return scopes.Overlaps(otherScope);
         }
 
         internal static string[] AsArray(this SortedSet<string> setOfStrings)

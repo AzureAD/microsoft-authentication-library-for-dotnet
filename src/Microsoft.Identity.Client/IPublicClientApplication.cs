@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing token of the user</returns>
-        Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scope);
+        Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes);
 
         /// <summary>
         /// Interactive request to acquire token. 
