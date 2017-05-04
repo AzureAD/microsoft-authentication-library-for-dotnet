@@ -35,9 +35,9 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
     internal abstract class EventBase : Dictionary<string, string>
     {
         protected const string EventNamePrefix = "msal.";
-        public const string EventName = EventNamePrefix + "event_name";
-        protected const string StartTime = EventNamePrefix + "start_time";
-        protected const string ElapsedTime = EventNamePrefix + "elapsed_time";
+        public const string EventNameKey = EventNamePrefix + "event_name";
+        protected const string StartTimeKey = EventNamePrefix + "start_time";
+        protected const string ElapsedTimeKey = EventNamePrefix + "elapsed_time";
         private readonly long _startTimestamp;
 
         public const string TenantPlaceHolder = "<tenant>"; // It is used to replace the real tenant in telemetry info
@@ -51,15 +51,15 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
 
         public EventBase(string eventName, IDictionary<string, string> predefined) : base(predefined)
         {
-            this[EventName] = eventName;
+            this[EventNameKey] = eventName;
             _startTimestamp = CurrentUnixTimeMilliseconds();
-            this[StartTime] = _startTimestamp.ToStringInvariant();
-            this[ElapsedTime] = "-1";
+            this[StartTimeKey] = _startTimestamp.ToStringInvariant();
+            this[ElapsedTimeKey] = "-1";
         }
 
         public void Stop()
         {
-            this[ElapsedTime] = (CurrentUnixTimeMilliseconds() - _startTimestamp).ToStringInvariant();  // It is a duration
+            this[ElapsedTimeKey] = (CurrentUnixTimeMilliseconds() - _startTimestamp).ToStringInvariant();  // It is a duration
         }
 
         public static string ScrubTenant(Uri uri) // Note: There is also a Unit Test case for this helper
