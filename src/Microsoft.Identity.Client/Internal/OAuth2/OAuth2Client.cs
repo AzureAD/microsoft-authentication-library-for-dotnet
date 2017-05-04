@@ -166,8 +166,8 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             UriBuilder endpointUri = new UriBuilder(endPoint);
             string extraQp = _queryParameters.ToQueryParameter();
             endpointUri.AppendQueryParameters(extraQp);
-            
-            return new Uri(MsalHelpers.CheckForExtraQueryParameter(endpointUri.Uri.AbsoluteUri));
+
+            return endpointUri.Uri;
         }
 
         private static void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers, RequestContext requestContext)

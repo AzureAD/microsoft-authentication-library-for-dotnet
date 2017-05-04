@@ -177,7 +177,7 @@ namespace Test.MSAL.NET.Unit
                 Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
             }
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.ConstEventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"
+                anEvent[EventBase.EventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"
                 && anEvent[ApiEvent.ConstApiId] == "170"));
         }
 
@@ -450,7 +450,7 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual("user_mismatch", exc.ErrorCode);
             }
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.ConstEventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"
+                anEvent[EventBase.EventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"
                 && anEvent[ApiEvent.ConstApiId] == "174"));
 
             Assert.AreEqual(1, app.Users.Count());
@@ -651,7 +651,7 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual(MsalUiRequiredException.NoTokensFoundError, exc.ErrorCode);
             }
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.ConstEventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"
+                anEvent[EventBase.EventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"
                 && anEvent[ApiEvent.ConstApiId] == "30"));
         }
 
@@ -840,7 +840,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.ConstEventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "true"
+                anEvent[EventBase.EventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "true"
                 && anEvent[ApiEvent.ConstApiId] == "31"));
         }
 

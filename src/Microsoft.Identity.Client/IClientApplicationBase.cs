@@ -37,7 +37,8 @@ namespace Microsoft.Identity.Client
     public interface IClientApplicationBase
     {
         /// <summary>
-        /// Identifier of the component consuming MSAL and it is intended for libraries/SDKs that consume MSAL. This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
+        /// Identifier of the component consuming MSAL and it is intended for libraries/SDKs that consume MSAL. This will allow for 
+        /// disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
         string Component { get; set; }
 
@@ -66,6 +67,12 @@ namespace Microsoft.Identity.Client
         /// Returns a user-centric view over the cache that provides a list of all the available users in the cache.
         /// </summary>
         IEnumerable<IUser> Users { get; }
+
+        /// <summary>
+        /// Sets or Gets the custom query parameters that may be sent to the STS for dogfood testing. This parameter should not be set by the 
+        /// developers as it may have adverse effect on the application.
+        /// </summary>
+        string SliceParameters { get; set; }
 
         /// <summary>
         /// Get user by identifier from users available in the cache.

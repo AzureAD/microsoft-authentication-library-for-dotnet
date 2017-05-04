@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
     internal abstract class EventBase : Dictionary<string, string>
     {
         protected const string EventNamePrefix = "msal.";
-        public const string ConstEventName = EventNamePrefix + "event_name";
+        public const string EventName = EventNamePrefix + "event_name";
         protected const string StartTime = EventNamePrefix + "start_time";
         protected const string ElapsedTime = EventNamePrefix + "elapsed_time";
         private readonly long _startTimestamp;
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
 
         public EventBase(string eventName, IDictionary<string, string> predefined) : base(predefined)
         {
-            this[ConstEventName] = eventName;
+            this[EventName] = eventName;
             _startTimestamp = CurrentUnixTimeMilliseconds();
             this[StartTime] = _startTimestamp.ToStringInvariant();
             this[ElapsedTime] = "-1";

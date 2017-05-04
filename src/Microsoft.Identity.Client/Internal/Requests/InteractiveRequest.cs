@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _state = Guid.NewGuid().ToString();
                 requestParameters[OAuth2Parameter.State] = _state;
             }
-
+            
             //add uid/utid values to QP if user object was passed in.
             if (AuthenticationRequestParameters.User != null)
             {
@@ -173,12 +173,24 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
+            CheckForDuplicateQueryParameters(AuthenticationRequestParameters.ExtraQueryParameters, requestParameters);
+            CheckForDuplicateQueryParameters(AuthenticationRequestParameters.SliceParameters, requestParameters);
 
-            if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.ExtraQueryParameters))
+            string qp = requestParameters.ToQueryParameter();
+            UriBuilder builder =
+                new UriBuilder(new Uri(AuthenticationRequestParameters.Authority.AuthorizationEndpoint));
+            builder.AppendQueryParameters(qp);
+
+            return builder.Uri;
+        }
+
+        private void CheckForDuplicateQueryParameters(string queryParams, IDictionary<string, string> requestParameters)
+        {
+            if (!string.IsNullOrWhiteSpace(queryParams))
             {
                 // Checks for _extraQueryParameters duplicating standard parameters
                 Dictionary<string, string> kvps =
-                    MsalHelpers.ParseKeyValueList(AuthenticationRequestParameters.ExtraQueryParameters, '&', false,
+                    MsalHelpers.ParseKeyValueList(queryParams, '&', false,
                         AuthenticationRequestParameters.RequestContext);
 
                 foreach (KeyValuePair<string, string> kvp in kvps)
@@ -189,19 +201,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.DuplicateQueryParameterTemplate,
                                 kvp.Key));
                     }
+
+                    requestParameters[kvp.Key] = kvp.Value;
                 }
             }
-
-            string qp = requestParameters.ToQueryParameter();
-            if (!string.IsNullOrEmpty(AuthenticationRequestParameters.ExtraQueryParameters))
-            {
-                qp += "&" + AuthenticationRequestParameters.ExtraQueryParameters;
-            }
-
-            UriBuilder builder =
-                new UriBuilder(new Uri(AuthenticationRequestParameters.Authority.AuthorizationEndpoint));
-            builder.AppendQueryParameters(qp);
-            return new Uri(MsalHelpers.CheckForExtraQueryParameter(builder.ToString()));
         }
 
         private Dictionary<string, string> CreateAuthorizationRequestParameters()
