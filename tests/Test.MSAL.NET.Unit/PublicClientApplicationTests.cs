@@ -177,8 +177,8 @@ namespace Test.MSAL.NET.Unit
                 Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
             }
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.EventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"
-                && anEvent[ApiEvent.ConstApiId] == "170"));
+                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "false"
+                && anEvent[ApiEvent.ApiIdKey] == "170"));
         }
 
         [TestMethod]
@@ -450,8 +450,8 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual("user_mismatch", exc.ErrorCode);
             }
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.EventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"
-                && anEvent[ApiEvent.ConstApiId] == "174"));
+                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "false"
+                && anEvent[ApiEvent.ApiIdKey] == "174"));
 
             Assert.AreEqual(1, app.Users.Count());
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
@@ -651,8 +651,8 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual(MsalUiRequiredException.NoTokensFoundError, exc.ErrorCode);
             }
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.EventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "false"
-                && anEvent[ApiEvent.ConstApiId] == "30"));
+                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "false"
+                && anEvent[ApiEvent.ApiIdKey] == "30"));
         }
 
         [TestMethod]
@@ -840,8 +840,8 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.EventName].EndsWith("api_event") && anEvent[ApiEvent.ConstWasSuccessful] == "true"
-                && anEvent[ApiEvent.ConstApiId] == "31"));
+                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "true"
+                && anEvent[ApiEvent.ApiIdKey] == "31"));
         }
 
         [TestMethod]

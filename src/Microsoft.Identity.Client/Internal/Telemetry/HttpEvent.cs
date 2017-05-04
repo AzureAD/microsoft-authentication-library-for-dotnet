@@ -32,43 +32,43 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
 {
     internal class HttpEvent : EventBase
     {
-        public const string ConstHttpPath = EventNamePrefix + "http_path";
-        public const string ConstUserAgent = EventNamePrefix + "user_agent";
-        public const string ConstQueryParameters = EventNamePrefix + "query_parameters";
-        public const string ConstApiVersion = EventNamePrefix + "api_version";
-        public const string ConstResponseCode = EventNamePrefix + "response_code";
-        public const string ConstOauthErrorCode = EventNamePrefix + "oauth_error_code";
+        public const string HttpPathKey = EventNamePrefix + "http_path";
+        public const string UserAgentKey = EventNamePrefix + "user_agent";
+        public const string QueryParametersKey = EventNamePrefix + "query_parameters";
+        public const string ApiVersionKey = EventNamePrefix + "api_version";
+        public const string ResponseCodeKey = EventNamePrefix + "response_code";
+        public const string OauthErrorCodeKey = EventNamePrefix + "oauth_error_code";
 
         public HttpEvent() : base(EventNamePrefix + "http_event") {}
 
         public Uri HttpPath
         {
-            set => this[ConstHttpPath] = ScrubTenant(value); // http path is case-sensitive
+            set => this[HttpPathKey] = ScrubTenant(value); // http path is case-sensitive
         }
 
         public string UserAgent
         {
-            set => this[ConstUserAgent] = value;
+            set => this[UserAgentKey] = value;
         }
 
         public string QueryParams
         {
-            set => this[ConstQueryParameters] = String.Join( // query parameters are case-sensitive
+            set => this[QueryParametersKey] = String.Join( // query parameters are case-sensitive
                 "&", MsalHelpers.ParseKeyValueList(value, '&', false, true, null).Keys); // It turns out ParseKeyValueList(..., null) is valid
         }
 
         public string ApiVersion {
-            set => this[ConstApiVersion] = value?.ToLowerInvariant();
+            set => this[ApiVersionKey] = value?.ToLowerInvariant();
         }
 
         public int HttpResponseStatus
         {
-            set => this[ConstResponseCode] = value.ToStringInvariant();
+            set => this[ResponseCodeKey] = value.ToStringInvariant();
         }
 
         public string OauthErrorCode
         {
-            set => this[ConstOauthErrorCode] = value;
+            set => this[OauthErrorCodeKey] = value;
         }
     }
 }

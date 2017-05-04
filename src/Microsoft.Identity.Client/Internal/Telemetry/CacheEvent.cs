@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
         public const string TokenCacheBeforeWrite = EventNamePrefix + "token_cache_before_write";
         public const string TokenCacheDelete = EventNamePrefix + "token_cache_delete";
 
-        public const string ConstTokenType = EventNamePrefix + "token_type";
+        public const string TokenTypeKey = EventNamePrefix + "token_type";
 
         public CacheEvent(string eventName) : base(eventName)
         {
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
                     {TokenTypes.AT, "at"},
                     {TokenTypes.RT, "rt"}
                 };
-                this[ConstTokenType] = types[value];
+                this[TokenTypeKey] = types[value];
             }
         }
     }

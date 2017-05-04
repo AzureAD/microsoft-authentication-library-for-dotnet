@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client
         {
             if (_receiver != null && requestId != null)
             {
-                EventsInProgress[new Tuple<string, string>(requestId, eventToStart[EventBase.EventName])] = eventToStart;
+                EventsInProgress[new Tuple<string, string>(requestId, eventToStart[EventBase.EventNameKey])] = eventToStart;
             }
         }
 
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
             {
                 return;
             }
-            Tuple<string, string> eventKey = new Tuple<string, string>(requestId, eventToStop[EventBase.EventName]);
+            Tuple<string, string> eventKey = new Tuple<string, string>(requestId, eventToStop[EventBase.EventNameKey]);
 
             // Locate the same name event in the EventsInProgress map
             EventBase eventStarted = null;
