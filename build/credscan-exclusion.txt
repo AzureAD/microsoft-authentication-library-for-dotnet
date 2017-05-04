@@ -1,1 +1,0 @@
-\dev apps\XForms\XForms.UWP\XForms.UWP_TemporaryKey.pfx
