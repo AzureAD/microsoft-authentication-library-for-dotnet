@@ -103,9 +103,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             //check if scope or additional scope contains client ID.
             if (scopesToValidate.Intersect(OAuth2Value.ReservedScopes.CreateSetFromEnumerable()).Any())
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,
-                    "API does not accept '{0}' value as user-provided scopes",
-                    OAuth2Value.ReservedScopes.AsSingleString()));
+                throw new ArgumentException("MSAL always sends the scopes 'openid profile offline_access'. " +
+                                            "They cannot be suppressed as they are required for the " +
+                                            "library to function. Do not include any of these scopes in the scope parameter.");
             }
 
             if (scopesToValidate.Contains(AuthenticationRequestParameters.ClientId))
