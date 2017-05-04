@@ -227,7 +227,7 @@ namespace Test.MSAL.NET.Unit.Mocks
             return responseMessage;
         }
 
-        public static HttpResponseMessage CreateOpenIdConfigurationResponse(string authority)
+        public static HttpResponseMessage CreateOpenIdConfigurationResponse(string authority, string qp = "")
         {
             var authorityUri = new Uri(authority);
             string path = authorityUri.AbsolutePath.Substring(1);
@@ -237,9 +237,14 @@ namespace Test.MSAL.NET.Unit.Mocks
                 tenant = "{tenant}";
             }
 
+            if (!string.IsNullOrEmpty(qp))
+            {
+                qp = "?" + qp;
+            }
+
             return CreateSuccessResponseMessage(string.Format(CultureInfo.InvariantCulture,
-                "{{\"authorization_endpoint\":\"{0}oauth2/v2.0/authorize\",\"token_endpoint\":\"{0}oauth2/v2.0/token\",\"issuer\":\"https://sts.windows.net/{1}\"}}",
-                authority, tenant));
+                "{{\"authorization_endpoint\":\"{0}oauth2/v2.0/authorize{2}\",\"token_endpoint\":\"{0}oauth2/v2.0/token{2}\",\"issuer\":\"https://sts.windows.net/{1}\"}}",
+                authority, tenant, qp));
         }
     }
 }

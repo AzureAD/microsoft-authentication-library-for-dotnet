@@ -50,6 +50,7 @@ namespace Test.MSAL.NET.Unit
     public class ConfidentialClientApplicationTests
     {
         private readonly MyReceiver _myReceiver = new MyReceiver();
+        private byte[] serializedCache = null;
 
         [TestInitialize]
         public void TestInitialize()
@@ -604,6 +605,67 @@ namespace Test.MSAL.NET.Unit
                 .FirstOrDefault();
 
             Assert.AreEqual(tokenRetrievedFromNetCall, accessTokenInCache?.AccessToken);
+        }
+        
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public async Task AuthorizationCodeRequestTest()
+        {
+            TokenCache cache = new TokenCache()
+            {
+                BeforeAccess = BeforeCacheAccess,
+                AfterAccess = AfterCacheAccess
+            };
+
+            ClientCredential cc =
+                new ClientCredential("secret");
+            var app = new ConfidentialClientApplication(TestConstants.ClientId, "https://" + TestConstants.ProductionEnvironment + "/tfp/home/policy",
+                TestConstants.RedirectUri, cc, cache, null)
+            {
+                ValidateAuthority = false
+            };
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant, "p=policy")
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            });
+
+            AuthenticationResult result = await app.AcquireTokenByAuthorizationCodeAsync("some-code", TestConstants.Scope).ConfigureAwait(false);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, app.UserTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(1, app.UserTokenCache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
+
+            cache = new TokenCache()
+            {
+                BeforeAccess = BeforeCacheAccess,
+                AfterAccess = AfterCacheAccess
+            };
+
+            app = new ConfidentialClientApplication(TestConstants.ClientId, "https://" + TestConstants.ProductionEnvironment + "/tfp/home/policy",
+                TestConstants.RedirectUri, cc, cache, null)
+            {
+                ValidateAuthority = false
+            };
+
+            Assert.AreEqual(1, app.Users.Count());
+        }
+
+        private void BeforeCacheAccess(TokenCacheNotificationArgs args)
+        {
+            args.TokenCache.Deserialize(serializedCache);
+        }
+
+        private void AfterCacheAccess(TokenCacheNotificationArgs args)
+        {
+            serializedCache = args.TokenCache.Serialize();
         }
     }
 }
