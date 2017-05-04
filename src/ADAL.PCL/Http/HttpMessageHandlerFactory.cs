@@ -42,7 +42,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 return MockHandlerQueue.Dequeue();
             }
 
-            return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials, Proxy = System.Net.WebRequest.DefaultWebProxy };
+            // TODO: users need to be able to set the proxy to use, but .Net Core doesn't
+            // have a default proxy setting
+            return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials };
         }
 
         private readonly static Queue<HttpMessageHandler> MockHandlerQueue = new Queue<HttpMessageHandler>();
