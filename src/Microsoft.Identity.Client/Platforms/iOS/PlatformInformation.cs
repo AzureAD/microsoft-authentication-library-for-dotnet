@@ -73,8 +73,8 @@ namespace Microsoft.Identity.Client
         {
             base.ValidateRedirectUri(redirectUri, requestContext);
 
-            if (PublicClientApplication.DEFAULT_REDIRECT_URI.Equals(redirectUri))
-                throw new MsalException("Default redirect URI - " + PublicClientApplication.DEFAULT_REDIRECT_URI +
+            if (PublicClientApplication.DEFAULT_REDIRECT_URI.Equals(redirectUri.AbsoluteUri))
+                throw new MsalException(MsalError.RedirectUriValidationFailed, "Default redirect URI - " + PublicClientApplication.DEFAULT_REDIRECT_URI +
                                         " can not be used on iOS platform");
         }
     }
