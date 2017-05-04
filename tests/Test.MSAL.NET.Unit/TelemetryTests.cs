@@ -48,7 +48,7 @@ namespace Test.MSAL.NET.Unit
             Console.WriteLine("{0} event(s) received", events.Count);
             foreach(var e in events)
             {
-                Console.WriteLine("Event: {0}", e[EventBase.ConstEventName]);
+                Console.WriteLine("Event: {0}", e[EventBase.EventName]);
                 foreach(var entry in e)
                 {
                     Console.WriteLine("  {0}: {1}", entry.Key, entry.Value);

@@ -98,6 +98,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string RedirectUri { get; set; }
 
+        /// <summary>
+        /// Sets or Gets the custom query parameters that may be sent to the STS for dogfood testing. This parameter should not be set by the 
+        /// developers as it may have adverse effect on the application.
+        /// </summary>
+        public string SliceParameters { get; set; }
+
         /// <Summary>
         /// Token Cache instance for storing User tokens.
         /// </Summary>
@@ -219,6 +225,7 @@ namespace Microsoft.Identity.Client
         {
             return new AuthenticationRequestParameters
             {
+                SliceParameters = SliceParameters,
                 Authority = authority,
                 ClientId =  ClientId,
                 TokenCache = cache,

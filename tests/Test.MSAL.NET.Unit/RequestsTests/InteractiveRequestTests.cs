@@ -69,6 +69,72 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
         [TestMethod]
         [TestCategory("InteractiveRequestTests")]
+        public void SliceParametersTest()
+        {
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
+            cache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
+
+            MockWebUI ui = new MockWebUI()
+            {
+                MockResult = new AuthorizationResult(AuthorizationStatus.Success,
+                    TestConstants.AuthorityHomeTenant + "?code=some-code"),
+                QueryParamsToValidate = new Dictionary<string, string>()
+                {
+                    {"key1", "value1%20with%20encoded%20space"},
+                    {"key2", "value2"}
+                }
+            };
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
+            });
+
+            MockHttpMessageHandler mockHandler = new MockHttpMessageHandler();
+            mockHandler.Method = HttpMethod.Post;
+            mockHandler.QueryParams = new Dictionary<string, string>()
+            {
+                {"key1", "value1%20with%20encoded%20space"},
+                {"key2", "value2"}
+            };
+            mockHandler.ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage();
+            HttpMessageHandlerFactory.AddMockHandler(mockHandler);
+
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
+            {
+                Authority = authority,
+                SliceParameters = "key1=value1%20with%20encoded%20space&key2=value2",
+                ClientId = TestConstants.ClientId,
+                Scope = TestConstants.Scope,
+                TokenCache = cache,
+                RequestContext = new RequestContext(Guid.Empty, null)
+            };
+
+            parameters.RedirectUri = new Uri("some://uri");
+            parameters.ExtraQueryParameters = "extra=qp";
+
+            InteractiveRequest request = new InteractiveRequest(parameters,
+                TestConstants.ScopeForAnotherResource.ToArray(),
+                TestConstants.DisplayableId,
+                UIBehavior.SelectAccount, ui);
+            Task<AuthenticationResult> task = request.RunAsync();
+            task.Wait();
+            AuthenticationResult result = task.Result;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
+            Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(result.AccessToken, "some-access-token");
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
+        [TestMethod]
+        [TestCategory("InteractiveRequestTests")]
         public void NoCacheLookup()
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
@@ -139,9 +205,9 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
 
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.ConstEventName].EndsWith("ui_event") && anEvent[UiEvent.ConstUserCancelled] == "false"));
+                anEvent[EventBase.EventName].EndsWith("ui_event") && anEvent[UiEvent.ConstUserCancelled] == "false"));
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.ConstEventName].EndsWith("api_event") && anEvent[ApiEvent.ConstUiBehavior] == "select_account"));
+                anEvent[EventBase.EventName].EndsWith("api_event") && anEvent[ApiEvent.ConstUiBehavior] == "select_account"));
         }
 
         [TestMethod]

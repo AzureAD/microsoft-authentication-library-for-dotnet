@@ -259,6 +259,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task SendHttpMessageAsync(OAuth2Client client)
         {
             UriBuilder builder = new UriBuilder(AuthenticationRequestParameters.Authority.TokenEndpoint);
+            builder.AppendQueryParameters(AuthenticationRequestParameters.SliceParameters);
             Response =
                 await client
                     .GetToken(builder.Uri,

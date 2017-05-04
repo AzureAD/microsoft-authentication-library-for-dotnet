@@ -348,18 +348,6 @@ namespace Microsoft.Identity.Client.Internal
 
             return items;
         }
-        
-        public static string CheckForExtraQueryParameter(string url)
-        {
-            string extraQueryParameter = PlatformPlugin.PlatformInformation.GetEnvironmentVariable("MsalExtraQueryParameter");
-            string delimiter = (url.IndexOf('?') > 0) ? "&" : "?";
-            if (!string.IsNullOrWhiteSpace(extraQueryParameter))
-            {
-                url += string.Concat(delimiter, extraQueryParameter);
-            }
-
-            return url;
-        }
 
         public static void AppendQueryParameters(this UriBuilder builder, string queryParams)
         {

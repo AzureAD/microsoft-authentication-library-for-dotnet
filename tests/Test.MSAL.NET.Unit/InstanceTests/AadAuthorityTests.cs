@@ -71,7 +71,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
                 QueryParams = new Dictionary<string, string>
                 {
                     {"api-version", "1.0"},
-                    {"authorization_endpoint", "https://login.microsoftonline.in/mytenant.com/oauth2/v2.0/authorize"},
+                    {"authorization_endpoint", "https%3A%2F%2Flogin.microsoftonline.in%2Fmytenant.com%2Foauth2%2Fv2.0%2Fauthorize"},
                 },
                 ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
                     "{\"tenant_discovery_endpoint\":\"https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration\"}")
@@ -147,7 +147,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
                 QueryParams = new Dictionary<string, string>
                 {
                     {"api-version", "1.0"},
-                    {"authorization_endpoint", "https://login.microsoft0nline.com/mytenant.com/oauth2/v2.0/authorize"},
+                    {"authorization_endpoint", "https%3A%2F%2Flogin.microsoft0nline.com%2Fmytenant.com%2Foauth2%2Fv2.0%2Fauthorize"},
                 },
                 ResponseMessage =
                     MockHelpers.CreateFailureMessage(HttpStatusCode.BadRequest, "{\"error\":\"invalid_instance\"," +
