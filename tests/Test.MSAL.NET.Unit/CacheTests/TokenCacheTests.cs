@@ -886,6 +886,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             AccessTokenCacheItem item = items.First();
             Assert.AreEqual(0, item.Version);
         }
+        
         [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void DeserializeCacheItemWithDifferentVersion()
