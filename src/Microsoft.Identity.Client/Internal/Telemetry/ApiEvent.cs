@@ -44,6 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
         public const string CorrelationIdKey = EventNamePrefix + "correlation_id";
         public const string RequestIdKey = EventNamePrefix + "request_id";
         public const string IsConfidentialClientKey = EventNamePrefix + "is_confidential_client";
+        public const string ApiErrorCodeKey = EventNamePrefix + "api_error_code";
 
         public enum ApiIds
         {
@@ -123,6 +124,10 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
         public bool IsConfidentialClient
         {
             set => this[IsConfidentialClientKey] = value.ToString().ToLowerInvariant();
+        }
+
+        public string ApiErrorCode {
+            set => this[ApiErrorCodeKey] = value;
         }
     }
 }

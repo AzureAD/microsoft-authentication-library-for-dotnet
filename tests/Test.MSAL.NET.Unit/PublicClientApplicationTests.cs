@@ -177,8 +177,9 @@ namespace Test.MSAL.NET.Unit
                 Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
             }
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "false"
-                && anEvent[ApiEvent.ApiIdKey] == "170"));
+                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.ApiIdKey] == "170"
+                && anEvent[ApiEvent.WasSuccessfulKey] == "false" && anEvent[ApiEvent.ApiErrorCodeKey] == "state_mismatch"
+                ));
         }
 
         [TestMethod]
@@ -450,8 +451,9 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual("user_mismatch", exc.ErrorCode);
             }
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "false"
-                && anEvent[ApiEvent.ApiIdKey] == "174"));
+                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.ApiIdKey] == "174"
+                && anEvent[ApiEvent.WasSuccessfulKey] == "false" && anEvent[ApiEvent.ApiErrorCodeKey] == "user_mismatch"
+                ));
 
             Assert.AreEqual(1, app.Users.Count());
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
@@ -651,8 +653,9 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual(MsalUiRequiredException.NoTokensFoundError, exc.ErrorCode);
             }
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "false"
-                && anEvent[ApiEvent.ApiIdKey] == "30"));
+                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.ApiIdKey] == "30"
+                && anEvent[ApiEvent.WasSuccessfulKey] == "false" && anEvent[ApiEvent.ApiErrorCodeKey] == "no_tokens_found"
+                ));
         }
 
         [TestMethod]
