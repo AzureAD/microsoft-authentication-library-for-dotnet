@@ -870,5 +870,12 @@ namespace Test.MSAL.NET.Unit.CacheTests
             Assert.IsNotNull(item);
             Assert.IsTrue(item.ScopeSet.Contains(scopeInCache));
         }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void DeserializeCacheItemWithNoVersion()
+        {
+
+        }
     }
 }

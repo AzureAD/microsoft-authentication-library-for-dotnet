@@ -48,6 +48,9 @@ namespace Microsoft.Identity.Client.Internal.Cache
         {
         }
 
+        [DataMember(Name = "ver", IsRequired = false)]
+        public int Version { get; set; }
+
         [DataMember(Name = "client_info")]
         public string RawClientInfo { get; set; }
 
