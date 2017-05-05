@@ -875,7 +875,42 @@ namespace Test.MSAL.NET.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void DeserializeCacheItemWithNoVersion()
         {
+            string noVersionCacheEntry = "{\"client_id\":\"client_id\",\"client_info\":\"eyJ1aWQiOiJteS1VSUQiLCJ1dGlkIjoibXktVVRJRCJ9\"," +
+                                         "\"access_token\":\"access-token\",\"authority\":\"https:\\\\login.microsoftonline.com\\home\\\"," +
+                                         "\"expires_on\":1494023670,\"id_token\":\"someheader.eyJhdWQiOiAiZTg1NGE0YTctNmMzNC00NDljLWIyMzctZmM3YTI4MDkzZDg0Iiwi" +
+                                         "aXNzIjogImh0dHBzOi8vbG9naW4ubWljcm9zb2Z0b25saW5lLmNvbS82YzNkNTFkZC1mMGU1LTQ5NTktYjRlYS1hODBjNGUzNmZlNWUvdjIuMC8iLCJpY" +
+                                         "XQiOiAxNDU1ODMzODI4LCJuYmYiOiAxNDU1ODMzODI4LCJleHAiOiAxNDU1ODM3NzI4LCJpcGFkZHIiOiAiMTMxLjEwNy4xNTkuMTE3IiwibmFtZSI6IC" +
+                                         "JNYXJycnJyaW8gQm9zc3kiLCJvaWQiOiAidW5pcXVlX2lkIiwicHJlZmVycmVkX3VzZXJuYW1lIjogImRpc3BsYXlhYmxlQGlkLmNvbSIsInN1YiI6ICJLN" +
+                                         "F9TR0d4S3FXMVN4VUFtaGc2QzFGNlZQaUZ6Y3gtUWQ4MGVoSUVkRnVzIiwidGlkIjogIm15LWlkcCIsInZlciI6ICIyLjAifQ.somesignature\"," +
+                                         "\"scope\":\"r1\\scope1 r1\\scope2\",\"token_type\":\"Bearer\",\"user_assertion_hash\":null}";
 
+            TokenCache cache = new TokenCache();
+            cache.Deserialize(noVersionCacheEntry.ToByteArray());
+            ICollection<AccessTokenCacheItem> items = cache.GetAllAccessTokensForClient(new RequestContext(Guid.Empty, null));
+            Assert.AreEqual(1, items.Count);
+            AccessTokenCacheItem item = items.First();
+            Assert.AreEqual(1, item.Version);
+        }
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void DeserializeCacheItemWithDifferentVersion()
+        {
+            string noVersionCacheEntry = "{\"client_id\":\"client_id\",\"client_info\":\"eyJ1aWQiOiJteS1VSUQiLCJ1dGlkIjoibXktVVRJRCJ9\"," +
+                                         "\"access_token\":\"access-token\",\"authority\":\"https:\\\\login.microsoftonline.com\\home\\\"," +
+                                         "\"ver\":5," +
+                                         "\"expires_on\":1494023670,\"id_token\":\"someheader.eyJhdWQiOiAiZTg1NGE0YTctNmMzNC00NDljLWIyMzctZmM3YTI4MDkzZDg0Iiwi" +
+                                         "aXNzIjogImh0dHBzOi8vbG9naW4ubWljcm9zb2Z0b25saW5lLmNvbS82YzNkNTFkZC1mMGU1LTQ5NTktYjRlYS1hODBjNGUzNmZlNWUvdjIuMC8iLCJpY" +
+                                         "XQiOiAxNDU1ODMzODI4LCJuYmYiOiAxNDU1ODMzODI4LCJleHAiOiAxNDU1ODM3NzI4LCJpcGFkZHIiOiAiMTMxLjEwNy4xNTkuMTE3IiwibmFtZSI6IC" +
+                                         "JNYXJycnJyaW8gQm9zc3kiLCJvaWQiOiAidW5pcXVlX2lkIiwicHJlZmVycmVkX3VzZXJuYW1lIjogImRpc3BsYXlhYmxlQGlkLmNvbSIsInN1YiI6ICJLN" +
+                                         "F9TR0d4S3FXMVN4VUFtaGc2QzFGNlZQaUZ6Y3gtUWQ4MGVoSUVkRnVzIiwidGlkIjogIm15LWlkcCIsInZlciI6ICIyLjAifQ.somesignature\"," +
+                                         "\"scope\":\"r1\\scope1 r1\\scope2\",\"token_type\":\"Bearer\",\"user_assertion_hash\":null}";
+
+            TokenCache cache = new TokenCache();
+            cache.Deserialize(noVersionCacheEntry.ToByteArray());
+            ICollection<AccessTokenCacheItem> items = cache.GetAllAccessTokensForClient(new RequestContext(Guid.Empty, null));
+            Assert.AreEqual(1, items.Count);
+            AccessTokenCacheItem item = items.First();
+            Assert.AreEqual(5, item.Version);
         }
     }
 }
