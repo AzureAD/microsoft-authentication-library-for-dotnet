@@ -77,5 +77,10 @@ namespace Microsoft.Identity.Client.Internal
         /// Failed to refresh token.
         /// </summary>
         public const string FailedToRefreshToken = "failed_to_refresh_token";
+
+        /// <summary>
+        /// RedirectUri validation failed.
+        /// </summary>
+        public const string RedirectUriValidationFailed = "redirect_uri_validation_failed";
     }
 }

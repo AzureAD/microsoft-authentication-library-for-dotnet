@@ -36,8 +36,8 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
     {
         protected const string EventNamePrefix = "msal.";
         public const string EventNameKey = EventNamePrefix + "event_name";
-        protected const string StartTimeKey = EventNamePrefix + "start_time";
-        protected const string ElapsedTimeKey = EventNamePrefix + "elapsed_time";
+        public const string StartTimeKey = EventNamePrefix + "start_time";
+        public const string ElapsedTimeKey = EventNamePrefix + "elapsed_time";
         private readonly long _startTimestamp;
 
         public const string TenantPlaceHolder = "<tenant>"; // It is used to replace the real tenant in telemetry info
