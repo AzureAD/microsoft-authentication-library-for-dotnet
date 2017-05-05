@@ -205,9 +205,9 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
 
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.EventName].EndsWith("ui_event") && anEvent[UiEvent.ConstUserCancelled] == "false"));
+                anEvent[EventBase.EventNameKey].EndsWith("ui_event") && anEvent[UiEvent.UserCancelledKey] == "false"));
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.EventName].EndsWith("api_event") && anEvent[ApiEvent.ConstUiBehavior] == "select_account"));
+                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.UiBehaviorKey] == "select_account"));
         }
 
         [TestMethod]
