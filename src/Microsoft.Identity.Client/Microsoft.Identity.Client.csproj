@@ -6,8 +6,8 @@
     <PackageLicenseUrl>https://go.microsoft.com/fwlink/?linkid=844762</PackageLicenseUrl>
     <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
     <MinClientVersion>2.12</MinClientVersion>
-    <Description>This package contains the binaries of the Microsoft Authentication Library (MSAL). MSAL provides easy to use authentication functionality for your .NET based client on various platforms including Windows desktop, Windows Store, Xamarin iOS and Xamarin Android by taking advantage of Azure Active Directory and MSA.</Description>
-    <Summary>This package contains the binaries of the Microsoft Authentication Library (MSAL). MSAL provides easy to use authentication functionality for your .NET based client on various platforms including Windows desktop, Windows Store, Xamarin iOS and Xamarin Android by taking advantage of Azure Active Directory and MSA.</Summary>
+    <Description>This package contains the binaries of the Microsoft Authentication Library (MSAL). MSAL makes it easy to obtain tokens from Azure AD v2 (work &amp; school accounts, MSA) and Azure AD B2C, gaining access to Microsoft Cloud API and any other API secured by Microsoft identities. This version supports adding authentication functionality to your .NET based client on Windows desktop (.NET 4.5+), UWP, .NET Core, Xamarin iOS and Xamarin Android.</Description>
+    <Summary>This package contains the binaries of the Microsoft Authentication Library (MSAL). MSAL makes it easy to obtain tokens from Azure AD v2 (work &amp; school accounts, MSA) and Azure AD B2C, gaining access to Microsoft Cloud API and any other API secured by Microsoft identities. This version supports adding authentication functionality to your .NET based client on Windows desktop (.NET 4.5+), UWP, .NET Core, Xamarin iOS and Xamarin Android.</Summary>
     <Copyright>(C) Microsoft Corporation. All rights reserved.</Copyright>
     <PackageTags>Microsoft Authentication Library;MSA;MSAL;B2C;Azure Active Directory;AAD;Identity;Authentication;.NET;Windows Store;Xamarin iOS;Android</PackageTags>
     <Product>Microsoft.Identity.Client ($(TargetFramework))</Product>
