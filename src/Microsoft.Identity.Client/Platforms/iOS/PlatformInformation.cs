@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client
 {
     internal class PlatformInformation : PlatformInformationBase
     {
-        internal const string IosDefaultRedirectUri = "msal{0}://auth";
+        internal const string IosDefaultRedirectUriTemplate = "msal{0}://auth";
 
         public PlatformInformation(RequestContext requestContext) : base(requestContext)
         {
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetDefaultRedirectUri(string clientId)
         {
-            return string.Format(IosDefaultRedirectUri, clientId);
+            return string.Format(IosDefaultRedirectUriTemplate, clientId);
         }
     }
 }
