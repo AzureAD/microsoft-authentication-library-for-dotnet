@@ -184,5 +184,88 @@ namespace Test.MSAL.NET.Unit
 
             Assert.AreEqual(null, EventBase.ScrubTenant(new Uri("https://login.contoso.com/adfs")));
         }
+
+        [TestMethod]
+        [TestCategory("TelemetryInternalAPI")]
+        public void TelemetryContainsDefaultEventAsFirstEvent()
+        {
+            Telemetry telemetry = new Telemetry() { ClientId = "a1b2c3d4" };  // To isolate the test environment, we do not use a singleton here
+            var myReceiver = new MyReceiver();
+            telemetry.RegisterReceiver(myReceiver.OnEvents);
+            var reqId = telemetry.GenerateNewRequestId();
+            try
+            {
+                var anEvent = new UiEvent();
+                telemetry.StartEvent(reqId, anEvent);
+                telemetry.StopEvent(reqId, anEvent);
+            }
+            finally
+            {
+                telemetry.Flush(reqId);
+            }
+            Assert.IsTrue(myReceiver.EventsReceived[0][EventBase.EventNameKey].EndsWith("default_event"));
+            Assert.IsTrue(myReceiver.EventsReceived[1][EventBase.EventNameKey].EndsWith("ui_event"));
+            Assert.AreNotEqual(myReceiver.EventsReceived[1][EventBase.ElapsedTimeKey], "-1");
+        }
+
+        [TestMethod]
+        [TestCategory("TelemetryInternalAPI")]
+        public void TelemetryStartAnEventWithoutStoppingItLater() // Such event(s) becomes an orphaned event
+        {
+            Telemetry telemetry = new Telemetry() { ClientId = "a1b2c3d4" };  // To isolate the test environment, we do not use a singleton here
+            var myReceiver = new MyReceiver();
+            telemetry.RegisterReceiver(myReceiver.OnEvents);
+
+            var reqId = telemetry.GenerateNewRequestId();
+            try
+            {
+                var apiEvent = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                telemetry.StartEvent(reqId, apiEvent);
+                var uiEvent = new UiEvent();
+                telemetry.StartEvent(reqId, uiEvent);
+                // Forgot to stop this event. A started event which never got stopped, becomes an orphan.
+                //telemetry.StopEvent(reqId, uiEvent);
+                telemetry.StopEvent(reqId, apiEvent);
+            }
+            finally
+            {
+                Assert.IsFalse(telemetry.CompletedEvents.IsEmpty); // There are completed event(s) inside
+                Assert.IsFalse(telemetry.EventsInProgress.IsEmpty); // There is an orphaned event inside
+                telemetry.Flush(reqId);
+                Assert.IsTrue(telemetry.CompletedEvents.IsEmpty); // Completed event(s) have been dispatched
+                Assert.IsTrue(telemetry.EventsInProgress.IsEmpty); // The orphaned event is also dispatched, so there is no memory leak here.
+            }
+            Assert.IsNotNull(myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
+                anEvent[EventBase.EventNameKey].EndsWith("ui_event") && anEvent[EventBase.ElapsedTimeKey] == "-1"));
+        }
+
+        [TestMethod]
+        [TestCategory("TelemetryInternalAPI")]
+        public void TelemetryStopAnEventWithoutStartingItBeforehand()
+        {
+            Telemetry telemetry = new Telemetry() { ClientId = "a1b2c3d4" };  // To isolate the test environment, we do not use a singleton here
+            var myReceiver = new MyReceiver();
+            telemetry.RegisterReceiver(myReceiver.OnEvents);
+
+            var reqId = telemetry.GenerateNewRequestId();
+            try
+            {
+                var apiEvent = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                telemetry.StartEvent(reqId, apiEvent);
+                var uiEvent = new UiEvent();
+                // Forgot to start this event
+                //telemetry.StartEvent(reqId, uiEvent);
+                // Now attempting to stop a never-started event
+                telemetry.StopEvent(reqId, uiEvent); // This line will not cause any exception. The implementation simply ignores it.
+                telemetry.StopEvent(reqId, apiEvent);
+            }
+            finally
+            {
+                telemetry.Flush(reqId);
+                Assert.IsTrue(telemetry.CompletedEvents.IsEmpty && telemetry.EventsInProgress.IsEmpty); // No memory leak here
+            }
+            Assert.IsNull(myReceiver.EventsReceived.Find(anEvent =>  // Expect NOT finding such an event
+                anEvent[EventBase.EventNameKey].EndsWith("ui_event")));
+        }
     }
 }

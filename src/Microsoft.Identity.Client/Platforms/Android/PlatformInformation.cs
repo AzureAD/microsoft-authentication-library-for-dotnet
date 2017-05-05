@@ -35,6 +35,8 @@ namespace Microsoft.Identity.Client
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class PlatformInformation : PlatformInformationBase
     {
+        internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
+
         public PlatformInformation(RequestContext requestContext) : base(requestContext)
         {
         }
@@ -79,9 +81,14 @@ namespace Microsoft.Identity.Client
         {
             base.ValidateRedirectUri(redirectUri, requestContext);
 
-            if (PublicClientApplication.DEFAULT_REDIRECT_URI.Equals(redirectUri))
-                throw new MsalException("Default redirect URI - " + PublicClientApplication.DEFAULT_REDIRECT_URI +
+            if (PlatformInformationBase.DefaultRedirectUri.Equals(redirectUri.AbsoluteUri))
+                throw new MsalException(MsalError.RedirectUriValidationFailed, "Default redirect URI - " + PlatformInformationBase.DefaultRedirectUri +
                                         " can not be used on Android platform");
+        }
+
+        public override string GetDefaultRedirectUri(string clientId)
+        {
+            return string.Format(AndroidDefaultRedirectUriTemplate, clientId);
         }
     }
 }

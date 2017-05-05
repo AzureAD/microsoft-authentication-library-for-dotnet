@@ -73,9 +73,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool TelemetryOnFailureOnly { get; set; }
 
-        private ConcurrentDictionary<Tuple<string, string>, EventBase> EventsInProgress = new ConcurrentDictionary<Tuple<string, string>, EventBase>();
+        internal ConcurrentDictionary<Tuple<string, string>, EventBase> EventsInProgress = new ConcurrentDictionary<Tuple<string, string>, EventBase>();
 
-        private ConcurrentDictionary<string, List<EventBase>> CompletedEvents = new ConcurrentDictionary<string, List<EventBase>>();
+        internal ConcurrentDictionary<string, List<EventBase>> CompletedEvents = new ConcurrentDictionary<string, List<EventBase>>();
 
         internal string GenerateNewRequestId()
         {

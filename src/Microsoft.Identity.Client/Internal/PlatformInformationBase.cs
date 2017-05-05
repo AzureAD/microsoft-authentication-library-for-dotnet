@@ -34,6 +34,8 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal abstract class PlatformInformationBase
     {
+        internal const string DefaultRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
+
         protected readonly RequestContext RequestContext;
         protected PlatformInformationBase(RequestContext requestContext)
         {
@@ -73,6 +75,11 @@ namespace Microsoft.Identity.Client.Internal
         public virtual string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
         {
             return redirectUri.OriginalString;
+        }
+
+        public virtual string GetDefaultRedirectUri(string correlationId)
+        {
+            return DefaultRedirectUri;
         }
     }
 }

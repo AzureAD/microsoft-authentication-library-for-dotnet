@@ -206,7 +206,7 @@ namespace Test.MSAL.NET.Unit
             {
                 ValidateAuthority = false
             };
-            
+
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
@@ -319,11 +319,6 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(cachedAssertion, cc.Assertion);
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
-
-            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent => // Expect finding such an event
-                anEvent[EventBase.EventNameKey].EndsWith("http_event") && anEvent[HttpEvent.ResponseCodeKey] == "200"
-                && anEvent[HttpEvent.HttpPathKey].Contains(EventBase.TenantPlaceHolder) // The tenant info is expected to be replaced by a holder
-                ));
         }
 
         [TestMethod]
@@ -336,9 +331,16 @@ namespace Test.MSAL.NET.Unit
             Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent => // Expect finding such an event
+                anEvent[EventBase.EventNameKey].EndsWith("http_event") && anEvent[HttpEvent.ResponseCodeKey] == "200"
+                && anEvent[HttpEvent.HttpPathKey].Contains(EventBase.TenantPlaceHolder) // The tenant info is expected to be replaced by a holder
+                ));
+            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent => // Expect finding such an event
                 anEvent[EventBase.EventNameKey].EndsWith("token_cache_lookup") && anEvent[CacheEvent.TokenTypeKey] == "at"));
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent => // Expect finding such an event
                 anEvent[EventBase.EventNameKey].EndsWith("token_cache_write") && anEvent[CacheEvent.TokenTypeKey] == "at"));
+            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
+                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "true"
+                && anEvent[ApiEvent.ApiIdKey] == "726"));
         }
 
         [TestMethod]
@@ -377,7 +379,7 @@ namespace Test.MSAL.NET.Unit
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
-            
+
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
@@ -500,7 +502,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual("qp", qp["extra"]);
             Assert.AreEqual("select_account", qp["prompt"]);
 
-            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");            
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]
@@ -605,8 +607,11 @@ namespace Test.MSAL.NET.Unit
                 .FirstOrDefault();
 
             Assert.AreEqual(tokenRetrievedFromNetCall, accessTokenInCache?.AccessToken);
+            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
+                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "true"
+                && anEvent[ApiEvent.ApiIdKey] == "727"));
         }
-        
+
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
         public async Task AuthorizationCodeRequestTest()

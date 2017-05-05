@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Internal;
+
 namespace Microsoft.Identity.Client
 {
     public sealed partial class PublicClientApplication : ClientApplicationBase
@@ -36,7 +38,8 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId">Client id of the application</param>
         /// <param name="authority">Default authority to be used for the application</param>
         /// <param name="userTokenCache">Instance of TokenCache.</param>
-        public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache) : base(clientId, authority, DEFAULT_REDIRECT_URI, true)
+        public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache) : base(clientId,
+            authority, PlatformPlugin.PlatformInformation.GetDefaultRedirectUri(clientId), true)
         {
             UserTokenCache = userTokenCache;
         }
