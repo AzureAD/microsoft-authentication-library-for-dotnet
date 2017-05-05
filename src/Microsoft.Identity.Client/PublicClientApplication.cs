@@ -41,8 +41,6 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication
     {
-        internal const string DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
-
         /// <summary>
         /// Consutructor of the application. It will use https://login.microsoftonline.com/common as the default authority.
         /// </summary>
@@ -57,7 +55,7 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId">Client id of the application</param>
         /// <param name="authority">Default authority to be used for the application</param>
         public PublicClientApplication(string clientId, string authority)
-            : base(clientId, authority, DEFAULT_REDIRECT_URI, true)
+            : base(clientId, authority, PlatformPlugin.PlatformInformation.GetDefaultRedirectUri(clientId), true)
         {
             UserTokenCache = new TokenCache()
             {
