@@ -30,13 +30,13 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
 {
     internal class UiEvent : EventBase
     {
-        public const string ConstUserCancelled = EventNamePrefix + "user_cancelled";
+        public const string UserCancelledKey = EventNamePrefix + "user_cancelled";
 
         public UiEvent(): base(EventNamePrefix + "ui_event") {}
 
         public bool UserCancelled
         {
-            set => this[ConstUserCancelled] = value.ToString().ToLowerInvariant();
+            set => this[UserCancelledKey] = value.ToString().ToLowerInvariant();
         }
     }
 }

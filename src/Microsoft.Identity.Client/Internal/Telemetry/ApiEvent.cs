@@ -33,17 +33,17 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
 {
     internal class ApiEvent : EventBase
     {
-        public const string ConstApiId = EventNamePrefix + "api_id";
-        public const string ConstAuthority = EventNamePrefix + "authority";
-        public const string ConstAuthorityType = EventNamePrefix + "authority_type";
-        public const string ConstUiBehavior = EventNamePrefix + "ui_behavior";
-        public const string ConstValidationStatus = EventNamePrefix + "validation_status";
-        public const string ConstTenantId = EventNamePrefix + "tenant_id";
-        public const string ConstUserId = EventNamePrefix + "user_id";
-        public const string ConstWasSuccessful = EventNamePrefix + "was_successful";
-        public const string ConstCorrelationId = EventNamePrefix + "correlation_id";
-        public const string ConstRequestId = EventNamePrefix + "request_id";
-        public const string ConstIsConfidentialClient = EventNamePrefix + "is_confidential_client";
+        public const string ApiIdKey = EventNamePrefix + "api_id";
+        public const string AuthorityKey = EventNamePrefix + "authority";
+        public const string AuthorityTypeKey = EventNamePrefix + "authority_type";
+        public const string UiBehaviorKey = EventNamePrefix + "ui_behavior";
+        public const string ValidationStatusKey = EventNamePrefix + "validation_status";
+        public const string TenantIdKey = EventNamePrefix + "tenant_id";
+        public const string UserIdKey = EventNamePrefix + "user_id";
+        public const string WasSuccessfulKey = EventNamePrefix + "was_successful";
+        public const string CorrelationIdKey = EventNamePrefix + "correlation_id";
+        public const string RequestIdKey = EventNamePrefix + "request_id";
+        public const string IsConfidentialClientKey = EventNamePrefix + "is_confidential_client";
 
         public enum ApiIds
         {
@@ -71,58 +71,58 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
 
         public ApiIds ApiId
         {
-            set => this[ConstApiId] = ((int)value).ToStringInvariant();
+            set => this[ApiIdKey] = ((int)value).ToStringInvariant();
         }
 
         public Uri Authority
         {
-            set => this[ConstAuthority] = ScrubTenant(value)?.ToLowerInvariant();
+            set => this[AuthorityKey] = ScrubTenant(value)?.ToLowerInvariant();
         }
 
         public string AuthorityType
         {
-            set => this[ConstAuthorityType] = value?.ToLowerInvariant();
+            set => this[AuthorityTypeKey] = value?.ToLowerInvariant();
         }
 
         public string UiBehavior
         {
-            set => this[ConstUiBehavior] = value?.ToLowerInvariant();
+            set => this[UiBehaviorKey] = value?.ToLowerInvariant();
         }
 
         public string ValidationStatus
         {
-            set => this[ConstValidationStatus] = value?.ToLowerInvariant();
+            set => this[ValidationStatusKey] = value?.ToLowerInvariant();
         }
 
         public string TenantId
         {
-            set => this[ConstTenantId] = (value != null) ? CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value) : null;
+            set => this[TenantIdKey] = (value != null) ? CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value) : null;
         }
 
         public string UserId
         {
-            set => this[ConstUserId] = value != null ? CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value) : null;
+            set => this[UserIdKey] = value != null ? CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value) : null;
         }
 
         public bool WasSuccessful
         {
-            set => this[ConstWasSuccessful] = value.ToString().ToLowerInvariant();
-            get => this[ConstWasSuccessful] == true.ToString().ToLowerInvariant();
+            set => this[WasSuccessfulKey] = value.ToString().ToLowerInvariant();
+            get => this[WasSuccessfulKey] == true.ToString().ToLowerInvariant();
         }
 
         public string CorrelationId
         {
-            set => this[ConstCorrelationId] = value;
+            set => this[CorrelationIdKey] = value;
         }
 
         public string RequestId
         {
-            set => this[ConstRequestId] = value;
+            set => this[RequestIdKey] = value;
         }
 
         public bool IsConfidentialClient
         {
-            set => this[ConstIsConfidentialClient] = value.ToString().ToLowerInvariant();
+            set => this[IsConfidentialClientKey] = value.ToString().ToLowerInvariant();
         }
     }
 }
