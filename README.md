@@ -31,16 +31,18 @@ These libraries are suitable to use in a production environment. We provide the 
     ***Azure AD v2.0***
 
     [.NET WPF Desktop App](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2)
+    
     [Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-xamarin-native-v2)
 
     ***Azure AD B2C***
 
     [Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-b2c-xamarin-native)
+
     [.NET Web App](https://github.com/Azure-Samples/active-directory-b2c-dotnet-webapp-and-webapi) 
 
 #### Step 1: Add MSAL to your Solution/Project
 
-1.  ***Right click on your project*** > ***Manage packages***.
+1.  Right click on your project > ***Manage packages***.
 2.	Select ***include prerelease*** > search ***msal***.
 3.	Select the ***Microsoft.Identity.Client*** package > ***install***.
 
