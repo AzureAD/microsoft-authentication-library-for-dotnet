@@ -1,6 +1,6 @@
 # Microsoft Authentication Library (MSAL) for .NET, Windows Store, UWP, NetCore, Xamarin Android and iOS
 
-| [Getting Started](https://docs.microsoft.com/en-us/azure/active-directory/develop/guidedsetups/active-directory-mobileanddesktopapp-android-intro) | [Sample Code](https://github.com/Azure-Samples/active-directory-android-native-v2) | [API Reference](http://javadoc.io/doc/com.microsoft.identity.client/msal) | [Support](README.md#community-help-and-support)
+| [Getting Started](https://identity.microsoft.com/portal/register-app?appType=mobileAndDesktopApp&appTech=windowsDesktop) | [Sample Code](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2) | [API Reference](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-libraries) | [Support](README.md#community-help-and-support)
 | --- | --- | --- | --- |
 
 ## General
@@ -25,13 +25,20 @@ These libraries are suitable to use in a production environment. We provide the 
 
 ### Using MSAL
 - Before you can get a token from Azure AD v2.0 or Azure AD B2C, you'll need to register an application. For Azure AD v2.0, use [the app registration portal](https://apps.dev.microsoft.com). For Azure AD B2C, checkout [how to register your app with B2C](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-app-registration).  
-For a full example of basic usage, checkout our [code sample](https://github.com/Azure-Samples/active-directory-android-native-v2).
+
+- For a full example of basic usage, checkout one of our code samples!       
+    ***Azure AD v2.0***
+    1. [.NET WPF Desktop App](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2)
+    2. [Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-xamarin-native-v2)
+
+    ***Azure AD B2C***
+    1. [Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-b2c-xamarin-native)
 
 #### Step 1: Add MSAL to your Solution/Project
 
-1.  Right click on your project and select "Manage packages...".
-2.	Select "include prerelease" checkbox and search for "msal".
-3.	Select "Microsoft.Identity.Client" package and click install.
+1.  Right click on your project > *Manage packages...*.
+2.	Select *include prerelease* checkbox > search ***msal***.
+3.	Select the *Microsoft.Identity.Client* package > *install*.
 
 #### Step 2: Instantiate MSAL and Acquire a Token
 
@@ -49,7 +56,7 @@ For a full example of basic usage, checkout our [code sample](https://github.com
 
 #### Step 3: Use the token!
 
-The access token can now be used in an [HTTP Bearer request](https://github.com/Azure-Samples/active-directory-android-native-v2/blob/master/app/src/main/java/com/danieldobalian/msalandroidapp/MainActivity.java#L152).
+The access token can now be used in an [HTTP Bearer request](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2/blob/master/active-directory-wpf-nodejs-webapi-v2/MainWindow.xaml.cs#L84).
 
 
 ## Community Help and Support
