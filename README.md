@@ -26,19 +26,21 @@ These libraries are suitable to use in a production environment. We provide the 
 ### Using MSAL
 - Before you can get a token from Azure AD v2.0 or Azure AD B2C, you'll need to register an application. For Azure AD v2.0, use [the app registration portal](https://apps.dev.microsoft.com). For Azure AD B2C, checkout [how to register your app with B2C](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-app-registration).  
 
-- For a full example of basic usage, checkout one of our code samples!       
+- For a full example, checkout one of our code samples!  
+
     ***Azure AD v2.0***
-    1. [.NET WPF Desktop App](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2)
-    2. [Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-xamarin-native-v2)
+        [.NET WPF Desktop App](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2)
+        [Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-xamarin-native-v2)
 
     ***Azure AD B2C***
-    1. [Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-b2c-xamarin-native)
+        [Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-b2c-xamarin-native)
+        [.NET Web App](https://github.com/Azure-Samples/active-directory-b2c-dotnet-webapp-and-webapi) 
 
 #### Step 1: Add MSAL to your Solution/Project
 
-1.  Right click on your project > *Manage packages...*.
-2.	Select *include prerelease* checkbox > search ***msal***.
-3.	Select the *Microsoft.Identity.Client* package > *install*.
+1.  Right click on your project > ***Manage packages...***.
+2.	Select ***include prerelease*** checkbox > search *msal*.
+3.	Select the ***Microsoft.Identity.Client*** package > ***install***.
 
 #### Step 2: Instantiate MSAL and Acquire a Token
 
