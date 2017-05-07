@@ -36,6 +36,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
     [DataContract]
     internal abstract class BaseTokenCacheItem
     {
+        private const int CacheVersion = 1;
+
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -47,6 +49,9 @@ namespace Microsoft.Identity.Client.Internal.Cache
         public BaseTokenCacheItem()
         {
         }
+
+        [DataMember(Name = "ver", IsRequired = false)]
+        public int Version { get; set; } = CacheVersion;
 
         [DataMember(Name = "client_info")]
         public string RawClientInfo { get; set; }

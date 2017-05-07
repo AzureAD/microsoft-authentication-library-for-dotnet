@@ -151,6 +151,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.WasSuccessful = true;
                 return result;
             }
+            catch (MsalException ex)
+            {
+                apiEvent.ApiErrorCode = ex.ErrorCode;
+                AuthenticationRequestParameters.RequestContext.Logger.Error(ex);
+                throw;
+            }
             catch (Exception ex)
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Error(ex);
