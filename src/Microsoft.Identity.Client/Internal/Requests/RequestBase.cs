@@ -62,14 +62,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected RequestBase(AuthenticationRequestParameters authenticationRequestParameters)
         {
             TokenCache = authenticationRequestParameters.TokenCache;
-
+            
             authenticationRequestParameters.RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
-                "=== Token Acquisition ({4}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCache Provided: {3}",
-                CryptographyHelper.CreateBase64UrlEncodedSha256Hash(AuthenticationRequestParameters?.Authority
-                    ?.CanonicalAuthority), authenticationRequestParameters.Scope.AsSingleString(),
-                authenticationRequestParameters.ClientId,
-                TokenCache != null, this.GetType().Name));
-            authenticationRequestParameters.RequestContext.Logger.InfoPii(string.Format(CultureInfo.InvariantCulture,
                 "=== Token Acquisition ({4}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCache Provided: {3}",
                 AuthenticationRequestParameters?.Authority?.CanonicalAuthority,
                 authenticationRequestParameters.Scope.AsSingleString(),
