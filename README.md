@@ -26,7 +26,7 @@ These libraries are suitable to use in a production environment. We provide the 
 ### Using MSAL
 - Before you can get a token from Azure AD v2.0 or Azure AD B2C, you'll need to register an application. For Azure AD v2.0, use [the app registration portal](https://apps.dev.microsoft.com). For Azure AD B2C, checkout [how to register your app with B2C](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-app-registration).  
 
-- For a full sample,  
+For a full sample,  
 
     ***Azure AD v2.0***
 
