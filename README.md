@@ -87,7 +87,7 @@ Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MI
 2. Acquire a token
 
 ```C#
-    AuthenticationResult authenticationResult = await myApp.AcquireToken(SCOPES).ConfigureAwait(false);
+    AuthenticationResult authenticationResult = await myApp.AcquireTokenAsync(SCOPES).ConfigureAwait(false);
 ```
 
 #### Step 3: Use the token!
