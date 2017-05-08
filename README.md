@@ -1,10 +1,10 @@
-# Microsoft Authentication Library (MSAL) for .NET, Windows Store, UWP, NetCore, Xamarin Android and iOS
+Microsoft Authentication Library (MSAL) Preview for .NET, Windows Store, UWP, NetCore, Xamarin Android and iOS
+==========================================================================
 
-| [Getting Started](https://docs.microsoft.com/en-us/azure/active-directory/develop/guidedsetups/active-directory-mobileanddesktopapp-android-intro) | [Sample Code](https://github.com/Azure-Samples/active-directory-android-native-v2) | [API Reference](http://javadoc.io/doc/com.microsoft.identity.client/msal) | [Support](README.md#community-help-and-support)
+| [Getting Started](https://identity.microsoft.com/portal/register-app?appType=mobileAndDesktopApp&appTech=windowsDesktop) | [Sample Code](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2) | [API Reference](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-libraries) | [Support](README.md#community-help-and-support)
 | --- | --- | --- | --- |
 
-## General
-The MSAL library for .NET gives your app the ability to begin using the [Microsoft Cloud](https://cloud.microsoft.com) by supporting [Microsoft Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/).
+The MSAL library for Android gives your app the ability to begin using the [Microsoft Cloud](https://cloud.microsoft.com) by supporting [Microsoft Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/).
 
  Stable (`master` branch)    | Nightly (`dev` branch)
 -----------------------------|-------------------------
@@ -17,40 +17,11 @@ The MSAL library for .NET gives your app the ability to begin using the [Microso
 
 ## Important Note about the MSAL Preview
 
-These libraries are suitable to use in a production environment. We provide the same production level support for these libraries as we do our current production libraries. During the preview we reserve the right to make changes to the API, cache format, and other mechanisms of this library without notice which you will be required to take along with bug fixes or feature improvements. This may impact your application. For instance, a change to the cache format may impact your users, such as requiring them to sign in again and an API change may require you to update your code. When we provide our General Availability release later, we will require you to update your application to our General Availability version within six months as applications written using the preview library could no longer work.
+This library is suitable for use in a production environment. We provide the same production level support for this library as we do our current production libraries. During the preview we may make changes to the API, internal cache format, and other mechanisms of this library, which you will be required to take along with bug fixes or feature improvements. This may impact your application. For instance, a change to the cache format may impact your users, such as requiring them to sign in again. An API change may require you to update your code. When we provide the General Availability release we will require you to update to the General Availability version within six months, as applications written using a preview version of library may no longer work.
 
 ### Requirements
 * Windows 7 or greater
 * .NET 4.5 or greater
-
-### Using MSAL
-- Before you can get a token from Azure AD v2.0 or Azure AD B2C, you'll need to register an application. For Azure AD v2.0, use [the app registration portal](https://apps.dev.microsoft.com). For Azure AD B2C, checkout [how to register your app with B2C](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-app-registration).  
-For a full example of basic usage, checkout our [code sample](https://github.com/Azure-Samples/active-directory-android-native-v2).
-
-#### Step 1: Add MSAL to your Solution/Project
-
-1.  Right click on your project and select "Manage packages...".
-2.	Select "include prerelease" checkbox and search for "msal".
-3.	Select "Microsoft.Identity.Client" package and click install.
-
-#### Step 2: Instantiate MSAL and Acquire a Token
-
-1.  Create a new PublicClientApplication instance. Make sure to fill in your app/client id
-
-```C#
-    PublicClientApplication myApp = new PublicClientApplication(CLIENT_ID);
-```
-
-2. Acquire a token
-
-```C#
-    AuthenticationResult authenticationResult = await myApp.AcquireToken(SCOPES).ConfigureAwait(false);
-```
-
-#### Step 3: Use the token!
-
-The access token can now be used in an [HTTP Bearer request](https://github.com/Azure-Samples/active-directory-android-native-v2/blob/master/app/src/main/java/com/danieldobalian/msalandroidapp/MainActivity.java#L152).
-
 
 ## Community Help and Support
 
@@ -78,3 +49,47 @@ If you find a security issue with our libraries or services please report it to 
 Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the "License");
 
 
+### Using MSAL
+- Before you can get a token from Azure AD v2.0 or Azure AD B2C, you'll need to register an application. For Azure AD v2.0, use [the app registration portal](https://apps.dev.microsoft.com). For Azure AD B2C, checkout [how to register your app with B2C](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-app-registration).  
+
+- For a full sample,  
+
+    ***Azure AD v2.0***
+
+    [.NET WPF Desktop App](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2)
+
+    [.NET Web App](https://github.com/Azure-Samples/active-directory-dotnet-webapp-openidconnect-v2)
+
+    [Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-xamarin-native-v2)
+
+    ***Azure AD B2C***
+
+    [.NET WPF Desktop App](https://github.com/Azure-Samples/active-directory-b2c-dotnet-desktop) 
+
+    [.NET Web App](https://github.com/Azure-Samples/active-directory-b2c-dotnet-webapp-and-webapi)
+
+    [Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-b2c-xamarin-native) 
+
+#### Step 1: Add MSAL to your Solution/Project
+
+1.  Right click on your project > ***Manage packages***.
+2.	Select ***include prerelease*** > search ***msal***.
+3.	Select the ***Microsoft.Identity.Client*** package > ***install***.
+
+#### Step 2: Instantiate MSAL and Acquire a Token
+
+1.  Create a new PublicClientApplication instance. Make sure to fill in your app/client id
+
+```C#
+    PublicClientApplication myApp = new PublicClientApplication(CLIENT_ID);
+```
+
+2. Acquire a token
+
+```C#
+    AuthenticationResult authenticationResult = await myApp.AcquireTokenAsync(SCOPES).ConfigureAwait(false);
+```
+
+#### Step 3: Use the token!
+
+The access token can now be used in an [HTTP Bearer request](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2/blob/master/active-directory-wpf-nodejs-webapi-v2/MainWindow.xaml.cs#L84).
