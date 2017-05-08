@@ -26,23 +26,23 @@ These libraries are suitable to use in a production environment. We provide the 
 ### Using MSAL
 - Before you can get a token from Azure AD v2.0 or Azure AD B2C, you'll need to register an application. For Azure AD v2.0, use [the app registration portal](https://apps.dev.microsoft.com). For Azure AD B2C, checkout [how to register your app with B2C](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-app-registration).  
 
-For a full sample,  
+- For a full sample,  
 
-***Azure AD v2.0***
+    ***Azure AD v2.0***
 
-[.NET WPF Desktop App](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2)
+    [.NET WPF Desktop App](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2)
 
-[.NET Web App](https://github.com/Azure-Samples/active-directory-dotnet-webapp-openidconnect-v2)
+    [.NET Web App](https://github.com/Azure-Samples/active-directory-dotnet-webapp-openidconnect-v2)
 
-[Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-xamarin-native-v2)
+    [Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-xamarin-native-v2)
 
-***Azure AD B2C***
+    ***Azure AD B2C***
 
-[.NET WPF Desktop App](https://github.com/Azure-Samples/active-directory-b2c-dotnet-desktop) 
+    [.NET WPF Desktop App](https://github.com/Azure-Samples/active-directory-b2c-dotnet-desktop) 
 
-[.NET Web App](https://github.com/Azure-Samples/active-directory-b2c-dotnet-webapp-and-webapi)
+    [.NET Web App](https://github.com/Azure-Samples/active-directory-b2c-dotnet-webapp-and-webapi)
 
-[Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-b2c-xamarin-native) 
+    [Xamarin Cross-Platform App](https://github.com/Azure-Samples/active-directory-b2c-xamarin-native) 
 
 #### Step 1: Add MSAL to your Solution/Project
 
