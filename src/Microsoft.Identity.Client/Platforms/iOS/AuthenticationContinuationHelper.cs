@@ -39,8 +39,7 @@ namespace Microsoft.Identity.Client
         /// Sets response for continuing authentication flow. This function will return true if the response was meant for MSAL, else it will return false.
         /// </summary>
         /// <param name="url">url used to invoke the application</param>
-        /// <param name="sourceApplication">name of the application that caused app invocation</param>
-        public static bool SetAuthenticationContinuationEventArgs(NSUrl url, string sourceApplication)
+        public static bool SetAuthenticationContinuationEventArgs(NSUrl url)
         {
             return WebUI.ContinueAuthentication(url.AbsoluteString);
         }
