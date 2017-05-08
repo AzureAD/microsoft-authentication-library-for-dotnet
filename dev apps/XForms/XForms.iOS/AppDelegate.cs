@@ -57,7 +57,7 @@ namespace XForms.iOS
 
         public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options)
         {
-            if (!AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(url, ""))
+            if (!AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(url))
             {
                 return false;
             }
