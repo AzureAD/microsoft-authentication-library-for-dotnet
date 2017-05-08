@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client
         /// Flag to enable/disable logging to platform defaults. In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
         /// In android, logcat is used.
         /// </summary>
-        public static bool DefaultLoggingEnabled { get; set; } = true;
+        internal static bool DefaultLoggingEnabled { get; set; } = false;
 
         internal static void ExecuteCallback(Logger.LogLevel level, string message, bool containsPii)
         {
