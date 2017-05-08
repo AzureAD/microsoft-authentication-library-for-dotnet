@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             
             authenticationRequestParameters.RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
                 "=== Token Acquisition ({4}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCache Provided: {3}",
-                AuthenticationRequestParameters?.Authority?.CanonicalAuthority,
+                authenticationRequestParameters?.Authority?.CanonicalAuthority,
                 authenticationRequestParameters.Scope.AsSingleString(),
                 authenticationRequestParameters.ClientId,
                 TokenCache != null, this.GetType().Name));
