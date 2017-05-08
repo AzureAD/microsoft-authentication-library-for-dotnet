@@ -31,15 +31,15 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
+    /// Static class that consumes the response from the Authentication flow and continues token acquisition. This class should be called in ApplicationDelegate whenever app loads/reloads.
     /// </summary>
     public static class AuthenticationContinuationHelper
     {
         /// <summary>
-        /// 
+        /// Sets response for continuing authentication flow. This function will return true if the response was meant for MSAL, else it will return false.
         /// </summary>
-        /// <param name="url"></param>
-        /// <param name="sourceApplication"></param>
+        /// <param name="url">url used to invoke the application</param>
+        /// <param name="sourceApplication">name of the application that caused app invocation</param>
         public static bool SetAuthenticationContinuationEventArgs(NSUrl url, string sourceApplication)
         {
             return WebUI.ContinueAuthentication(url.AbsoluteString);

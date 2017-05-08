@@ -34,11 +34,16 @@ using System;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
+    /// Static class that consumes the response from the Authentication flow and continues token acquisition. This class should be called in OnActivityResult() of the activity doing authentication.
     /// </summary>
     public static class AuthenticationContinuationHelper
     {
         /// <summary>
+        /// Sets authentication response from the webview for token acquisition continuation.
         /// </summary>
+        /// <param name="requestCode">Request response code</param>
+        /// <param name="resultCode">Result code from authentication</param>
+        /// <param name="data">Response data from authentication</param>
         public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
             RequestContext requestContext = new RequestContext(Guid.Empty, null);
