@@ -1,0 +1,9 @@
+1.1.0-preview
+=============
+This release marks the seconds preview of the library which brings in several features and changes - 
+- Support for NetStandard
+- Client Certificate Assertion in NetCore
+- Support for system webviews in iOS/Android
+- Updated Object Model
+- Updated to JSON cache storage
+- Several bug fixes
