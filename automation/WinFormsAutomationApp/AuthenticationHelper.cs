@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
+using Newtonsoft.Json;
 
 namespace WinFormsAutomationApp
 {
@@ -174,13 +175,13 @@ namespace WinFormsAutomationApp
                 deviceCodeResult.DeviceCode = input["device_code"];
                 deviceCodeResult.ClientId = input["client_id"];
                 deviceCodeResult.Resource = input["resource"];
-                deviceCodeResult.ExpiresOn = Convert.ToDateTime(input["expires_on"]);
+                deviceCodeResult.ExpiresOn = DateTime.Parse(input["expires_on"]);
 
                 //Try to get access token form given device code.
                 AuthenticationResult result = await ctx.AcquireTokenByDeviceCodeAsync(deviceCodeResult);
                 res.Add("unique_id", result.UserInfo.UniqueId);
                 res.Add("access_token", result.AccessToken);
-                res.Add("tenant_id", result.TenantId);               
+                res.Add("tenant_id", result.TenantId);
             }
             catch (Exception exc)
             {
@@ -202,7 +203,7 @@ namespace WinFormsAutomationApp
                 res.Add("user_code", result.UserCode);
                 res.Add("client_id", result.ClientId);
                 res.Add("resource", result.Resource);
-                res.Add("expires_on", result.ExpiresOn.DateTime);
+                res.Add("expires_on", result.ExpiresOn.UtcDateTime);
             }
             catch (Exception exc)
             {
@@ -294,8 +295,7 @@ namespace WinFormsAutomationApp
 
         private static string FromDictionaryToJson(this Dictionary<string, object> dictionary)
         {
-            var jss = new JavaScriptSerializer();
-            return jss.Serialize(dictionary);
+            return JsonConvert.SerializeObject(dictionary);
         }
 
         private static Dictionary<string, object> ProcessResult(AuthenticationResult result, Dictionary<string, string> input)
