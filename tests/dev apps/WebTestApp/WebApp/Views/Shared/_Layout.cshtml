@@ -36,7 +36,7 @@
                 @if (User.Identity.IsAuthenticated)
                 {
                     <ul class="nav navbar-nav navbar-right">
-                        <li class="navbar-text">Hello, @User.Identity.Name</li>
+                        <li class="navbar-text">Hello, @User.FindFirst("name") </li>
                         <li><a asp-controller="Account" asp-action="LogOff">Log Out</a></li>
                     </ul>
                 }

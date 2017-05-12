@@ -33,13 +33,17 @@
     <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="3.13.5" />
     <PackageReference Include="Microsoft.AspNetCore.Session" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="1.0.2" />
-    <PackageReference Include="System.Private.DataContractSerialization" Version="4.1.1" />
+    <PackageReference Include="System.Private.DataContractSerialization" Version="4.3.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="wwwroot\lib\bootstrap\dist\css\" />
     <Folder Include="wwwroot\lib\jquery\dist\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
 
   <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish">

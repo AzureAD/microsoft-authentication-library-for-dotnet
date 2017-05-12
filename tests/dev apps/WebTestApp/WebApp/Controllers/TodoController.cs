@@ -37,6 +37,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
 using WebApp.Models;
+using WebApp.Utils;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -50,22 +51,21 @@ namespace WebApp.Controllers
         // GET: /<controller>/
         public async Task<IActionResult> Index()
         {
-            AuthenticationResult result = null;
+            ////AuthenticationResult result = null;
             List<TodoItem> itemList = new List<TodoItem>();
 
             try
             {
-                string userObjectID = (User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier"))?.Value;
-                AuthenticationContext authContext = new AuthenticationContext(Startup.Authority, new NaiveSessionCache(userObjectID, HttpContext.Session));
-                ClientCredential credential = new ClientCredential(Startup.ClientId, Startup.ClientSecret);
-                result = await authContext.AcquireTokenSilentAsync(Startup.TodoListResourceId, credential, new UserIdentifier(userObjectID, UserIdentifierType.UniqueId));
+                var userName = User.FindFirst("preferred_username")?.Value;
+
+                var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(Startup.Scopes, userName, HttpContext.Session);
 
                 //
                 // Retrieve the user's To Do List.
                 //
                 HttpClient client = new HttpClient();
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, TodoListBaseAddress + "/api/todolist");
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authenticationResult.AccessToken);
                 HttpResponseMessage response = await client.SendAsync(request);
 
                 //
@@ -95,9 +95,9 @@ namespace WebApp.Controllers
                     //
                     if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     {
-                        var todoTokens = authContext.TokenCache.ReadItems().Where(a => a.Resource == Startup.TodoListResourceId);
-                        foreach (TokenCacheItem tci in todoTokens)
-                            authContext.TokenCache.DeleteItem(tci);
+                        ////var todoTokens = authContext.TokenCache.ReadItems().Where(a => a.Resource == Startup.TodoListResourceId);
+                        ////foreach (TokenCacheItem tci in todoTokens)
+                        ////    authContext.TokenCache.DeleteItem(tci);
 
                         ViewBag.ErrorMessage = "UnexpectedError";
                         TodoItem newItem = new TodoItem();
@@ -146,15 +146,14 @@ namespace WebApp.Controllers
                 //
                 // Retrieve the user's tenantID and access token since they are parameters used to call the To Do service.
                 //
-                AuthenticationResult result = null;
+                ////AuthenticationResult result = null;
                 List<TodoItem> itemList = new List<TodoItem>();
 
                 try
                 {
-                    string userObjectID = (User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier"))?.Value;
-                    AuthenticationContext authContext = new AuthenticationContext(Startup.Authority, new NaiveSessionCache(userObjectID, HttpContext.Session));
-                    ClientCredential credential = new ClientCredential(Startup.ClientId, Startup.ClientSecret);
-                    result = await authContext.AcquireTokenSilentAsync(Startup.TodoListResourceId, credential, new UserIdentifier(userObjectID, UserIdentifierType.UniqueId));
+                    var userName = User.FindFirst("preferred_username")?.Value;
+
+                    var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(Startup.Scopes, userName, HttpContext.Session);
 
                     // Forms encode todo item, to POST to the todo list web api.
                     HttpContent content = new StringContent(JsonConvert.SerializeObject(new { Title = item }), System.Text.Encoding.UTF8, "application/json");
@@ -164,7 +163,7 @@ namespace WebApp.Controllers
                     //
                     HttpClient client = new HttpClient();
                     HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, TodoListBaseAddress + "/api/todolist");
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authenticationResult.AccessToken);
                     request.Content = content;
                     HttpResponseMessage response = await client.SendAsync(request);
 
@@ -183,9 +182,9 @@ namespace WebApp.Controllers
                         //
                         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                         {
-                            var todoTokens = authContext.TokenCache.ReadItems().Where(a => a.Resource == Startup.TodoListResourceId);
-                            foreach (TokenCacheItem tci in todoTokens)
-                                authContext.TokenCache.DeleteItem(tci);
+                            ////var todoTokens = authContext.TokenCache.ReadItems().Where(a => a.Resource == Startup.TodoListResourceId);
+                            ////foreach (TokenCacheItem tci in todoTokens)
+                            ////    authContext.TokenCache.DeleteItem(tci);
 
                             ViewBag.ErrorMessage = "UnexpectedError";
                             TodoItem newItem = new TodoItem();

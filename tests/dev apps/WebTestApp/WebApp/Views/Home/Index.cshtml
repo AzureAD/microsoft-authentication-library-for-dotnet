@@ -1,3 +1,26 @@
-﻿@{
+﻿@model string
+
+@{
     ViewData["Title"] = "Home Page";
+
+     if (User.Identity.IsAuthenticated)
+     {
+         <ul >
+             <li><a asp-controller="Home" asp-action="CallGraph">Call Graph by User Credential</a></li>
+             <li><a asp-controller="Home" asp-action="CallGraphSecretClientCredential">Call Graph by Secret ClientCredential</a></li>
+             <li><a asp-controller="Home" asp-action="CallGraphCertClientCredential">Call Graph by Certificate ClientCredential</a></li>
+             <li><a asp-controller="Home" asp-action="RequestPermissions">Request Application Permissions</a></li>
+         </ul>
+     }
+     else
+     {
+         <p> Please log in to see available Api</p>
+    }
+
+    if (Model != null)
+    {
+        <p>Api Call response</p>
+        <p>@Model</p>        
+    }
+
 }
