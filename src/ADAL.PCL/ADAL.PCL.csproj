@@ -1,44 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
     <TargetFramework>netstandard1.1</TargetFramework>
-
-    <Authors>Microsoft Corporation</Authors>
-    <PackageTitle>Active Directory Authentication Library</PackageTitle>
-    <Description>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides a class library with easy to use authentication functionality for your .NET client on various platforms including Windows desktop, Windows Store, Xamarin iOS and Xamarin Android by taking advantage of Windows Server Active Directory and Azure Active Directory.</Description>
-    <Summary>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides a class library with easy to use authentication functionality for your .NET client on various platforms including Windows desktop, Windows Store, Xamarin iOS and Xamarin Android by taking advantage of Windows Server Active Directory and Azure Active Directory.</Summary>
-    <Copyright>(C) Microsoft Corporation. All rights reserved.</Copyright>
-    <Product>Microsoft.IdentityModel.Clients.ActiveDirectory</Product>
-    
     <IncludeSymbols>true</IncludeSymbols>
     <GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
-    
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <ProjectGuid>{94569420-69B5-4031-A975-F5791E3F2F17}</ProjectGuid>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.IdentityModel.Clients.ActiveDirectory</RootNamespace>
     <AssemblyName>Microsoft.IdentityModel.Clients.ActiveDirectory</AssemblyName>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <PropertyGroup>
     <DebugType>full</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <DelaySign>true</DelaySign>
-    <!-- TODO: set version number correctly. Currently hard-coded to 0.0.0.0 to make the tests pass -->
-    <AssemblyVersion>0.0.0.0</AssemblyVersion>
-    <FileVersion>0.0.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .NET Framework is automatically included -->
+    <!-- A reference to NETStandard.Library is automatically included -->
     <None Include="..\..\build\35MSSharedLib1024.snk">
       <Link>35MSSharedLib1024.snk</Link>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <!-- TODO: common assembly info -->
-    <!--<Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
+    <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
-    </Compile>-->
+    </Compile>
     <Compile Include="Flows\DeviceCode\AcquireDeviceCodeHandler.cs" />
     <Compile Include="Flows\AcquireTokenByAuthorizationCodeHandler.cs" />
     <Compile Include="Flows\DeviceCode\AcquireTokenByDeviceCodeHandler.cs" />

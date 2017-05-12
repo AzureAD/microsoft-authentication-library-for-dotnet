@@ -1,15 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
     <TargetFramework>netstandard1.1</TargetFramework>
-    <Authors>Microsoft Corporation</Authors>
-    <Copyright>(C) Microsoft Corporation. All rights reserved.</Copyright>
-
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <ProjectGuid>{75D27855-D189-44AE-9FA9-10E729C573F4}</ProjectGuid>
     <RootNamespace>Microsoft.IdentityModel.Clients.ActiveDirectory</RootNamespace>
     <AssemblyName>Microsoft.IdentityModel.Clients.ActiveDirectory.Platform</AssemblyName>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-  
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <PropertyGroup>
     <DebugType>full</DebugType>
@@ -18,7 +14,7 @@
     <DelaySign>true</DelaySign>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .NET Framework is automatically included -->
+    <!-- A reference to NETStandard.Library is automatically included -->
     <None Include="..\..\build\35MSSharedLib1024.snk">
       <Link>35MSSharedLib1024.snk</Link>
     </None>
@@ -30,11 +26,9 @@
     <Compile Include="..\ADAL.Common\AdalEventSource.cs">
       <Link>AdalEventSource.cs</Link>
     </Compile>
-   
-    <!-- TODO: common assembly info -->
-    <!--<Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
+    <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
-    </Compile>-->
+    </Compile>
     <Compile Include="..\ADAL.Common\Logger.cs">
       <Link>Logger.cs</Link>
     </Compile>
