@@ -27,16 +27,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
+using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Cache;
 
 namespace Microsoft.Identity.Client
 {
+    [DataContract]
     internal class TokenCacheAccessor : ITokenCacheAccessor
     {
+        [DataMember]
         internal readonly IDictionary<string, string> AccessTokenCacheDictionary =
             new ConcurrentDictionary<string, string>();
 
+        [DataMember]
         internal readonly IDictionary<string, string> RefreshTokenCacheDictionary =
             new ConcurrentDictionary<string, string>();
         
