@@ -242,11 +242,11 @@ NOTE: Traces generated in this way may contain highly privileged information suc
 
 ### ADAL.PCL
 
-* This project contains the source of ADAL Portable Library.
+* This project contains the source of the core ADAL Library (.NET Standard 1.1).
 
 ### ADAL.PCL.Desktop
 
-* This project contains the source of the platform specific implementation for Windows desktop.
+* This project contains the source of the platform specific implementation for Windows desktop (.NET Framework 4.5).
 
 ### ADAL.PCL.WinRT
 
@@ -254,7 +254,7 @@ NOTE: Traces generated in this way may contain highly privileged information suc
 
 ### ADAL.PCL.CoreCLR
 
-* This project contains the source of the platform specific implementation for Core CLR (still in preview).
+* This project contains the source of the platform specific implementation for Core CLR (still in preview) (.NET Standard 1.1).
 
 ### ADAL.PCL.iOS
 
@@ -263,7 +263,6 @@ NOTE: Traces generated in this way may contain highly privileged information suc
 ### ADAL.PCL.Android
 
 * This project contains the source of the platform specific implementation for Xamarin Android.
-
 
 ## License
 
