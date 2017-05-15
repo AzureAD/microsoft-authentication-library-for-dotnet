@@ -25,23 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Net;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal static class AdalInitializer
+    internal class WebProxyProvider : IWebProxyProvider
     {
-        public static void Initialize()
+        public IWebProxy GetDefaultWebProxy()
         {
-            PlatformPluginSwitch.DynamicallyLinkAssembly = false;
-
-            PlatformPlugin.InjectDependecies(
-                new WebUIFactory(),
-                new TokenCachePlugin(),
-                new Logger(),
-                new PlatformInformation(),
-                new CryptographyHelper(),
-                new DeviceAuthHelper(),
-                new BrokerHelper(),
-                new WebProxyProvider());
+            // .NET Standard does not include the default implementation of IWebRequest and therefore
+            // there is no default IWebProxy implementation (via WebRequest.DefaultWebProxy).
+            // The current advice when targeting CoreCLR is to use native platform/OS proxy settings.
+            return null;
         }
     }
 }

@@ -37,6 +37,7 @@
     <Compile Include="Flows\AcquireTokenOnBehalfHandler.cs" />
     <Compile Include="Flows\AcquireTokenSilentHandler.cs" />
     <Compile Include="Exceptions\AdalException.cs" />
+    <Compile Include="Platform\IWebProxyProvider.cs" />
     <Compile Include="Utilities\AdalIdHelper.cs" />
     <Compile Include="Exceptions\AdalServiceException.cs" />
     <Compile Include="Exceptions\AdalSilentTokenAcquisitionException.cs" />

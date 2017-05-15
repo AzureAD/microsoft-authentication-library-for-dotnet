@@ -38,6 +38,7 @@
     </Compile>
     <Compile Include="BrokerHelper.cs" />
     <Compile Include="DeviceAuthHelper.cs" />
+    <Compile Include="WebProxyProvider.cs" />
     <Compile Include="PlatformParameters.cs" />
     <Compile Include="CryptographyHelper.cs" />
     <Compile Include="PlatformInformation.cs" />

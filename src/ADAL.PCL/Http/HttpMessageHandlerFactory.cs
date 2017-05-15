@@ -25,11 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -42,12 +39,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 return MockHandlerQueue.Dequeue();
             }
 
-            // TODO: users need to be able to set the proxy to use, but .Net Core doesn't
-            // have a default proxy setting
-            return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials };
+            return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials, Proxy = PlatformPlugin.WebProxyProvider.GetDefaultWebProxy() };
         }
 
-        private readonly static Queue<HttpMessageHandler> MockHandlerQueue = new Queue<HttpMessageHandler>();
+        private static readonly Queue<HttpMessageHandler> MockHandlerQueue = new Queue<HttpMessageHandler>();
 
         public static void AddMockHandler(HttpMessageHandler mockHandler)
         {
