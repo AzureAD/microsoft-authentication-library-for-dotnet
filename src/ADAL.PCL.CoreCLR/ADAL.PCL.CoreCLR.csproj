@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFramework>netstandard1.1</TargetFramework>
+    <TargetFramework>netstandard1.3</TargetFramework>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <ProjectGuid>{75D27855-D189-44AE-9FA9-10E729C573F4}</ProjectGuid>
     <RootNamespace>Microsoft.IdentityModel.Clients.ActiveDirectory</RootNamespace>
@@ -37,6 +37,7 @@
       <Link>AdalOption.cs</Link>
     </Compile>
     <Compile Include="BrokerHelper.cs" />
+    <Compile Include="ClientAssertionCertificate.cs" />
     <Compile Include="DeviceAuthHelper.cs" />
     <Compile Include="WebProxyProvider.cs" />
     <Compile Include="PlatformParameters.cs" />
