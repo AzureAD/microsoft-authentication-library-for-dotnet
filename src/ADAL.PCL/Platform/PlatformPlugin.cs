@@ -62,6 +62,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static ICryptographyHelper CryptographyHelper { get; set; }
         public static IDeviceAuthHelper DeviceAuthHelper { get; set; }
         public static IBrokerHelper BrokerHelper { get; set; }
+        public static IWebProxyProvider WebProxyProvider { get; set; }
 
         public static void InitializeByAssemblyDynamicLinking()
         {
@@ -74,13 +75,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 (PlatformInformationBase)Activator.CreateInstance(assembly.GetType(Namespace + "PlatformInformation")),
                 (ICryptographyHelper)Activator.CreateInstance(assembly.GetType(Namespace + "CryptographyHelper")),
                 (IDeviceAuthHelper)Activator.CreateInstance(assembly.GetType(Namespace + "DeviceAuthHelper")),
-                (IBrokerHelper)Activator.CreateInstance(assembly.GetType(Namespace + "BrokerHelper"))
+                (IBrokerHelper)Activator.CreateInstance(assembly.GetType(Namespace + "BrokerHelper")),
+                (IWebProxyProvider)Activator.CreateInstance(assembly.GetType(Namespace + "WebProxyProvider"))
             );
         }
 
         public static void InjectDependecies(IWebUIFactory webUIFactory, ITokenCachePlugin tokenCachePlugin, LoggerBase logger, 
             PlatformInformationBase platformInformation, ICryptographyHelper cryptographyHelper,
-            IDeviceAuthHelper deviceAuthHelper, IBrokerHelper brokerHelper)
+            IDeviceAuthHelper deviceAuthHelper, IBrokerHelper brokerHelper, IWebProxyProvider webProxyProvider)
         {
             WebUIFactory = webUIFactory;
             TokenCachePlugin = tokenCachePlugin;
@@ -89,6 +91,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             CryptographyHelper = cryptographyHelper;
             DeviceAuthHelper = deviceAuthHelper;
             BrokerHelper = brokerHelper;
+            WebProxyProvider = webProxyProvider;
         }
 
         private static Assembly LoadPlatformSpecificAssembly()

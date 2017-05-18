@@ -1,10 +1,16 @@
-image: Visual Studio 2015
+image: Visual Studio 2017
 
 configuration: Release
 
+environment:
+  JavaSdkDirectory: '%JAVA_HOME%'
+
 before_build:
-  - nuget restore
+  - nuget restore ADAL.NET.NoWinRT.sln
   - '"C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.6.1 Tools/sn.exe" -Vr *,31bf3856ad364e35'
+
+build:
+  project: ADAL.NET.NoWinRT.sln
 
 skip_commits:
   files:

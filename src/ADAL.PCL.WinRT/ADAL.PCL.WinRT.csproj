@@ -132,6 +132,9 @@
     <Compile Include="..\ADAL.PCL\AdalOption.cs">
       <Link>AdalOption.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\WebProxyProvider.cs">
+      <Link>WebProxyProvider.cs</Link>
+    </Compile>
     <Compile Include="BrokerHelper.cs" />
     <Compile Include="DeviceAuthHelper.cs" />
     <Compile Include="PlatformParameters.cs" />

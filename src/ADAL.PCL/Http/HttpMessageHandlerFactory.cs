@@ -25,11 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -42,10 +39,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 return MockHandlerQueue.Dequeue();
             }
 
-            return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials, Proxy = System.Net.WebRequest.DefaultWebProxy };
+            return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials, Proxy = PlatformPlugin.WebProxyProvider.GetDefaultWebProxy() };
         }
 
-        private readonly static Queue<HttpMessageHandler> MockHandlerQueue = new Queue<HttpMessageHandler>();
+        private static readonly Queue<HttpMessageHandler> MockHandlerQueue = new Queue<HttpMessageHandler>();
 
         public static void AddMockHandler(HttpMessageHandler mockHandler)
         {
