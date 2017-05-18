@@ -42,12 +42,10 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Token cache class used by ConfidentialClientApplication and PublicClientApplication to store access and refresh tokens.
     /// </summary>
-    [DataContract]
     public sealed class TokenCache
     {
         private const int DefaultExpirationBufferInMinutes = 5;
 
-        [DataMember]
         internal readonly TelemetryTokenCacheAccessor TokenCacheAccessor = new TelemetryTokenCacheAccessor();
 
         /// <summary>

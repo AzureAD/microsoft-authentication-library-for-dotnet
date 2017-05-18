@@ -26,11 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -63,7 +61,8 @@ namespace WebApp.Controllers
         {
             var userName = User.FindFirst("preferred_username")?.Value;
 
-            var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync (Startup.Scopes, userName, HttpContext.Session);
+            var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(Startup.Scopes, userName,
+                HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential());
 
             // Query for list of users in the tenant
             var client = new HttpClient();
@@ -83,7 +82,7 @@ namespace WebApp.Controllers
 
         private const string adminConsentUrlFormat =
             "https://login.microsoftonline.com/{0}/adminconsent?client_id={1}&redirect_uri={2}";
-         
+
         [Authorize]
         [HttpGet]
         public ActionResult RequestPermissions()
@@ -93,7 +92,7 @@ namespace WebApp.Controllers
                     Startup.Configuration["AzureAd:Tenant"],
                     Startup.Configuration["AzureAd:ClientId"],
                     Startup.Configuration["AzureAd:AdminConsentRedirectUri"]
-                    ));
+                ));
         }
 
         [Authorize]
@@ -104,13 +103,12 @@ namespace WebApp.Controllers
             if (error != null)
             {
                 ViewBag.ErrorDescription = error_description;
-                return View("~/Views/Home/Index.cshtml", "failed to grant permissions, error_description - " + error_description);
+                return View("~/Views/Home/Index.cshtml",
+                    "failed to grant permissions, error_description - " + error_description);
             }
             // If the admin successfully granted permissions, continue to showing the list of users
-            else if (admin_consent == "True" && tenant != null)
-            {
+            if (admin_consent == "True" && tenant != null)
                 return View("~/Views/Home/Index.cshtml", "admin successfully granted permissions");
-            }
             return View("~/Views/Home/Index.cshtml");
         }
 
@@ -118,17 +116,17 @@ namespace WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> CallGraphSecretClientCredential()
         {
-           return await CallGraphClientCredential(new Microsoft.Identity.Client.ClientCredential(Startup.Configuration["AzureAd:ClientSecret"]));
+            return await CallGraphClientCredential(ConfidentialClientUtils.CreateSecretClientCredential());
         }
 
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> CallGraphCertClientCredential()
         {
-            return await CallGraphClientCredential(new Microsoft.Identity.Client.ClientCredential(Startup.Configuration["AzureAd:ClientCertificateThumbprint"]));
+            return await CallGraphClientCredential(ConfidentialClientUtils.CreateClientCertificateCredential());
         }
 
-        private async Task<IActionResult> CallGraphClientCredential(Microsoft.Identity.Client.ClientCredential clientCredential)
+        private async Task<IActionResult> CallGraphClientCredential(ClientCredential clientCredential)
         {
             var tenantIdClaimType = "http://schemas.microsoft.com/identity/claims/tenantid";
             var authorityFormat = "https://login.microsoftonline.com/{0}/v2.0";
@@ -139,12 +137,13 @@ namespace WebApp.Controllers
             try
             {
                 var authenticationResult =
-                    await ConfidentialClientUtils.AcquireTokenForClientAsync(new[] {msGraphScope}, HttpContext.Session);
+                    await ConfidentialClientUtils.AcquireTokenForClientAsync(new[] {msGraphScope}, HttpContext.Session, clientCredential);
 
                 // Query for list of users in the tenant, to ensure we have been granted the necessary permissions
                 var client = new HttpClient();
                 var request = new HttpRequestMessage(HttpMethod.Get, msGraphQuery);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authenticationResult.AccessToken);
+                request.Headers.Authorization =
+                    new AuthenticationHeaderValue("Bearer", authenticationResult.AccessToken);
                 var response = await client.SendAsync(request);
 
                 // If we get back a 403, we need to ask the admin for permissions
@@ -175,7 +174,5 @@ namespace WebApp.Controllers
 
             return View("~/Views/Home/Index.cshtml", resultJson);
         }
-
-
     }
 }

@@ -148,7 +148,7 @@ namespace WebApp
         {
             // Acquire a Token for the Graph API and cache it using MSAL.  
             var authenticationResult = await ConfidentialClientUtils.AcquireTokenByAuthorizationCodeAsync(context.ProtocolMessage.Code,
-                Scopes, context.HttpContext.Session);
+                Scopes, context.HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential());
 
             // Notify the OIDC middleware that we already took care of code redemption.
             context.HandleCodeRedemption(authenticationResult.AccessToken, authenticationResult.IdToken);

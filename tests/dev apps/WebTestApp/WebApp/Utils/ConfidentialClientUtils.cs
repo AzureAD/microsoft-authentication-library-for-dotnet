@@ -38,24 +38,21 @@ namespace WebApp.Utils
 {
     public static class ConfidentialClientUtils
     {
-        public static ConfidentialClientApplication CreateConfidentialClient(ClientCredential clientCredential,
-            TokenCache userCache, TokenCache appCache)
+        private const string UserCache = "UserCache";
+        private const string ApplicationCache = "ApplicationCache";
+
+        private static ConfidentialClientApplication CreateConfidentialClient(ClientCredential clientCredential,
+            ISession session)
         {
+            var userCache = MsalSessionCacheHelper.GetMsalSessionCacheInstance(session, UserCache);
+            var appCache = MsalSessionCacheHelper.GetMsalSessionCacheInstance(session, ApplicationCache);
+
             return new ConfidentialClientApplication(
                 Startup.Configuration["AzureAd:ClientId"],
                 Startup.Authority,
                 Startup.Configuration["AzureAd:RedirectUri"],
                 clientCredential,
                 userCache, appCache);
-        }
-
-        public static ConfidentialClientApplication CreateConfidentialClient(ClientCredential clientCredential,
-            ISession session)
-        {
-            var userCache = session.Get<TokenCache>("userCache") ?? new TokenCache();
-            var appCache = session.Get<TokenCache>("appCache") ?? new TokenCache();
-
-            return CreateConfidentialClient(clientCredential, userCache, appCache);
         }
 
         public static ClientCredential CreateSecretClientCredential()
@@ -89,53 +86,27 @@ namespace WebApp.Utils
         }
 
         public static async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
-            IEnumerable<string> scopes, ISession session)
+            IEnumerable<string> scopes, ISession session, ClientCredential clientCredential)
         {
-            var userCache = new TokenCache();
-            var appCache = new TokenCache();
+            var confidentialClient = CreateConfidentialClient(clientCredential, session);
 
-            var confidentialClient = CreateConfidentialClient(CreateSecretClientCredential(), userCache, appCache);
-
-            var authenticationResult =
-                await confidentialClient.AcquireTokenByAuthorizationCodeAsync(authorizationCode, scopes);
-
-            session.Set("userCache", userCache);
-            session.Set("appCache", appCache);
-
-            return authenticationResult;
+            return await confidentialClient.AcquireTokenByAuthorizationCodeAsync(authorizationCode, scopes);
         }
 
-        public static async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, string userName, ISession session)
+        public static async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, string userName, ISession session, ClientCredential clientCredential)
         {
-            var userCache = session.Get<TokenCache>("userCache") ?? new TokenCache();
-            var appCache = session.Get<TokenCache>("appCache") ?? new TokenCache();
-
-            var confidentialClient  = CreateConfidentialClient(CreateSecretClientCredential(), userCache, appCache);
-
+            var confidentialClient = CreateConfidentialClient(clientCredential, session);
             var user = confidentialClient.Users.FirstOrDefault(u => u.DisplayableId.Equals(userName));
-            var authenticationResult =
-                await confidentialClient.AcquireTokenSilentAsync(scopes, user);
 
-            session.Set("userCache", userCache);
-            session.Set("appCache", appCache);
-
-            return authenticationResult;
+            return await confidentialClient.AcquireTokenSilentAsync(scopes, user);
         }
 
-        public static async Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes, ISession session)
+        public static async Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes,
+            ISession session, ClientCredential clientCredential)
         {
-            var userCache = session.Get<TokenCache>("userCache") ?? new TokenCache();
-            var appCache = session.Get<TokenCache>("appCache") ?? new TokenCache();
+            var confidentialClient = CreateConfidentialClient(clientCredential, session);
 
-            var confidentialClient = CreateConfidentialClient(CreateSecretClientCredential(), userCache, appCache);
-
-            var authenticationResult =
-                await confidentialClient.AcquireTokenForClientAsync(scopes);
-
-            session.Set("userCache", userCache);
-            session.Set("appCache", appCache);
-
-            return authenticationResult;
+            return await confidentialClient.AcquireTokenForClientAsync(scopes);
         }
     }
 }

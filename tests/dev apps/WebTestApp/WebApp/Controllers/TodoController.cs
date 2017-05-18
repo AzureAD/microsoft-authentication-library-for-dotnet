@@ -58,7 +58,8 @@ namespace WebApp.Controllers
             {
                 var userName = User.FindFirst("preferred_username")?.Value;
 
-                var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(Startup.Scopes, userName, HttpContext.Session);
+                var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(Startup.Scopes, userName, HttpContext.Session,
+                    ConfidentialClientUtils.CreateSecretClientCredential());
 
                 //
                 // Retrieve the user's To Do List.
@@ -153,7 +154,8 @@ namespace WebApp.Controllers
                 {
                     var userName = User.FindFirst("preferred_username")?.Value;
 
-                    var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(Startup.Scopes, userName, HttpContext.Session);
+                    var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(Startup.Scopes, userName, HttpContext.Session,
+                        ConfidentialClientUtils.CreateSecretClientCredential());
 
                     // Forms encode todo item, to POST to the todo list web api.
                     HttpContent content = new StringContent(JsonConvert.SerializeObject(new { Title = item }), System.Text.Encoding.UTF8, "application/json");
