@@ -64,6 +64,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             var privateKey = certificate.GetRSAPrivateKey();
             var messageBytes = Encoding.UTF8.GetBytes(message);
 
+            // Using PKCS#1 padding scheme – same as in MSAL:
+            // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/7fe94109/src/Microsoft.Identity.Client/Platforms/netstandard1.3/CryptographyHelper.cs#L68
             return privateKey.SignData(messageBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         }
     }
