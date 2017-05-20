@@ -37,6 +37,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Globalization;
+using System.Linq;
 using WebApp.Utils;
 
 namespace WebApp
@@ -146,9 +147,10 @@ namespace WebApp
 
         private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedContext context)
         {
+           var userId =  context.JwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type == "oid").Value;
             // Acquire a Token for the Graph API and cache it using MSAL.  
             var authenticationResult = await ConfidentialClientUtils.AcquireTokenByAuthorizationCodeAsync(context.ProtocolMessage.Code,
-                Scopes, context.HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential());
+                Scopes, context.HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(), userId);
 
             // Notify the OIDC middleware that we already took care of code redemption.
             context.HandleCodeRedemption(authenticationResult.AccessToken, authenticationResult.IdToken);

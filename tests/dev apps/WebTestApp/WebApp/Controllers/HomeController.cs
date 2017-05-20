@@ -55,6 +55,11 @@ namespace WebApp.Controllers
             return View("~/Views/Shared/Error.cshtml");
         }
 
+        private string GetCurrentUserId()
+        {
+            return User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
+        }
+
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> CallGraph()
@@ -62,7 +67,7 @@ namespace WebApp.Controllers
             var userName = User.FindFirst("preferred_username")?.Value;
 
             var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(Startup.Scopes, userName,
-                HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential());
+                HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(), GetCurrentUserId());
 
             // Query for list of users in the tenant
             var client = new HttpClient();
@@ -137,7 +142,8 @@ namespace WebApp.Controllers
             try
             {
                 var authenticationResult =
-                    await ConfidentialClientUtils.AcquireTokenForClientAsync(new[] {msGraphScope}, HttpContext.Session, clientCredential);
+                    await ConfidentialClientUtils.AcquireTokenForClientAsync(new[] {msGraphScope}, HttpContext.Session, clientCredential,
+                        GetCurrentUserId());
 
                 // Query for list of users in the tenant, to ensure we have been granted the necessary permissions
                 var client = new HttpClient();

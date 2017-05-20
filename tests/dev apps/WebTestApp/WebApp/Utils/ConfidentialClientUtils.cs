@@ -33,6 +33,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Identity.Client;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebApp.Utils
 {
@@ -41,11 +42,11 @@ namespace WebApp.Utils
         private const string UserCache = "UserCache";
         private const string ApplicationCache = "ApplicationCache";
 
-        private static ConfidentialClientApplication CreateConfidentialClient(ClientCredential clientCredential,
+        private static ConfidentialClientApplication CreateConfidentialClient(ClientCredential clientCredential, string userId,
             ISession session)
         {
-            var userCache = MsalSessionCacheHelper.GetMsalSessionCacheInstance(session, UserCache);
-            var appCache = MsalSessionCacheHelper.GetMsalSessionCacheInstance(session, ApplicationCache);
+            var userCache = MsalSessionCacheHelper.GetMsalFileCacheInstance(Startup.ClientId + "_" + userId + "_" + UserCache);
+            var appCache = MsalSessionCacheHelper.GetMsalFileCacheInstance(Startup.ClientId + "_" + ApplicationCache);
 
             return new ConfidentialClientApplication(
                 Startup.Configuration["AzureAd:ClientId"],
@@ -86,25 +87,26 @@ namespace WebApp.Utils
         }
 
         public static async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
-            IEnumerable<string> scopes, ISession session, ClientCredential clientCredential)
+            IEnumerable<string> scopes, ISession session, ClientCredential clientCredential, string userId)
         {
-            var confidentialClient = CreateConfidentialClient(clientCredential, session);
+            var confidentialClient = CreateConfidentialClient(clientCredential, userId, session);
 
             return await confidentialClient.AcquireTokenByAuthorizationCodeAsync(authorizationCode, scopes);
         }
 
-        public static async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, string userName, ISession session, ClientCredential clientCredential)
+        public static async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, string userName, ISession session, 
+            ClientCredential clientCredential, string userId)
         {
-            var confidentialClient = CreateConfidentialClient(clientCredential, session);
+            var confidentialClient = CreateConfidentialClient(clientCredential, userId, session);
             var user = confidentialClient.Users.FirstOrDefault(u => u.DisplayableId.Equals(userName));
 
             return await confidentialClient.AcquireTokenSilentAsync(scopes, user);
         }
 
         public static async Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes,
-            ISession session, ClientCredential clientCredential)
+            ISession session, ClientCredential clientCredential, string userId)
         {
-            var confidentialClient = CreateConfidentialClient(clientCredential, session);
+            var confidentialClient = CreateConfidentialClient(clientCredential, userId, session);
 
             return await confidentialClient.AcquireTokenForClientAsync(scopes);
         }
