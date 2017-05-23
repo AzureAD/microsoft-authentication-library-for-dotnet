@@ -1,4 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net45' ">
+    <!-- Exclude the analysis of this framework type: workaround for https://jira.sonarsource.com/browse/SONARMSBRU-317 -->
+    <SonarQubeExclude>true</SonarQubeExclude>
+  </PropertyGroup>
+
   <PropertyGroup>
     <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid7;Xamarin.iOS10</TargetFrameworks>        
     <Authors>Microsoft Corp.</Authors>
