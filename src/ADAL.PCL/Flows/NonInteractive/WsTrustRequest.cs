@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             @"<s:Envelope xmlns:s='http://www.w3.org/2003/05/soap-envelope' xmlns:a='http://www.w3.org/2005/08/addressing' xmlns:u='{0}'>
               <s:Header>
               <a:Action s:mustUnderstand='1'>{1}</a:Action>
-              <a:messageID>urn:uuid:{2}</a:messageID>
+              <a:MessageID>urn:uuid:{2}</a:MessageID>
               <a:ReplyTo><a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address></a:ReplyTo>
               <a:To s:mustUnderstand='1'>{3}</a:To>
               {4}
@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             StringBuilder messageBuilder = new StringBuilder(MaxExpectedMessageSize);
             String schemaLocation = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
             String soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue";
-            String rstTrustNamespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
+            String rstTrustNamespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/";
             String keyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer";
             String requestType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue";
 
