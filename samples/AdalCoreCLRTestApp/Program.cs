@@ -26,46 +26,52 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
+using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace AdalCoreCLRTestApp
 {
-    internal class CryptographyHelper : ICryptographyHelper
+    class Program
     {
-        public string CreateSha256Hash(string input)
+        static void Main(string[] args)
         {
-            if (string.IsNullOrWhiteSpace(input))
+            try
             {
-                return null;
+                AcquireTokenAsync().Wait();
             }
-
-            using (var sha256 = SHA256.Create())
+            catch (AggregateException ae)
             {
-                var inputBytes = Encoding.UTF8.GetBytes(input);
-                var outputBytes = sha256.ComputeHash(inputBytes);
-                return Convert.ToBase64String(outputBytes);
+                Console.WriteLine(ae.InnerException.Message);
+                Console.WriteLine(ae.InnerException.StackTrace);
+            }
+            finally
+            {
+                Console.ReadKey();
             }
         }
 
-        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+        private static async Task AcquireTokenAsync()
         {
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
+            AuthenticationContext context = new AuthenticationContext("https://login.microsoftonline.com/common", true);
+            var certificate = GetCertificateByThumbprint("<CERT_THUMBPRINT>");
+            var result = await context.AcquireTokenAsync("https://graph.windows.net", new ClientAssertionCertificate("<CLIENT_ID>", certificate));
 
-            if (certificate == null)
-            {
-                throw new ArgumentNullException(nameof(certificate));
-            }
+            string token = result.AccessToken;
+            Console.WriteLine(token + "\n");
+        }
 
-            // Copied from MSAL:
-            // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/7fe94109/src/Microsoft.Identity.Client/Platforms/netstandard1.3/CryptographyHelper.cs#L68
-            using (var key = certificate.GetRSAPrivateKey())
+        private static X509Certificate2 GetCertificateByThumbprint(string thumbprint)
+        {
+            using (var store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
             {
-                return key.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                store.Open(OpenFlags.ReadOnly);
+                var certs = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
+                if (certs.Count > 0)
+                {
+                    return certs[0];
+                }
+                throw new Exception($"Cannot find certificate with thumbprint '{thumbprint}'");
             }
         }
     }

@@ -23,6 +23,8 @@ namespace Test.ADAL.NET.Unit.Mocks
 
         public Exception ExceptionToThrow { get; set; }
 
+        public Action<HttpRequestMessage> AdditionalRequestValidation { get; set; }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             Assert.AreEqual(Method, request.Method);
@@ -56,6 +58,8 @@ namespace Test.ADAL.NET.Unit.Mocks
                     Assert.AreEqual(PostData[key], postDataInput[key]);
                 }
             }
+
+            AdditionalRequestValidation?.Invoke(request);
 
             if (ExceptionToThrow != null)
             {

@@ -26,47 +26,28 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
+using System.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Test.ADAL.NET.Unit
 {
-    internal class CryptographyHelper : ICryptographyHelper
+    public static class TokenHelper
     {
-        public string CreateSha256Hash(string input)
+        public static bool TryParseToken(string encodedJwt, out JwtSecurityToken token)
         {
-            if (string.IsNullOrWhiteSpace(input))
+            if (string.IsNullOrWhiteSpace(encodedJwt))
             {
-                return null;
+                throw new ArgumentNullException(nameof(encodedJwt));
             }
 
-            using (var sha256 = SHA256.Create())
-            {
-                var inputBytes = Encoding.UTF8.GetBytes(input);
-                var outputBytes = sha256.ComputeHash(inputBytes);
-                return Convert.ToBase64String(outputBytes);
-            }
-        }
+            token = null;
 
-        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
-        {
-            if (message == null)
+            var jwtHandler = new JwtSecurityTokenHandler();
+            if (jwtHandler.CanReadToken(encodedJwt))
             {
-                throw new ArgumentNullException(nameof(message));
+                token = new JwtSecurityToken(encodedJwt);
             }
 
-            if (certificate == null)
-            {
-                throw new ArgumentNullException(nameof(certificate));
-            }
-
-            // Copied from MSAL:
-            // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/7fe94109/src/Microsoft.Identity.Client/Platforms/netstandard1.3/CryptographyHelper.cs#L68
-            using (var key = certificate.GetRSAPrivateKey())
-            {
-                return key.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-            }
+            return token != null;
         }
     }
 }

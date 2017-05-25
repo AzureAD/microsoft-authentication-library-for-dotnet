@@ -29,6 +29,8 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
@@ -36,6 +38,7 @@ using System.Threading.Tasks;
 using Test.ADAL.Common;
 using Test.ADAL.Common.Unit;
 using Test.ADAL.NET.Unit.Mocks;
+using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
 
 namespace Test.ADAL.NET.Unit
 {
@@ -1067,30 +1070,57 @@ namespace Test.ADAL.NET.Unit
         [Description("Test for Client assertion with X509")]
         public async Task ClientAssertionWithX509Test()
         {
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            var certificate = new ClientAssertionCertificate(TestConstants.DefaultClientId, new X509Certificate2("valid_cert.pfx", TestConstants.DefaultPassword));
+            var certificate = new X509Certificate2("valid_cert.pfx", TestConstants.DefaultPassword);
+            var clientAssertion = new ClientAssertionCertificate(TestConstants.DefaultClientId, certificate);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
+            var expectedAudience = TestConstants.DefaultAuthorityCommonTenant + "oauth2/token";
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"some-access-token\"}")
                 },
-                PostData = new Dictionary<string, string>()
+                PostData = new Dictionary<string, string>
                 {
                     {"client_id", TestConstants.DefaultClientId},
-                    {"grant_type", "client_credentials"}
+                    {"grant_type", "client_credentials"},
+                    {"client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"}
+                },
+                AdditionalRequestValidation = request =>
+                {
+                    var requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    var formsData = EncodingHelper.ParseKeyValueList(requestContent, '&', true, null);
+
+                    // Check presence of client_assertion in request
+                    string encodedJwt;
+                    Assert.IsTrue(formsData.TryGetValue("client_assertion", out encodedJwt), "Missing client_assertion from request");
+
+                    // Check assetion is a valid JWT
+                    JwtSecurityToken jwt;
+                    Assert.IsTrue(TokenHelper.TryParseToken(encodedJwt, out jwt), "client_assertion in request is not a valid JWT");
+
+                    // Check payload for correct claims
+                    Assert.AreEqual(1, jwt.Audiences.Count(), "Only expected one audience");
+                    Assert.AreEqual(expectedAudience, jwt.Audiences.Single(), "Unexpected audience");
+                    Assert.AreEqual(TestConstants.DefaultClientId, jwt.Issuer, "Unexpected issuer");
+
+                    // Check header for correct algorithm and certificate
+                    Assert.AreEqual("RS256", jwt.SignatureAlgorithm, true, "Unexpected signature algorithm");
+                    X509ThumbprintKeyIdentifierClause certThumbprintClause;
+                    Assert.IsTrue(jwt.Header.SigningKeyIdentifier.TryFind(out certThumbprintClause), "Header does not contain X509 certificate thumbprint");
+                    Assert.IsTrue(certThumbprintClause.Matches(certificate), "Unexpected certificate");
                 }
             });
 
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, certificate);
+            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, clientAssertion);
             Assert.IsNotNull(result.AccessToken);
-
 
             // Null resource -> error
             var exc = AssertException.TaskThrows<ArgumentNullException>(() =>
-                context.AcquireTokenAsync(null, certificate));
+                context.AcquireTokenAsync(null, clientAssertion));
             Assert.AreEqual(exc.ParamName, "resource");
 
             // Null client credential -> error
