@@ -25,15 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace WebApi
 {
@@ -48,7 +45,7 @@ namespace WebApi
                 .Build();
         }
 
-        public IConfigurationRoot Configuration { get; set; }
+        public static IConfigurationRoot Configuration { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -71,17 +68,18 @@ namespace WebApi
             {
                 AutomaticAuthenticate = true,
                 AutomaticChallenge = true,
-                Authority = String.Format(Configuration["AzureAd:AadInstance"], Configuration["AzureAD:Tenant"]),
+                Authority = Configuration["AzureAd:CommonAuthority"],
                 Audience = Configuration["AzureAd:Audience"],
+                TokenValidationParameters =
+                    new TokenValidationParameters {SaveSigninToken = true, ValidateIssuer = false}
             });
 
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    "default",
+                    "{controller=Home}/{action=Index}/{id?}");
             });
-
         }
     }
 }

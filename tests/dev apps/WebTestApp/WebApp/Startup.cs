@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -38,6 +39,7 @@ using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Globalization;
 using System.Linq;
+using Microsoft.IdentityModel.Tokens;
 using WebApp.Utils;
 
 namespace WebApp
@@ -46,16 +48,15 @@ namespace WebApp
     {
         public static string ClientId;
         public static string ClientSecret;
-        public static string Authority;
+
+        public static string[] Scopes = { "User.Read" };
+
+        public static string WebApiScope = "api://2878ab18-1738-4a30-96f3-085df7ed4a70/access_as_user";
 
         public static string GraphResourceId;
         public static string TodoListResourceId;
 
-        public static string[] Scopes = { "User.Read" };
-
-        public static string CommonAuthority = "https://login.microsoftonline.com/common";
-        public static string CommonAuthority2 = "https://login.microsoftonline.com/common/v2.0";
-
+        public static Dictionary<string, string> ExtraParamsDictionary = new Dictionary<string, string>();
 
         public Startup(IHostingEnvironment env)
         {
@@ -64,6 +65,15 @@ namespace WebApp
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json")
                 .Build();
+
+            InitExtraParameters();
+        }
+
+        private static void InitExtraParameters()
+        {
+            ExtraParamsDictionary.Add("slice", "testslice");
+            ExtraParamsDictionary.Add("combineddelegationquery", "true");
+            ExtraParamsDictionary.Add("dc", "prod-wst-test");
         }
 
         public static IConfigurationRoot Configuration { get; set; }
@@ -100,12 +110,6 @@ namespace WebApp
             // Configure session middleware.
             app.UseSession();
 
-            // Populate AzureAd Configuration Values
-            //Authority = String.Format(Configuration["AzureAd:AadInstance"], Configuration["AzureAd:Tenant"]);
-
-            Authority = string.Format(CultureInfo.InvariantCulture, Configuration["AzureAd:AadInstance1"], Configuration["AzureAd:Tenant"], "/v2.0");
-
-
             ClientId = Configuration["AzureAd:ClientId"];
             ClientSecret = Configuration["AzureAd:ClientSecret"];
             GraphResourceId = Configuration["AzureAd:GraphResourceId"];
@@ -119,20 +123,37 @@ namespace WebApp
             {
                 AutomaticChallenge = true,
                 ClientId = ClientId,
-                Authority = Authority,
+                Authority = Configuration["AzureAd:CommonAuthority"],
                 PostLogoutRedirectUri = Configuration["AzureAd:PostLogoutRedirectUri"],
                 ResponseType = OpenIdConnectResponseType.CodeIdToken,
                 GetClaimsFromUserInfoEndpoint = false,
                 Events = new OpenIdConnectEvents
                 {
                     OnRemoteFailure = OnAuthenticationFailed,
-                    OnAuthorizationCodeReceived = OnAuthorizationCodeReceived
-                }
+                    OnAuthorizationCodeReceived = OnAuthorizationCodeReceived,
+                    OnRedirectToIdentityProvider = context =>
+                    {
+                        foreach (var entry in ExtraParamsDictionary)
+                        {
+                            context.ProtocolMessage.SetParameter(entry.Key, entry.Value);
+                        }
+
+                        return Task.FromResult(0);
+                    }
+                },
+                TokenValidationParameters = new TokenValidationParameters
+                {
+                    // instead of using the default validation (validating against a single issuer value, as we do in line of business apps), 
+                    // we inject our own multitenant validation logic
+                    ValidateIssuer = false
+                },
             };
+
             authOptions.Scope.Add("User.Read");
+
             authOptions.Scope.Add("offline_access");
-              authOptions.Scope.Add("openid");
-            authOptions.Scope.Add("profile");
+
+            authOptions.Scope.Add(WebApiScope);
 
             app.UseOpenIdConnectAuthentication(authOptions);
 
@@ -147,10 +168,12 @@ namespace WebApp
 
         private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedContext context)
         {
-           var userId =  context.JwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type == "oid").Value;
+            string[] scopes = { "User.Read" };
+
+            var userId =  context.JwtSecurityToken != null ? context.JwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type == "oid").Value : "";
             // Acquire a Token for the Graph API and cache it using MSAL.  
             var authenticationResult = await ConfidentialClientUtils.AcquireTokenByAuthorizationCodeAsync(context.ProtocolMessage.Code,
-                Scopes, context.HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(), userId);
+                scopes, context.HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(), userId);
 
             // Notify the OIDC middleware that we already took care of code redemption.
             context.HandleCodeRedemption(authenticationResult.AccessToken, authenticationResult.IdToken);

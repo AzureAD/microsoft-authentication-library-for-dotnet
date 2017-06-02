@@ -50,7 +50,7 @@ namespace WebApp.Utils
 
             return new ConfidentialClientApplication(
                 Startup.Configuration["AzureAd:ClientId"],
-                Startup.Authority,
+                Startup.Configuration["AzureAd:CommonAuthority"],
                 Startup.Configuration["AzureAd:RedirectUri"],
                 clientCredential,
                 userCache, appCache);
@@ -89,7 +89,7 @@ namespace WebApp.Utils
         public static async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
             IEnumerable<string> scopes, ISession session, ClientCredential clientCredential, string userId)
         {
-            var confidentialClient = CreateConfidentialClient(clientCredential, userId, session);
+            var confidentialClient = GetConfidentialClientWithExtraParams(session, clientCredential, userId);
 
             return await confidentialClient.AcquireTokenByAuthorizationCodeAsync(authorizationCode, scopes);
         }
@@ -97,7 +97,7 @@ namespace WebApp.Utils
         public static async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, string userName, ISession session, 
             ClientCredential clientCredential, string userId)
         {
-            var confidentialClient = CreateConfidentialClient(clientCredential, userId, session);
+            var confidentialClient = GetConfidentialClientWithExtraParams(session, clientCredential, userId);
             var user = confidentialClient.Users.FirstOrDefault(u => u.DisplayableId.Equals(userName));
 
             return await confidentialClient.AcquireTokenSilentAsync(scopes, user);
@@ -106,9 +106,28 @@ namespace WebApp.Utils
         public static async Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes,
             ISession session, ClientCredential clientCredential, string userId)
         {
-            var confidentialClient = CreateConfidentialClient(clientCredential, userId, session);
+            var confidentialClient = GetConfidentialClientWithExtraParams(session, clientCredential, userId);
 
             return await confidentialClient.AcquireTokenForClientAsync(scopes);
+        }
+
+        private static IConfidentialClientApplication GetConfidentialClientWithExtraParams(ISession session, ClientCredential clientCredential, string userId)
+        {
+            var confidentialClient = CreateConfidentialClient(clientCredential, userId, session);
+
+            var extraParamsStr = "";
+            foreach (var entry in Startup.ExtraParamsDictionary)
+            {
+                if (!string.IsNullOrEmpty(extraParamsStr))
+                {
+                    extraParamsStr += "&";
+                }
+                extraParamsStr += entry.Key + "=" + entry.Value;
+            }
+
+            confidentialClient.SliceParameters = extraParamsStr;
+
+            return confidentialClient;
         }
     }
 }

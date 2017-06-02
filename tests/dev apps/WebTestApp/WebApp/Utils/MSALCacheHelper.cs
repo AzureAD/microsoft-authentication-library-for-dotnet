@@ -42,7 +42,7 @@ namespace WebApp.Utils
             cache.Deserialize(session.Get(cacheId));
         }
 
-        private const string TokenCacheDir = @"C:\WebAppTest\TokenCache\";
+        private static readonly string TokenCacheDir = Startup.Configuration["TokenCacheDir"];
         private const string TokenCacheFileExtension = ".txt";
 
 

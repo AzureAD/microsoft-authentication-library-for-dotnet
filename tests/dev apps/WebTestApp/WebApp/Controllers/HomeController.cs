@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -39,10 +38,15 @@ namespace WebApp.Controllers
 {
     public class HomeController : Controller
     {
-        private const string msGraphMeQuery = "https://graph.microsoft.com/v1.0/me";
-        private const string msGraphUsersQuery = "https://graph.microsoft.com/v1.0/users";
+        private const string MsGraphMeQuery = "https://graph.microsoft.com/v1.0/me";
+        private const string MsGraphUsersQuery = "https://graph.microsoft.com/v1.0/users";
 
-        private const string msGraphScope = "https://graph.microsoft.com/.default";
+        private const string MsGraphScope = "https://graph.microsoft.com/.default";
+
+        private const string AdminConsentUrlFormat =
+            "https://login.microsoftonline.com/{0}/adminconsent?client_id={1}&redirect_uri={2}";
+
+        private const string WebApiUserProfileQuery = "https://localhost:44351/api/UserProfile";
 
         public IActionResult Index()
         {
@@ -62,38 +66,37 @@ namespace WebApp.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> CallGraph()
+        public async Task<IActionResult> CallGraphMeQuery()
         {
             var userName = User.FindFirst("preferred_username")?.Value;
 
-            var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(Startup.Scopes, userName,
-                HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(), GetCurrentUserId());
+            string result;
+            try
+            {
+                var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(Startup.Scopes,
+                    userName,
+                    HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(), GetCurrentUserId());
 
-            // Query for list of users in the tenant
-            var client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, msGraphMeQuery);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authenticationResult.AccessToken);
-            var response = await client.SendAsync(request);
+                result = await CallApi(MsGraphMeQuery, authenticationResult.AccessToken);
+            }
+            catch (MsalException ex)
+            {
+                result = "WebApp failed to call GraphMeQuery, MsalException - " + ex.Message;
+            }
+            catch (Exception ex)
+            {
+                result = "WebApp failed to call GraphMeQuery, Exception - " + ex.Message;
+            }
 
-            if (!response.IsSuccessStatusCode)
-                throw new Exception(response.StatusCode.ToString());
-
-            // Record users in the data store (note that this only records the first page of users)
-            var resultJson = await response.Content.ReadAsStringAsync();
-            // MsGraphUserListResponse users = JsonConvert.DeserializeObject<MsGraphUserListResponse>(json);
-
-            return View("~/Views/Home/Index.cshtml", resultJson);
+            return View("~/Views/Home/Index.cshtml", result);
         }
-
-        private const string adminConsentUrlFormat =
-            "https://login.microsoftonline.com/{0}/adminconsent?client_id={1}&redirect_uri={2}";
 
         [Authorize]
         [HttpGet]
-        public ActionResult RequestPermissions()
+        public ActionResult RequestApplicationPermissions()
         {
             return new RedirectResult(
-                string.Format(adminConsentUrlFormat,
+                string.Format(AdminConsentUrlFormat,
                     Startup.Configuration["AzureAd:Tenant"],
                     Startup.Configuration["AzureAd:ClientId"],
                     Startup.Configuration["AzureAd:AdminConsentRedirectUri"]
@@ -104,81 +107,94 @@ namespace WebApp.Controllers
         [HttpGet]
         public ActionResult AdminConsent(string admin_consent, string tenant, string error, string error_description)
         {
-            // If there was an error getting permissions from the admin. ask for permissions again
-            if (error != null)
+            // If the admin successfully granted permissions, continue to showing the list of users
+            if (admin_consent == "True")
             {
-                ViewBag.ErrorDescription = error_description;
+                return View("~/Views/Home/Index.cshtml", "admin successfully granted permissions");
+            }
+            else
+            {
                 return View("~/Views/Home/Index.cshtml",
                     "failed to grant permissions, error_description - " + error_description);
             }
-            // If the admin successfully granted permissions, continue to showing the list of users
-            if (admin_consent == "True" && tenant != null)
-                return View("~/Views/Home/Index.cshtml", "admin successfully granted permissions");
-            return View("~/Views/Home/Index.cshtml");
         }
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> CallGraphSecretClientCredential()
+        public async Task<IActionResult> CallGraphUsersQueryBySecretClientCredential()
         {
-            return await CallGraphClientCredential(ConfidentialClientUtils.CreateSecretClientCredential());
+            return await CallGraphUsersQuery(ConfidentialClientUtils.CreateSecretClientCredential());
         }
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> CallGraphCertClientCredential()
+        public async Task<IActionResult> CallGraphUsersQueryByCertClientCredential()
         {
-            return await CallGraphClientCredential(ConfidentialClientUtils.CreateClientCertificateCredential());
+            return await CallGraphUsersQuery(ConfidentialClientUtils.CreateClientCertificateCredential());
         }
 
-        private async Task<IActionResult> CallGraphClientCredential(ClientCredential clientCredential)
+        private async Task<IActionResult> CallGraphUsersQuery(ClientCredential clientCredential)
         {
-            var tenantIdClaimType = "http://schemas.microsoft.com/identity/claims/tenantid";
-            var authorityFormat = "https://login.microsoftonline.com/{0}/v2.0";
-            var msGraphScope = "https://graph.microsoft.com/.default";
-            var msGraphQuery = "https://graph.microsoft.com/v1.0/users";
-
-            string resultJson;
+            string result;
             try
             {
                 var authenticationResult =
-                    await ConfidentialClientUtils.AcquireTokenForClientAsync(new[] {msGraphScope}, HttpContext.Session, clientCredential,
+                    await ConfidentialClientUtils.AcquireTokenForClientAsync(new[] { MsGraphScope }, HttpContext.Session,
+                        clientCredential,
                         GetCurrentUserId());
 
-                // Query for list of users in the tenant, to ensure we have been granted the necessary permissions
-                var client = new HttpClient();
-                var request = new HttpRequestMessage(HttpMethod.Get, msGraphQuery);
-                request.Headers.Authorization =
-                    new AuthenticationHeaderValue("Bearer", authenticationResult.AccessToken);
-                var response = await client.SendAsync(request);
-
-                // If we get back a 403, we need to ask the admin for permissions
-                if (response.StatusCode == HttpStatusCode.Forbidden)
-                {
-                    // daemonClient.AppTokenCache.Clear(Startup.clientId);
-                    // return new RedirectResult("/Account/GrantPermissions");
-                }
-                else if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception("Status code for call to Graph is not ok");
-                }
-
-                resultJson = await response.Content.ReadAsStringAsync();
+                result = await CallApi(MsGraphUsersQuery, authenticationResult.AccessToken);
             }
             catch (MsalException ex)
             {
-                // If we can't get a token, we need to ask the admin for permissions as well
-                if (ex.ErrorCode == "failed_to_acquire_token_silently")
-                    return new RedirectResult("/Account/GrantPermissions");
-
-                return View("Error");
+                result = "WebApp failed to call GraphUsersQuery, MsalException - " + ex.Message;
             }
             catch (Exception ex)
             {
-                return View("Error");
+                result = "WebApp failed to call GraphUsersQuery, Exception - " + ex.Message;
             }
 
-            return View("~/Views/Home/Index.cshtml", resultJson);
+            return View("~/Views/Home/Index.cshtml", result);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> CallWebApiUserProfileQuery()
+        {
+            string result;
+            try
+            {
+                var userName = User.FindFirst("preferred_username")?.Value;
+
+                var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(
+                    new[] { Startup.WebApiScope }, userName,
+                    HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(), GetCurrentUserId());
+
+                result = await CallApi(WebApiUserProfileQuery, authenticationResult.AccessToken);
+            }
+            catch (MsalException ex)
+            {
+                result = "WebApp failed to call WebApiUserProfileQuery, MsalException - " + ex.Message;
+            }
+            catch (Exception ex)
+            {
+                result = "WebApp failed to call WebApiUserProfileQuery, Exception - " + ex.Message;
+            }
+
+            return View("~/Views/Home/Index.cshtml", result);
+        }
+
+        private static async Task<string> CallApi(string apiUrl, string accessToken)
+        {
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var response = await client.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(response.StatusCode.ToString());
+
+            return await response.Content.ReadAsStringAsync();
         }
     }
 }
