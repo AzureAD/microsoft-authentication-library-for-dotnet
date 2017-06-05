@@ -1,4 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Exclude the analysis of this framework type: workaround for https://jira.sonarsource.com/browse/SONARMSBRU-317 -->
+  <!-- NB this property has no effect on the assemblies that are built - it is only to tell the VSTS SonarQube analysis tasks
+       which assembly to analyse. -->
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net45' ">
+    <SonarQubeExclude>true</SonarQubeExclude>
+  </PropertyGroup>
+
   <PropertyGroup>
     <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid7;Xamarin.iOS10</TargetFrameworks>        
     <Authors>Microsoft Corp.</Authors>
