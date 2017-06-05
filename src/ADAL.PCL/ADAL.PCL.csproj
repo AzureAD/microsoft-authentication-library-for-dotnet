@@ -14,13 +14,13 @@
   <PropertyGroup>
     <DebugType>full</DebugType>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\build\272MSSharedLibSN2048.snk</AssemblyOriginatorKeyFile>
     <DelaySign>true</DelaySign>
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to NETStandard.Library is automatically included -->
-    <None Include="..\..\build\35MSSharedLib1024.snk">
-      <Link>35MSSharedLib1024.snk</Link>
+    <None Include="..\..\build\272MSSharedLibSN2048.snk">
+      <Link>272MSSharedLibSN2048.snk</Link>
     </None>
   </ItemGroup>
   <ItemGroup>

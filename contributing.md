@@ -110,7 +110,7 @@ structured (license boilerplate, common includes, etc.).
 Before you can run tests you will need to enable Skip Verification for on your machine.  Open the 'Developer Command Prompt for VS2015' as an administrator and run the following command:
 
 ```
-sn -Vr *,31bf3856ad364e35
+sn -Vr *,f300afd708cefcd3
 ```
 
 Make sure that all tests pass.

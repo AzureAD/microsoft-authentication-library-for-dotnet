@@ -74,8 +74,8 @@
     <Compile Include="WebUIFactory.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\build\35MSSharedLib1024.snk">
-      <Link>35MSSharedLib1024.snk</Link>
+    <None Include="..\..\build\272MSSharedLibSN2048.snk">
+      <Link>272MSSharedLibSN2048.snk</Link>
     </None>
     <None Include="Resources\AboutResources.txt" />
     <AndroidResource Include="Resources\layout\WebAuthenticationBroker.axml" />
