@@ -41,7 +41,9 @@ namespace WebApp.Controllers
         private const string MsGraphMeQuery = "https://graph.microsoft.com/v1.0/me";
         private const string MsGraphUsersQuery = "https://graph.microsoft.com/v1.0/users";
 
-        private const string MsGraphScope = "https://graph.microsoft.com/.default";
+        private const string MsGraphDefaultScope = "https://graph.microsoft.com/.default";
+        private const string MsGraphUsersScope = "User.Read.All";
+
 
         private const string AdminConsentUrlFormat =
             "https://login.microsoftonline.com/{0}/adminconsent?client_id={1}&redirect_uri={2}";
@@ -139,7 +141,7 @@ namespace WebApp.Controllers
             try
             {
                 var authenticationResult =
-                    await ConfidentialClientUtils.AcquireTokenForClientAsync(new[] { MsGraphScope }, HttpContext.Session,
+                    await ConfidentialClientUtils.AcquireTokenForClientAsync(new[] { MsGraphDefaultScope }, HttpContext.Session,
                         clientCredential,
                         GetCurrentUserId());
 

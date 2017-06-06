@@ -40,8 +40,10 @@ namespace WebApp.Controllers
         public async Task Login(string returnUrl = null)
         {
             if (HttpContext.User == null || !HttpContext.User.Identity.IsAuthenticated)
+            {
                 await HttpContext.Authentication.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme,
                     new AuthenticationProperties {RedirectUri = "/"});
+            }
         }
 
         // GET: /Account/LogOff
