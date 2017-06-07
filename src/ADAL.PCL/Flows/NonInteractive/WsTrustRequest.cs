@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 throw new AdalServiceException(
                     AdalError.FederatedServiceReturnedError,
-                    string.Format(AdalErrorMessage.FederatedServiceReturnedErrorTemplate, wsTrustAddress.Uri, errorMessage),
+                    string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.FederatedServiceReturnedErrorTemplate, wsTrustAddress.Uri, errorMessage),
                     null,
                     ex);
             }
