@@ -41,4 +41,4 @@ using System.Runtime.InteropServices;
 // Assembly version information is in file ADAL.Common\CommonAssemblyInfo.cs
 
 [assembly: AssemblyDelaySign(true)]
-[assembly: AssemblyKeyFile(@"..\..\build\35MSSharedLib1024.snk")]
+[assembly: AssemblyKeyFile(@"..\..\build\272MSSharedLibSN2048.snk")]
