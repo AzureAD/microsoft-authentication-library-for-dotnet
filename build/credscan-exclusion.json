@@ -12,6 +12,10 @@
     {
       "file": "valid_cert2.pfx",
       "_justification": "Self-signed certificate used by unit tests."
+    },
+    {
+      "file": "invalid_cert.pfx",
+      "_justification": "Self-signed certificate used by unit tests."
     }
   ]
 }
