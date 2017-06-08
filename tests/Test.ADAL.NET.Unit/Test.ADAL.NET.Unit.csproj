@@ -120,9 +120,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="oldcache.txt">
+    <None Include="oldcache.serialized">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
     <Content Include="WsTrustResponse.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
