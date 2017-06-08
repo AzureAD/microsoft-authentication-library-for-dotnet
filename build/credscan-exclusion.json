@@ -16,6 +16,11 @@
     {
       "file": "invalid_cert.pfx",
       "_justification": "Self-signed certificate used by unit tests."
+    },
+    {
+      "file": "UnitTests.cs",
+      "_justification": "Test contains password to load the two dummy valid_cert files excluded above"
     }
+
   ]
 }
