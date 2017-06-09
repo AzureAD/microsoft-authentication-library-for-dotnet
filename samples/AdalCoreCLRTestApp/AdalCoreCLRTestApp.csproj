@@ -5,6 +5,11 @@
     <TargetFramework>netcoreapp1.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Label="SonarQube analysis settings">
+    <!-- These properties have no effect on how the project is built. -->
+    <SonarQubeTestProject>true</SonarQubeTestProject>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\ADAL.PCL.CoreCLR\ADAL.PCL.CoreCLR.csproj" />
     <ProjectReference Include="..\..\src\ADAL.PCL\ADAL.PCL.csproj" />
