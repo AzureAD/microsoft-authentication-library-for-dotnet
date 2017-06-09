@@ -150,9 +150,7 @@ namespace WebApp
             };
 
             authOptions.Scope.Add("User.Read");
-
             authOptions.Scope.Add("offline_access");
-
             authOptions.Scope.Add(WebApiScope);
 
             app.UseOpenIdConnectAuthentication(authOptions);
