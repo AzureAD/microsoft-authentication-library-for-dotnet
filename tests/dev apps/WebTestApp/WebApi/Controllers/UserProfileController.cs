@@ -29,10 +29,13 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
+using WebApi.Utils;
 
 namespace WebApi.Controllers
 {
@@ -43,38 +46,113 @@ namespace WebApi.Controllers
         private const string MsGraphMeQuery = "https://graph.microsoft.com/v1.0/me";
         private const string MsGraphUserReadScope = "User.Read";
 
-        [HttpGet]
-        public async Task<string> Get()
+        private static readonly StringBuilder LogStringBuilder = new StringBuilder();
+
+        private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
+
+        private const string UserCache = "UserCache";
+        private const string ApplicationCache = "ApplicationCache";
+
+
+        static UserProfileController()
         {
-            var identity = User.Identity as ClaimsIdentity;
-            var userAccessToken = identity?.BootstrapContext as string;
+            Logger.LogCallback = delegate(Logger.LogLevel level, string message, bool containsPii)
+            {
+                lock (LogStringBuilder)
+                {
+                    LogStringBuilder.AppendLine("[" + level + "]" + " [hasPii - " + containsPii + "] - " +
+                                                message);
+                }
+            };
+            Logger.Level = Logger.LogLevel.Verbose;
+            Logger.PiiLoggingEnabled = true;
+        }
+
+        private static void ClearLog()
+        {
+            lock (LogStringBuilder)
+            {
+                LogStringBuilder.Clear();
+            }
+        }
+
+        private static string GetLog()
+        {
+            lock (LogStringBuilder)
+            {
+                return LogStringBuilder.ToString();
+            }
+        }
+
+        private ConfidentialClientApplication GetConfidentialClient()
+        {
+            var userCache =
+                MsalCacheHelper.GetMsalFileCacheInstance(Startup.Configuration["AzureAd:ClientId"] + "_" + GetCurrentUserId() +
+                                                         "_" + UserCache);
+            var appCache =
+                MsalCacheHelper.GetMsalFileCacheInstance(Startup.Configuration["AzureAd:ClientId"] + "_" +
+                                                         ApplicationCache);
 
             var confidentialClient = new ConfidentialClientApplication(
                 Startup.Configuration["AzureAd:ClientId"],
+                Startup.Configuration["AzureAd:TenantAuthority"],
                 Startup.Configuration["AzureAd:RedirectUri"],
                 new ClientCredential(Startup.Configuration["AzureAd:Secret"]),
-                null, null);
+                userCache, appCache);
 
-            var userAssertion = new UserAssertion(userAccessToken);
+            confidentialClient.SliceParameters = "slice=testslice";
 
-            string result;
+            return confidentialClient;
+        }
+
+        private static string GetFormattedLog()
+        {
+            return Environment.NewLine + Environment.NewLine + Environment.NewLine + "Web Api MSAL Log:" +
+                   Environment.NewLine + Environment.NewLine + GetLog();
+        }
+
+        private string GetCurrentUserId()
+        {
+            return User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
+        }
+
+        [HttpGet]
+        public async Task<string> Get()
+        {
+            await Semaphore.WaitAsync();
             try
             {
-                var authResult =
-                    await confidentialClient.AcquireTokenOnBehalfOfAsync(new[] {MsGraphUserReadScope}, userAssertion);
+                ClearLog();
 
-                result = await CallApi(MsGraphMeQuery, authResult.AccessToken);
-            }
-            catch (MsalException ex)
-            {
-                result = "Web Api failed, MSAL Exception - " + ex.Message;
-            }
-            catch (Exception ex)
-            {
-                result = "Web Api failed, Exception - " + ex.Message;
-            }
+                var identity = User.Identity as ClaimsIdentity;
+                var userAccessToken = identity?.BootstrapContext as string;
 
-            return result;
+                var userAssertion = new UserAssertion(userAccessToken);
+
+                string result;
+                try
+                {
+                    var authResult =
+                        await GetConfidentialClient().AcquireTokenOnBehalfOfAsync(new[] {MsGraphUserReadScope},
+                            userAssertion);
+
+                    result = await CallApi(MsGraphMeQuery, authResult.AccessToken);
+                }
+                catch (MsalException ex)
+                {
+                    result = "Web Api failed, MSAL Exception - " + ex.Message;
+                }
+                catch (Exception ex)
+                {
+                    result = "Web Api failed, Exception - " + ex.Message;
+                }
+
+                return result + GetFormattedLog();
+            }
+            finally
+            {
+                Semaphore.Release();
+            }
         }
 
         private static async Task<string> CallApi(string apiUrl, string accessToken)

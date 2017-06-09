@@ -2,8 +2,9 @@
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Identity.Client;
+using WebApi;
 
-namespace WebApp.Utils
+namespace WebApi.Utils
 {
     public class MsalCacheHelper
     {

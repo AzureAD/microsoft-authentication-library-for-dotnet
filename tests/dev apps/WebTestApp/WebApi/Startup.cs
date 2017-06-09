@@ -69,6 +69,8 @@ namespace WebApi
                 AutomaticAuthenticate = true,
                 AutomaticChallenge = true,
                 Authority = Configuration["AzureAd:CommonAuthority"],
+                //Authority = Configuration["AzureAd:TenantAuthority"],
+
                 Audience = Configuration["AzureAd:Audience"],
                 TokenValidationParameters =
                     new TokenValidationParameters {SaveSigninToken = true, ValidateIssuer = false}

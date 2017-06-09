@@ -45,8 +45,8 @@ namespace WebApp.Utils
         private static ConfidentialClientApplication CreateConfidentialClient(ClientCredential clientCredential, string authority, string userId,
             ISession session)
         {
-            var userCache = MsalSessionCacheHelper.GetMsalFileCacheInstance(Startup.ClientId + "_" + userId + "_" + UserCache);
-            var appCache = MsalSessionCacheHelper.GetMsalFileCacheInstance(Startup.ClientId + "_" + ApplicationCache);
+            var userCache = MsalCacheHelper.GetMsalFileCacheInstance(Startup.ClientId + "_" + userId + "_" + UserCache);
+            var appCache = MsalCacheHelper.GetMsalFileCacheInstance(Startup.ClientId + "_" + ApplicationCache);
 
             return new ConfidentialClientApplication(
                 Startup.Configuration["AzureAd:ClientId"],

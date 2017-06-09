@@ -28,6 +28,8 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -44,11 +46,43 @@ namespace WebApp.Controllers
         private const string MsGraphDefaultScope = "https://graph.microsoft.com/.default";
         private const string MsGraphUsersScope = "User.Read.All";
 
+        private static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+        private static readonly StringBuilder LogStringBuilder = new StringBuilder();
 
         private const string AdminConsentUrlFormat =
             "https://login.microsoftonline.com/{0}/adminconsent?client_id={1}&redirect_uri={2}";
 
         private const string WebApiUserProfileQuery = "https://localhost:44351/api/UserProfile";
+
+        static HomeController()
+        {
+            Logger.LogCallback = delegate(Logger.LogLevel level, string message, bool containsPii)
+            {
+                lock (LogStringBuilder)
+                {
+                    LogStringBuilder.AppendLine("[" + level + "]" + " [hasPii - " + containsPii + "] - " +
+                                                message);
+                }
+            };
+            Logger.Level = Logger.LogLevel.Verbose;
+            Logger.PiiLoggingEnabled = true;
+        }
+
+        private static void ClearLog()
+        {
+            lock (LogStringBuilder)
+            {
+                LogStringBuilder.Clear();
+            }
+        }
+
+        private static string GetLog()
+        {
+            lock (LogStringBuilder)
+            {
+                return LogStringBuilder.ToString();
+            }
+        }
 
         public IActionResult Index()
         {
@@ -66,31 +100,47 @@ namespace WebApp.Controllers
             return User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
         }
 
+        private static string GetFormattedLog()
+        {
+            return Environment.NewLine + Environment.NewLine + Environment.NewLine + "Web App MSAL Log:" + Environment.NewLine +
+                   Environment.NewLine + GetLog();
+        }
+
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> CallGraphMeQuery()
         {
-            var userName = User.FindFirst("preferred_username")?.Value;
-
-            string result;
+            await semaphore.WaitAsync();
             try
             {
-                var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(Startup.Scopes,
-                    userName,
-                    HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(), GetCurrentUserId());
+                ClearLog();
+                var userName = User.FindFirst("preferred_username")?.Value;
 
-                result = await CallApi(MsGraphMeQuery, authenticationResult.AccessToken);
-            }
-            catch (MsalException ex)
-            {
-                result = "WebApp failed to call GraphMeQuery, MsalException - " + ex.Message;
-            }
-            catch (Exception ex)
-            {
-                result = "WebApp failed to call GraphMeQuery, Exception - " + ex.Message;
-            }
+                string result;
+                try
+                {
+                    var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(Startup.Scopes,
+                        userName,
+                        HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(),
+                        GetCurrentUserId());
 
-            return View("~/Views/Home/Index.cshtml", result);
+                    result = await CallApi(MsGraphMeQuery, authenticationResult.AccessToken);
+                }
+                catch (MsalException ex)
+                {
+                    result = "WebApp failed to call GraphMeQuery, MsalException - " + ex.Message;
+                }
+                catch (Exception ex)
+                {
+                    result = "WebApp failed to call GraphMeQuery, Exception - " + ex.Message;
+                }
+
+                return View("~/Views/Home/Index.cshtml", result + GetFormattedLog());
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         [Authorize]
@@ -111,14 +161,9 @@ namespace WebApp.Controllers
         {
             // If the admin successfully granted permissions, continue to showing the list of users
             if (admin_consent == "True")
-            {
                 return View("~/Views/Home/Index.cshtml", "admin successfully granted permissions");
-            }
-            else
-            {
-                return View("~/Views/Home/Index.cshtml",
-                    "failed to grant permissions, error_description - " + error_description);
-            }
+            return View("~/Views/Home/Index.cshtml",
+                "failed to grant permissions, error_description - " + error_description);
         }
 
         [Authorize]
@@ -137,53 +182,73 @@ namespace WebApp.Controllers
 
         private async Task<IActionResult> CallGraphUsersQuery(ClientCredential clientCredential)
         {
-            string result;
+            await semaphore.WaitAsync();
             try
             {
-                var authenticationResult =
-                    await ConfidentialClientUtils.AcquireTokenForClientAsync(new[] { MsGraphDefaultScope }, HttpContext.Session,
-                        clientCredential,
-                        GetCurrentUserId());
+                ClearLog();
+                string result;
+                try
+                {
+                    var authenticationResult =
+                        await ConfidentialClientUtils.AcquireTokenForClientAsync(new[] {MsGraphDefaultScope},
+                            HttpContext.Session,
+                            clientCredential,
+                            GetCurrentUserId());
 
-                result = await CallApi(MsGraphUsersQuery, authenticationResult.AccessToken);
-            }
-            catch (MsalException ex)
-            {
-                result = "WebApp failed to call GraphUsersQuery, MsalException - " + ex.Message;
-            }
-            catch (Exception ex)
-            {
-                result = "WebApp failed to call GraphUsersQuery, Exception - " + ex.Message;
-            }
+                    result = await CallApi(MsGraphUsersQuery, authenticationResult.AccessToken);
+                }
+                catch (MsalException ex)
+                {
+                    result = "WebApp failed to call GraphUsersQuery, MsalException - " + ex.Message;
+                }
+                catch (Exception ex)
+                {
+                    result = "WebApp failed to call GraphUsersQuery, Exception - " + ex.Message;
+                }
 
-            return View("~/Views/Home/Index.cshtml", result);
+                return View("~/Views/Home/Index.cshtml", result + GetFormattedLog());
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> CallWebApiUserProfileQuery()
         {
-            string result;
+            await semaphore.WaitAsync();
             try
             {
-                var userName = User.FindFirst("preferred_username")?.Value;
+                ClearLog();
+                string result;
+                try
+                {
+                    var userName = User.FindFirst("preferred_username")?.Value;
 
-                var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(
-                    new[] { Startup.WebApiScope }, userName,
-                    HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(), GetCurrentUserId());
+                    var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(
+                        new[] {Startup.WebApiScope}, userName,
+                        HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(),
+                        GetCurrentUserId());
 
-                result = await CallApi(WebApiUserProfileQuery, authenticationResult.AccessToken);
+                    result = await CallApi(WebApiUserProfileQuery, authenticationResult.AccessToken);
+                }
+                catch (MsalException ex)
+                {
+                    result = "WebApp failed to call WebApiUserProfileQuery, MsalException - " + ex.Message;
+                }
+                catch (Exception ex)
+                {
+                    result = "WebApp failed to call WebApiUserProfileQuery, Exception - " + ex.Message;
+                }
+
+                return View("~/Views/Home/Index.cshtml", result + GetFormattedLog());
             }
-            catch (MsalException ex)
+            finally
             {
-                result = "WebApp failed to call WebApiUserProfileQuery, MsalException - " + ex.Message;
+                semaphore.Release();
             }
-            catch (Exception ex)
-            {
-                result = "WebApp failed to call WebApiUserProfileQuery, Exception - " + ex.Message;
-            }
-
-            return View("~/Views/Home/Index.cshtml", result);
         }
 
         private static async Task<string> CallApi(string apiUrl, string accessToken)

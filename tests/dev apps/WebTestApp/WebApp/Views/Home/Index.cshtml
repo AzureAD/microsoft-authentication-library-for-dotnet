@@ -21,6 +21,7 @@
     if (Model != null)
     {
         <p>Api Call Response:</p>
-        <p>@Model</p>
+
+        @Html.Raw("<pre>" + Html.Encode(Model) + "</pre>")
     }
 }
