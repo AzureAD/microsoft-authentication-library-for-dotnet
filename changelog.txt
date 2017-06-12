@@ -4,6 +4,9 @@ This release includes
 - Add support for ClientAssertionCertificate in CoreCLR
 - Port ADAL.PCL project to .NET Standard 1.1 project (requires VS2017 to build)
 - Port ADAL.CoreCLR project to .NET Standard 1.3 project (requires VS2017 to build)
+- Assemblies are signed with SHA-256 certificate
+- Fix an issue where silently logging in with an expired refresh token could cause a null reference exception
+- Fix casing bugs in SOAP requests (GitHub issue #401)
 
 Version 3.13.9
 ==============
