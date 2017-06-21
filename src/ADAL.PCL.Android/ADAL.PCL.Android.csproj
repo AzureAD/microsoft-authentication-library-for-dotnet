@@ -52,9 +52,7 @@
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\WebProxyProvider.cs">
-      <Link>WebProxyProvider.cs</Link>
-    </Compile>
+    <Compile Include="WebProxyProvider.cs" />
     <Compile Include="AuthenticationRequest.cs" />
     <Compile Include="BrokerConstants.cs" />
     <Compile Include="BrokerHelper.cs" />

@@ -27,9 +27,7 @@
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -75,10 +73,14 @@ namespace TestApp.PCL
 
     public class TokenBroker
     {
-        private AuthenticationContext context;
 
-        public Sts Sts = new AadSts();
+        private Sts sts = new AadSts();
 
+        public Sts Sts
+        {
+            get { return this.sts; }
+            set { this.sts = value; }
+        }
 
         UserIdentifier GetUserIdentifier()
         {
@@ -93,15 +95,13 @@ namespace TestApp.PCL
         {
             try
             {
-                context = new AuthenticationContext(Sts.Authority, true);
+                AuthenticationContext context = new AuthenticationContext(Sts.Authority, true);
                 var result = await context.AcquireTokenSilentAsync(Sts.ValidResource, Sts.ValidClientId, GetUserIdentifier(), parameters);
                 return result.AccessToken;
             }
             catch (Exception ex)
             {
-                string msg = ex.Message + "\n" + ex.StackTrace;
-
-                return msg;
+                return GetErrorMessage(ex);
             }
         }
 
@@ -109,15 +109,13 @@ namespace TestApp.PCL
         {
             try
             {
-                context = new AuthenticationContext(Sts.Authority, true);
+                AuthenticationContext context = new AuthenticationContext(Sts.Authority, true);
                 var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, Sts.ValidNonExistingRedirectUri, parameters, GetUserIdentifier());
                 return result.AccessToken;
             }
             catch (Exception ex)
             {
-                string msg = ex.Message +"\n"+ex.StackTrace;
-                
-                return msg;
+                return GetErrorMessage(ex);
             }
         }
 
@@ -125,14 +123,14 @@ namespace TestApp.PCL
         {
             try
             {
-                context = new AuthenticationContext(Sts.Authority, true);
+                AuthenticationContext context = new AuthenticationContext(Sts.Authority, true);
                 var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, null, parameters, GetUserIdentifier());
 
                 return result.AccessToken;
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                return GetErrorMessage(ex);
             }
         }
 
@@ -140,20 +138,41 @@ namespace TestApp.PCL
         {
             try
             {
-                context = new AuthenticationContext(Sts.Authority, true);
+                AuthenticationContext context = new AuthenticationContext(Sts.Authority, true);
                 var result = await context.AcquireTokenAsync(Sts.ValidResource, new ClientCredential(Sts.ValidConfidentialClientId, Sts.ValidConfidentialClientSecret));
 
                 return result.AccessToken;
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                return GetErrorMessage(ex);
             }
         }
 
         public void ClearTokenCache()
         {
             TokenCache.DefaultShared.Clear();
+        }
+
+        private static string GetErrorMessage(Exception ex)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(ex.Message);
+
+            Exception current = ex;
+            while (current.InnerException != null)
+            {
+                current = current.InnerException;
+                sb.AppendLine();
+                sb.AppendLine();
+                sb.AppendFormat(CultureInfo.CurrentCulture, "Inner exception: {0}", current.Message);
+            }
+
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendFormat(CultureInfo.CurrentCulture, "Stack trace: {0}", current.StackTrace);
+
+            return sb.ToString();
         }
     }
 }
