@@ -29,6 +29,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -36,6 +37,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Schema;
 using Test.ADAL.Common;
 using Test.ADAL.NET.Unit.Mocks;
 
@@ -290,34 +292,70 @@ namespace Test.ADAL.NET.Unit
         [Description("WS-Trust Request Xml Format Test")]
         public void WsTrustRequestXmlFormatTest()
         {
+            // Arrange
             UserCredential cred = new UserPasswordCredential("user", "pass&<>\"'");
+
+            // Act
             StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto",
                 new WsTrustAddress { Uri = new Uri("some://resource") }, cred);
-            try
+
+            // Assert
+            XmlReaderSettings readerSettings = new XmlReaderSettings();
+            readerSettings.XmlResolver = null;
+            readerSettings.IgnoreWhitespace = true;
+            readerSettings.ConformanceLevel = ConformanceLevel.Fragment;
+            readerSettings.DtdProcessing = DtdProcessing.Ignore;
+
+            // Load the fragment, validating it against the XSDs
+            List<string> validationIssues = new List<string>();
+
+            readerSettings.ValidationFlags = XmlSchemaValidationFlags.ReportValidationWarnings;
+            readerSettings.ValidationType = ValidationType.Schema;
+            readerSettings.Schemas = CreateWsTrustEnvelopeSchemaSet();
+
+            readerSettings.ValidationEventHandler += (s, e) =>
             {
-                XmlDocument document = new XmlDocument();
-                document.XmlResolver = null;
-                document.PreserveWhitespace = false;
-                using (var xmlReader = new XmlTextReader(new StringReader("<?xml version=\"1.0\"?>" + sb)))
-                {
-                    xmlReader.DtdProcessing = DtdProcessing.Ignore;
-                    document.Load(xmlReader);
-                }
-            }
-            catch (Exception)
+                validationIssues.Add(e.Severity + " " + e.Message);
+            };
+
+
+            XmlDocument document = new XmlDocument();
+            using (var xmlReader = XmlTextReader.Create(new StringReader(sb.ToString()), readerSettings))
             {
-                Assert.Fail("Not expected");
+                document.Load(xmlReader);
             }
+
+            Debug.WriteLine("Validation issues:");
+            Debug.WriteLine(string.Join("\r\n", validationIssues.ToArray()));
+
+            Assert.AreEqual(0, validationIssues.Count, "Not expecting any XML schema validation errors. See the test output for the validation errors.");
         }
 
-        public static Stream GenerateStreamFromString(string s)
+        private static XmlSchemaSet CreateWsTrustEnvelopeSchemaSet()
         {
-            MemoryStream stream = new MemoryStream();
-            StreamWriter writer = new StreamWriter(stream);
-            writer.Write(s);
-            writer.Flush();
-            stream.Position = 0;
-            return stream;
+            // Creates and returns a schema set that contains all of the schema required to
+            // validate the XML Envelope.
+            // Note: this schema are loaded dynamically from the web so this method can take several seconds.
+            // However, before this validation was added the XML that was produced contained several schema
+            // errors, so it's worth a few seconds to check that the XML is standards-compliant.
+            XmlSchemaSet schemas = new XmlSchemaSet();
+            try
+            {
+                schemas.XmlResolver = null;
+                schemas.Add("http://www.w3.org/XML/1998/namespace", "http://www.w3.org/2001/xml.xsd");
+                schemas.Add("http://www.w3.org/2003/05/soap-envelope", "http://www.w3.org/2003/05/soap-envelope");
+                schemas.Add("http://www.w3.org/2005/08/addressing", "http://www.w3.org/2006/03/addressing/ws-addr.xsd");
+                schemas.Add("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
+                schemas.Add("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
+                schemas.Add("http://schemas.xmlsoap.org/ws/2004/09/policy", "http://schemas.xmlsoap.org/ws/2004/09/policy/ws-policy.xsd");
+                schemas.Add("http://docs.oasis-open.org/ws-sx/ws-trust/200512/", "http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3.xsd");
+            }
+            catch (Exception ex)
+            {
+                Assert.Inconclusive("Test error - failed to load the XML soap schema. Error: " + ex.ToString());
+            }
+
+            return schemas;
         }
 
         private static void VerifyUserRealmResponse(UserRealmDiscoveryResponse userRealmResponse, string expectedAccountType)

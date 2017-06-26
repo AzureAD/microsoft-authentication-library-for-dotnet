@@ -25,24 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    /// <summary>
-    /// 
-    /// </summary>
     internal static class AdalInitializer
     {
         public static void Initialize()
         {
             PlatformPluginSwitch.DynamicallyLinkAssembly = false;
 
-            PlatformPlugin.InjectDependecies(new WebUIFactory(), new TokenCachePlugin(), new Logger(), new PlatformInformation(), new CryptographyHelper(), new DeviceAuthHelper(), new BrokerHelper());
+            PlatformPlugin.InjectDependecies(
+                new WebUIFactory(),
+                new TokenCachePlugin(),
+                new Logger(),
+                new PlatformInformation(),
+                new CryptographyHelper(),
+                new DeviceAuthHelper(),
+                new BrokerHelper(),
+                new WebProxyProvider());
         }
     }
 }

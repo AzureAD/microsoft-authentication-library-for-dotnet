@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 Task.Factory.StartNew(
                     () =>
                     {
-                        return string.Format(authHeaderTemplate, authToken, challengeData["Context"],
+                        return string.Format(CultureInfo.InvariantCulture, authHeaderTemplate, authToken, challengeData["Context"],
                             challengeData["Version"]);
                     });
 

@@ -227,7 +227,7 @@ namespace Test.ADAL.Common
             this.ValidClientId = "oic.resource.owner.flow";
             this.ValidDefaultRedirectUri = new Uri("oic://resource-owner/flow");
             this.ValidUserName = @"somedomain\username";
-            this.ValidPassword = "Password123";
+            this.ValidPassword = "<REPLACE>";
             this.ValidResource = "https://management.core.contoso.com/";
         }
     }

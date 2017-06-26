@@ -34,7 +34,7 @@ using Test.ADAL.Common.Unit;
 namespace Test.ADAL.NET.Unit
 {
     [TestClass]
-    [DeploymentItem("oldcache.txt")]
+    [DeploymentItem("oldcache.serialized")]
     public class TokenCacheUnitTests
     {
         [TestMethod]
@@ -92,7 +92,6 @@ namespace Test.ADAL.NET.Unit
             TokenCacheTests.MultipleUserAssertionHashTest();
         }
 
-
         [TestMethod]
         [Description("Test for Token Cache Serialization")]
         [TestCategory("AdalDotNetUnit")]
@@ -101,20 +100,20 @@ namespace Test.ADAL.NET.Unit
             TokenCacheTests.TokenCacheSerializationTest();
         }
 
-
         [TestMethod]
         [Description("Test for Token Cache backwasrd compatiblity where new attribute is added in AuthenticationResultEx")]
         [TestCategory("AdalDotNetUnit")]
         public void TokenCacheBackCompatTest()
         {
-                TokenCacheTests.TokenCacheBackCompatTest(File.ReadAllBytes("oldcache.txt"));
+            TokenCacheTests.TokenCacheBackCompatTest(File.ReadAllBytes("oldcache.serialized"));
         }
+
         [TestMethod]
         [Description("Positive Test for Parallel stores on cache")]
         [TestCategory("AdalDotNet.Unit")]
         public void ParallelStoreTest()
         {
-            TokenCacheTests.ParallelStorePositiveTest(File.ReadAllBytes("oldcache.txt"));
+            TokenCacheTests.ParallelStorePositiveTest(File.ReadAllBytes("oldcache.serialized"));
         }
     }
 }

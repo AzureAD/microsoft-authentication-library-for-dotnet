@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,22 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Reflection;
+using System.Net;
 
-[assembly: AssemblyProduct("Active Directory Authentication Library")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCulture("")]
-[assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyMetadata("Serviceable", "True")]
-
-[assembly: AssemblyFileVersion("3.14.0.0")]
-
-// On official build, attribute AssemblyInformationalVersionAttribute is added as well
-// with its value equal to the hash of the last commit to the git branch.
-// e.g.: [assembly: AssemblyInformationalVersionAttribute("4392c9835a38c27516fc0cd7bad7bccdcaeab161")]
-
-[assembly: CLSCompliant(false)]
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+{
+    internal class WebProxyProvider : IWebProxyProvider
+    {
+        public IWebProxy GetDefaultWebProxy()
+        {
+            return WebRequest.DefaultWebProxy;
+        }
+    }
+}

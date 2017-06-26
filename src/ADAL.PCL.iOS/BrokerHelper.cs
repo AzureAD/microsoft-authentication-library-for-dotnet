@@ -49,6 +49,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             get
             {
                 PlatformParameters pp = PlatformParameters as PlatformParameters;
+				if (pp == null)
+				{
+					return false;
+				}
                 return pp.UseBroker && UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://"));
             }
         }

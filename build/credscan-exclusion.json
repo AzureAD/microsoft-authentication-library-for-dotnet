@@ -1,0 +1,26 @@
+{
+  "tool": "Credential Scanner",
+  "suppressions": [
+    {
+      "file": "AdalUniversalTestApp.Windows_TemporaryKey.pfx",
+      "_justification": "Legitimate UWP app certificate file with private key required for the app to function. This is sample test app."
+    },
+    {
+      "file": "valid_cert.pfx",
+      "_justification": "Self-signed certificate used by unit tests."
+    },
+    {
+      "file": "valid_cert2.pfx",
+      "_justification": "Self-signed certificate used by unit tests."
+    },
+    {
+      "file": "invalid_cert.pfx",
+      "_justification": "Self-signed certificate used by unit tests."
+    },
+    {
+      "file": "UnitTests.cs",
+      "_justification": "Test contains password to load the two dummy valid_cert files excluded above"
+    }
+
+  ]
+}

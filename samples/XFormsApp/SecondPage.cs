@@ -27,27 +27,48 @@
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
 using System.Text;
 using TestApp.PCL;
 using Xamarin.Forms;
 
 namespace XFormsApp
 {
+
+    class AdalCallback : IAdalLogCallback
+    {
+        StringBuilder logs = new StringBuilder();
+        
+        public void Log(LogLevel level, string message)
+        {
+            logs.AppendLine(message);
+        }
+
+        public string DrainLogs()
+        {
+            string output = logs.ToString();
+            logs.Clear();
+            return output;
+        }
+    }
+
     public class SecondPage : ContentPage
     {
         private TokenBroker tokenBroker;
         private Label result;
-
+        private Label logLabel;
+        private AdalCallback callback = new AdalCallback();
         public SecondPage()
         {
             this.tokenBroker = new TokenBroker();
 
-            var browseButton = new Button
+            var acquireTokenButton = new Button
             {
                 Text = "Acquire Token"
+            };
+
+            var acquireTokenSilentButton = new Button
+            {
+                Text = "Acquire Token Silent"
             };
 
             var clearButton = new Button
@@ -56,35 +77,89 @@ namespace XFormsApp
             };
 
             result = new Label { };
+            logLabel = new Label
+            {
+            };
 
-            browseButton.Clicked += browseButton_Clicked;
+            acquireTokenButton.Clicked += browseButton_Clicked;
+            acquireTokenSilentButton.Clicked += acquireTokenSilentButton_Clicked;
             clearButton.Clicked += clearButton_Clicked;
 
             Content = new StackLayout
             {
                 VerticalOptions = LayoutOptions.Center,
                 Children = {
-                    browseButton,
+                    acquireTokenButton,
+                    acquireTokenSilentButton,
                     clearButton,
-                    result
+                    result,
+                    logLabel
 				}
             };
+
+            LoggerCallbackHandler.Callback = callback;
         }
 
-        public IPlatformParameters Paramters { get; set; }
+        private async void acquireTokenSilentButton_Clicked(object sender, EventArgs e)
+        {
+            this.result.Text = string.Empty;
+            AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
+            string output = string.Empty;
+            try
+            {
+                AuthenticationResult result = await ctx.AcquireTokenSilentAsync("https://graph.windows.net", "de49ddaf-c7f8-4a06-8463-3c6ae124fe52").ConfigureAwait(false);
+                output = "Signed in User - " + result.UserInfo.DisplayableId;
+            }
+            catch (Exception exc)
+            {
+                output = exc.Message;
+            } finally
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    this.logLabel.Text = callback.DrainLogs();
+                    this.result.Text = output;
+                });
+            }
+
+        }
+
+        public IPlatformParameters Parameters { get; set; }
 
         async void browseButton_Clicked(object sender, EventArgs e)
         {
             this.result.Text = string.Empty;
-            string token = await tokenBroker.GetTokenInteractiveAsync(Paramters);
-            this.result.Text = token;
+            AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
+            string output = string.Empty;
+            try
+            {
+                AuthenticationResult result =
+                    await
+                        ctx.AcquireTokenAsync("https://graph.windows.net", "de49ddaf-c7f8-4a06-8463-3c6ae124fe52",
+                            new Uri("adaliosapp://com.yourcompany.xformsapp"),
+                            Parameters).ConfigureAwait(false);
+                output = "Signed in User - " + result.UserInfo.DisplayableId;
+            }
+            catch (Exception exc)
+            {
+                output = exc.Message;
+            }
+            finally
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                                                         this.logLabel.Text = callback.DrainLogs();
+                    this.result.Text = output;
+                });
+            }
+
         }
 
         void clearButton_Clicked(object sender, EventArgs e)
         {
-            this.result.Text = this.result.Text = "Cache items before clear: " + TokenCache.DefaultShared.Count;
-            tokenBroker.ClearTokenCache();
-            this.result.Text = "Cache items after clear: " + TokenCache.DefaultShared.Count;
+            Device.BeginInvokeOnMainThread(() => {
+                this.result.Text = "Cache items before clear: " + TokenCache.DefaultShared.Count + Environment.NewLine;
+                tokenBroker.ClearTokenCache();
+                this.result.Text += "Cache items after clear: " + TokenCache.DefaultShared.Count + Environment.NewLine;
+            });
         }
     }
 }

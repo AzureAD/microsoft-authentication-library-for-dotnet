@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Newtonsoft.Json;
 
 namespace WinFormsAutomationApp
 {
@@ -15,15 +15,28 @@ namespace WinFormsAutomationApp
         #region Public Methods      
         public static async Task<string> AcquireToken(Dictionary<string, string> input)
         {
-            Dictionary<string, string> res = new Dictionary<string, string>();
+            Dictionary<string, object> res = new Dictionary<string, object>();
             AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
             try
             {
-                string prompt = input.ContainsKey("prompt_behavior") ? input["prompt_behavior"] : null;
-                AuthenticationResult result =
-                    await
-                        ctx.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
-                            GetPlatformParametersInstance(prompt)).ConfigureAwait(false);
+                AuthenticationResult result = null;
+
+                if (!input.ContainsKey("redirect_uri"))
+                {
+                    UserCredential userCred = new UserCredential();
+                    result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], userCred).ConfigureAwait(false);
+                }
+                else if (input.ContainsKey("user_identifier") && input.ContainsKey("password"))
+                {
+                    UserPasswordCredential user = new UserPasswordCredential(input["user_identifier"], input["password"]);
+                    result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], user).ConfigureAwait(false);
+                }
+                else
+                {
+                    string prompt = input.ContainsKey("prompt_behavior") ? input["prompt_behavior"] : null;
+                    result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
+                                GetPlatformParametersInstance(prompt)).ConfigureAwait(false);
+                }
                 res = ProcessResult(result, input);
             }
             catch (Exception exc)
@@ -36,7 +49,7 @@ namespace WinFormsAutomationApp
         public static async Task<string> AcquireTokenSilent(Dictionary<string, string> input)
         {
             AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
-            Dictionary<string, string> res = new Dictionary<string, string>();
+            Dictionary<string, object> res = new Dictionary<string, object>();
             try
             {
                 AuthenticationResult result = await ctx.AcquireTokenSilentAsync(input["resource"], input["client_id"]).ConfigureAwait(false);
@@ -54,7 +67,7 @@ namespace WinFormsAutomationApp
            
             Task<string> myTask = Task<string>.Factory.StartNew(() =>
             {
-            
+                TokenCache.DefaultShared.ReadItems();
                 List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> CacheItems = QueryCache(input["authority"],
                     input["client_id"], input["user_identifier"]);
 
@@ -69,7 +82,7 @@ namespace WinFormsAutomationApp
                         UpdateCache(item, updated);
                     }
                 }
-                Dictionary<string, string> output = new Dictionary<string, string>();
+                Dictionary<string, object> output = new Dictionary<string, object>();
                 //Send back error if userId or displayableId is not sent back to the user
                 output.Add("expired_access_token_count", CacheItems.Count.ToString());
                 return output.FromDictionaryToJson();
@@ -81,11 +94,12 @@ namespace WinFormsAutomationApp
 
         public static async Task<string> InvalidateRefreshToken(Dictionary<string, string> input)
         {
-            Dictionary<string, string> output = new Dictionary<string, string>();
+            Dictionary<string, object> output = new Dictionary<string, object>();
             Task<string> myTask = Task<string>.Factory.StartNew(() =>
             {
                 try
                 {
+                    TokenCache.DefaultShared.ReadItems();
                     List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> CacheItems = QueryCache(input["authority"],
                     input["client_id"], input["user_identifier"]);
 
@@ -109,28 +123,24 @@ namespace WinFormsAutomationApp
             return await myTask.ConfigureAwait(false);
         }
 
-        private static List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> QueryCache(string authority,
-            string clientId, string displayableId)
-        {
-            return TokenCache.DefaultShared.tokenCacheDictionary.Where(
-                p =>
-                    (string.IsNullOrWhiteSpace(authority) || p.Key.Authority == authority)
-                    && (string.IsNullOrWhiteSpace(clientId) || p.Key.ClientIdEquals(clientId))
-                    && (string.IsNullOrWhiteSpace(displayableId) || p.Key.DisplayableIdEquals(displayableId))).ToList();
-        }
-
-        public static async Task<string> ReadCache(Dictionary<string, string> input)
+        public static async Task<string> ReadCache()
         {
             Task<string> myTask = Task<string>.Factory.StartNew(() =>
-            {                
-                int count = TokenCache.DefaultShared.Count;
-                Dictionary<string, string> output = new Dictionary<string, string>();
-                 output.Add("item_count", count.ToString());
-                var list = TokenCache.DefaultShared.ReadItems();
+            {
+
+                Dictionary<string, object> output = new Dictionary<string, object>();
+                TokenCache.DefaultShared.ReadItems();
+                var list = TokenCache.DefaultShared.tokenCacheDictionary;
+                
                 if (list.Any())
                 {
-                    output.Add("AccessToken", ((list.ToList())[0]).AccessToken);
+                    output.Add("Count", list.Count());
+                    var item = list.FirstOrDefault();
+                    output.Add("AccessToken", item.Value.Result.AccessToken);
+                    output.Add("expires_on", item.Value.Result.ExpiresOn);
+                    output.Add("refresh_token", item.Value.RefreshToken);
                 }
+              
                 return FromDictionaryToJson(output);
             });
             return await myTask.ConfigureAwait(false);
@@ -153,17 +163,53 @@ namespace WinFormsAutomationApp
 
         public static async Task<string> AcquireTokenUsingDeviceProfile(Dictionary<string, string> input)
         {
-            Task<string> myTask = Task<string>.Factory.StartNew(() =>
-            {
-                int count = TokenCache.DefaultShared.Count;
-                Dictionary<string, string> output = new Dictionary<string, string>();
-                output.Add("item_count", count.ToString());
-                var list = TokenCache.DefaultShared.ReadItems().ToJson();
-                output.Add("AccessToken", list);
-                return output.ToJson();
-            });
+            Dictionary<string, object> res = new Dictionary<string, object>();
+            AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
 
-            return await myTask.ConfigureAwait(false);
+            try
+            {
+                //Fetch values from input and create DeviceCodeResult object
+                DeviceCodeResult deviceCodeResult = new DeviceCodeResult();
+                deviceCodeResult.VerificationUrl = input["verification_url"];
+                deviceCodeResult.UserCode = input["user_code"];
+                deviceCodeResult.DeviceCode = input["device_code"];
+                deviceCodeResult.ClientId = input["client_id"];
+                deviceCodeResult.Resource = input["resource"];
+                deviceCodeResult.ExpiresOn = DateTime.Parse(input["expires_on"]);
+
+                //Try to get access token form given device code.
+                AuthenticationResult result = await ctx.AcquireTokenByDeviceCodeAsync(deviceCodeResult);
+                res.Add("unique_id", result.UserInfo.UniqueId);
+                res.Add("access_token", result.AccessToken);
+                res.Add("tenant_id", result.TenantId);
+            }
+            catch (Exception exc)
+            {
+                res.Add("error", exc.Message);
+            }
+            return FromDictionaryToJson(res);
+        }
+
+        public static async Task<string> AcquireDeviceCode(Dictionary<string, string> input)
+        {
+            Dictionary<string, object> res = new Dictionary<string, object>();
+            AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
+            DeviceCodeResult result;
+            try
+            {
+                result = await ctx.AcquireDeviceCodeAsync(input["resource"], input["client_id"]);
+                res.Add("device_code", result.DeviceCode);
+                res.Add("verification_url", result.VerificationUrl);
+                res.Add("user_code", result.UserCode);
+                res.Add("client_id", result.ClientId);
+                res.Add("resource", result.Resource);
+                res.Add("expires_on", result.ExpiresOn.UtcDateTime);
+            }
+            catch (Exception exc)
+            {
+                res.Add("error", exc.Message);
+            }
+            return FromDictionaryToJson(res);
         }
 
         public static string ToJson(this object obj)
@@ -247,19 +293,18 @@ namespace WinFormsAutomationApp
             return platformParameters;
         }
 
-        private static string FromDictionaryToJson(this IDictionary<string, string> dictionary)
+        private static string FromDictionaryToJson(this Dictionary<string, object> dictionary)
         {
-            var kvs = dictionary.Select(kvp => $"\"{ kvp.Key}\":\"{ kvp.Value}\"");
-            return string.Concat("{", string.Join(",", kvs), "}");
+            return JsonConvert.SerializeObject(dictionary);
         }
 
-        private static Dictionary<string, string> ProcessResult(AuthenticationResult result, Dictionary<string, string> input)
+        private static Dictionary<string, object> ProcessResult(AuthenticationResult result, Dictionary<string, string> input)
         {
-            Dictionary<string, string> res = new Dictionary<string, string>();
+            Dictionary<string, object> res = new Dictionary<string, object>();
             res.Add("unique_id", result.UserInfo.UniqueId);
             res.Add("access_token", result.AccessToken);
             res.Add("tenant_id", result.TenantId);
-            res.Add("refresh_token", TokenCache.DefaultShared.tokenCacheDictionary[new TokenCacheKey(input["authority"], input["resource"], input["client_id"], TokenSubjectType.User, result.UserInfo)].RefreshToken);
+            res.Add("refresh_token", TokenCache.DefaultShared.tokenCacheDictionary.Where(x => x.Key.UniqueId == result.UserInfo.UniqueId).FirstOrDefault().Value.RefreshToken);
             return res;
         }
 
@@ -294,7 +339,17 @@ namespace WinFormsAutomationApp
             TokenCache.DefaultShared.StoreToCache(updated.Value, updated.Key.Authority, updated.Key.Resource, updated.Key.ClientId, updated.Key.TokenSubjectType, new CallState(new Guid()));
             NotifyAfterAccessCache(updated.Key.Resource, updated.Key.ClientId, updated.Value.Result.UserInfo.UniqueId, updated.Value.Result.UserInfo.DisplayableId);
         }
+
+        private static List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> QueryCache(string authority,
+            string clientId, string displayableId)
+        {
+            return TokenCache.DefaultShared.tokenCacheDictionary.Where(
+                p =>
+                    (string.IsNullOrWhiteSpace(authority) || p.Key.Authority == authority)
+                    && (string.IsNullOrWhiteSpace(clientId) || p.Key.ClientIdEquals(clientId))
+                    && (string.IsNullOrWhiteSpace(displayableId) || p.Key.DisplayableIdEquals(displayableId))).ToList();
+        }
         #endregion
 
-    }
+    }    
 }

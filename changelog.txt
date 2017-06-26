@@ -1,6 +1,29 @@
+Version 3.14.0
+==============
+This release includes
+- Add support for ClientAssertionCertificate in CoreCLR
+- Port ADAL.PCL project to .NET Standard 1.1 project (requires VS2017 to build)
+- Port ADAL.CoreCLR project to .NET Standard 1.3 project (requires VS2017 to build)
+- Assemblies are signed with SHA-256 certificate
+- Fix an issue where silently logging in with an expired refresh token could cause a null reference exception
+- Fix casing bugs in SOAP requests (GitHub issue #401)
+
+Version 3.13.9
+==============
+This release includes
+- Add blackforest as a trusted authority
+- Addition of new US Gov STS as a trusted authority
+- Limit Http Response size to 1MB
+- Fix an issue where request to WS-Trust was not working when using ADAL in sovereign clouds
+- Fix to ignore all navigation events once redirect_uri is reached in the webview
+- Add support for configuring transitioning styles in iOS
+- Add support to disable logging to platform defaults.
+- Update resiliency error codes to be HTTP 500-599 (all inclusive)
+- Add support to consume developer configured Proxy in HttpMessageHandler.
+
 Version 3.13.8
 ==============
-This release inclues
+This release includes
 - update to nuget package to fix casing of NETStandard.Library nuget dependency
 - Add serialization packages to netstandard1.4 target as they are not part of netstandard.
 
