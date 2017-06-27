@@ -31,6 +31,16 @@ namespace WinFormsAutomationApp
                     UserPasswordCredential user = new UserPasswordCredential(input["user_identifier"], input["password"]);
                     result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], user).ConfigureAwait(false);
                 }
+                else if (input.ContainsKey("user_identifier") && input.ContainsKey("user_identifier_type"))
+                {
+                    UserIdentifierType userIdentifier;
+                    UserIdentifierType.TryParse(input["user_identifier_type"], out userIdentifier);
+                    string prompt = input.ContainsKey("prompt_behavior") ? input["prompt_behavior"] : null;
+                    result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
+                        GetPlatformParametersInstance(prompt), 
+                        new UserIdentifier(input["user_identifier"], userIdentifier))
+                        .ConfigureAwait(false);
+                }
                 else
                 {
                     string prompt = input.ContainsKey("prompt_behavior") ? input["prompt_behavior"] : null;
