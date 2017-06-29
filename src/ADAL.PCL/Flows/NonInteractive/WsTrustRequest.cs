@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             StringBuilder messageBuilder = new StringBuilder(MaxExpectedMessageSize);
             String schemaLocation = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
             String soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue";
-            String rstTrustNamespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/";
+            String rstTrustNamespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
             String keyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer";
             String requestType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue";
 

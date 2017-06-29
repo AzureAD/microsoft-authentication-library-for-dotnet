@@ -31,6 +31,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -288,6 +289,23 @@ namespace Test.ADAL.NET.Unit
             Assert.IsNotNull(wstResponse.Token);
         }
 
+        [TestMethod, WorkItem(699)] // Regression test https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/issues/699
+        [Description("Tests the real service accepts the request as valid")]
+        public void WsTrustRequestAcceptedByService()
+        {
+            AuthenticationContext context = new AuthenticationContext("https://login.microsoftonline.com/common", true);
+
+            AdalServiceException ex = AssertException.TaskThrows<AdalServiceException>(() =>
+                context.AcquireTokenAsync("https://graph.windows.net", "unknown-client-F1E93291-6F42-453A-866F-C2F672F283BD", new UserCredential("unknown-userF1E93291-6F42-453A-866F-C2F672F283BD@microsoft.com")));
+
+            Debug.WriteLine($"Error code: {ex.ErrorCode}");
+            Debug.WriteLine($"Error message: {ex.Message}");
+
+            // If the request is not well-formed then the error message returned will be something like
+            //  "Federated service at https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport returned error: ID3035: The request was not valid or is malformed."
+            Assert.IsFalse(ex.Message.Contains("ID3035"), "Not expecting the request to be rejected as invalid");
+        }
+
         [TestMethod]
         [Description("WS-Trust Request Xml Format Test")]
         public void WsTrustRequestXmlFormatTest()
@@ -325,10 +343,17 @@ namespace Test.ADAL.NET.Unit
                 document.Load(xmlReader);
             }
 
-            Debug.WriteLine("Validation issues:");
+
+            Debug.WriteLine("All validation issues:");
             Debug.WriteLine(string.Join("\r\n", validationIssues.ToArray()));
 
-            Assert.AreEqual(0, validationIssues.Count, "Not expecting any XML schema validation errors. See the test output for the validation errors.");
+            // Filter out "expected" schema-validation messages.
+            // The real ws-trust XML namespace is http://docs.oasis-open.org/ws-sx/ws-trust/200512/ i.e. with a trailing slash. However, we use 
+            // the namespace without a trailing slash as this is what the server expects, so we expect validation messages about missing elements
+            const string invalidTrustNamespaceMessageContent = "Could not find schema information for the element 'http://docs.oasis-open.org/ws-sx/ws-trust/200512:";
+            List<string> unexpectedValidationIssues = validationIssues.Where(i => !i.Contains(invalidTrustNamespaceMessageContent)).ToList();
+
+            Assert.AreEqual(0, unexpectedValidationIssues.Count, "Not expecting any XML schema validation errors. See the test output for the validation errors.");
         }
 
         private static XmlSchemaSet CreateWsTrustEnvelopeSchemaSet()
