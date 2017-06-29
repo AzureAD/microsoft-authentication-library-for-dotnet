@@ -141,7 +141,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             String schemaLocation = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
             String soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue";
 
-            // Note: the real namespace has a trailing space, but the server expect this so we have to use
+            // Note: the real namespace has a trailing space, but the server doesn't expect this so we have to use
             // the following version
             String rstTrustNamespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
 
