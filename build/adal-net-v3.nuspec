@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package >
+    <metadata minClientVersion="2.8.6">
+        <title>Active Directory Authentication Library</title>
+        <id>Microsoft.IdentityModel.Clients.ActiveDirectory</id>
+        <version>REPLACE_DURING_BUILD</version>
+        <authors>Microsoft Corporation</authors>
+        <licenseUrl>https://go.microsoft.com/fwlink/?linkid=841311</licenseUrl>
+        <projectUrl>http://go.microsoft.com/fwlink/?LinkId=258232</projectUrl>
+        <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <description>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides a .NET Standard class library with easy to use authentication functionality for your .NET client on various platforms including Windows desktop, Windows Store, Xamarin iOS and Xamarin Android by taking advantage of Windows Server Active Directory and Azure Active Directory.</description>
+        <summary>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides easy to use authentication functionality for your .NET based client by taking advantage of Windows Server Active Directory and Azure Active Directory.</summary>
+        <language>en-US</language>
+        <owners>Microsoft Open Technologies</owners>
+        <tags>Active Directory Authentication Library, ADAL, Active Directory, Azure Active Directory, AD, AAD, Identity, Authentication, .NET, Windows Store, Xamarin iOS, Xamarin Android</tags>
+        <copyright>(C) Microsoft Open Technologies. All rights reserved.</copyright>
+
+    <dependencies>
+		<group targetFramework="netstandard1.4">
+			<dependency id="NETStandard.Library" version="1.6" />
+			<dependency id="System.Runtime.Serialization.Json" version="4.0.2" />
+			<dependency id="System.Runtime.Serialization.Primitives" version="4.1.1" />
+		</group>
+		<group targetFramework="netcore45"/>
+		<group targetFramework="net45"/>
+		<group targetFramework="portable-net45+win8"/>
+		<group targetFramework="MonoAndroid10"/>
+		<group targetFramework=" Xamarin.iOS10"/>
+    </dependencies>
+    </metadata>
+</package>
