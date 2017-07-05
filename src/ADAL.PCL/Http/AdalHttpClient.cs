@@ -25,10 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Exceptions;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 
@@ -41,6 +44,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private const string WwwAuthenticateHeader = "WWW-Authenticate";
         private const string PKeyAuthName = "PKeyAuth";
         private const int DelayTimePeriodMilliSeconds = 1000;
+
+        // Error Constants
+        const String INTERACTION_REQUIRED = "interaction_required";
 
         internal bool Resiliency = false;
         internal bool RetryOnce = true;
@@ -100,10 +106,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     AdalServiceException serviceEx;
                     if (ex.WebResponse != null)
                     {
+                        // Challenge claim fix #3 for OBO flow
                         TokenResponse tokenResponse = TokenResponse.CreateFromErrorResponse(ex.WebResponse);
                         string[] errorCodes = tokenResponse.ErrorCodes ?? new[] { ex.WebResponse.StatusCode.ToString() };
                         serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
                             errorCodes, ex);
+
+                        if ((int)ex.WebResponse.StatusCode == 400 && tokenResponse.Error == INTERACTION_REQUIRED)
+                        {
+                            // Extracts the error and claims data from exception JSON
+                            String temp = ex.InnerException.InnerException.Message;
+                            InteractionRequiredExceptionDetails output = JsonHelper.DecodeFromJson<InteractionRequiredExceptionDetails>(temp);
+
+                            HttpResponseMessage httpResponseMessage = new HttpResponseMessage
+                            {
+                                StatusCode = HttpStatusCode.BadRequest,
+                                ReasonPhrase = output.Error,
+                                Content = new StringContent(output.Claims)
+                            };
+
+                            throw new AdalClaimChallengeException(output.Error, httpResponseMessage.ToString(), output.Claims);
+                        }
 
                         if ((int)ex.WebResponse.StatusCode >= 500 && (int)ex.WebResponse.StatusCode < 600)
                         {
@@ -111,6 +134,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             Resiliency = true;
                         }
                     }
+
                     else
                     {
                         serviceEx = new AdalServiceException(AdalError.Unknown, ex);

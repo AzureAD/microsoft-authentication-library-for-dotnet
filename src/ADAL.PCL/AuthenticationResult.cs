@@ -71,6 +71,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
+        /// Creates result returned from AcquireToken. Except in advanced scenarios related to token caching, you do not need to create any instance of AuthenticationResult.
+        /// </summary>
+        /// <param name="accessTokenType">Type of the Access Token returned</param>
+        /// <param name="accessToken">The Access Token requested</param>
+        /// <param name="expiresOn">The point in time in which the Access Token returned in the AccessToken property ceases to be valid</param>
+        /// <param name="extendedExpiresOn">The point in time in which the Access Token returned in the AccessToken property ceases to be valid</param>
+        internal AuthenticationResult(string accessTokenType, string accessToken, DateTimeOffset expiresOn, DateTimeOffset extendedExpiresOn, string claims)
+        {
+            this.AccessTokenType = accessTokenType;
+            this.AccessToken = accessToken;
+            this.ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
+            this.ExtendedExpiresOn = DateTime.SpecifyKind(extendedExpiresOn.DateTime, DateTimeKind.Utc);
+            this.Claims = claims;
+        }
+
+        /// <summary>
         /// Gets the type of the Access Token returned. 
         /// </summary>
         [DataMember]
@@ -119,6 +135,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         [DataMember]
         public string IdToken { get; internal set; }
+
+        /// <summary>
+        /// Gets the claims if returned by the service or null if no claims are returned.
+        /// </summary>
+        [DataMember]
+        public string Claims { get; internal set; }
 
         /// <summary>
         /// Creates authorization header from authentication result.

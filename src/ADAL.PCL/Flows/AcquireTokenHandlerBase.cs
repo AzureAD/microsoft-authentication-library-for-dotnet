@@ -108,7 +108,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected bool StoreToCache { get; set; }
 
-
         public async Task<AuthenticationResult> RunAsync()
         {
             bool notifiedBeforeAccessCache = false;

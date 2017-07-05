@@ -25,9 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Flows;
 using System;
 using System.Globalization;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -344,6 +344,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
+        /// Acquires an access token from the authority on behalf of a user, passing in the necessary claims for authentication. It requires using a user token previously received.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientCredential">The client credential to use for token acquisition.</param>
+        /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
+        /// <param name="claims">Additional claims that are needed for authentication. Acquired from the AdalClaimChallengeException</param>
+        /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientCredential clientCredential, Uri redirectUri, IPlatformParameters parameters,
+            UserIdentifier userId, string extraQueryParameters, string claims)
+        {
+            return await this.AcquireTokenOnBehalfOfWithClaimsStepUpCommonAsync(resource, new ClientKey(clientCredential), redirectUri, parameters,
+            userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters), claims).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Acquires an access token from the authority on behalf of a user. It requires using a user token previously received.
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
@@ -553,6 +568,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             };
 
             var handler = new AcquireTokenOnBehalfHandler(requestData, userAssertion);
+            return await handler.RunAsync().ConfigureAwait(false);
+        }
+
+        private async Task<AuthenticationResult> AcquireTokenOnBehalfOfWithClaimsStepUpCommonAsync(string resource, ClientKey clientKey, Uri redirectUri, IPlatformParameters parameters, 
+            UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims)
+        {
+            RequestData requestData = new RequestData
+            {
+                Authenticator = this.Authenticator,
+                TokenCache = this.TokenCache,
+                Resource = resource,
+                ClientKey = clientKey,
+                ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled
+            };
+            var handler = new AcquireTokenOnBehalfInteractiveHandler(requestData, redirectUri, parameters, userId, extraQueryParameters, webUI, claims);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
