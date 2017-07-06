@@ -1,9 +1,4 @@
 @echo ==========================
-@echo Cleaning packaging staging folder
-md %TO_PACK_TARGET%
-del /q %TO_PACK_TARGET%\*.*
-
-@echo ==========================
 @echo Copying source files for NuGet symbols package
 xcopy /ys src\* %TO_PACK_TARGET%\src\src\
 
