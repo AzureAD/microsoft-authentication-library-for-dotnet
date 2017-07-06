@@ -20,7 +20,7 @@ copy /y build\%LIBRARY_NAME%.nuspec %TO_PACK_TARGET%
 
 @echo ==========================
 @echo Copying source files for NuGet symbols package
-xcopy /ys src\* NuGet\src\src\
+xcopy /ys src\* %TO_PACK_TARGET%\src\src\
 
 @echo ==========================
 @echo Copying signed files to the NuGet lib path
