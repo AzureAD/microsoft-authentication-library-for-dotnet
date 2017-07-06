@@ -7,6 +7,8 @@ $d = Get-Date;
 $date=($d.ToString("yy")-13).ToString() + $d.ToString("MMdd.HHmm");
 $hash = git rev-parse HEAD
 
+Write-Host "=========================="
+Write-Host "Versioning assembly info file..."
 $filename = "src\ADAL.Common\CommonAssemblyInfo.cs"
 $content = Get-Content $filename
 $newContent = $content -replace "Microsoft Open Technologies", "Microsoft Corporation"
@@ -31,7 +33,11 @@ Write-Host "Setting assembly version attribute:" $assemblyVersion;
 
 $nugetVersion = "{0}.{1}.{2}" -f ($versionTokens[0], $versionTokens[1], $versionTokens[2]);
 
-$filename = $env:TO_PACK_TARGET + "\Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec"
+Write-Host "=========================="
+Write-Host "Copying and versioning nuspec file..."
+$copySource = "build\" + $env:LIBRARY_NAME.nuspec
+copy /y $copySource $env:TO_PACK_TARGET
+$filename = $env:TO_PACK_TARGET + "\" + $env:LIBRARY_NAME + ".nuspec"
 $content = Get-Content $filename
 $newContent = $content -replace "REPLACE_DURING_BUILD", $nugetVersion
 Set-Content $filename $newContent

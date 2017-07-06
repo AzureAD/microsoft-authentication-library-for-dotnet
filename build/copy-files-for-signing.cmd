@@ -1,12 +1,3 @@
-set BUILD_PATH=bin\%BuildConfiguration%
-set TO_SIGN_TARGET=ToSign
-set IS_SIGNED_PATH=Signed
-set TO_PACK_TARGET=ToPack
-set LIBRARY_NAME=Microsoft.IdentityModel.Clients.ActiveDirectory
-
-
-set PLATFORM_SPECIFIC_LIBRARY_NAME=%LIBRARY_NAME%.Platform
-
 @echo ==========================
 @echo Cleaning signing staging folder
 md %TO_SIGN_TARGET%

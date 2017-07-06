@@ -1,22 +1,7 @@
-set BUILD_PATH=bin\%BuildConfiguration%
-
-
-set TO_PACK_TARGET=ToPack
-set LIBRARY_NAME=Microsoft.IdentityModel.Clients.ActiveDirectory
-set COPY_TO_NUGET_LIBFOLDER=build/copy-to-nuget-libfolder.cmd
-
-set PLATFORM_SPECIFIC_LIBRARY_NAME=%LIBRARY_NAME%.Platform
-
 @echo ==========================
 @echo Cleaning packaging staging folder
 md %TO_PACK_TARGET%
 del /q %TO_PACK_TARGET%\*.*
-
-@echo ==========================
-@echo Copying nuspec file...
-copy /y build\%LIBRARY_NAME%.nuspec %TO_PACK_TARGET%
-@echo ##vso[task.setvariable variable=TO_PACK_TARGET]%TO_PACK_TARGET%
-@echo ##vso[task.setvariable variable=NUSPEC_TARGET]%TO_PACK_TARGET%\%LIBRARY_NAME%.nuspec
 
 @echo ==========================
 @echo Copying source files for NuGet symbols package
