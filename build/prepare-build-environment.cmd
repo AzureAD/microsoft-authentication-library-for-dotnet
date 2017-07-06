@@ -31,3 +31,7 @@ del /q %IS_SIGNED_PATH%\*.*
 @echo Cleaning packaging staging folder
 md %TO_PACK_TARGET%
 del /q %TO_PACK_TARGET%\*.*
+
+@echo ==========================
+@echo Copying .nuspec file
+copy /y build\%LIBRARY_NAME%.nuspec %TO_PACK_TARGET%

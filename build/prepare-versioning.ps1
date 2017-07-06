@@ -34,9 +34,7 @@ Write-Host "Setting assembly version attribute:" $assemblyVersion;
 $nugetVersion = "{0}.{1}.{2}" -f ($versionTokens[0], $versionTokens[1], $versionTokens[2]);
 
 Write-Host "=========================="
-Write-Host "Copying and versioning nuspec file..."
-$copySource = "build\" + $env:LIBRARY_NAME.nuspec
-copy $copySource $env:TO_PACK_TARGET
+Write-Host "Versioning .nuspec file..."
 $filename = $env:TO_PACK_TARGET + "\" + $env:LIBRARY_NAME + ".nuspec"
 $content = Get-Content $filename
 $newContent = $content -replace "REPLACE_DURING_BUILD", $nugetVersion
