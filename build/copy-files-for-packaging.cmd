@@ -16,6 +16,7 @@ del /q %TO_PACK_TARGET%\*.*
 @echo Copying nuspec file...
 copy /y build\%LIBRARY_NAME%.nuspec %TO_PACK_TARGET%
 @echo ##vso[task.setvariable variable=TO_PACK_TARGET]%TO_PACK_TARGET%
+@echo ##vso[task.setvariable variable=NUSPEC_TARGET]%TO_PACK_TARGET%\%LIBRARY_NAME%.nuspec
 
 @echo ==========================
 @echo Copying source files for NuGet symbols package
