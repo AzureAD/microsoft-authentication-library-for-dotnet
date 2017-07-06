@@ -36,7 +36,7 @@ $nugetVersion = "{0}.{1}.{2}" -f ($versionTokens[0], $versionTokens[1], $version
 Write-Host "=========================="
 Write-Host "Copying and versioning nuspec file..."
 $copySource = "build\" + $env:LIBRARY_NAME.nuspec
-copy /y $copySource $env:TO_PACK_TARGET
+copy $copySource $env:TO_PACK_TARGET
 $filename = $env:TO_PACK_TARGET + "\" + $env:LIBRARY_NAME + ".nuspec"
 $content = Get-Content $filename
 $newContent = $content -replace "REPLACE_DURING_BUILD", $nugetVersion
