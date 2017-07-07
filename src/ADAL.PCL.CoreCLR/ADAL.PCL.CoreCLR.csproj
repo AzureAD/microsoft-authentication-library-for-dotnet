@@ -10,17 +10,13 @@
   </PropertyGroup>
   <PropertyGroup>
     <DebugType>full</DebugType>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\build\272MSSharedLibSN2048.snk</AssemblyOriginatorKeyFile>
-    <DelaySign>true</DelaySign>
   </PropertyGroup>
+
+  <!-- Import common settings -->
+  <Import Project="..\..\build\ADAL.Net.settings.targets" />
+
   <ItemGroup>
     <!-- A reference to NETStandard.Library is automatically included -->
-    <None Include="..\..\build\272MSSharedLibSN2048.snk">
-      <Link>272MSSharedLibSN2048.snk</Link>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="..\ADAL.Common\AuthenticationContextIntegratedAuthExtensions.cs">
       <Link>AuthenticationContextIntegratedAuthExtensions.cs</Link>
     </Compile>
