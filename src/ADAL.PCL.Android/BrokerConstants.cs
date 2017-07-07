@@ -174,5 +174,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string BrowserExtInstallPrefix = "msauth://";
 
         public const string CallerInfoPackage = "caller.info.package";
+
+        // Claims step-up. Skip cache look up
+        public const string SkipCache = "skip.cache";
+        public const string Claims = "account.claims";
     }
 }

@@ -56,6 +56,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public string Version { get; set; }
 
+        public string Claims { get; set; }
+
         public AuthenticationRequest(IDictionary<string, string> brokerPayload)
         {
             Authority = brokerPayload["authority"];
@@ -76,6 +78,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 ExtraQueryParamsAuthentication = brokerPayload["extra_qp"];
             }
+
             CorrelationId = Guid.Parse(brokerPayload["correlation_id"]);
             Version = brokerPayload["client_version"];
         }
