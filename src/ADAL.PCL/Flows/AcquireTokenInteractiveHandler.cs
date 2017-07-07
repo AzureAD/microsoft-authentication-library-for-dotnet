@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             this.LoadFromCache = (requestData.TokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters) && String.IsNullOrEmpty(claims));
 
-            //Stuff claims into extraQueryParameters just in case.  I don't know what I'm doing.
+            // Push claims into extraQueryParameters just in case.
             if (!String.IsNullOrEmpty(this.extraQueryParameters))
             {
                 this.extraQueryParameters += "&";
@@ -266,13 +266,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private string ProcessClaims(string extraQueryParameters, string claims)
         {
-            // We'll only process the extra query parameters if it's not null.
+            // Only process the extra query parameters if it's not null.
             if (string.IsNullOrEmpty(extraQueryParameters))
             {
                 return claims;
             }
 
-            // Split the query parameters  the ampersand.
+            // Split the query parameters on the ampersand.
             string[] parts = extraQueryParameters.Split('&');
             foreach (string part in parts)
             {
@@ -280,7 +280,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 string[] nameValue = part.Split('=');
                 if (nameValue.Length > 2)
                 {
-                    // I don't know what to do if there are multiple equal signs, then query paramerter is not well formed, so skip?
+                    // If there are multiple equal signs, then query paramerter is not well formed, so skip
                     // Example of poorly formed query parameter string: var=12=45=67
                     continue;
                 }
