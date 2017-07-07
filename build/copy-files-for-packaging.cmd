@@ -11,6 +11,8 @@ copy /y  %SIGNED%\*.dll "%NUGET_TARGET%\lib\%PORTABLE_LIB%\"
 copy /y %TO_SIGN_TARGET%\*.pdb "%NUGET_TARGET%\lib\%PORTABLE_LIB%\"
 copy /y %TO_SIGN_TARGET%\*.xml "%NUGET_TARGET%\lib\%PORTABLE_LIB%\"
 
+set COPY_TO_NUGET_LIBFOLDER=build/copy-to-nuget-libfolder.cmd
+
 call %COPY_TO_NUGET_LIBFOLDER% Desktop net45
 call %COPY_TO_NUGET_LIBFOLDER% CoreCLR netstandard1.3
 call %COPY_TO_NUGET_LIBFOLDER% WinRT netcore45
