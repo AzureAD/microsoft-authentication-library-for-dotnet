@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Flows;
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
@@ -351,10 +350,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
         /// <param name="claims">Additional claims that are needed for authentication. Acquired from the AdalClaimChallengeException</param>
         /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientCredential clientCredential, Uri redirectUri, IPlatformParameters parameters,
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters,
             UserIdentifier userId, string extraQueryParameters, string claims)
         {
-            return await this.AcquireTokenOnBehalfOfWithClaimsStepUpCommonAsync(resource, new ClientKey(clientCredential), redirectUri, parameters,
+            return await this.AcquireTokenWithClaimsCommonAsync(resource, new ClientKey(clientId), redirectUri, parameters,
             userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters), claims).ConfigureAwait(false);
         }
 
@@ -571,7 +570,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenOnBehalfOfWithClaimsStepUpCommonAsync(string resource, ClientKey clientKey, Uri redirectUri, IPlatformParameters parameters, 
+        private async Task<AuthenticationResult> AcquireTokenWithClaimsCommonAsync(string resource, ClientKey clientKey, Uri redirectUri, IPlatformParameters parameters, 
             UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims)
         {
             RequestData requestData = new RequestData
@@ -582,7 +581,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 ClientKey = clientKey,
                 ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled
             };
-            var handler = new AcquireTokenOnBehalfInteractiveHandler(requestData, redirectUri, parameters, userId, extraQueryParameters, webUI, claims);
+            
+            var handler = new AcquireTokenInteractiveHandler(requestData, redirectUri, parameters, userId, extraQueryParameters, webUI, claims);
+            
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

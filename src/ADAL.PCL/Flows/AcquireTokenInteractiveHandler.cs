@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly UserIdentifier userId;
 
-        public AcquireTokenInteractiveHandler(RequestData requestData, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters, IWebUI webUI)
+        public AcquireTokenInteractiveHandler(RequestData requestData, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims = "")
             : base(requestData)
         {
             this.redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
@@ -79,8 +79,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.UniqueId = userId.UniqueId;
             this.DisplayableId = userId.DisplayableId;
             this.UserIdentifierType = userId.Type;
-            this.LoadFromCache = (requestData.TokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters));
             this.SupportADFS = true;
+
+            claims = ProcessClaims(extraQueryParameters, claims);
+            if(!String.IsNullOrEmpty(claims))
+            {
+                PlatformPlugin.Logger.Verbose(CallState,
+                string.Format(CultureInfo.InvariantCulture,
+                    "Claims present. Skipping cache lookup."));
+            }
+            this.LoadFromCache = (requestData.TokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters) && String.IsNullOrEmpty(claims));
+
+            //Stuff claims into extraQueryParameters just in case.  I don't know what I'm doing.
+            if (!String.IsNullOrEmpty(this.extraQueryParameters))
+            {
+                this.extraQueryParameters += "&";
+            }
+            this.extraQueryParameters += "claims=" + claims;
 
             this.brokerParameters["force"] = "NO";
             if (userId != UserIdentifier.AnyUser)
@@ -95,6 +110,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.brokerParameters["redirect_uri"] = this.redirectUri.AbsoluteUri;
             this.brokerParameters["extra_qp"] = extraQueryParameters;
+            this.brokerParameters["claims"] = claims;
             PlatformPlugin.BrokerHelper.PlatformParameters = authorizationParameters;
         }
 
@@ -161,7 +177,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             IRequestParameters requestParameters = this.CreateAuthorizationRequest(loginHint);
 
-            return  new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + requestParameters);
+            return new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + requestParameters);
         }
 
         private DictionaryRequestParameters CreateAuthorizationRequest(string loginHint)
@@ -246,6 +262,52 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return false;
+        }
+
+        private string ProcessClaims(string extraQueryParameters, string claims)
+        {
+            // We'll only process the extra query parameters if it's not null.
+            if (string.IsNullOrEmpty(extraQueryParameters))
+            {
+                return claims;
+            }
+
+            // Split the query parameters  the ampersand.
+            string[] parts = extraQueryParameters.Split('&');
+            foreach (string part in parts)
+            {
+                // Split the key and value on equal sign.
+                string[] nameValue = part.Split('=');
+                if (nameValue.Length > 2)
+                {
+                    // I don't know what to do if there are multiple equal signs, then query paramerter is not well formed, so skip?
+                    // Example of poorly formed query parameter string: var=12=45=67
+                    continue;
+                }
+
+                // Don't process anything but claims query parameter
+                if (!nameValue[0].Equals("claims"))
+                {
+                    continue;
+                }
+
+                string qpClaims = nameValue[1];
+
+                // Now make sure they match; otherwise throw an error.
+                if (!string.IsNullOrEmpty(qpClaims) && String.IsNullOrEmpty(claims)
+                    && String.Compare(claims, qpClaims, StringComparison.CurrentCultureIgnoreCase) == 0)
+                {
+                    throw new ArgumentException("The claims parameter must match the claims in the extra query parameter.");
+                }
+
+                if (!string.IsNullOrEmpty(qpClaims))
+                {
+                    return qpClaims;
+                }
+            }
+
+            // If there are query parameters, but none of them are the claims parameter, then return the claims string
+            return claims;
         }
     }
 }

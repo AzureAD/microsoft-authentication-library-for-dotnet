@@ -661,7 +661,7 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
-        [Description("Test for autority validation to AuthenticationContext")]
+        [Description("Test for authority validation to AuthenticationContext")]
         public async Task AuthenticationContextAuthorityValidationTestAsync()
         {
             AuthenticationContext context = null;
@@ -768,8 +768,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(result.AccessToken, "some-access-token");
             Assert.IsNotNull(result.UserInfo);
         }
-
-
+        
         [TestMethod]
         [Description("Test for simple refresh token")]
         public void SimpleRefreshTokenTest()

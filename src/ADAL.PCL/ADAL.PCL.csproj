@@ -29,7 +29,6 @@
     </Compile>
     <Compile Include="Exceptions\AdalClaimChallengeException.cs" />
     <Compile Include="Flows\AcquireTokenOnBehalfHandler.cs" />
-    <Compile Include="Flows\AcquireTokenOnBehalfInteractiveHandler.cs" />
     <Compile Include="Flows\DeviceCode\AcquireDeviceCodeHandler.cs" />
     <Compile Include="Flows\AcquireTokenByAuthorizationCodeHandler.cs" />
     <Compile Include="Flows\DeviceCode\AcquireTokenByDeviceCodeHandler.cs" />
