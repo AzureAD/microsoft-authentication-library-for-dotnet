@@ -81,6 +81,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             CorrelationId = Guid.Parse(brokerPayload["correlation_id"]);
             Version = brokerPayload["client_version"];
+
+            if (brokerPayload.ContainsKey("claims")) {
+                Claims = brokerPayload["claims"];
+            }
         }
     }
 }

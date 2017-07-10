@@ -346,8 +346,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Acquires an access token from the authority on behalf of a user, passing in the necessary claims for authentication. It requires using a user token previously received.
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientCredential">The client credential to use for token acquisition.</param>
-        /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="claims">Additional claims that are needed for authentication. Acquired from the AdalClaimChallengeException</param>
         /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters,

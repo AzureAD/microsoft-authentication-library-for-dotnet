@@ -433,7 +433,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             if(request.Claims != null)
             {
-                brokerOptions.PutString(BrokerConstants.SkipCache, Boolean.TrueString);
+                brokerOptions.PutString(BrokerConstants.SkipCache, Boolean.TrueString.ToLower());
                 brokerOptions.PutString(BrokerConstants.Claims, request.Claims);
             }
 

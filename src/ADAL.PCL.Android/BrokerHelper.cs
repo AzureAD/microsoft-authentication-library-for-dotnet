@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 // Don't send background request, if prompt flag is always or
                 // refresh_session
-                if (!string.IsNullOrEmpty(request.BrokerAccountName) || !string.IsNullOrEmpty(request.UserId))
+                if (string.IsNullOrEmpty(request.Claims) && !string.IsNullOrEmpty(request.BrokerAccountName) || !string.IsNullOrEmpty(request.UserId))
                 {
                     PlatformPlugin.Logger.Verbose(null, "User is specified for background token request");
                     resultEx = mBrokerProxy.GetAuthTokenInBackground(request, platformParams.CallerActivity);

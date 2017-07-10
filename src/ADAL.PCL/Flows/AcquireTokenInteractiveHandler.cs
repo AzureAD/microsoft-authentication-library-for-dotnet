@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             this.LoadFromCache = (requestData.TokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters) && String.IsNullOrEmpty(claims));
 
-            // Push claims into extraQueryParameters just in case.
+            // Push claims into extraQueryParameters.
             if (!String.IsNullOrEmpty(this.extraQueryParameters))
             {
                 this.extraQueryParameters += "&";
