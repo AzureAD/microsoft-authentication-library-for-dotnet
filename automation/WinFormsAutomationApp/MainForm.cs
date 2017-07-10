@@ -16,8 +16,6 @@ namespace WinFormsAutomationApp
         {
             DeleteCache.CleanCookies();
             InitializeComponent();
-            TokenCache.DefaultShared.AfterAccess += TokenCacheDelegates.AfterAccessNotification;
-            TokenCache.DefaultShared.BeforeAccess += TokenCacheDelegates.BeforeAccessNotification;
             LoggerCallbackHandler.Callback = loggerCallback;
         }
 
