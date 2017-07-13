@@ -44,6 +44,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly string extraQueryParameters;
 
+        private readonly string claims;
+
         private readonly IWebUI webUi;
 
         private readonly UserIdentifier userId;
@@ -82,11 +84,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.SupportADFS = true;
 
             claims = ProcessClaims(extraQueryParameters, claims);
-            if(!String.IsNullOrEmpty(claims))
+            if (!String.IsNullOrEmpty(claims))
             {
                 PlatformPlugin.Logger.Verbose(CallState,
                 string.Format(CultureInfo.InvariantCulture,
-                    "Claims present. Skipping cache lookup."));
+                    "Claims present. Skip cache lookup."));
             }
             this.LoadFromCache = (requestData.TokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters) && String.IsNullOrEmpty(claims));
 

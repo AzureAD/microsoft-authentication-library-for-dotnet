@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private const int DelayTimePeriodMilliSeconds = 1000;
 
         // Error Constants
-        const String INTERACTION_REQUIRED = "interaction_required";
+        const String interactionRequired = "interaction_required";
 
         internal bool Resiliency = false;
         internal bool RetryOnce = true;
@@ -106,16 +106,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     AdalServiceException serviceEx;
                     if (ex.WebResponse != null)
                     {
-                        // Challenge claim fix #3 for OBO flow
                         TokenResponse tokenResponse = TokenResponse.CreateFromErrorResponse(ex.WebResponse);
                         string[] errorCodes = tokenResponse.ErrorCodes ?? new[] { ex.WebResponse.StatusCode.ToString() };
                         serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
                             errorCodes, ex);
 
-                        if ((int)ex.WebResponse.StatusCode == 400 && tokenResponse.Error == INTERACTION_REQUIRED)
+                        if ((int)ex.WebResponse.StatusCode == 400 && tokenResponse.Error == interactionRequired)
                         {
-                            // Extracts the error and claims data from exception JSON
-                            String temp = ex.InnerException.InnerException.Message;
+                            // Extracts the error and claims data from exception
+                            string temp = ex.InnerException.InnerException.Message;
                             InteractionRequiredExceptionDetails output = JsonHelper.DecodeFromJson<InteractionRequiredExceptionDetails>(temp);
 
                             HttpResponseMessage httpResponseMessage = new HttpResponseMessage
