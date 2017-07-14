@@ -42,8 +42,7 @@ namespace Test.ADAL.NET.Unit
     public class ClaimsChallengeExceptionTests
     {
         private PlatformParameters platformParameters;
-
-        public const string Claims = "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
+        public const string jsonOutputWithClaims = "{\"error\":\"interaction_required\",\"claims\":\"{\\\"access_token\\\":{\\\"polids\\\":{\\\"essential\\\":true,\\\"values\\\":[\\\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\\\"]}}}\"}";
 
         [TestInitialize]
         public void Initialize()
@@ -58,20 +57,19 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
-            string claims = "{\"error\":\"interaction_required\",\"claims\":\"{\\\"access_token\\\":{\\\"polids\\\":{\\\"essential\\\":true,\\\"values\\\":[\\\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\\\"]}}}\"}";
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
-                    Content = new StringContent(claims)
+                    Content = new StringContent(jsonOutputWithClaims)
                 }
             });
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, credential));
-            Assert.AreEqual(result.Claims, Claims);
+            Assert.AreEqual(result.Claims, TestConstants.Claims);
         }
 
         [TestMethod]
@@ -81,20 +79,19 @@ namespace Test.ADAL.NET.Unit
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
             string accessToken = "some-access-token";
-            string claims = "{\"error\":\"interaction_required\",\"claims\":\"{\\\"access_token\\\":{\\\"polids\\\":{\\\"essential\\\":true,\\\"values\\\":[\\\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\\\"]}}}\"}";
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
-                    Content = new StringContent(claims)
+                    Content = new StringContent(jsonOutputWithClaims)
                 }
             });
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, credential, new UserAssertion(accessToken)));
-            Assert.AreEqual(result.Claims, Claims);
+            Assert.AreEqual(result.Claims, TestConstants.Claims);
         }
 
         [TestMethod]
@@ -102,20 +99,19 @@ namespace Test.ADAL.NET.Unit
         public void AdalClaimsChallengeExceptionThrownWithAcquireTokenWhenClaimsChallengeRequiredTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            string claims = "{\"error\":\"interaction_required\",\"claims\":\"{\\\"access_token\\\":{\\\"polids\\\":{\\\"essential\\\":true,\\\"values\\\":[\\\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\\\"]}}}\"}";
-
+            
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
-                    Content = new StringContent(claims)
+                    Content = new StringContent(jsonOutputWithClaims)
                 }
             });
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, platformParameters));
-            Assert.AreEqual(result.Claims, Claims);
+            Assert.AreEqual(result.Claims, TestConstants.Claims);
         }
 
         [TestMethod]
@@ -125,20 +121,19 @@ namespace Test.ADAL.NET.Unit
             var certificate = new X509Certificate2("valid_cert.pfx", TestConstants.DefaultPassword);
             var clientAssertion = new ClientAssertionCertificate(TestConstants.DefaultClientId, certificate);
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            string claims = "{\"error\":\"interaction_required\",\"claims\":\"{\\\"access_token\\\":{\\\"polids\\\":{\\\"essential\\\":true,\\\"values\\\":[\\\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\\\"]}}}\"}";
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
-                    Content = new StringContent(claims)
+                    Content = new StringContent(jsonOutputWithClaims)
                 }
             });
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, clientAssertion));
-            Assert.AreEqual(result.Claims, Claims);
+            Assert.AreEqual(result.Claims, TestConstants.Claims);
         }
 
         [TestMethod]
@@ -148,20 +143,18 @@ namespace Test.ADAL.NET.Unit
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             ClientAssertion clientAssertion = new ClientAssertion(TestConstants.DefaultClientId, "some-assertion");
 
-            string claims = "{\"error\":\"interaction_required\",\"claims\":\"{\\\"access_token\\\":{\\\"polids\\\":{\\\"essential\\\":true,\\\"values\\\":[\\\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\\\"]}}}\"}";
-
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
-                    Content = new StringContent(claims)
+                    Content = new StringContent(jsonOutputWithClaims)
                 }
             });
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenByAuthorizationCodeAsync("some-code", TestConstants.DefaultRedirectUri, clientAssertion, TestConstants.DefaultResource));
-            Assert.AreEqual(result.Claims, Claims);
+            Assert.AreEqual(result.Claims, TestConstants.Claims);
         }
     }
 }
