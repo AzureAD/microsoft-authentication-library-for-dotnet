@@ -44,11 +44,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly string extraQueryParameters;
 
-        private readonly string claims;
-
         private readonly IWebUI webUi;
 
         private readonly UserIdentifier userId;
+
+        private readonly string claims;
 
         public AcquireTokenInteractiveHandler(RequestData requestData, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims = "")
             : base(requestData)
@@ -86,18 +86,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             claims = ProcessClaims(extraQueryParameters, claims);
             if (!String.IsNullOrEmpty(claims))
             {
-                PlatformPlugin.Logger.Verbose(CallState,
-                string.Format(CultureInfo.InvariantCulture,
-                    "Claims present. Skip cache lookup."));
-            }
-            this.LoadFromCache = (requestData.TokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters) && String.IsNullOrEmpty(claims));
+                this.LoadFromCache = false;
 
-            // Push claims into extraQueryParameters.
-            if (!String.IsNullOrEmpty(this.extraQueryParameters))
-            {
-                this.extraQueryParameters += "&";
+                PlatformPlugin.Logger.Verbose(CallState, string.Format(CultureInfo.InvariantCulture,
+                    "Claims present, skip cache lookup."));
+
+                this.claims = claims;
             }
-            this.extraQueryParameters += "claims=" + claims;
+            else
+            {
+                this.LoadFromCache = (requestData.TokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters));
+            }
 
             this.brokerParameters["force"] = "NO";
             if (userId != UserIdentifier.AnyUser)
@@ -194,6 +193,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 authorizationRequestParameters[OAuthParameter.LoginHint] = loginHint;
             }
 
+            if (!string.IsNullOrWhiteSpace(claims))
+            {
+                authorizationRequestParameters["claims"] = claims;
+            }
+
             if (this.CallState != null && this.CallState.CorrelationId != Guid.Empty)
             {
                 authorizationRequestParameters[OAuthParameter.CorrelationId] = this.CallState.CorrelationId.ToString();
@@ -244,7 +248,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-
         protected override void UpdateBrokerParameters(IDictionary<string, string> parameters)
         {
             Uri uri = new Uri(this.authorizationResult.Code);
@@ -266,7 +269,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return false;
         }
 
-        private string ProcessClaims(string extraQueryParameters, string claims)
+        // ProcessClaims will process the claims passed in, either in the
+        // extraQueryParamters or as a string through AcquireToken
+        internal static string ProcessClaims(string extraQueryParameters, string claims)
         {
             // Only process the extra query parameters if it's not null.
             if (string.IsNullOrEmpty(extraQueryParameters))
@@ -295,11 +300,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 string qpClaims = nameValue[1];
 
-                // Now make sure they match; otherwise throw an error.
-                if (!string.IsNullOrEmpty(qpClaims) && String.IsNullOrEmpty(claims)
+                // If claims are in both, throw an error.
+                if (!string.IsNullOrEmpty(qpClaims) && !string.IsNullOrEmpty(claims)
                     && String.Compare(claims, qpClaims, StringComparison.CurrentCultureIgnoreCase) == 0)
                 {
-                    throw new ArgumentException("The claims parameter must match the claims in the extra query parameter.");
+                    throw new ArgumentException("The claims parameter must be passed in either string claims or extra query parameters.");
                 }
 
                 if (!string.IsNullOrEmpty(qpClaims))

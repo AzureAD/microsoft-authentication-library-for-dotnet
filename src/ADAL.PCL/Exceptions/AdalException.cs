@@ -223,6 +223,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     message = AdalErrorMessage.GetUserNameFailed;
                     break;
 
+                case AdalError.InteractionRequired:
+                    message = AdalErrorMessage.InteractionRequired;
+                    break;
+
                 default:
                     message = AdalErrorMessage.Unknown;
                     break;

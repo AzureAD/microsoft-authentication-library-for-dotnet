@@ -30,7 +30,7 @@ using System.Runtime.Serialization;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Utilities
 {
     [DataContract]
-    public class InteractionRequiredExceptionDetails
+    internal class InteractionRequiredExceptionDetails
     {
         [DataMember(Name = "claims", IsRequired = false)]
         public string Claims { get; set; }

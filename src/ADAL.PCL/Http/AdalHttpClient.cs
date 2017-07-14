@@ -45,9 +45,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private const string PKeyAuthName = "PKeyAuth";
         private const int DelayTimePeriodMilliSeconds = 1000;
 
-        // Error Constants
-        const String interactionRequired = "interaction_required";
-
         internal bool Resiliency = false;
         internal bool RetryOnce = true;
 
@@ -111,11 +108,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
                             errorCodes, ex);
 
-                        if ((int)ex.WebResponse.StatusCode == 400 && tokenResponse.Error == interactionRequired)
+                        if (ex.WebResponse.StatusCode == HttpStatusCode.BadRequest && tokenResponse.Error == AdalErrorMessage.InteractionRequired)
                         {
                             // Extracts the error and claims data from exception
-                            string temp = ex.InnerException.InnerException.Message;
-                            InteractionRequiredExceptionDetails output = JsonHelper.DecodeFromJson<InteractionRequiredExceptionDetails>(temp);
+                            string errorJson = ex.InnerException?.InnerException?.Message;
+                            InteractionRequiredExceptionDetails output = JsonHelper.DecodeFromJson<InteractionRequiredExceptionDetails>(errorJson);
 
                             HttpResponseMessage httpResponseMessage = new HttpResponseMessage
                             {
@@ -209,7 +206,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.Client.Headers["Authorization"] = responseHeader;
             return await this.GetResponseAsync<T>(false).ConfigureAwait(false);
         }
-
 
         private static string CheckForExtraQueryParameter(string url)
         {

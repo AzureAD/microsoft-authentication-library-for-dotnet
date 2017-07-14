@@ -28,10 +28,11 @@
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
+using Test.ADAL.Common;
 using Test.ADAL.NET.Unit.Mocks;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
 
@@ -42,6 +43,8 @@ namespace Test.ADAL.NET.Unit
     {
         private PlatformParameters platformParameters;
 
+        public const string Claims = "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
+
         [TestInitialize]
         public void Initialize()
         {
@@ -51,7 +54,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for claims challenge exception with client credential")]
-        public async Task AdalClaimsChallengeExceptionThrownWithAcquireTokenClientCredentialWhenClaimsChallengeRequiredTestAsync()
+        public void AdalClaimsChallengeExceptionThrownWithAcquireTokenClientCredentialWhenClaimsChallengeRequiredTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
@@ -66,22 +69,14 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            try
-            {
-                AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential);
-            }
-
-            catch (AdalClaimChallengeException ex)
-            {
-                Assert.AreEqual(ex.Claims, "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}");
-                return;
-            }
-            Assert.Fail("Expected exception was not thrown");
+            var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
+            context.AcquireTokenAsync(TestConstants.DefaultResource, credential));
+            Assert.AreEqual(result.Claims, Claims);
         }
 
         [TestMethod]
         [Description("Test for claims challenge exception with client credential and user assertion")]
-        public async Task AdalClaimsChallengeExceptionThrownWithAcquireTokenClientCredentialUserAssertionWhenClaimsChallengeRequiredTestAsync()
+        public void AdalClaimsChallengeExceptionThrownWithAcquireTokenClientCredentialUserAssertionWhenClaimsChallengeRequiredTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
@@ -97,22 +92,14 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            try
-            {
-                AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, credential, new UserAssertion(accessToken));
-            }
-
-            catch (AdalClaimChallengeException ex)
-            {
-                Assert.AreEqual(ex.Claims, "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}");
-                return;
-            }
-            Assert.Fail("Expected exception was not thrown");
+            var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
+            context.AcquireTokenAsync(TestConstants.DefaultResource, credential, new UserAssertion(accessToken)));
+            Assert.AreEqual(result.Claims, Claims);
         }
 
         [TestMethod]
         [Description("Test for claims challenge exception with acquire token")]
-        public async Task AdalClaimsChallengeExceptionThrownWithAcquireTokenWhenClaimsChallengeRequiredTestAsync()
+        public void AdalClaimsChallengeExceptionThrownWithAcquireTokenWhenClaimsChallengeRequiredTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             string claims = "{\"error\":\"interaction_required\",\"claims\":\"{\\\"access_token\\\":{\\\"polids\\\":{\\\"essential\\\":true,\\\"values\\\":[\\\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\\\"]}}}\"}";
@@ -126,22 +113,14 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            try
-            {
-                AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, platformParameters);
-            }
-
-            catch (AdalClaimChallengeException ex)
-            {
-                Assert.AreEqual(ex.Claims, "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}");
-                return;
-            }
-            Assert.Fail("Expected exception was not thrown");
+            var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
+            context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, platformParameters));
+            Assert.AreEqual(result.Claims, Claims);
         }
 
         [TestMethod]
         [Description("Test for claims challenge exception with client assertion")]
-        public async Task AdalClaimsChallengeExceptionThrownWithClientAssertionWhenClaimsChallengeRequiredTestAsync()
+        public void AdalClaimsChallengeExceptionThrownWithClientAssertionWhenClaimsChallengeRequiredTestAsync()
         {
             var certificate = new X509Certificate2("valid_cert.pfx", TestConstants.DefaultPassword);
             var clientAssertion = new ClientAssertionCertificate(TestConstants.DefaultClientId, certificate);
@@ -157,22 +136,14 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            try
-            {
-                AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, clientAssertion);
-            }
-
-            catch (AdalClaimChallengeException ex)
-            {
-                Assert.AreEqual(ex.Claims, "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}");
-                return;
-            }
-            Assert.Fail("Expected exception was not thrown");
+            var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
+            context.AcquireTokenAsync(TestConstants.DefaultResource, clientAssertion));
+            Assert.AreEqual(result.Claims, Claims);
         }
 
         [TestMethod]
         [Description("Test for claims challenge exception with auth code")]
-        public async Task AdalClaimsChallengeExceptionThrownWithAuthCodeWhenClaimsChallengeRequiredTestAsync()
+        public void AdalClaimsChallengeExceptionThrownWithAuthCodeWhenClaimsChallengeRequiredTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             ClientAssertion clientAssertion = new ClientAssertion(TestConstants.DefaultClientId, "some-assertion");
@@ -188,17 +159,33 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            try
-            {
-                AuthenticationResult result = await context.AcquireTokenByAuthorizationCodeAsync("some-code", TestConstants.DefaultRedirectUri, clientAssertion, TestConstants.DefaultResource);
-            }
+            var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
+            context.AcquireTokenByAuthorizationCodeAsync("some-code", TestConstants.DefaultRedirectUri, clientAssertion, TestConstants.DefaultResource));
+            Assert.AreEqual(result.Claims, Claims);
+        }
 
-            catch (AdalClaimChallengeException ex)
-            {
-                Assert.AreEqual(ex.Claims, "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}");
-                return;
-            }
-            Assert.Fail("Expected exception was not thrown");
+        [TestMethod]
+        [Description("Process claims when claims are passed as a string in method overload")]
+        public void ClaimsPassedInAsStringPositiveTestAsync()
+        {
+            string processedClaims = AcquireTokenInteractiveHandler.ProcessClaims(null, Claims);
+            Assert.AreEqual(processedClaims, Claims);
+        }
+
+        [TestMethod]
+        [Description("Process claims when claims are passed in extra query parameters")]
+        public void ClaimsPassedInAsExtraQueryParametersPositiveTestAsync()
+        {
+            string processedClaims = AcquireTokenInteractiveHandler.ProcessClaims("&claims=" + Claims, null);
+            Assert.AreEqual(processedClaims, Claims);
+        }
+
+        [TestMethod]
+        [Description("Process claims when claims are passed in extra query parameters and string in method overload")]
+        public void ClaimsPassedInAsExtraQueryParametersAndStringOverloadPositiveTestAsync()
+        {
+            var ex = AssertException.Throws<ArgumentException>(() => AcquireTokenInteractiveHandler.ProcessClaims("&claims=" + Claims, Claims));
+            Assert.AreEqual(ex.Message, "The claims parameter must be passed in either string claims or extra query parameters.");
         }
     }
 }
