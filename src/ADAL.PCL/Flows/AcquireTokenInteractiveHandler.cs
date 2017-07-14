@@ -83,7 +83,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.UserIdentifierType = userId.Type;
             this.SupportADFS = true;
 
-            claims = ProcessClaims(extraQueryParameters, claims);
             if (!String.IsNullOrEmpty(claims))
             {
                 this.LoadFromCache = false;
@@ -267,54 +266,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             return false;
-        }
-
-        // ProcessClaims will process the claims passed in, either in the
-        // extraQueryParamters or as a string through AcquireToken
-        internal static string ProcessClaims(string extraQueryParameters, string claims)
-        {
-            // Only process the extra query parameters if it's not null.
-            if (string.IsNullOrEmpty(extraQueryParameters))
-            {
-                return claims;
-            }
-
-            // Split the query parameters on the ampersand.
-            string[] parts = extraQueryParameters.Split('&');
-            foreach (string part in parts)
-            {
-                // Split the key and value on equal sign.
-                string[] nameValue = part.Split('=');
-                if (nameValue.Length > 2)
-                {
-                    // If there are multiple equal signs, then query paramerter is not well formed, so skip
-                    // Example of poorly formed query parameter string: var=12=45=67
-                    continue;
-                }
-
-                // Don't process anything but claims query parameter
-                if (!nameValue[0].Equals("claims"))
-                {
-                    continue;
-                }
-
-                string qpClaims = nameValue[1];
-
-                // If claims are in both, throw an error.
-                if (!string.IsNullOrEmpty(qpClaims) && !string.IsNullOrEmpty(claims)
-                    && String.Compare(claims, qpClaims, StringComparison.CurrentCultureIgnoreCase) == 0)
-                {
-                    throw new ArgumentException("The claims parameter must be passed in either string claims or extra query parameters.");
-                }
-
-                if (!string.IsNullOrEmpty(qpClaims))
-                {
-                    return qpClaims;
-                }
-            }
-
-            // If there are query parameters, but none of them are the claims parameter, then return the claims string
-            return claims;
         }
     }
 }

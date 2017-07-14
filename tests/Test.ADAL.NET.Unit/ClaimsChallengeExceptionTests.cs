@@ -163,29 +163,5 @@ namespace Test.ADAL.NET.Unit
             context.AcquireTokenByAuthorizationCodeAsync("some-code", TestConstants.DefaultRedirectUri, clientAssertion, TestConstants.DefaultResource));
             Assert.AreEqual(result.Claims, Claims);
         }
-
-        [TestMethod]
-        [Description("Process claims when claims are passed as a string in method overload")]
-        public void ClaimsPassedInAsStringPositiveTestAsync()
-        {
-            string processedClaims = AcquireTokenInteractiveHandler.ProcessClaims(null, Claims);
-            Assert.AreEqual(processedClaims, Claims);
-        }
-
-        [TestMethod]
-        [Description("Process claims when claims are passed in extra query parameters")]
-        public void ClaimsPassedInAsExtraQueryParametersPositiveTestAsync()
-        {
-            string processedClaims = AcquireTokenInteractiveHandler.ProcessClaims("&claims=" + Claims, null);
-            Assert.AreEqual(processedClaims, Claims);
-        }
-
-        [TestMethod]
-        [Description("Process claims when claims are passed in extra query parameters and string in method overload")]
-        public void ClaimsPassedInAsExtraQueryParametersAndStringOverloadPositiveTestAsync()
-        {
-            var ex = AssertException.Throws<ArgumentException>(() => AcquireTokenInteractiveHandler.ProcessClaims("&claims=" + Claims, Claims));
-            Assert.AreEqual(ex.Message, "The claims parameter must be passed in either string claims or extra query parameters.");
-        }
     }
 }
