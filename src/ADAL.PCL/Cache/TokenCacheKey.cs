@@ -68,17 +68,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.DisplayableId = displayableId;
         }
 
-        public string Authority { get; private set; }
+        public string Authority { get; }
 
-        public string Resource { get; internal set; }
+        public string Resource { get; }
 
-        public string ClientId { get; private set; }
+        public string ClientId { get; }
 
-        public string UniqueId { get; private set; }
+        public string UniqueId { get; }
 
-        public string DisplayableId { get; private set; }
+        public string DisplayableId { get; }
 
-        public TokenSubjectType TokenSubjectType { get; private set; }
+        public TokenSubjectType TokenSubjectType { get; }
 
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
@@ -102,14 +102,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="other">The TokenCacheKey to compare with the current object. </param><filterpriority>2</filterpriority>
         public bool Equals(TokenCacheKey other)
         {
-            return ReferenceEquals(this, other) ||
-               (other != null
-               && (other.Authority == this.Authority)
-               && this.ResourceEquals(other.Resource)
-               && this.ClientIdEquals(other.ClientId)
-               && (other.UniqueId == this.UniqueId)
-               && this.DisplayableIdEquals(other.DisplayableId)
-               && (other.TokenSubjectType == this.TokenSubjectType));
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return other != null
+                && other.Authority == this.Authority
+                && this.ResourceEquals(other.Resource)
+                && this.ClientIdEquals(other.ClientId)
+                && other.UniqueId == this.UniqueId
+                && this.DisplayableIdEquals(other.DisplayableId)
+                && other.TokenSubjectType == this.TokenSubjectType;
         }
 
         /// <summary>
@@ -120,13 +124,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </returns>
         public override int GetHashCode()
         {
-            const string Delimiter = ":::";
-            return (this.Authority + Delimiter 
-                + this.Resource.ToLower() + Delimiter
-                + this.ClientId.ToLower() + Delimiter
-                + this.UniqueId + Delimiter
-                + ((this.DisplayableId != null) ? this.DisplayableId.ToLower() : null) + Delimiter
-                + (int)this.TokenSubjectType).GetHashCode();
+            const string delimiter = ":::";
+            var hashString = this.Authority + delimiter
+                           + this.Resource.ToLowerInvariant() + delimiter
+                           + this.ClientId.ToLowerInvariant() + delimiter
+                           + this.UniqueId + delimiter
+                           + this.DisplayableId?.ToLowerInvariant() + delimiter
+                           + (int) this.TokenSubjectType;
+            return hashString.GetHashCode();
         }
 
         internal bool ResourceEquals(string otherResource)

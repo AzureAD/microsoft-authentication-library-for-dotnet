@@ -163,7 +163,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     writer.Write(this.tokenCacheDictionary.Count);
                     foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> kvp in this.tokenCacheDictionary)
                     {
-                        writer.Write(string.Format(CultureInfo.CurrentCulture, "{1}{0}{2}{0}{3}{0}{4}", Delimiter,
+                        writer.Write(string.Format(CultureInfo.InvariantCulture, "{1}{0}{2}{0}{3}{0}{4}", Delimiter,
                             kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId, (int)kvp.Key.TokenSubjectType));
                         writer.Write(kvp.Value.Serialize());
                     }
