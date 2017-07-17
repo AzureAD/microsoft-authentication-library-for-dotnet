@@ -151,11 +151,8 @@ namespace Test.ADAL.NET.Unit
             RunAuthenticationParametersNegative("Bearer ");
             RunAuthenticationParametersNegative("BearerX");
             RunAuthenticationParametersNegative("BearerX authorization_uri=\"abc\", resource_id=\"de\"");
-
-            // TODO: the following input doesn't cause errors.
-            // Issue #611: https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/issues/611
-            //RunAuthenticationParametersNegative("Bearer authorization_uri=\"abc\"=\"de\"");
-            //RunAuthenticationParametersNegative("Bearer authorization_uri=abc=de");
+            RunAuthenticationParametersNegative("Bearer authorization_uri=\"abc\"=\"de\"");
+            RunAuthenticationParametersNegative("Bearer authorization_uri=abc=de");
         }
 
 
