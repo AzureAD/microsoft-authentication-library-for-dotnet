@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public string GetResponseToSign()
         {
-            return String.Format(CultureInfo.CurrentCulture, "{0}.{1}", 
+            return String.Format(CultureInfo.InvariantCulture, "{0}.{1}", 
                 Base64UrlEncoder.Encode(JsonHelper.EncodeToJson(header).ToByteArray()), 
                 Base64UrlEncoder.Encode(JsonHelper.EncodeToJson(payload).ToByteArray()));
         }

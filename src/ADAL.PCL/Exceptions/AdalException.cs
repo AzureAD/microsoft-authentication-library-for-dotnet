@@ -228,7 +228,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     break;
             }
 
-            return String.Format(CultureInfo.InvariantCulture, "{0}: {1}", errorCode, message);
+            return String.Format(CultureInfo.CurrentCulture, "{0}: {1}", errorCode, message);
         }
     }
 }

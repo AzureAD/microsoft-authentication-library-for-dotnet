@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (certificate.PublicKey.Key.KeySize < ClientAssertionCertificate.MinKeySizeInBits)
             {
                 throw new ArgumentOutOfRangeException("rawData",
-                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.CertificateKeySizeTooSmallTemplate, ClientAssertionCertificate.MinKeySizeInBits));
+                    string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.CertificateKeySizeTooSmallTemplate, ClientAssertionCertificate.MinKeySizeInBits));
             }
 
             X509AsymmetricSecurityKey x509Key = new X509AsymmetricSecurityKey(certificate);

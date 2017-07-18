@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // For security reasons, it is important to have PublicKeyToken mentioned referencing the assembly.
             const string PlatformSpecificAssemblyNameTemplate = "Microsoft.IdentityModel.Clients.ActiveDirectory.Platform, Version={0}, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
 
-            string platformSpecificAssemblyName = string.Format(CultureInfo.CurrentCulture, PlatformSpecificAssemblyNameTemplate, AdalIdHelper.GetAdalVersion());
+            string platformSpecificAssemblyName = string.Format(CultureInfo.InvariantCulture, PlatformSpecificAssemblyNameTemplate, AdalIdHelper.GetAdalVersion());
 
             try
             {
@@ -107,11 +107,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (FileNotFoundException ex)
             {
-                throw new AdalException(AdalError.AssemblyNotFound, string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.AssemblyNotFoundTemplate, platformSpecificAssemblyName), ex);
+                throw new AdalException(AdalError.AssemblyNotFound, string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.AssemblyNotFoundTemplate, platformSpecificAssemblyName), ex);
             }
             catch (Exception ex) // FileLoadException is missing from PCL
             {
-                throw new AdalException(AdalError.AssemblyLoadFailed, string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.AssemblyLoadFailedTemplate, platformSpecificAssemblyName), ex);
+                throw new AdalException(AdalError.AssemblyLoadFailed, string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.AssemblyLoadFailedTemplate, platformSpecificAssemblyName), ex);
             }
         }
     }

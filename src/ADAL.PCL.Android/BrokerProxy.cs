@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 Application.Context.PackageManager.CheckPermission(permission, Application.Context.PackageName))
             {
                 PlatformPlugin.Logger.Information(null,
-                    string.Format(AdalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission));
+                    string.Format(CultureInfo.CurrentCulture, AdalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission));
                 return false;
             }
 
@@ -371,7 +371,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string signatureDigest = this.GetCurrentSignatureForPackage(packageName);
             if (!string.IsNullOrEmpty(signatureDigest))
             {
-                return string.Format(CultureInfo.CurrentCulture, "{0}://{1}/{2}", RedirectUriScheme,
+                return string.Format(CultureInfo.InvariantCulture, "{0}://{1}/{2}", RedirectUriScheme,
                     packageName.ToLower(), signatureDigest);
             }
 
@@ -602,7 +602,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             if (chainStatus.Status != X509ChainStatusFlags.UntrustedRoot)
                             {
                                 throw new AdalException(AdalErrorAndroidEx.SignatureVerificationFailed,
-                                    string.Format(CultureInfo.InvariantCulture,
+                                    string.Format(CultureInfo.CurrentCulture,
                                         "app certificate validation failed with {0}", chainStatus.Status));
                             }
                         }

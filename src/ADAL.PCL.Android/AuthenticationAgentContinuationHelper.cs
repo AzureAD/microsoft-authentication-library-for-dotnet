@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static void SetAuthenticationAgentContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
             AuthorizationResult authorizationResult = null;
-            PlatformPlugin.Logger.Information(null, string.Format(CultureInfo.InvariantCulture,"Received Activity Result({0})", (int)resultCode));
+            PlatformPlugin.Logger.Information(null, string.Format(CultureInfo.CurrentCulture,"Received Activity Result({0})", (int)resultCode));
             switch ((int)resultCode)
             {
                 case (int)Result.Ok:
