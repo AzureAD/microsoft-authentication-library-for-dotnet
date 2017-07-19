@@ -602,7 +602,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             if (chainStatus.Status != X509ChainStatusFlags.UntrustedRoot)
                             {
                                 throw new AdalException(AdalErrorAndroidEx.SignatureVerificationFailed,
-                                    string.Format(CultureInfo.CurrentCulture,
+                                    string.Format(CultureInfo.InvariantCulture,
                                         "app certificate validation failed with {0}", chainStatus.Status));
                             }
                         }
