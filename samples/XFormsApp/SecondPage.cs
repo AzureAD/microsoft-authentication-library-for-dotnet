@@ -173,9 +173,10 @@ namespace XFormsApp
             
             try
             {
-                AuthenticationResult result = await ctx.AcquireTokenAsync("https://graph.windows.net", "de49ddaf-c7f8-4a06-8463-3c6ae124fe52",
+                AuthenticationResult result = await ctx.AcquireTokenAsync("https://graph.windows.net", "<CLIENT_ID>",
                         new Uri("adaliosapp://com.yourcompany.xformsapp"),
-                        Parameters, new UserIdentifier("apitest@strockisdev.onmicrosoft.com", UserIdentifierType.OptionalDisplayableId), null, claims).ConfigureAwait(false);
+                        Parameters, new UserIdentifier("<USER>", UserIdentifierType.OptionalDisplayableId), null, claims).ConfigureAwait(false);
+                output = "Access Token: " + result.AccessToken;
             }
 
             catch (Exception exc)
