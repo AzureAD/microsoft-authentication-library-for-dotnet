@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 Application.Context.PackageManager.CheckPermission(permission, Application.Context.PackageName))
             {
                 PlatformPlugin.Logger.Information(null,
-                    string.Format(CultureInfo.CurrentCulture, AdalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission));
+                    string.Format(AdalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission));
                 return false;
             }
 

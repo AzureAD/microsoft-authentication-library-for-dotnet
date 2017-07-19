@@ -177,7 +177,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (ExtendedExpiresIn < ExpiresIn)
             {
                 PlatformPlugin.Logger.Information(null,
-                    string.Format(CultureInfo.CurrentCulture,
+                    string.Format(CultureInfo.InvariantCulture,
                         "ExtendedExpiresIn({0}) is less than ExpiresIn({1}). Set ExpiresIn as ExtendedExpiresIn",
                         this.ExtendedExpiresIn, this.ExpiresIn));
                 ExtendedExpiresIn = ExpiresIn;

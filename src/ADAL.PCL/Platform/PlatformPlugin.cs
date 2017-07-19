@@ -107,11 +107,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (FileNotFoundException ex)
             {
-                throw new AdalException(AdalError.AssemblyNotFound, string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.AssemblyNotFoundTemplate, platformSpecificAssemblyName), ex);
+                throw new AdalException(AdalError.AssemblyNotFound, string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.AssemblyNotFoundTemplate, platformSpecificAssemblyName), ex);
             }
             catch (Exception ex) // FileLoadException is missing from PCL
             {
-                throw new AdalException(AdalError.AssemblyLoadFailed, string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.AssemblyLoadFailedTemplate, platformSpecificAssemblyName), ex);
+                throw new AdalException(AdalError.AssemblyLoadFailed, string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.AssemblyLoadFailedTemplate, platformSpecificAssemblyName), ex);
             }
         }
     }

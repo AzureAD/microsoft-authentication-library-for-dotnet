@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (certificate.GetRSAPublicKey().KeySize < MinKeySizeInBits)
             {
                 throw new ArgumentOutOfRangeException("certificate",
-                    string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.CertificateKeySizeTooSmallTemplate, MinKeySizeInBits));
+                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.CertificateKeySizeTooSmallTemplate, MinKeySizeInBits));
             }
 
             this.clientId = clientId;
