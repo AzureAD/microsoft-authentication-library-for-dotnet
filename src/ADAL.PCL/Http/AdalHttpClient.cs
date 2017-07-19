@@ -26,13 +26,9 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Exceptions;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Utilities;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -104,25 +100,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (ex.WebResponse != null)
                     {
                         TokenResponse tokenResponse = TokenResponse.CreateFromErrorResponse(ex.WebResponse);
+
+                        // Check for claims challenge response
+                        if (!string.IsNullOrEmpty(tokenResponse.Claims))
+                        {
+                            throw new AdalClaimChallengeException(tokenResponse.Error, tokenResponse.ErrorDescription, tokenResponse.Claims);
+                        }
+
                         string[] errorCodes = tokenResponse.ErrorCodes ?? new[] { ex.WebResponse.StatusCode.ToString() };
                         serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
                             errorCodes, ex);
-
-                        if (ex.WebResponse.StatusCode == HttpStatusCode.BadRequest && tokenResponse.Error == AdalErrorMessage.InteractionRequired)
-                        {
-                            // Extracts the error and claims data from exception
-                            string errorJson = ex.InnerException?.InnerException?.Message;
-                            InteractionRequiredExceptionDetails output = JsonHelper.DecodeFromJson<InteractionRequiredExceptionDetails>(errorJson);
-
-                            HttpResponseMessage httpResponseMessage = new HttpResponseMessage
-                            {
-                                StatusCode = HttpStatusCode.BadRequest,
-                                ReasonPhrase = output.Error,
-                                Content = new StringContent(output.Claims)
-                            };
-
-                            throw new AdalClaimChallengeException(output.Error, httpResponseMessage.ToString(), output.Claims);
-                        }
 
                         if ((int)ex.WebResponse.StatusCode >= 500 && (int)ex.WebResponse.StatusCode < 600)
                         {

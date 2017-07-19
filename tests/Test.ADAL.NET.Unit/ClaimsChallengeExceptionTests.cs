@@ -69,7 +69,7 @@ namespace Test.ADAL.NET.Unit
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, credential));
-            Assert.AreEqual(result.Claims, TestConstants.Claims);
+            Assert.AreEqual(result.GetRequiredClaims, TestConstants.Claims);
         }
 
         [TestMethod]
@@ -91,7 +91,7 @@ namespace Test.ADAL.NET.Unit
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, credential, new UserAssertion(accessToken)));
-            Assert.AreEqual(result.Claims, TestConstants.Claims);
+            Assert.AreEqual(result.GetRequiredClaims, TestConstants.Claims);
         }
 
         [TestMethod]
@@ -99,7 +99,7 @@ namespace Test.ADAL.NET.Unit
         public void AdalClaimsChallengeExceptionThrownWithAcquireTokenWhenClaimsChallengeRequiredTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            
+
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
@@ -111,7 +111,7 @@ namespace Test.ADAL.NET.Unit
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, platformParameters));
-            Assert.AreEqual(result.Claims, TestConstants.Claims);
+            Assert.AreEqual(result.GetRequiredClaims, TestConstants.Claims);
         }
 
         [TestMethod]
@@ -133,7 +133,7 @@ namespace Test.ADAL.NET.Unit
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, clientAssertion));
-            Assert.AreEqual(result.Claims, TestConstants.Claims);
+            Assert.AreEqual(result.GetRequiredClaims, TestConstants.Claims);
         }
 
         [TestMethod]
@@ -154,7 +154,7 @@ namespace Test.ADAL.NET.Unit
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenByAuthorizationCodeAsync("some-code", TestConstants.DefaultRedirectUri, clientAssertion, TestConstants.DefaultResource));
-            Assert.AreEqual(result.Claims, TestConstants.Claims);
+            Assert.AreEqual(result.GetRequiredClaims, TestConstants.Claims);
         }
     }
 }

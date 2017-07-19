@@ -51,6 +51,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string Error = "error";
         public const string ErrorDescription = "error_description";
         public const string ErrorCodes = "error_codes";
+        public const string Claims = "claims";
     }
 
     [DataContract]
@@ -96,6 +97,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         [DataMember(Name = CorrelationIdClaim, IsRequired = false)]
         public string CorrelationId { get; set; }
+
+        [DataMember(Name = TokenResponseClaim.Claims, IsRequired = false)]
+        public string Claims { get; set; }
 
         internal static TokenResponse CreateFromBrokerResponse(IDictionary<string, string> responseDictionary)
         {
