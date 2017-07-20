@@ -164,7 +164,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     if (lowercaseKeys)
                     {
-                        key = key.Trim().ToLower();
+                        key = key.Trim().ToLowerInvariant();
                     }
 
                     value = value.Trim().Trim(new[] { '\"' }).Trim();
