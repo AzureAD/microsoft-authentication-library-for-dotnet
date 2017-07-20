@@ -95,9 +95,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 case PromptBehavior.RefreshSession:
                     authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
                     break;
-                case PromptBehavior.Never:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
-                    break;
             }
         }
 

@@ -23,9 +23,6 @@
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\ADAL.Common\PromptBehavior.cs">
-      <Link>PromptBehavior.cs</Link>
-    </Compile>
     <Compile Include="Flows\DeviceCode\AcquireDeviceCodeHandler.cs" />
     <Compile Include="Flows\AcquireTokenByAuthorizationCodeHandler.cs" />
     <Compile Include="Flows\DeviceCode\AcquireTokenByDeviceCodeHandler.cs" />
