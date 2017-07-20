@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
 
-            PromptBehavior promptBehavior = (parameters as PlatformParameters).PromptBehavior;
+            PromptBehavior promptBehavior = authorizationParameters.PromptBehavior;
 
             switch (promptBehavior)
             {
@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
             }
 
-            PromptBehavior promptBehavior = (parameters as PlatformParameters).PromptBehavior;
+            PromptBehavior promptBehavior = authorizationParameters.PromptBehavior;
 
             return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession;
         }
