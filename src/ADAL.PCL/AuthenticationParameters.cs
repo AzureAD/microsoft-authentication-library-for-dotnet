@@ -95,14 +95,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 || authenticateHeader.Length < Bearer.Length + 2
                 || !char.IsWhiteSpace(authenticateHeader[Bearer.Length]))
             {
-                var ex = new ArgumentException(AdalErrorMessage.InvalidAuthenticateHeaderFormat, "authenticateHeader");
+                var ex = new ArgumentException(AdalErrorMessage.InvalidAuthenticateHeaderFormat, nameof(authenticateHeader));
                 PlatformPlugin.Logger.Error(null, ex);
                 throw ex;
             }
 
             authenticateHeader = authenticateHeader.Substring(Bearer.Length).Trim();
 
-            Dictionary<string, string> authenticateHeaderItems = EncodingHelper.ParseKeyValueList(authenticateHeader, ',', false, null);
+            IDictionary<string, string> authenticateHeaderItems;
+            try
+            {
+                authenticateHeaderItems = EncodingHelper.ParseKeyValueListStrict(authenticateHeader, ',', false, true, null);
+            }
+            catch (ArgumentException ex)
+            {
+                var newEx = new ArgumentException(AdalErrorMessage.InvalidAuthenticateHeaderFormat, nameof(authenticateHeader), ex);
+                PlatformPlugin.Logger.Error(null, newEx);
+                throw newEx;
+            }
 
             var authParams = new AuthenticationParameters();
             string param;

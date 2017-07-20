@@ -25,14 +25,48 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class CryptographyHelper : ICryptographyHelper
     {
-
         public string CreateSha256Hash(string input)
         {
-            return null;
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return null;
+            }
+
+            using (var sha256 = SHA256.Create())
+            {
+                var inputBytes = Encoding.UTF8.GetBytes(input);
+                var outputBytes = sha256.ComputeHash(inputBytes);
+                return Convert.ToBase64String(outputBytes);
+            }
+        }
+
+        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+        {
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            if (certificate == null)
+            {
+                throw new ArgumentNullException(nameof(certificate));
+            }
+
+            // Copied from MSAL:
+            // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/7fe94109/src/Microsoft.Identity.Client/Platforms/netstandard1.3/CryptographyHelper.cs#L68
+            using (var key = certificate.GetRSAPrivateKey())
+            {
+                return key.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            }
         }
     }
 }

@@ -164,66 +164,66 @@ namespace Test.ADAL.Common.Unit
         }
 
 
- /// <summary>
- /// Check when there are multiple users in the cache with the same
- /// authority, clientId, resource but different unique and displayId's that
- /// we can correctly get them from the cache without a multiple token 
- /// detected exception.
- /// </summary>
- /// <returns></returns>
- public static async Task TestUniqueIdDisplayableIdLookup()
- {
- 
-     string authority = "https://www.gotJwt.com/";
-     string clientId = Guid.NewGuid().ToString();
-     string resource = Guid.NewGuid().ToString();
-     string tenantId = Guid.NewGuid().ToString();
-     string uniqueId = Guid.NewGuid().ToString();
-     string displayableId = Guid.NewGuid().ToString();
-     Uri redirectUri = new Uri("https://www.GetJwt.com");
- 
-     var authenticationResult = CreateCacheValue(uniqueId, displayableId);
-     authority = authority + tenantId + "/";
-     UserCredential credential = new UserCredential(displayableId);
-     AuthenticationContext tempContext = new AuthenticationContext(authority, false);
-     var localCache = tempContext.TokenCache;
-     localCache.Clear();
- 
-     // Add first user into cache
-     resource = Guid.NewGuid().ToString();
-     clientId = Guid.NewGuid().ToString();
-     uniqueId = Guid.NewGuid().ToString();
-     displayableId = Guid.NewGuid().ToString();
-     var cacheValue = CreateCacheValue(uniqueId, displayableId);
-     AddToDictionary(localCache,
-         new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User, uniqueId, displayableId),
-         cacheValue);
- 
-     //Add second user into cache
-     uniqueId = Guid.NewGuid().ToString();
-     displayableId = Guid.NewGuid().ToString();
-     cacheValue = CreateCacheValue(uniqueId, displayableId);
-     AddToDictionary(localCache,
-         new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User, uniqueId, displayableId),
-         cacheValue);
- 
-     var acWithLocalCache = new AuthenticationContext(authority, false, localCache);
-     var userId = new UserIdentifier(uniqueId, UserIdentifierType.UniqueId);
-     var userIdUpper = new UserIdentifier(displayableId.ToUpper(), UserIdentifierType.RequiredDisplayableId);
+        /// <summary>
+        /// Check when there are multiple users in the cache with the same
+        /// authority, clientId, resource but different unique and displayId's that
+        /// we can correctly get them from the cache without a multiple token
+        /// detected exception.
+        /// </summary>
+        /// <returns></returns>
+        public static async Task TestUniqueIdDisplayableIdLookup()
+        {
 
-     var parameters = new PlatformParameters(PromptBehavior.Auto);
-     var authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, parameters, userId);
-     VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
- 
-     authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, parameters, userIdUpper);
-     VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
- 
-     authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userId);
-     VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
- 
-     authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userIdUpper);
-     VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
- }
+            string authority = "https://www.gotJwt.com/";
+            string clientId = Guid.NewGuid().ToString();
+            string resource = Guid.NewGuid().ToString();
+            string tenantId = Guid.NewGuid().ToString();
+            string uniqueId = Guid.NewGuid().ToString();
+            string displayableId = Guid.NewGuid().ToString();
+            Uri redirectUri = new Uri("https://www.GetJwt.com");
+
+            var authenticationResult = CreateCacheValue(uniqueId, displayableId);
+            authority = authority + tenantId + "/";
+            UserCredential credential = new UserCredential(displayableId);
+            AuthenticationContext tempContext = new AuthenticationContext(authority, false);
+            var localCache = tempContext.TokenCache;
+            localCache.Clear();
+
+            // Add first user into cache
+            resource = Guid.NewGuid().ToString();
+            clientId = Guid.NewGuid().ToString();
+            uniqueId = Guid.NewGuid().ToString();
+            displayableId = Guid.NewGuid().ToString();
+            var cacheValue = CreateCacheValue(uniqueId, displayableId);
+            AddToDictionary(localCache,
+                new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User, uniqueId, displayableId),
+                cacheValue);
+
+            //Add second user into cache
+            uniqueId = Guid.NewGuid().ToString();
+            displayableId = Guid.NewGuid().ToString();
+            cacheValue = CreateCacheValue(uniqueId, displayableId);
+            AddToDictionary(localCache,
+                new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User, uniqueId, displayableId),
+                cacheValue);
+
+            var acWithLocalCache = new AuthenticationContext(authority, false, localCache);
+            var userId = new UserIdentifier(uniqueId, UserIdentifierType.UniqueId);
+            var userIdUpper = new UserIdentifier(displayableId.ToUpper(), UserIdentifierType.RequiredDisplayableId);
+
+            var parameters = new PlatformParameters(PromptBehavior.Auto);
+            var authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, parameters, userId);
+            VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
+
+            authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, parameters, userIdUpper);
+            VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
+
+            authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userId);
+            VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
+
+            authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userIdUpper);
+            VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
+        }
 
 #if TEST_ADAL_NET
     public static async Task TokenCacheKeyTestAsync(IPlatformParameters parameters)
@@ -260,28 +260,21 @@ namespace Test.ADAL.Common.Unit
                 new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User, null, displayableId),
                 authenticationResult);
 
-            try
-            {
-                await acWithLocalCache.AcquireTokenAsync(resource, clientId, credential);
-                Assert.Fail("Exception expected");
-            }
-            catch (AdalException adae)
-            {
-                Assert.IsTrue(adae.ErrorCode == "multiple_matching_tokens_detected" &&
-                              adae.Message.Contains("The cache contains multiple tokens satisfying the requirements"));
-            }
 
-            try
+            var adae = AssertException.TaskThrows<AdalException>(() =>
+                acWithLocalCache.AcquireTokenAsync(resource, clientId, credential));
+            Assert.IsTrue(adae.ErrorCode == "multiple_matching_tokens_detected" &&
+                            adae.Message.Contains("The cache contains multiple tokens satisfying the requirements"));
+
+
+            adae = AssertException.TaskThrows<AdalException>(async () =>
             {
                 AuthenticationContext acWithDefaultCache = new AuthenticationContext(authority, false);
                 await acWithDefaultCache.AcquireTokenAsync(resource, clientId, credential);
                 Assert.Fail("Exception expected");
-            }
-            catch (AdalException adae)
-            {
-                Assert.IsTrue(adae.ErrorCode == "multiple_matching_tokens_detected" &&
+            });
+            Assert.IsTrue(adae.ErrorCode == "multiple_matching_tokens_detected" &&
                               adae.Message.Contains("The cache contains multiple tokens satisfying the requirements"));
-            }
 
             // @resource && @clientId
             acWithLocalCache = new AuthenticationContext(authority, false, localCache);
@@ -371,15 +364,11 @@ namespace Test.ADAL.Common.Unit
             valueInCache = cacheDictionary[key];
             VerifyAuthenticationResultExsAreEqual(valueInCache, value2);
             VerifyAuthenticationResultExsAreNotEqual(valueInCache, value);
-            try
-            {
-                AddToDictionary(tokenCache, key, value);
-                Assert.Fail("Exception expected due to duplicate key");
-            }
-            catch (ArgumentException)
-            {
-                // Expected
-            }
+
+            // Duplicate key -> should fail to add again
+            AssertException.Throws<ArgumentException>(() =>
+                AddToDictionary(tokenCache, key, value));
+
 
             Log.Comment(
                 "====== Verifying that correct values are retrieved when requested for different tenant with user and without user");
@@ -407,25 +396,16 @@ namespace Test.ADAL.Common.Unit
             Assert.AreEqual(cacheDictionary[key], value);
             Assert.AreEqual(cacheDictionary[key2], value2);
 
-            try
-            {
-                AddToDictionary(tokenCache, null, value);
-                Assert.Fail("Exception expected due to duplicate key");
-            }
-            catch (ArgumentNullException)
-            {
-                // Expected
-            }
 
-            try
-            {
-                cacheDictionary[null] = value;
-                Assert.Fail("Exception expected due to duplicate key");
-            }
-            catch (ArgumentNullException)
-            {
-                // Expected
-            }
+            // Null key -> error
+            AssertException.Throws<ArgumentNullException>(() =>
+                AddToDictionary(tokenCache, null, value));
+
+
+            // Null key -> error
+            AssertException.Throws<ArgumentNullException>(() =>
+                AddToDictionary(tokenCache, null, value));
+
 
             Assert.IsFalse(cacheDictionary.IsReadOnly);
 
@@ -456,15 +436,11 @@ namespace Test.ADAL.Common.Unit
             Assert.IsFalse(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AuthenticationResultEx>(key, value2)));
             Assert.IsFalse(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AuthenticationResultEx>(key2, value)));
 
-            try
-            {
-                AddToDictionary(tokenCache, key, value);
-                Assert.Fail("Exception expected due to duplicate key");
-            }
-            catch (ArgumentException)
-            {
-                // Expected
-            }
+
+            // Duplicate key -> error
+            AssertException.Throws<ArgumentException>(() =>
+                AddToDictionary(tokenCache, key, value));
+
 
             AddToDictionary(tokenCache, key3, value);
             Assert.AreEqual(3, cacheDictionary.Keys.Count);
@@ -477,25 +453,13 @@ namespace Test.ADAL.Common.Unit
                 Assert.AreEqual(cacheItemsCopy[i + 1].Value, cacheDictionary[cacheItemsCopy[i + 1].Key]);
             }
 
-            try
-            {
-                cacheDictionary.CopyTo(cacheItemsCopy, 2);
-                Assert.Fail("Exception expected");
-            }
-            catch (ArgumentException)
-            {
-                // Expected
-            }
 
-            try
-            {
-                cacheDictionary.CopyTo(cacheItemsCopy, -1);
-                Assert.Fail("Exception expected");
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                // Expected
-            }
+            AssertException.Throws<ArgumentException>(() =>
+                cacheDictionary.CopyTo(cacheItemsCopy, 2));
+
+            AssertException.Throws<ArgumentOutOfRangeException>(() =>
+                cacheDictionary.CopyTo(cacheItemsCopy, -1));
+
 
             RemoveFromDictionary(tokenCache, key2);
             Assert.AreEqual(2, cacheDictionary.Keys.Count);
@@ -551,16 +515,10 @@ namespace Test.ADAL.Common.Unit
 
             data.AssertionHash = null;
 
-            try
-            {
-                cache.LoadFromCache(data, null);
-                Assert.Fail("multiple_tokens_detected should have been thrown");
-            }
-            catch (Exception exc)
-            {
-                Assert.IsTrue(exc is AdalException);
-                Assert.AreEqual(((AdalException) exc).ErrorCode, AdalError.MultipleTokensMatched);
-            }
+            // Multiple tokens in cache -> error
+            var exc = AssertException.Throws<AdalException>(() =>
+                cache.LoadFromCache(data, null));
+            Assert.AreEqual(exc.ErrorCode, AdalError.MultipleTokensMatched);
         }
 
         internal static void TokenCacheCapacityTest()

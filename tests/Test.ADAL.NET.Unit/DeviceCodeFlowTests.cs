@@ -37,6 +37,12 @@ namespace Test.ADAL.NET.Unit
     [TestClass]
     public class DeviceCodeFlowTests
     {
+        [TestInitialize]
+        public void Initialize()
+        {
+            HttpMessageHandlerFactory.ClearMockHandlers();
+        }
+
         [TestMethod]
         public async Task PositiveTest()
         {

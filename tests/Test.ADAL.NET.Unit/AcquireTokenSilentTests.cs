@@ -25,11 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Net.Http;
 using Test.ADAL.Common;
 using Test.ADAL.NET.Unit.Mocks;
 
@@ -38,9 +37,15 @@ namespace Test.ADAL.NET.Unit
     [TestClass]
     public class AcquireTokenSilentTests
     {
+        [TestInitialize]
+        public void Initialize()
+        {
+            HttpMessageHandlerFactory.ClearMockHandlers();
+        }
+
         [TestMethod]
         [TestCategory("AcquireTokenSilentTests")]
-        public async Task AcquireTokenSilentServiceErrorTestAsync()
+        public void AcquireTokenSilentServiceErrorTestAsync()
         {
             TokenCache cache = new TokenCache();
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
@@ -55,28 +60,21 @@ namespace Test.ADAL.NET.Unit
 
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, cache);
 
-            try
-            {
-                HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            var ex = AssertException.TaskThrows<AdalSilentTokenAcquisitionException>(async () =>
                 {
-                    Method = HttpMethod.Post,
-                    ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage()
+                    HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+                    {
+                        Method = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage()
+                    });
+                    await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
                 });
-                await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
-                Assert.Fail("AdalSilentTokenAcquisitionException was expected");
-            }
-            catch (AdalSilentTokenAcquisitionException ex)
-            {
-                Assert.AreEqual(AdalError.FailedToAcquireTokenSilently, ex.ErrorCode);
-                Assert.AreEqual(AdalErrorMessage.FailedToRefreshToken, ex.Message);
-                Assert.IsNotNull(ex.InnerException);
-                Assert.IsTrue(ex.InnerException is AdalException);
-                Assert.AreEqual(((AdalException)ex.InnerException).ErrorCode, "invalid_grant");
-            }
-            catch
-            {
-                Assert.Fail("AdalSilentTokenAcquisitionException was expected");
-            }
+            
+            Assert.AreEqual(AdalError.FailedToAcquireTokenSilently, ex.ErrorCode);
+            Assert.AreEqual(AdalErrorMessage.FailedToRefreshToken, ex.Message);
+            Assert.IsNotNull(ex.InnerException);
+            Assert.IsTrue(ex.InnerException is AdalException);
+            Assert.AreEqual(((AdalException)ex.InnerException).ErrorCode, "invalid_grant");
 
         }
     }
