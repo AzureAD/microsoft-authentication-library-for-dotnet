@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this.LoadFromCache = false;
 
                 PlatformPlugin.Logger.Verbose(CallState, string.Format(CultureInfo.InvariantCulture,
-                    "Claims present. skip cache lookup."));
+                    "Claims present. Skip cache lookup."));
 
                 this.claims = claims;
             }

@@ -42,7 +42,9 @@ namespace Test.ADAL.NET.Unit
     public class ClaimsChallengeExceptionTests
     {
         private PlatformParameters platformParameters;
-        public const string jsonOutputWithClaims = "{\"error\":\"interaction_required\",\"claims\":\"{\\\"access_token\\\":{\\\"polids\\\":{\\\"essential\\\":true,\\\"values\\\":[\\\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\\\"]}}}\"}";
+        public static string claims = "{\\\"access_token\\\":{\\\"polids\\\":{\\\"essential\\\":true,\\\"values\\\":[\\\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\\\"]}}}";
+
+        public static string responseContent = "{\"error\":\"interaction_required\",\"claims\":\"" + claims + "\"}";
 
         [TestInitialize]
         public void Initialize()
@@ -63,13 +65,13 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
-                    Content = new StringContent(jsonOutputWithClaims)
+                    Content = new StringContent(responseContent)
                 }
             });
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, credential));
-            Assert.AreEqual(result.GetRequiredClaims, TestConstants.Claims);
+            Assert.AreEqual(claims.Replace("\\", ""), result.Claims);
         }
 
         [TestMethod]
@@ -85,33 +87,13 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
-                    Content = new StringContent(jsonOutputWithClaims)
+                    Content = new StringContent(responseContent)
                 }
             });
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, credential, new UserAssertion(accessToken)));
-            Assert.AreEqual(result.GetRequiredClaims, TestConstants.Claims);
-        }
-
-        [TestMethod]
-        [Description("Test for claims challenge exception with acquire token")]
-        public void AdalClaimsChallengeExceptionThrownWithAcquireTokenWhenClaimsChallengeRequiredTestAsync()
-        {
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
-                {
-                    Content = new StringContent(jsonOutputWithClaims)
-                }
-            });
-
-            var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
-            context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, platformParameters));
-            Assert.AreEqual(result.GetRequiredClaims, TestConstants.Claims);
+            Assert.AreEqual(claims.Replace("\\", ""), result.Claims);
         }
 
         [TestMethod]
@@ -127,13 +109,13 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
-                    Content = new StringContent(jsonOutputWithClaims)
+                    Content = new StringContent(responseContent)
                 }
             });
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, clientAssertion));
-            Assert.AreEqual(result.GetRequiredClaims, TestConstants.Claims);
+            Assert.AreEqual(claims.Replace("\\", ""), result.Claims);
         }
 
         [TestMethod]
@@ -148,13 +130,13 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
-                    Content = new StringContent(jsonOutputWithClaims)
+                    Content = new StringContent(responseContent)
                 }
             });
 
             var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
             context.AcquireTokenByAuthorizationCodeAsync("some-code", TestConstants.DefaultRedirectUri, clientAssertion, TestConstants.DefaultResource));
-            Assert.AreEqual(result.GetRequiredClaims, TestConstants.Claims);
+            Assert.AreEqual(claims.Replace("\\", ""), result.Claims);
         }
     }
 }

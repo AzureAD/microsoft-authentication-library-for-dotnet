@@ -22,6 +22,5 @@ namespace Test.ADAL.NET.Unit
         public static readonly string ErrorSubCode = "ErrorSubCode";
         public static readonly string CloudAudienceUrnMicrosoft = "urn:federation:MicrosoftOnline";
         public static readonly string CloudAudienceUrn = "urn:federation:Blackforest";
-        public static readonly string Claims = "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
     }
 }

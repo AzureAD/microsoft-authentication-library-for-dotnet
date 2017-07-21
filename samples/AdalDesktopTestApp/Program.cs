@@ -45,7 +45,7 @@ namespace AdalDesktopTestApp
                 // clear display
                 Console.Clear();
 
-                Console.WriteLine("\n\t1. Acquire Token" + "\n\t2. Acquire Token with Claims" + "\n\t0. Exit App");
+                Console.WriteLine("\n\t1. Acquire Token\n\t2. Acquire Token Conditional Access Policy\n\t0. Exit App");
                 Console.WriteLine("\n\tEnter your Selection: ");
 
                 int selection;

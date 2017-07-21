@@ -100,16 +100,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (ex.WebResponse != null)
                     {
                         TokenResponse tokenResponse = TokenResponse.CreateFromErrorResponse(ex.WebResponse);
-
-                        // Check for claims challenge response
-                        if (!string.IsNullOrEmpty(tokenResponse.Claims))
-                        {
-                            throw new AdalClaimChallengeException(tokenResponse.Error, tokenResponse.ErrorDescription, tokenResponse.Claims);
-                        }
-
                         string[] errorCodes = tokenResponse.ErrorCodes ?? new[] { ex.WebResponse.StatusCode.ToString() };
                         serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
                             errorCodes, ex);
+
+                        if(ex.WebResponse.StatusCode == HttpStatusCode.BadRequest && tokenResponse.Error == AdalErrorMessage.InteractionRequired)
+                        {
+                            throw new AdalClaimChallengeException(tokenResponse.Error, tokenResponse.ErrorDescription, tokenResponse.Claims);
+                        }
 
                         if ((int)ex.WebResponse.StatusCode >= 500 && (int)ex.WebResponse.StatusCode < 600)
                         {

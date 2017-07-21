@@ -1320,7 +1320,7 @@ namespace Test.ADAL.NET.Unit
             uri = await context.GetAuthorizationRequestUrlAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId), "extra", null);
             Assert.IsNotNull(uri);
             Assert.IsTrue(uri.AbsoluteUri.Contains("client-request-id="));
-            uri = await context.GetAuthorizationRequestUrlAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId), "extra=123", TestConstants.Claims);
+            uri = await context.GetAuthorizationRequestUrlAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId), "extra=123", "some");
             Assert.IsNotNull(uri);
             Assert.IsTrue(uri.AbsoluteUri.Contains("claims"));
         }

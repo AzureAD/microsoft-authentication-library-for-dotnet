@@ -38,9 +38,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Exceptions
         public AdalClaimChallengeException(string errorCode, string message, string claims)
             : base(errorCode, message)
         {
-            GetRequiredClaims = claims;
+            Claims = claims;
         }
 
-        public string GetRequiredClaims { get; set; }
+        public string Claims { get; set; }
     }
 }
