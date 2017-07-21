@@ -1,3 +1,10 @@
+Version 3.14.2
+==============
+This release includes
+- Use ISO 8601 formatted date-times in log messages (#710)
+- Fix TokenCacheKey::GetHashCode to no longer be culture-specific (#717)
+- More uniform use of Invariant Culture when manipulating URLs, tokens, and request messages
+
 Version 3.14.1
 ==============
 This release includes
