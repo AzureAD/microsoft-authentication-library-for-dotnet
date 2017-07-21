@@ -160,11 +160,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 passwordFieldElement =
                     (
                         from element in doc.GetElementsByTagName("INPUT").Cast<HtmlElement>()
-                        where
-                               0 == String.Compare(element.GetAttribute("type"), "password", true, CultureInfo.CurrentCulture)
-                            && element.Enabled
-                            && element.OffsetRectangle.Height > 0
-                            && element.OffsetRectangle.Width > 0
+                        where string.Equals(element.GetAttribute("type"), "password", StringComparison.OrdinalIgnoreCase)
+                           && element.Enabled
+                           && element.OffsetRectangle.Height > 0
+                           && element.OffsetRectangle.Width > 0
                         select element
                     ).FirstOrDefault();
             }

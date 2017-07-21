@@ -371,7 +371,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string signatureDigest = this.GetCurrentSignatureForPackage(packageName);
             if (!string.IsNullOrEmpty(signatureDigest))
             {
-                return string.Format(CultureInfo.CurrentCulture, "{0}://{1}/{2}", RedirectUriScheme,
+                return string.Format(CultureInfo.InvariantCulture, "{0}://{1}/{2}", RedirectUriScheme,
                     packageName.ToLower(), signatureDigest);
             }
 

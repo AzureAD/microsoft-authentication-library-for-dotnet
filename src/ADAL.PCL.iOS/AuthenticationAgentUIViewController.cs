@@ -38,6 +38,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     [Foundation.Register("AuthenticationAgentUIViewController")]
     internal class AuthenticationAgentUIViewController : UIViewController
     {
+        private const string AboutBlankUri = "about:blank";
+
         private UIWebView webView;
 
         private readonly string url;
@@ -70,18 +72,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
                 string requestUrlString = request.Url.ToString();
-                
+
+                // If the URL has the browser:// scheme then this is a request to open an external browser
                 if (requestUrlString.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     DispatchQueue.MainQueue.DispatchAsync(() => CancelAuthentication(null, null));
-                    requestUrlString = requestUrlString.Replace(BrokerConstants.BrowserExtPrefix, "https://");
+
+                    // Build the HTTPS URL for launching with an external browser
+                    var httpsUrlBuilder = new UriBuilder(requestUrlString)
+                    {
+                        Scheme = Uri.UriSchemeHttps
+                    };
+                    requestUrlString = httpsUrlBuilder.Uri.AbsoluteUri;
+
                     DispatchQueue.MainQueue.DispatchAsync(
                         () => UIApplication.SharedApplication.OpenUrl(new NSUrl(requestUrlString)));
                     this.DismissViewController(true, null);
                     return false;
                 }
 
-                if (requestUrlString.ToLower(CultureInfo.InvariantCulture).StartsWith(callback.ToLower(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase) || 
+                if (requestUrlString.StartsWith(callback, StringComparison.OrdinalIgnoreCase) || 
                     requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, request.Url.ToString()));
@@ -89,7 +99,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     return false;
                 }
 
-                if (requestUrlString.StartsWith(BrokerConstants.DeviceAuthChallengeRedirect, StringComparison.CurrentCultureIgnoreCase))
+                if (requestUrlString.StartsWith(BrokerConstants.DeviceAuthChallengeRedirect, StringComparison.OrdinalIgnoreCase))
                 {
                     Uri uri = new Uri(requestUrlString);
                     string query = uri.Query;
@@ -108,7 +118,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     return false;
                 }
                 
-                if (!request.Url.AbsoluteString.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) && !request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
+                if (!request.Url.AbsoluteString.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase)
+                 && !request.Url.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
                 {
                     AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
                     result.Error = AdalError.NonHttpsRedirectNotSupported;

@@ -39,7 +39,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     internal static class EncodingHelper
     {
-
+        /// <summary>
+        /// URL encode the given string.
+        /// </summary>
+        /// <param name="message">String to URL encode</param>
+        /// <returns>URL encoded string</returns>
+        /// <remarks>This method encodes the space ' ' character as "+" rather than "%20".</remarks>
         public static string UrlEncode(string message)
         {
             if (string.IsNullOrEmpty(message))
@@ -53,6 +58,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return message;
         }
 
+        /// <summary>
+        /// Decode the given URL encoded string.
+        /// </summary>
+        /// <param name="message">URL encoded string to decode</param>
+        /// <returns>Decoded string</returns>
+        /// <remarks>This method decodes "+" (as well as "%20") into the space character ' '.</remarks>
         public static string UrlDecode(string message)
         {
             if (string.IsNullOrEmpty(message))
@@ -71,6 +82,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AddKeyValueString(messageBuilder, key, value.ToCharArray());
         }
 
+        /// <summary>
+        /// Convert the given dictionary of string key-value pairs into a URL query string.
+        /// </summary>
+        /// <param name="input">Dictionary of string key-value pairs</param>
+        /// <returns>URL query string</returns>
+        /// <remarks>This method does NOT prepend the result with the '?' character.</remarks>
         public static string ToQueryParameter(this IDictionary<string, string> input)
         {
             StringBuilder builder = new StringBuilder();
@@ -83,8 +100,47 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return builder.ToString();
         }
 
+        /// <summary>
+        /// Parse a delimited string of key-value pairs in to a dictionary.
+        /// </summary>
+        /// <param name="input">Delimited string of key-value pairs</param>
+        /// <param name="delimiter">Character used as a delimiter between key-value pairs</param>
+        /// <param name="urlDecode">True to perform URL decoding of both the keys and values</param>
+        /// <param name="lowercaseKeys">True to make all resulting keys lower-case</param>
+        /// <returns>Dictionary of string key-value pairs</returns>
         public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, bool lowercaseKeys,
             CallState callState)
+        {
+            return ParseKeyValueList(input, delimiter, urlDecode, lowercaseKeys, callState, strict: false);
+        }
+
+        /// <summary>
+        /// Parse a delimited string of key-value pairs in to a dictionary.
+        /// </summary>
+        /// <param name="input">Delimited string of key-value pairs</param>
+        /// <param name="delimiter">Character used as a delimiter between key-value pairs</param>
+        /// <param name="urlDecode">True to perform URL decoding of both the keys and values</param>
+        /// <param name="lowercaseKeys">True to make all resulting keys lower-case</param>
+        /// <exception cref="ArgumentException">Thrown if a malformed key-value pair is present in <paramref name="input"/></exception>
+        /// <returns>Dictionary of string key-value pairs</returns>
+        public static Dictionary<string, string> ParseKeyValueListStrict(string input, char delimiter, bool urlDecode, bool lowercaseKeys,
+            CallState callState)
+        {
+            return ParseKeyValueList(input, delimiter, urlDecode, lowercaseKeys, callState, strict: true);
+        }
+
+        /// <summary>
+        /// Parse a delimited string of key-value pairs in to a dictionary.
+        /// </summary>
+        /// <param name="input">Delimited string of key-value pairs</param>
+        /// <param name="delimiter">Character used as a delimiter between key-value pairs</param>
+        /// <param name="urlDecode">True to perform URL decoding of both the keys and values</param>
+        /// <param name="lowercaseKeys">True to make all resulting keys lower-case</param>
+        /// <param name="strict">Throw <see cref="ArgumentException"/> when the input string contains a malformed key-value pair</param>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="strict"/> is true and a malformed key-value pair is present in <paramref name="input"/></exception>
+        /// <returns>Dictionary of string key-value pairs</returns>
+        private static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, bool lowercaseKeys,
+            CallState callState, bool strict)
         {
             var response = new Dictionary<string, string>();
 
@@ -108,7 +164,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     if (lowercaseKeys)
                     {
-                        key = key.Trim().ToLower();
+                        key = key.Trim().ToLowerInvariant();
                     }
 
                     value = value.Trim().Trim(new[] { '\"' }).Trim();
@@ -120,21 +176,44 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     response[key] = value;
                 }
+                else if(strict && pair.Count > 2)
+                {
+                    throw new ArgumentException(nameof(input));
+                }
             }
 
             return response;
         }
 
+        /// <summary>
+        /// Parse a delimited string of key-value pairs in to a dictionary.
+        /// </summary>
+        /// <param name="input">Delimited string of key-value pairs</param>
+        /// <param name="delimiter">Character used as a delimiter between key-value pairs</param>
+        /// <param name="urlDecode">True to perform URL decoding of both the keys and values</param>
+        /// <remarks>Keys are forced to lower-cased</remarks>
+        /// <returns>Dictionary of string key-value pairs</returns>
         public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, CallState callState)
         {
-            return ParseKeyValueList(input, delimiter, urlDecode, true, callState);
+            return ParseKeyValueList(input, delimiter, urlDecode, true, callState, strict: false);
         }
 
+        /// <summary>
+        /// Create an array of bytes representing the UTF-8 encoding of the given string.
+        /// </summary>
+        /// <param name="stringInput">String to get UTF-8 bytes for</param>
+        /// <returns>Array of UTF-8 character bytes</returns>
         public static byte[] ToByteArray(this String stringInput)
         {
             return ToByteArray(new StringBuilder(stringInput));
         }
 
+        /// <summary>
+        /// Create an array of bytes representing the UTF-8 encoding of the current string value of
+        /// the given <see cref="StringBuilder"/>.
+        /// </summary>
+        /// <param name="stringBuilder"><see cref="StringBuilder"/> to get the UTF-8 bytes for</param>
+        /// <returns>Array of UTF-8 character bytes</returns>
         public static byte[] ToByteArray(this StringBuilder stringBuilder)
         {
             if (stringBuilder == null)
@@ -191,6 +270,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
+        /// <summary>
+        /// Create a <see cref="Stream"/> from the given string.
+        /// </summary>
+        /// <param name="s">String to create a <see cref="Stream"/> from</param>
+        /// <returns><see cref="Stream"/> from a string</returns>
         public static Stream GenerateStreamFromString(string s)
         {
             MemoryStream stream = new MemoryStream();
@@ -201,6 +285,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return stream;
         }
 
+        /// <summary>
+        /// Deserialize the given JSON string in to the specified type <typeparamref name="T"/>
+        /// </summary>
+        /// <typeparam name="T">Type to deserialize the JSON as</typeparam>
+        /// <param name="response">JSON string</param>
+        /// <returns>Deserialized type <typeparamref name="T"/></returns>
         public static T DeserializeResponse<T>(string response)
         {
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
@@ -216,6 +306,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
+        /// <summary>
+        /// Base64 encode the given string.
+        /// </summary>
+        /// <param name="input">String to base64 encode</param>
+        /// <returns>Base64 encoded string</returns>
         internal static string Base64Encode(string input)
         {
             string encodedString = String.Empty;
@@ -227,6 +322,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return encodedString;
         }
 
+        /// <summary>
+        /// Decode the given base64 encoded string.
+        /// </summary>
+        /// <param name="encodedString">Base64 encoded string</param>
+        /// <returns>Decoded string</returns>
         internal static string Base64Decode(string encodedString)
         {
             string output = null;
@@ -268,6 +368,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return encodedMessage;
         }
 
+        /// <summary>
+        /// Split a string into individual elements by the specified delimiter, where
+        /// a delimiter enclosed within double-quotes '"' is considered to be part of the same
+        /// single element.
+        /// </summary>
+        /// <param name="input">Delimited string</param>
+        /// <param name="delimiter">Element delimiter</param>
+        /// <returns>List of elements</returns>
         internal static List<string> SplitWithQuotes(string input, char delimiter)
         {
             List<string> items = new List<string>();
