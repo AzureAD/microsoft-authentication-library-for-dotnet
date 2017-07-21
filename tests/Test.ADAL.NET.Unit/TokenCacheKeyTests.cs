@@ -138,15 +138,19 @@ namespace Test.ADAL.NET.Unit
                 var testSubject = new TokenCacheKey(Authority, Resource, ClientId, SubjectType, UniqueId, "a displayable ID with four types of letter iIİı");
 
                 // Act: en-US as current culture
-                Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+                Thread.CurrentThread.CurrentCulture = GetEnglishUsCulture();
                 var enUsHashCode = testSubject.GetHashCode();
 
                 // Act: tr-TK as current culture
-                Thread.CurrentThread.CurrentCulture = new CultureInfo("tr-TK");
+                Thread.CurrentThread.CurrentCulture = GetTurkishCulture();
                 var trTkHashCode = testSubject.GetHashCode();
 
                 // Verify
                 Assert.AreEqual(enUsHashCode, trTkHashCode, "Expected hash codes to be the same regardless of current thread culture");
+            }
+            catch (CultureNotFoundException ex)
+            {
+                Assert.Inconclusive($"The culture {ex.InvalidCultureId} is not available.");
             }
             finally
             {
@@ -159,6 +163,34 @@ namespace Test.ADAL.NET.Unit
         #endregion
 
         #region Helpers
+
+        private static CultureInfo GetEnglishUsCulture()
+        {
+            try
+            {
+                // Try "English (United States)" first
+                return new CultureInfo("en-US");
+            }
+            catch (CultureNotFoundException)
+            {
+                // If not found, try the more general "English"
+                return new CultureInfo("en");
+            }
+        }
+
+        private static CultureInfo GetTurkishCulture()
+        {
+            try
+            {
+                // Try "Turkish (Turkey)" first
+                return new CultureInfo("tr-TK");
+            }
+            catch (CultureNotFoundException)
+            {
+                // If not found, try the more general "Turkish"
+                return new CultureInfo("tr");
+            }
+        }
 
         private static string AsString(TokenCacheKey key)
         {

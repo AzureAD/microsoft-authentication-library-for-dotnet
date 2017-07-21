@@ -154,10 +154,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private bool isDeviceAuthChallenge(IHttpWebResponse response, bool respondToDeviceAuthChallenge)
         {
-            return PlatformPlugin.DeviceAuthHelper.CanHandleDeviceAuthChallenge &&
-                   respondToDeviceAuthChallenge && response != null && response.Headers != null &&
-                   (response.Headers.ContainsKey(WwwAuthenticateHeader) &&
-                    response.Headers[WwwAuthenticateHeader].StartsWith(PKeyAuthName, StringComparison.CurrentCulture));
+            return PlatformPlugin.DeviceAuthHelper.CanHandleDeviceAuthChallenge
+                && respondToDeviceAuthChallenge
+                && response?.Headers != null
+                && response.Headers.ContainsKey(WwwAuthenticateHeader)
+                && response.Headers[WwwAuthenticateHeader].StartsWith(PKeyAuthName, StringComparison.OrdinalIgnoreCase);
         }
 
         private IDictionary<string, string> ParseChallengeData(IHttpWebResponse response)

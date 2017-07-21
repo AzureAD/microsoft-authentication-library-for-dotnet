@@ -44,11 +44,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
     public abstract class WindowsFormsWebAuthenticationDialogBase : Form
     {
         private static readonly NavigateErrorStatus NavigateErrorStatus = new NavigateErrorStatus();
+        private static readonly HashSet<string> WhiteListedSchemes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         private const int UIWidth = 566;
 
-        private Panel webBrowserPanel;
+        private const string BrowserScheme = "browser";
+        private const string JavaScriptScheme = "javascript";
+        private const string AboutBlankUri = "about:blank";
+
         private readonly CustomWebBrowser webBrowser;
+
+        private Panel webBrowserPanel;
+        private Keys key = Keys.None;
 
         private Uri desiredCallbackUri;
 
@@ -57,9 +64,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         /// </summary>
         protected IWin32Window ownerWindow;
 
-        private Keys key = Keys.None;
-
-        private readonly HashSet<string> whiteListedSchemes = new HashSet<string>();
         internal AuthorizationResult Result { get; set; }
 
         /// <summary>
@@ -104,7 +108,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             this.webBrowser.PreviewKeyDown += webBrowser_PreviewKeyDown;
             this.InitializeComponent();
 
-            whiteListedSchemes.Add("browser");
+            WhiteListedSchemes.Add(BrowserScheme);
         }
 
         private void webBrowser_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -152,9 +156,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             // check if the url scheme is of type browser://
             // this means we need to launch external browser
-            if (!e.Cancel && e.Url.Scheme.Equals("browser", StringComparison.CurrentCultureIgnoreCase))
+            if (!e.Cancel && e.Url.Scheme.Equals(BrowserScheme, StringComparison.OrdinalIgnoreCase))
             {
-                Process.Start(e.Url.AbsoluteUri.Replace("browser://", "https://"));
+                // Build the HTTPS URL for launching with an external browser
+                var httpsUrlBuilder = new UriBuilder(e.Url)
+                {
+                    Scheme = Uri.UriSchemeHttps
+                };
+
+                Process.Start(httpsUrlBuilder.Uri.AbsoluteUri);
+
                 e.Cancel = true;
             }
 
@@ -217,8 +228,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             // Make change here
             bool canClose = false;
-            if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.CurrentCultureIgnoreCase) &&
-                url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath, StringComparison.CurrentCulture))
+            if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) &&
+                url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath, StringComparison.OrdinalIgnoreCase))
             {
                 this.Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
                 canClose = true;
@@ -226,10 +237,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             // if redirect_uri is not hit and scheme of the url is not whitelisted and url is not about:blank
             // and url scheme is not https then fail to load.
-            if (!canClose && !whiteListedSchemes.Contains(url.Scheme.ToLower(CultureInfo.CurrentCulture)) &&
-                !url.AbsoluteUri.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase)
-                && !url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase) 
-                && !url.Scheme.Equals("javascript", StringComparison.CurrentCultureIgnoreCase))
+            if (!canClose && !WhiteListedSchemes.Contains(url.Scheme)
+                && !url.AbsoluteUri.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase)
+                && !url.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
+                && !url.Scheme.Equals(JavaScriptScheme, StringComparison.OrdinalIgnoreCase))
             {
                 this.Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
                 this.Result.Error = AdalError.NonHttpsRedirectNotSupported;

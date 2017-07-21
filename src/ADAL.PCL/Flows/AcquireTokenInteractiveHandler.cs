@@ -259,7 +259,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (this.authorizationResult != null
                 && !string.IsNullOrEmpty(this.authorizationResult.Code)
-                && this.authorizationResult.Code.StartsWith("msauth://", StringComparison.CurrentCultureIgnoreCase))
+                && this.authorizationResult.Code.StartsWith("msauth://", StringComparison.OrdinalIgnoreCase))
             {
                 this.brokerParameters["broker_install_url"] = this.authorizationResult.Code;
                 return true;

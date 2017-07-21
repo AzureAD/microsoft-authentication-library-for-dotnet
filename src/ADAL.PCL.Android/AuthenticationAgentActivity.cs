@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Android.App;
 using Android.Content;
 using Android.OS;
@@ -38,6 +39,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     [CLSCompliant(false)]
     internal class AuthenticationAgentActivity : Activity
     {
+        private const string AboutBlankUri = "about:blank";
+
         private AdalWebViewClient client;
 
         protected override void OnCreate(Bundle bundle)
@@ -108,7 +111,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             public override bool ShouldOverrideUrlLoading(WebView view, string url)
             {
                 Uri uri = new Uri(url);
-                if (url.StartsWith(BrokerConstants.BrowserExtPrefix))
+                if (url.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     PlatformPlugin.Logger.Verbose(null, "It is browser launch request");
                     OpenLinkInBrowser(url, ((Activity)view.Context));
@@ -117,7 +120,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     return true;
                 }
 
-                if (url.StartsWith(BrokerConstants.BrowserExtInstallPrefix))
+                if (url.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     PlatformPlugin.Logger.Verbose(null, "It is an azure authenticator install request");
                     view.StopLoading();
@@ -125,7 +128,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     return true;
                 }
 
-                if (url.StartsWith(BrokerConstants.ClientTlsRedirect, StringComparison.CurrentCultureIgnoreCase))
+                if (url.StartsWith(BrokerConstants.ClientTlsRedirect, StringComparison.OrdinalIgnoreCase))
                 {
                     string query = uri.Query;
                     if (query.StartsWith("?"))
@@ -148,10 +151,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
 
 
-                if (!url.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) && !uri.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
+                if (!url.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase) && !uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
                 {
                     UriBuilder errorUri = new UriBuilder(callback);
-                    errorUri.Query = string.Format("error={0}&error_description={1}",
+                    errorUri.Query = string.Format(CultureInfo.InvariantCulture, "error={0}&error_description={1}",
                         AdalError.NonHttpsRedirectNotSupported, AdalErrorMessage.NonHttpsRedirectNotSupported);
                     this.Finish(view, errorUri.ToString());
                     return true;
@@ -163,8 +166,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             private void OpenLinkInBrowser(string url, Activity activity)
             {
-                String link = url
-                        .Replace(BrokerConstants.BrowserExtPrefix, "https://");
+                // Construct URL to launch external browser (use HTTPS)
+                var externalBrowserUrlBuilder = new UriBuilder(url)
+                {
+                    Scheme = Uri.UriSchemeHttps
+                };
+
+                String link = externalBrowserUrlBuilder.Uri.AbsoluteUri;
                 Intent intent = new Intent(Intent.ActionView, Android.Net.Uri.Parse(link));
                 activity.StartActivity(intent);
             }
