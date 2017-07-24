@@ -13,3 +13,4 @@ src/ADAL.PCL.Android/ADAL.PCL.Android.csproj.bak
 AppPackages
 Microsoft.IdentityModel.Clients.ActiveDirectory.XML
 *.htm
+.nugetPackageRoot/

@@ -3,7 +3,7 @@
     <metadata minClientVersion="2.8.6">
         <title>Active Directory Authentication Library</title>
         <id>Microsoft.IdentityModel.Clients.ActiveDirectory</id>
-        <version>REPLACE_DURING_BUILD</version>
+        <version>0.0.1-LOCALBUILD</version>
         <authors>Microsoft Corporation</authors>
         <licenseUrl>https://go.microsoft.com/fwlink/?linkid=841311</licenseUrl>
         <projectUrl>http://go.microsoft.com/fwlink/?LinkId=258232</projectUrl>
@@ -18,8 +18,8 @@
     <dependencies>
 		<group targetFramework="netstandard1.4">
 			<dependency id="NETStandard.Library" version="1.6" />
-			<dependency id="System.Runtime.Serialization.Json" version="4.0.2" />
-			<dependency id="System.Runtime.Serialization.Primitives" version="4.1.1" />
+			<dependency id="System.Runtime.Serialization.Json" version="4.3.0" />
+			<dependency id="System.Runtime.Serialization.Primitives" version="4.3.0" />
 		</group>
 		<group targetFramework="netcore45"/>
 		<group targetFramework="net45"/>

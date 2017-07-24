@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Layout">
+
+  <!-- 
+      This project copies files from the build output into the folder layout required to create the NuGet package.
+      The NuGet package can then be created by running "nuget pack" against the root packaging folder.
+  -->
+  
+  <PropertyGroup>
+    <Configuration Condition="$(Configuration)==''" >Debug</Configuration>
+    
+    <NuspecFilePath Condition="$(NuspecFilePath)==''">$(MSBuildThisFileDirectory)\Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec</NuspecFilePath>
+
+    <NugetPackageRootFolder Condition="$(NugetPackageRootFolder)==''">..\.nugetPackageRoot</NugetPackageRootFolder>
+    <AdalBinaryFolder Condition="$(AdalBinaryFolder)==''">..\src\ADAL.PCL\bin\$(Configuration)\netstandard1.1\</AdalBinaryFolder>
+  </PropertyGroup>
+
+  <ItemGroup Label="Platform-specific files">
+    
+    <SourceFile Include="..\src\ADAL.PCL.Android\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+      <TargetFolder>MonoAndroid10</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.Android\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+      <TargetFolder>MonoAndroid10</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\ADAL.PCL.CoreCLR\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+      <TargetFolder>netstandard1.3</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.CoreCLR\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+      <TargetFolder>netstandard1.3</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\ADAL.PCL.Desktop\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+      <TargetFolder>net45</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.Desktop\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+      <TargetFolder>net45</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\ADAL.PCL.iOS\bin\iPhone\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+      <TargetFolder>Xamarin.iOS10</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.iOS\bin\iPhone\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+      <TargetFolder>Xamarin.iOS10</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\ADAL.PCL.WinRT\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+      <TargetFolder>netcore45</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.WinRT\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+      <TargetFolder>netcore45</TargetFolder>
+    </SourceFile>
+
+  </ItemGroup>
+
+  <ItemGroup Label="Source files">
+    <SourceCode Include="..\src\**\*.*" />
+    <SourceCode Remove="..\**\bin\**\*.*" />
+    <SourceCode Remove="..\**\obj\**\*.*" />
+  </ItemGroup>
+  
+  <Target Name="Layout">
+
+    <RemoveDir Directories="$(NugetPackageRootFolder)" />
+    <MakeDir Directories="$(NugetPackageRootFolder)" />
+
+    <!-- Copy the nuspec file -->
+    <Copy SourceFiles="$(NuspecFilePath)" DestinationFolder="$(NugetPackageRootFolder)" />
+
+    <!-- Copy the platform-ADAL.Net binary to every target platform folder -->
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(NugetPackageRootFolder)\lib\%(SourceFile.TargetFolder)" />
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb" DestinationFolder="$(NugetPackageRootFolder)\lib\%(SourceFile.TargetFolder)" />
+
+
+    <!-- Copy the platform-ADAL.Net binary to the portable platform -->
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(NugetPackageRootFolder)\lib\portable-net45+win" />
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb" DestinationFolder="$(NugetPackageRootFolder)\lib\portable-net45+win" />
+
+
+    <!-- Copy the platform-specifc ADAL.Net binaries to the appropriate target platform folder -->
+    <Copy SourceFiles="%(SourceFile.Identity)" DestinationFolder="$(NugetPackageRootFolder)\lib\%(SourceFile.TargetFolder)" />
+
+    <!-- Copy the source files -->
+    <Copy SourceFiles="%(SourceCode.Identity)" DestinationFolder="$(NugetPackageRootFolder)\src\%(RecursiveDir)" />
+
+    <Message Importance="high" Text="%(SourceFiles.Identity)" />
+
+  </Target>
+
+</Project>

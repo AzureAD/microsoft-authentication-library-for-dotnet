@@ -37,7 +37,7 @@ Write-Host "=========================="
 Write-Host "Versioning .nuspec file..."
 $filename = $env:TO_PACK_TARGET + "\" + $env:LIBRARY_NAME + ".nuspec"
 $content = Get-Content $filename
-$newContent = $content -replace "REPLACE_DURING_BUILD", $nugetVersion
+$newContent = $content -replace "<version>(.*)</version>", "<version>$nugetVersion</version>"
 Set-Content $filename $newContent
 Write-Host "Modifying:" $filename;
 Write-Host "Setting NuGet version:" $nugetVersion;
