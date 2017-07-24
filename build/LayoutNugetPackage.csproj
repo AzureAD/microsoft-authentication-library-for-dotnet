@@ -24,10 +24,10 @@
       <TargetFolder>MonoAndroid10</TargetFolder>
     </SourceFile>
 
-    <SourceFile Include="..\src\ADAL.PCL.CoreCLR\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+    <SourceFile Include="..\src\ADAL.PCL.CoreCLR\bin\$(Configuration)\netstandard1.3\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
       <TargetFolder>netstandard1.3</TargetFolder>
     </SourceFile>
-    <SourceFile Include="..\src\ADAL.PCL.CoreCLR\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+    <SourceFile Include="..\src\ADAL.PCL.CoreCLR\bin\$(Configuration)\netstandard1.3\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
       <TargetFolder>netstandard1.3</TargetFolder>
     </SourceFile>
 
