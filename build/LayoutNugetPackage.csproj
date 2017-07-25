@@ -121,12 +121,14 @@
   <!-- ****************************************************************************** -->
 
   <!-- Verify the binaries to be packaged are all signed-->
-  <Target Name="CheckNuGetBinariesAreSigned">
+  <Target Name="CheckNuGetBinariesAreSigned" DependsOnTargets="GetBinariesToCheck;LocateSnExe;LocateSignToolExe">
 
-    <Message Importance="high" Text="  Verifying that the binaries to be packaged are signed..." />
-    
-    <CallTarget Targets="GetBinariesToCheck" />
-    <CallTarget Targets="CheckStrongNameSigning;CheckAuthenticodeSigning" />
+    <!-- sn.exe will return an error code if the file is not strong-named. This will cause the Exec task to fail. -->
+    <Exec Condition="Exists('$(SnFilePath)')" LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command='"$(SnFilePath)" -vf "%(BinariesToVerify.Identity)"' />
+
+    <!-- signtool.exe will return an error code if the file is not authenticode signed. This will cause the Exec task to fail. -->
+    <Exec Condition="Exists('$(SignToolFilePath)')"  LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command='"$(SignToolFilePath)" verify /pa "%(BinariesToVerify.Identity)"' />
+
   </Target>
 
   <Target Name="GetBinariesToCheck">
@@ -141,14 +143,12 @@
     <Message Importance="normal" Text="Binaries to verify:" />
     <Message Importance="normal" Text="  %(BinariesToVerify.Identity)" />
   </Target>
-  
-  
-  <Target Name="CheckStrongNameSigning">
-    
+
+  <Target Name="LocateSnExe">
     <!-- Locating sn.exe isn't necessary when running from a developer command prompt, but
          it is necessary when running on a build agent.
          We're not sure what will be installed on the build agent so try multiple locations. -->
-    <Message Importance="normal" Text="Attempting to locate sn.exe..." />
+    <Message Importance="high" Text="Attempting to locate sn.exe..." />
     <PropertyGroup>
       <SnFilePath Condition="$(SnFilePath)=='' AND $(WindowsSDK_ExecutablePath_x64)!=''">$(WindowsSDK_ExecutablePath_x64)\sn.exe</SnFilePath>
       <SnFilePath Condition="$(SnFilePath)=='' AND $(SDK40ToolsPath)!=''">$(SDK40ToolsPath)\sn.exe</SnFilePath>
@@ -157,18 +157,13 @@
 
     <Warning Condition="!Exists('$(SnFilePath)')" Text="Unable to verify strong-naming - cannot locate sn.exe at $(SnFilePath)" />
     <Message Condition="Exists('$(SnFilePath)')"  Importance="high" Text="  Located sn.exe: $(SnFilePath)" />
-
-    <!-- sn.exe will return an error code if the file is not strong-named. This will cause the Exec task to fail. -->
-    <Exec Condition="Exists('$(SnFilePath)')" LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command='"$(SnFilePath)" -vf "%(BinariesToVerify.Identity)"' />
   </Target>
 
-  
-  <Target Name="CheckAuthenticodeSigning">
-
+  <Target Name="LocateSignToolExe">
     <!-- Locating signtool.exe isn't necessary when running from a developer command prompt, but
          it is necessary when running on a build agent.
          We're not sure what will be installed on the build agent so try multiple locations. -->
-    <Message Importance="normal" Text="Attempting to locate signtool.exe..." />
+    <Message Importance="high" Text="Attempting to locate signtool.exe..." />
     <PropertyGroup>
       <SignToolFilePath Condition="$(SignToolFilePath)=='' AND $(WindowsSdkBinPath)!=''">$(WindowsSdkBinPath)x64\signtool.exe</SignToolFilePath>
       <SignToolFilePath Condition="$(SignToolFilePath)=='' AND $(WindowsSDK80Path)!=''">$(WindowsSDK80Path)bin\x64\signtool.exe</SignToolFilePath>
@@ -176,9 +171,5 @@
 
     <Warning Condition="!Exists('$(SignToolFilePath)')" Text="Unable to verify Authenticode signing - cannot locate signtool.exe at $(SignToolFilePath)" />
     <Message Condition="Exists('$(SignToolFilePath)')"  Importance="high" Text="  Located signtool.exe: $(SignToolFilePath)" />
-
-    <!-- signtool.exe will return an error code if the file is not authenticode signed. This will cause the Exec task to fail. -->
-    <Exec Condition="Exists('$(SignToolFilePath)')"  LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command='"$(SignToolFilePath)" verify /pa "%(BinariesToVerify.Identity)"' />
   </Target>
-
 </Project>
