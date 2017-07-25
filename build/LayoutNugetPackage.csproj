@@ -111,16 +111,28 @@
          "src", and our product code is also in a folder called "src" in the repo. -->
     <Copy SourceFiles="%(SourceCode.Identity)" DestinationFolder="$(_PackToFolder)\src\src\%(RecursiveDir)" />
 
-    <CallTarget Condition="$(VerifySigning)=='true'" Targets="CheckNuGetBinariesSigned" />
-    <Message Condition="$(VerifySigning)!='true'" Importance="high" Text="  Skipping verification that binaries to be packaged are signed" />
+    <CallTarget Condition="$(VerifySigning)=='true'" Targets="CheckNuGetBinariesAreSigned" />
+    <Message Condition="$(VerifySigning)!='true'" Importance="high" Text="  Skipping verification that binaries to be packaged are signed. To verify signing, pass /p:VerifySigning=true on the command line." />
 
   </Target>
 
+  <!-- ****************************************************************************** -->
+  <!-- Signing verification targets -->
+  <!-- ****************************************************************************** -->
 
   <!-- Verify the binaries to be packaged are all signed-->
-  <Target Name="CheckNuGetBinariesSigned">
-    <Message Importance="high" Text="  Verifying that the binaries to be packaged are signed..." />
+  <Target Name="CheckNuGetBinariesAreSigned">
 
+    <Message Importance="high" Text="  Verifying that the binaries to be packaged are signed..." />
+    
+    <CallTarget Targets="GetBinariesToCheck" />
+    <CallTarget Targets="CheckStrongNameSigning;CheckAuthenticodeSigning" />
+  </Target>
+
+  <Target Name="GetBinariesToCheck">
+    <!-- Create a list of binaries.
+         Dynamically-created item groups are not available to other targets until the target that
+         created them has finished, which is why this item group is created in a separate target. -->
     <ItemGroup>
       <BinariesToVerify Include="$(_PackToFolder)\**\*.dll"/>
       <BinariesToVerify Include="$(_PackToFolder)\**\*.exe"/>
@@ -128,13 +140,40 @@
 
     <Message Importance="normal" Text="Binaries to verify:" />
     <Message Importance="normal" Text="  %(BinariesToVerify.Identity)" />
-
-    <!-- signtool.exe will return an error code if the file is not authenticode signed. This will cause the Exec task to fail. -->
-    <Exec LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command ="signtool.exe verify /pa %(BinariesToVerify.Identity)" />
-
-    <!-- sn.exe will return an error code if the file is not strong-named. This will cause the Exec task to fail. -->
-    <Exec LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command ="sn.exe -vf %(BinariesToVerify.Identity)" />
-  
   </Target>
   
+  
+  <Target Name="CheckStrongNameSigning">
+    
+    <!-- Locating sn.exe isn't necessary when running from a developer command prompt, but
+         it is necessary when running on a build agent. -->
+    <Message Importance="normal" Text="Attempting to locate sn.exe..." />
+    <PropertyGroup>
+      <SnFilePath Condition="$(SnFilePath)==''">$(WindowsSDK_ExecutablePath_x64)\sn.exe</SnFilePath>
+    </PropertyGroup>
+
+    <Warning Condition="!Exists('$(SnFilePath)')" Text="Unable to verify strong-naming - cannot locate sn.exe at $(SnFilePath)" />
+    <Message Condition="Exists('$(SnFilePath)')"  Importance="high" Text="  Located sn.exe: $(SnFilePath)" />
+
+    <!-- sn.exe will return an error code if the file is not strong-named. This will cause the Exec task to fail. -->
+    <Exec Condition="Exists('$(SnFilePath)')" LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command='"$(SnFilePath)" -vf "%(BinariesToVerify.Identity)"' />
+  </Target>
+
+  
+  <Target Name="CheckAuthenticodeSigning">
+
+    <!-- Locating signtool.exe isn't necessary when running from a developer command prompt, but
+         it is necessary when running on a build agent. -->
+    <Message Importance="normal" Text="Attempting to locate signtool.exe..." />
+    <PropertyGroup>
+      <SignToolFilePath Condition="$(SignToolFilePath)==''">$(WindowsSdkBinPath)x64\signtool.exe</SignToolFilePath>
+    </PropertyGroup>
+
+    <Warning Condition="!Exists('$(SignToolFilePath)')" Text="Unable to verify Authenticode signing - cannot locate signtool.exe at $(SignToolFilePath)" />
+    <Message Condition="Exists('$(SignToolFilePath)')"  Importance="high" Text="  Located signtool.exe: $(SignToolFilePath)" />
+
+    <!-- signtool.exe will return an error code if the file is not authenticode signed. This will cause the Exec task to fail. -->
+    <Exec Condition="Exists('$(SignToolFilePath)')"  LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command='"$(SignToolFilePath)" verify /pa "%(BinariesToVerify.Identity)"' />
+  </Target>
+
 </Project>
