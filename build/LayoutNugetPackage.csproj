@@ -5,10 +5,19 @@
       This project copies files from the build output into the folder layout required to create the NuGet package.
       The NuGet package can then be created by running "nuget pack" against the root packaging folder.
 
+      Setting the package folder
+      ==========================
       By default, the layout will be created under a folder called ".nugetPackageRoot" under the repo root.
       This can be changed by setting the build property $(NuGetPackageRootFolder). This can set to either
       an absolute or relative path. If it set to a relative path then it will be treated as relative to
       the repo root.
+
+
+      Signing verification
+      ====================
+      By default, the project will not verify that the package files are strong-named.
+      To turn on verification, set the build property $(VerifySigning)=true
+      The build will fail unless all of the .dll and .exe files being packaged are strong-named.
       
   -->
   
@@ -102,8 +111,27 @@
          "src", and our product code is also in a folder called "src" in the repo. -->
     <Copy SourceFiles="%(SourceCode.Identity)" DestinationFolder="$(_PackToFolder)\src\src\%(RecursiveDir)" />
 
-    <Message Importance="high" Text="%(SourceFiles.Identity)" />
+    <CallTarget Condition="$(VerifySigning)=='true'" Targets="CheckNuGetBinariesSigned" />
+    <Message Condition="$(VerifySigning)!='true'" Importance="high" Text="  Skipping verification that binaries to be packaged are signed" />
 
   </Target>
 
+
+  <!-- Verify the binaries to be packaged are all signed-->
+  <Target Name="CheckNuGetBinariesSigned">
+    <Message Importance="high" Text="  Verifying that the binaries to be packaged are signed..." />
+
+    <ItemGroup>
+      <BinariesToVerify Include="$(_PackToFolder)\**\*.dll"/>
+      <BinariesToVerify Include="$(_PackToFolder)\**\*.exe"/>
+    </ItemGroup>
+
+    <Message Importance="normal" Text="Binaries to verify:" />
+    <Message Importance="normal" Text="  %(BinariesToVerify.Identity)" />
+
+    <!-- sn.exe will return an error code if the file is not strong-named. This will cause the Exec task to fail. -->
+    <Exec LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command ="sn.exe -vf %(BinariesToVerify.Identity)" />
+  
+  </Target>
+  
 </Project>
