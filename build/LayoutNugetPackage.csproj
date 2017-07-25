@@ -151,8 +151,8 @@
     <Message Importance="normal" Text="Attempting to locate sn.exe..." />
     <PropertyGroup>
       <SnFilePath Condition="$(SnFilePath)=='' AND $(WindowsSDK_ExecutablePath_x64)!=''">$(WindowsSDK_ExecutablePath_x64)\sn.exe</SnFilePath>
-      <SnFilePath Condition="$(SnFilePath)=='' AND $(SDK35ToolsPath)!=''">$(SDK35ToolsPath)\sn.exe</SnFilePath>
       <SnFilePath Condition="$(SnFilePath)=='' AND $(SDK40ToolsPath)!=''">$(SDK40ToolsPath)\sn.exe</SnFilePath>
+      <SnFilePath Condition="$(SnFilePath)=='' AND $(SDK35ToolsPath)!=''">$(SDK35ToolsPath)\sn.exe</SnFilePath>
     </PropertyGroup>
 
     <Warning Condition="!Exists('$(SnFilePath)')" Text="Unable to verify strong-naming - cannot locate sn.exe at $(SnFilePath)" />
