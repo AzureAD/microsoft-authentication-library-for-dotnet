@@ -129,6 +129,9 @@
     <Message Importance="normal" Text="Binaries to verify:" />
     <Message Importance="normal" Text="  %(BinariesToVerify.Identity)" />
 
+    <!-- signtool.exe will return an error code if the file is not authenticode signed. This will cause the Exec task to fail. -->
+    <Exec LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command ="signtool.exe verify /pa %(BinariesToVerify.Identity)" />
+
     <!-- sn.exe will return an error code if the file is not strong-named. This will cause the Exec task to fail. -->
     <Exec LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command ="sn.exe -vf %(BinariesToVerify.Identity)" />
   
