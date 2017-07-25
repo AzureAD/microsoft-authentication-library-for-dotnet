@@ -35,7 +35,7 @@ $nugetVersion = "{0}.{1}.{2}" -f ($versionTokens[0], $versionTokens[1], $version
 
 Write-Host "=========================="
 Write-Host "Versioning .nuspec file..."
-$filename = $env:TO_PACK_TARGET + "\" + $env:LIBRARY_NAME + ".nuspec"
+$filename = "build\Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec"
 $content = Get-Content $filename
 $newContent = $content -replace "<version>(.*)</version>", "<version>$nugetVersion</version>"
 Set-Content $filename $newContent
