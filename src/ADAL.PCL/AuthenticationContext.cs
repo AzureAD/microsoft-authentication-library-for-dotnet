@@ -27,7 +27,6 @@
 
 using System;
 using System.Globalization;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -344,6 +343,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
+        /// Acquires an access token from the authority on behalf of a user, passing in the necessary claims for authentication. It requires using a user token previously received.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
+        /// <param name="claims">Additional claims that are needed for authentication. Acquired from the AdalClaimChallengeException</param>
+        /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters,
+            UserIdentifier userId, string extraQueryParameters, string claims)
+        {
+            return await this.AcquireTokenWithClaimsCommonAsync(resource, new ClientKey(clientId), redirectUri, parameters,
+            userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters), claims).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Acquires an access token from the authority on behalf of a user. It requires using a user token previously received.
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
@@ -447,8 +461,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <param name="claims">Additional claims that are needed for authentication. Acquired from the AdalClaimChallengeException. This parameter can be null.</param>
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        public async Task<Uri> GetAuthorizationRequestUrlAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters)
+        public async Task<Uri> GetAuthorizationRequestUrlAsync(string resource, string clientId, Uri redirectUri, UserIdentifier userId, string extraQueryParameters, string claims)
         {
             RequestData requestData = new RequestData
             {
@@ -458,7 +473,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 ClientKey = new ClientKey(clientId),
                 ExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled
             };
-            var handler = new AcquireTokenInteractiveHandler(requestData, redirectUri, null, userId, extraQueryParameters, null);
+            var handler = new AcquireTokenInteractiveHandler(requestData, redirectUri, null, userId, extraQueryParameters, null, claims);
             return await handler.CreateAuthorizationUriAsync(this.CorrelationId).ConfigureAwait(false);
         }
 
@@ -556,6 +571,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
+        private async Task<AuthenticationResult> AcquireTokenWithClaimsCommonAsync(string resource, ClientKey clientKey, Uri redirectUri, IPlatformParameters parameters, 
+            UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims)
+        {
+            RequestData requestData = new RequestData
+            {
+                Authenticator = this.Authenticator,
+                TokenCache = this.TokenCache,
+                Resource = resource,
+                ClientKey = clientKey,
+                ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled
+            };
+            
+            var handler = new AcquireTokenInteractiveHandler(requestData, redirectUri, parameters, userId, extraQueryParameters, webUI, claims);
+            
+            return await handler.RunAsync().ConfigureAwait(false);
+        }
+
         internal IWebUI CreateWebAuthenticationDialog(IPlatformParameters parameters)
         {
             return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parameters);
@@ -589,7 +621,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters = null)
+        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters = null, string claims = null)
         {
             RequestData requestData = new RequestData
             {
@@ -599,7 +631,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 ClientKey = new ClientKey(clientId),
                 ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled,
             };
-            var handler = new AcquireTokenInteractiveHandler(requestData, redirectUri, parameters, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters));
+            var handler = new AcquireTokenInteractiveHandler(requestData, redirectUri, parameters, userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters), claims);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

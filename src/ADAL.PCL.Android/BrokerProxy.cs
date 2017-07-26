@@ -430,6 +430,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 request.Version);
             brokerOptions.PutString(BrokerConstants.AccountExtraQueryParam,
                 request.ExtraQueryParamsAuthentication);
+
+            if(request.Claims != null)
+            {
+                brokerOptions.PutString(BrokerConstants.SkipCache, Boolean.TrueString.ToLowerInvariant());
+                brokerOptions.PutString(BrokerConstants.Claims, request.Claims);
+            }
+
             if (request.CorrelationId != null)
             {
                 brokerOptions.PutString(BrokerConstants.AccountCorrelationId, request

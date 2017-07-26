@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 PlatformParameters pp = PlatformParameters as PlatformParameters;
                 pp.CallerActivity.StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse(keyPair["app_link"])));
-                
+
                 throw new AdalException(AdalErrorAndroidEx.BrokerApplicationRequired, AdalErrorMessageAndroidEx.BrokerApplicationRequired);
             }
 
@@ -111,7 +111,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 // Don't send background request, if prompt flag is always or
                 // refresh_session
-                if (!string.IsNullOrEmpty(request.BrokerAccountName) || !string.IsNullOrEmpty(request.UserId))
+                bool hasAccountNameOrUserId = !string.IsNullOrEmpty(request.BrokerAccountName) || !string.IsNullOrEmpty(request.UserId);
+                if (string.IsNullOrEmpty(request.Claims) && hasAccountNameOrUserId)
                 {
                     PlatformPlugin.Logger.Verbose(null, "User is specified for background token request");
                     resultEx = mBrokerProxy.GetAuthTokenInBackground(request, platformParams.CallerActivity);
@@ -173,17 +174,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new AdalException(AdalErrorAndroidEx.NoBrokerAccountFound, "Add requested account as a Workplace account via Settings->Accounts or set UseBroker=true.");
             }
         }
-        
+
         internal static void SetBrokerResult(Intent data, int resultCode)
         {
             if (resultCode != BrokerResponseCode.ResponseReceived)
             {
-                    resultEx = new AuthenticationResultEx
-                    {
-                        Exception =
-                            new AdalException(data.GetStringExtra(BrokerConstants.ResponseErrorCode),
-                                data.GetStringExtra(BrokerConstants.ResponseErrorMessage))
-                    };
+                resultEx = new AuthenticationResultEx
+                {
+                    Exception =
+                        new AdalException(data.GetStringExtra(BrokerConstants.ResponseErrorCode),
+                            data.GetStringExtra(BrokerConstants.ResponseErrorMessage))
+                };
             }
             else
             {

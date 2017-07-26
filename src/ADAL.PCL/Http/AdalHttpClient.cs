@@ -25,11 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Exceptions;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
-using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -105,12 +104,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
                             errorCodes, ex);
 
+                        if(ex.WebResponse.StatusCode == HttpStatusCode.BadRequest && tokenResponse.Error == AdalErrorMessage.InteractionRequired)
+                        {
+                            throw new AdalClaimChallengeException(tokenResponse.Error, tokenResponse.ErrorDescription, tokenResponse.Claims);
+                        }
+
                         if ((int)ex.WebResponse.StatusCode >= 500 && (int)ex.WebResponse.StatusCode < 600)
                         {
                             PlatformPlugin.Logger.Information(this.CallState, "HttpStatus code: " + ex.WebResponse.StatusCode + " - " + ex.InnerException.Message);
                             Resiliency = true;
                         }
                     }
+
                     else
                     {
                         serviceEx = new AdalServiceException(AdalError.Unknown, ex);
@@ -187,7 +192,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.Client.Headers["Authorization"] = responseHeader;
             return await this.GetResponseAsync<T>(false).ConfigureAwait(false);
         }
-
 
         private static string CheckForExtraQueryParameter(string url)
         {

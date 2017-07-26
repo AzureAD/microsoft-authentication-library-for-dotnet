@@ -294,6 +294,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Device certificate not found.
         /// </summary>
         public const string DeviceCertificateNotFound = "device_certificate_not_found";
+
+        /// <summary>
+        /// Claims step-up required.
+        /// </summary>
+        public const string InteractionRequired = "interaction_required";
     }
 
     /// <summary>
@@ -409,6 +414,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string DuplicateQueryParameterTemplate = "Duplicate query parameter '{0}' in extraQueryParameters";
         
         public const string DeviceCertificateNotFoundTemplate = "Device Certificate was not found for {0}";
+
+        public const string InteractionRequired = "interaction_required";
     }
 
     internal class XmlNamespace

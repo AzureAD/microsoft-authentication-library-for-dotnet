@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Exceptions;
 using System;
 using System.Text;
 using TestApp.PCL;
@@ -37,7 +38,7 @@ namespace XFormsApp
     class AdalCallback : IAdalLogCallback
     {
         StringBuilder logs = new StringBuilder();
-        
+
         public void Log(LogLevel level, string message)
         {
             logs.AppendLine(message);
@@ -71,6 +72,11 @@ namespace XFormsApp
                 Text = "Acquire Token Silent"
             };
 
+            var conditionalAccessButton = new Button
+            {
+                Text = "Conditional Access"
+            };
+
             var clearButton = new Button
             {
                 Text = "Clear Cache"
@@ -83,6 +89,7 @@ namespace XFormsApp
 
             acquireTokenButton.Clicked += browseButton_Clicked;
             acquireTokenSilentButton.Clicked += acquireTokenSilentButton_Clicked;
+            conditionalAccessButton.Clicked += conditionalAccessButton_Clicked;
             clearButton.Clicked += clearButton_Clicked;
 
             Content = new StackLayout
@@ -91,10 +98,11 @@ namespace XFormsApp
                 Children = {
                     acquireTokenButton,
                     acquireTokenSilentButton,
+                    conditionalAccessButton,
                     clearButton,
                     result,
                     logLabel
-				}
+                }
             };
 
             LoggerCallbackHandler.Callback = callback;
@@ -113,9 +121,11 @@ namespace XFormsApp
             catch (Exception exc)
             {
                 output = exc.Message;
-            } finally
+            }
+            finally
             {
-                Device.BeginInvokeOnMainThread(() => {
+                Device.BeginInvokeOnMainThread(() =>
+                {
                     this.logLabel.Text = callback.DrainLogs();
                     this.result.Text = output;
                 });
@@ -145,17 +155,48 @@ namespace XFormsApp
             }
             finally
             {
-                Device.BeginInvokeOnMainThread(() => {
-                                                         this.logLabel.Text = callback.DrainLogs();
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    this.logLabel.Text = callback.DrainLogs();
                     this.result.Text = output;
                 });
             }
 
         }
 
+        private async void conditionalAccessButton_Clicked(object sender, EventArgs e)
+        {
+            this.result.Text = string.Empty;
+            AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
+            string output = string.Empty;
+            string claims = "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
+            
+            try
+            {
+                AuthenticationResult result = await ctx.AcquireTokenAsync("https://graph.windows.net", "<CLIENT_ID>",
+                        new Uri("adaliosapp://com.yourcompany.xformsapp"),
+                        Parameters, new UserIdentifier("<USER>", UserIdentifierType.OptionalDisplayableId), null, claims).ConfigureAwait(false);
+                output = "Access Token: " + result.AccessToken;
+            }
+
+            catch (Exception exc)
+            {
+                output = exc.Message;
+            }
+            finally
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    this.logLabel.Text = callback.DrainLogs();
+                    this.result.Text = output;
+                });
+            }
+        }
+
         void clearButton_Clicked(object sender, EventArgs e)
         {
-            Device.BeginInvokeOnMainThread(() => {
+            Device.BeginInvokeOnMainThread(() =>
+            {
                 this.result.Text = "Cache items before clear: " + TokenCache.DefaultShared.Count + Environment.NewLine;
                 tokenBroker.ClearTokenCache();
                 this.result.Text += "Cache items after clear: " + TokenCache.DefaultShared.Count + Environment.NewLine;

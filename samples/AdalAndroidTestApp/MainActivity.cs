@@ -59,6 +59,9 @@ namespace AdalAndroidTestApp
             Button clearCacheButton = FindViewById<Button>(Resource.Id.clearCacheButton);
             clearCacheButton.Click += clearCacheButton_Click;
 
+            Button conditionalAccessButton = FindViewById<Button>(Resource.Id.conditionalAccessButton);
+            conditionalAccessButton.Click += conditionalAccessButton_Click;
+
             this.accessTokenTextView = FindViewById<TextView>(Resource.Id.accessTokenTextView);
 
             sts.Authority = "https://login.microsoftonline.com/common";
@@ -132,6 +135,31 @@ namespace AdalAndroidTestApp
                 TokenCache.DefaultShared.Clear();
                 this.accessTokenTextView.Text = "Cache cleared";
             });
+        }
+
+        private async void conditionalAccessButton_Click(object sender, EventArgs e)
+        {
+            this.accessTokenTextView.Text = string.Empty;
+            TokenBroker tokenBroker = new TokenBroker();
+            tokenBroker.Sts = sts;
+            EditText email = FindViewById<EditText>(Resource.Id.email);
+            tokenBroker.Sts.ValidUserName = email.Text;
+            string value = null;
+            try
+            {
+                string policy = "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
+                value = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this, true), null, policy);
+            }
+            catch (Java.Lang.Exception ex)
+            {
+                throw new Exception(ex.Message + "\n" + ex.StackTrace);
+            }
+            catch (Exception exc)
+            {
+                value = exc.Message;
+            }
+
+            this.accessTokenTextView.Text = value;
         }
     }
 }
