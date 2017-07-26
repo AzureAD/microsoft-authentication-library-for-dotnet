@@ -20,11 +20,13 @@
       The build will fail unless all of the .dll and .exe files being packaged are strong-named.
       
   -->
+
+  <Import Project="$(MSBuildThisFileDirectory)AssemblySigningVerification.targets"/>
   
   <PropertyGroup>
     <Configuration Condition="$(Configuration)==''" >Debug</Configuration>
     
-    <NuspecFilePath Condition="$(NuspecFilePath)==''">$(MSBuildThisFileDirectory)\Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec</NuspecFilePath>
+    <NuspecFilePath Condition="$(NuspecFilePath)==''">$(MSBuildThisFileDirectory)Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec</NuspecFilePath>
     <AdalBinaryFolder Condition="$(AdalBinaryFolder)==''">..\src\ADAL.PCL\bin\$(Configuration)\netstandard1.1\</AdalBinaryFolder>
 
     <!-- Calculate the root folder the files will be laid out in -->
@@ -111,65 +113,22 @@
          "src", and our product code is also in a folder called "src" in the repo. -->
     <Copy SourceFiles="%(SourceCode.Identity)" DestinationFolder="$(_PackToFolder)\src\src\%(RecursiveDir)" />
 
-    <CallTarget Condition="$(VerifySigning)=='true'" Targets="CheckNuGetBinariesAreSigned" />
+    <CallTarget Condition="$(VerifySigning)=='true'" Targets="GetAssembliesToCheck;CheckAssembliesAreSigned" />
     <Message Condition="$(VerifySigning)!='true'" Importance="high" Text="  Skipping verification that binaries to be packaged are signed. To verify signing, pass /p:VerifySigning=true on the command line." />
-
+  
   </Target>
 
-  <!-- ****************************************************************************** -->
-  <!-- Signing verification targets -->
-  <!-- ****************************************************************************** -->
-
-  <!-- Verify the binaries to be packaged are all signed-->
-  <Target Name="CheckNuGetBinariesAreSigned" DependsOnTargets="GetBinariesToCheck;LocateSnExe;LocateSignToolExe">
-
-    <!-- sn.exe will return an error code if the file is not strong-named. This will cause the Exec task to fail. -->
-    <Exec Condition="Exists('$(SnFilePath)')" LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command='"$(SnFilePath)" -vf "%(BinariesToVerify.Identity)"' />
-
-    <!-- signtool.exe will return an error code if the file is not authenticode signed. This will cause the Exec task to fail. -->
-    <Exec Condition="Exists('$(SignToolFilePath)')"  LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command='"$(SignToolFilePath)" verify /pa "%(BinariesToVerify.Identity)"' />
-
-  </Target>
-
-  <Target Name="GetBinariesToCheck">
-    <!-- Create a list of binaries.
+  <Target Name="GetAssembliesToCheck">
+    <!-- Create a list of assemblies.
          Dynamically-created item groups are not available to other targets until the target that
          created them has finished, which is why this item group is created in a separate target. -->
     <ItemGroup>
-      <BinariesToVerify Include="$(_PackToFolder)\**\*.dll"/>
-      <BinariesToVerify Include="$(_PackToFolder)\**\*.exe"/>
+      <AssembliesToCheck Include="$(_PackToFolder)\**\*.dll"/>
+      <AssembliesToCheck Include="$(_PackToFolder)\**\*.exe"/>
     </ItemGroup>
 
     <Message Importance="normal" Text="Binaries to verify:" />
-    <Message Importance="normal" Text="  %(BinariesToVerify.Identity)" />
+    <Message Importance="normal" Text="  %(AssembliesToCheck.Identity)" />
   </Target>
 
-  <Target Name="LocateSnExe">
-    <!-- Locating sn.exe isn't necessary when running from a developer command prompt, but
-         it is necessary when running on a build agent.
-         We're not sure what will be installed on the build agent so try multiple locations. -->
-    <Message Importance="high" Text="Attempting to locate sn.exe..." />
-    <PropertyGroup>
-      <SnFilePath Condition="$(SnFilePath)=='' AND $(WindowsSDK_ExecutablePath_x64)!=''">$(WindowsSDK_ExecutablePath_x64)\sn.exe</SnFilePath>
-      <SnFilePath Condition="$(SnFilePath)=='' AND $(SDK40ToolsPath)!=''">$(SDK40ToolsPath)\sn.exe</SnFilePath>
-      <SnFilePath Condition="$(SnFilePath)=='' AND $(SDK35ToolsPath)!=''">$(SDK35ToolsPath)\sn.exe</SnFilePath>
-    </PropertyGroup>
-
-    <Warning Condition="!Exists('$(SnFilePath)')" Text="Unable to verify strong-naming - cannot locate sn.exe at $(SnFilePath)" />
-    <Message Condition="Exists('$(SnFilePath)')"  Importance="high" Text="  Located sn.exe: $(SnFilePath)" />
-  </Target>
-
-  <Target Name="LocateSignToolExe">
-    <!-- Locating signtool.exe isn't necessary when running from a developer command prompt, but
-         it is necessary when running on a build agent.
-         We're not sure what will be installed on the build agent so try multiple locations. -->
-    <Message Importance="high" Text="Attempting to locate signtool.exe..." />
-    <PropertyGroup>
-      <SignToolFilePath Condition="$(SignToolFilePath)=='' AND $(WindowsSdkBinPath)!=''">$(WindowsSdkBinPath)x64\signtool.exe</SignToolFilePath>
-      <SignToolFilePath Condition="$(SignToolFilePath)=='' AND $(WindowsSDK80Path)!=''">$(WindowsSDK80Path)bin\x64\signtool.exe</SignToolFilePath>
-    </PropertyGroup>
-
-    <Warning Condition="!Exists('$(SignToolFilePath)')" Text="Unable to verify Authenticode signing - cannot locate signtool.exe at $(SignToolFilePath)" />
-    <Message Condition="Exists('$(SignToolFilePath)')"  Importance="high" Text="  Located signtool.exe: $(SignToolFilePath)" />
-  </Target>
 </Project>
