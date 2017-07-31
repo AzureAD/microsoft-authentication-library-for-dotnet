@@ -60,44 +60,41 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-
             var x509Key = new X509AsymmetricSecurityKey(certificate);
 
-            using (RSA rsa = x509Key.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, true) as RSA)
+            RSA rsa = x509Key.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, true) as RSA;
+
+            RSACryptoServiceProvider newRsa = null;
+            try
             {
-                RSACryptoServiceProvider newRsa = null;
-
-                try
+                if (rsa is RSACryptoServiceProvider cspRsa)
                 {
-                    if (rsa is RSACryptoServiceProvider cspRsa)
-                    {
-                        // For .NET 4.6 and below we get the old RSACryptoServiceProvider implementation as the default.
-                        // Try and get an instance of RSACryptoServiceProvider which supports SHA256
-                        newRsa = GetCryptoProviderForSha256(cspRsa);
-                    }
-                    else
-                    {
-                        // For .NET Framework 4.7 and onwards the RSACng implementation is the default.
-                        // Since we're targeting .NET Framework 4.5, we cannot actually use this type as it was
-                        // only introduced with .NET Framework 4.6.
-                        // Instead we try and create an RSACryptoServiceProvider based on the private key from the
-                        // certificate.
-                        newRsa = GetCryptoProviderForSha256(certificate);
-                    }
-
-                    using (var sha = new SHA256Cng())
-                    {
-                        return newRsa.SignData(messageBytes, sha);
-                    }
+                    // For .NET 4.6 and below we get the old RSACryptoServiceProvider implementation as the default.
+                    // Try and get an instance of RSACryptoServiceProvider which supports SHA256
+                    newRsa = GetCryptoProviderForSha256(cspRsa);
                 }
-                finally
+                else
                 {
-                    // We only want to dispose of the 'newRsa' instance if it is a *different instance*
-                    // from the original one that was used to create it.
-                    if (newRsa != null && !ReferenceEquals(rsa, newRsa))
-                    {
-                        newRsa.Dispose();
-                    }
+                    // For .NET Framework 4.7 and onwards the RSACng implementation is the default.
+                    // Since we're targeting .NET Framework 4.5, we cannot actually use this type as it was
+                    // only introduced with .NET Framework 4.6.
+                    // Instead we try and create an RSACryptoServiceProvider based on the private key from the
+                    // certificate.
+                    newRsa = GetCryptoProviderForSha256(certificate);
+                }
+
+                using (var sha = new SHA256Cng())
+                {
+                    return newRsa.SignData(messageBytes, sha);
+                }
+            }
+            finally
+            {
+                // We only want to dispose of the 'newRsa' instance if it is a *different instance*
+                // from the original one that was used to create it.
+                if (newRsa != null && !ReferenceEquals(rsa, newRsa))
+                {
+                    newRsa.Dispose();
                 }
             }
         }
