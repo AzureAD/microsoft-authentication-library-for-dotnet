@@ -36,7 +36,12 @@
     <NugetPackageRootFolder Condition="$(NugetPackageRootFolder)==''">.nugetPackageRoot</NugetPackageRootFolder>
     <_PackToFolder>$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..", $(NugetPackageRootFolder)))</_PackToFolder>
     <_PackToFolder>$([System.IO.Path]::GetFullPath($(_PackToFolder)))</_PackToFolder>
-    
+
+    <!-- This property specifies whether the XML doc files should be copied.
+         By default, XML doc files are only produced for release builds so the copy step will fail for debug builds if we
+         try to copy the doc files. -->
+    <CopyXmlDocFiles Condition="$(CopyXmlDocFiles)=='' AND $(Configuration)=='release'">true</CopyXmlDocFiles>
+  
   </PropertyGroup>
 
   <ItemGroup Label="Platform-specific files">
@@ -45,6 +50,10 @@
       <TargetFolder>MonoAndroid10</TargetFolder>
     </SourceFile>
     <SourceFile Include="..\src\ADAL.PCL.Android\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+      <TargetFolder>MonoAndroid10</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.Android\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
       <TargetFolder>MonoAndroid10</TargetFolder>
     </SourceFile>
 
@@ -61,6 +70,10 @@
     <SourceFile Include="..\src\ADAL.PCL.Desktop\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
       <TargetFolder>net45</TargetFolder>
     </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.Desktop\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+    <TargetFolder>net45</TargetFolder>
+    </SourceFile>
 
     <SourceFile Include="..\src\ADAL.PCL.iOS\bin\iPhone\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
       <TargetFolder>Xamarin.iOS10</TargetFolder>
@@ -68,11 +81,19 @@
     <SourceFile Include="..\src\ADAL.PCL.iOS\bin\iPhone\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
       <TargetFolder>Xamarin.iOS10</TargetFolder>
     </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.iOS\bin\iPhone\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+      <TargetFolder>Xamarin.iOS10</TargetFolder>
+    </SourceFile>
 
     <SourceFile Include="..\src\ADAL.PCL.WinRT\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
       <TargetFolder>netcore45</TargetFolder>
     </SourceFile>
     <SourceFile Include="..\src\ADAL.PCL.WinRT\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+      <TargetFolder>netcore45</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.WinRT\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
       <TargetFolder>netcore45</TargetFolder>
     </SourceFile>
 
@@ -88,7 +109,8 @@
 
     <Message Importance="high" Text="Copying files to NuGet package layout... " />
     <Message Importance="high" Text="  Laying out files under $(_PackToFolder)" />
-             
+    <Message Importance="high" Text="  Skipping copying XML documentation files." Condition="$(CopyXmlDocFiles)!='true'" />         
+    
     <RemoveDir Directories="$(_PackToFolder)" />
     <MakeDir Directories="$(_PackToFolder)" />
 
@@ -98,11 +120,13 @@
     <!-- Copy the platform-ADAL.Net binary to every target platform folder -->
     <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(_PackToFolder)\lib\%(SourceFile.TargetFolder)" />
     <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb" DestinationFolder="$(_PackToFolder)\lib\%(SourceFile.TargetFolder)" />
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.xml" DestinationFolder="$(_PackToFolder)\lib\%(SourceFile.TargetFolder)" Condition="$(CopyXmlDocFiles)=='true'" />
 
 
     <!-- Copy the platform-ADAL.Net binary to the portable platform -->
     <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" />
     <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" />
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.xml" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" Condition="$(CopyXmlDocFiles)=='true'" />
 
 
     <!-- Copy the platform-specifc ADAL.Net binaries to the appropriate target platform folder -->
