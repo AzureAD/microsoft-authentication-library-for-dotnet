@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string signedJwt = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", response.GetResponseToSign(),
                 Base64UrlEncoder.Encode(signed.ToArray()));
             string authToken = string.Format(CultureInfo.InvariantCulture, " AuthToken=\"{0}\"", signedJwt);
-            return string.Format(authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
+            return string.Format(CultureInfo.InvariantCulture, authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
         }
 
         private async Task<Certificate> FindCertificate(IDictionary<string, string> challengeData)
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (certificates == null || certificates.Count == 0)
             {
                 throw new AdalException(AdalError.DeviceCertificateNotFound,
-                    string.Format(AdalErrorMessage.DeviceCertificateNotFoundTemplate, errMessage));
+                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.DeviceCertificateNotFoundTemplate, errMessage));
             }
 
             return certificates[0];
