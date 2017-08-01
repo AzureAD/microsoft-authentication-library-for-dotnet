@@ -26,6 +26,13 @@
         android:id="@+id/clearCacheButton"
         android:layout_marginBottom="5.6dp"
         android:layout_marginTop="0.0dp" />
+    <Button
+        android:text="CONDITIONAL ACCESS"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/conditionalAccessButton"
+        android:layout_marginBottom="5.6dp"
+        android:layout_marginTop="0.0dp" />
     <TextView
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"

@@ -72,12 +72,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             brokerPayload["broker_key"] = base64EncodedString;
             brokerPayload["max_protocol_ver"] = "2";
 
+            if (brokerPayload.ContainsKey("claims"))
+            {
+                brokerPayload.Add("skip_cache", "YES");
+            }
+
             if (brokerPayload.ContainsKey("broker_install_url"))
             {
                     string url = brokerPayload["broker_install_url"];
                     Uri uri = new Uri(url);
                     string query = uri.Query;
-                    if (query.StartsWith("?"))
+                    if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
                     {
                         query = query.Substring(1);
                     }
@@ -88,6 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     throw new AdalException(AdalErrorIOSEx.BrokerApplicationRequired, AdalErrorMessageIOSEx.BrokerApplicationRequired);
             }
+
             else
             {
                 NSUrl url = new NSUrl("msauth://broker?" + brokerPayload.ToQueryParameter());

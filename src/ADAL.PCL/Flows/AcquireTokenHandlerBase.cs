@@ -26,10 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -108,7 +106,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected bool StoreToCache { get; set; }
 
-
         public async Task<AuthenticationResult> RunAsync()
         {
             bool notifiedBeforeAccessCache = false;
@@ -120,6 +117,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (this.LoadFromCache)
                 {
+                    PlatformPlugin.Logger.Verbose(CallState, string.Format(CultureInfo.InvariantCulture,
+                    "Loading from cache."));
                     CacheQueryData.Authority = Authenticator.Authority;
                     CacheQueryData.Resource = this.Resource;
                     CacheQueryData.ClientId = this.ClientKey.ClientId;

@@ -1,3 +1,11 @@
+Version 3.15.0
+==============
+This release includes
+- Support for returning claims challenge back to developer for OBO flows. (#712)
+- Support for API overload to consume claims challenge. (#712)
+- Handle new RSA default (RSACng) on netfx4.7 (#708)
+- Minor source code cleanups to have culture invariant messages and address FxCop violations.
+
 Version 3.14.2
 ==============
 This release includes

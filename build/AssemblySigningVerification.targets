@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Layout">
+
+  <!-- 
+      This project contains targets to verify that assemblies are strong-named and Authenticode signed.
+      
+      Usage
+      =====
+      1. Import these targets into your project
+          e.g.   <Import Project="AssemblySigningVerification.targets"/>
+          
+      2. Populate an ItemGroup called "AssembliesToCheck" with the list of binaries to verify
+      
+      3. Call the target "CheckAssembliesAreSigned"
+          e.g. <CallTarget Targets="CheckAssembliesAreSigned" />
+      ,m
+  -->
+  
+  <!-- ****************************************************************************** -->
+  <!-- Signing verification targets -->
+  <!-- ****************************************************************************** -->
+
+  <!-- Verify the binaries to be packaged are all signed-->
+  <Target Name="CheckAssembliesAreSigned" DependsOnTargets="LocateSnExe;LocateSignToolExe;CheckStrongNameSigning;CheckAuthenticodeSigning">
+
+    <Error Condition="@(AssembliesToCheck)==''" Text="Configuration error: the list of assemblies to check is empty" />
+    
+    <!-- NOTE: the following two lines would be check all of the files, but would stop on the first error with an not particularly
+         helpful error message.
+         Instead, the checking is done in the CheckXXXSigning targets. These are called for every assembly and the list of failing
+         assemblies is collected. A warning is displayed for each assembly, and this target then logs an error if any assembly failed.
+
+    <Exec Condition="Exists('$(SnFilePath)')" LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command='"$(SnFilePath)" -vf "%(AssembliesToCheck.Identity)"' />
+    <Exec Condition="Exists('$(SignToolFilePath)')"  LogStandardErrorAsError="true" StandardErrorImportance="high" IgnoreExitCode="false" Command='"$(SignToolFilePath)" verify /pa "%(AssembliesToCheck.Identity)"' />
+    -->
+
+    <Error Condition="@(SnErrors)!='' OR @(SignToolErrors)!=''" Text="Assembly signing verification failed. At least one assembly is not correctly strong-named or Authenticode signed. The failing assemblies are listed in the build warnings." />
+
+  </Target>
+
+  <Target Name="LocateSnExe">
+    <!-- Locating sn.exe isn't necessary when running from a developer command prompt, but
+         it is necessary when running on a build agent.
+         We're not sure what will be installed on the build agent so try multiple locations. -->
+    <Message Importance="high" Text="Attempting to locate sn.exe..." />
+    <PropertyGroup>
+      <SnFilePath Condition="$(SnFilePath)=='' AND $(WindowsSDK_ExecutablePath_x64)!=''">$(WindowsSDK_ExecutablePath_x64)\sn.exe</SnFilePath>
+      <SnFilePath Condition="$(SnFilePath)=='' AND $(SDK40ToolsPath)!=''">$(SDK40ToolsPath)\sn.exe</SnFilePath>
+      <SnFilePath Condition="$(SnFilePath)=='' AND $(SDK35ToolsPath)!=''">$(SDK35ToolsPath)\sn.exe</SnFilePath>
+    </PropertyGroup>
+
+    <Warning Condition="!Exists('$(SnFilePath)')" Text="Unable to verify strong-naming - cannot locate sn.exe at $(SnFilePath)" />
+    <Message Condition="Exists('$(SnFilePath)')"  Importance="high" Text="  Located sn.exe: $(SnFilePath)" />
+  </Target>
+
+  <Target Name="LocateSignToolExe">
+    <!-- Locating signtool.exe isn't necessary when running from a developer command prompt, but
+         it is necessary when running on a build agent.
+         We're not sure what will be installed on the build agent so try multiple locations. -->
+    <Message Importance="high" Text="Attempting to locate signtool.exe..." />
+    <PropertyGroup>
+      <SignToolFilePath Condition="$(SignToolFilePath)=='' AND $(WindowsSdkBinPath)!=''">$(WindowsSdkBinPath)x64\signtool.exe</SignToolFilePath>
+      <SignToolFilePath Condition="$(SignToolFilePath)=='' AND $(WindowsSDK80Path)!=''">$(WindowsSDK80Path)bin\x64\signtool.exe</SignToolFilePath>
+    </PropertyGroup>
+
+    <Warning Condition="!Exists('$(SignToolFilePath)')" Text="Unable to verify Authenticode signing - cannot locate signtool.exe at $(SignToolFilePath)" />
+    <Message Condition="Exists('$(SignToolFilePath)')"  Importance="high" Text="  Located signtool.exe: $(SignToolFilePath)" />
+  </Target>
+
+
+  <Target Name="CheckStrongNameSigning" Outputs="%(AssembliesToCheck.Identity" Condition="Exists('$(SnFilePath)')">
+    
+    <!-- sn.exe will return an error code if the file is not strong-named. This will cause the Exec task to fail,
+         so we need to tell MSBuild to ignore the exit code and continue processing. -->
+    <Exec Command='"$(SnFilePath)" -vf "%(AssembliesToCheck.Identity)"'
+          LogStandardErrorAsError="false" StandardErrorImportance="low" IgnoreExitCode="true" ContinueOnError="true" >
+      <Output PropertyName="ExitCode" TaskParameter="ExitCode" />
+    </Exec>
+
+    <ItemGroup>
+      <SnErrors Include="%(AssembliesToCheck.Identity)" Condition="$(ExitCode)!=0" />
+    </ItemGroup>
+
+    <Warning Condition="$(ExitCode)!=0" Text="Strong naming error - assembly is not strong named: %(AssembliesToCheck.Identity)" />
+  </Target>
+
+  <Target Name="CheckAuthenticodeSigning" Outputs="%(AssembliesToCheck.Identity" Condition="Exists('$(SignToolFilePath)')">
+
+    <!-- signtool.exe will return an error code if the file is not strong-named. This will cause the Exec task to fail,
+         so we need to tell MSBuild to ignore the exit code and continue processing. -->
+    <Exec Command='"$(SignToolFilePath)" verify /pa "%(AssembliesToCheck.Identity)"'
+          LogStandardErrorAsError="false" StandardErrorImportance="low" IgnoreExitCode="true" ContinueOnError="true" >
+      <Output PropertyName="ExitCode" TaskParameter="ExitCode" />
+    </Exec>
+
+    <ItemGroup>
+      <SignToolErrors Include="%(AssembliesToCheck.Identity)" Condition="$(ExitCode)!=0" />
+    </ItemGroup>
+
+    <Warning Condition="$(ExitCode)!=0" Text="Authenticode signing error - assembly is not signed: %(AssembliesToCheck.Identity)" />
+  </Target>
+
+
+</Project>

@@ -119,6 +119,22 @@ namespace TestApp.PCL
             }
         }
 
+        public async Task<string> GetTokenInteractiveAsync(IPlatformParameters parameters, string extraQueryParameters, string claims)
+        {
+            try
+            {
+                AuthenticationContext context = new AuthenticationContext(Sts.Authority, true);
+                var result = await context.AcquireTokenAsync(Sts.ValidResource, Sts.ValidClientId, Sts.ValidNonExistingRedirectUri, parameters,
+           GetUserIdentifier(), extraQueryParameters, claims);
+                return result.AccessToken;
+            }
+            catch (Exception ex)
+            {
+                return GetErrorMessage(ex);
+            }
+        }
+
+
         public async Task<string> GetTokenInteractiveWithMsAppAsync(IPlatformParameters parameters)
         {
             try

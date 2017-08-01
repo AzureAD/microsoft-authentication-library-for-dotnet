@@ -48,7 +48,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private readonly UserIdentifier userId;
 
-        public AcquireTokenInteractiveHandler(RequestData requestData, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters, IWebUI webUI)
+        private readonly string claims;
+
+        public AcquireTokenInteractiveHandler(RequestData requestData, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims)
             : base(requestData)
         {
             this.redirectUri = PlatformPlugin.PlatformInformation.ValidateRedirectUri(redirectUri, this.CallState);
@@ -79,8 +81,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.UniqueId = userId.UniqueId;
             this.DisplayableId = userId.DisplayableId;
             this.UserIdentifierType = userId.Type;
-            this.LoadFromCache = (requestData.TokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters));
             this.SupportADFS = true;
+
+            if (!String.IsNullOrEmpty(claims))
+            {
+                this.LoadFromCache = false;
+
+                PlatformPlugin.Logger.Verbose(CallState, string.Format(CultureInfo.InvariantCulture,
+                    "Claims present. Skip cache lookup."));
+
+                this.claims = claims;
+            }
+            else
+            {
+                this.LoadFromCache = (requestData.TokenCache != null && parameters != null && PlatformPlugin.PlatformInformation.GetCacheLoadPolicy(parameters));
+            }
 
             this.brokerParameters["force"] = "NO";
             if (userId != UserIdentifier.AnyUser)
@@ -95,6 +110,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.brokerParameters["redirect_uri"] = this.redirectUri.AbsoluteUri;
             this.brokerParameters["extra_qp"] = extraQueryParameters;
+            this.brokerParameters["claims"] = claims;
             PlatformPlugin.BrokerHelper.PlatformParameters = authorizationParameters;
         }
 
@@ -161,7 +177,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             IRequestParameters requestParameters = this.CreateAuthorizationRequest(loginHint);
 
-            return  new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + requestParameters);
+            return new Uri(new Uri(this.Authenticator.AuthorizationUri), "?" + requestParameters);
         }
 
         private DictionaryRequestParameters CreateAuthorizationRequest(string loginHint)
@@ -174,6 +190,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (!string.IsNullOrWhiteSpace(loginHint))
             {
                 authorizationRequestParameters[OAuthParameter.LoginHint] = loginHint;
+            }
+
+            if (!string.IsNullOrWhiteSpace(claims))
+            {
+                authorizationRequestParameters["claims"] = claims;
             }
 
             if (this.CallState != null && this.CallState.CorrelationId != Guid.Empty)
@@ -225,7 +246,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new AdalServiceException(this.authorizationResult.Error, this.authorizationResult.ErrorDescription);
             }
         }
-
 
         protected override void UpdateBrokerParameters(IDictionary<string, string> parameters)
         {

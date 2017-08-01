@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Layout">
+
+  <!-- 
+      This project copies files from the build output into the folder layout required to create the NuGet package.
+      The NuGet package can then be created by running "nuget pack" against the root packaging folder.
+
+      Setting the package folder
+      ==========================
+      By default, the layout will be created under a folder called ".nugetPackageRoot" under the repo root.
+      This can be changed by setting the build property $(NuGetPackageRootFolder). This can set to either
+      an absolute or relative path. If it set to a relative path then it will be treated as relative to
+      the repo root.
+
+
+      Signing verification
+      ====================
+      By default, the project will not verify that the package files are strong-named.
+      To turn on verification, set the build property $(VerifySigning)=true
+      The build will fail unless all of the .dll and .exe files being packaged are strong-named.
+      
+  -->
+
+  <Import Project="$(MSBuildThisFileDirectory)AssemblySigningVerification.targets"/>
+  
+  <PropertyGroup>
+    <Configuration Condition="$(Configuration)==''" >Debug</Configuration>
+    
+    <NuspecFilePath Condition="$(NuspecFilePath)==''">$(MSBuildThisFileDirectory)Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec</NuspecFilePath>
+    <AdalBinaryFolder Condition="$(AdalBinaryFolder)==''">..\src\ADAL.PCL\bin\$(Configuration)\netstandard1.1\</AdalBinaryFolder>
+
+    <!-- Calculate the root folder the files will be laid out in -->
+    <!-- If the supplied root folder is a relative path, treat it as relative to the repo root directory.
+         This simplifies combining this build step with other tasks in a VSTS: if the root package folder
+         is passed in to multiple tasks, is simpler if they all treat it as relative to the repo root. -->
+    <NugetPackageRootFolder Condition="$(NugetPackageRootFolder)==''">.nugetPackageRoot</NugetPackageRootFolder>
+    <_PackToFolder>$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..", $(NugetPackageRootFolder)))</_PackToFolder>
+    <_PackToFolder>$([System.IO.Path]::GetFullPath($(_PackToFolder)))</_PackToFolder>
+
+    <!-- This property specifies whether the XML doc files should be copied.
+         By default, XML doc files are only produced for release builds so the copy step will fail for debug builds if we
+         try to copy the doc files. -->
+    <CopyXmlDocFiles Condition="$(CopyXmlDocFiles)=='' AND $(Configuration)=='release'">true</CopyXmlDocFiles>
+  
+  </PropertyGroup>
+
+  <ItemGroup Label="Platform-specific files">
+    
+    <SourceFile Include="..\src\ADAL.PCL.Android\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+      <TargetFolder>MonoAndroid10</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.Android\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+      <TargetFolder>MonoAndroid10</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.Android\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+      <TargetFolder>MonoAndroid10</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\ADAL.PCL.CoreCLR\bin\$(Configuration)\netstandard1.3\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+      <TargetFolder>netstandard1.3</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.CoreCLR\bin\$(Configuration)\netstandard1.3\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+      <TargetFolder>netstandard1.3</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\ADAL.PCL.Desktop\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+      <TargetFolder>net45</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.Desktop\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+      <TargetFolder>net45</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.Desktop\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+    <TargetFolder>net45</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\ADAL.PCL.iOS\bin\iPhone\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+      <TargetFolder>Xamarin.iOS10</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.iOS\bin\iPhone\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+      <TargetFolder>Xamarin.iOS10</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.iOS\bin\iPhone\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+      <TargetFolder>Xamarin.iOS10</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\ADAL.PCL.WinRT\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+      <TargetFolder>netcore45</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.WinRT\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+      <TargetFolder>netcore45</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\ADAL.PCL.WinRT\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+      <TargetFolder>netcore45</TargetFolder>
+    </SourceFile>
+
+  </ItemGroup>
+
+  <ItemGroup Label="Source files">
+    <SourceCode Include="..\src\**\*.*" />
+    <SourceCode Remove="..\**\bin\**\*.*" />
+    <SourceCode Remove="..\**\obj\**\*.*" />
+  </ItemGroup>
+  
+  <Target Name="Layout">
+
+    <Message Importance="high" Text="Copying files to NuGet package layout... " />
+    <Message Importance="high" Text="  Laying out files under $(_PackToFolder)" />
+    <Message Importance="high" Text="  Skipping copying XML documentation files." Condition="$(CopyXmlDocFiles)!='true'" />         
+    
+    <RemoveDir Directories="$(_PackToFolder)" />
+    <MakeDir Directories="$(_PackToFolder)" />
+
+    <!-- Copy the nuspec file -->
+    <Copy SourceFiles="$(NuspecFilePath)" DestinationFolder="$(_PackToFolder)" />
+
+    <!-- Copy the platform-ADAL.Net binary to every target platform folder -->
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(_PackToFolder)\lib\%(SourceFile.TargetFolder)" />
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb" DestinationFolder="$(_PackToFolder)\lib\%(SourceFile.TargetFolder)" />
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.xml" DestinationFolder="$(_PackToFolder)\lib\%(SourceFile.TargetFolder)" Condition="$(CopyXmlDocFiles)=='true'" />
+
+
+    <!-- Copy the platform-ADAL.Net binary to the portable platform -->
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" />
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" />
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.xml" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" Condition="$(CopyXmlDocFiles)=='true'" />
+
+
+    <!-- Copy the platform-specifc ADAL.Net binaries to the appropriate target platform folder -->
+    <Copy SourceFiles="%(SourceFile.Identity)" DestinationFolder="$(_PackToFolder)\lib\%(SourceFile.TargetFolder)" />
+
+    <!-- Copy the source files -->
+    <!-- Note: we are copying the sources to "src\src" because NuGet expects the files to be under a folder called
+         "src", and our product code is also in a folder called "src" in the repo. -->
+    <Copy SourceFiles="%(SourceCode.Identity)" DestinationFolder="$(_PackToFolder)\src\src\%(RecursiveDir)" />
+
+    <CallTarget Condition="$(VerifySigning)=='true'" Targets="GetAssembliesToCheck;CheckAssembliesAreSigned" />
+    <Message Condition="$(VerifySigning)!='true'" Importance="high" Text="  Skipping verification that binaries to be packaged are signed. To verify signing, pass /p:VerifySigning=true on the command line." />
+  
+  </Target>
+
+  <Target Name="GetAssembliesToCheck">
+    <!-- Create a list of assemblies.
+         Dynamically-created item groups are not available to other targets until the target that
+         created them has finished, which is why this item group is created in a separate target. -->
+    <ItemGroup>
+      <AssembliesToCheck Include="$(_PackToFolder)\**\*.dll"/>
+      <AssembliesToCheck Include="$(_PackToFolder)\**\*.exe"/>
+    </ItemGroup>
+
+    <Message Importance="normal" Text="Binaries to verify:" />
+    <Message Importance="normal" Text="  %(AssembliesToCheck.Identity)" />
+  </Target>
+
+</Project>

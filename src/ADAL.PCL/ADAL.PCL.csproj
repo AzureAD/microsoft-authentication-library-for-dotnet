@@ -23,6 +23,8 @@
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Exceptions\AdalClaimChallengeException.cs" />
+    <Compile Include="Flows\AcquireTokenOnBehalfHandler.cs" />
     <Compile Include="Flows\DeviceCode\AcquireDeviceCodeHandler.cs" />
     <Compile Include="Flows\AcquireTokenByAuthorizationCodeHandler.cs" />
     <Compile Include="Flows\DeviceCode\AcquireTokenByDeviceCodeHandler.cs" />
@@ -30,7 +32,6 @@
     <Compile Include="Flows\AcquireTokenHandlerBase.cs" />
     <Compile Include="Flows\AcquireTokenInteractiveHandler.cs" />
     <Compile Include="Flows\NonInteractive\AcquireTokenNonInteractiveHandler.cs" />
-    <Compile Include="Flows\AcquireTokenOnBehalfHandler.cs" />
     <Compile Include="Flows\AcquireTokenSilentHandler.cs" />
     <Compile Include="Exceptions\AdalException.cs" />
     <Compile Include="Platform\IWebProxyProvider.cs" />

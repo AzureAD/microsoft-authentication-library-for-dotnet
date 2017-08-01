@@ -54,24 +54,44 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (certificate.PublicKey.Key.KeySize < ClientAssertionCertificate.MinKeySizeInBits)
             {
-                throw new ArgumentOutOfRangeException("rawData",
-                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.CertificateKeySizeTooSmallTemplate, ClientAssertionCertificate.MinKeySizeInBits));
+                throw new ArgumentOutOfRangeException(nameof(certificate),
+                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.CertificateKeySizeTooSmallTemplate,
+                        ClientAssertionCertificate.MinKeySizeInBits));
             }
 
-            X509AsymmetricSecurityKey x509Key = new X509AsymmetricSecurityKey(certificate);
-            RSACryptoServiceProvider rsa = x509Key.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, true) as RSACryptoServiceProvider;
+            byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+            var x509Key = new X509AsymmetricSecurityKey(certificate);
+
+            RSA rsa = x509Key.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, true) as RSA;
 
             RSACryptoServiceProvider newRsa = null;
             try
             {
-                newRsa = GetCryptoProviderForSha256(rsa);
-                using (SHA256Cng sha = new SHA256Cng())
+                if (rsa is RSACryptoServiceProvider cspRsa)
                 {
-                    return newRsa.SignData(Encoding.UTF8.GetBytes(message), sha);
+                    // For .NET 4.6 and below we get the old RSACryptoServiceProvider implementation as the default.
+                    // Try and get an instance of RSACryptoServiceProvider which supports SHA256
+                    newRsa = GetCryptoProviderForSha256(cspRsa);
+                }
+                else
+                {
+                    // For .NET Framework 4.7 and onwards the RSACng implementation is the default.
+                    // Since we're targeting .NET Framework 4.5, we cannot actually use this type as it was
+                    // only introduced with .NET Framework 4.6.
+                    // Instead we try and create an RSACryptoServiceProvider based on the private key from the
+                    // certificate.
+                    newRsa = GetCryptoProviderForSha256(certificate);
+                }
+
+                using (var sha = new SHA256Cng())
+                {
+                    return newRsa.SignData(messageBytes, sha);
                 }
             }
             finally
             {
+                // We only want to dispose of the 'newRsa' instance if it is a *different instance*
+                // from the original one that was used to create it.
                 if (newRsa != null && !ReferenceEquals(rsa, newRsa))
                 {
                     newRsa.Dispose();
@@ -79,8 +99,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
+        /// <summary>
+        /// Create a <see cref="RSACryptoServiceProvider"/> using the private key from the given <see cref="X509Certificate2"/>.
+        /// </summary>
+        /// <param name="certificate">Certificate including private key with which to initialize the <see cref="RSACryptoServiceProvider"/> with</param>
+        /// <returns><see cref="RSACryptoServiceProvider"/> initialized with private key from <paramref name="certificate"/></returns>
+        private static RSACryptoServiceProvider GetCryptoProviderForSha256(X509Certificate2 certificate)
+        {
+            var privateKeyXmlParams = certificate.PrivateKey.ToXmlString(true);
+            var rsa = new RSACryptoServiceProvider();
+            rsa.FromXmlString(privateKeyXmlParams);
+            return rsa;
+        }
+
         // Copied from ACS code
-        // This method returns an AsymmetricSignatureFormatter capable of supporting Sha256 signatures. 
+        // This method returns an AsymmetricSignatureFormatter capable of supporting Sha256 signatures.
         private static RSACryptoServiceProvider GetCryptoProviderForSha256(RSACryptoServiceProvider rsaProvider)
         {
             const int PROV_RSA_AES = 24;    // CryptoApi provider type for an RSA provider supporting sha-256 digital signatures
