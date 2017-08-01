@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 Application.Context.PackageManager.CheckPermission(permission, Application.Context.PackageName))
             {
                 PlatformPlugin.Logger.Information(null,
-                    string.Format(AdalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission));
+                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission));
                 return false;
             }
 
@@ -259,7 +259,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string msg = bundleResult.GetString(AccountManager.KeyErrorMessage);
             if (!string.IsNullOrEmpty(msg))
             {
-                throw new AdalException(errCode.ToString(), msg);
+                throw new AdalException(errCode.ToString(CultureInfo.InvariantCulture), msg);
             }
             else
             {
@@ -372,7 +372,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (!string.IsNullOrEmpty(signatureDigest))
             {
                 return string.Format(CultureInfo.InvariantCulture, "{0}://{1}/{2}", RedirectUriScheme,
-                    packageName.ToLower(), signatureDigest);
+                    packageName.ToLower(CultureInfo.InvariantCulture), signatureDigest);
             }
 
             return string.Empty;
