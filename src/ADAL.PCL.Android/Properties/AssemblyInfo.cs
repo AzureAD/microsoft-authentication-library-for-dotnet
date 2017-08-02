@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -39,3 +40,10 @@ using System.Runtime.InteropServices;
 [assembly: Guid("ff47962a-d498-4c63-b7e9-4db3653ad7df")]
 
 // Assembly version information is in file ADAL.Common\CommonAssemblyInfo.cs
+
+// See VSTS #265363 for tracking these suppressions
+[assembly: SuppressMessage("Microsoft.Security", "CA2132:DefaultConstructorsMustHaveConsistentTransparency", Justification = "VSTS #265363")]
+[assembly: SuppressMessage("Microsoft.Security", "CA2134:MethodsMustOverrideWithConsistentTransparency", Justification = "VSTS #265363")]
+[assembly: SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCode", Justification = "VSTS #265363")]
+[assembly: SuppressMessage("Microsoft.Security", "CA2146:TypesMustBeAtLeastAsCriticalAsBaseTypes", Justification = "VSTS #265363")]
+[assembly: SuppressMessage("Microsoft.Security", "CA2151:FieldsWithCriticalTypesShouldBeSecurityCritical", Justification = "VSTS #265363")]
