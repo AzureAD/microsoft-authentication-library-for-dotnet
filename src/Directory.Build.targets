@@ -17,19 +17,30 @@
            For .Net Core projects, you can just drop this file next to the project file: see https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build
            Alternatively, explicitly import the targets into your project.
        
-       2. Pass in the folder path the referenced binaries should be copied to
-          e.g. /p:ReferencedAsmListFolderPath=MyFolder
+       2. Pass in either the root folder path to use "$(ReferencedBinsPathRoot)" or the full folder path "$(ReferencedBinsPath)" to specify
+           where the referenced binaries should be copied.
+           If you specify the root directory then the full path will be calculated by adding the name of the current project (useful if you
+           are building a solution and don't want to have to set the output folder for each project).
+       
+          e.g. /p:ReferencedBinsPath=MyFolder
+          e.g. /p:ReferencedBinsPathRoot=MyRootFolder
           
-           The targets will not run if the property has not been set.
+           The targets will not run unless one of the properties has been set.
            You can use VSTS build variables when specifying the folder: see https://www.visualstudio.com/en-us/docs/build/define/variables
            
        3. Configure the VSTS FxCop task to look in that folder
        
     -->
-  <Target Name="CopyReferencedAssembliesToSingleFolder" AfterTargets="Build" Condition="$(ReferencedAsmListFolderPath)!=''">
-    <Message Importance="high" Text="Copying assemblies referenced during the build to: $(ReferencedAsmListFolderPath)" />
-    <MakeDir Directories="$(ReferencedAsmListFolderPath)" />
-    <Copy SourceFiles="@(ReferencePath)" DestinationFolder="$(ReferencedAsmListFolderPath)" />
+  <PropertyGroup>
+    <!-- If the caller has specified a $(ReferencedBinsPath) then use that.
+         Otherwise, if the caller has specified a $(ReferencedBinsPathRoot) then use that as the root and add the current project name as subfolder. -->
+    <ReferencedBinsPath Condition="$(ReferencedBinsPath)=='' AND $(ReferencedBinsPathRoot)!=''" >$([MSBuild]::NormalizeDirectory($(ReferencedBinsPathRoot)))$(MSBuildProjectName)</ReferencedBinsPath>
+  </PropertyGroup>
+  
+  <Target Name="CopyReferencedAssembliesToSingleFolder" AfterTargets="Build" Condition="$(ReferencedBinsPath)!=''">
+    <Message Importance="high" Text="Copying assemblies referenced during the build to: $(ReferencedBinsPath)" />
+    <MakeDir Directories="$(ReferencedBinsPath)" />
+    <Copy SourceFiles="@(ReferencePath)" DestinationFolder="$(ReferencedBinsPath)" />
   </Target>
 
 </Project>
