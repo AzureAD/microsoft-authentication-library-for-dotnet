@@ -45,6 +45,9 @@
     <Compile Include="..\ADAL.Common\WebProxyProvider.cs">
       <Link>WebProxyProvider.cs</Link>
     </Compile>
+    <Compile Include="..\ADAL.Common\PromptBehavior.Xamarin.cs">
+      <Link>PromptBehavior.Xamarin.cs</Link>
+    </Compile>
     <Compile Include="AdalCustomUrlProtocol.cs" />
     <Compile Include="AdalInitializer.cs" />
     <Compile Include="AuthenticationAgentUINavigationController.cs" />

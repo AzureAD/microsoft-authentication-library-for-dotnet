@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Constructor
         /// </summary>
         /// <param name="callerActivity">activity calling ADAL to acquire token</param>
-        public PlatformParameters(Activity callerActivity):this(callerActivity, false)
+        public PlatformParameters(Activity callerActivity):this(callerActivity, false, PromptBehavior.Auto)
         {
         }
 
@@ -47,10 +47,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="callerActivity">activity calling ADAL to acquire token</param>
         /// <param name="useBroker">flag to enable or disable broker flow. FALSE by default.</param>
-        public PlatformParameters(Activity callerActivity, bool useBroker)
+        public PlatformParameters(Activity callerActivity, bool useBroker):this(callerActivity, useBroker, PromptBehavior.Auto)
+        {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="callerActivity">activity calling ADAL to acquire token</param>
+        /// <param name="useBroker">flag to enable or disable broker flow. FALSE by default.</param>
+        /// <param name="promptBehavior">Prompt behavior enum to control UI</param>
+        public PlatformParameters(Activity callerActivity, bool useBroker, PromptBehavior promptBehavior)
         {
             this.CallerActivity = callerActivity;
             UseBroker = useBroker;
+            PromptBehavior = promptBehavior;
         }
 
         /// <summary>
@@ -61,6 +72,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Caller Android Activity
         /// </summary>
-        public Activity CallerActivity { get; private set; } 
+        public Activity CallerActivity { get; private set; }
+
+        /// <summary>
+        /// Gets prompt behavior. If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.
+        /// </summary>
+        public PromptBehavior PromptBehavior { get; set; }
     }
 }

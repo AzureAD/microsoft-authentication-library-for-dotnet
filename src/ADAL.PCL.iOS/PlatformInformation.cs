@@ -76,5 +76,39 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // TODO: Check if assembly file version can be read in iOS assembly as well or not. For now, we use assembly version instead.
             return typeof(AdalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
         }
+
+        public override void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
+        {
+            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
+            if (authorizationParameters == null)
+            {
+                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
+            }
+
+            PromptBehavior promptBehavior = authorizationParameters.PromptBehavior;
+
+            switch (promptBehavior)
+            {
+                case PromptBehavior.Always:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
+                    break;
+                case PromptBehavior.RefreshSession:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
+                    break;
+            }
+        }
+
+        public override bool GetCacheLoadPolicy(IPlatformParameters parameters)
+        {
+            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
+            if (authorizationParameters == null)
+            {
+                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
+            }
+
+            PromptBehavior promptBehavior = authorizationParameters.PromptBehavior;
+
+            return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession;
+        }
     }
 }

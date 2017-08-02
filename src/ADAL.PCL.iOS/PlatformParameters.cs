@@ -42,6 +42,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private PlatformParameters()
         {
             UseBroker = false;
+            PromptBehavior = PromptBehavior.Auto;
         }
 
         /// <summary>
@@ -58,9 +59,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="callerViewController">UIViewController instance</param>
         /// <param name="useBroker">skips calling to broker if broker is present. false, by default</param>
-        public PlatformParameters(UIViewController callerViewController, bool useBroker):this(callerViewController)
+        public PlatformParameters(UIViewController callerViewController, bool useBroker) : this(callerViewController)
         {
             UseBroker = useBroker;
+        }
+
+        /// <summary>
+        /// Additional parameters used in acquiring user's authorization
+        /// </summary>
+        /// <param name="callerViewController">UIViewController instance</param>
+        /// <param name="useBroker">skips calling to broker if broker is present. false, by default</param>
+        /// <param name="promptBehavior">Prompt behavior enum to control UI</param>
+        public PlatformParameters(UIViewController callerViewController, bool useBroker, PromptBehavior promptBehavior) : this(callerViewController, useBroker)
+        {
+            PromptBehavior = promptBehavior;
         }
 
         /// <summary>
@@ -97,5 +109,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <value>The transitioning delegate.</value>
         public UIViewControllerTransitioningDelegate TransitioningDelegate { get; set; }
+
+        /// <summary>
+        /// Gets prompt behavior. If <see cref="PromptBehavior.Always"/>, asks service to show user the authentication page which gives them chance to authenticate as a different user.
+        /// </summary>
+        public PromptBehavior PromptBehavior { get; set; }
     }
 }
