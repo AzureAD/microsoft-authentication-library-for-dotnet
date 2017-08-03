@@ -10,6 +10,7 @@
     <AssemblyName>Microsoft.IdentityModel.Clients.ActiveDirectory</AssemblyName>
     <EnableDefaultItems>false</EnableDefaultItems>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <CodeAnalysisRuleSet>..\SonarQube.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <DebugType>full</DebugType>
@@ -102,6 +103,7 @@
     <Compile Include="Flows\NonInteractive\WsTrustResponse.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="6.2.0.2536" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
   </ItemGroup>
