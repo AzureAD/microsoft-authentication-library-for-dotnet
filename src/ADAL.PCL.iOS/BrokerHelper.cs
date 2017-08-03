@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private AuthenticationResultEx ResultFromBrokerResponse(IDictionary<string, string> responseDictionary)
         {
-            TokenResponse response = new TokenResponse();
+            TokenResponse response;
 
             if (responseDictionary.ContainsKey("error") || responseDictionary.ContainsKey("error_description"))
             {

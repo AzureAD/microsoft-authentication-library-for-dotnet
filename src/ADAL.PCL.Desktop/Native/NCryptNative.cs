@@ -347,7 +347,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
     {
         internal SafeNCryptBuffer() : base(true)
         {
-            return;
         }
 
         /// <summary>

@@ -301,7 +301,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
     {
         private SafeBCryptAlgorithmHandle() : base(true)
         {
-            return;
         }
 
         [DllImport("bcrypt.dll")]

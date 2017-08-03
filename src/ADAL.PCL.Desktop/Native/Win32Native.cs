@@ -170,7 +170,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
 
         protected SafeHandleWithBuffer() : base(true)
         {
-            return;
         }
 
         public override bool IsInvalid

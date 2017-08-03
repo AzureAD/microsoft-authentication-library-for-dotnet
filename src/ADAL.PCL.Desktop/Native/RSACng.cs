@@ -102,7 +102,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
         /// </summary>
         public RSACng() : this(2048)
         {
-            return;
         }
 
         /// <summary>
