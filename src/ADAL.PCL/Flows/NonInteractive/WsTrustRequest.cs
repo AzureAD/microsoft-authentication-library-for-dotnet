@@ -201,7 +201,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     passwordChars.SecureClear();
                 }
 
-                messageCredentialsBuilder.AppendFormat(CultureInfo.CurrentCulture, "</o:Password></o:UsernameToken>");
+                messageCredentialsBuilder.Append("</o:Password></o:UsernameToken>");
 
                 //
                 // Timestamp the message
