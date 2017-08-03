@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         serviceEx = new AdalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription,
                             errorCodes, ex);
 
-                        if(ex.WebResponse.StatusCode == HttpStatusCode.BadRequest && tokenResponse.Error == AdalErrorMessage.InteractionRequired)
+                        if(ex.WebResponse.StatusCode == HttpStatusCode.BadRequest && tokenResponse.Error == AdalError.InteractionRequired)
                         {
                             throw new AdalClaimChallengeException(tokenResponse.Error, tokenResponse.ErrorDescription, tokenResponse.Claims);
                         }
