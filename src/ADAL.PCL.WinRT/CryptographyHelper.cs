@@ -43,6 +43,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public string CreateSha256Hash(string input)
         {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return null;
+            }
+            
             IBuffer inputBuffer = CryptographicBuffer.ConvertStringToBinary(input, BinaryStringEncoding.Utf8);
 
             var hasher = HashAlgorithmProvider.OpenAlgorithm("SHA256");

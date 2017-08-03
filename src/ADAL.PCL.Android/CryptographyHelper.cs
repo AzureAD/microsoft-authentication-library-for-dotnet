@@ -34,6 +34,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public string CreateSha256Hash(string input)
         {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return null;
+            }
+
             return string.Empty;    // TODO: Update
         }
         
