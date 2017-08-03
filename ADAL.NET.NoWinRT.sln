@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34FFBC9F-C270-4B10-98C8-F6882606DDFE}"
 EndProject
@@ -53,6 +53,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "automation", "automation", "{91268539-BB38-47F9-98B1-48251F4DED5E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFormsAutomationApp", "automation\WinFormsAutomationApp\WinFormsAutomationApp.csproj", "{84AAB705-1A89-4149-BBE0-5C4505D9CBED}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{82834A93-B3C6-42E0-ACA7-9774D1E33EEB}"
+	ProjectSection(SolutionItems) = preProject
+		sonarqube\adalnet_devcsharp.ruleset = sonarqube\adalnet_devcsharp.ruleset
+		sonarqube\SolutionBinding.sqconfig = sonarqube\SolutionBinding.sqconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
