@@ -13,7 +13,7 @@
     <RootNamespace>Microsoft.IdentityModel.Clients.ActiveDirectory</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AssemblyName>Microsoft.IdentityModel.Clients.ActiveDirectory.Platform</AssemblyName>
-    <CodeAnalysisRuleSet>..\SonarQube.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>ADAL.PCL.iOS.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

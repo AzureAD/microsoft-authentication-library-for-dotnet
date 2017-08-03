@@ -7,7 +7,7 @@
     <AssemblyName>Microsoft.IdentityModel.Clients.ActiveDirectory.Platform</AssemblyName>
     <EnableDefaultItems>false</EnableDefaultItems>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <CodeAnalysisRuleSet>..\SonarQube.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>ADAL.PCL.CoreCLR.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <DebugType>full</DebugType>
