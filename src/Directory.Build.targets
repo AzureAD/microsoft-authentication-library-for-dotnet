@@ -1,6 +1,6 @@
 <Project>
   
-  <!-- This targets file works round a problem with the VSTS SDL FxCop task.
+  <!-- This targets file works round a problem with a legacy, internal Microsoft VSTS task (the SDL FxCop task).
   
        FxCop needs to be able to find all of the referenced binaries. The VSTS task allows multiple reference folders
        to be specified to search for referenced binaries, but the search doesn't recursive into those folders.
