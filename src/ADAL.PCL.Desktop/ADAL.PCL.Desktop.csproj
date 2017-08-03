@@ -74,6 +74,7 @@
     </Compile>
     <Compile Include="BrokerHelper.cs" />
     <Compile Include="DeviceAuthHelper.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Native\BCryptNative.cs" />
     <Compile Include="Native\ICngAlgorithm.cs" />
     <Compile Include="Native\ICngAsymmetricAlgorithm.cs" />

@@ -53,6 +53,7 @@
     <Compile Include="..\ADAL.Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="WebProxyProvider.cs" />
     <Compile Include="..\ADAL.Common\PromptBehavior.Xamarin.cs">
       <Link>PromptBehavior.Xamarin.cs</Link>

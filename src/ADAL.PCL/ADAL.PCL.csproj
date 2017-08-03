@@ -35,6 +35,7 @@
     <Compile Include="Flows\NonInteractive\AcquireTokenNonInteractiveHandler.cs" />
     <Compile Include="Flows\AcquireTokenSilentHandler.cs" />
     <Compile Include="Exceptions\AdalException.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Platform\IWebProxyProvider.cs" />
     <Compile Include="Utilities\AdalIdHelper.cs" />
     <Compile Include="Exceptions\AdalServiceException.cs" />
