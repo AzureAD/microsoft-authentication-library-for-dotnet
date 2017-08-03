@@ -76,6 +76,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
     ///     </para>
     /// </summary>
     [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "RSA", Justification = "This is for consistency with the existing RSACryptoServiceProvider type")]
+    [SuppressMessage("Sonar Code Smell", "S101:Types should be named in camel case", Justification = "See above justification")]
     internal sealed class RSACng : RSA, ICngAsymmetricAlgorithm
     {
         private static KeySizes[] s_legalKeySizes = new KeySizes[] { new KeySizes(384, 16384, 8) };
