@@ -156,8 +156,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             // To decide whether user realm discovery is needed or not
             // we should also consider if that is supported by the authority
-            return this.userAssertion == null &&
-                   this.SupportADFS == false;
+            return this.userAssertion == null && !this.SupportADFS;
         }
     }
 }

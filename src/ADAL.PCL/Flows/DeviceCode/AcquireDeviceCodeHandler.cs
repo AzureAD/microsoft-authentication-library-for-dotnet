@@ -34,11 +34,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     class AcquireDeviceCodeHandler
     {
-        private Authenticator authenticator;
-        private ClientKey clientKey;
-        private string resource;
-        private CallState callState;
-        private string extraQueryParameters;
+        private readonly Authenticator authenticator;
+        private readonly ClientKey clientKey;
+        private readonly string resource;
+        private readonly CallState callState;
+        private readonly string extraQueryParameters;
 
         public AcquireDeviceCodeHandler(Authenticator authenticator, string resource, string clientId, string extraQueryParameters)
         {

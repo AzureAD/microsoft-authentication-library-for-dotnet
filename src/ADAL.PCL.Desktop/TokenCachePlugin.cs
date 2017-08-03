@@ -37,10 +37,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         public void BeforeAccess(TokenCacheNotificationArgs args)
         {
+            // Default implementation, do nothing
         }
-        
+
         public void AfterAccess(TokenCacheNotificationArgs args)
         {
+            // Default implementation, do nothing
         }
     }
 }

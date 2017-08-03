@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public sealed class ClientAssertionCertificate : IClientAssertionCertificate
     {
-        private string clientId = null;
+        private readonly string clientId;
 
         /// <summary>
         /// Constructor to create credential with client Id and certificate.

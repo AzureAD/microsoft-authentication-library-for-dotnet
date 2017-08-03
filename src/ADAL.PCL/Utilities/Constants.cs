@@ -418,7 +418,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string InteractionRequired = "interaction_required";
     }
 
-    internal class XmlNamespace
+    internal static class XmlNamespace
     {
         public static readonly XNamespace Wsdl = "http://schemas.xmlsoap.org/wsdl/";
         public static readonly XNamespace Wsp = "http://schemas.xmlsoap.org/ws/2004/09/policy";

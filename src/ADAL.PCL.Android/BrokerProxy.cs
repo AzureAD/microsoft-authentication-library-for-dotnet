@@ -51,9 +51,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal class BrokerProxy
     {
         private const string RedirectUriScheme = "msauth";
-        private Context mContext;
-        private AccountManager mAcctManager;
-        private string mBrokerTag;
+        private readonly Context mContext;
+        private readonly AccountManager mAcctManager;
+        private readonly string mBrokerTag;
         public const string DATA_USER_INFO = "com.microsoft.workaccount.user.info";
 
 

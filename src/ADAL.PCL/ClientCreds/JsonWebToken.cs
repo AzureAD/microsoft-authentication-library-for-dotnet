@@ -33,19 +33,19 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class JsonWebTokenConstants
+    internal static class JsonWebTokenConstants
     {
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
 
         public const string HeaderType = "JWT";
 
-        internal class Algorithms
+        internal static class Algorithms
         {
             public const string RsaSha256 = "RS256";
             public const string None = "none";
         }
 
-        internal class ReservedClaims
+        internal static class ReservedClaims
         {
             public const string Audience = "aud";
             public const string Issuer = "iss";
@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             public const string JwtIdentifier = "jti";
         }
 
-        internal class ReservedHeaderParameters
+        internal static class ReservedHeaderParameters
         {
             public const string Algorithm = "alg";
             public const string Type = "typ";

@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private volatile bool hasStateChanged;
 
-        private Object cacheLock = new Object();
+        private readonly Object cacheLock = new Object();
 
         static TokenCache()
         {
@@ -492,7 +492,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> resourceSpecificItems =
                     items.Where(p => p.Key.ResourceEquals(cacheQueryData.Resource)).ToList();
-                int resourceValuesCount = resourceSpecificItems.Count();
+                int resourceValuesCount = resourceSpecificItems.Count;
 
                 KeyValuePair<TokenCacheKey, AuthenticationResultEx>? returnValue = null;
                 switch (resourceValuesCount)

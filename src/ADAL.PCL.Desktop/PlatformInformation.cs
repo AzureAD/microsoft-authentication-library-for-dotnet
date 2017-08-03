@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (Exception)
             {
-                // ignore the exception as the result is already set to false;
+                // ignore the exception as the result is already set to false
             }
 
             return returnValue;

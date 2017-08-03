@@ -77,8 +77,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
     internal class DeviceAuthJWTResponse
     {
-        private DeviceAuthHeader header;
-        private DeviceAuthPayload payload;
+        private readonly DeviceAuthHeader header;
+        private readonly DeviceAuthPayload payload;
 
         public DeviceAuthJWTResponse(string audience, string nonce,
             string base64EncodedCertificate)

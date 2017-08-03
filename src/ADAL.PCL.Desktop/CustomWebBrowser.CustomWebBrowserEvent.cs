@@ -78,123 +78,153 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             public void ClientToHostWindow( ref long cX, ref long cY )
             {
+                // Ignore event
             }
 
             public void CommandStateChange( long command, bool enable )
             {
+                // Ignore event
             }
 
             public void DocumentComplete( object pDisp, ref object urlObject )
             {
+                // Ignore event
             }
 
             public void DownloadBegin()
             {
+                // Ignore event
             }
 
             public void DownloadComplete()
             {
+                // Ignore event
             }
 
             public void FileDownload( ref bool cancel )
             {
+                // Ignore event
             }
 
             public void NavigateComplete2( object pDisp, ref object urlObject )
             {
+                // Ignore event
             }
 
 
             public void NewWindow2( ref object ppDisp, ref bool cancel )
             {
+                // Ignore event
             }
 
             public void OnFullScreen( bool fullScreen )
             {
+                // Ignore event
             }
 
             public void OnMenuBar( bool menuBar )
             {
+                // Ignore event
             }
 
             public void OnQuit()
             {
+                // Ignore event
             }
 
             public void OnStatusBar( bool statusBar )
             {
+                // Ignore event
             }
 
             public void OnTheaterMode( bool theaterMode )
             {
+                // Ignore event
             }
 
             public void OnToolBar( bool toolBar )
             {
+                // Ignore event
             }
 
             public void OnVisible( bool visible )
             {
+                // Ignore event
             }
 
             public void PrintTemplateInstantiation( object pDisp )
             {
+                // Ignore event
             }
 
             public void PrintTemplateTeardown( object pDisp )
             {
+                // Ignore event
             }
 
             public void PrivacyImpactedStateChange( bool bImpacted )
             {
+                // Ignore event
             }
 
             public void ProgressChange( int progress, int progressMax )
             {
+                // Ignore event
             }
 
             public void PropertyChange( string szProperty )
             {
+                // Ignore event
             }
 
             public void SetSecureLockIcon( int secureLockIcon )
             {
+                // Ignore event
             }
 
             public void StatusTextChange( string text )
             {
+                // Ignore event
             }
 
             public void TitleChange( string text )
             {
+                // Ignore event
             }
 
             public void UpdatePageStatus( object pDisp, ref object nPage, ref object fDone )
             {
+                // Ignore event
             }
 
             public void WindowClosing( bool isChildWindow, ref bool cancel )
             {
+                // Ignore event
             }
 
             public void WindowSetHeight( int height )
             {
+                // Ignore event
             }
 
             public void WindowSetLeft( int left )
             {
+                // Ignore event
             }
 
             public void WindowSetResizable( bool resizable )
             {
+                // Ignore event
             }
 
             public void WindowSetTop( int top )
             {
+                // Ignore event
             }
 
             public void WindowSetWidth( int width )
             {
+                // Ignore event
             }
         }
     }

@@ -32,25 +32,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        private PlatformParameters parameters;
-
         public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters)
         {
-            this.parameters = inputParameters as PlatformParameters;
-            if (this.parameters == null)
+            var parameters = inputParameters as PlatformParameters;
+            if (parameters == null)
             {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
+                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(inputParameters));
             }
 
-            switch (this.parameters.PromptBehavior)
+            switch (parameters.PromptBehavior)
             {
                 case PromptBehavior.Auto:
-                    return new InteractiveWebUI { OwnerWindow = this.parameters.OwnerWindow };
+                    return new InteractiveWebUI { OwnerWindow = parameters.OwnerWindow };
                 case PromptBehavior.Always:
                 case PromptBehavior.RefreshSession:
-                    return new InteractiveWebUI { OwnerWindow = this.parameters.OwnerWindow };
+                    return new InteractiveWebUI { OwnerWindow = parameters.OwnerWindow };
                 case PromptBehavior.Never:
-                    return new SilentWebUI { OwnerWindow = this.parameters.OwnerWindow };
+                    return new SilentWebUI { OwnerWindow = parameters.OwnerWindow };
                 default:
                     throw new InvalidOperationException("Unexpected PromptBehavior value");
             }

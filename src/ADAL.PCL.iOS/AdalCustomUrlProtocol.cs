@@ -82,8 +82,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private class AdalCustomConnectionDelegate : NSUrlConnectionDataDelegate
         {
-            private AdalCustomUrlProtocol handler;
-            private INSUrlProtocolClient client;
+            private readonly AdalCustomUrlProtocol handler;
+            private readonly INSUrlProtocolClient client;
 
             public AdalCustomConnectionDelegate(AdalCustomUrlProtocol handler)
             {

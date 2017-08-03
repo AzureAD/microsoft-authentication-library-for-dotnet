@@ -32,7 +32,7 @@ using System.Runtime.Serialization.Json;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class IdTokenClaim
+    internal static class IdTokenClaim
     {
         public const string ObjectId = "oid";
         public const string Subject = "sub";
