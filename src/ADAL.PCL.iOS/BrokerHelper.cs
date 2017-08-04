@@ -75,6 +75,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (brokerPayload.ContainsKey("claims"))
             {
                 brokerPayload.Add("skip_cache", "YES");
+                string claims = EncodingHelper.UrlEncode(brokerPayload["claims"]);
+                brokerPayload["claims"] = claims;
             }
 
             if (brokerPayload.ContainsKey("broker_install_url"))
