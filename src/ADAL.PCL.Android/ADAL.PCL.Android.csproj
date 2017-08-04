@@ -57,6 +57,9 @@
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="WebProxyProvider.cs" />
+    <Compile Include="..\ADAL.Common\PromptBehavior.Xamarin.cs">
+      <Link>PromptBehavior.Xamarin.cs</Link>
+    </Compile>
     <Compile Include="AuthenticationRequest.cs" />
     <Compile Include="BrokerConstants.cs" />
     <Compile Include="BrokerHelper.cs" />

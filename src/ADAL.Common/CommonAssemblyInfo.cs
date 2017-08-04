@@ -37,7 +37,7 @@ using System.Reflection;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyMetadata("Serviceable", "True")]
 
-[assembly: AssemblyFileVersion("3.15.0.0")]
+[assembly: AssemblyFileVersion("3.16.0.0")]
 
 // On official build, attribute AssemblyInformationalVersionAttribute is added as well
 // with its value equal to the hash of the last commit to the git branch.
