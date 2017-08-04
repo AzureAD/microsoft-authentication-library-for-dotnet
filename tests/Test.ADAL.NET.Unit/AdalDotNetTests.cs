@@ -1305,19 +1305,44 @@ namespace Test.ADAL.NET.Unit
             Uri uri = null;
 
             var ex = AssertException.TaskThrows<ArgumentNullException>(() =>
-                context.GetAuthorizationRequestUrlAsync(null, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId), "extra=123", null));
+                context.GetAuthorizationRequestUrlAsync(null, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId), "extra=123"));
             Assert.AreEqual(ex.ParamName, "resource");
 
-            uri = await context.GetAuthorizationRequestUrlAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId), "extra=123", null);
+            uri = await context.GetAuthorizationRequestUrlAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId), "extra=123");
             Assert.IsNotNull(uri);
             Assert.IsTrue(uri.AbsoluteUri.Contains("login_hint"));
             Assert.IsTrue(uri.AbsoluteUri.Contains("extra=123"));
-            uri = await context.GetAuthorizationRequestUrlAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, UserIdentifier.AnyUser, null, null);
+            uri = await context.GetAuthorizationRequestUrlAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, UserIdentifier.AnyUser, null);
             Assert.IsNotNull(uri);
             Assert.IsFalse(uri.AbsoluteUri.Contains("login_hint"));
             Assert.IsFalse(uri.AbsoluteUri.Contains("client-request-id="));
             context.CorrelationId = Guid.NewGuid();
-            uri = await context.GetAuthorizationRequestUrlAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId), "extra", null);
+            uri = await context.GetAuthorizationRequestUrlAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId), "extra");
+            Assert.IsNotNull(uri);
+            Assert.IsTrue(uri.AbsoluteUri.Contains("client-request-id="));
+        }
+
+        [TestMethod]
+        [Description("Test for GetAuthorizationRequestURL with claims")]
+        public async Task GetAuthorizationRequestUrlWithClaimsTest()
+        {
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
+            Uri uri = null;
+
+            var ex = AssertException.TaskThrows<ArgumentNullException>(() =>
+                context.GetAuthorizationRequestUrlAsync(null, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId), "extra=123", "some"));
+            Assert.AreEqual(ex.ParamName, "resource");
+
+            uri = await context.GetAuthorizationRequestUrlAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId), "extra=123", "some");
+            Assert.IsNotNull(uri);
+            Assert.IsTrue(uri.AbsoluteUri.Contains("login_hint"));
+            Assert.IsTrue(uri.AbsoluteUri.Contains("extra=123"));
+            uri = await context.GetAuthorizationRequestUrlAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, UserIdentifier.AnyUser, null, "some");
+            Assert.IsNotNull(uri);
+            Assert.IsFalse(uri.AbsoluteUri.Contains("login_hint"));
+            Assert.IsFalse(uri.AbsoluteUri.Contains("client-request-id="));
+            context.CorrelationId = Guid.NewGuid();
+            uri = await context.GetAuthorizationRequestUrlAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId), "extra", "some");
             Assert.IsNotNull(uri);
             Assert.IsTrue(uri.AbsoluteUri.Contains("client-request-id="));
             uri = await context.GetAuthorizationRequestUrlAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId), "extra=123", "some");
