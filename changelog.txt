@@ -1,3 +1,11 @@
+Version 3.16.0
+==============
+This release includes
+- Fix for WinRT failure when logging an empty UserInfo object (#727).
+- Implement PromptBehavior support for iOS/Android
+- Url encode claims for iOS with Broker (#744)
+- Fix api surface -- Add GetAuthRequestUrlAsync method without claims overload (#740)
+
 Version 3.15.0
 ==============
 This release includes
