@@ -98,9 +98,6 @@
     <PackageReference Include="StrongNamer">
       <Version>0.0.6</Version>
     </PackageReference>
-    <PackageReference Include="Xamarin.Forms">
-      <Version>2.3.4.247</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
