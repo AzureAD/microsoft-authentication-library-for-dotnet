@@ -5,6 +5,9 @@ branches:
 
 image: Visual Studio 2017     
 
+# clone directory
+clone_folder: c:\projects\msal-dotnet
+
 configuration: Release
 
 before_build:

@@ -53,7 +53,7 @@
     <EmbeddedResource Include="Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.6" PrivateAssets="All" />
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0011" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3'">
@@ -139,8 +139,6 @@
     <Compile Include="Platforms\Android\**\*.cs" />
     <AndroidResource Include="Resources\**\*.axml" />
     <AndroidResource Include="Resources\**\*.xml" />
-    <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="23.3.0" />
-    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="23.3.0" />    
   </ItemGroup>
   
   <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
@@ -153,5 +151,13 @@
     <None Update="Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
     <None Update="Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
     <None Update="Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
+    <PackageReference Include="Xamarin.Android.Support.CustomTabs">
+      <Version>25.3.1</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat">
+      <Version>25.3.1</Version>
+    </PackageReference>
   </ItemGroup>
 </Project>
