@@ -98,15 +98,6 @@
     <PackageReference Include="StrongNamer">
       <Version>0.0.6</Version>
     </PackageReference>
-    <PackageReference Include="Xamarin.Android.Support.CustomTabs">
-      <Version>25.3.1</Version>
-    </PackageReference>
-    <PackageReference Include="Xamarin.Android.Support.v4">
-      <Version>25.3.1</Version>
-    </PackageReference>
-    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat">
-      <Version>25.3.1</Version>
-    </PackageReference>
     <PackageReference Include="Xamarin.Forms">
       <Version>2.3.4.247</Version>
     </PackageReference>
