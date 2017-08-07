@@ -7,6 +7,7 @@
     <AssemblyName>Microsoft.IdentityModel.Clients.ActiveDirectory.Platform</AssemblyName>
     <EnableDefaultItems>false</EnableDefaultItems>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <CodeAnalysisRuleSet>ADAL.PCL.CoreCLR.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <DebugType>full</DebugType>
@@ -35,6 +36,7 @@
     <Compile Include="BrokerHelper.cs" />
     <Compile Include="ClientAssertionCertificate.cs" />
     <Compile Include="DeviceAuthHelper.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="WebProxyProvider.cs" />
     <Compile Include="PlatformParameters.cs" />
     <Compile Include="CryptographyHelper.cs" />
@@ -50,5 +52,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="6.2.0.2536" />
   </ItemGroup>
 </Project>

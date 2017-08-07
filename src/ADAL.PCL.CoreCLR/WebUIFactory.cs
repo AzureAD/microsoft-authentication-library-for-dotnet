@@ -34,6 +34,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
         {
             throw new NotImplementedException();
-        }   
+        }
     }
 }

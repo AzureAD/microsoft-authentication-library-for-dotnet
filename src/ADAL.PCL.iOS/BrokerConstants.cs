@@ -28,7 +28,7 @@
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    class BrokerConstants
+    internal static class BrokerConstants
     {
         public const string ChallengeResponseHeader = "Authorization";
 

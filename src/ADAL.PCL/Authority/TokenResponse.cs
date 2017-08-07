@@ -36,7 +36,7 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class TokenResponseClaim
+    internal static class TokenResponseClaim
     {
         public const string Code = "code";
         public const string TokenType = "token_type";

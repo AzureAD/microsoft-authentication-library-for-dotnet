@@ -178,7 +178,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 {
                     if (ModifierKeys == Keys.Shift || ModifierKeys == Keys.Alt || ModifierKeys == Keys.Control)
                     {
-                        int num = ((int) msg.wParam) | (int) ModifierKeys;
+                        int num = (int) msg.wParam | (int) ModifierKeys;
                         Shortcut s = (Shortcut) num;
                         if (shortcutBlacklist.Contains(s))
                         {

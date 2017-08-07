@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             View.BackgroundColor = UIColor.White;
 
-            webView = new UIWebView((CGRect) View.Bounds);
+            webView = new UIWebView(View.Bounds);
             webView.ShouldStartLoad = (wView, request, navType) =>
             {
                 if (request == null)

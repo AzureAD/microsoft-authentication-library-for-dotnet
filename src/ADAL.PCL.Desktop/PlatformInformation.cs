@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (Exception)
             {
-                // ignore the exception as the result is already set to false;
+                // ignore the exception as the result is already set to false
             }
 
             return returnValue;
@@ -207,6 +207,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             [StructLayout(LayoutKind.Sequential)]
             private struct SYSTEM_INFO
             {
+// Justifications: Fields are required to match native structure layout
+#pragma warning disable S1144 // Unused private types or members should be removed
+#pragma warning disable S3459 // Unassigned members should be removed
                 public short wProcessorArchitecture;
                 public short wReserved;
                 public int dwPageSize;
@@ -218,6 +221,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 public int dwAllocationGranularity;
                 public short wProcessorLevel;
                 public short wProcessorRevision;
+#pragma warning restore S1144 // Unused private types or members should be removed
+#pragma warning restore S3459 // Unassigned members should be removed
             }
 
             public const int ErrorSuccess = 0;

@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class AcquireTokenByDeviceCodeHandler : AcquireTokenHandlerBase
     {
-        private DeviceCodeResult deviceCodeResult = null;
+        private readonly DeviceCodeResult deviceCodeResult;
 
         public AcquireTokenByDeviceCodeHandler(RequestData requestData, DeviceCodeResult deviceCodeResult)
             : base(requestData)

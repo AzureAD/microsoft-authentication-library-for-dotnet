@@ -117,8 +117,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 if (this.LoadFromCache)
                 {
-                    PlatformPlugin.Logger.Verbose(CallState, string.Format(CultureInfo.InvariantCulture,
-                    "Loading from cache."));
+                    PlatformPlugin.Logger.Verbose(CallState, "Loading from cache.");
                     CacheQueryData.Authority = Authenticator.Authority;
                     CacheQueryData.Resource = this.Resource;
                     CacheQueryData.ClientId = this.ClientKey.ClientId;

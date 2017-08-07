@@ -27,7 +27,7 @@
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class OAuthParameter
+    internal static class OAuthParameter
     {
         public const string ResponseType = "response_type";
         public const string GrantType = "grant_type";
@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string Prompt = "prompt"; // prompt is not standard oauth2 parameter
     }
 
-    internal class OAuthGrantType
+    internal static class OAuthGrantType
     {
         public const string AuthorizationCode = "authorization_code";
         public const string RefreshToken = "refresh_token";
@@ -63,38 +63,38 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string DeviceCode = "device_code";
     }
 
-    internal class OAuthResponseType
+    internal static class OAuthResponseType
     {
         public const string Code = "code";
     }
 
-    internal class OAuthAssertionType
+    internal static class OAuthAssertionType
     {
         public const string JwtBearer = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     }
 
-    internal class OAuthRequestedTokenUse
+    internal static class OAuthRequestedTokenUse
     {
         public const string OnBehalfOf = "on_behalf_of";
     }
 
-    internal class OAuthHeader
+    internal static class OAuthHeader
     {
         public const string CorrelationId = "client-request-id";
         public const string RequestCorrelationIdInResponse = "return-client-request-id";
     }
 
-    internal class OAuthError
+    internal static class OAuthError
     {
         public const string LoginRequired = "login_required";
     }
 
-    internal class OAuthValue
+    internal static class OAuthValue
     {
         public const string ScopeOpenId = "openid";
     }
 
-    internal class PromptValue
+    internal static class PromptValue
     {
         public const string Login = "login";
         public const string RefreshSession = "refresh_session";

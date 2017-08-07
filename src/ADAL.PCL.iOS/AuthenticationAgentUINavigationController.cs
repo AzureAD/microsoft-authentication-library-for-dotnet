@@ -57,12 +57,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     [Foundation.Register("AuthenticationAgentUINavigationController")]
     internal class AuthenticationAgentUINavigationController : UINavigationController
     {
-        private string url;
-        private string callback;
+        private readonly string url;
+        private readonly string callback;
 
-        private AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod;
+        private readonly AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod;
 
-        private UIStatusBarStyle preferredStatusBarStyle;
+        private readonly UIStatusBarStyle preferredStatusBarStyle;
 
         public AuthenticationAgentUINavigationController(string url, string callback, AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod, UIStatusBarStyle preferredStatusBarStyle)
         {

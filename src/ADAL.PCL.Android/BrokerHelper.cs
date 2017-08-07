@@ -37,12 +37,12 @@ using Java.IO;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     [Android.Runtime.Preserve(AllMembers = true)]
-    class BrokerHelper : IBrokerHelper
+    internal class BrokerHelper : IBrokerHelper
     {
         private static SemaphoreSlim readyForResponse = null;
         private static AuthenticationResultEx resultEx = null;
 
-        private BrokerProxy mBrokerProxy = new BrokerProxy(Application.Context);
+        private readonly BrokerProxy mBrokerProxy = new BrokerProxy(Application.Context);
 
         public IPlatformParameters PlatformParameters { get; set; }
 

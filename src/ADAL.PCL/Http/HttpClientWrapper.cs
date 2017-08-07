@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private readonly string uri;
         private int _timeoutInMilliSeconds = 30000;
-        private long _maxResponseSizeInBytes = 1048576;
+        private readonly long _maxResponseSizeInBytes = 1048576;
 
         public HttpClientWrapper(string uri, CallState callState)
         {

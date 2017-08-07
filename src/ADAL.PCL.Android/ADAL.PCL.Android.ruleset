@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="SonarQube - ADAL.Net dev Sonar way" ToolsVersion="15.0">
+  <Include Path="..\..\sonarqube\adalnet_devcsharp.ruleset" Action="Default" />
+</RuleSet>
