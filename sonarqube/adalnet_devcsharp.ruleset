@@ -3,13 +3,13 @@
   <Rules AnalyzerId="SonarAnalyzer.CSharp" RuleNamespace="SonarAnalyzer.CSharp">
     <Rule Id="S100" Action="None" />
     <Rule Id="S1006" Action="Warning" />
-    <Rule Id="S101" Action="Warning" />
+    <Rule Id="S101" Action="None" />
     <Rule Id="S103" Action="None" />
     <Rule Id="S104" Action="Warning" />
     <Rule Id="S105" Action="None" />
     <Rule Id="S1066" Action="Warning" />
     <Rule Id="S1067" Action="None" />
-    <Rule Id="S107" Action="Warning" />
+    <Rule Id="S107" Action="None" />
     <Rule Id="S108" Action="Warning" />
     <Rule Id="S110" Action="None" />
     <Rule Id="S1104" Action="None" />
