@@ -138,5 +138,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this.UserInfo = new UserInfo(userInfo);
             }
         }
+
+        public String Authority { get; internal set; }
     }
 }

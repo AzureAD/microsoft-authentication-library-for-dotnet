@@ -77,6 +77,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember]
         public string ErrorDescription { get; set; }
 
+        [DataMember]
+        public string CloudInstanceName { get; set; }
+
         public void ParseAuthorizeResponse(string webAuthenticationResult)
         {
             var resultUri = new Uri(webAuthenticationResult);
@@ -110,6 +113,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.Error = AdalError.AuthenticationFailed;
                     this.ErrorDescription = AdalErrorMessage.AuthorizationServerInvalidResponse;
                     this.Status = AuthorizationStatus.UnknownError;
+                }
+
+                if (response.ContainsKey(TokenResponseClaim.CloudInstanceName))
+                {
+                    this.CloudInstanceName = response[TokenResponseClaim.CloudInstanceName];
                 }
             }
             else

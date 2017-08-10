@@ -52,6 +52,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string ErrorDescription = "error_description";
         public const string ErrorCodes = "error_codes";
         public const string Claims = "claims";
+        public const string CloudInstanceName = "cloud_instance_name";
     }
 
     [DataContract]

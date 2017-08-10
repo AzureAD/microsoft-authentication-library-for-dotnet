@@ -19,16 +19,17 @@ namespace Test.ADAL.NET.Unit.Mocks
             ConfigureMockWebUI(authorizationResult, new Dictionary<string, string>());
         }
 
-        public static void ConfigureMockWebUI(AuthorizationResult authorizationResult, Dictionary<string, string> headersToValidate)
+        public static void ConfigureMockWebUI(AuthorizationResult authorizationResult, Dictionary<string, string> queryParamsToValidate)
         {
             MockWebUI webUi = new MockWebUI();
-            webUi.HeadersToValidate = headersToValidate;
+            webUi.QueryParams = queryParamsToValidate;
             webUi.MockResult = authorizationResult;
 
             IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
             mockFactory.CreateAuthenticationDialog(Arg.Any<IPlatformParameters>()).Returns(webUi);
             PlatformPlugin.WebUIFactory = mockFactory;
         }
+
 
         public static Stream GenerateStreamFromString(string s)
         {
@@ -145,7 +146,7 @@ namespace Test.ADAL.NET.Unit.Mocks
                         "\"oid\": \"" + uniqueId + "\"," +
                         "\"upn\": \"" + displayableId + "\"," +
                         "\"sub\": \"werwerewrewrew-Qd80ehIEdFus\"," +
-                        "\"tid\": \"some-tenant-id\"," +
+                        "\"tid\": \"" +  TestConstants.SomeTenantId + "\"," +
                         "\"ver\": \"2.0\"}";
 
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.signature", Base64UrlEncoder.Encode(header), Base64UrlEncoder.Encode(payload));

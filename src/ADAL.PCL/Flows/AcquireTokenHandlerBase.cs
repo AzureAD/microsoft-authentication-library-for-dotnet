@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         protected bool SupportADFS { get; set; }
 
-        protected Authenticator Authenticator { get; private set; }
+        protected Authenticator Authenticator { get; set; }
 
         protected string Resource { get; set; }
 
@@ -180,6 +180,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         this.tokenCache.StoreToCache(ResultEx, this.Authenticator.Authority, this.Resource,
                             this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
                     }
+                }
+                if (ResultEx.Result != null)
+                {
+                    ResultEx.Result.Authority = this.Authenticator.Authority;
                 }
                 await this.PostRunAsync(ResultEx.Result).ConfigureAwait(false);
                 return ResultEx.Result;
@@ -357,7 +361,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        private void ValidateAuthorityType()
+        protected void ValidateAuthorityType()
         {
             if (!this.SupportADFS && this.Authenticator.AuthorityType == AuthorityType.ADFS)
             {

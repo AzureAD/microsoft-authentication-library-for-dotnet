@@ -113,6 +113,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             PlatformPlugin.BrokerHelper.PlatformParameters = authorizationParameters;
         }
 
+        private static string ReplaceHost(string original, string newHost)
+        {
+            return new UriBuilder(original) {Host = "login." + newHost}.Uri.ToString();
+        }
+
         protected override async Task PreTokenRequest()
         {
             await base.PreTokenRequest().ConfigureAwait(false);
@@ -120,6 +125,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
             await this.AcquireAuthorizationAsync().ConfigureAwait(false);
             this.VerifyAuthorizationResult();
+
+            if (!string.IsNullOrEmpty(authorizationResult.CloudInstanceName))
+            {
+                var updatedAuthority = ReplaceHost(Authenticator.Authority,
+                    authorizationResult.CloudInstanceName);
+
+                Authenticator = new Authenticator(updatedAuthority, Authenticator.ValidateAuthority);
+
+                await Authenticator.UpdateFromTemplateAsync(CallState).ConfigureAwait(false);
+                this.ValidateAuthorityType();
+            }
         }
 
         internal async Task AcquireAuthorizationAsync()

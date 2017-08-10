@@ -53,7 +53,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 				{
 					return false;
 				}
-                return pp.UseBroker && UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://"));
+
+                var res = false;
+
+                if (pp.UseBroker)
+                {
+                    pp.CallerViewController.InvokeOnMainThread(() =>
+                    {
+                        res = UIApplication.SharedApplication.CanOpenUrl(new NSUrl("msauth://"));
+                    });
+                }
+
+                return res;
             }
         }
 
