@@ -25,15 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.MSAL.NET.Unit
 {
     [TestClass]
     [DeploymentItem(@"Resources\testCert.crtfile")]
-    //[DeploymentItem(@"Resources\valid.crtfile")]
     public class CryptographyTests
     {
         [TestMethod]
@@ -41,12 +43,12 @@ namespace Test.MSAL.NET.Unit
         public void SignWithCertificate()
         {
             //Tests the cryptography libraries used by MSAL to sign with certificates
-            //var cert = new X509Certificate2("valid.crtfile");
             var cert = new X509Certificate2("testCert.crtfile", "passw0rd!");
             CryptographyHelper helper = new CryptographyHelper();
-            var result = helper.SignWithCertificate("TEST", cert);
-
-            Assert.IsNotNull(result);
+            byte[] result = helper.SignWithCertificate("TEST", cert);
+            string value = Base64UrlHelpers.Encode(result);
+            Assert.IsNotNull(value);
+            Assert.AreEqual("MrknKHbOAVu2iuLHMFSk2SK773H1ysxaAjAPcTXYSfH4P2fUfvzP6aIb9MkBknjoE_aBYtTnQ7jOAvyQETvogdeSH7pRDPhCk2aX_8VIQw0bjo_zBZj5yJYVWQDLIu8XvbuzIGEvVaXKz4jJ1nYM6toun4tM74rEHvwa0ferafmqHWOd5puPhlKH1VVK2RPuNOoKNLWBprVBaAQVJVFOdRcd3iR0INBHykxtOsG0pgo0Q2uQBlKP7KQb7Ox8i_sw-M21BuUzdIdGs_oeUYh0B8s-eIGf34JmHRWMwWCnRWzZgY9YuIjRoaWNqlWYb8ASjKOxzvk99x8eFEYKOjgAcA", value);
         }
     }
 }
