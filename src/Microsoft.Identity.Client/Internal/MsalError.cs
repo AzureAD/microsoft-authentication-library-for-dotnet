@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Internal
     /// <summary>
     /// Error code returned as a property in MsalException
     /// </summary>
-    public static class MsalError
+    internal static class MsalError
     {
         /// <summary>
         /// Authentication failed.
