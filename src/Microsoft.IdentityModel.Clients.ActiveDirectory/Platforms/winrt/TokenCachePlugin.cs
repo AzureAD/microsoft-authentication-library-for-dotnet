@@ -35,7 +35,7 @@ using Windows.Storage;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class TokenCachePlugin
+    internal static class TokenCachePlugin
     {
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
