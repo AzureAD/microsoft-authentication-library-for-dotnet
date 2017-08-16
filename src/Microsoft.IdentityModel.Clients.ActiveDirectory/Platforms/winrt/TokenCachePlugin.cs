@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             byte[] encryptedValue = CryptographyHelper.Encrypt(value);
             containerValues[CacheValueLength] = encryptedValue.Length;
-            if (encryptedValue == null)
+            if (encryptedValue.Length == 0)
             {
                 containerValues[CacheValueSegmentCount] = 1;
                 containerValues[CacheValue + 0] = null;

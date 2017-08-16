@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             if (message == null)
             {
-                return null;
+                return new byte[]{};
             }
 
             DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
