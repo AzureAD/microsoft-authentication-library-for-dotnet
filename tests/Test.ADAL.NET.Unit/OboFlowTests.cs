@@ -48,7 +48,6 @@ namespace Test.ADAL.NET.Unit
     [TestClass]
     public class OboFlowTests
     {
-        private readonly CryptographyHelper _cryptoHelper = new CryptographyHelper();
         private readonly DateTimeOffset _expirationTime = DateTimeOffset.UtcNow + TimeSpan.FromMinutes(30);
         private static readonly string[] _cacheNoise = { "", "different" };
 
@@ -115,7 +114,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(2, context.TokenCache.Count);
 
             //assertion hash should be stored in the cache entry.
-            Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+            Assert.AreEqual(CryptographyHelper.CreateSha256Hash(accessToken),
                 context.TokenCache.tokenCacheDictionary.Values.First(x => x.UserAssertionHash != null).UserAssertionHash);
         }
 
@@ -177,7 +176,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(2, context.TokenCache.Count);
 
             //assertion hash should be stored in the cache entry.
-            Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+            Assert.AreEqual(CryptographyHelper.CreateSha256Hash(accessToken),
                 context.TokenCache.tokenCacheDictionary.Values.First(x => x.UserAssertionHash != null).UserAssertionHash);
         }
 
@@ -245,7 +244,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(3, context.TokenCache.Count);
 
             //assertion hash should be stored in the cache entry.
-            Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+            Assert.AreEqual(CryptographyHelper.CreateSha256Hash(accessToken),
                 context.TokenCache.tokenCacheDictionary.Values.First(x => x.UserAssertionHash != null)
                     .UserAssertionHash);
         }
@@ -279,7 +278,7 @@ namespace Test.ADAL.NET.Unit
                                     UniqueId = cachenoise + TestConstants.DefaultUniqueId
                                 }
                         },
-                    UserAssertionHash = _cryptoHelper.CreateSha256Hash(cachenoise + accessToken)
+                    UserAssertionHash = CryptographyHelper.CreateSha256Hash(cachenoise + accessToken)
                 };
             }
 
@@ -328,7 +327,7 @@ namespace Test.ADAL.NET.Unit
                                     UniqueId = cachenoise + TestConstants.DefaultUniqueId
                                 }
                         },
-                    UserAssertionHash = _cryptoHelper.CreateSha256Hash(cachenoise + accessToken)
+                    UserAssertionHash = CryptographyHelper.CreateSha256Hash(cachenoise + accessToken)
                 };
             }
 
@@ -390,7 +389,7 @@ namespace Test.ADAL.NET.Unit
                                     UniqueId = cachenoise + TestConstants.DefaultUniqueId
                                 }
                         },
-                    UserAssertionHash = _cryptoHelper.CreateSha256Hash(cachenoise + accessToken)
+                    UserAssertionHash = CryptographyHelper.CreateSha256Hash(cachenoise + accessToken)
                 };
             }
 
@@ -411,7 +410,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(2, context.TokenCache.Count);
 
             //assertion hash should be stored in the cache entry.
-            Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+            Assert.AreEqual(CryptographyHelper.CreateSha256Hash(accessToken),
                 context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
         }
 
@@ -443,7 +442,7 @@ namespace Test.ADAL.NET.Unit
                                     UniqueId = cachenoise + TestConstants.DefaultUniqueId
                                 }
                         },
-                    UserAssertionHash = _cryptoHelper.CreateSha256Hash(cachenoise + accessToken)
+                    UserAssertionHash = CryptographyHelper.CreateSha256Hash(cachenoise + accessToken)
                 };
             }
 
@@ -530,7 +529,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(1, context.TokenCache.Count);
 
             //assertion hash should be stored in the cache entry.
-            Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+            Assert.AreEqual(CryptographyHelper.CreateSha256Hash(accessToken),
                 context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
         }
 
@@ -588,7 +587,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(1, context.TokenCache.Count);
 
             //assertion hash should be stored in the cache entry.
-            Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+            Assert.AreEqual(CryptographyHelper.CreateSha256Hash(accessToken),
                 context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
         }
 
@@ -652,7 +651,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(2, context.TokenCache.Count);
 
             //assertion hash should be stored in the cache entry.
-            Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+            Assert.AreEqual(CryptographyHelper.CreateSha256Hash(accessToken),
                 context.TokenCache.tokenCacheDictionary.Values.First(
                     s => s.Result.UserInfo != null && s.Result.UserInfo.DisplayableId.Equals(displayableId2))
                     .UserAssertionHash);
@@ -684,7 +683,7 @@ namespace Test.ADAL.NET.Unit
                                 UniqueId = TestConstants.DefaultUniqueId
                             }
                     },
-                UserAssertionHash = _cryptoHelper.CreateSha256Hash(accessToken)
+                UserAssertionHash = CryptographyHelper.CreateSha256Hash(accessToken)
             };
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
@@ -704,7 +703,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(1, context.TokenCache.Count);
 
             //assertion hash should be stored in the cache entry.
-            Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+            Assert.AreEqual(CryptographyHelper.CreateSha256Hash(accessToken),
                 context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
         }
 
@@ -734,7 +733,7 @@ namespace Test.ADAL.NET.Unit
                                 UniqueId = TestConstants.DefaultUniqueId
                             }
                     },
-                UserAssertionHash = _cryptoHelper.CreateSha256Hash(accessToken + "different")
+                UserAssertionHash = CryptographyHelper.CreateSha256Hash(accessToken + "different")
             };
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
@@ -766,7 +765,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(1, context.TokenCache.Count);
 
             //assertion hash should be stored in the cache entry.
-            Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+            Assert.AreEqual(CryptographyHelper.CreateSha256Hash(accessToken),
                 context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
         }
 
@@ -797,7 +796,7 @@ namespace Test.ADAL.NET.Unit
                                 UniqueId = TestConstants.DefaultUniqueId
                             }
                     },
-                UserAssertionHash = _cryptoHelper.CreateSha256Hash(accessToken)
+                UserAssertionHash = CryptographyHelper.CreateSha256Hash(accessToken)
             };
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
@@ -817,7 +816,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(1, context.TokenCache.Count);
 
             //assertion hash should be stored in the cache entry.
-            Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+            Assert.AreEqual(CryptographyHelper.CreateSha256Hash(accessToken),
                 context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
         }
 
@@ -847,7 +846,7 @@ namespace Test.ADAL.NET.Unit
                                 UniqueId = TestConstants.DefaultUniqueId
                             }
                     },
-                UserAssertionHash = _cryptoHelper.CreateSha256Hash(accessToken + "different")
+                UserAssertionHash = CryptographyHelper.CreateSha256Hash(accessToken + "different")
             };
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
@@ -879,7 +878,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(1, context.TokenCache.Count);
 
             //assertion hash should be stored in the cache entry.
-            Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken),
+            Assert.AreEqual(CryptographyHelper.CreateSha256Hash(accessToken),
                 context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
         }
 
@@ -909,7 +908,7 @@ namespace Test.ADAL.NET.Unit
                                 UniqueId = TestConstants.DefaultUniqueId
                             }
                     },
-                UserAssertionHash = _cryptoHelper.CreateSha256Hash(accessToken)
+                UserAssertionHash = CryptographyHelper.CreateSha256Hash(accessToken)
             };
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
@@ -943,7 +942,7 @@ namespace Test.ADAL.NET.Unit
             //assertion hash should be stored in the cache entry.
             foreach (var value in context.TokenCache.tokenCacheDictionary.Values)
             {
-                Assert.AreEqual(_cryptoHelper.CreateSha256Hash(accessToken), value.UserAssertionHash);
+                Assert.AreEqual(CryptographyHelper.CreateSha256Hash(accessToken), value.UserAssertionHash);
             }
         }
     }

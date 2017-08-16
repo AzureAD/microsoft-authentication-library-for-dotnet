@@ -50,10 +50,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.IdentityModel" />
-    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.IdentityModel.Tokens.Jwt.4.0.1\lib\net45\System.IdentityModel.Tokens.Jwt.dll</HintPath>
-    </Reference>
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Serialization" />
@@ -89,7 +85,6 @@
     <Compile Include="AuthenticationParametersTests.cs" />
     <Compile Include="ClaimsChallengeExceptionTests.cs" />
     <Compile Include="Common\AssertException.cs" />
-    <Compile Include="Common\TokenHelper.cs" />
     <Compile Include="LoggerCallbackTests.cs" />
     <Compile Include="Mocks\MockHelpers.cs" />
     <Compile Include="Mocks\MockHttpMessageHandler.cs" />
@@ -103,16 +98,6 @@
     <Compile Include="TokenCacheUnitTests.cs" />
     <Compile Include="DeviceCodeFlowTests.cs" />
     <Compile Include="UnitTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\ADAL.PCL.Desktop\ADAL.PCL.Desktop.csproj">
-      <Project>{fa2c7f08-3ccb-47c2-b359-627cc96c04a3}</Project>
-      <Name>ADAL.PCL.Desktop</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\ADAL.PCL\ADAL.PCL.csproj">
-      <Project>{94569420-69b5-4031-a975-f5791e3f2f17}</Project>
-      <Name>ADAL.PCL</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="oldcache.serialized">
@@ -137,7 +122,12 @@
       <Link>valid_cert2.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\Microsoft.IdentityModel.Clients.ActiveDirectory.csproj">
+      <Project>{aece489d-9ed4-442d-8d8f-0f383aebb781}</Project>
+      <Name>Microsoft.IdentityModel.Clients.ActiveDirectory</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

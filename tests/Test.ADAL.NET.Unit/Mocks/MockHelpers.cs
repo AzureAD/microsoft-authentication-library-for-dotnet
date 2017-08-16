@@ -27,7 +27,7 @@ namespace Test.ADAL.NET.Unit.Mocks
 
             IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
             mockFactory.CreateAuthenticationDialog(Arg.Any<IPlatformParameters>()).Returns(webUi);
-            PlatformPlugin.WebUIFactory = mockFactory;
+            WebUIFactoryProvider.WebUIFactory = mockFactory;
         }
 
 

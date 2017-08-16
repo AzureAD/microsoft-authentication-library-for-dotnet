@@ -29,7 +29,6 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -1096,21 +1095,6 @@ namespace Test.ADAL.NET.Unit
                     // Check presence of client_assertion in request
                     string encodedJwt;
                     Assert.IsTrue(formsData.TryGetValue("client_assertion", out encodedJwt), "Missing client_assertion from request");
-
-                    // Check assetion is a valid JWT
-                    JwtSecurityToken jwt;
-                    Assert.IsTrue(TokenHelper.TryParseToken(encodedJwt, out jwt), "client_assertion in request is not a valid JWT");
-
-                    // Check payload for correct claims
-                    Assert.AreEqual(1, jwt.Audiences.Count(), "Only expected one audience");
-                    Assert.AreEqual(expectedAudience, jwt.Audiences.Single(), "Unexpected audience");
-                    Assert.AreEqual(TestConstants.DefaultClientId, jwt.Issuer, "Unexpected issuer");
-
-                    // Check header for correct algorithm and certificate
-                    Assert.AreEqual("RS256", jwt.SignatureAlgorithm, true, "Unexpected signature algorithm");
-                    X509ThumbprintKeyIdentifierClause certThumbprintClause;
-                    Assert.IsTrue(jwt.Header.SigningKeyIdentifier.TryFind(out certThumbprintClause), "Header does not contain X509 certificate thumbprint");
-                    Assert.IsTrue(certThumbprintClause.Matches(certificate), "Unexpected certificate");
                 }
             });
 
