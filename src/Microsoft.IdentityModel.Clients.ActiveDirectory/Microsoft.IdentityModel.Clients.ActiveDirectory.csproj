@@ -50,12 +50,9 @@
   <ItemGroup>
     <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
-    <Compile Remove="Features\WsTrustAuth\**" />
     <Compile Remove="Platforms\**\*.*" />
     <Compile Remove="Features\**\*.*" />
     <Compile Remove="Resources\**\*.*" />
-    <EmbeddedResource Remove="Features\WsTrustAuth\**" />
-    <None Remove="Features\WsTrustAuth\**" />
     <EmbeddedResource Include="Properties\Microsoft.IdentityModel.Clients.ActiveDirectory.rd.xml" />
   </ItemGroup>
   <ItemGroup>

@@ -36,12 +36,12 @@ using Windows.Storage.Streams;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    internal class CryptographyHelper : ICryptographyHelper
+    internal class CryptographyHelper
     {
         // This descriptor does not require the enterprise authentication capability.
         private const string ProtectionDescriptor = "LOCAL=user";
 
-        public string CreateSha256Hash(string input)
+        public static string CreateSha256Hash(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
             {

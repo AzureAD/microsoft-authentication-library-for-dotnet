@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             set { this._timeoutInMilliSeconds = value; }
 
-            get => this._timeoutInMilliSeconds;
+            get { return this._timeoutInMilliSeconds; }
         }
 
         public async Task<IHttpWebResponse> GetResponseAsync()

@@ -28,10 +28,8 @@
 using System;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-using TestApp.PCL;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Test.ADAL.Common;
 
 
 namespace AdalUniversalTestApp
@@ -41,18 +39,14 @@ namespace AdalUniversalTestApp
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private TokenBroker tokenBroker;
-
         public MainPage()
         {
             this.InitializeComponent();
-            tokenBroker = new TokenBroker();
         }
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
-            this.AccessToken.Text = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(PromptBehavior.Auto, false));
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
@@ -63,15 +57,11 @@ namespace AdalUniversalTestApp
         private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
-            string token = await tokenBroker.GetTokenInteractiveWithMsAppAsync(new PlatformParameters(PromptBehavior.Auto, false));
-            this.AccessToken.Text = token;
         }
 
         private async void Button_Click_3(object sender, RoutedEventArgs e)
         {
             this.AccessToken.Text = string.Empty;
-            string token = await tokenBroker.GetTokenWithClientCredentialAsync();
-            this.AccessToken.Text = token;
         }
     }
 }

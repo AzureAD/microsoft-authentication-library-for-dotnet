@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 catch (Exception ex)
                 {
-                    CallState.Logger.Warning(null, "Failed to load cache: " + ex);
+                    CallState.Default.Logger.Warning(null, "Failed to load cache: " + ex);
                     // Ignore as the cache seems to be corrupt
                 }
             }
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
                 catch (Exception ex)
                 {
-                    CallState.Logger.Warning(null, "Failed to save cache: " + ex);
+                    CallState.Default.Logger.Warning(null, "Failed to save cache: " + ex);
                 }
             }
         }
