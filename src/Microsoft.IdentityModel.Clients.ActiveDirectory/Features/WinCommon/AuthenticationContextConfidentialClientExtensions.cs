@@ -42,6 +42,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Acquires security token without asking for user credential.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientCredential">The client credential to use for token acquisition.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
@@ -56,6 +57,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Acquires security token without asking for user credential.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
@@ -70,6 +72,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Acquires security token without asking for user credential.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
@@ -85,6 +88,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Acquires security token from the authority.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userAssertion">The assertion to use for token acquisition.</param>
@@ -98,6 +102,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Acquires security token from the authority.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientCredential">The client credential to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
@@ -110,6 +115,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Acquires security token from the authority.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
@@ -124,6 +130,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Acquires security token from the authority.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
@@ -137,6 +144,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Acquires security token from the authority using authorization code previously received.
         /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         /// <param name="clientCredential">The credential to use for token acquisition.</param>
@@ -153,6 +161,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Acquires security token from the authority using an authorization code previously received.
         /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         /// <param name="clientCredential">The credential to use for token acquisition.</param>
@@ -170,6 +179,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Acquires security token from the authority using an authorization code previously received.
         /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
         /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
@@ -186,6 +196,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Acquires security token from the authority using an authorization code previously received.
         /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
         /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
@@ -203,6 +214,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Acquires security token from the authority using an authorization code previously received.
         /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
@@ -218,6 +230,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Acquires security token from the authority using an authorization code previously received.
         /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
@@ -233,6 +246,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Acquires an access token from the authority on behalf of a user. It requires using a user token previously received.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientCredential">The client credential to use for token acquisition.</param>
         /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
@@ -248,6 +262,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Acquires an access token from the authority on behalf of a user. It requires using a user token previously received.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
@@ -263,6 +278,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Acquires an access token from the authority on behalf of a user. It requires using a user token previously received.
         /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
         /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>

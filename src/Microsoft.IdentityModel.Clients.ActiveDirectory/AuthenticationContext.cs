@@ -196,7 +196,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="parameters">Instance of PlatformParameters containing platform specific arguments and information.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <param name="claims">Additional claims that are needed for authentication. Acquired from the AdalClaimChallengeException</param>
         /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri,

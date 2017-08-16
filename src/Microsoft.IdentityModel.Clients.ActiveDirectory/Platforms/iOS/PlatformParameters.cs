@@ -37,6 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// Additional parameters used in acquiring user's authorization
     /// </summary>
+    [CLSCompliant(false)]
     public class PlatformParameters : IPlatformParameters
     {
         private PlatformParameters()

@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Globalization;
 using Android.App;
 using Android.Content;
@@ -34,6 +35,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// Static class that consumes the response from the Authentication flow and continues token acquisition. This class should be called in OnActivityResult() of the activity doing authentication.
     /// </summary>
+    [CLSCompliant(false)]
     public static class AuthenticationAgentContinuationHelper
     {
         /// <summary>

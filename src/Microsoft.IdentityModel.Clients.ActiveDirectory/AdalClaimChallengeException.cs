@@ -41,6 +41,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             Claims = claims;
         }
 
-        public string Claims { get; set; }
+        /// <summary>
+        /// Claims challenge returned from the STS. This value should be passed back to the API caller.
+        /// </summary>
+        public string Claims { get; internal set; }
     }
 }
