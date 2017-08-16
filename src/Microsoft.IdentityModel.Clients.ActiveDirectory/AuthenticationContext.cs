@@ -192,168 +192,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Acquires security token from the authority.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="userAssertion">The assertion to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId,
-            UserAssertion userAssertion)
-        {
-            return await this.AcquireTokenCommonAsync(resource, clientId, userAssertion).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientCredential">The client credential to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientCredential clientCredential)
-        {
-            return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCredential))
-                .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource,
-            IClientAssertionCertificate clientCertificate)
-        {
-            return await this
-                .AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCertificate, this.Authenticator))
-                .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientAssertion clientAssertion)
-        {
-            return await this.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientAssertion))
-                .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority using authorization code previously received.
-        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
-        /// </summary>
-        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
-        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <param name="clientCredential">The credential to use for token acquisition.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
-            Uri redirectUri, ClientCredential clientCredential)
-        {
-            return await this
-                .AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri,
-                    new ClientKey(clientCredential), null).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority using an authorization code previously received.
-        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
-        /// </summary>
-        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
-        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <param name="clientCredential">The credential to use for token acquisition.</param>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. It can be null if provided earlier to acquire authorizationCode.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
-            Uri redirectUri, ClientCredential clientCredential, string resource)
-        {
-            return await this
-                .AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri,
-                    new ClientKey(clientCredential), resource).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority using an authorization code previously received.
-        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
-        /// </summary>
-        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
-        /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
-        /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
-            Uri redirectUri, ClientAssertion clientAssertion)
-        {
-            return await this
-                .AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri,
-                    new ClientKey(clientAssertion), null).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority using an authorization code previously received.
-        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
-        /// </summary>
-        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
-        /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
-        /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. It can be null if provided earlier to acquire authorizationCode.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
-            Uri redirectUri, ClientAssertion clientAssertion, string resource)
-        {
-            return await this
-                .AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri,
-                    new ClientKey(clientAssertion), resource).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority using an authorization code previously received.
-        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
-        /// </summary>
-        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
-        /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
-        /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
-            Uri redirectUri, IClientAssertionCertificate clientCertificate)
-        {
-            return await this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri,
-                new ClientKey(clientCertificate, this.Authenticator), null).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority using an authorization code previously received.
-        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
-        /// </summary>
-        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
-        /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
-        /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. It can be null if provided earlier to acquire authorizationCode.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
-            Uri redirectUri, IClientAssertionCertificate clientCertificate, string resource)
-        {
-            return await this.AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri,
-                new ClientKey(clientCertificate, this.Authenticator), resource).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires an access token from the authority on behalf of a user. It requires using a user token previously received.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientCredential">The client credential to use for token acquisition.</param>
-        /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientCredential clientCredential,
-            UserAssertion userAssertion)
-        {
-            return await this.AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientCredential), userAssertion)
-                .ConfigureAwait(false);
-        }
-
-        /// <summary>
         /// Acquires an access token from the authority on behalf of a user, passing in the necessary claims for authentication. It requires using a user token previously received.
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
@@ -368,35 +206,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await this.AcquireTokenWithClaimsCommonAsync(resource, new ClientKey(clientId), redirectUri,
                     parameters,
                     userId, extraQueryParameters, this.CreateWebAuthenticationDialog(parameters), claims)
-                .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires an access token from the authority on behalf of a user. It requires using a user token previously received.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
-        /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource,
-            IClientAssertionCertificate clientCertificate, UserAssertion userAssertion)
-        {
-            return await this
-                .AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientCertificate, this.Authenticator),
-                    userAssertion).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires an access token from the authority on behalf of a user. It requires using a user token previously received.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
-        /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
-        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientAssertion clientAssertion,
-            UserAssertion userAssertion)
-        {
-            return await this.AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientAssertion), userAssertion)
                 .ConfigureAwait(false);
         }
 
@@ -437,48 +246,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             UserIdentifier userId, IPlatformParameters parameters)
         {
             return await this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientId), userId, parameters)
-                .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token without asking for user credential.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientCredential">The client credential to use for token acquisition.</param>
-        /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource,
-            ClientCredential clientCredential, UserIdentifier userId)
-        {
-            return await this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientCredential), userId, null)
-                .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token without asking for user credential.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
-        /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource,
-            IClientAssertionCertificate clientCertificate, UserIdentifier userId)
-        {
-            return await this.AcquireTokenSilentCommonAsync(resource,
-                new ClientKey(clientCertificate, this.Authenticator), userId, null).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token without asking for user credential.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
-        /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource,
-            ClientAssertion clientAssertion, UserIdentifier userId)
-        {
-            return await this.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientAssertion), userId, null)
                 .ConfigureAwait(false);
         }
 
@@ -575,7 +342,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 extraQueryParameters).ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode,
+        internal async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode,
             Uri redirectUri, ClientKey clientKey, string resource)
         {
             const string nullResource = "null_resource_as_optional";
@@ -595,7 +362,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(string resource, ClientKey clientKey)
+        internal async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(string resource, ClientKey clientKey)
         {
             RequestData requestData = new RequestData
             {
@@ -610,7 +377,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(string resource, ClientKey clientKey,
+        internal async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(string resource, ClientKey clientKey,
             UserAssertion userAssertion)
         {
             RequestData requestData = new RequestData
@@ -665,7 +432,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId,
+        internal async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId,
             UserAssertion userAssertion)
         {
             RequestData requestData = new RequestData
@@ -697,7 +464,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string resource, ClientKey clientKey,
+        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(string resource, ClientKey clientKey,
             UserIdentifier userId, IPlatformParameters parameters)
         {
             RequestData requestData = new RequestData
