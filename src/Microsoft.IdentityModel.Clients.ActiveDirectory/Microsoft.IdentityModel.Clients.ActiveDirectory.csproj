@@ -9,25 +9,22 @@
 
   <PropertyGroup>
     <TargetFrameworks>net45;netstandard1.1;netstandard1.3;MonoAndroid7;Xamarin.iOS10</TargetFrameworks>        
-    <Authors>Microsoft Corp.</Authors>
-    <PackageTitle>Active Directory Authentication Library</PackageTitle>
-    <PackageLicenseUrl>https://go.microsoft.com/fwlink/?linkid=844762</PackageLicenseUrl>
-    <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
-    <MinClientVersion>2.12</MinClientVersion>
-    <Description>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides a .NET Standard class library with easy to use authentication functionality for your .NET client on various platforms including Windows desktop, Windows Store, Xamarin iOS and Xamarin Android by taking advantage of Windows Server Active Directory and Azure Active Directory.</Description>
-    <Summary>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides easy to use authentication functionality for your .NET based client by taking advantage of Windows Server Active Directory and Azure Active Directory.</Summary>
-    <Copyright>(C) Microsoft Corporation. All rights reserved.</Copyright>
-    <PackageTags>Active Directory Authentication Library, ADAL, Active Directory, Azure Active Directory, AD, AAD, Identity, Authentication, .NET, Windows Store, Xamarin iOS, Xamarin Android</PackageTags>
     <Product>Microsoft.IdentityModel.Clients.ActiveDirectory ($(TargetFramework))</Product>
-    <IncludeSymbols>true</IncludeSymbols>
     <GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
 	<DelaySign>true</DelaySign>
     <!-- Workaround until Xamarin supports PPDB -->
     <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
     <DebugType>full</DebugType>
-  </PropertyGroup>
+  
+
+</PropertyGroup>
  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
@@ -57,7 +54,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.6" PrivateAssets="All" />
-    <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3'">
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
