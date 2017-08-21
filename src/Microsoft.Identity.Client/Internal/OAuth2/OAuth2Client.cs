@@ -144,7 +144,10 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                     StringComparison.OrdinalIgnoreCase))
                 {
                     throw new MsalUiRequiredException(MsalUiRequiredException.InvalidGrantError,
-                        tokenResponse.ErrorDescription);
+                        tokenResponse.ErrorDescription)
+                    {
+                        Claims = tokenResponse.Claims
+                    };
                 }
 
                 serviceEx = new MsalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, (int)response.StatusCode, tokenResponse.Claims, null)

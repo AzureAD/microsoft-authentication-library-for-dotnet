@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        public string Claims { get; }
+        public string Claims { get; internal set; }
         
         /// <summary>
         /// Raw response body received from the server.
