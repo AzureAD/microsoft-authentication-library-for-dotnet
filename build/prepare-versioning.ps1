@@ -9,7 +9,7 @@ $hash = git rev-parse HEAD
 
 Write-Host "=========================="
 Write-Host "Versioning assembly info file..."
-$filename = "src\ADAL.Common\CommonAssemblyInfo.cs"
+$filename = "src\Microsoft.IdentityModel.Clients.ActiveDirectory\Properties\AssemblyInfo.cs"
 $content = Get-Content $filename
 $newContent = $content -replace "Microsoft Open Technologies", "Microsoft Corporation"
 $newContent = $newContent + "`n" + "[assembly: AssemblyInformationalVersionAttribute(""$hash"")]"
@@ -32,6 +32,12 @@ Write-Host "Modifying:" $filename;
 Write-Host "Setting assembly version attribute:" $assemblyVersion;
 
 $nugetVersion = "{0}.{1}.{2}" -f ($versionTokens[0], $versionTokens[1], $versionTokens[2]);
+
+if ($env:BUILD_SOURCEBRANCHNAME -eq "dev")
+{
+	$nugetVersion = $nugetVersion + "-alpha";
+}
+
 
 Write-Host "=========================="
 Write-Host "Versioning .nuspec file..."
