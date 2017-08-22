@@ -35,7 +35,7 @@ $nugetVersion = "{0}.{1}.{2}" -f ($versionTokens[0], $versionTokens[1], $version
 
 if ($env:BUILD_SOURCEBRANCHNAME -eq "dev")
 {
-	$nugetVersion = $nugetVersion + "-alpha";
+	$nugetVersion = $nugetVersion + "-alpha" + $env:BUILD_BUILDNUMBER;
 }
 
 
