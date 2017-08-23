@@ -63,11 +63,19 @@
     <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netstandard1.3\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb">
       <TargetFolder>netstandard1.3</TargetFolder>
     </SourceFile>
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netstandard1.3\Microsoft.IdentityModel.Clients.ActiveDirectory.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+      <TargetFolder>netstandard1.3</TargetFolder>
+    </SourceFile>
 
     <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netstandard1.1\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
       <TargetFolder>netstandard1.1</TargetFolder>
     </SourceFile>
     <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netstandard1.1\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb">
+      <TargetFolder>netstandard1.1</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netstandard1.1\Microsoft.IdentityModel.Clients.ActiveDirectory.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
       <TargetFolder>netstandard1.1</TargetFolder>
     </SourceFile>
 
