@@ -33,8 +33,23 @@ namespace WinFormsAutomationApp
                 }
                 else if (input.ContainsKey("user_identifier") && input.ContainsKey("user_identifier_type"))
                 {
-                    UserIdentifierType userIdentifierType;
-                    UserIdentifierType.TryParse(input["user_identifier_type"], out userIdentifierType);
+                    // user identifier type defaults to RequiredDisplayableId 
+                    UserIdentifierType userIdentifierType = UserIdentifierType.RequiredDisplayableId;
+                    if (string.Equals(input["user_identifier_type"], "unique_id",
+                        StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        userIdentifierType = UserIdentifierType.UniqueId;
+                    }
+                     else if (string.Equals(input["user_identifier_type"], "optional_displayable",
+                        StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        userIdentifierType = UserIdentifierType.OptionalDisplayableId;
+                    }
+                    else if (string.Equals(input["user_identifier_type"], "required_displayable",
+                        StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        userIdentifierType = UserIdentifierType.RequiredDisplayableId;
+                    }
                     string prompt = input.ContainsKey("prompt_behavior") ? input["prompt_behavior"] : null;
                     result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
                         GetPlatformParametersInstance(prompt), 
