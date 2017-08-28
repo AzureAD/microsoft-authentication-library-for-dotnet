@@ -52,7 +52,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string ErrorDescription = "error_description";
         public const string ErrorCodes = "error_codes";
         public const string Claims = "claims";
-        public const string CloudInstanceName = "cloud_instance_name";
+        public const string CloudInstanceHost = "cloud_instance_host_name";
+        public const string Authority = "authority";
     }
 
     [DataContract]
@@ -102,6 +103,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataMember(Name = TokenResponseClaim.Claims, IsRequired = false)]
         public string Claims { get; set; }
 
+        public string Authority { get; set; }
+
         internal static TokenResponse CreateFromBrokerResponse(IDictionary<string, string> responseDictionary)
         {
             if (responseDictionary.ContainsKey(TokenResponseClaim.ErrorDescription))
@@ -115,6 +118,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             return new TokenResponse
             {
+                Authority = responseDictionary.ContainsKey("authority") ? EncodingHelper.UrlDecode(responseDictionary["authority"]) : null,
                 AccessToken = responseDictionary["access_token"],
                 RefreshToken = responseDictionary["refresh_token"],
                 IdTokenString = responseDictionary["id_token"],
@@ -251,6 +255,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             PasswordExpiresOn = passwordExpiresOffest,
                             PasswordChangeUrl = changePasswordUri
                         });
+
+                    result.Authority = Authority;
                 }
 
                 resultEx = new AuthenticationResultEx

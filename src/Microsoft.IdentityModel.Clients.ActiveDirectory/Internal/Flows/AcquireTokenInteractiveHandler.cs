@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static string ReplaceHost(string original, string newHost)
         {
-            return new UriBuilder(original) {Host = "login." + newHost}.Uri.ToString();
+            return new UriBuilder(original) {Host = newHost}.Uri.ToString();
         }
 
         protected override async Task PreTokenRequest()
@@ -126,15 +126,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             await this.AcquireAuthorizationAsync().ConfigureAwait(false);
             this.VerifyAuthorizationResult();
 
-            if (!string.IsNullOrEmpty(authorizationResult.CloudInstanceName))
+            if (!string.IsNullOrEmpty(authorizationResult.CloudInstanceHost))
             {
-                var updatedAuthority = ReplaceHost(Authenticator.Authority,
-                    authorizationResult.CloudInstanceName);
+                var updatedAuthority = ReplaceHost(Authenticator.Authority, authorizationResult.CloudInstanceHost);
 
-                Authenticator = new Authenticator(updatedAuthority, Authenticator.ValidateAuthority);
-
-                await Authenticator.UpdateFromTemplateAsync(CallState).ConfigureAwait(false);
-                this.ValidateAuthorityType();
+                await UpdateAuthority(updatedAuthority).ConfigureAwait(false);
             }
         }
 
@@ -157,9 +153,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             requestParameters[OAuthParameter.RedirectUri] = this.redirectUriRequestParameter;
         }
 
-        protected override void PostTokenRequest(AuthenticationResultEx resultEx)
+        protected override async Task PostTokenRequest(AuthenticationResultEx resultEx)
         {
-            base.PostTokenRequest(resultEx);
+            await base.PostTokenRequest(resultEx).ConfigureAwait(false);
             if ((this.DisplayableId == null && this.UniqueId == null) || this.UserIdentifierType == UserIdentifierType.OptionalDisplayableId)
             {
                 return;

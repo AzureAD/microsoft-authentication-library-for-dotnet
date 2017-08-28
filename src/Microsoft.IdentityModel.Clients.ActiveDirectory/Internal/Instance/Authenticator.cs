@@ -43,9 +43,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static readonly AuthenticatorTemplateList AuthenticatorTemplateList = new AuthenticatorTemplateList();
 
-        private bool updatedFromTemplate; 
+        private bool updatedFromTemplate;
 
-        public Authenticator(string authority, bool validateAuthority)
+        private void Init(string authority, bool validateAuthority)
         {
             this.Authority = CanonicalizeUri(authority);
 
@@ -57,6 +57,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.ValidateAuthority = validateAuthority;
+        }
+
+        public Authenticator(string authority, bool validateAuthority)
+        {
+            Init(authority, validateAuthority);
+        }
+
+        public async Task UpdateAuthority(string authority, CallState callState)
+        {
+            Init(authority, this.ValidateAuthority);
+
+            updatedFromTemplate = false;
+            await UpdateFromTemplateAsync(callState).ConfigureAwait(false);
         }
 
         public string Authority { get; private set; }

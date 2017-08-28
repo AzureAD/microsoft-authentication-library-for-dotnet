@@ -169,15 +169,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         throw ResultEx.Exception;
                     }
 
-                    this.PostTokenRequest(ResultEx);
+                    await this.PostTokenRequest(ResultEx).ConfigureAwait(false);
+
                     StoreResultExToCache(ref notifiedBeforeAccessCache);
                 }
-
-                if (ResultEx.Result != null)
-                {
-                    ResultEx.Result.Authority = this.Authenticator.Authority;
-                }
-
                 await this.PostRunAsync(ResultEx.Result).ConfigureAwait(false);
                 return ResultEx.Result;
             }
@@ -261,9 +256,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return CompletedTask;
         }
 
-        protected virtual void PostTokenRequest(AuthenticationResultEx result)
+        protected async Task UpdateAuthority(string updatedAuthority)
         {
-            this.Authenticator.UpdateTenantId(result.Result.TenantId);
+            if (!Authenticator.Authority.Equals(updatedAuthority))
+            {
+                await Authenticator.UpdateAuthority(updatedAuthority, this.CallState).ConfigureAwait(false);
+                this.ValidateAuthorityType();
+            }
+        }
+
+        protected virtual async Task PostTokenRequest(AuthenticationResultEx resultEx)
+        {
+            // if broker returned Authority update Authenticator
+            if (!string.IsNullOrEmpty(resultEx.Result.Authority)) 
+            {
+                await UpdateAuthority(resultEx.Result.Authority).ConfigureAwait(false);
+            }
+
+            this.Authenticator.UpdateTenantId(resultEx.Result.TenantId);
+
+            resultEx.Result.Authority = Authenticator.Authority;
         }
 
         protected abstract void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters);
@@ -307,6 +319,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     newResultEx = await this.SendTokenRequestByRefreshTokenAsync(result.RefreshToken)
                         .ConfigureAwait(false);
                     this.Authenticator.UpdateTenantId(result.Result.TenantId);
+
+                    newResultEx.Result.Authority = Authenticator.Authority;
 
                     if (newResultEx.Result.IdToken == null)
                     {

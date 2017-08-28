@@ -193,16 +193,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             else
             {
-                string accessToken = data.GetStringExtra(BrokerConstants.AccountAccessToken);
-                DateTimeOffset expiresOn = BrokerProxy.ConvertFromTimeT(data.GetLongExtra(BrokerConstants.AccountExpireDate, 0));
-                UserInfo userInfo = BrokerProxy.GetUserInfoFromBrokerResult(data.Extras);
-                resultEx = new AuthenticationResultEx
+                var tokenResponse = new TokenResponse
                 {
-                    Result = new AuthenticationResult("Bearer", accessToken, expiresOn)
-                    {
-                        UserInfo = userInfo
-                    }
+                    Authority = data.GetStringExtra(BrokerConstants.AccountAuthority),
+                    AccessToken = data.GetStringExtra(BrokerConstants.AccountAccessToken),
+                    IdTokenString = data.GetStringExtra(BrokerConstants.AccountIdToken),
+                    TokenType = "Bearer",
+                    ExpiresOn = data.GetLongExtra(BrokerConstants.AccountExpireDate, 0)
                 };
+
+                resultEx = tokenResponse.GetResult(BrokerProxy.ConvertFromTimeT(tokenResponse.ExpiresOn),
+                    BrokerProxy.ConvertFromTimeT(tokenResponse.ExpiresOn));
             }
 
             readyForResponse.Release();

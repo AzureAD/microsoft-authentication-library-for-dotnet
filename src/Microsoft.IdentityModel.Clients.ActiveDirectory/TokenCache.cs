@@ -422,6 +422,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                     if (resultEx != null)
                     {
+                        resultEx.Result.Authority = cacheKey.Authority;
                         callState.Logger.Information(callState,
                             "A matching item (access token or refresh token or both) was found in the cache");
                     }
@@ -532,9 +533,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> itemsForAllTenants = this.QueryCache(
                         null, cacheQueryData.ClientId, cacheQueryData.SubjectType, cacheQueryData.UniqueId,
                         cacheQueryData.DisplayableId, cacheQueryData.AssertionHash);
-                    if (itemsForAllTenants.Count != 0)
+
+                    List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> cloudSpecificItemsForAllTenants =
+                        itemsForAllTenants.Where(item => IsSameCloud(item.Key.Authority, cacheQueryData.Authority)).ToList();
+
+                    if (cloudSpecificItemsForAllTenants.Count != 0)
                     {
-                        returnValue = itemsForAllTenants.First();
+                        returnValue = cloudSpecificItemsForAllTenants.First();
                     }
 
                     // check if the token was issued by AAD
@@ -547,6 +552,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                 return returnValue;
             }
+        }
+
+        private static bool IsSameCloud(string authority, string authority1)
+        {
+            return new Uri(authority).Host.Equals(new Uri(authority1).Host);
         }
 
         /// <summary>

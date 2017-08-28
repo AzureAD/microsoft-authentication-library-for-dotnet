@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -69,9 +70,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             requestParameters[OAuthParameter.RedirectUri] = this.redirectUri.OriginalString;
         }
 
-        protected override void PostTokenRequest(AuthenticationResultEx resultEx)
+        protected override async Task PostTokenRequest(AuthenticationResultEx resultEx)
         {
-            base.PostTokenRequest(resultEx);
+            await base.PostTokenRequest(resultEx).ConfigureAwait(false);
             UserInfo userInfo = resultEx.Result.UserInfo;
             this.UniqueId = (userInfo == null) ? null : userInfo.UniqueId;
             this.DisplayableId = (userInfo == null) ? null : userInfo.DisplayableId;

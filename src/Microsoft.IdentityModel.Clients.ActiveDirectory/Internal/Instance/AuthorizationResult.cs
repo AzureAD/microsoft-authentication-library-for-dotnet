@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string ErrorDescription { get; set; }
 
         [DataMember]
-        public string CloudInstanceName { get; set; }
+        public string CloudInstanceHost { get; set; }
 
         public void ParseAuthorizeResponse(string webAuthenticationResult)
         {
@@ -115,9 +115,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     this.Status = AuthorizationStatus.UnknownError;
                 }
 
-                if (response.ContainsKey(TokenResponseClaim.CloudInstanceName))
+                if (response.ContainsKey(TokenResponseClaim.CloudInstanceHost))
                 {
-                    this.CloudInstanceName = response[TokenResponseClaim.CloudInstanceName];
+                    this.CloudInstanceHost = response[TokenResponseClaim.CloudInstanceHost];
                 }
             }
             else
