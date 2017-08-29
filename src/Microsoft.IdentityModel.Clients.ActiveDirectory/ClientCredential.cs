@@ -55,8 +55,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.ClientSecret = clientSecret;
         }
 
+#if !WINDOWS_APP
         /// <summary>
-        /// Constructor to create credential with client id and secret
+        /// Constructor to create credential with client id and secret. This is only available on desktop.
         /// </summary>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="secureClientSecret">Secure secret of the client requesting the token.</param>
@@ -75,6 +76,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             this.ClientId = clientId;
             this.SecureClientSecret = secureClientSecret;
         }
+#endif
 
         /// <summary>
         /// Gets the identifier of the client requesting the token.

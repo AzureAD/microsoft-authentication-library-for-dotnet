@@ -39,6 +39,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     public static class AuthenticationContextConfidentialClientExtensions
     {
 
+#if !WINDOWS_APP
         /// <summary>
         /// Acquires security token without asking for user credential.
         /// </summary>
@@ -81,62 +82,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             ClientAssertion clientAssertion, UserIdentifier userId)
         {
             return await ctx.AcquireTokenSilentCommonAsync(resource, new ClientKey(clientAssertion), userId, null)
-                .ConfigureAwait(false);
-        }
-
-
-        /// <summary>
-        /// Acquires security token from the authority.
-        /// </summary>
-        /// <param name="ctx">Authentication context instance</param>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="userAssertion">The assertion to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public static async Task<AuthenticationResult> AcquireTokenAsync(this AuthenticationContext ctx, string resource, string clientId,
-            UserAssertion userAssertion)
-        {
-            return await ctx.AcquireTokenCommonAsync(resource, clientId, userAssertion).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority.
-        /// </summary>
-        /// <param name="ctx">Authentication context instance</param>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientCredential">The client credential to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public static async Task<AuthenticationResult> AcquireTokenAsync(this AuthenticationContext ctx, string resource, ClientCredential clientCredential)
-        {
-            return await ctx.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCredential))
-                .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority.
-        /// </summary>
-        /// <param name="ctx">Authentication context instance</param>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public static async Task<AuthenticationResult> AcquireTokenAsync(this AuthenticationContext ctx, string resource,
-            IClientAssertionCertificate clientCertificate)
-        {
-            return await ctx
-                .AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCertificate, ctx.Authenticator))
-                .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Acquires security token from the authority.
-        /// </summary>
-        /// <param name="ctx">Authentication context instance</param>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
-        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
-        public static async Task<AuthenticationResult> AcquireTokenAsync(this AuthenticationContext ctx, string resource, ClientAssertion clientAssertion)
-        {
-            return await ctx.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientAssertion))
                 .ConfigureAwait(false);
         }
 
@@ -291,5 +236,60 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
 
+        /// <summary>
+        /// Acquires security token from the authority.
+        /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="userAssertion">The assertion to use for token acquisition.</param>
+        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
+        public static async Task<AuthenticationResult> AcquireTokenAsync(this AuthenticationContext ctx, string resource, string clientId,
+            UserAssertion userAssertion)
+        {
+            return await ctx.AcquireTokenCommonAsync(resource, clientId, userAssertion).ConfigureAwait(false);
+        }
+        
+        /// <summary>
+        /// Acquires security token from the authority.
+        /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
+        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
+        public static async Task<AuthenticationResult> AcquireTokenAsync(this AuthenticationContext ctx, string resource,
+            IClientAssertionCertificate clientCertificate)
+        {
+            return await ctx
+                .AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCertificate, ctx.Authenticator))
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority.
+        /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
+        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
+        public static async Task<AuthenticationResult> AcquireTokenAsync(this AuthenticationContext ctx, string resource, ClientAssertion clientAssertion)
+        {
+            return await ctx.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientAssertion))
+                .ConfigureAwait(false);
+        }
+#endif
+
+        /// <summary>
+        /// Acquires security token from the authority.
+        /// </summary>
+        /// <param name="ctx">Authentication context instance</param>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientCredential">The client credential to use for token acquisition.</param>
+        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
+        public static async Task<AuthenticationResult> AcquireTokenAsync(this AuthenticationContext ctx, string resource, ClientCredential clientCredential)
+        {
+            return await ctx.AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCredential))
+                .ConfigureAwait(false);
+        }
     }
 }
