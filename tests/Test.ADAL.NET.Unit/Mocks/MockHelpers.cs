@@ -92,6 +92,18 @@ namespace Test.ADAL.NET.Unit.Mocks
             return responseMessage;
         }
 
+        public static HttpResponseMessage CreateCustomHeaderFailureResponseMessage(IEnumerable<KeyValuePair<string, string>> headers)
+        {
+            HttpResponseMessage responseMessage = CreateHttpErrorResponse();
+
+            foreach (KeyValuePair<string, string> header in headers)
+            {
+                responseMessage.Headers.Add(header.Key, header.Value);
+            }
+
+            return responseMessage;
+        }
+
         public static HttpResponseMessage CreateResiliencyMessage(HttpStatusCode statusCode)
         {
             HttpResponseMessage responseMessage = null;

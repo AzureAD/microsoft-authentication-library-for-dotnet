@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -148,15 +149,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                    && respondToDeviceAuthChallenge
                    && response?.Headers != null
                    && response.StatusCode == HttpStatusCode.Unauthorized
-                   && response.Headers.ContainsKey(WwwAuthenticateHeader)
-                   && response.Headers[WwwAuthenticateHeader]
+                   && response.Headers.Contains(WwwAuthenticateHeader)
+                   && response.Headers.GetValues(WwwAuthenticateHeader).FirstOrDefault()
                        .StartsWith(PKeyAuthName, StringComparison.OrdinalIgnoreCase);
         }
 
         private IDictionary<string, string> ParseChallengeData(IHttpWebResponse response)
         {
             IDictionary<string, string> data = new Dictionary<string, string>();
-            string wwwAuthenticate = response.Headers[WwwAuthenticateHeader];
+            string wwwAuthenticate = response.Headers.GetValues(WwwAuthenticateHeader).FirstOrDefault();
             wwwAuthenticate = wwwAuthenticate.Substring(PKeyAuthName.Length + 1);
             List<string> headerPairs = EncodingHelper.SplitWithQuotes(wwwAuthenticate, ',');
             foreach (string pair in headerPairs)

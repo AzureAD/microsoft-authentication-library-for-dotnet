@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http.Headers;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -36,7 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         HttpStatusCode StatusCode { get; }
 
-        Dictionary<string, string> Headers { get; }
+        HttpResponseHeaders Headers { get; }
 
         string ResponseString { get; }
     }

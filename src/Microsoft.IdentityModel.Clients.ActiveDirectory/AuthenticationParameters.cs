@@ -173,9 +173,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             AuthenticationParameters authParams;
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                if (response.Headers.Keys.Contains(AuthenticateHeader))
+                if (response.Headers.Contains(AuthenticateHeader))
                 {
-                    authParams = CreateFromResponseAuthenticateHeader(response.Headers[AuthenticateHeader]);
+                    authParams = CreateFromResponseAuthenticateHeader(response.Headers.GetValues(AuthenticateHeader).FirstOrDefault());
                 }
                 else
                 {

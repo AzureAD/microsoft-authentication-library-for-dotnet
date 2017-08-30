@@ -1386,5 +1386,44 @@ namespace Test.ADAL.NET.Unit
                 context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId)));
             Assert.IsTrue((ex.InnerException.InnerException.InnerException).Message.Contains(TestConstants.ErrorSubCode));
         }
+
+        [TestMethod]
+        [Description("Test for ensuring ADAL returns the appropriate headers during a http failure.")]
+        public async Task HttpErrorResponseWithHeaders()
+        {
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                                           TestConstants.DefaultRedirectUri + "?code=some-code"));
+
+            List<KeyValuePair<string, string>> HttpErrorResponseWithHeaders = new List<KeyValuePair<string, string>>();
+            HttpErrorResponseWithHeaders.Add(new KeyValuePair<string, string>("Retry-After", "120"));
+            HttpErrorResponseWithHeaders.Add(new KeyValuePair<string, string>("GatewayTimeout", "0"));
+            HttpErrorResponseWithHeaders.Add(new KeyValuePair<string, string>("Forbidden", "0"));
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateCustomHeaderFailureResponseMessage(HttpErrorResponseWithHeaders)
+            });
+
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, true);
+
+            try
+            {
+                AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
+                                              TestConstants.DefaultRedirectUri, platformParameters);
+                Assert.Fail();
+            }
+            catch (Exception ex)
+            {
+                if (ex is AdalServiceException adalEx)
+                {
+                    foreach (KeyValuePair<string, string> header in HttpErrorResponseWithHeaders)
+                    {
+                        var match = adalEx.Headers.Where(x => x.Key == header.Key && x.Value.Contains(header.Value)).FirstOrDefault();
+                        Assert.IsNotNull(match);
+                    }
+                }
+            }
+        }
     }
 }

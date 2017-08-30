@@ -158,27 +158,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public async static Task<IHttpWebResponse> CreateResponseAsync(HttpResponseMessage response)
         {
-            var headers = new Dictionary<string, string>();
-            if (response.Headers != null)
-            {
-                foreach (var kvp in response.Headers)
-                {
-                    headers[kvp.Key] = kvp.Value.First();
-                }
-            }
-
-            return new HttpWebResponseWrapper(await response.Content.ReadAsStringAsync().ConfigureAwait(false), headers,
+            return new HttpWebResponseWrapper(await response.Content.ReadAsStringAsync().ConfigureAwait(false), response.Headers,
                 response.StatusCode);
         }
 
-        private void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers)
+        private void VerifyCorrelationIdHeaderInReponse(HttpResponseHeaders headers)
         {
-            foreach (string reponseHeaderKey in headers.Keys)
+            foreach (KeyValuePair<string, IEnumerable<string>> header in headers)
             {
+                string reponseHeaderKey = header.Key;
                 string trimmedKey = reponseHeaderKey.Trim();
                 if (string.Compare(trimmedKey, OAuthHeader.CorrelationId, StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    string correlationIdHeader = headers[trimmedKey].Trim();
+                    string correlationIdHeader = headers.GetValues(trimmedKey).FirstOrDefault().Trim();
                     Guid correlationIdInResponse;
                     if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
                     {

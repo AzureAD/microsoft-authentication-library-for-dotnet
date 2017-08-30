@@ -29,12 +29,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http.Headers;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     internal class HttpWebResponseWrapper : IHttpWebResponse
     {
-        public HttpWebResponseWrapper(string responseString, Dictionary<string, string> headers, HttpStatusCode statusCode)
+        public HttpWebResponseWrapper(string responseString, HttpResponseHeaders headers, HttpStatusCode statusCode)
         {
             this.ResponseString = responseString;
             this.Headers = headers;
@@ -43,7 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public HttpStatusCode StatusCode { get; private set; }
 
-        public Dictionary<string, string> Headers { get; private set; }
+        public HttpResponseHeaders Headers { get; private set; }
 
         public string ResponseString { get; private set; }
 
