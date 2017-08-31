@@ -140,6 +140,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 case PromptBehavior.Always:
                     authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
                     break;
+                case PromptBehavior.SelectAccount:
+                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.SelectAccount;
+                    break;
                 case PromptBehavior.RefreshSession:
                     authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
                     break;
@@ -158,8 +161,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             PromptBehavior promptBehavior = authorizationParameters.PromptBehavior;
-            
-            return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession;
+
+            return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession &&
+                   promptBehavior != PromptBehavior.SelectAccount;
         }
 
         private static class NativeMethods

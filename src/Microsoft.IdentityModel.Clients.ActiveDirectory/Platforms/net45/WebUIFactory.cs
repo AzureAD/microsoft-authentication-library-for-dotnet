@@ -43,8 +43,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             switch (parameters.PromptBehavior)
             {
                 case PromptBehavior.Auto:
-                    return new InteractiveWebUI { OwnerWindow = parameters.OwnerWindow };
                 case PromptBehavior.Always:
+                case PromptBehavior.SelectAccount:
                 case PromptBehavior.RefreshSession:
                     return new InteractiveWebUI { OwnerWindow = parameters.OwnerWindow };
                 case PromptBehavior.Never:

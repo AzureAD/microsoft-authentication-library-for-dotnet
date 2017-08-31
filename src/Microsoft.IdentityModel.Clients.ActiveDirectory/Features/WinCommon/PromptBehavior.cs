@@ -46,6 +46,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         Always,
 
         /// <summary>
+        /// Prompt the user to select a user account even if there is a token that meets the requirements
+        /// already in the cache. This enables an user who has multiple accounts at the Authorization Server to select amongst 
+        /// the multiple accounts that they might have current sessions for. 
+        /// </summary>
+        SelectAccount,
+
+        /// <summary>
         /// The user will not be prompted for credentials.  If prompting is necessary then the AcquireToken request
         /// will fail.
         /// </summary>
