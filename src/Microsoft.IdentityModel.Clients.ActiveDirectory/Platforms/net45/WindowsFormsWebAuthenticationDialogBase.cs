@@ -170,23 +170,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
                 e.Cancel = true;
             }
-
-            if (!e.Cancel)
-            {
-                CallState.Default.Logger.Verbose(null,
-                    string.Format(CultureInfo.CurrentCulture, " Navigating to '{0}'.",
-                        EncodingHelper.UrlDecode(e.Url.ToString())));
-            }
         }
 
         private void WebBrowserNavigatedHandler(object sender, WebBrowserNavigatedEventArgs e)
         {
-            if (!this.CheckForClosingUrl(e.Url))
-            {
-                CallState.Default.Logger.Verbose(null,
-                    string.Format(CultureInfo.CurrentCulture, " Navigated to '{0}'.",
-                        EncodingHelper.UrlDecode(e.Url.ToString())));
-            }
+            this.CheckForClosingUrl(e.Url);
         }
 
         /// <summary>
