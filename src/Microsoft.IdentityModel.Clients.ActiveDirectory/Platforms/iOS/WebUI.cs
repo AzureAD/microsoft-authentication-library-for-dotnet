@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private static SemaphoreSlim returnedUriReady;
         private static AuthorizationResult authorizationResult;
-        private readonly PlatformParameters parameters;
+        private PlatformParameters parameters;
 
         public WebUI(IPlatformParameters parameters)
         {
@@ -51,6 +51,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, callState);
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
+
+            this.parameters.CallerViewController = null;
+            this.parameters = null;
             return authorizationResult;
         }
 
@@ -71,9 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             redirectUri.OriginalString, CallbackMethod, this.parameters.PreferredStatusBarStyle);
 
                     navigationController.ModalPresentationStyle = this.parameters.ModalPresentationStyle;
-
                     navigationController.ModalTransitionStyle = this.parameters.ModalTransitionStyle;
-
                     navigationController.TransitioningDelegate = this.parameters.TransitioningDelegate;
 
                     this.parameters.CallerViewController.PresentViewController(navigationController, true, null);
@@ -81,6 +82,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (Exception ex)
             {
+                this.parameters.CallerViewController = null;
+                this.parameters = null;
                 throw new AdalException(AdalError.AuthenticationUiFailed, ex);
             }
         }
