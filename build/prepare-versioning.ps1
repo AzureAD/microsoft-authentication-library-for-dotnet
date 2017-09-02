@@ -33,6 +33,11 @@ Write-Host "Setting assembly version attribute:" $assemblyVersion;
 
 $nugetVersion = "{0}.{1}.{2}" -f ($versionTokens[0], $versionTokens[1], $versionTokens[2]);
 
+if ($env:BUILD_SOURCEBRANCHNAME -ne "master")
+{
+	$nugetVersion = $nugetVersion + "-alpha" + $env:BUILD_BUILDNUMBER;
+}
+
 Write-Host "=========================="
 Write-Host "Versioning .nuspec file..."
 $filename = "build\Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec"
