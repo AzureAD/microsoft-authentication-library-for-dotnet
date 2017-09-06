@@ -128,8 +128,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (ex.WebResponse.StatusCode == HttpStatusCode.BadRequest &&
                         tokenResponse.Error == AdalError.InteractionRequired)
                     {
-                        throw new AdalClaimChallengeException(tokenResponse.Error, tokenResponse.ErrorDescription,
-                            tokenResponse.Claims);
+                        throw new AdalClaimChallengeException(tokenResponse.Error, tokenResponse.ErrorDescription, ex, tokenResponse.Claims);
                     }
 
                     throw serviceEx;
