@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Constructor to create credential with client id and secret
+        /// Constructor to create credential with username
         /// </summary>
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
         public UserCredential(string userName) : this(userName, UserAuthType.IntegratedAuth)

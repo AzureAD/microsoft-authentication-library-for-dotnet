@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientCredential">The client credential to use for token acquisition.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public static async Task<AuthenticationResult> AcquireTokenSilentAsync(this AuthenticationContext ctx, string resource,
             ClientCredential clientCredential, UserIdentifier userId)
         {
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public static async Task<AuthenticationResult> AcquireTokenSilentAsync(this AuthenticationContext ctx, string resource,
             IClientAssertionCertificate clientCertificate, UserIdentifier userId)
         {
@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public static async Task<AuthenticationResult> AcquireTokenSilentAsync(this AuthenticationContext ctx, string resource,
             ClientAssertion clientAssertion, UserIdentifier userId)
         {
@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         /// <param name="clientCredential">The credential to use for token acquisition.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
         public static async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(this AuthenticationContext ctx, string authorizationCode,
             Uri redirectUri, ClientCredential clientCredential)
         {
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         /// <param name="clientCredential">The credential to use for token acquisition.</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. It can be null if provided earlier to acquire authorizationCode.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
         public static async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(this AuthenticationContext ctx, string authorizationCode,
             Uri redirectUri, ClientCredential clientCredential, string resource)
         {
@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
         /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
         public static async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(this AuthenticationContext ctx, string authorizationCode,
             Uri redirectUri, ClientAssertion clientAssertion)
         {
@@ -146,7 +146,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
         /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. It can be null if provided earlier to acquire authorizationCode.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
         public static async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(this AuthenticationContext ctx, string authorizationCode,
             Uri redirectUri, ClientAssertion clientAssertion, string resource)
         {
@@ -163,7 +163,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
         public static async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(this AuthenticationContext ctx, string authorizationCode,
             Uri redirectUri, IClientAssertionCertificate clientCertificate)
         {
@@ -180,7 +180,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
         /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. It can be null if provided earlier to acquire authorizationCode.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
         public static async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(this AuthenticationContext ctx, string authorizationCode,
             Uri redirectUri, IClientAssertionCertificate clientCertificate, string resource)
         {

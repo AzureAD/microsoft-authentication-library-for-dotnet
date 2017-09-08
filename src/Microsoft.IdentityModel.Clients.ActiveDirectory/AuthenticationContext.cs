@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        /// <returns>It contains Device Code, its expiration time, User Code.</returns>
         public async Task<DeviceCodeResult> AcquireDeviceCodeAsync(string resource, string clientId)
         {
             return await this.AcquireDeviceCodeAsync(resource, clientId, null).ConfigureAwait(false);
@@ -157,7 +157,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        /// <returns>It contains Device Code, its expiration time, User Code.</returns>
         public async Task<DeviceCodeResult> AcquireDeviceCodeAsync(string resource, string clientId,
             string extraQueryParameters)
         {
@@ -170,7 +170,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
         /// </summary>
         /// <param name="deviceCodeResult">The device code result received from calling AcquireDeviceCodeAsync.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
         public async Task<AuthenticationResult> AcquireTokenByDeviceCodeAsync(DeviceCodeResult deviceCodeResult)
         {
             if (deviceCodeResult == null)
@@ -217,7 +217,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId)
         {
             return await this.AcquireTokenSilentAsync(resource, clientId, UserIdentifier.AnyUser).ConfigureAwait(false);
@@ -229,7 +229,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId,
             UserIdentifier userId)
         {
@@ -244,7 +244,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <param name="parameters">Instance of PlatformParameters containing platform specific arguments and information.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource, string clientId,
             UserIdentifier userId, IPlatformParameters parameters)
         {
@@ -301,7 +301,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         /// <param name="parameters">An object of type PlatformParameters which may pass additional parameters used for authorization.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri,
             IPlatformParameters parameters)
         {
@@ -319,7 +319,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="parameters">An object of type PlatformParameters which may pass additional parameters used for authorization.</param>
         /// <param name="userId">Identifier of the user token is requested for. If created from DisplayableId, this parameter will be used to pre-populate the username field in the authentication form. Please note that the end user can still edit the username field and authenticate as a different user.
         /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri,
             IPlatformParameters parameters, UserIdentifier userId)
         {
@@ -337,7 +337,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// If you want to be notified of such change with an exception, create UserIdentifier with type RequiredDisplayableId. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
         /// <param name="parameters">Parameters needed for interactive flow requesting authorization code. Pass an instance of PlatformParameters.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <returns>It contains Access Token, Refresh Token and the Access Token's expiration time.</returns>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId, Uri redirectUri,
             IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters)
         {

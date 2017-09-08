@@ -1,4 +1,4 @@
-# Active Directory Authentication Library (ADAL) for .NET, Windows Store, Xamarin iOS and Xamarin Android. 
+# Active Directory Authentication Library (ADAL) for .NET, Windows Store, Xamarin iOS and Xamarin Android.
 
 | [Code Samples](https://github.com/azure-samples?utf8=✓&q=active-directory-dotnet) | [Reference Docs](https://docs.microsoft.com/active-directory/adal/microsoft.identitymodel.clients.activedirectory) | [Developer Guide](https://aka.ms/aaddev)
 | --- | --- | --- |
@@ -34,11 +34,11 @@ Affected 3.x versions: 3.11.305310302-alpha, 3.10.305231913, 3.10.305161347, 3.1
 
 ## Samples and Documentation
 
-We provide a full suite of [sample applications](https://github.com/Azure-Samples?utf8=%E2%9C%93&q=active-directory) and [ADAL documentation](https://docs.microsoft.com/active-directory/adal/microsoft.identitymodel.clients.activedirectory) to help you get started with learning the Azure Identity system. Our [Azure AD Developer Guide](https://aka.ms/aaddev) includes tutorials for native clients such as Windows, Windows Phone, iOS, OSX, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features. 
+We provide a full suite of [sample applications](https://github.com/Azure-Samples?utf8=%E2%9C%93&q=active-directory) and [ADAL documentation](https://docs.microsoft.com/active-directory/adal/microsoft.identitymodel.clients.activedirectory) to help you get started with learning the Azure Identity system. Our [Azure AD Developer Guide](https://aka.ms/aaddev) includes tutorials for native clients such as Windows, Windows Phone, iOS, OSX, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features.
 
 ## Community Help and Support
 
-We leverage [Stack Overflow](http://stackoverflow.com/) to work with the community on supporting Azure Active Directory and its SDKs, including this one! We highly recommend you ask your questions on Stack Overflow (we're all on there!) Also browser existing issues to see if someone has had your question before. 
+We leverage [Stack Overflow](http://stackoverflow.com/) to work with the community on supporting Azure Active Directory and its SDKs, including this one! We highly recommend you ask your questions on Stack Overflow (we're all on there!) Also browser existing issues to see if someone has had your question before.
 
 We recommend you use the "adal" tag so we can see it! Here is the latest Q&A on Stack Overflow for ADAL: [http://stackoverflow.com/questions/tagged/adal](http://stackoverflow.com/questions/tagged/adal)
 
@@ -66,100 +66,21 @@ This is obviously the first diagnostic.  We try to provide helpful error message
 
 ### Logs
 
-You can configure the library to generate log messages that you can use to help diagnose issues.  You configure logging by setting properties of the static class `AdalTrace`; however, depending on the platform, logging methods and the properties of this class differ. Here is how logging works on each platform:
+In order to configure logging, implementation of IAdalLogCallback interface should be provided
 
-#### Desktop Applications
-
-ADAL.NET for desktop applications by default logs via `System.Diagnostics.Trace` class. You can add a trace listener to receive those logs. You can also control tracing using this method (e.g. change trace level or turn it off) using `AdalTrace.LegacyTraceSwitch`. 
-
-The following example shows how to add a Console based listener and set trace level to `Information` (the default trace level is `Verbose`):
-
-```
-Trace.Listeners.Add(new ConsoleTraceListener());
-AdalTrace.LegacyTraceSwitch.Level = TraceLevel.Info;
-```
-
-You can achieve the same result by adding the following lines to your application's config file:
-
-```
-  <system.diagnostics>
-    <sharedListeners>
-      <add name="console" 
-        type="System.Diagnostics.ConsoleTraceListener" 
-        initializeData="false"/>
-    </sharedListeners>
-    <trace autoflush="true">
-      <listeners>
-        <add name="console" />
-      </listeners>
-    </trace>    
-    <switches>
-      <add name="ADALLegacySwitch" value="Info"/>
-    </switches>
-  </system.diagnostics>
-```
-
-If you would like to have more control over how tracing is done in ADAL, you can add a `TraceListener` to ADAL's dedicated `TraceSource` with name **"Microsoft.IdentityModel.Clients.ActiveDirectory"**. 
-
-The following example shows how to write ADAL's traces to a text file using this method:
-
-```
-Stream logFile = File.Create("logFile.txt");
-AdalTrace.TraceSource.Listeners.Add(new TextWriterTraceListener(logFile));
-AdalTrace.TraceSource.Switch.Level = SourceLevels.Information;
-```
-
-You can achieve the same result by adding the following lines to your application's config file:
-
-```
-  <system.diagnostics>
-    <trace autoflush="true"/>
-    <sources>
-      <source name="Microsoft.IdentityModel.Clients.ActiveDirectory" 
-        switchName="sourceSwitch" 
-        switchType="System.Diagnostics.SourceSwitch">
-        <listeners>
-          <add name="textListener" 
-            type="System.Diagnostics.TextWriterTraceListener" 
-            initializeData="logFile.txt"/>
-          <remove name="Default" />
-        </listeners>
-      </source>
-    </sources>    
-    <switches>
-      <add name="sourceSwitch" value="Information"/>
-    </switches>
-  </system.diagnostics>
-``` 
-
-#### Windows Store Applications
-
-Tracing in ADAL for Windows Store is done via an instance of class `System.Diagnostics.Tracing.EventSource` with name **"Microsoft.IdentityModel.Clients.ActiveDirectory"**. You can define your own ```EventListener```, connect it to the event source and set your desired trace level. Here is an example:
-```
-var eventListener = new SampleEventListener();
-
-class SampleEventListener : EventListener
+```C#
+class LoggerCallbackImpl : IAdalLogCallback
 {
-    protected override void OnEventSourceCreated(EventSource eventSource)
+    public void Log(LogLevel level, string message)
     {
-        if (eventSource.Name == "Microsoft.IdentityModel.Clients.ActiveDirectory")
-        {
-            this.EnableEvents(eventSource, EventLevel.Verbose);
-        }
-    }
-
-    protected override void OnEventWritten(EventWrittenEventArgs eventData)
-    {
-	    ...
+        // process log message, for example write it to your favorite logging framework
     }
 }
-
 ```
+static property Callback of the LoggerCallbackHandler class should be set to the instance of a class implementing IAdalLogCallback interface
 
-There is also a default event listener which writes logs to a local file named **"AdalTraces.log"**. You can control the level of tracing to that event listener using the property ```AdalTrace.Level```. By default, trace level for this event listener is set to "None" and to enable tracing to this particular listener, you need to set the above property. This is an example:
-
-```
-AdalTrace.Level = AdalTraceLevel.Informational;
+```C#
+LoggerCallbackHandler.Callback = new LoggerCallbackImpl();
 ```
 
 ### Brokered Authentication for iOS
@@ -176,7 +97,7 @@ public PlatformParameters(UIViewController callerViewController, bool useBroker)
 The userBroker flag setting will allow ADAL to try to call out to the broker.
 
 #### AppDelegate changes
-Update the AppDelegate.cs file to  include the override method below. This method is invoked everytime the application is launched and is used as an opportunity to process response from the Broker and complete the authentication process. 
+Update the AppDelegate.cs file to  include the override method below. This method is invoked everytime the application is launched and is used as an opportunity to process response from the Broker and complete the authentication process.
 ```C#
 public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options)
 {
