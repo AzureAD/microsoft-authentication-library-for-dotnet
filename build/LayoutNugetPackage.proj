@@ -101,7 +101,6 @@
       <TargetFolder>Xamarin.iOS10</TargetFolder>
     </SourceFile>
 
-    <!--
     <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netcore45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
       <TargetFolder>netcore45</TargetFolder>
     </SourceFile>
@@ -112,7 +111,6 @@
                 Condition="$(CopyXmlDocFiles)=='true'">
       <TargetFolder>netcore45</TargetFolder>
     </SourceFile>
-    -->
 
   </ItemGroup>
 
