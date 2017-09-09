@@ -90,6 +90,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public string SelfSignedJwtAudience { get; private set; }
 
+        public string PreferredCache { get; private set; }
+
+        public string[] Aliases { get; private set; }
+
         public Guid CorrelationId { get; set; }
 
         public async Task UpdateFromTemplateAsync(CallState callState)
@@ -97,19 +101,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (!this.updatedFromTemplate)
             {
                 var authorityUri = new Uri(this.Authority);
-                string host = authorityUri.Authority;
                 string path = authorityUri.AbsolutePath.Substring(1);
                 string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-
-                AuthenticatorTemplate matchingTemplate = await AuthenticatorTemplateList.FindMatchingItemAsync(this.ValidateAuthority, host, tenant, callState).ConfigureAwait(false);
-
-                this.AuthorizationUri = matchingTemplate.AuthorizeEndpoint.Replace("{tenant}", tenant);
-                this.DeviceCodeUri = matchingTemplate.DeviceCodeEndpoint.Replace("{tenant}", tenant);
-                this.TokenUri = matchingTemplate.TokenEndpoint.Replace("{tenant}", tenant);
-                this.UserRealmUri = CanonicalizeUri(matchingTemplate.UserRealmEndpoint);
+                var entry = await InstanceDiscovery.GetMetadataEntry(authorityUri.Host, this.ValidateAuthority, callState);
+                this.AuthorizationUri = InstanceDiscovery.AuthorizeEndpointTemplate.Replace("{host}", entry.PreferredNetwork).Replace("{tenant}", tenant);
+                this.DeviceCodeUri = "https://{host}/{tenant}/oauth2/devicecode".Replace("{host}", entry.PreferredNetwork).Replace("{tenant}", tenant);
+                this.TokenUri = "https://{host}/{tenant}/oauth2/token".Replace("{host}", entry.PreferredNetwork).Replace("{tenant}", tenant);
+                this.UserRealmUri = CanonicalizeUri("https://{host}/common/UserRealm".Replace("{host}", entry.PreferredNetwork));
                 this.IsTenantless = (string.Compare(tenant, TenantlessTenantName, StringComparison.OrdinalIgnoreCase) == 0);
-                this.SelfSignedJwtAudience = matchingTemplate.Issuer.Replace("{tenant}", tenant);
+                this.SelfSignedJwtAudience = this.TokenUri;
                 this.updatedFromTemplate = true;
+                this.PreferredCache = entry?.PreferredCache ?? authorityUri.Host;
+                this.Aliases = entry?.Aliases;
             }
         }
 

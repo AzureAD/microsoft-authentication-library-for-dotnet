@@ -73,7 +73,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public const string AuthorizeEndpointTemplate = "https://{host}/{tenant}/oauth2/authorize";
 
-        private static ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> InstanceCache =
+        // The following cache could be private, but we keep it public so that internal unit test can take a peek into it
+        public static ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> InstanceCache =
             new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>(); // Keys are host strings
 
         private static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
