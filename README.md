@@ -99,9 +99,13 @@ The userBroker flag setting will allow ADAL to try to call out to the broker.
 #### AppDelegate changes
 Update the AppDelegate.cs file to  include the override method below. This method is invoked everytime the application is launched and is used as an opportunity to process response from the Broker and complete the authentication process.
 ```C#
-public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options)
-{
-    AuthenticationContinuationHelper.SetBrokerContinuationEventArgs(url);
+public override bool OpenUrl(UIApplication application, NSUrl url, string sourceApplication, NSObject annotation)
+{            
+	if (AuthenticationContinuationHelper.IsBrokerResponse(sourceApplication))
+    {
+		AuthenticationContinuationHelper.SetBrokerContinuationEventArgs(url);    
+    }
+	
     return true;
 }
 ```
@@ -149,6 +153,39 @@ msauth://code/<broker-redirect-uri-in-url-encoded-form>
 AND
 msauth://code/<broker-redirect-uri-in-url-encoded-form>/
 ex: msauth://code/mytestiosapp%3A%2F%2Fcom.mycompany.myapp and msauth://code/mytestiosapp%3A%2F%2Fcom.mycompany.myapp/  
+```
+### Brokered Authentication for Android
+
+If your app or your app users require conditional access or certificate authentication support, you must set up your AuthenticationContext and redirectURI to be able to talk to the Azure Authenticator app OR Company Portal. Make sure that your Redirect URI and application's bundle id is all in lower case.
+
+#### Enable Broker Mode on Your Context
+Broker is enabled on a per-authentication-context basis. It is disabled by default. You must set useBroker flag to true in PlatformParameters constructor if you wish ADAL to call to broker:
+
+```C#
+public PlatformParameters(Activity callerActivity, bool useBroker)
+public PlatformParameters(Activity callerActivity, bool useBroker, PromptBehavior promptBehavior)
+```
+
+The useBroker flag setting will allow ADAL to try to call out to the broker.
+
+If target version is lower than 23, calling app has to have the following permissions declared in manifest(http://developer.android.com/reference/android/accounts/AccountManager.html):
+ - GET_ACCOUNTS
+ - USE_CREDENTIALS
+ - MANAGE_ACCOUNTS
+If target version is 23, USE_CREDENTIALS and MANAGE_ACCOUNTS have been deprecated and GET_ACCOUNTS is under protection level "dangerous". The calling app is responsible for requesting the runtime permission for GET_ACCOUNTS. You can reference Runtime permission request for API 23.
+
+#### Registering Redirect URI
+ADAL uses URLs to invoke the broker and then return back to your app. To finish that round trip you need a URL scheme registered for your app. We recommend making the URL scheme fairly unique to minimize the chances of another app using the same URL scheme.
+You can call generateRedirectUriForBroker.ps1 (requires updates from the developer to fill in values and details about the app) to compute the redirect uri.
+
+#### App Activity changes
+Update the MainActivity.cs file to  include the override method below. This method is invoked when the activity receives a callback from webview or the broker application. This code snippet is required complete the authentication process.
+```C#
+protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+{
+    base.OnActivityResult(requestCode, resultCode, data);
+	AuthenticationAgentContinuationHelper.SetAuthenticationAgentContinuationEventArgs(requestCode, resultCode, data);
+}
 ```
 
 ### Network Traces
