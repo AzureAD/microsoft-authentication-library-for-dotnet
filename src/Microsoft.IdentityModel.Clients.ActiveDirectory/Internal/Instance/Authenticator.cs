@@ -41,8 +41,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private const string TenantlessTenantName = "Common";
 
-        private static readonly AuthenticatorTemplateList AuthenticatorTemplateList = new AuthenticatorTemplateList();
-
         private bool updatedFromTemplate;
 
         private void Init(string authority, bool validateAuthority)
