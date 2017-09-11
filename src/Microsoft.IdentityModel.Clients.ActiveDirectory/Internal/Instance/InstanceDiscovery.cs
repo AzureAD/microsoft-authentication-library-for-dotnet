@@ -57,9 +57,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string[] Aliases { get; set; }
     }
 
-    internal class InstanceDiscovery
+    internal static class InstanceDiscovery
     {
-        public static string DefaultTrustedAuthority = "login.microsoftonline.com";
+        public const string DefaultTrustedAuthority = "login.microsoftonline.com";
 
         private static HashSet<string> WhitelistedAuthorities = new HashSet<string>(new[]
         {
@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public const string AuthorizeEndpointTemplate = "https://{host}/{tenant}/oauth2/authorize";
 
         // The following cache could be private, but we keep it public so that internal unit test can take a peek into it
-        public static ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> InstanceCache =
+        public static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> InstanceCache =
             new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>(); // Keys are host strings
 
         private static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             try
             {
                 discoveryResponse = await client.GetResponseAsync<InstanceDiscoveryResponse>().ConfigureAwait(false);
-                if (validateAuthority & discoveryResponse.TenantDiscoveryEndpoint == null)
+                if (validateAuthority && discoveryResponse.TenantDiscoveryEndpoint == null)
                 {
                     // hard stop here
                     throw new AdalException(AdalError.AuthorityNotInValidList);
