@@ -85,12 +85,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             InstanceDiscoveryMetadataEntry entry = null;
             if (!InstanceCache.TryGetValue(host, out entry))
             {
-                await semaphore.WaitAsync(); // SemaphoreSlim.WaitAsync() will not block current thread
+                await semaphore.WaitAsync().ConfigureAwait(false); // SemaphoreSlim.WaitAsync() will not block current thread
                 try
                 {
                     if (!InstanceCache.TryGetValue(host, out entry))
                     {
-                        await DiscoverAsync(host, validateAuthority, callState);
+                        await DiscoverAsync(host, validateAuthority, callState).ConfigureAwait(false);
                         InstanceCache.TryGetValue(host, out entry);
                     }
                 }

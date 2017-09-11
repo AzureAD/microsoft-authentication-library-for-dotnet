@@ -66,12 +66,12 @@ namespace Test.ADAL.NET.Unit
             string host = "invalid_instance.example.com";
 
             // ADAL still behaves correctly using developer provided authority
-            var entry = await InstanceDiscovery.GetMetadataEntry(host, false, callState);
+            var entry = await InstanceDiscovery.GetMetadataEntry(host, false, callState).ConfigureAwait(false);
             Assert.AreEqual(host, entry.PreferredNetwork); // No exception raised, the host is returned as-is
             Assert.AreEqual(1, HttpMessageHandlerFactory.MockHandlersCount()); // 1 mock response is consumed, 1 remaining
 
             // Subsequent requests do not result in further authority validation network requests for the process lifetime
-            var entry2 = await InstanceDiscovery.GetMetadataEntry(host, false, callState);
+            var entry2 = await InstanceDiscovery.GetMetadataEntry(host, false, callState).ConfigureAwait(false);
             Assert.AreEqual(host, entry2.PreferredNetwork);
             Assert.AreEqual(1, HttpMessageHandlerFactory.MockHandlersCount()); // Still 1 mock response remaining, so no new request was attempted
         }
@@ -89,12 +89,12 @@ namespace Test.ADAL.NET.Unit
             string host = "login.windows.net";
 
             // ADAL still behaves correctly using developer provided authority
-            var entry = await InstanceDiscovery.GetMetadataEntry(host, true, callState);
+            var entry = await InstanceDiscovery.GetMetadataEntry(host, true, callState).ConfigureAwait(false);
             Assert.AreEqual(host, entry.PreferredNetwork); // No exception raised, the host is returned as-is
             Assert.AreEqual(1, HttpMessageHandlerFactory.MockHandlersCount()); // 1 mock response is consumed, 1 remaining
 
             // Subsequent requests do not result in further authority validation network requests for the process lifetime
-            var entry2 = await InstanceDiscovery.GetMetadataEntry(host, true, callState);
+            var entry2 = await InstanceDiscovery.GetMetadataEntry(host, true, callState).ConfigureAwait(false);
             Assert.AreEqual(host, entry2.PreferredNetwork);
             Assert.AreEqual(1, HttpMessageHandlerFactory.MockHandlersCount()); // Still 1 mock response remaining, so no new request was attempted
         }
@@ -138,12 +138,12 @@ namespace Test.ADAL.NET.Unit
 
             CallState callState = new CallState(Guid.NewGuid());
             // ADAL still behaves correctly using developer provided authority
-            var entry = await InstanceDiscovery.GetMetadataEntry("login.windows.net", true, callState);
+            var entry = await InstanceDiscovery.GetMetadataEntry("login.windows.net", true, callState).ConfigureAwait(false);
             Assert.AreEqual("login.microsoftonline.com", entry.PreferredNetwork); // No exception raised, the host is returned as-is
             Assert.AreEqual(1, HttpMessageHandlerFactory.MockHandlersCount()); // 1 mock response is consumed, 1 remaining
 
             // Subsequent requests do not result in further authority validation network requests for the process lifetime
-            var entry2 = await InstanceDiscovery.GetMetadataEntry("sts.microsoft.com", true, callState);
+            var entry2 = await InstanceDiscovery.GetMetadataEntry("sts.microsoft.com", true, callState).ConfigureAwait(false);
             Assert.AreEqual("login.microsoftonline.com", entry2.PreferredNetwork);
             Assert.AreEqual(1, HttpMessageHandlerFactory.MockHandlersCount()); // Still 1 mock response remaining, so no new request was attempted
         }
