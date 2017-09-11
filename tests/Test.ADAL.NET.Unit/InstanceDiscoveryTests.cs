@@ -53,7 +53,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("InstanceDiscoveryTests")]
         public async Task WhenAuthorityIsInvalidButValidationIsNotRequired()
         {
-            for (int i = 0; i < 2; i++) // Prepare 2 mock response
+            for (int i = 0; i < 2; i++) // Prepare 2 mock responses
             {
                 HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
                 {
@@ -61,6 +61,7 @@ namespace Test.ADAL.NET.Unit
                     ResponseMessage = MockHelpers.CreateFailureResponseMessage("{\"error\":\"invalid_instance\"}")
                 });
             }
+
             CallState callState = new CallState(Guid.NewGuid());
             string host = "invalid_instance.example.com";
 
@@ -79,10 +80,11 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("InstanceDiscoveryTests")]
         public async Task WhenAuthorityIsValidButNoMetadataIsReturned()
         {
-            for (int i = 0; i < 2; i++) // Prepare 2 mock response
+            for (int i = 0; i < 2; i++) // Prepare 2 mock responses
             {
                 HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler());
             }
+
             CallState callState = new CallState(Guid.NewGuid());
             string host = "login.windows.net";
 
@@ -101,10 +103,11 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("InstanceDiscoveryTests")]
         public async Task WhenMultipleSimultaneousCallsWithTheSameAuthority()
         {
-            for (int i = 0; i < 2; i++) // Prepare 2 mock response
+            for (int i = 0; i < 2; i++) // Prepare 2 mock responses
             {
                 HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler());
             }
+
             CallState callState = new CallState(Guid.NewGuid());
             string host = "login.windows.net";
             Task.WaitAll( // Simulate several simultaneous calls
@@ -117,7 +120,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("InstanceDiscoveryTests")]
         public async Task WhenAuthorityIsValidAndMetadataIsReturned()
         {
-            for (int i = 0; i < 2; i++) // Prepare 2 mock response
+            for (int i = 0; i < 2; i++) // Prepare 2 mock responses
             {
                 HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(
                     @"{
@@ -132,6 +135,7 @@ namespace Test.ADAL.NET.Unit
                     }"
                     ));
             }
+
             CallState callState = new CallState(Guid.NewGuid());
             // ADAL still behaves correctly using developer provided authority
             var entry = await InstanceDiscovery.GetMetadataEntry("login.windows.net", true, callState);

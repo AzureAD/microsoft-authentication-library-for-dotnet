@@ -99,6 +99,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     semaphore.Release();
                 }
             }
+
             return entry;
         }
 
@@ -140,6 +141,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     InstanceCache.TryAdd(alias, entry);
                 }
             }
+
             InstanceCache.TryAdd(host, new InstanceDiscoveryMetadataEntry
             {
                 PreferredNetwork = host,
