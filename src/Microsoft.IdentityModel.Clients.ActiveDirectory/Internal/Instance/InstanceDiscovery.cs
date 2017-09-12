@@ -137,9 +137,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             foreach (var entry in discoveryResponse?.Metadata ?? Enumerable.Empty<InstanceDiscoveryMetadataEntry>())
             {
-                foreach (var alias in entry?.Aliases ?? Enumerable.Empty<string>())
+                foreach (var aliasedAuthority in entry?.Aliases ?? Enumerable.Empty<string>())
                 {
-                    InstanceCache.TryAdd(alias, entry);
+                    InstanceCache.TryAdd(aliasedAuthority, entry);
                 }
             }
 
