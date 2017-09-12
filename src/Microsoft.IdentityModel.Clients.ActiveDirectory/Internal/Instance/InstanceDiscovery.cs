@@ -73,9 +73,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public const string AuthorizeEndpointTemplate = "https://{host}/{tenant}/oauth2/authorize";
 
-        // The following cache could be private, but we keep it public so that internal unit test can take a peek into it
+        // The following cache could be private, but we keep it public so that internal unit test can take a peek into it.
+        // Keys are host strings.
         public static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> InstanceCache =
-            new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>(); // Keys are host strings
+            new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>();
 
         private static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
@@ -103,8 +104,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return entry;
         }
 
-        private static async Task DiscoverAsync(string host, bool validateAuthority,
-            CallState callState) // No return value. Modifies InstanceCache directly.
+        // No return value. Modifies InstanceCache directly.
+        private static async Task DiscoverAsync(string host, bool validateAuthority, CallState callState)
         {
             string tentativeAuthorizeEndpoint = AuthorizeEndpointTemplate.Replace("{host}", host);
             string instanceDiscoveryEndpoint =
