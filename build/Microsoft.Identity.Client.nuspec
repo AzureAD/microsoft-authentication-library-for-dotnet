@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+    <metadata minClientVersion="2.12">
+        <title>Microsoft Authentication Library</title>
+        <id>Microsoft.Identity.Client</id>
+        <version>1.1.0-preview</version>
+        <authors>Microsoft Corp.</authors>
+        <owners>Microsoft Corp.</owners>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <licenseUrl>https://go.microsoft.com/fwlink/?linkid=844762</licenseUrl>
+        <projectUrl>https://go.microsoft.com/fwlink/?linkid=844761</projectUrl>
+        <description>This package contains the binaries of the Microsoft Authentication Library (MSAL). MSAL makes it easy to obtain tokens from Azure AD v2 (work &amp; school accounts, MSA) and Azure AD B2C, gaining access to Microsoft Cloud API and any other API secured by Microsoft identities. This version supports adding authentication functionality to your .NET based client on Windows desktop (.NET 4.5+), UWP, .NET Core, Xamarin iOS and Xamarin Android.</description>
+        <copyright>(C) Microsoft Corporation. All rights reserved.</copyright>
+        <tags>Microsoft Authentication Library MSA MSAL B2C Azure Active Directory AAD Identity Authentication .NET Windows Store Xamarin iOS Android</tags>
+        <dependencies>
+            <group targetFramework="MonoAndroid7.0">
+                <dependency id="Xamarin.Android.Support.CustomTabs" version="23.3.0" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.Android.Support.v7.AppCompat" version="23.3.0" exclude="Build,Analyzers" />
+            </group>
+            <group targetFramework=".NETFramework4.5" />
+            <group targetFramework=".NETStandard1.1">
+                <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
+                <dependency id="System.Runtime.Serialization.Primitives" version="4.3.0" exclude="Build,Analyzers" />
+                <dependency id="System.Runtime.Serialization.Json" version="4.3.0" exclude="Build,Analyzers" />
+                <dependency id="System.Xml.XDocument" version="4.3.0" exclude="Build,Analyzers" />
+            </group>
+            <group targetFramework=".NETStandard1.3">
+                <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
+                <dependency id="System.Runtime.Serialization.Primitives" version="4.3.0" exclude="Build,Analyzers" />
+                <dependency id="System.Runtime.Serialization.Json" version="4.3.0" exclude="Build,Analyzers" />
+                <dependency id="System.Xml.XDocument" version="4.3.0" exclude="Build,Analyzers" />
+                <dependency id="System.Security.Cryptography.X509Certificates" version="4.3.0" exclude="Build,Analyzers" />
+            </group>
+            <group targetFramework="Windows8.1" />
+            <group targetFramework="Xamarin.iOS1.0" />
+        </dependencies>
+    </metadata>
+</package>

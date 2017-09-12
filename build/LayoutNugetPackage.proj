@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Layout">
+
+  <!-- 
+      This project copies files from the build output into the folder layout required to create the NuGet package.
+      The NuGet package can then be created by running "nuget pack" against the root packaging folder.
+
+      Setting the package folder
+      ==========================
+      By default, the layout will be created under a folder called ".nugetPackageRoot" under the repo root.
+      This can be changed by setting the build property $(NuGetPackageRootFolder). This can set to either
+      an absolute or relative path. If it set to a relative path then it will be treated as relative to
+      the repo root.
+
+
+      Signing verification
+      ====================
+      By default, the project will not verify that the package files are strong-named.
+      To turn on verification, set the build property $(VerifySigning)=true
+      The build will fail unless all of the .dll and .exe files being packaged are strong-named.
+      
+  -->
+
+  <Import Project="$(MSBuildThisFileDirectory)AssemblySigningVerification.targets"/>
+  
+  <PropertyGroup>
+    <Configuration Condition="$(Configuration)==''" >Debug</Configuration>
+    
+    <NuspecFilePath Condition="$(NuspecFilePath)==''">$(MSBuildThisFileDirectory)Microsoft.Identity.Client.nuspec</NuspecFilePath>
+    <MsalBinaryFolder Condition="$(MsalBinaryFolder)==''">..\src\Microsoft.Identity.Client\bin\$(Configuration)\netstandard1.1\</MsalBinaryFolder>
+
+    <!-- Calculate the root folder the files will be laid out in -->
+    <!-- If the supplied root folder is a relative path, treat it as relative to the repo root directory.
+         This simplifies combining this build step with other tasks in a VSTS: if the root package folder
+         is passed in to multiple tasks, is simpler if they all treat it as relative to the repo root. -->
+    <NugetPackageRootFolder Condition="$(NugetPackageRootFolder)==''">.nugetPackageRoot</NugetPackageRootFolder>
+    <_PackToFolder>$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..", $(NugetPackageRootFolder)))</_PackToFolder>
+    <_PackToFolder>$([System.IO.Path]::GetFullPath($(_PackToFolder)))</_PackToFolder>
+
+    <!-- This property specifies whether the XML doc files should be copied.
+         By default, XML doc files are only produced for release builds so the copy step will fail for debug builds if we
+         try to copy the doc files. -->
+    <CopyXmlDocFiles Condition="$(CopyXmlDocFiles)=='' AND $(Configuration)=='release'">true</CopyXmlDocFiles>
+  
+  </PropertyGroup>
+
+  <ItemGroup Label="Platform-specific files">
+    
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\MonoAndroid7\Microsoft.Identity.Client.dll">
+      <TargetFolder>monoandroid70</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\MonoAndroid7\Microsoft.Identity.Client.pdb">
+      <TargetFolder>monoandroid70</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\MonoAndroid7\Microsoft.Identity.Client.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+      <TargetFolder>monoandroid70</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\netstandard1.3\Microsoft.Identity.Client.dll">
+      <TargetFolder>netstandard1.3</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\netstandard1.3\Microsoft.Identity.Client.pdb">
+      <TargetFolder>netstandard1.3</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\netstandard1.3\Microsoft.Identity.Client.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+      <TargetFolder>netstandard1.3</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\netstandard1.1\Microsoft.Identity.Client.dll">
+      <TargetFolder>netstandard1.1</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\netstandard1.1\Microsoft.Identity.Client.pdb">
+      <TargetFolder>netstandard1.1</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\netstandard1.1\Microsoft.Identity.Client.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+      <TargetFolder>netstandard1.1</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\net45\Microsoft.Identity.Client.dll">
+      <TargetFolder>net45</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\net45\Microsoft.Identity.Client.pdb">
+      <TargetFolder>net45</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\net45\Microsoft.Identity.Client.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+    <TargetFolder>net45</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\Xamarin.iOS10\Microsoft.Identity.Client.dll">
+      <TargetFolder>xamarinios10</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\Xamarin.iOS10\Microsoft.Identity.Client.pdb">
+      <TargetFolder>xamarinios10</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\Xamarin.iOS10\Microsoft.Identity.Client.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+      <TargetFolder>xamarinios10</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\win81\Microsoft.Identity.Client.dll">
+      <TargetFolder>win81</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\win81\Microsoft.Identity.Client.pdb">
+      <TargetFolder>win81</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\win81\Microsoft.Identity.Client.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+      <TargetFolder>win81</TargetFolder>
+    </SourceFile>
+
+    <!--
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\netcore45\Microsoft.Identity.Client.dll">
+      <TargetFolder>netcore45</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\netcore45\Microsoft.Identity.Client.pdb">
+      <TargetFolder>netcore45</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.Identity.Client\bin\$(Configuration)\netcore45\Microsoft.Identity.Client.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+      <TargetFolder>netcore45</TargetFolder>
+    </SourceFile>
+    -->
+
+  </ItemGroup>
+
+  <ItemGroup Label="Source files">
+    <SourceCode Include="..\src\**\*.*" />
+    <SourceCode Remove="..\**\bin\**\*.*" />
+    <SourceCode Remove="..\**\obj\**\*.*" />
+  </ItemGroup>
+  
+  <Target Name="Layout">
+
+    <Message Importance="high" Text="Copying files to NuGet package layout... " />
+    <Message Importance="high" Text="  Laying out files under $(_PackToFolder)" />
+    <Message Importance="high" Text="  Skipping copying XML documentation files." Condition="$(CopyXmlDocFiles)!='true'" />         
+    
+    <RemoveDir Directories="$(_PackToFolder)" />
+    <MakeDir Directories="$(_PackToFolder)" />
+
+    <!-- Copy the nuspec file -->
+    <Copy SourceFiles="$(NuspecFilePath)" DestinationFolder="$(_PackToFolder)" />
+
+    <!-- Copy the platform-ADAL.Net binary to the portable platform (not used by MSAL) 
+    <Copy SourceFiles="$(MsalBinaryFolder)\Microsoft.Identity.Client.dll" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" />
+    <Copy SourceFiles="$(MsalBinaryFolder)\Microsoft.Identity.Client.pdb" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" />
+    <Copy SourceFiles="$(MsalBinaryFolder)\Microsoft.Identity.Client.xml" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" Condition="$(CopyXmlDocFiles)=='true'" />
+	-->
+
+    <!-- Copy the platform-specifc binaries to the appropriate target platform folder -->
+    <Copy SourceFiles="%(SourceFile.Identity)" DestinationFolder="$(_PackToFolder)\lib\%(SourceFile.TargetFolder)" />
+
+    <!-- Copy the source files -->
+    <!-- Note: we are copying the sources to "src\src" because NuGet expects the files to be under a folder called
+         "src", and our product code is also in a folder called "src" in the repo. -->
+    <Copy SourceFiles="%(SourceCode.Identity)" DestinationFolder="$(_PackToFolder)\src\src\%(RecursiveDir)" />
+
+    <CallTarget Condition="$(VerifySigning)=='true'" Targets="GetAssembliesToCheck;CheckAssembliesAreSigned" />
+    <Message Condition="$(VerifySigning)!='true'" Importance="high" Text="  Skipping verification that binaries to be packaged are signed. To verify signing, pass /p:VerifySigning=true on the command line." />
+  
+  </Target>
+
+  <Target Name="GetAssembliesToCheck">
+    <!-- Create a list of assemblies.
+         Dynamically-created item groups are not available to other targets until the target that
+         created them has finished, which is why this item group is created in a separate target. -->
+    <ItemGroup>
+      <AssembliesToCheck Include="$(_PackToFolder)\**\*.dll"/>
+      <AssembliesToCheck Include="$(_PackToFolder)\**\*.exe"/>
+    </ItemGroup>
+
+    <Message Importance="normal" Text="Binaries to verify:" />
+    <Message Importance="normal" Text="  %(AssembliesToCheck.Identity)" />
+  </Target>
+
+</Project>
