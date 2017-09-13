@@ -31,13 +31,10 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 using UIKit;
 
-using TestApp.PCL;
-
 namespace AdaliOSTestApp
 {
     public partial class AdaliOSTestAppViewController : UIViewController
     {
-        MobileAppSts sts = new  MobileAppSts();
         public AdaliOSTestAppViewController(IntPtr handle)
             : base(handle)
         {
@@ -80,53 +77,32 @@ namespace AdaliOSTestApp
 
         #endregion
 
-        async partial void UIButton11_TouchUpInside(UIButton sender)
+        partial void UIButton11_TouchUpInside(UIButton sender)
         {
             try
             {
-                ReportLabel.Text = string.Empty;
-                TokenBroker tokenBroker = new TokenBroker();
-
-                sts.Authority = "https://login.microsoftonline.com/common";
-                sts.ValidClientId = "<CLIENT_ID>";
-                sts.ValidResource = "<RESOURCE>";
-                sts.ValidUserName = "<USER>";
-                sts.ValidNonExistingRedirectUri = new Uri("REDIRECT_URI");
-                tokenBroker.Sts = sts;
-                string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this, false));
-                ReportLabel.Text = token;
+                ReportLabel.Text = "test";
             }
             catch (Exception ex)
             {
-                throw ex;
+                ReportLabel.Text = ex.Message;
             }
         }
 
-        async partial void UIButton16_TouchUpInside(UIButton sender)
+        partial void UIButton16_TouchUpInside(UIButton sender)
         {
             try
             {
-                ReportLabel.Text = string.Empty;
-                TokenBroker tokenBroker = new TokenBroker();
-                sts.Authority = "https://login.microsoftonline.com/common";
-                sts.ValidClientId = "<CLIENT_ID>";
-                sts.ValidResource = "<RESOURCE>";
-                sts.ValidUserName = "<USER>";
-                sts.ValidNonExistingRedirectUri = new Uri("REDIRECT_URI");
-                tokenBroker.Sts = sts;
-                string token = await tokenBroker.GetTokenInteractiveAsync(new PlatformParameters(this, false));
-                ReportLabel.Text = token;
+                ReportLabel.Text = "test";
             }
             catch (Exception ex)
             {
-                throw ex;
+                ReportLabel.Text = ex.Message;
             }
         }
 
         partial void UIButton30_TouchUpInside(UIButton sender)
         {
-            TokenBroker tokenBroker = new TokenBroker();
-            tokenBroker.ClearTokenCache();
         }
     }
 }
