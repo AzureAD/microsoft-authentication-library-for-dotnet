@@ -71,8 +71,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             "login.microsoftonline.com" // Microsoft Azure Worldwide
         });
 
-        public const string AuthorizeEndpointTemplate = "https://{host}/{tenant}/oauth2/authorize";
-
         // The following cache could be private, but we keep it public so that internal unit test can take a peek into it.
         // Keys are host strings.
         public static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> InstanceCache =
@@ -104,14 +102,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return entry;
         }
 
+        public static string FormatAuthorizeEndpoint(string host, string tenant)
+        {
+            return $"https://{host}/{tenant}/oauth2/authorize";
+        }
+
         // No return value. Modifies InstanceCache directly.
         private static async Task DiscoverAsync(string host, bool validateAuthority, CallState callState)
         {
-            string tentativeAuthorizeEndpoint = AuthorizeEndpointTemplate.Replace("{host}", host);
+            string tentativeAuthorizeEndpoint = FormatAuthorizeEndpoint(host, "irrelevant");
+            string instanceDiscoveryHost = WhitelistedAuthorities.Contains(host) ? host : DefaultTrustedAuthority;
             string instanceDiscoveryEndpoint =
-                ("https://{host}/common/discovery/instance?api-version=1.1&authorization_endpoint=" +
-                 tentativeAuthorizeEndpoint)
-                .Replace("{host}", WhitelistedAuthorities.Contains(host) ? host : DefaultTrustedAuthority);
+                $"https://{instanceDiscoveryHost}/common/discovery/instance?api-version=1.1&authorization_endpoint={tentativeAuthorizeEndpoint}";
             var client = new AdalHttpClient(instanceDiscoveryEndpoint, callState);
             InstanceDiscoveryResponse discoveryResponse = null;
             try

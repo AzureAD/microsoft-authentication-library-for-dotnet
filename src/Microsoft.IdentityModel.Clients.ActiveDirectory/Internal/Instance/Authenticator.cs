@@ -99,13 +99,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (!this.updatedFromTemplate)
             {
                 var authorityUri = new Uri(this.Authority);
+                var host = authorityUri.Host;
                 string path = authorityUri.AbsolutePath.Substring(1);
                 string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
                 var entry = await InstanceDiscovery.GetMetadataEntry(authorityUri.Host, this.ValidateAuthority, callState);
-                this.AuthorizationUri = InstanceDiscovery.AuthorizeEndpointTemplate.Replace("{host}", entry.PreferredNetwork).Replace("{tenant}", tenant);
-                this.DeviceCodeUri = "https://{host}/{tenant}/oauth2/devicecode".Replace("{host}", entry.PreferredNetwork).Replace("{tenant}", tenant);
-                this.TokenUri = "https://{host}/{tenant}/oauth2/token".Replace("{host}", entry.PreferredNetwork).Replace("{tenant}", tenant);
-                this.UserRealmUri = CanonicalizeUri("https://{host}/common/UserRealm".Replace("{host}", entry.PreferredNetwork));
+                this.AuthorizationUri = InstanceDiscovery.FormatAuthorizeEndpoint(host, tenant);
+                this.DeviceCodeUri = $"https://{host}/{tenant}/oauth2/devicecode";
+                this.TokenUri = $"https://{host}/{tenant}/oauth2/token";
+                this.UserRealmUri = CanonicalizeUri($"https://{host}/common/UserRealm");
                 this.IsTenantless = (string.Compare(tenant, TenantlessTenantName, StringComparison.OrdinalIgnoreCase) == 0);
                 this.SelfSignedJwtAudience = this.TokenUri;
                 this.updatedFromTemplate = true;
