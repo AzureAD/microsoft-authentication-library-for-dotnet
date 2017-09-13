@@ -127,6 +127,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (AdalServiceException ex)
             {
+                // The pre-existing implementation (https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/796/files#diff-e4febd8f40f03e71bcae0f990f9690eaL99)
+                // has been coded in this way: it catches the AdalServiceException and then translate it into 2 validation-relevant exceptions.
+                // So the following implementation absorbs these specific exceptions when the validateAuthority flag is false.
+                // All other unexpected exceptions will still bubble up, as always.
                 if (validateAuthority)
                 {
                     // hard stop here
