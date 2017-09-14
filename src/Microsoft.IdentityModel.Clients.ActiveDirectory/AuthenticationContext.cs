@@ -140,6 +140,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             set { this.Authenticator.CorrelationId = value; }
         }
 
+        //these APIs are not exposed on iOS or android
+#if !ANDROID && !iOS
         /// <summary>
         /// Acquires device code from the authority.
         /// </summary>
@@ -190,6 +192,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             var handler = new AcquireTokenByDeviceCodeHandler(requestData, deviceCodeResult);
             return await handler.RunAsync().ConfigureAwait(false);
         }
+#endif
 
         /// <summary>
         /// Acquires an access token from the authority on behalf of a user, passing in the necessary claims for authentication. It requires using a user token previously received.
