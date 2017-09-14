@@ -63,6 +63,16 @@ namespace Test.ADAL.NET.Unit.Mocks
             return responseMessage;
         }
 
+        public static HttpResponseMessage CreateSuccessDeviceCodeResponseMessage()
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+
+            HttpContent content = new StringContent(
+                "{\"user_code\":\"some-user-code\",\"device_code\":\"some-device-code\",\"verification_url\":\"some-URL\",\"expires_in\":\"900\",\"interval\":\"5\",\"message\":\"some-message\"}");
+            responseMessage.Content = content;
+            return responseMessage;
+        }
+
         public static HttpResponseMessage CreateInvalidRequestTokenResponseMessage()
         {
             return
