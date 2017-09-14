@@ -141,13 +141,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         //these APIs are not exposed on iOS or android
-#if !ANDROID && !iOS
-        /// <summary>
-        /// Acquires device code from the authority.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <returns>It contains Device Code, its expiration time, User Code.</returns>
+#if !ANDROID && !iOS 
+/// <summary>
+/// Acquires device code from the authority.
+/// </summary>
+/// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+/// <param name="clientId">Identifier of the client requesting the token.</param>
+/// <returns>It contains Device Code, its expiration time, User Code.</returns>
         public async Task<DeviceCodeResult> AcquireDeviceCodeAsync(string resource, string clientId)
         {
             return await this.AcquireDeviceCodeAsync(resource, clientId, null).ConfigureAwait(false);
@@ -256,48 +256,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Gets URL of the authorize endpoint including the query parameters.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        public async Task<Uri> GetAuthorizationRequestUrlAsync(string resource, string clientId, Uri redirectUri,
-            UserIdentifier userId, string extraQueryParameters)
-        {
-            return await GetAuthorizationRequestUrlAsync(resource, clientId, redirectUri, userId, extraQueryParameters,
-                null);
-        }
-
-        /// <summary>
-        /// Gets URL of the authorize endpoint including the query parameters.
-        /// </summary>
-        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-        /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <param name="claims">Additional claims that are needed for authentication. Acquired from the AdalClaimChallengeException. This parameter can be null.</param>
-        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        public async Task<Uri> GetAuthorizationRequestUrlAsync(string resource, string clientId, Uri redirectUri,
-            UserIdentifier userId, string extraQueryParameters, string claims)
-        {
-            RequestData requestData = new RequestData
-            {
-                Authenticator = this.Authenticator,
-                TokenCache = this.TokenCache,
-                Resource = resource,
-                ClientKey = new ClientKey(clientId),
-                ExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled
-            };
-            var handler = new AcquireTokenInteractiveHandler(requestData, redirectUri, null, userId,
-                extraQueryParameters, null, claims);
-            return await handler.CreateAuthorizationUriAsync(this.CorrelationId).ConfigureAwait(false);
-        }
-
-        /// <summary>
         /// Acquires security token from the authority.
         /// </summary>
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
@@ -346,6 +304,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return await this.AcquireTokenCommonAsync(resource, clientId, redirectUri, parameters, userId,
                 extraQueryParameters).ConfigureAwait(false);
+        }
+
+
+        internal async Task<Uri> GetAuthorizationRequestUrlCommonAsync(string resource, string clientId,
+            Uri redirectUri,
+            UserIdentifier userId, string extraQueryParameters, string claims)
+        {
+            RequestData requestData = new RequestData
+            {
+                Authenticator = this.Authenticator,
+                TokenCache = this.TokenCache,
+                Resource = resource,
+                ClientKey = new ClientKey(clientId),
+                ExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled
+            };
+            var handler = new AcquireTokenInteractiveHandler(requestData, redirectUri, null, userId,
+                extraQueryParameters, null, claims);
+            return await handler.CreateAuthorizationUriAsync(this.CorrelationId).ConfigureAwait(false);
         }
 
         internal async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode,
