@@ -95,7 +95,6 @@
     <Compile Include="TestConstants.cs" />
     <Compile Include="TokenCacheKeyTests.cs" />
     <Compile Include="TokenCacheUnitTests.cs" />
-    <Compile Include="DeviceCodeFlowTests.cs" />
     <Compile Include="UnitTests.cs" />
   </ItemGroup>
   <ItemGroup>
