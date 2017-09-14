@@ -88,10 +88,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public string SelfSignedJwtAudience { get; private set; }
 
-        public string PreferredCache { get; private set; }
-
-        public string[] Aliases { get; private set; }
-
         public Guid CorrelationId { get; set; }
 
         public async Task UpdateFromTemplateAsync(CallState callState)
@@ -102,7 +98,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 var host = authorityUri.Host;
                 string path = authorityUri.AbsolutePath.Substring(1);
                 string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-                var entry = await InstanceDiscovery.GetMetadataEntry(authorityUri.Host, this.ValidateAuthority, callState);
+                await InstanceDiscovery.GetMetadataEntry(host, this.ValidateAuthority, callState);
                 this.AuthorizationUri = InstanceDiscovery.FormatAuthorizeEndpoint(host, tenant);
                 this.DeviceCodeUri = $"https://{host}/{tenant}/oauth2/devicecode";
                 this.TokenUri = $"https://{host}/{tenant}/oauth2/token";
@@ -110,8 +106,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this.IsTenantless = (string.Compare(tenant, TenantlessTenantName, StringComparison.OrdinalIgnoreCase) == 0);
                 this.SelfSignedJwtAudience = this.TokenUri;
                 this.updatedFromTemplate = true;
-                this.PreferredCache = entry?.PreferredCache ?? authorityUri.Host;
-                this.Aliases = entry?.Aliases;
             }
         }
 
