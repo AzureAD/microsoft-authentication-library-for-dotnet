@@ -30,7 +30,8 @@ using System.ComponentModel;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
     /// <summary>
-    /// 
+    /// Represents the event agruments received when web browser navigation fails.
+    /// This class is public only for COM requirements, but should not be used by the developer.
     /// </summary>
     public class WebBrowserNavigateErrorEventArgs : CancelEventArgs
     {
@@ -41,12 +42,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         private readonly object webBrowserActiveXInstance;
 
         /// <summary>
-        /// 
+        /// Constructor
         /// </summary>
-        /// <param name="url"></param>
-        /// <param name="targetFrameName"></param>
-        /// <param name="statusCode"></param>
-        /// <param name="webBrowserActiveXInstance"></param>
+        /// <param name="url">url as a string, as in case of error it could be invalid url</param>
+        /// <param name="targetFrameName">Name of the target frame that had the failure</param>
+        /// <param name="statusCode">Error status code</param>
+        /// <param name="webBrowserActiveXInstance">return object</param>
         public WebBrowserNavigateErrorEventArgs(string url, string targetFrameName, int statusCode, object webBrowserActiveXInstance)
         {
             this.url = url;
@@ -56,7 +57,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         }
 
         /// <summary>
-        /// 
+        /// Name of the target frame that had the failure
         /// </summary>
         public string TargetFrameName
         {
