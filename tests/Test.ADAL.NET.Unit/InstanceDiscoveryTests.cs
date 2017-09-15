@@ -51,7 +51,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task WhenAuthorityIsInvalidButValidationIsNotRequired()
+        public async Task TestInstanceDiscovery_WhenAuthorityIsInvalidButValidationIsNotRequired_ShouldCacheTheProvidedAuthority()
         {
             for (int i = 0; i < 2; i++) // Prepare 2 mock responses
             {
@@ -78,7 +78,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task WhenAuthorityIsValidButNoMetadataIsReturned()
+        public async Task TestInstanceDiscovery_WhenAuthorityIsValidButNoMetadataIsReturned_ShouldCacheTheProvidedAuthority()
         {
             for (int i = 0; i < 2; i++) // Prepare 2 mock responses
             {
@@ -101,7 +101,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task WhenMultipleSimultaneousCallsWithTheSameAuthority()
+        public async Task TestInstanceDiscovery_WhenMultipleSimultaneousCallsWithTheSameAuthority_ShouldMakeOnlyOneRequest()
         {
             for (int i = 0; i < 2; i++) // Prepare 2 mock responses
             {
@@ -118,7 +118,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task WhenAuthorityIsValidAndMetadataIsReturned()
+        public async Task TestInstanceDiscovery_WhenAuthorityIsValidAndMetadataIsReturned_ShouldCacheAllReturnedAliases()
         {
             for (int i = 0; i < 2; i++) // Prepare 2 mock responses
             {
