@@ -21,7 +21,7 @@ namespace Test.ADAL.NET.Unit
             platformParameters = new PlatformParameters(PromptBehavior.Auto);
         }
 
-        [TestMethod]
+/*        [TestMethod]
         [Description("Sovereign user use world wide authority")]
         public async Task SovereignUserWorldWideAuthorityIntegrationTest()
         {
@@ -70,6 +70,6 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(1, authenticationContext.TokenCache.tokenCacheDictionary.Count);
             Assert.AreEqual(sovereignTenantSpesificAuthority,
                 authenticationContext.TokenCache.tokenCacheDictionary.Keys.FirstOrDefault().Authority);
-        }
+        }*/
     }
 }

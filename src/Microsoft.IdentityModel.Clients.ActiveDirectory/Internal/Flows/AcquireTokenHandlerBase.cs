@@ -169,10 +169,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         throw ResultEx.Exception;
                     }
 
-                    await this.PostTokenRequest(ResultEx).ConfigureAwait(false);
-
+                    this.PostTokenRequest(ResultEx);
                     StoreResultExToCache(ref notifiedBeforeAccessCache);
                 }
+
                 await this.PostRunAsync(ResultEx.Result).ConfigureAwait(false);
                 return ResultEx.Result;
             }
@@ -255,27 +255,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             return CompletedTask;
         }
-
-        protected async Task UpdateAuthority(string updatedAuthority)
+        
+        protected virtual void PostTokenRequest(AuthenticationResultEx result)
         {
-            if (!Authenticator.Authority.Equals(updatedAuthority))
-            {
-                await Authenticator.UpdateAuthority(updatedAuthority, this.CallState).ConfigureAwait(false);
-                this.ValidateAuthorityType();
-            }
-        }
-
-        protected virtual async Task PostTokenRequest(AuthenticationResultEx resultEx)
-        {
-            // if broker returned Authority update Authenticator
-            if (!string.IsNullOrEmpty(resultEx.Result.Authority)) 
-            {
-                await UpdateAuthority(resultEx.Result.Authority).ConfigureAwait(false);
-            }
-
-            this.Authenticator.UpdateTenantId(resultEx.Result.TenantId);
-
-            resultEx.Result.Authority = Authenticator.Authority;
+            this.Authenticator.UpdateTenantId(result.Result.TenantId);
         }
 
         protected abstract void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters);

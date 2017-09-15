@@ -104,7 +104,7 @@ namespace Test.ADAL.NET.Unit
             mockMessageHandler = new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
-                Url = "https://login.microsoftonline.com/home/oauth2/token",
+                Url = TestConstants.DefaultAuthorityHomeTenant + "oauth2/token",
                 ResponseMessage = MockHelpers.CreateFailureResponseMessage("{\"error\":\"authorization_pending\"," +
                                                                "\"error_description\":\"AADSTS70016: Pending end-user authorization." +
                                                                "\\r\\nTrace ID: f6c2c73f-a21d-474e-a71f-d8b121a58205\\r\\nCorrelation ID: " +
@@ -118,7 +118,7 @@ namespace Test.ADAL.NET.Unit
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
-                Url = "https://login.microsoftonline.com/home/oauth2/token",
+                Url = TestConstants.DefaultAuthorityHomeTenant + "oauth2/token",
                 ResponseMessage =
                     MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.DefaultUniqueId,
                         TestConstants.DefaultDisplayableId, TestConstants.DefaultResource)

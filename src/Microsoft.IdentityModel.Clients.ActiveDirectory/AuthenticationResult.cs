@@ -122,6 +122,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public string IdToken { get; internal set; }
 
         /// <summary>
+        /// Gets the authority which has issued tokens.
+        /// </summary>
+        internal string Authority { get; set; }
+
+        /// <summary>
         /// Creates authorization header from authentication result.
         /// </summary>
         /// <returns>Created authorization header</returns>
@@ -139,9 +144,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this.UserInfo = new UserInfo(userInfo);
             }
         }
-        /// <summary>
-        /// Gets the authority which has issued tokens.
-        /// </summary>
-        public string Authority { get; internal set; }
     }
 }

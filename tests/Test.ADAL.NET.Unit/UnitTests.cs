@@ -45,7 +45,6 @@ namespace Test.ADAL.NET.Unit
     [TestClass]
     [DeploymentItem("valid_cert.pfx")]
     [DeploymentItem("valid_cert2.pfx")]
-    [DeploymentItem("Microsoft.Owin.Host.HttpListener.dll")]
     public class UnitTests
     {
         private const string ComplexString = "asdfk+j0a-=skjwe43;1l234 1#$!$#%345903485qrq@#$!@#$!(rekr341!#$%Ekfaآزمايشsdsdfsddfdgsfgjsglk==CVADS";
