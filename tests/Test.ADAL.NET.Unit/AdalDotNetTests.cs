@@ -51,6 +51,8 @@ namespace Test.ADAL.NET.Unit
         public void Initialize()
         {
             HttpMessageHandlerFactory.ClearMockHandlers();
+            InstanceDiscovery.InstanceCache.Clear();
+            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler());
             platformParameters = new PlatformParameters(PromptBehavior.Auto);
         }
 
@@ -126,7 +128,6 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
             });
-            Assert.AreEqual(HttpMessageHandlerFactory.MockHandlersCount(), 2);
             context.ExtendedLifeTimeEnabled = true;
             AuthenticationResult result =
             await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,TestConstants.DefaultRedirectUri, platformParameters);
@@ -162,7 +163,6 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
             });
-            Assert.AreEqual(HttpMessageHandlerFactory.MockHandlersCount(), 2);
             context.ExtendedLifeTimeEnabled = true;
             AuthenticationResult result =
                     await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
@@ -199,7 +199,6 @@ namespace Test.ADAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateResiliencyMessage(HttpStatusCode.GatewayTimeout),
             });
 
-            Assert.AreEqual(HttpMessageHandlerFactory.MockHandlersCount(), 2);
             context.ExtendedLifeTimeEnabled = true;
             AuthenticationResult result =
                  await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
@@ -474,8 +473,6 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            Assert.AreEqual(HttpMessageHandlerFactory.MockHandlersCount(), 2);
-
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
 
 
@@ -537,8 +534,6 @@ namespace Test.ADAL.NET.Unit
                     {"grant_type", "client_credentials"}
                 }
             });
-
-            Assert.AreEqual(HttpMessageHandlerFactory.MockHandlersCount(), 2);
 
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
 
@@ -602,8 +597,6 @@ namespace Test.ADAL.NET.Unit
                     {"grant_type", "client_credentials"}
                 }
             });
-
-            Assert.AreEqual(HttpMessageHandlerFactory.MockHandlersCount(), 2);
 
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
 

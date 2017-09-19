@@ -40,7 +40,26 @@ namespace Test.ADAL.NET.Unit.Mocks
             stream.Position = 0;
             return stream;
         }
-        
+
+        public static HttpMessageHandler CreateInstanceDiscoveryMockHandler()
+        {
+            return CreateInstanceDiscoveryMockHandler(
+                "{\"tenant_discovery_endpoint\" : \"https://login.microsoftonline.com/v1/.well-known/openid-configuration\"}"
+                );
+        }
+
+        public static HttpMessageHandler CreateInstanceDiscoveryMockHandler(string content)
+        {
+            return new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(content)
+                }
+            };
+        }
+
         public static HttpResponseMessage CreateSuccessTokenResponseMessage()
         {
             return CreateSuccessTokenResponseMessage(false);

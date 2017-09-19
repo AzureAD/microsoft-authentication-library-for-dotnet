@@ -41,8 +41,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private const string TenantlessTenantName = "Common";
 
-        private static readonly AuthenticatorTemplateList AuthenticatorTemplateList = new AuthenticatorTemplateList();
-
         private bool updatedFromTemplate;
 
         private void Init(string authority, bool validateAuthority)
@@ -97,18 +95,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             if (!this.updatedFromTemplate)
             {
                 var authorityUri = new Uri(this.Authority);
-                string host = authorityUri.Authority;
+                var host = authorityUri.Host;
                 string path = authorityUri.AbsolutePath.Substring(1);
                 string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-
-                AuthenticatorTemplate matchingTemplate = await AuthenticatorTemplateList.FindMatchingItemAsync(this.ValidateAuthority, host, tenant, callState).ConfigureAwait(false);
-
-                this.AuthorizationUri = matchingTemplate.AuthorizeEndpoint.Replace("{tenant}", tenant);
-                this.DeviceCodeUri = matchingTemplate.DeviceCodeEndpoint.Replace("{tenant}", tenant);
-                this.TokenUri = matchingTemplate.TokenEndpoint.Replace("{tenant}", tenant);
-                this.UserRealmUri = CanonicalizeUri(matchingTemplate.UserRealmEndpoint);
+                await InstanceDiscovery.GetMetadataEntry(host, this.ValidateAuthority, callState);
+                this.AuthorizationUri = InstanceDiscovery.FormatAuthorizeEndpoint(host, tenant);
+                this.DeviceCodeUri = $"https://{host}/{tenant}/oauth2/devicecode";
+                this.TokenUri = $"https://{host}/{tenant}/oauth2/token";
+                this.UserRealmUri = CanonicalizeUri($"https://{host}/common/UserRealm");
                 this.IsTenantless = (string.Compare(tenant, TenantlessTenantName, StringComparison.OrdinalIgnoreCase) == 0);
-                this.SelfSignedJwtAudience = matchingTemplate.Issuer.Replace("{tenant}", tenant);
+                this.SelfSignedJwtAudience = this.TokenUri;
                 this.updatedFromTemplate = true;
             }
         }
