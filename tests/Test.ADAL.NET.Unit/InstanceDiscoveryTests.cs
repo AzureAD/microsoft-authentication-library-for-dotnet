@@ -33,6 +33,7 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.NET.Unit.Mocks;
+using System.Net;
 
 namespace Test.ADAL.NET.Unit
 {
@@ -58,6 +59,7 @@ namespace Test.ADAL.NET.Unit
                 HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
                 {
                     Method = HttpMethod.Get,
+                    Url = $"https://{InstanceDiscovery.DefaultTrustedAuthority}/common/discovery/instance",
                     ResponseMessage = MockHelpers.CreateFailureResponseMessage("{\"error\":\"invalid_instance\"}")
                 });
             }
@@ -120,25 +122,33 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("InstanceDiscoveryTests")]
         public async Task TestInstanceDiscovery_WhenAuthorityIsValidAndMetadataIsReturned_ShouldCacheAllReturnedAliases()
         {
+            string host = "login.windows.net";
             for (int i = 0; i < 2; i++) // Prepare 2 mock responses
             {
-                HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(
-                    @"{
-                    ""tenant_discovery_endpoint"" : ""https://login.microsoftonline.com/v1/.well-known/openid-configuration"",
-                    ""metadata"": [
-                        {
-                        ""preferred_network"": ""login.microsoftonline.com"",
-                        ""preferred_cache"": ""login.windows.net"",
-                        ""aliases"": [""login.microsoftonline.com"", ""login.windows.net"", ""sts.microsoft.com""]
-                        }
-                    ]
-                    }"
-                    ));
+                HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler{
+                    Method = HttpMethod.Get,
+                    Url = $"https://{host}/common/discovery/instance",
+                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent(
+                            @"{
+                            ""tenant_discovery_endpoint"" : ""https://login.microsoftonline.com/v1/.well-known/openid-configuration"",
+                            ""metadata"": [
+                                {
+                                ""preferred_network"": ""login.microsoftonline.com"",
+                                ""preferred_cache"": ""login.windows.net"",
+                                ""aliases"": [""login.microsoftonline.com"", ""login.windows.net"", ""sts.microsoft.com""]
+                                }
+                            ]
+                            }"
+                        )
+                    }
+                });
             }
 
             CallState callState = new CallState(Guid.NewGuid());
             // ADAL still behaves correctly using developer provided authority
-            var entry = await InstanceDiscovery.GetMetadataEntry("login.windows.net", true, callState).ConfigureAwait(false);
+            var entry = await InstanceDiscovery.GetMetadataEntry(host, true, callState).ConfigureAwait(false);
             Assert.AreEqual("login.microsoftonline.com", entry.PreferredNetwork); // No exception raised, the host is returned as-is
             Assert.AreEqual(1, HttpMessageHandlerFactory.MockHandlersCount()); // 1 mock response is consumed, 1 remaining
 
