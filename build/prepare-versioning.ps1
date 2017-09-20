@@ -18,22 +18,3 @@ if ($env:BUILD_SOURCEBRANCHNAME -eq "master" -and $env:ReleaseVersioning -eq "tr
 
 Set-Content $filename $newContent
 Write-Host "Modifying:" $filename;
-
-Write-Host "=========================="
-Write-Host "Versioning .nuspec file..."
-$filename = "build\Microsoft.Identity.Client.nuspec"
-$content = Get-Content $filename
-
-if ($env:BUILD_SOURCEBRANCHNAME -eq "master" -and $env:ReleaseVersioning -eq "false")
-{
-	$nugetVersion = $nugetVersion + "-preview" + $env:BUILD_BUILDNUMBER;
-}
-if ($env:BUILD_SOURCEBRANCHNAME -eq "dev")
-{
-	$nugetVersion = $nugetVersion + "-alpha" + $env:BUILD_BUILDNUMBER;
-}
-
-$newContent = $content -replace "<version>(.*)</version>", "<version>$nugetVersion</version>"
-Set-Content $filename $newContent
-Write-Host "Modifying:" $filename;
-Write-Host "Setting NuGet version:" $nugetVersion;
