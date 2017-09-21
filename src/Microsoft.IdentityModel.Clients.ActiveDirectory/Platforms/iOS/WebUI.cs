@@ -52,7 +52,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             Authenticate(authorizationUri, redirectUri, callState);
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
 
-            this.parameters.CallerViewController = null;
             this.parameters = null;
             return authorizationResult;
         }
@@ -82,7 +81,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
             catch (Exception ex)
             {
-                this.parameters.CallerViewController = null;
                 this.parameters = null;
                 throw new AdalException(AdalError.AuthenticationUiFailed, ex);
             }

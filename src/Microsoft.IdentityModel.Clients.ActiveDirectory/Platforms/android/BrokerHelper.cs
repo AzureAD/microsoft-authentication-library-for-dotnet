@@ -59,7 +59,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return false;
         }
 
-        public bool CanInvokeBroker { get { return WillUseBroker() && mBrokerProxy.CanSwitchToBroker(); } }
+        public bool CanInvokeBroker
+        {
+            get
+            {
+                mBrokerProxy.CallState = CallState;
+                return WillUseBroker() && mBrokerProxy.CanSwitchToBroker();
+            }
+        }
 
 
         public async Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)

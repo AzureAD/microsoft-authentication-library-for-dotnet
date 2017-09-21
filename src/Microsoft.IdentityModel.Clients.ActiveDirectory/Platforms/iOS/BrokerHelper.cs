@@ -115,8 +115,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             await brokerResponseReady.WaitAsync().ConfigureAwait(false);
-            PlatformParameters pp = PlatformParameters as PlatformParameters;
-            pp.CallerViewController = null;
             PlatformParameters = null;
             return ProcessBrokerResponse();
         }
