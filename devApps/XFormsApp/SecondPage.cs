@@ -29,6 +29,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Text;
 using Xamarin.Forms;
+using Xamarin.Forms.PlatformConfiguration;
 
 namespace XFormsApp
 {
@@ -53,7 +54,6 @@ namespace XFormsApp
     public class SecondPage : ContentPage
     {
         private Label result;
-        private Label logLabel;
         private AdalCallback callback = new AdalCallback();
         public SecondPage()
         {
@@ -77,9 +77,22 @@ namespace XFormsApp
                 Text = "Clear Cache"
             };
 
-            result = new Label { };
-            logLabel = new Label
+            result = new Label()
             {
+                VerticalOptions = LayoutOptions.FillAndExpand
+            };
+
+            var scrollView = new ScrollView()
+            {
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                Content = new StackLayout()
+                {
+                    VerticalOptions = LayoutOptions.FillAndExpand,
+                    Children =
+                    {
+                        result
+                    }
+                }
             };
 
             acquireTokenButton.Clicked += browseButton_Clicked;
@@ -87,16 +100,27 @@ namespace XFormsApp
             conditionalAccessButton.Clicked += conditionalAccessButton_Clicked;
             clearButton.Clicked += clearButton_Clicked;
 
+            Thickness padding;
+            switch (Device.RuntimePlatform)
+            {
+                case Device.iOS:
+                    padding = new Thickness(0, 40, 0, 0);
+                    break;
+                default:
+                    padding = new Thickness(0, 0, 0, 0);
+                    break;
+            }
+
             Content = new StackLayout
             {
-                VerticalOptions = LayoutOptions.Center,
+                Padding = padding,
+                VerticalOptions = LayoutOptions.FillAndExpand,
                 Children = {
                     acquireTokenButton,
                     acquireTokenSilentButton,
                     conditionalAccessButton,
                     clearButton,
-                    result,
-                    logLabel
+                    scrollView
                 }
             };
 
@@ -121,8 +145,9 @@ namespace XFormsApp
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    this.logLabel.Text = callback.DrainLogs();
-                    this.result.Text = output;
+                    this.result.Text += "Result : " + output;
+
+                    this.result.Text += "Logs : " + callback.DrainLogs();
                 });
             }
 
@@ -152,8 +177,9 @@ namespace XFormsApp
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    this.logLabel.Text = callback.DrainLogs();
-                    this.result.Text = output;
+                    this.result.Text += "Result : " + output;
+
+                    this.result.Text += "Logs : " + callback.DrainLogs();
                 });
             }
 
@@ -182,8 +208,9 @@ namespace XFormsApp
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    this.logLabel.Text = callback.DrainLogs();
-                    this.result.Text = output;
+                    this.result.Text += "Result : " + output;
+
+                    this.result.Text += "Logs : " + callback.DrainLogs();
                 });
             }
         }

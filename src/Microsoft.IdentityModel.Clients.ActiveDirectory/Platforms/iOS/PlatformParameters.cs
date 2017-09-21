@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Caller UIViewController
         /// </summary>
-        public UIViewController CallerViewController { get; internal set; }
+        public UIViewController CallerViewController { get; private set; }
 
         /// <summary>
         /// Skips calling to broker if broker is present. false, by default

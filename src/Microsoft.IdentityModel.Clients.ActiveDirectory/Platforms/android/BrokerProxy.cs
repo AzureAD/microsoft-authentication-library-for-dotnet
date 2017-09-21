@@ -104,6 +104,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private bool VerifyManifestPermission(string permission)
         {
+
             if (Permission.Granted !=
                 Application.Context.PackageManager.CheckPermission(permission, Application.Context.PackageName))
             {
@@ -466,39 +467,32 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     Account[] accountList = mAcctManager
                         .GetAccountsByType(BrokerConstants.BrokerAccountType);
 
-                    // Authenticator installed from Company portal
-                    // This supports only one account
+                    string packageName;
+
                     if (authenticator.PackageName
-                        .Equals(BrokerConstants.PackageName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        // Adal should not connect if given username does not match
-                        if (accountList != null && accountList.Length > 0)
-                        {
-                            return VerifyAccount(accountList, username, uniqueId);
-                        }
-
-                        return false;
-
-                        // Check azure authenticator and allow calls for test
-                        // versions
+                        .Equals(BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase)){
+                        packageName = BrokerConstants.AzureAuthenticatorAppPackageName;
                     }
                     else if (authenticator.PackageName
-                        .Equals(BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase)
-                             || authenticator.PackageName
-                                 .Equals(BrokerConstants.PackageName, StringComparison.OrdinalIgnoreCase))
+                        .Equals(BrokerConstants.PackageName, StringComparison.OrdinalIgnoreCase)){
+                        packageName = BrokerConstants.PackageName;
+                    }
+                    else
                     {
-                        // Existing broker logic only connects to broker for token
-                        // requests if account exists. New version can allow to
-                        // add accounts through Adal.
-                        if (HasSupportToAddUserThroughBroker())
-                        {
-                            CallState.Logger.Verbose(null, "Broker supports to add user through app");
-                            return true;
-                        }
-                        else if (accountList != null && accountList.Length > 0)
-                        {
-                            return VerifyAccount(accountList, username, uniqueId);
-                        }
+                        return false;
+                    }
+
+                    // Existing broker logic only connects to broker for token
+                    // requests if account exists. New version can allow to
+                    // add accounts through Adal.
+                    if (HasSupportToAddUserThroughBroker(packageName))
+                    {
+                        CallState.Logger.Verbose(null, "Broker supports to add user through app");
+                        return true;
+                    }
+                    else if (accountList != null && accountList.Length > 0)
+                    {
+                        return VerifyAccount(accountList, username, uniqueId);
                     }
                 }
             }
@@ -539,13 +533,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return true;
         }
 
-        private bool HasSupportToAddUserThroughBroker()
+        private bool HasSupportToAddUserThroughBroker(string packageName)
         {
             Intent intent = new Intent();
-            intent.SetPackage(BrokerConstants.AzureAuthenticatorAppPackageName);
-            intent.SetClassName(BrokerConstants.AzureAuthenticatorAppPackageName,
-                BrokerConstants.AzureAuthenticatorAppPackageName
-                + ".ui.AccountChooserActivity");
+            intent.SetPackage(packageName);
+            intent.SetClassName(packageName, packageName + ".ui.AccountChooserActivity");
+
             PackageManager packageManager = mContext.PackageManager;
             IList<ResolveInfo> infos = packageManager.QueryIntentActivities(intent, 0);
             return infos.Count > 0;
