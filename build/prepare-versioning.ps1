@@ -33,7 +33,7 @@ Write-Host "Setting assembly version attribute:" $assemblyVersion;
 
 $nugetVersion = "{0}.{1}.{2}" -f ($versionTokens[0], $versionTokens[1], $versionTokens[2]);
 
-if ($env:BUILD_SOURCEBRANCHNAME -eq "dev")
+if ($env:BUILD_SOURCEBRANCHNAME -ne "master")
 {
 	$nugetVersion = $nugetVersion + "-alpha" + $env:BUILD_BUILDNUMBER;
 }
