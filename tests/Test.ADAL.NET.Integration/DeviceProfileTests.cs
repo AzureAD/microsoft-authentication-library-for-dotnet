@@ -31,6 +31,7 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.NET.Unit.Mocks;
+using Test.ADAL.Common;
 
 namespace Test.ADAL.NET.Unit
 {
@@ -143,5 +144,23 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual("some-access-token", result.AccessToken);
         }
 
+        [TestMethod]
+        public void NegativeDeviceCodeTest()
+        {
+            MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                Url = TestConstants.DefaultAuthorityHomeTenant + "oauth2/devicecode",
+                ResponseMessage = MockHelpers.CreateDeviceCodeErrorResponse()
+            };
+
+            HttpMessageHandlerFactory.AddMockHandler(mockMessageHandler);
+
+            TokenCache cache = new TokenCache();
+            AuthenticationContext ctx = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, cache);
+            DeviceCodeResult dcr;
+            AdalServiceException ex = AssertException.TaskThrows<AdalServiceException>(async () => dcr = await ctx.AcquireDeviceCodeAsync("some-resource", "some-client"));
+            Assert.IsTrue(ex.Message.Contains("some error message"));
+        }
     }
 }
