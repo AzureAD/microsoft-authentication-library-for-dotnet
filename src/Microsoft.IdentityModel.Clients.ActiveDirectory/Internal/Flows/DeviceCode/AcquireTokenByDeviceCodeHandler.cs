@@ -47,7 +47,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             TimeSpan timeRemaining = deviceCodeResult.ExpiresOn - DateTimeOffset.UtcNow;
             AuthenticationResultEx resultEx = null;
-            while (timeRemaining.TotalSeconds > 0)
+            //the interval is added so that the while loop does not end before aquiring the last response from the STS stating that the code has expired.
+            //Without it, resultEx will end up being null.
+            while (timeRemaining.TotalSeconds + deviceCodeResult.Interval > 0)
             {
                 try
                 {
