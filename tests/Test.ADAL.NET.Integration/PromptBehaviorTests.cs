@@ -35,8 +35,9 @@ using System.Net.Http;
 using Test.ADAL.Common;
 using System.Net;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
+using Test.ADAL.NET.Unit;
 
-namespace Test.ADAL.NET.Unit
+namespace Test.ADAL.NET.Integration
 {
     [TestClass]
     public class PromptBehaviorTests
@@ -66,7 +67,7 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true);
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
@@ -84,8 +85,7 @@ namespace Test.ADAL.NET.Unit
         [Description("Test for calling promptBehavior.Auto when cache already has an access token")]
         public async Task AutoPromptBehaviorWithTokenInCacheTest()
         {
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true);
-            context.TokenCache.Clear();
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
@@ -114,8 +114,7 @@ namespace Test.ADAL.NET.Unit
         [Description("Test for calling promptBehavior.Auto when cache has an expired access token, but a good refresh token")]
         public async Task AutoPromptBehaviorWithExpiredAccessTokenAndGoodRefreshTokenInCacheTest()
         {
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true);
-            context.TokenCache.Clear();
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
@@ -172,8 +171,7 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true);
-            context.TokenCache.Clear();
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
@@ -216,8 +214,7 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true);
-            context.TokenCache.Clear();
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
@@ -251,7 +248,6 @@ namespace Test.ADAL.NET.Unit
         public void ForcePromptForNeverPromptBehaviorTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
-            context.TokenCache.Clear();
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
@@ -297,8 +293,7 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true);
-            context.TokenCache.Clear();
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,

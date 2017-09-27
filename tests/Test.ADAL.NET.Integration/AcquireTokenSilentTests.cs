@@ -28,11 +28,15 @@
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Test.ADAL.Common;
+using Test.ADAL.NET.Unit;
 using Test.ADAL.NET.Unit.Mocks;
 
-namespace Test.ADAL.NET.Unit
+namespace Test.ADAL.NET.Integration
 {
     [TestClass]
     public class AcquireTokenSilentTests
@@ -77,7 +81,32 @@ namespace Test.ADAL.NET.Unit
             Assert.IsNotNull(ex.InnerException);
             Assert.IsTrue(ex.InnerException is AdalException);
             Assert.AreEqual(((AdalException)ex.InnerException).ErrorCode, "invalid_grant");
+        }
 
+        [TestMethod]
+        [TestCategory("AcquireTokenSilentTests")]
+        //292916 Ensure AcquireTokenSilent tests exist in ADAL.NET for public clients
+        public async Task AcquireTokenSilentTestWithValidTokenInCache()
+        {
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
+
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
+            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            {
+                RefreshToken = "some-rt",
+                ResourceInResponse = TestConstants.DefaultResource,
+                Result = new AuthenticationResult("Bearer", "existing-access-token",
+                    DateTimeOffset.UtcNow + TimeSpan.FromMinutes(100))
+            };
+
+            AuthenticationResult result =
+                await
+                    context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("existing-access-token", result.AccessToken);
         }
     }
 }

@@ -78,6 +78,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AcquireTokenSilentTests.cs" />
     <Compile Include="DeviceProfileTests.cs" />
     <Compile Include="PromptBehaviorTests.cs" />
     <Compile Include="SovereignCloudsTests.cs" />

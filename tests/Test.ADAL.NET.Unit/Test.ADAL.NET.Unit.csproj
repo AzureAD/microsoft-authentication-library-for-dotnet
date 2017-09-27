@@ -80,7 +80,6 @@
     <Compile Include="..\Test.ADAL.Common\TokenCacheTests.cs">
       <Link>Common\TokenCacheTests.cs</Link>
     </Compile>
-    <Compile Include="AcquireTokenSilentTests.cs" />
     <Compile Include="AdalDotNetTests.cs" />
     <Compile Include="AuthenticationParametersTests.cs" />
     <Compile Include="ClaimsChallengeExceptionTests.cs" />
