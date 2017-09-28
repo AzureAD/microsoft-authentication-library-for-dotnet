@@ -30,10 +30,11 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.ADAL.NET.Unit.Mocks;
 using Test.ADAL.Common;
+using Test.ADAL.NET.Common;
+using Test.ADAL.NET.Common.Mocks;
 
-namespace Test.ADAL.NET.Unit
+namespace Test.ADAL.NET.Integration
 {
     [TestClass]
     public class DeviceCodeFlowTests

@@ -30,6 +30,7 @@ using System.Globalization;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.Common;
+using Test.ADAL.NET.Common;
 
 namespace Test.ADAL.NET.Unit
 {

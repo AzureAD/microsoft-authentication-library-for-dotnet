@@ -6,6 +6,7 @@
     <SignAssembly>true</SignAssembly>
     <DelaySign>true</DelaySign>
     <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Label="SonarQube analysis settings">
     <!-- These properties have no effect on how the project is built. -->
@@ -19,7 +20,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Test.ADAL.NET.Integration</RootNamespace>
     <AssemblyName>Test.ADAL.NET.Integration</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
@@ -92,9 +93,9 @@
       <Project>{aece489d-9ed4-442d-8d8f-0f383aebb781}</Project>
       <Name>Microsoft.IdentityModel.Clients.ActiveDirectory</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Test.ADAL.NET.Unit\Test.ADAL.NET.Unit.csproj">
-      <Project>{91E9E564-8A44-457B-A97C-E76C9F6275D6}</Project>
-      <Name>Test.ADAL.NET.Unit</Name>
+    <ProjectReference Include="..\Test.ADAL.NET.Common\Test.ADAL.NET.Common.csproj">
+      <Project>{412f8f05-2694-4d2e-8fe0-a821721cf682}</Project>
+      <Name>Test.ADAL.NET.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

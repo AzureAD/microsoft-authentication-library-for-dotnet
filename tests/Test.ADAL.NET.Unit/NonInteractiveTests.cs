@@ -40,7 +40,8 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using Test.ADAL.Common;
-using Test.ADAL.NET.Unit.Mocks;
+using Test.ADAL.NET.Common;
+using Test.ADAL.NET.Common.Mocks;
 
 namespace Test.ADAL.NET.Unit
 {

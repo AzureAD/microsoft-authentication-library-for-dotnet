@@ -30,10 +30,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.ADAL.NET.Unit.Mocks;
 using System.Net.Http;
 using Test.ADAL.Common;
 using System.Net;
+using Test.ADAL.NET.Common;
+using Test.ADAL.NET.Common.Mocks;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
 using Test.ADAL.NET.Unit;
 

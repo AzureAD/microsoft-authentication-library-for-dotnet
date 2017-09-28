@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,23 +25,39 @@
 //
 //------------------------------------------------------------------------------
 
-using Owin;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.ADAL.Common
+namespace Test.ADAL.NET.Common.Mocks
 {
-    internal class RelyingParty
+    internal class MockWebUI : IWebUI
     {
-        public void Configuration(IAppBuilder app)
+        internal AuthorizationResult MockResult { get; set; }
+
+        internal IDictionary<string, string> QueryParams { get; set; }
+        
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
         {
-            app.Run(ctx =>
+            //match QP passed in for validation. 
+            if (QueryParams != null)
             {
-                var response = ctx.Response;
-                response.StatusCode = 401;
-                response.Headers.Add("WWW-authenticate",
-                    new string[] { @" Bearer     authorization_uri  =   ""https://login.windows.net/aadadfs.onmicrosoft.com/oauth2/authorize""   ,    Resource_id  =  ""test_resource, test_resource2""  " });
-                
-                return response.WriteAsync("dummy");
-            });
+                Assert.IsNotNull(authorizationUri.Query);
+                IDictionary<string, string> inputQp =
+                    EncodingHelper.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);
+                foreach (var key in QueryParams.Keys)
+                {
+                    Assert.IsTrue(inputQp.ContainsKey(key));
+                    Assert.AreEqual(QueryParams[key], inputQp[key]);
+                }
+            }
+
+            return await Task.Factory.StartNew(() => this.MockResult).ConfigureAwait(false);
         }
     }
 }

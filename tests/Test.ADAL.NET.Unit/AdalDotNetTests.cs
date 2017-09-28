@@ -36,7 +36,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Test.ADAL.Common;
 using Test.ADAL.Common.Unit;
-using Test.ADAL.NET.Unit.Mocks;
+using Test.ADAL.NET.Common;
+using Test.ADAL.NET.Common.Mocks;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
 
 namespace Test.ADAL.NET.Unit
