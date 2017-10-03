@@ -1,21 +1,17 @@
 set BUILD_PATH=bin\%BUILD_BUILDCONFIGURATION%
-set SIGNED_TARGET=../a/SignedProductBinaries
-set NUGET_TARGET=../a
-set NUGET_TEMP_TARGET=NuGet-Temp
+set SIGNED_TARGET=%BUILD_ARTIFACTSTAGINGDIRECTORY%/SignedProductBinaries
+set NUGET_TARGET=%BUILD_ARTIFACTSTAGINGDIRECTORY%
+set NUGET_TEMP_TARGET=%BUILD_SOURCESDIRECTORY%/NuGet-Temp
 set LIBRARY_NAME=Microsoft.Identity.Client
 setlocal ENABLEDELAYEDEXPANSION
 
 md %NUGET_TEMP_TARGET%
 
 @echo ==========================
-@echo Moving symbols.nupkg file to NuGet path...
-	mv *.symbols.nupkg %NUGET_TARGET%\
-
-@echo ==========================
 @echo Decompressing nuget...
-for %%i in (*.nupkg) do (
+for %%i in (%NUGET_TARGET%\*.nupkg) do (
 	set NUGET_NAME=%%~ni
-	unzip %%~ni.nupkg -d %NUGET_TEMP_TARGET%\
+	7z e %NUGET_TARGET%\%%~ni.nupkg -o%NUGET_TEMP_TARGET%\ -y
 )
 
 @echo Saved nuget name as %NUGET_NAME%
@@ -34,10 +30,8 @@ del %NUGET_TARGET%\*.lastcodeanalysissucceeded /s
 
 @echo ==========================
 @echo Creating NuGet Package....
-cd %NUGET_TEMP_TARGET%
-7z a ..\%NUGET_TARGET%\%NUGET_NAME%.zip -r *
-cd ..
-mv %NUGET_TARGET%\%NUGET_NAME%.zip %NUGET_TARGET%\%NUGET_NAME%.nupkg
+7z a %NUGET_TARGET%\%NUGET_NAME%.zip -r %NUGET_TEMP_TARGET%/*
+copy %NUGET_TARGET%\%NUGET_NAME%.zip %NUGET_TARGET%\%NUGET_NAME%.nupkg
 
 @echo ====================================
 @echo MSAL-NET Postbuild script complete with no errors
