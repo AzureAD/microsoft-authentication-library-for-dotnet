@@ -62,39 +62,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             // Since ADAL .NET may be used on servers, for security reasons, we do not emit device type.
             return null;
         }
-
-        public override void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
-        {
-            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
-            if (authorizationParameters == null)
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
-            }
-
-            PromptBehavior promptBehavior = authorizationParameters.PromptBehavior;
-
-            switch (promptBehavior)
-            {
-                case PromptBehavior.Always:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
-                    break;
-                case PromptBehavior.RefreshSession:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
-                    break;
-            }
-        }
-
-        public override bool GetCacheLoadPolicy(IPlatformParameters parameters)
-        {
-            PlatformParameters authorizationParameters = (parameters as PlatformParameters);
-            if (authorizationParameters == null)
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
-            }
-
-            PromptBehavior promptBehavior = authorizationParameters.PromptBehavior;
-
-            return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession;
-        }
     }
 }
