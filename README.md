@@ -1,9 +1,9 @@
-# Active Directory Authentication Library (ADAL) for .NET, Windows Store, Xamarin iOS and Xamarin Android.
+# Active Directory Authentication Library (ADAL) for .NET, Windows Store, .NET Core, Xamarin iOS and Xamarin Android.
 
 | [Code Samples](https://github.com/azure-samples?utf8=✓&q=active-directory-dotnet) | [Reference Docs](https://docs.microsoft.com/active-directory/adal/microsoft.identitymodel.clients.activedirectory) | [Developer Guide](https://aka.ms/aaddev)
 | --- | --- | --- |
 
-Active Directory Authentication Library (ADAL) provides easy to use authentication functionality for your .NET client and Windows Store apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.
+Active Directory Authentication Library (ADAL) provides easy to use authentication functionality for your .NET/.NET Core client, Windows Store/Xamarin.iOS/Xamarin.Android apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.
 
 
  Stable (`master` branch)    | Nightly (`dev` branch)
@@ -17,7 +17,7 @@ Active Directory Authentication Library (ADAL) provides easy to use authenticati
 
 ## Versions
 Current version - latest one at [nuget.org](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).  
-Minimum recommended version - 2.28.0  
+Minimum recommended version - 2.29.0
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/blob/master/changelog.txt).
 
 ## Security Issue in Multiple Versions of ADAL .Net ###
@@ -195,32 +195,6 @@ You can use various tools to capture the HTTP traffic that ADAL generates.  This
 Fiddler is the easiest HTTP tracing tool.  In order to be useful it is necessary to configure fiddler to record unencrypted SSL traffic.  
 
 NOTE: Traces generated in this way may contain highly privileged information such as access tokens, usernames and passwords.  If you are using production accounts, do not share these traces with 3rd parties.  If you need to supply a trace to someone in order to get support, reproduce the issue with a temporary account with usernames and passwords that you don't mind sharing.
-
-## Projects in this repo
-
-### ADAL.PCL
-
-* This project contains the source of the core ADAL Library (.NET Standard 1.1).
-
-### ADAL.PCL.Desktop
-
-* This project contains the source of the platform specific implementation for Windows desktop (.NET Framework 4.5).
-
-### ADAL.PCL.WinRT
-
-* This project contains the source of the platform specific implementation for Windows Store.
-
-### ADAL.PCL.CoreCLR
-
-* This project contains the source of the platform specific implementation for Core CLR (still in preview) (.NET Standard 1.1).
-
-### ADAL.PCL.iOS
-
-* This project contains the source of the platform specific implementation for Xamarin iOS.
-
-### ADAL.PCL.Android
-
-* This project contains the source of the platform specific implementation for Xamarin Android.
 
 ## License
 
