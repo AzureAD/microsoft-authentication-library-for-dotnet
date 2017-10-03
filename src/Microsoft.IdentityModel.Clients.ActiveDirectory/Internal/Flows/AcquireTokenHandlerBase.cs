@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
-                    ResultEx = this.tokenCache.LoadFromCache(CacheQueryData, this.CallState);
+                    ResultEx = await this.tokenCache.LoadFromCache(CacheQueryData, this.CallState);
                     extendedLifetimeResultEx = ResultEx;
 
                     if (ResultEx?.Result != null &&
