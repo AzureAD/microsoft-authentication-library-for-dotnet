@@ -34,7 +34,7 @@
   <PropertyGroup>
     <!-- If the caller has specified a $(ReferencedBinsPath) then use that.
          Otherwise, if the caller has specified a $(ReferencedBinsPathRoot) then use that as the root and add the current project name as subfolder. -->
-    <ReferencedBinsPath Condition="$(ReferencedBinsPath)=='' AND $(ReferencedBinsPathRoot)!=''" >$([MSBuild]::NormalizeDirectory($(ReferencedBinsPathRoot)))$(MSBuildProjectName)</ReferencedBinsPath>
+    <ReferencedBinsPath Condition="$(ReferencedBinsPath)=='' AND $(ReferencedBinsPathRoot)!=''" >$([MSBuild]::NormalizeDirectory($(ReferencedBinsPathRoot)))$(MSBuildProjectName)_$(TargetFramework)</ReferencedBinsPath>
   </PropertyGroup>
   
   <Target Name="CopyReferencedAssembliesToSingleFolder" AfterTargets="Build" Condition="$(ReferencedBinsPath)!=''">

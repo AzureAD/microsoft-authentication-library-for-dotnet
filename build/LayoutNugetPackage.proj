@@ -27,7 +27,7 @@
     <Configuration Condition="$(Configuration)==''" >Debug</Configuration>
     
     <NuspecFilePath Condition="$(NuspecFilePath)==''">$(MSBuildThisFileDirectory)Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec</NuspecFilePath>
-    <AdalBinaryFolder Condition="$(AdalBinaryFolder)==''">..\src\ADAL.PCL\bin\$(Configuration)\netstandard1.1\</AdalBinaryFolder>
+    <AdalBinaryFolder Condition="$(AdalBinaryFolder)==''">..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netstandard1.1\</AdalBinaryFolder>
 
     <!-- Calculate the root folder the files will be laid out in -->
     <!-- If the supplied root folder is a relative path, treat it as relative to the repo root directory.
@@ -46,53 +46,68 @@
 
   <ItemGroup Label="Platform-specific files">
     
-    <SourceFile Include="..\src\ADAL.PCL.Android\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
-      <TargetFolder>MonoAndroid10</TargetFolder>
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\MonoAndroid7\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
+      <TargetFolder>MonoAndroid7</TargetFolder>
     </SourceFile>
-    <SourceFile Include="..\src\ADAL.PCL.Android\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
-      <TargetFolder>MonoAndroid10</TargetFolder>
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\MonoAndroid7\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb">
+      <TargetFolder>MonoAndroid7</TargetFolder>
     </SourceFile>
-    <SourceFile Include="..\src\ADAL.PCL.Android\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\MonoAndroid7\Microsoft.IdentityModel.Clients.ActiveDirectory.xml"
                 Condition="$(CopyXmlDocFiles)=='true'">
-      <TargetFolder>MonoAndroid10</TargetFolder>
+      <TargetFolder>MonoAndroid7</TargetFolder>
     </SourceFile>
 
-    <SourceFile Include="..\src\ADAL.PCL.CoreCLR\bin\$(Configuration)\netstandard1.3\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netstandard1.3\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
       <TargetFolder>netstandard1.3</TargetFolder>
     </SourceFile>
-    <SourceFile Include="..\src\ADAL.PCL.CoreCLR\bin\$(Configuration)\netstandard1.3\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netstandard1.3\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb">
+      <TargetFolder>netstandard1.3</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netstandard1.3\Microsoft.IdentityModel.Clients.ActiveDirectory.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
       <TargetFolder>netstandard1.3</TargetFolder>
     </SourceFile>
 
-    <SourceFile Include="..\src\ADAL.PCL.Desktop\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netstandard1.1\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
+      <TargetFolder>netstandard1.1</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netstandard1.1\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb">
+      <TargetFolder>netstandard1.1</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netstandard1.1\Microsoft.IdentityModel.Clients.ActiveDirectory.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+      <TargetFolder>netstandard1.1</TargetFolder>
+    </SourceFile>
+
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
       <TargetFolder>net45</TargetFolder>
     </SourceFile>
-    <SourceFile Include="..\src\ADAL.PCL.Desktop\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb">
       <TargetFolder>net45</TargetFolder>
     </SourceFile>
-    <SourceFile Include="..\src\ADAL.PCL.Desktop\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.xml"
                 Condition="$(CopyXmlDocFiles)=='true'">
     <TargetFolder>net45</TargetFolder>
     </SourceFile>
 
-    <SourceFile Include="..\src\ADAL.PCL.iOS\bin\iPhone\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\Xamarin.iOS10\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
       <TargetFolder>Xamarin.iOS10</TargetFolder>
     </SourceFile>
-    <SourceFile Include="..\src\ADAL.PCL.iOS\bin\iPhone\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\Xamarin.iOS10\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb">
       <TargetFolder>Xamarin.iOS10</TargetFolder>
     </SourceFile>
-    <SourceFile Include="..\src\ADAL.PCL.iOS\bin\iPhone\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\Xamarin.iOS10\Microsoft.IdentityModel.Clients.ActiveDirectory.xml"
                 Condition="$(CopyXmlDocFiles)=='true'">
       <TargetFolder>Xamarin.iOS10</TargetFolder>
     </SourceFile>
 
-    <SourceFile Include="..\src\ADAL.PCL.WinRT\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netcore45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
       <TargetFolder>netcore45</TargetFolder>
     </SourceFile>
-    <SourceFile Include="..\src\ADAL.PCL.WinRT\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netcore45\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb">
       <TargetFolder>netcore45</TargetFolder>
     </SourceFile>
-    <SourceFile Include="..\src\ADAL.PCL.WinRT\bin\$(Configuration)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netcore45\Microsoft.IdentityModel.Clients.ActiveDirectory.xml"
                 Condition="$(CopyXmlDocFiles)=='true'">
       <TargetFolder>netcore45</TargetFolder>
     </SourceFile>
@@ -116,12 +131,6 @@
 
     <!-- Copy the nuspec file -->
     <Copy SourceFiles="$(NuspecFilePath)" DestinationFolder="$(_PackToFolder)" />
-
-    <!-- Copy the platform-ADAL.Net binary to every target platform folder -->
-    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(_PackToFolder)\lib\%(SourceFile.TargetFolder)" />
-    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb" DestinationFolder="$(_PackToFolder)\lib\%(SourceFile.TargetFolder)" />
-    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.xml" DestinationFolder="$(_PackToFolder)\lib\%(SourceFile.TargetFolder)" Condition="$(CopyXmlDocFiles)=='true'" />
-
 
     <!-- Copy the platform-ADAL.Net binary to the portable platform -->
     <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" />

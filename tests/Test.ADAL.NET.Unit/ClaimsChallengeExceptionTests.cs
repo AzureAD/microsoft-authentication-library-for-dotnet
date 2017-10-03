@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Net;
@@ -51,6 +50,30 @@ namespace Test.ADAL.NET.Unit
         {
             HttpMessageHandlerFactory.ClearMockHandlers();
             platformParameters = new PlatformParameters(PromptBehavior.Auto);
+        }
+
+        [TestMethod]
+        [Description("Test for inner exception in claims challenge exception")]
+        public void InnerExceptionIncludedWithAdalClaimsChallengeExceptionTestAsync()
+        {
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
+            var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent(responseContent)
+                }
+            });
+
+            var result = AssertException.TaskThrows<AdalClaimChallengeException>(() =>
+            context.AcquireTokenAsync(TestConstants.DefaultResource, credential));
+           
+            // Check inner exception
+            Assert.AreEqual(" Response status code does not indicate success: 400 (BadRequest).", result.InnerException.Message);
+            Assert.AreEqual(responseContent + ": Unknown error", result.InnerException.InnerException.Message);
         }
 
         [TestMethod]

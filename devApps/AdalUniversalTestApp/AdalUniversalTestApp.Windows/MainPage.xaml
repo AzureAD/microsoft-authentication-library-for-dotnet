@@ -1,0 +1,18 @@
+﻿<Page
+    x:Class="AdalUniversalTestApp.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:AdalUniversalTestApp"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Button Content="Acquire Token Interactive" HorizontalAlignment="Center" Margin="0,100,0,0" VerticalAlignment="Top" Click="AccessTokenButton_Click"/>
+        <Button Content="Acquire Token Username/Password" HorizontalAlignment="Center" Margin="0,150,0,0" VerticalAlignment="Top" Click="Button_Click_1"/>
+        <Button Content="Acquire Token Interactive with ms-app" HorizontalAlignment="Center" Margin="0,200,0,0" VerticalAlignment="Top" Click="Button_Click_2"/>
+        <Button Content="Acquire Token with Client Credential" HorizontalAlignment="Center" Margin="0,250,0,0" VerticalAlignment="Top" Click="Button_Click_3"/>
+        <TextBlock HorizontalAlignment="Center" Margin="0,350,0,0" Height="400" Width="800" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextAlignment="Center" Name="AccessToken"/>
+
+    </Grid>
+</Page>

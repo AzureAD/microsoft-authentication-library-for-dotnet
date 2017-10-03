@@ -97,7 +97,7 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, null);
+            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, CallState.Default);
             VerifyUserRealmResponse(userRealmResponse, "Federated");
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
@@ -112,12 +112,12 @@ namespace Test.ADAL.NET.Unit
                     {"api-version", "1.0"}
                 }
             });
-            userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, null);
+            userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, CallState.Default);
             VerifyUserRealmResponse(userRealmResponse, "Unknown");
 
 
             var ex = AssertException.TaskThrows<AdalException>(() =>
-                UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, null, null));
+                UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, null, CallState.Default));
             Assert.IsNotNull(ex.ErrorCode, AdalError.UnknownUser);
         }
 
@@ -146,7 +146,7 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, null);
+            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, CallState.Default);
 
             WsTrustAddress address = new WsTrustAddress()
             {
@@ -175,7 +175,7 @@ namespace Test.ADAL.NET.Unit
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
             await context.Authenticator.UpdateFromTemplateAsync(null);
 
-            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, null);
+            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, CallState.Default);
 
             WsTrustAddress address = new WsTrustAddress()
             {

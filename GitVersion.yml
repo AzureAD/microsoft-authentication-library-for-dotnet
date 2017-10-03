@@ -1,0 +1,9 @@
+mode: ContinuousDeployment
+next-version: 3.17.0
+branches:
+  master:
+    regex: (origin/)?master$
+    tag: 
+  develop:
+    regex: (origin/)?dev(elop)?(ment)?$
+    tag: alpha

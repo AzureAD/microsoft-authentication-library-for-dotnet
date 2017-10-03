@@ -19,16 +19,17 @@ namespace Test.ADAL.NET.Unit.Mocks
             ConfigureMockWebUI(authorizationResult, new Dictionary<string, string>());
         }
 
-        public static void ConfigureMockWebUI(AuthorizationResult authorizationResult, Dictionary<string, string> headersToValidate)
+        public static void ConfigureMockWebUI(AuthorizationResult authorizationResult, Dictionary<string, string> queryParamsToValidate)
         {
             MockWebUI webUi = new MockWebUI();
-            webUi.HeadersToValidate = headersToValidate;
+            webUi.QueryParams = queryParamsToValidate;
             webUi.MockResult = authorizationResult;
 
             IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
             mockFactory.CreateAuthenticationDialog(Arg.Any<IPlatformParameters>()).Returns(webUi);
-            PlatformPlugin.WebUIFactory = mockFactory;
+            WebUIFactoryProvider.WebUIFactory = mockFactory;
         }
+
 
         public static Stream GenerateStreamFromString(string s)
         {
@@ -62,6 +63,16 @@ namespace Test.ADAL.NET.Unit.Mocks
             return responseMessage;
         }
 
+        public static HttpResponseMessage CreateSuccessDeviceCodeResponseMessage()
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+
+            HttpContent content = new StringContent(
+                "{\"user_code\":\"some-user-code\",\"device_code\":\"some-device-code\",\"verification_url\":\"some-URL\",\"expires_in\":\"900\",\"interval\":\"5\",\"message\":\"some-message\"}");
+            responseMessage.Content = content;
+            return responseMessage;
+        }
+
         public static HttpResponseMessage CreateInvalidRequestTokenResponseMessage()
         {
             return
@@ -88,6 +99,18 @@ namespace Test.ADAL.NET.Unit.Mocks
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
             HttpContent content = new StringContent(message);
             responseMessage.Content = content;
+            return responseMessage;
+        }
+
+        public static HttpResponseMessage CreateCustomHeaderFailureResponseMessage(IEnumerable<KeyValuePair<string, string>> headers)
+        {
+            HttpResponseMessage responseMessage = CreateHttpErrorResponse();
+
+            foreach (KeyValuePair<string, string> header in headers)
+            {
+                responseMessage.Headers.Add(header.Key, header.Value);
+            }
+
             return responseMessage;
         }
 
@@ -145,7 +168,7 @@ namespace Test.ADAL.NET.Unit.Mocks
                         "\"oid\": \"" + uniqueId + "\"," +
                         "\"upn\": \"" + displayableId + "\"," +
                         "\"sub\": \"werwerewrewrew-Qd80ehIEdFus\"," +
-                        "\"tid\": \"some-tenant-id\"," +
+                        "\"tid\": \"" +  TestConstants.SomeTenantId + "\"," +
                         "\"ver\": \"2.0\"}";
 
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.signature", Base64UrlEncoder.Encode(header), Base64UrlEncoder.Encode(payload));

@@ -1,7 +1,26 @@
+Version 3.17.0
+==============
+This release includes
+- Removal of API surfaces accidently exposed in some platforms.
+  - WinRT should only expose client credential API for confidential client flows (#768)
+  - Confidential client API surface should not be exposed on iOS/Android (#759)
+  - GetAuthorizationRequestUrl() API should not be exposed on WinRT, iOS and Android (#808)
+  - Device Profile API should not be exposed on iOS/Android (#806)
+- Update library to use [assembly: CLSCompliant(true)] (#673)
+- Removal of dependency injection of platform specific DLLs (#511)
+- Leak of ViewController passed with PlatformParameters (#534)
+- Log Scrubbing to remove potential PII (#772, #800)
+- Support to return all response headers from a failed request to the STS (#721)
+- Bug fix to include inner exception details in AdalClaimChallengeException (#777)
+- Fix to ensure refresh tokens are not used for incorrect environments (#290)
+- Support for PromptBehavior.SelectAccount (#754)
+- Fix for net47 where RSACng key was not being used correctly (#781)
+
 Version 3.16.1
 ==============
 This release includes
 - Fix for net47 where non-exportable private key usage was failing. (#752)
+- Fix api surface -- Add GetAuthRequestUrlAsync method without claims overload (#740)
 
 Version 3.16.0
 ==============
@@ -9,7 +28,6 @@ This release includes
 - Fix for WinRT failure when logging an empty UserInfo object (#727).
 - Implement PromptBehavior support for iOS/Android
 - Url encode claims for iOS with Broker (#744)
-- Fix api surface -- Add GetAuthRequestUrlAsync method without claims overload (#740)
 
 Version 3.15.0
 ==============

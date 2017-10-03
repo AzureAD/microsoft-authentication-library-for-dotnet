@@ -13,8 +13,6 @@ namespace Test.ADAL.NET.Unit.Mocks
     {
         internal AuthorizationResult MockResult { get; set; }
 
-        internal IDictionary<string, string> HeadersToValidate { get; set; }
-
         internal IDictionary<string, string> QueryParams { get; set; }
         
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)

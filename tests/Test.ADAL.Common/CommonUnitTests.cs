@@ -36,10 +36,9 @@ namespace Test.ADAL.Common
     {
         public static void CreateSha256HashTest()
         {
-            ICryptographyHelper cryptoHelper = new CryptographyHelper();
-            string hash = cryptoHelper.CreateSha256Hash("abc");
-            string hash2 = cryptoHelper.CreateSha256Hash("abd");
-            string hash3 = cryptoHelper.CreateSha256Hash("abc");
+            string hash = CryptographyHelper.CreateSha256Hash("abc");
+            string hash2 = CryptographyHelper.CreateSha256Hash("abd");
+            string hash3 = CryptographyHelper.CreateSha256Hash("abc");
             Assert.AreEqual(hash, hash3);
             Assert.AreNotEqual(hash, hash2);
             Assert.AreEqual(hash, "ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=");

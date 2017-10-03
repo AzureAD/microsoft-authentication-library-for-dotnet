@@ -1,0 +1,11 @@
+{
+  "ServerUri": "http://iddp-sonarqube:9000",
+  "Organization": null,
+  "ProjectKey": "ADALnet_dev",
+  "Profiles": {
+    "CSharp": {
+      "ProfileKey": "cs-sonar-way-00726",
+      "ProfileTimestamp": "2017-07-22T08:28:15+01:00"
+    }
+  }
+}
