@@ -149,7 +149,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
 
-            InstanceCache.TryAdd(host, new InstanceDiscoveryMetadataEntry
+            AddMetadataEntry(host);
+        }
+
+        // To populate a host into the cache as-is, when it is not already there
+        public static bool AddMetadataEntry(string host)
+        {
+            return InstanceCache.TryAdd(host, new InstanceDiscoveryMetadataEntry
             {
                 PreferredNetwork = host,
                 PreferredCache = host,

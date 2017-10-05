@@ -155,5 +155,15 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual("login.microsoftonline.com", entry2.PreferredNetwork);
             Assert.AreEqual(1, HttpMessageHandlerFactory.MockHandlersCount()); // Still 1 mock response remaining, so no new request was attempted
         }
+
+        [TestMethod]
+        [TestCategory("InstanceDiscoveryTests")]
+        public async Task TestInstanceDiscovery_WhenAuthorityIsAdfs_ShouldNotDoInstanceDiscovery()
+        {
+            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler());
+            var authenticator = new Authenticator("https://login.contoso.com/adfs", false);
+            await authenticator.UpdateFromTemplateAsync(new CallState(Guid.NewGuid()));
+            Assert.AreEqual(1, HttpMessageHandlerFactory.MockHandlersCount()); // mock is NOT consumed, so no new request was NOT attempted
+        }
     }
 }
