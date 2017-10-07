@@ -36,10 +36,10 @@ using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Native;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Native;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class CryptographyHelper
     {

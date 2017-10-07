@@ -31,7 +31,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http.Headers;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
 {
     internal interface IHttpWebResponse : IDisposable
     {

@@ -33,7 +33,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     // This IDisposable class doe not need to implement Dispose method in standard way, because it is sealed. 
     // If it ever needs to become inheritable, it should follow the standard pattern as desribed in http://msdn.microsoft.com/en-us/library/fs2xkftw(v=vs.110).aspx.

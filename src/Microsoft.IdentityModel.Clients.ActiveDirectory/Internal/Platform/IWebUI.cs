@@ -28,7 +28,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     interface IWebUI
     {

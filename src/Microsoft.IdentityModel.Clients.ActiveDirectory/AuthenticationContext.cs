@@ -28,6 +28,12 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -41,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// The AuthenticationContext class retrieves authentication tokens from Azure Active Directory and ADFS services.
     /// </summary>
-    public sealed partial class AuthenticationContext
+    public sealed class AuthenticationContext
     {
         internal Authenticator Authenticator;
 

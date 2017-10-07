@@ -32,8 +32,9 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Webkit;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     [Activity(Label = "Sign in")]
     [CLSCompliant(false)]

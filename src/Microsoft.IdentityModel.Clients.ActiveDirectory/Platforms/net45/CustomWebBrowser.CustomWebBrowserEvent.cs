@@ -27,7 +27,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal partial class CustomWebBrowser
     {

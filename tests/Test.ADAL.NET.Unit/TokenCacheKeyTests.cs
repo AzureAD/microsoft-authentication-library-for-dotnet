@@ -31,6 +31,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 
 namespace Test.ADAL.NET.Unit
 {

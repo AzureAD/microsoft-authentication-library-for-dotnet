@@ -29,8 +29,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.Serialization;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
 {
     [DataContract]
     internal class DeviceAuthHeader

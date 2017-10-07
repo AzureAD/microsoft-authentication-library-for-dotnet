@@ -30,8 +30,9 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds
 {
     internal static class JsonWebTokenConstants
     {
@@ -142,24 +143,28 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         internal class JWTHeader
         {
             protected IClientAssertionCertificate Credential { get; private set; }
+            private string _type;
+            private string _alg;
 
             public JWTHeader(IClientAssertionCertificate credential)
             {
                 this.Credential = credential;
+                _alg = (this.Credential == null)
+                    ? JsonWebTokenConstants.Algorithms.None
+                    : JsonWebTokenConstants.Algorithms.RsaSha256;
+
+                _type = JsonWebTokenConstants.HeaderType;
             }
 
             [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.Type)]
-            public static string Type
+            public string Type
             {
                 get
                 {
-                    return JsonWebTokenConstants.HeaderType;
+                    return _type;
                 }
 
-                set
-                {
-                    // This setter is required by DataContractJsonSerializer
-                }
+                set { _type = value; }
             }
 
             [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.Algorithm)]
@@ -167,13 +172,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 get
                 {
-                    return this.Credential == null ? JsonWebTokenConstants.Algorithms.None : JsonWebTokenConstants.Algorithms.RsaSha256;
+                    return _alg;
                 }
 
-                set
-                {
-                    // This setter is required by DataContractJsonSerializer
-                }
+
+                set { _alg = value; }
             }
         }
 
@@ -203,9 +206,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         [DataContract]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
+            private string _thumbPrint;
+
             public JWTHeaderWithCertificate(IClientAssertionCertificate credential)
                 : base(credential)
             {
+                _thumbPrint = this.Credential.Thumbprint;
             }
 
             [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificateThumbprint)]
@@ -214,13 +220,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 get
                 {
                     // Thumbprint should be url encoded
-                    return this.Credential.Thumbprint;
+                    return _thumbPrint;
                 }
 
-                set
-                {
-                    // This setter is required by DataContractJsonSerializer
-                }
+                set { _thumbPrint = value; }
             }
         }
     }

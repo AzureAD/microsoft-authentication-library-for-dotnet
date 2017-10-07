@@ -31,9 +31,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
-    class BrokerHelper
+    internal class BrokerHelper
     {
         public CallState CallState { get; set; }
         public IPlatformParameters PlatformParameters { get; set; }

@@ -29,7 +29,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class CryptographyHelper
     {

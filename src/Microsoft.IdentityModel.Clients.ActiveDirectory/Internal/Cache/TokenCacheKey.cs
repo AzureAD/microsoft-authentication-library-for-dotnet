@@ -27,7 +27,7 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
 {
     /// <summary>
     /// Determines what type of subject the token was issued for.

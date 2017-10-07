@@ -33,7 +33,7 @@ using Foundation;
 using INSUrlProtocolClient = Foundation.NSUrlProtocolClient;
 #endif
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class AdalCustomUrlProtocol : NSUrlProtocol
     {

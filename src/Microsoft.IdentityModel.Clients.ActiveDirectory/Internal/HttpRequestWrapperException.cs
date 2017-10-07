@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,10 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+using System;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
+
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
-    internal static class WebUIFactoryProvider
+    internal class HttpRequestWrapperException : Exception
     {
-        public static IWebUIFactory WebUIFactory { get; set; } = new WebUIFactory();
+        public HttpRequestWrapperException(IHttpWebResponse webResponse, Exception innerException) 
+            : base(string.Empty, innerException)
+        {
+            this.WebResponse = webResponse;
+        }
+
+        public IHttpWebResponse WebResponse { get; private set; }
     }
 }

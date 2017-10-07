@@ -32,7 +32,7 @@ using CoreFoundation;
 using UIKit;
 using Foundation;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     [Foundation.Register("UniversalView")]
     internal class UniversalView : UIView

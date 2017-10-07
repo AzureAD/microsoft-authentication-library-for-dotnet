@@ -29,7 +29,7 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class NativeWrapper
     {

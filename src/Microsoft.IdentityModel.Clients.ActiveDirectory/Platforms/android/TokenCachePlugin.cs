@@ -29,7 +29,7 @@ using Android.App;
 using Android.Content;
 using System;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
 {
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class TokenCachePlugin

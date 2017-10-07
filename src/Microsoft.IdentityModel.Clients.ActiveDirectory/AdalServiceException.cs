@@ -31,6 +31,8 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

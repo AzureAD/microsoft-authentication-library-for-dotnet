@@ -34,8 +34,10 @@ using System.Threading.Tasks;
 using CoreFoundation;
 using Foundation;
 using UIKit;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class BrokerHelper
     {

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,27 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
-    class RequestData
+    internal static class WebUIFactoryProvider
     {
-        public Authenticator Authenticator { get; set; }
-
-        public TokenCache TokenCache { get; set; }
-
-        public string Resource { get; set; }
-
-        public ClientKey ClientKey { get; set; }
-
-        public TokenSubjectType SubjectType { get; set; }
-
-        public bool ExtendedLifeTimeEnabled { get; set; }
-
+        public static IWebUIFactory WebUIFactory { get; set; } = new WebUIFactory();
     }
 }

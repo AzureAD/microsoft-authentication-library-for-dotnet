@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

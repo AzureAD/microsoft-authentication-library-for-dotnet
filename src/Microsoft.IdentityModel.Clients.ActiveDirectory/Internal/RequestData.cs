@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,22 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
-    internal class CallState
+    class RequestData
     {
-        public CallState(Guid correlationId)
-        {
-            this.CorrelationId = correlationId;
-            Logger = new Logger() {CorrelationId = correlationId.ToString()};
-        }
+        public Authenticator Authenticator { get; set; }
 
-        public Guid CorrelationId { get; set; }
+        public TokenCache TokenCache { get; set; }
 
-        public Logger Logger { get; internal set; }
+        public string Resource { get; set; }
 
-        public static CallState Default => new CallState(Guid.Empty);
+        public ClientKey ClientKey { get; set; }
+
+        public TokenSubjectType SubjectType { get; set; }
+
+        public bool ExtendedLifeTimeEnabled { get; set; }
+
     }
 }

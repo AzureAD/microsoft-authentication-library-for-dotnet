@@ -30,8 +30,9 @@ using System.IO;
 using System.Security.Cryptography;
 using Foundation;
 using Security;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     static class BrokerKeyHelper
     {

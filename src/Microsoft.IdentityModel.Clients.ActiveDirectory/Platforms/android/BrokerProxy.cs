@@ -46,7 +46,7 @@ using OperationCanceledException = Android.Accounts.OperationCanceledException;
 using Permission = Android.Content.PM.Permission;
 using Signature = Android.Content.PM.Signature;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class BrokerProxy
     {

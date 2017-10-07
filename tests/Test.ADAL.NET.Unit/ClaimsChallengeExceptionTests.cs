@@ -31,6 +31,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 using Test.ADAL.Common;
 using Test.ADAL.NET.Common.Mocks;
 using Test.ADAL.NET.Common;

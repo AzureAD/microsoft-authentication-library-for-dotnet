@@ -29,6 +29,8 @@ using System;
 using System.Globalization;
 using Android.App;
 using Android.Content;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

@@ -25,7 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class WebUIFactory : IWebUIFactory

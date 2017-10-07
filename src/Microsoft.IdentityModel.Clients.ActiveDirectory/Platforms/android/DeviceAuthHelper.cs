@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class DeviceAuthHelper

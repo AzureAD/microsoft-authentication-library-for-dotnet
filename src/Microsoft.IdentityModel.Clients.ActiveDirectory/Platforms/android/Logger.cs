@@ -29,7 +29,7 @@ using System;
 using Android.Provider;
 using Android.Util;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class Logger : LoggerBase

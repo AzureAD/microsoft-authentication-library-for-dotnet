@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -34,8 +35,9 @@ using Windows.Networking.Connectivity;
 using Windows.Security.Authentication.Web;
 using Windows.Storage;
 using Windows.System.UserProfile;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class PlatformInformation : PlatformInformationBase
     {

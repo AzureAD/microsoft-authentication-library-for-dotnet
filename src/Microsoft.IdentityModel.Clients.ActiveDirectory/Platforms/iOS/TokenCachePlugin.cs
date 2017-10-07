@@ -29,7 +29,7 @@ using Foundation;
 using Security;
 using System;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
 {
     internal class TokenCachePlugin
     {

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Diagnostics.Tracing;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {

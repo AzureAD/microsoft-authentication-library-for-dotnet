@@ -33,8 +33,10 @@ using Android.Accounts;
 using Android.App;
 using Android.Content;
 using Java.IO;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class BrokerHelper

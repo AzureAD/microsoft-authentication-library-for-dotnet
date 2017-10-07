@@ -39,7 +39,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Native
 {
     //
     // Public facing interop enumerations

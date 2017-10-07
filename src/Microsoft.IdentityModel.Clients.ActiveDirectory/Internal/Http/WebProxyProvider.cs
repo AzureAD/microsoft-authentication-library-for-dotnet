@@ -27,7 +27,7 @@
 
 using System.Net;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
 {
 #if ANDROID
     [Android.Runtime.Preserve(AllMembers = true)]
