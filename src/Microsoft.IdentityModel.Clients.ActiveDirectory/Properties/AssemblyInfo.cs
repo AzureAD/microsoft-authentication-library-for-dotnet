@@ -39,7 +39,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyMetadata("Serviceable", "True")]
 
-[assembly: AssemblyFileVersion("3.17.0.0")]
+[assembly: AssemblyFileVersion("3.17.1.0")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
