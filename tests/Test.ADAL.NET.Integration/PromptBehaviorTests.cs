@@ -113,26 +113,25 @@ namespace Test.ADAL.NET.Integration
             // There should be only one cache entry.
             Assert.AreEqual(1, context.TokenCache.Count);
         }
-        
+
         [TestMethod]
         [Description("Test for calling promptBehavior.Auto when cache has an expired access token, but a good refresh token")]
-        public async Task AutoPromptBehaviorWithExpiredAccessTokenAndGoodRefreshTokenInCacheTest()
+        public async Task AutoPromptBehaviorWithExpiredAccessTokenAndGoodRefreshTokenInCacheTestAsync()
         {
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
+            MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                TestConstants.DefaultRedirectUri + "?code=some-code"));
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized)
-                {
-                    Content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"some-access-token\"}")
-                },
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
                 PostData = new Dictionary<string, string>()
                 {
-                    {"client_id", TestConstants.DefaultClientId},
                     {"grant_type", "refresh_token"}
                 }
             });
+
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
@@ -141,8 +140,7 @@ namespace Test.ADAL.NET.Integration
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
-                Result = new AuthenticationResult("Bearer", "existing-access-token",
-                    DateTimeOffset.UtcNow + TimeSpan.FromMinutes(100))
+                Result = new AuthenticationResult("Bearer", "existing-access-token", DateTimeOffset.UtcNow)
             };
 
             AuthenticationResult result =
@@ -152,12 +150,12 @@ namespace Test.ADAL.NET.Integration
                     new PlatformParameters(PromptBehavior.Auto));
 
             Assert.IsNotNull(result);
-            Assert.AreEqual("existing-access-token", result.AccessToken);
+            Assert.AreEqual("some-access-token", result.AccessToken);
 
             // There should be only one cache entry.
             Assert.AreEqual(1, context.TokenCache.Count);
         }
-        
+
         [TestMethod]
         [Description("Test for Force Prompt with PromptBehavior.Always")]
         public async Task ForcePromptForAlwaysPromptBehaviorTestAsync()

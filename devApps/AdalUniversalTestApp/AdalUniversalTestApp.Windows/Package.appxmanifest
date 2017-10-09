@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest">
-  <Identity Name="62fcbc72-1a1c-4799-b8aa-63289457027d" Publisher="CN=afshins" Version="1.0.0.0" />
+  <Identity Name="62fcbc72-1a1c-4799-b8aa-63289457027d" Publisher="CN=devex" Version="1.0.0.0" />
   <Properties>
     <DisplayName>AdalUniversalTestApp.Windows</DisplayName>
     <PublisherDisplayName>afshins</PublisherDisplayName>
