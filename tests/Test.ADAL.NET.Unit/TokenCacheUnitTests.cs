@@ -65,7 +65,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public async Task TokenCacheOperationsTest()
         {
-            await TokenCacheTests.TokenCacheOperationsTest();
+            await TokenCacheTests.TokenCacheOperationsTest().ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -89,7 +89,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public async Task MultipleUserAssertionHashTest()
         {
-            await TokenCacheTests.MultipleUserAssertionHashTest();
+            await TokenCacheTests.MultipleUserAssertionHashTest().ConfigureAwait(false);
         }
 
         [TestMethod]

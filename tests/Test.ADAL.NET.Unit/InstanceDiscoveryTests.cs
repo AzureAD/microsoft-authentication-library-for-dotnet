@@ -165,7 +165,7 @@ namespace Test.ADAL.NET.Unit
         {
             HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler());
             var authenticator = new Authenticator("https://login.contoso.com/adfs", false);
-            await authenticator.UpdateFromTemplateAsync(new CallState(Guid.NewGuid()));
+            await authenticator.UpdateFromTemplateAsync(new CallState(Guid.NewGuid())).ConfigureAwait(false);
             Assert.AreEqual(1, HttpMessageHandlerFactory.MockHandlersCount()); // mock is NOT consumed, so no new request was NOT attempted
         }
 
@@ -181,7 +181,7 @@ namespace Test.ADAL.NET.Unit
                 PreferredCache = preferredCache,
                 Aliases = new string[] { "login.microsoftonline.com", "login.windows.net", "sts.microsoft.com" }
             });
-            var orderedList = await TokenCache.GetOrderedAliases(givenHost, false, new CallState(Guid.NewGuid()));
+            var orderedList = await TokenCache.GetOrderedAliases(givenHost, false, new CallState(Guid.NewGuid())).ConfigureAwait(false);
             CollectionAssert.AreEqual(
                 new string[] { preferredCache, givenHost, "login.microsoftonline.com", "login.windows.net", "sts.microsoft.com" },
                 orderedList);

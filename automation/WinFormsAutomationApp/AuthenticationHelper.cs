@@ -118,7 +118,7 @@ namespace WinFormsAutomationApp
                     {
                         var updated = item;
                         updated.Value.Result.ExpiresOn = DateTime.UtcNow;
-                        await UpdateCache(item, updated);
+                        await UpdateCache(item, updated).ConfigureAwait(false);
                     }
                 }
                 Dictionary<string, object> output = new Dictionary<string, object>();
@@ -147,7 +147,7 @@ namespace WinFormsAutomationApp
                         var updated = item;
                         updated.Value.RefreshToken = "bad_refresh_token";
                         updated.Value.Result.ExpiresOn = DateTime.UtcNow;
-                        await UpdateCache(item, updated);
+                        await UpdateCache(item, updated).ConfigureAwait(false);
                     }
                     //Send back error if userId or displayableId is not sent back to the user
                     output.Add("invalidated_refresh_token_count", CacheItems.Count.ToString());
@@ -375,7 +375,9 @@ namespace WinFormsAutomationApp
         {
             NotifyBeforeAccessCache(item.Key.Resource, item.Key.ClientId, item.Value.Result.UserInfo.UniqueId, item.Value.Result.UserInfo.DisplayableId);
             TokenCache.DefaultShared.tokenCacheDictionary[updated.Key] = updated.Value;
-            await TokenCache.DefaultShared.StoreToCache(updated.Value, updated.Key.Authority, updated.Key.Resource, updated.Key.ClientId, updated.Key.TokenSubjectType, new CallState(new Guid()));
+            await TokenCache.DefaultShared.StoreToCache(
+                updated.Value, updated.Key.Authority, updated.Key.Resource, updated.Key.ClientId, updated.Key.TokenSubjectType, new CallState(new Guid())
+                ).ConfigureAwait(false);
             NotifyAfterAccessCache(updated.Key.Resource, updated.Key.ClientId, updated.Value.Result.UserInfo.UniqueId, updated.Value.Result.UserInfo.DisplayableId);
         }
 

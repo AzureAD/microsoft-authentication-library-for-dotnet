@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
-                    ResultEx = await this.tokenCache.LoadFromCache(CacheQueryData, this.CallState);
+                    ResultEx = await this.tokenCache.LoadFromCache(CacheQueryData, this.CallState).ConfigureAwait(false);
                     extendedLifetimeResultEx = ResultEx;
 
                     if (ResultEx?.Result != null &&
@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                         ResultEx = await this.RefreshAccessTokenAsync(ResultEx).ConfigureAwait(false);
                         if (ResultEx != null && ResultEx.Exception == null)
                         {
-                            notifiedBeforeAccessCache = await StoreResultExToCache(notifiedBeforeAccessCache);
+                            notifiedBeforeAccessCache = await StoreResultExToCache(notifiedBeforeAccessCache).ConfigureAwait(false);
                         }
                     }
                 }
@@ -177,7 +177,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                     }
 
                     this.PostTokenRequest(ResultEx);
-                    notifiedBeforeAccessCache = await StoreResultExToCache(notifiedBeforeAccessCache);
+                    notifiedBeforeAccessCache = await StoreResultExToCache(notifiedBeforeAccessCache).ConfigureAwait(false);
                 }
 
                 await this.PostRunAsync(ResultEx.Result).ConfigureAwait(false);
@@ -214,7 +214,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 }
 
                 await this.tokenCache.StoreToCache(ResultEx, this.Authenticator.Authority, this.Resource,
-                    this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
+                    this.ClientKey.ClientId, this.TokenSubjectType, this.CallState).ConfigureAwait(false);
             }
             return notifiedBeforeAccessCache;
         }

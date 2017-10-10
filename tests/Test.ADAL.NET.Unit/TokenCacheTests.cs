@@ -384,7 +384,7 @@ namespace Test.ADAL.Common.Unit
                 SubjectType = TokenSubjectType.User
             };
 
-            AuthenticationResultEx resultEx = await tokenCache.LoadFromCache(data, CallState.Default);
+            AuthenticationResultEx resultEx = await tokenCache.LoadFromCache(data, CallState.Default).ConfigureAwait(false);
             Assert.IsNotNull(resultEx);
 
 
@@ -508,18 +508,18 @@ namespace Test.ADAL.Common.Unit
                 DisplayableId = null
             };
 
-            AuthenticationResultEx resultEx = await cache.LoadFromCache(data, CallState.Default);
+            AuthenticationResultEx resultEx = await cache.LoadFromCache(data, CallState.Default).ConfigureAwait(false);
             AreAuthenticationResultExsEqual(value, resultEx);
 
             data.AssertionHash = "hash2";
-            resultEx = await cache.LoadFromCache(data, CallState.Default);
+            resultEx = await cache.LoadFromCache(data, CallState.Default).ConfigureAwait(false);
             AreAuthenticationResultExsEqual(value2, resultEx);
 
             data.AssertionHash = null;
 
             // Multiple tokens in cache -> error
             var exc = AssertException.TaskThrows<AdalException>(async () =>
-                await cache.LoadFromCache(data, CallState.Default));
+                await cache.LoadFromCache(data, CallState.Default).ConfigureAwait(false));
             Assert.AreEqual(exc.ErrorCode, AdalError.MultipleTokensMatched);
         }
 
