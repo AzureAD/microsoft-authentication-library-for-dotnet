@@ -485,7 +485,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        internal void StoreToCache(AuthenticationResultEx result, string authority, string resource, string clientId,
+        internal async Task StoreToCache(AuthenticationResultEx result, string authority, string resource, string clientId,
+            TokenSubjectType subjectType, CallState callState)
+        {
+            var metadata = await InstanceDiscovery.GetMetadataEntry(GetHost(authority), false, callState).ConfigureAwait(false);
+            StoreToCacheCommon(result, ReplaceHost(authority, metadata.PreferredCache), resource, clientId, subjectType, callState);
+        }
+
+        internal void StoreToCacheCommon(AuthenticationResultEx result, string authority, string resource, string clientId,
             TokenSubjectType subjectType, CallState callState)
         {
             lock (cacheLock)

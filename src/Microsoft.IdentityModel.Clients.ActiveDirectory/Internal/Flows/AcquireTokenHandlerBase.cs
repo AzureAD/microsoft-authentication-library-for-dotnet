@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                         ResultEx = await this.RefreshAccessTokenAsync(ResultEx).ConfigureAwait(false);
                         if (ResultEx != null && ResultEx.Exception == null)
                         {
-                            StoreResultExToCache(ref notifiedBeforeAccessCache);
+                            notifiedBeforeAccessCache = await StoreResultExToCache(notifiedBeforeAccessCache);
                         }
                     }
                 }
@@ -177,7 +177,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                     }
 
                     this.PostTokenRequest(ResultEx);
-                    StoreResultExToCache(ref notifiedBeforeAccessCache);
+                    notifiedBeforeAccessCache = await StoreResultExToCache(notifiedBeforeAccessCache);
                 }
 
                 await this.PostRunAsync(ResultEx.Result).ConfigureAwait(false);
@@ -203,7 +203,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             }
         }
 
-        private void StoreResultExToCache(ref bool notifiedBeforeAccessCache)
+        private async Task<bool> StoreResultExToCache(bool notifiedBeforeAccessCache)
         {
             if (this.StoreToCache)
             {
@@ -213,9 +213,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                     notifiedBeforeAccessCache = true;
                 }
 
-                this.tokenCache.StoreToCache(ResultEx, this.Authenticator.Authority, this.Resource,
+                await this.tokenCache.StoreToCache(ResultEx, this.Authenticator.Authority, this.Resource,
                     this.ClientKey.ClientId, this.TokenSubjectType, this.CallState);
             }
+            return notifiedBeforeAccessCache;
         }
 
         private async Task CheckAndAcquireTokenUsingBroker()

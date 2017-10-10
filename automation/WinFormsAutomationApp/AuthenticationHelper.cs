@@ -104,7 +104,7 @@ namespace WinFormsAutomationApp
         public static async Task<string> ExpireAccessToken(Dictionary<string, string> input)
         {
 
-            Task<string> myTask = Task<string>.Factory.StartNew(() =>
+            Task<string> myTask = Task.Run(async () =>
             {
                 TokenCache.DefaultShared.ReadItems();
                 List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> CacheItems = QueryCache(input["authority"],
@@ -118,7 +118,7 @@ namespace WinFormsAutomationApp
                     {
                         var updated = item;
                         updated.Value.Result.ExpiresOn = DateTime.UtcNow;
-                        UpdateCache(item, updated);
+                        await UpdateCache(item, updated);
                     }
                 }
                 Dictionary<string, object> output = new Dictionary<string, object>();
@@ -134,7 +134,7 @@ namespace WinFormsAutomationApp
         public static async Task<string> InvalidateRefreshToken(Dictionary<string, string> input)
         {
             Dictionary<string, object> output = new Dictionary<string, object>();
-            Task<string> myTask = Task<string>.Factory.StartNew(() =>
+            Task<string> myTask = Task.Run(async () =>
             {
                 try
                 {
@@ -147,7 +147,7 @@ namespace WinFormsAutomationApp
                         var updated = item;
                         updated.Value.RefreshToken = "bad_refresh_token";
                         updated.Value.Result.ExpiresOn = DateTime.UtcNow;
-                        UpdateCache(item, updated);
+                        await UpdateCache(item, updated);
                     }
                     //Send back error if userId or displayableId is not sent back to the user
                     output.Add("invalidated_refresh_token_count", CacheItems.Count.ToString());
@@ -371,11 +371,11 @@ namespace WinFormsAutomationApp
             });
         }
 
-        private static void UpdateCache(KeyValuePair<TokenCacheKey, AuthenticationResultEx> item, KeyValuePair<TokenCacheKey, AuthenticationResultEx> updated)
+        private static async Task UpdateCache(KeyValuePair<TokenCacheKey, AuthenticationResultEx> item, KeyValuePair<TokenCacheKey, AuthenticationResultEx> updated)
         {
             NotifyBeforeAccessCache(item.Key.Resource, item.Key.ClientId, item.Value.Result.UserInfo.UniqueId, item.Value.Result.UserInfo.DisplayableId);
             TokenCache.DefaultShared.tokenCacheDictionary[updated.Key] = updated.Value;
-            TokenCache.DefaultShared.StoreToCache(updated.Value, updated.Key.Authority, updated.Key.Resource, updated.Key.ClientId, updated.Key.TokenSubjectType, new CallState(new Guid()));
+            await TokenCache.DefaultShared.StoreToCache(updated.Value, updated.Key.Authority, updated.Key.Resource, updated.Key.ClientId, updated.Key.TokenSubjectType, new CallState(new Guid()));
             NotifyAfterAccessCache(updated.Key.Resource, updated.Key.ClientId, updated.Value.Result.UserInfo.UniqueId, updated.Value.Result.UserInfo.DisplayableId);
         }
 
