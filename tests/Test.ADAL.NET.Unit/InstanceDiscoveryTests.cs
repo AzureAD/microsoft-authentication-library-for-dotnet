@@ -104,7 +104,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task TestInstanceDiscovery_WhenMultipleSimultaneousCallsWithTheSameAuthority_ShouldMakeOnlyOneRequest()
+        public void TestInstanceDiscovery_WhenMultipleSimultaneousCallsWithTheSameAuthority_ShouldMakeOnlyOneRequest()
         {
             for (int i = 0; i < 2; i++) // Prepare 2 mock responses
             {
@@ -165,8 +165,26 @@ namespace Test.ADAL.NET.Unit
         {
             HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler());
             var authenticator = new Authenticator("https://login.contoso.com/adfs", false);
-            await authenticator.UpdateFromTemplateAsync(new CallState(Guid.NewGuid()));
+            await authenticator.UpdateFromTemplateAsync(new CallState(Guid.NewGuid())).ConfigureAwait(false);
             Assert.AreEqual(1, HttpMessageHandlerFactory.MockHandlersCount()); // mock is NOT consumed, so no new request was NOT attempted
+        }
+
+        [TestMethod]
+        [TestCategory("InstanceDiscoveryTests")]
+        public async Task TestGetOrderedAliases_ShouldStartWithPreferredCacheAndGivenHost()
+        {
+            string givenHost = "sts.microsoft.com";
+            string preferredCache = "login.windows.net";
+            InstanceDiscovery.InstanceCache.TryAdd(givenHost, new InstanceDiscoveryMetadataEntry
+            {
+                PreferredNetwork = "login.microsoftonline.com",
+                PreferredCache = preferredCache,
+                Aliases = new string[] { "login.microsoftonline.com", "login.windows.net", "sts.microsoft.com" }
+            });
+            var orderedList = await TokenCache.GetOrderedAliases(givenHost, false, new CallState(Guid.NewGuid())).ConfigureAwait(false);
+            CollectionAssert.AreEqual(
+                new string[] { preferredCache, givenHost, "login.microsoftonline.com", "login.windows.net", "sts.microsoft.com" },
+                orderedList);
         }
     }
 }
