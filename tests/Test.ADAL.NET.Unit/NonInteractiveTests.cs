@@ -95,7 +95,7 @@ namespace Test.ADAL.NET.Unit
                                                 "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
                                                 "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
                                                 "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
-                                                ",\"cloudinstancename\":\"login.microsoftonline.com\"}")
+                                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
                 },
                 QueryParams = new Dictionary<string, string>()
                 {
@@ -111,7 +111,7 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"Unknown\",\"cloudinstancename\":\"login.microsoftonline.com\"}")
+                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"Unknown\",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
                 },
                 QueryParams = new Dictionary<string, string>()
                 {
@@ -144,7 +144,7 @@ namespace Test.ADAL.NET.Unit
                                     "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
                                     "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
                                     ",\"cloud_audience_urn\":\"urn:federation:Blackforest\"" +
-                                    ",\"cloudinstancename\":\"login.microsoftonline.com\"}")
+                                    ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
                 },
                 QueryParams = new Dictionary<string, string>()
                 {

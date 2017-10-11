@@ -41,7 +41,7 @@ namespace Test.ADAL.NET.Integration
                                                 "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
                                                 "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
                                                 "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
-                                                ",\"cloudinstancename\":\"login.microsoftonline.com\"}")
+                                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
                 },
                 QueryParams = new Dictionary<string, string>()
                 {
