@@ -81,6 +81,7 @@
   <ItemGroup>
     <Compile Include="AcquireTokenSilentTests.cs" />
     <Compile Include="DeviceProfileTests.cs" />
+    <Compile Include="FederatedUserCredentialTests.cs" />
     <Compile Include="ManagedUserCredentialTests.cs" />
     <Compile Include="PromptBehaviorTests.cs" />
     <Compile Include="SovereignCloudsTests.cs" />

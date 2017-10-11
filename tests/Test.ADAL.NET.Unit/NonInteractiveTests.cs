@@ -50,6 +50,7 @@ using Test.ADAL.NET.Common.Mocks;
 namespace Test.ADAL.NET.Unit
 {
     [TestClass]
+    [DeploymentItem("WsTrustResponse13.xml")]
     [DeploymentItem("WsTrustResponse.xml")]
     [DeploymentItem("TestMex.xml")]
     [DeploymentItem("TestMex2005.xml")]
@@ -164,7 +165,7 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                    Content = new StringContent(File.ReadAllText("WsTrustResponse13.xml"))
                 }
             });
 
@@ -193,7 +194,7 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                    Content = new StringContent(File.ReadAllText("WsTrustResponse13.xml"))
                 }
             });
 
@@ -239,7 +240,7 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                    Content = new StringContent(File.ReadAllText("WsTrustResponse13.xml"))
                 }
             });
 
@@ -248,7 +249,7 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                    Content = new StringContent(File.ReadAllText("WsTrustResponse13.xml"))
                 }
             });
 
@@ -274,7 +275,7 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                    Content = new StringContent(File.ReadAllText("WsTrustResponse13.xml"))
                 }
             });
 
@@ -283,7 +284,7 @@ namespace Test.ADAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                    Content = new StringContent(File.ReadAllText("WsTrustResponse13.xml"))
                 }
             });
 

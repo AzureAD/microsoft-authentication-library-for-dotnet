@@ -87,20 +87,6 @@
     <Compile Include="UnitTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="oldcache.serialized">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Content Include="WsTrustResponse.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestMex.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestMex2005.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\Test.ADAL.NET.Common\Certs\valid_cert.pfx">
       <Link>valid_cert.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

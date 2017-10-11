@@ -31,14 +31,22 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 
 namespace Test.ADAL.NET.Common.Mocks
 {
     public class MockHttpMessageHandler : HttpMessageHandler
     {
+        public MockHttpMessageHandler()
+        {
+        }
+
+        public MockHttpMessageHandler(string urlToValidate) : this()
+        {
+            this.Url = urlToValidate;
+        }
+
         public HttpResponseMessage ResponseMessage { get; set; }
 
         public string Url { get; set; }
