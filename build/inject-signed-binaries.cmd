@@ -1,7 +1,7 @@
 set BUILD_PATH=bin\%BUILD_BUILDCONFIGURATION%
-set SIGNED_TARGET=%BUILD_ARTIFACTSTAGINGDIRECTORY%/SignedProductBinaries
+set SIGNED_TARGET=%BUILD_ARTIFACTSTAGINGDIRECTORY%\SignedProductBinaries
 set NUGET_TARGET=%BUILD_ARTIFACTSTAGINGDIRECTORY%
-set NUGET_TEMP_TARGET=%BUILD_SOURCESDIRECTORY%/NuGet-Temp
+set NUGET_TEMP_TARGET=%BUILD_SOURCESDIRECTORY%\NuGet-Temp
 set LIBRARY_NAME=Microsoft.Identity.Client
 setlocal ENABLEDELAYEDEXPANSION
 
@@ -30,7 +30,7 @@ del %NUGET_TARGET%\*.lastcodeanalysissucceeded /s
 
 @echo ==========================
 @echo Creating NuGet Package....
-7z a %NUGET_TARGET%\%NUGET_NAME%.zip -r %NUGET_TEMP_TARGET%/*
+7z a %NUGET_TARGET%\%NUGET_NAME%.zip -r %NUGET_TEMP_TARGET%\*
 copy %NUGET_TARGET%\%NUGET_NAME%.zip %NUGET_TARGET%\%NUGET_NAME%.nupkg
 
 @echo ====================================
