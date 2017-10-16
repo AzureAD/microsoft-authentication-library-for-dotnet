@@ -35,6 +35,9 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
 using Test.ADAL.NET.Common.Mocks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 
 namespace Test.ADAL.NET.Unit
 {
@@ -179,12 +182,130 @@ namespace Test.ADAL.NET.Unit
             {
                 PreferredNetwork = "login.microsoftonline.com",
                 PreferredCache = preferredCache,
-                Aliases = new string[] { "login.microsoftonline.com", "login.windows.net", "sts.microsoft.com" }
+                Aliases = new string[] {"login.microsoftonline.com", "login.windows.net", "sts.microsoft.com"}
             });
             var orderedList = await TokenCache.GetOrderedAliases(givenHost, false, new CallState(Guid.NewGuid())).ConfigureAwait(false);
             CollectionAssert.AreEqual(
-                new string[] { preferredCache, givenHost, "login.microsoftonline.com", "login.windows.net", "sts.microsoft.com" },
+                new string[] {preferredCache, givenHost, "login.microsoftonline.com", "login.windows.net", "sts.microsoft.com"},
                 orderedList);
+        }
+
+        private void AddMockInstanceDiscovery(string host)
+        {
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                Url = $"https://{host}/common/discovery/instance",
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        @"{
+                        ""tenant_discovery_endpoint"" : ""https://login.microsoftonline.com/v1/.well-known/openid-configuration"",
+                        ""metadata"": [
+                            {
+                            ""preferred_network"": ""login.microsoftonline.com"",
+                            ""preferred_cache"": ""login.windows.net"",
+                            ""aliases"": [""login.microsoftonline.com"", ""login.windows.net"", ""sts.microsoft.com""]
+                            }
+                        ]
+                        }"
+                    )
+                }
+            });
+        }
+
+        [TestMethod]
+        [TestCategory("InstanceDiscoveryTests")]
+        public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForTokenRequest()
+        {
+            string host = "login.windows.net";
+            string preferredNetwork = "login.microsoftonline.com";
+            var authenticator = new Authenticator($"https://{host}/contoso.com/", false);
+            AddMockInstanceDiscovery(host);
+            await authenticator.UpdateFromTemplateAsync(new CallState(Guid.NewGuid()));
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                Url = $"https://{preferredNetwork}/contoso.com/oauth2/token", // This validates the token request is sending to expected host
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"some-token\"}")
+                }
+            });
+
+            var privateObject = new PrivateObject(new AcquireTokenForClientHandler(new RequestData
+            {
+                Authenticator = authenticator,
+                Resource = "resource1",
+                ClientKey = new ClientKey(new ClientCredential("client1", "something")),
+                SubjectType = TokenSubjectType.Client,
+                ExtendedLifeTimeEnabled = false
+            }));
+            await (Task)privateObject.Invoke("SendTokenRequestAsync");
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount()); // This validates that all the mock handlers have been consumed
+        }
+
+        [TestMethod]
+        [TestCategory("InstanceDiscoveryTests")]
+        public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForUserRealmDiscovery()
+        {
+            string host = "login.windows.net";
+            string preferredNetwork = "login.microsoftonline.com";
+            var authenticator = new Authenticator($"https://{host}/contoso.com/", false);
+            AddMockInstanceDiscovery(host);
+            await authenticator.UpdateFromTemplateAsync(new CallState(Guid.NewGuid()));
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                Url = $"https://{preferredNetwork}/common/UserRealm/johndoe@contoso.com", // This validates the token request is sending to expected host
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"account_type\":\"managed\"}")
+                }
+            });
+
+            var requestData = new RequestData
+            {
+                Authenticator = authenticator,
+                Resource = "resource1",
+                ClientKey = new ClientKey(new ClientCredential("client1", "something")),
+                SubjectType = TokenSubjectType.Client,
+                ExtendedLifeTimeEnabled = false
+            };
+            var privateObject = new PrivateObject(new AcquireTokenNonInteractiveHandler(
+                requestData, new UserPasswordCredential("johndoe@contoso.com", "fakepassword")));
+            await (Task)privateObject.Invoke("PreTokenRequest");
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount()); // This validates that all the mock handlers have been consumed
+        }
+
+        [TestMethod]
+        [TestCategory("InstanceDiscoveryTests")]
+        public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForDeviceCodeRequest()
+        {
+            string host = "login.windows.net";
+            string preferredNetwork = "login.microsoftonline.com";
+            var authenticator = new Authenticator($"https://{host}/contoso.com/", false);
+            AddMockInstanceDiscovery(host);
+            await authenticator.UpdateFromTemplateAsync(new CallState(Guid.NewGuid()));
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                Url = $"https://{preferredNetwork}/contoso.com/oauth2/devicecode", // This validates the token request is sending to expected host
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"user_code\":\"A1B2C3D4\"}")
+                }
+            });
+
+            var handler = new AcquireDeviceCodeHandler(authenticator, "resource1", "clientId", null);
+            await handler.RunHandlerAsync();
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount()); // This validates that all the mock handlers have been consumed
         }
     }
 }
