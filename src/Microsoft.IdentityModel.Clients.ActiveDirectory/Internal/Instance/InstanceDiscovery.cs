@@ -27,6 +27,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -106,7 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public static string FormatAuthorizeEndpoint(string host, string tenant)
         {
-            return $"https://{host}/{tenant}/oauth2/authorize";
+            return string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/authorize", host, tenant);
         }
 
         // No return value. Modifies InstanceCache directly.
@@ -114,8 +115,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             string tentativeAuthorizeEndpoint = FormatAuthorizeEndpoint(host, "irrelevant");
             string instanceDiscoveryHost = WhitelistedAuthorities.Contains(host) ? host : DefaultTrustedAuthority;
-            string instanceDiscoveryEndpoint =
-                $"https://{instanceDiscoveryHost}/common/discovery/instance?api-version=1.1&authorization_endpoint={tentativeAuthorizeEndpoint}";
+            string instanceDiscoveryEndpoint = string.Format(
+                CultureInfo.InvariantCulture,
+                "https://{0}/common/discovery/instance?api-version=1.1&authorization_endpoint={1}",
+                instanceDiscoveryHost, tentativeAuthorizeEndpoint);
             var client = new AdalHttpClient(instanceDiscoveryEndpoint, callState);
             InstanceDiscoveryResponse discoveryResponse = null;
             try

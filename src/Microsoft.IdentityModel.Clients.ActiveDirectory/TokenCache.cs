@@ -379,7 +379,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 throw new ArgumentNullException();
             }
 
-            return $"https://{newHost}{new Uri(oldUri).AbsolutePath}";
+            return string.Format(CultureInfo.InvariantCulture, "https://{0}{1}", newHost, new Uri(oldUri).AbsolutePath);
         }
 
         internal static async Task<List<string>> GetOrderedAliases(string host, bool validateAuthority, CallState callState)

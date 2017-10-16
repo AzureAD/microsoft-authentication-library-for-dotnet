@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -107,9 +108,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
                     InstanceDiscovery.AddMetadataEntry(host);
                 }
                 this.AuthorizationUri = InstanceDiscovery.FormatAuthorizeEndpoint(host, tenant);
-                this.DeviceCodeUri = $"https://{host}/{tenant}/oauth2/devicecode";
-                this.TokenUri = $"https://{host}/{tenant}/oauth2/token";
-                this.UserRealmUri = CanonicalizeUri($"https://{host}/common/UserRealm");
+                this.DeviceCodeUri = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/devicecode", host, tenant);
+                this.TokenUri = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/token", host, tenant);
+                this.UserRealmUri = CanonicalizeUri(string.Format(CultureInfo.InvariantCulture, "https://{0}/common/UserRealm", host));
                 this.IsTenantless = (string.Compare(tenant, TenantlessTenantName, StringComparison.OrdinalIgnoreCase) == 0);
                 this.SelfSignedJwtAudience = this.TokenUri;
                 this.updatedFromTemplate = true;
