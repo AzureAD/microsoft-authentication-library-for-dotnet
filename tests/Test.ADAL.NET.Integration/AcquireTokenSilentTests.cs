@@ -130,19 +130,19 @@ namespace Test.ADAL.NET.Integration
         [TestMethod]
         [TestCategory("AcquireTokenSilentTests")]
         //292916 Ensure AcquireTokenSilent tests exist in ADAL.NET for public clients
-        public void AcquireTokenSilentTestWithInvalidTokenInCache()
+        public async Task ExpiredATValidRTInCache_GetNewATRTFromService()
         {
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage(),
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
                 PostData = new Dictionary<string, string>()
                 {
                     { "client_id", TestConstants.DefaultClientId},
                     {"grant_type", "refresh_token"},
-                    {"refresh_token", "some-rt" }
+                    {"refresh_token", "some_rt" }
                 }
             });
 
@@ -152,23 +152,15 @@ namespace Test.ADAL.NET.Integration
 
             context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
             {
-                RefreshToken = "some-rt",
+                RefreshToken = "some_rt",
                 ResourceInResponse = TestConstants.DefaultResource,
                 Result = new AuthenticationResult("Bearer", "existing-access-token",
                     DateTimeOffset.UtcNow)
             };
 
-            AuthenticationResult result = null;
-
-            AdalSilentTokenAcquisitionException ex = AssertException.TaskThrows<AdalSilentTokenAcquisitionException>(async () => 
-            result = await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                    new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId)));
-
-            Assert.AreEqual(ex.ErrorCode, AdalError.FailedToAcquireTokenSilently);
-            Assert.AreEqual(ex.Message, AdalErrorMessage.FailedToRefreshToken);
-            Assert.IsNotNull(ex.InnerException);
-            Assert.IsTrue(ex.InnerException is AdalServiceException);
-            Assert.AreEqual(((AdalServiceException)(ex.InnerException)).ErrorCode, "invalid_grant");
+            AuthenticationResult result = await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
+                    new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId)).ConfigureAwait(false);
+            Assert.IsNotNull(result);
         }
     }
 }

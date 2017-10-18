@@ -280,6 +280,51 @@ namespace Test.ADAL.NET.Integration
         }
 
         [TestMethod]
+        [Description("Test for expired access token and valid refresh token in cache")]
+        public async Task IntegratedAuthWithExpiredTokenInCache_UsesRefreshTokenTestAsync()
+        {
+            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
+            await context.Authenticator.UpdateFromTemplateAsync(null);
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                PostData = new Dictionary<string, string>()
+                {
+                    {"grant_type", "refresh_token"}
+                }
+            });
+
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
+                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
+            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            {
+                RefreshToken = "some-rt",
+                ResourceInResponse = TestConstants.DefaultResource,
+                Result = new AuthenticationResult("Bearer", "existing-access-token", DateTimeOffset.UtcNow)
+            };
+
+            // Call acquire token
+            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
+                new UserCredential(TestConstants.DefaultDisplayableId));
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("some-access-token", result.AccessToken);
+
+            // There should be one cached entry.
+            Assert.AreEqual(1, context.TokenCache.Count);
+
+            // Cache entry updated with new access token
+            Assert.AreEqual("some-access-token", context.TokenCache.tokenCacheDictionary[key].Result.AccessToken);
+            Assert.IsNotNull(result.UserInfo);
+
+            // All mocks are consumed
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+        }
+
+        [TestMethod]
         [Description("Mex endpoint fails to resolve and results in a 404")]
         public async Task MexEndpointFailsToResolveTestAsync()
         {
@@ -320,6 +365,121 @@ namespace Test.ADAL.NET.Integration
 
             // Check exception message
             Assert.AreEqual("parsing_ws_metadata_exchange_failed: Parsing WS metadata exchange failed", result.Message);
+
+            // All mocks are consumed
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+        }
+
+        [TestMethod]
+        [Description("Integrated auth using upn of federated user and Mex does not return integrated auth endpoint")]
+        public async Task IntegratedAuthUsingUpn_MexDoesNotReturnAuthEndpointTestAsync()
+        {
+            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
+            await context.Authenticator.UpdateFromTemplateAsync(null);
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
+                                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
+                                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
+                                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
+                                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
+                },
+                QueryParams = new Dictionary<string, string>()
+                {
+                    {"api-version", "1.0"}
+                }
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText("TestMex.xml"))
+                }
+            });
+
+            // Mex does not return integrated auth endpoint (.../13/windowstransport)
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport")
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent("Not found")
+                }
+            });
+
+            // Call acquire token, endpoint not found
+            var result = AssertException.TaskThrows<Exception>(() =>
+            context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserCredential(TestConstants.DefaultDisplayableId)));
+
+            // Check exception message
+            Assert.AreEqual("Federated service at https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport returned error: See inner exception for detail.", result.Message);
+            Assert.AreEqual(" Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
+
+            // There should be one cached entry.
+            Assert.AreEqual(0, context.TokenCache.Count);
+
+            // All mocks are consumed
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+        }
+
+        [TestMethod]
+        [Description("Password of federated user provided and Mex does not return username/password endpoint")]
+        public async Task PasswordAndUpnProvided_MexDoesNotReturnUsernamePasswordEndpointTestAsync()
+        {
+            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
+            await context.Authenticator.UpdateFromTemplateAsync(null);
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
+                                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
+                                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
+                                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
+                                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
+                },
+                QueryParams = new Dictionary<string, string>()
+                {
+                    {"api-version", "1.0"}
+                }
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText("TestMex.xml"))
+                }
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed")
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent("Not found")
+                }
+            });
+
+            // Call acquire token, endpoint not found
+            var result = AssertException.TaskThrows<Exception>(() =>
+            context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)));
+
+            // Check exception message
+            Assert.AreEqual("Federated service at https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed returned error: See inner exception for detail.", result.Message);
+            Assert.AreEqual(" Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
+
+            // There should be one cached entry.
+            Assert.AreEqual(0, context.TokenCache.Count);
 
             // All mocks are consumed
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
