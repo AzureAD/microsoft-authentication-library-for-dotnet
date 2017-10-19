@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
     internal static class AdalIdParameter
     {
         /// <summary>
-        /// ADAL Flavor: .NET or WinRT
+        /// ADAL Flavor: PCL.CoreCLR, PCL.Android, PCL.iOS, PCL.Desktop, PCL.WinRT
         /// </summary>
         public const string Product = "x-client-SKU";
 
