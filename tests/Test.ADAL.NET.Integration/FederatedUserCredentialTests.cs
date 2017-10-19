@@ -236,6 +236,9 @@ namespace Test.ADAL.NET.Integration
             // Check inner exception
             Assert.AreEqual(" Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
 
+            // There should be no cached entries.
+            Assert.AreEqual(0, context.TokenCache.Count);
+
             // All mocks are consumed
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
         }
@@ -319,6 +322,7 @@ namespace Test.ADAL.NET.Integration
             // Cache entry updated with new access token
             Assert.AreEqual("some-access-token", context.TokenCache.tokenCacheDictionary[key].Result.AccessToken);
             Assert.IsNotNull(result.UserInfo);
+            Assert.AreEqual(1, context.TokenCache.Count);
 
             // All mocks are consumed
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
@@ -365,6 +369,9 @@ namespace Test.ADAL.NET.Integration
 
             // Check exception message
             Assert.AreEqual("parsing_ws_metadata_exchange_failed: Parsing WS metadata exchange failed", result.Message);
+
+            // There should be no cached entries.
+            Assert.AreEqual(0, context.TokenCache.Count);
 
             // All mocks are consumed
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
@@ -421,7 +428,7 @@ namespace Test.ADAL.NET.Integration
             Assert.AreEqual("Federated service at https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport returned error: See inner exception for detail.", result.Message);
             Assert.AreEqual(" Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
 
-            // There should be one cached entry.
+            // There should be no cached entries.
             Assert.AreEqual(0, context.TokenCache.Count);
 
             // All mocks are consumed
@@ -478,7 +485,7 @@ namespace Test.ADAL.NET.Integration
             Assert.AreEqual("Federated service at https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed returned error: See inner exception for detail.", result.Message);
             Assert.AreEqual(" Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
 
-            // There should be one cached entry.
+            // There should be no cached entries.
             Assert.AreEqual(0, context.TokenCache.Count);
 
             // All mocks are consumed

@@ -40,7 +40,6 @@ using Test.ADAL.NET.Common.Mocks;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 
 namespace Test.ADAL.NET.Integration
 {
@@ -56,8 +55,8 @@ namespace Test.ADAL.NET.Integration
         }
 
         [TestMethod]
-        [Description("Positive Test for AcquireToken with an empty cache")]
-        public async Task AcquireTokenWithEmptyCache_GetsNewTokenFromService()
+        [Description("Test for AcquireToken with an empty cache")]
+        public async Task AcquireTokenWithEmptyCache_GetsTokenFromServiceTestAsync()
         {
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
@@ -94,15 +93,20 @@ namespace Test.ADAL.NET.Integration
                         new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword));
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
-            Assert.AreEqual(result.AccessToken, "some-access-token");
+            Assert.AreEqual("some-access-token", result.AccessToken);
             Assert.IsNotNull(result.UserInfo);
             Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
             Assert.AreEqual(TestConstants.DefaultUniqueId, result.UserInfo.UniqueId);
+
+            // All mocks are consumed
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+
+            // There should be one cached entry
+            Assert.AreEqual(1, context.TokenCache.Count);
         }
 
         [TestMethod]
-        [Description("Positive Test for AcquireToken with a token already in cache")]
+        [Description("Test for AcquireToken with valid token in cache")]
         public async Task AcquireTokenWithValidTokenInCache_ReturnsCachedToken()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
@@ -125,11 +129,14 @@ namespace Test.ADAL.NET.Integration
             Assert.AreEqual("existing-access-token", result.AccessToken);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
             Assert.IsNotNull(result.UserInfo);
+
+            // There should be one cached entry.
+            Assert.AreEqual(1, context.TokenCache.Count);
         }
 
         [TestMethod]
-        [Description("Positive Test for AcquireToken for a user when a valid access token already exists in cache for another user.")]
-        public async Task AcquireTokenWithValidAccessTokenInCacheForAnotherUser_GetsNewTokenFromService()
+        [Description("Test for AcquireToken for a user when a valid access token already exists in cache for another user.")]
+        public async Task AcquireTokenWithValidAccessTokenInCacheForAnotherUser_GetsTokenFromService()
         {
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
@@ -183,7 +190,7 @@ namespace Test.ADAL.NET.Integration
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
-            Assert.AreEqual(result.AccessToken, "some-access-token");
+            Assert.AreEqual("some-access-token", result.AccessToken);
             Assert.IsNotNull(result.UserInfo);
             Assert.AreEqual("user2@id.com", result.UserInfo.DisplayableId);
             Assert.AreEqual(TestConstants.DefaultUniqueId + "2", result.UserInfo.UniqueId);
@@ -226,17 +233,22 @@ namespace Test.ADAL.NET.Integration
                     DateTimeOffset.UtcNow)
             };
 
-            var test1 = DateTimeOffset.UtcNow;
-
             var result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
                                                          new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword));
 
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
-            Assert.AreEqual("some-access-token", context.TokenCache.tokenCacheDictionary[key].Result.AccessToken);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
             Assert.IsNotNull(result.UserInfo);
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+
+            // Cache entry updated with new access token
+            Assert.AreEqual("some-access-token", context.TokenCache.tokenCacheDictionary[key].Result.AccessToken);
+
+            // There should be one cached entry.
+            Assert.AreEqual(1, context.TokenCache.Count);
+
+            // All mocks are consumed
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());           
         }
 
         [TestMethod]
@@ -263,6 +275,7 @@ namespace Test.ADAL.NET.Integration
                                                          new UserPasswordCredential(TestConstants.DefaultDisplayableId,
                                                                                     TestConstants.DefaultPassword)));
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            Assert.AreEqual(0, context.TokenCache.Count);
 
             //To be addressed in a later fix
             //Assert.AreEqual(((AdalException)ex.InnerException.InnerException).ErrorCode, AdalError.UserRealmDiscoveryFailed);
@@ -293,8 +306,9 @@ namespace Test.ADAL.NET.Integration
                                                          new UserPasswordCredential(TestConstants.DefaultDisplayableId, 
                                                                                     TestConstants.DefaultPassword)));
 
-            Assert.AreEqual(ex.ErrorCode, AdalError.UnknownUserType);
+            Assert.AreEqual(AdalError.UnknownUserType, ex.ErrorCode);
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            Assert.AreEqual(0, context.TokenCache.Count);
         }
     }
 }
