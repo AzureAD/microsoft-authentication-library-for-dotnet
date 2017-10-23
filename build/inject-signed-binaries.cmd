@@ -11,8 +11,7 @@ md %NUGET_TEMP_TARGET%
 @echo Decompressing nuget...
 for %%i in (%NUGET_TARGET%\*.nupkg) do (
 	set NUGET_NAME=%%~ni
-	if not x%NUGET_NAME:symbols=%==x%NUGET_NAME%
-	(
+	If NOT "%NUGET_NAME:symbols=%"=="%NUGET_NAME%" (
 		echo Skipping symbols package file %NUGET_NAME%
 	) else (
 		7z e %NUGET_TARGET%\%%~ni.nupkg -o%NUGET_TEMP_TARGET%\ -y
