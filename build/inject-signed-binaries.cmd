@@ -10,7 +10,7 @@ md %NUGET_TEMP_TARGET%
 md %NUGET_SYMBOLS_PLACEHOLDER%
 
 @echo Move symbols package to placeholder
-mv %NUGET_TARGET%\*.symbols.nupkg %NUGET_SYMBOLS_PLACEHOLDER%
+move /Y %NUGET_TARGET%\*.symbols.nupkg %NUGET_SYMBOLS_PLACEHOLDER%
 
 @echo ==========================
 @echo Decompressing nuget...
@@ -35,7 +35,7 @@ del %NUGET_TARGET%\*.lastcodeanalysissucceeded /s
 copy /Y %NUGET_TARGET%\%NUGET_NAME%.zip %NUGET_TARGET%\%NUGET_NAME%.nupkg
 
 @echo Move symbols package back to original location
-mv %NUGET_SYMBOLS_PLACEHOLDER%\*.symbols.nupkg %NUGET_TARGET%\
+move /Y %NUGET_SYMBOLS_PLACEHOLDER%\*.symbols.nupkg %NUGET_TARGET%\
 
 @echo ====================================
 @echo MSAL-NET nuget creation script complete with no errors
