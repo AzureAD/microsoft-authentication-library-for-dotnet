@@ -41,12 +41,6 @@ namespace Test.ADAL.NET.Common.Mocks
         public MockHttpMessageHandler()
         {
         }
-
-        public MockHttpMessageHandler(string urlToValidate) : this()
-        {
-            this.Url = urlToValidate;
-        }
-
         public HttpResponseMessage ResponseMessage { get; set; }
 
         public string Url { get; set; }
@@ -61,6 +55,11 @@ namespace Test.ADAL.NET.Common.Mocks
 
         public Action<HttpRequestMessage> AdditionalRequestValidation { get; set; }
 
+        public MockHttpMessageHandler(string Url)
+        {
+            this.Url = Url;
+        }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             Assert.AreEqual(Method, request.Method);
@@ -70,7 +69,7 @@ namespace Test.ADAL.NET.Common.Mocks
             {
                 Assert.AreEqual(Url, uri.AbsoluteUri.Split(new[] { '?' })[0]);
             }
-            
+
             //match QP passed in for validation. 
             if (QueryParams != null)
             {

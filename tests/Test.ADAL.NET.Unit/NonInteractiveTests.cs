@@ -66,7 +66,7 @@ namespace Test.ADAL.NET.Unit
         [Description("Get WsTrust Address from mex")]
         public async Task MexParserGetWsTrustAddressTest()
         {
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.DefaultAuthorityCommonTenant)
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -75,7 +75,7 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            WsTrustAddress address = await MexParser.FetchWsTrustAddressFromMexAsync("https://some-url", UserAuthType.IntegratedAuth, null);
+            WsTrustAddress address = await MexParser.FetchWsTrustAddressFromMexAsync(TestConstants.DefaultAuthorityCommonTenant, UserAuthType.IntegratedAuth, null);
             Assert.IsNotNull(address);
         }
 
@@ -83,10 +83,10 @@ namespace Test.ADAL.NET.Unit
         [Description("User Realm Discovery Test")]
         public async Task UserRealmDiscoveryTest()
         {
-            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
+            AuthenticationContext context = new AuthenticationContext(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" + TestConstants.DefaultDisplayableId, new TokenCache());
             await context.Authenticator.UpdateFromTemplateAsync(null);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" + TestConstants.DefaultDisplayableId)
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -106,7 +106,7 @@ namespace Test.ADAL.NET.Unit
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, CallState.Default);
             VerifyUserRealmResponse(userRealmResponse, "Federated");
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" + TestConstants.DefaultDisplayableId)
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -134,7 +134,7 @@ namespace Test.ADAL.NET.Unit
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
             await context.Authenticator.UpdateFromTemplateAsync(null);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" + TestConstants.DefaultDisplayableId)
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -160,7 +160,7 @@ namespace Test.ADAL.NET.Unit
                 Version = WsTrustVersion.WsTrust13
             };
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://some/address/usernamemixed")
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -189,7 +189,7 @@ namespace Test.ADAL.NET.Unit
                 Version = WsTrustVersion.WsTrust13
             };
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://some/address/usernamemixed")
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -229,13 +229,14 @@ namespace Test.ADAL.NET.Unit
         [Description("WS-Trust Request Test")]
         public async Task WsTrustRequestTest()
         {
+            string URI = "https://some/address/usernamemixed";
             WsTrustAddress address = new WsTrustAddress()
             {
-                Uri = new Uri("https://some/address/usernamemixed"),
+                Uri = new Uri(URI),
                 Version = WsTrustVersion.WsTrust13
             };
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(URI)
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -244,7 +245,7 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(URI)
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -264,13 +265,15 @@ namespace Test.ADAL.NET.Unit
         [Description("WS-Trust Request Generic Cloud Urn Test")]
         public async Task WsTrustRequestGenericCloudUrnTest()
         {
+            string URI = "https://some/address/usernamemixed";
+
             WsTrustAddress address = new WsTrustAddress()
             {
-                Uri = new Uri("https://some/address/usernamemixed"),
+                Uri = new Uri(URI),
                 Version = WsTrustVersion.WsTrust13
             };
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(URI)
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -279,7 +282,7 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(URI)
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)

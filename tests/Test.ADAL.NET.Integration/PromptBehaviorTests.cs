@@ -51,7 +51,7 @@ namespace Test.ADAL.NET.Integration
         {
             HttpMessageHandlerFactory.ClearMockHandlers();
             InstanceDiscovery.InstanceCache.Clear();
-            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler());
+            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
         }
         
         [TestMethod]
@@ -61,7 +61,7 @@ namespace Test.ADAL.NET.Integration
             MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultRedirectUri + "?code=some-code"));
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
@@ -121,7 +121,7 @@ namespace Test.ADAL.NET.Integration
             MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultRedirectUri + "?code=some-code"));
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
@@ -163,7 +163,7 @@ namespace Test.ADAL.NET.Integration
             MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultRedirectUri + "?code=some-code"));
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
@@ -206,7 +206,7 @@ namespace Test.ADAL.NET.Integration
                 // validate that authorizationUri passed to WebUi contains prompt=select_account query parameter
                 new Dictionary<string, string> { { "prompt", "select_account" } });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
@@ -261,7 +261,7 @@ namespace Test.ADAL.NET.Integration
                 Result = new AuthenticationResult("Bearer", "existing-access-token", DateTimeOffset.UtcNow)
             };
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateInvalidRequestTokenResponseMessage()
@@ -285,7 +285,7 @@ namespace Test.ADAL.NET.Integration
                 // validate that authorizationUri passed to WebUi contains prompt=refresh_session query parameter
                 new Dictionary<string, string> { { "prompt", "refresh_session" } });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),

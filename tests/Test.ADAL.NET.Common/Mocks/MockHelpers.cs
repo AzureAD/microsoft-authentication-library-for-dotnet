@@ -71,17 +71,18 @@ namespace Test.ADAL.NET.Common.Mocks
             return stream;
         }
 
-        public static HttpMessageHandler CreateInstanceDiscoveryMockHandler()
+        public static HttpMessageHandler CreateInstanceDiscoveryMockHandler(string Url)
         {
-            return CreateInstanceDiscoveryMockHandler(
+            return CreateInstanceDiscoveryMockHandler(Url,
                 "{\"tenant_discovery_endpoint\" : \"https://login.microsoftonline.com/v1/.well-known/openid-configuration\"}"
                 );
         }
 
-        public static HttpMessageHandler CreateInstanceDiscoveryMockHandler(string content)
+        public static HttpMessageHandler CreateInstanceDiscoveryMockHandler(string Url, string content)
         {
-            return new MockHttpMessageHandler()
+            return new MockHttpMessageHandler(Url)
             {
+                //Url = "",
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {

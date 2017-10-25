@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 
 namespace Test.ADAL.NET.Common
 {
@@ -51,8 +52,26 @@ namespace Test.ADAL.NET.Common
         public static readonly string ErrorSubCode = "ErrorSubCode";
         public static readonly string CloudAudienceUrnMicrosoft = "urn:federation:MicrosoftOnline";
         public static readonly string CloudAudienceUrn = "urn:federation:Blackforest";
+        public static readonly string TokenEndPoint = "oauth2/token";
+        public static readonly string UserRealmEndPoint = "userrealm";
+        public static readonly string DiscoveryEndPoint = "discovery/instance";
+
+        public static string GetTokenEndpoint(string Authority)
+        {
+            return Authority + TokenEndPoint;
+        }
+
+        public static string GetUserRealmEndpoint(string Authority)
+        {
+            return Authority + UserRealmEndPoint;
+        }
+
+        public static string GetDiscoveryEndpoint(string Authority)
+        {
+            return Authority + DiscoveryEndPoint;
+        }
     }
-	
+
     public static class StringValue
     {
         public const string NotProvided = "NotProvided";

@@ -52,7 +52,7 @@ namespace Test.ADAL.NET.Unit
         {
             HttpMessageHandlerFactory.ClearMockHandlers();
             InstanceDiscovery.InstanceCache.Clear();
-            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler());
+            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
             platformParameters = new PlatformParameters(PromptBehavior.Auto);
         }
 
@@ -63,7 +63,7 @@ namespace Test.ADAL.NET.Unit
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityCommonTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
@@ -87,7 +87,7 @@ namespace Test.ADAL.NET.Unit
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityCommonTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
@@ -109,7 +109,7 @@ namespace Test.ADAL.NET.Unit
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
             string accessToken = "some-access-token";
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityCommonTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
@@ -131,7 +131,7 @@ namespace Test.ADAL.NET.Unit
             var clientAssertion = new ClientAssertionCertificate(TestConstants.DefaultClientId, certificate);
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityCommonTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
@@ -152,7 +152,7 @@ namespace Test.ADAL.NET.Unit
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             ClientAssertion clientAssertion = new ClientAssertion(TestConstants.DefaultClientId, "some-assertion");
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityCommonTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)

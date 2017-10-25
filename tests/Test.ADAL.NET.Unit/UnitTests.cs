@@ -287,7 +287,7 @@ namespace Test.ADAL.NET.Unit
             }
 
             var finalString = new string(stringChars);
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.DefaultAuthorityCommonTenant)
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -315,7 +315,7 @@ namespace Test.ADAL.NET.Unit
             }
 
             var finalString = new string(stringChars);
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.DefaultAuthorityCommonTenant)
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)

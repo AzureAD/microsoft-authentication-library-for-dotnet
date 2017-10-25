@@ -49,7 +49,7 @@ namespace Test.ADAL.NET.Integration
         {
             HttpMessageHandlerFactory.ClearMockHandlers();
             InstanceDiscovery.InstanceCache.Clear();
-            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler());
+            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
         }
 
         [TestMethod]
@@ -71,7 +71,7 @@ namespace Test.ADAL.NET.Integration
 
             var ex = AssertException.TaskThrows<AdalSilentTokenAcquisitionException>(async () =>
                 {
-                    HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+                    HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityCommonTenant))
                     {
                         Method = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage()
@@ -134,7 +134,7 @@ namespace Test.ADAL.NET.Integration
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityCommonTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),

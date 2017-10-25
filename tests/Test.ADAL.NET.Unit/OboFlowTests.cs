@@ -62,7 +62,7 @@ namespace Test.ADAL.NET.Unit
         {
             HttpMessageHandlerFactory.ClearMockHandlers();
             InstanceDiscovery.InstanceCache.Clear();
-            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler());
+            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
         }
 
         [TestMethod]
@@ -96,7 +96,7 @@ namespace Test.ADAL.NET.Unit
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
                 TestConstants.DefaultClientSecret);
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
@@ -157,7 +157,7 @@ namespace Test.ADAL.NET.Unit
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
                 TestConstants.DefaultClientSecret);
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
@@ -223,7 +223,7 @@ namespace Test.ADAL.NET.Unit
             string displayableId2 = "extra" + TestConstants.DefaultDisplayableId;
             string uniqueId2 = "extra" + TestConstants.DefaultUniqueId;
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage =
@@ -339,7 +339,7 @@ namespace Test.ADAL.NET.Unit
                 };
             }
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
@@ -454,7 +454,7 @@ namespace Test.ADAL.NET.Unit
                 };
             }
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
@@ -511,7 +511,7 @@ namespace Test.ADAL.NET.Unit
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
                 TestConstants.DefaultClientSecret);
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
@@ -568,7 +568,7 @@ namespace Test.ADAL.NET.Unit
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
                 TestConstants.DefaultClientSecret);
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
@@ -630,7 +630,7 @@ namespace Test.ADAL.NET.Unit
             string displayableId2 = "extra" + TestConstants.DefaultDisplayableId;
             string uniqueId2 = "extra" + TestConstants.DefaultUniqueId;
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage =
@@ -744,7 +744,7 @@ namespace Test.ADAL.NET.Unit
                 UserAssertionHash = CryptographyHelper.CreateSha256Hash(accessToken + "different")
             };
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
@@ -857,7 +857,7 @@ namespace Test.ADAL.NET.Unit
                 UserAssertionHash = CryptographyHelper.CreateSha256Hash(accessToken + "different")
             };
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
@@ -918,7 +918,7 @@ namespace Test.ADAL.NET.Unit
                     },
                 UserAssertionHash = CryptographyHelper.CreateSha256Hash(accessToken)
             };
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.AnotherResource,
