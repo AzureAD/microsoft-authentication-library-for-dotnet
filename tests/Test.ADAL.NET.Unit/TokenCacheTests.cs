@@ -178,7 +178,7 @@ namespace Test.ADAL.Common.Unit
         public static async Task TestUniqueIdDisplayableIdLookup()
         {
 
-            string authority = "https://www.gotJwt.com/";
+            string authority = "https://www.gotjwt.com/";
             string tenantId = Guid.NewGuid().ToString();
             string uniqueId = Guid.NewGuid().ToString();
             string displayableId = Guid.NewGuid().ToString();
@@ -232,7 +232,7 @@ namespace Test.ADAL.Common.Unit
         {
             CheckPublicGetSets();
 
-            string authority = "https://www.gotJwt.com/";
+            string authority = "https://www.gotjwt.com/";
             string clientId = Guid.NewGuid().ToString();
             string resource = Guid.NewGuid().ToString();
             string tenantId = Guid.NewGuid().ToString();

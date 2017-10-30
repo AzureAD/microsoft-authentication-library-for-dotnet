@@ -347,11 +347,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         internal async Task<AuthenticationResultEx> LoadFromCache(CacheQueryData cacheQueryData, CallState callState)
         {
             AuthenticationResultEx resultEx = null;
-            var aliasedAuthorities = await GetOrderedAliases(
-                GetHost(cacheQueryData.Authority), false, callState).ConfigureAwait(false);
-            foreach (var aliasedAuthority in aliasedAuthorities)
+            var aliasedHosts = await GetOrderedAliases(cacheQueryData.Authority, false, callState).ConfigureAwait(false);
+            foreach (var aliasedHost in aliasedHosts)
             {
-                cacheQueryData.Authority = ReplaceHost(cacheQueryData.Authority, aliasedAuthority);
+                cacheQueryData.Authority = ReplaceHost(cacheQueryData.Authority, aliasedHost);
                 resultEx = LoadFromCacheCommon(cacheQueryData, callState);
                 if (resultEx?.Result != null)
                 {
@@ -362,9 +361,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return resultEx;
         }
 
-        private string GetHost(string uri)
+        private static string GetHost(string uri)
         {
-            // The following line serves as a validation for uri. Relevant exceptions will be throwed.
+            // The following line serves as a validation for uri. Relevant exceptions will be thrown.
             new Uri(uri); //NOSONAR
 
             // Note: host is supposed to be case insensitive, and would be normalized to lowercase by: new Uri(uri).Host
@@ -382,10 +381,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return string.Format(CultureInfo.InvariantCulture, "https://{0}{1}", newHost, new Uri(oldUri).AbsolutePath);
         }
 
-        internal static async Task<List<string>> GetOrderedAliases(string host, bool validateAuthority, CallState callState)
+        internal static async Task<List<string>> GetOrderedAliases(string authority, bool validateAuthority, CallState callState)
         {
-            var metadata = await InstanceDiscovery.GetMetadataEntry(host, validateAuthority, callState).ConfigureAwait(false);
-            var aliasedAuthorities = new List<string>(new string[] { metadata.PreferredCache, host });
+            var metadata = await InstanceDiscovery.GetMetadataEntry(new Uri(authority), validateAuthority, callState).ConfigureAwait(false);
+            var aliasedAuthorities = new List<string>(new string[] {metadata.PreferredCache, GetHost(authority)});
             aliasedAuthorities.AddRange(metadata.Aliases ?? Enumerable.Empty<string>());
             return aliasedAuthorities;
         }
@@ -488,7 +487,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         internal async Task StoreToCache(AuthenticationResultEx result, string authority, string resource, string clientId,
             TokenSubjectType subjectType, CallState callState)
         {
-            var metadata = await InstanceDiscovery.GetMetadataEntry(GetHost(authority), false, callState).ConfigureAwait(false);
+            var metadata = await InstanceDiscovery.GetMetadataEntry(new Uri(authority), false, callState).ConfigureAwait(false);
             StoreToCacheCommon(result, ReplaceHost(authority, metadata.PreferredCache), resource, clientId, subjectType, callState);
         }
 

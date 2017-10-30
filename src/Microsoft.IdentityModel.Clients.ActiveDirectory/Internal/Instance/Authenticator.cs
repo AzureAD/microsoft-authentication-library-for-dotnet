@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
                 string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
                 if (this.AuthorityType == AuthorityType.AAD)
                 {
-                    var metadata = await InstanceDiscovery.GetMetadataEntry(host, this.ValidateAuthority, callState);
+                    var metadata = await InstanceDiscovery.GetMetadataEntry(authorityUri, this.ValidateAuthority, callState);
                     host = metadata.PreferredNetwork;
                     // All the endpoints will use this updated host, and it affects future network calls, as desired.
                     // The Authority remains its original host, and will be used in TokenCache later.

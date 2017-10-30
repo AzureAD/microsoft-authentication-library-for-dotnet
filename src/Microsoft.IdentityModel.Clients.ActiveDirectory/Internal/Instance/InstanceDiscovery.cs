@@ -34,6 +34,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
+using System;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -81,19 +82,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
-        public static async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntry(string host, bool validateAuthority,
+        public static async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntry(Uri authority, bool validateAuthority,
             CallState callState)
         {
+            if (authority == null)
+            {
+                throw new ArgumentNullException(nameof(authority));
+            }
+
             InstanceDiscoveryMetadataEntry entry = null;
-            if (!InstanceCache.TryGetValue(host, out entry))
+            if (!InstanceCache.TryGetValue(authority.Host, out entry))
             {
                 await semaphore.WaitAsync().ConfigureAwait(false); // SemaphoreSlim.WaitAsync() will not block current thread
                 try
                 {
-                    if (!InstanceCache.TryGetValue(host, out entry))
+                    if (!InstanceCache.TryGetValue(authority.Host, out entry))
                     {
-                        await DiscoverAsync(host, validateAuthority, callState).ConfigureAwait(false);
-                        InstanceCache.TryGetValue(host, out entry);
+                        await DiscoverAsync(authority, validateAuthority, callState).ConfigureAwait(false);
+                        InstanceCache.TryGetValue(authority.Host, out entry);
                     }
                 }
                 finally
@@ -110,15 +116,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/authorize", host, tenant);
         }
 
-        // No return value. Modifies InstanceCache directly.
-        private static async Task DiscoverAsync(string host, bool validateAuthority, CallState callState)
+        private static string GetTenant(Uri uri)
         {
-            string tentativeAuthorizeEndpoint = FormatAuthorizeEndpoint(host, "irrelevant");
-            string instanceDiscoveryHost = WhitelistedAuthorities.Contains(host) ? host : DefaultTrustedAuthority;
+            return uri.AbsolutePath.Split('/')[1];  // Will generate exception when tenant can not be determined
+        }
+
+        // No return value. Modifies InstanceCache directly.
+        private static async Task DiscoverAsync(Uri authority, bool validateAuthority, CallState callState)
+        {
             string instanceDiscoveryEndpoint = string.Format(
                 CultureInfo.InvariantCulture,
                 "https://{0}/common/discovery/instance?api-version=1.1&authorization_endpoint={1}",
-                instanceDiscoveryHost, tentativeAuthorizeEndpoint);
+                WhitelistedAuthorities.Contains(authority.Host) ? authority.Host : DefaultTrustedAuthority,
+                FormatAuthorizeEndpoint(authority.Host, GetTenant(authority)));
             var client = new AdalHttpClient(instanceDiscoveryEndpoint, callState);
             InstanceDiscoveryResponse discoveryResponse = null;
             try
@@ -154,12 +164,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 }
             }
 
-            AddMetadataEntry(host);
+            AddMetadataEntry(authority.Host);
         }
 
         // To populate a host into the cache as-is, when it is not already there
         public static bool AddMetadataEntry(string host)
         {
+            if (host == null)
+            {
+                throw new ArgumentNullException(nameof(host));
+            }
+
             return InstanceCache.TryAdd(host, new InstanceDiscoveryMetadataEntry
             {
                 PreferredNetwork = host,
