@@ -146,14 +146,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             set { this.Authenticator.CorrelationId = value; }
         }
 
-        //these APIs are not exposed on iOS or android
-#if !ANDROID && !iOS 
-/// <summary>
-/// Acquires device code from the authority.
-/// </summary>
-/// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
-/// <param name="clientId">Identifier of the client requesting the token.</param>
-/// <returns>It contains Device Code, its expiration time, User Code.</returns>
+        /// <summary>
+        /// Acquires device code from the authority.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <returns>It contains Device Code, its expiration time, User Code.</returns>
+#if iOS
+        [Obsolete("This device profile API should only be used on text-only devices, and not on this target platform which is offering an interactive authentication experience. For details please see https://aka.ms/AdalNetConfFlows")]
+#endif
         public async Task<DeviceCodeResult> AcquireDeviceCodeAsync(string resource, string clientId)
         {
             return await this.AcquireDeviceCodeAsync(resource, clientId, null).ConfigureAwait(false);
@@ -166,6 +167,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>It contains Device Code, its expiration time, User Code.</returns>
+#if iOS
+        [Obsolete("This device profile API should only be used on text-only devices, and not on this target platform which is offering an interactive authentication experience. For details please see https://aka.ms/AdalNetConfFlows")]
+#endif
         public async Task<DeviceCodeResult> AcquireDeviceCodeAsync(string resource, string clientId,
             string extraQueryParameters)
         {
@@ -179,6 +183,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="deviceCodeResult">The device code result received from calling AcquireDeviceCodeAsync.</param>
         /// <returns>It contains Access Token, its expiration time, user information.</returns>
+#if iOS
+        [Obsolete("This device profile API should only be used on text-only devices, and not on this target platform which is offering an interactive authentication experience. For details please see https://aka.ms/AdalNetConfFlows")]
+#endif
         public async Task<AuthenticationResult> AcquireTokenByDeviceCodeAsync(DeviceCodeResult deviceCodeResult)
         {
             if (deviceCodeResult == null)
@@ -198,7 +205,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             var handler = new AcquireTokenByDeviceCodeHandler(requestData, deviceCodeResult);
             return await handler.RunAsync().ConfigureAwait(false);
         }
-#endif
 
         /// <summary>
         /// Acquires an access token from the authority on behalf of a user, passing in the necessary claims for authentication. It requires using a user token previously received.
@@ -467,5 +473,336 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             var handler = new AcquireTokenSilentHandler(requestData, userId, parameters);
             return await handler.RunAsync().ConfigureAwait(false);
         }
+
+
+        // confidential client APIs
+
+        /// <summary>
+        /// Gets URL of the authorize endpoint including the query parameters.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("This API should is only relevant for confidential client use in .NET Framework 4.5 and .NET Core. You should not use it to build against the chosen platform. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<Uri> GetAuthorizationRequestUrlAsync(string resource,
+            string clientId, Uri redirectUri,
+            UserIdentifier userId, string extraQueryParameters)
+        {
+            return await GetAuthorizationRequestUrlAsync(resource, clientId, redirectUri, userId,
+                extraQueryParameters,
+                null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Gets URL of the authorize endpoint including the query parameters.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <param name="claims">Additional claims that are needed for authentication. Acquired from the AdalClaimChallengeException. This parameter can be null.</param>
+        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("This API should is only relevant for confidential client use in .NET Framework 4.5 and .NET Core. You should not use it to build against the chosen platform. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<Uri> GetAuthorizationRequestUrlAsync(string resource,
+            string clientId, Uri redirectUri,
+            UserIdentifier userId, string extraQueryParameters, string claims)
+        {
+            return await GetAuthorizationRequestUrlCommonAsync(resource, clientId, redirectUri, userId, extraQueryParameters,
+                    claims).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires security token without asking for user credential.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientCredential">The client credential to use for token acquisition.</param>
+        /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
+        /// <returns>It contains Access Token, its expiration time, user information. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource,
+            ClientCredential clientCredential, UserIdentifier userId)
+        {
+            return await AcquireTokenSilentCommonAsync(resource, new ClientKey(clientCredential), userId, null)
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires security token without asking for user credential.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
+        /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
+        /// <returns>It contains Access Token, its expiration time, user information. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource,
+            IClientAssertionCertificate clientCertificate, UserIdentifier userId)
+        {
+            return await AcquireTokenSilentCommonAsync(resource,
+                new ClientKey(clientCertificate, Authenticator), userId, null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires security token without asking for user credential.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
+        /// <param name="userId">Identifier of the user token is requested for. This parameter can be <see cref="UserIdentifier"/>.Any.</param>
+        /// <returns>It contains Access Token, its expiration time, user information. If acquiring token without user credential is not possible, the method throws AdalException.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string resource,
+            ClientAssertion clientAssertion, UserIdentifier userId)
+        {
+            return await AcquireTokenSilentCommonAsync(resource, new ClientKey(clientAssertion), userId, null)
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority using authorization code previously received.
+        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
+        /// </summary>
+        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="clientCredential">The credential to use for token acquisition.</param>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
+            Uri redirectUri, ClientCredential clientCredential)
+        {
+            return await AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri,
+                    new ClientKey(clientCredential), null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority using an authorization code previously received.
+        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
+        /// </summary>
+        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="clientCredential">The credential to use for token acquisition.</param>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. It can be null if provided earlier to acquire authorizationCode.</param>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
+            Uri redirectUri, ClientCredential clientCredential, string resource)
+        {
+            return await AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri,
+                    new ClientKey(clientCredential), resource).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority using an authorization code previously received.
+        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
+        /// </summary>
+        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
+        /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
+        /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
+            Uri redirectUri, ClientAssertion clientAssertion)
+        {
+            return await AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri,
+                    new ClientKey(clientAssertion), null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority using an authorization code previously received.
+        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
+        /// </summary>
+        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
+        /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
+        /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. It can be null if provided earlier to acquire authorizationCode.</param>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
+            Uri redirectUri, ClientAssertion clientAssertion, string resource)
+        {
+            return await AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri,
+                    new ClientKey(clientAssertion), resource).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority using an authorization code previously received.
+        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
+        /// </summary>
+        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
+        /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
+        /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
+            Uri redirectUri, IClientAssertionCertificate clientCertificate)
+        {
+            return await AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri,
+                new ClientKey(clientCertificate, Authenticator), null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority using an authorization code previously received.
+        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="AuthenticationContext.AcquireTokenSilentAsync(string, string, UserIdentifier)"/>.
+        /// </summary>
+        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
+        /// <param name="redirectUri">The redirect address used for obtaining authorization code.</param>
+        /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token. It can be null if provided earlier to acquire authorizationCode.</param>
+        /// <returns>It contains Access Token, its expiration time, user information.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode,
+            Uri redirectUri, IClientAssertionCertificate clientCertificate, string resource)
+        {
+            return await AcquireTokenByAuthorizationCodeCommonAsync(authorizationCode, redirectUri,
+                new ClientKey(clientCertificate, Authenticator), resource).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires an access token from the authority on behalf of a user. It requires using a user token previously received.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientCredential">The client credential to use for token acquisition.</param>
+        /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
+        /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientCredential clientCredential,
+            UserAssertion userAssertion)
+        {
+            return await AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientCredential), userAssertion)
+                .ConfigureAwait(false);
+        }
+
+
+        /// <summary>
+        /// Acquires an access token from the authority on behalf of a user. It requires using a user token previously received.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
+        /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
+        /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource,
+            IClientAssertionCertificate clientCertificate, UserAssertion userAssertion)
+        {
+            return await AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientCertificate, Authenticator),
+                    userAssertion).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires an access token from the authority on behalf of a user. It requires using a user token previously received.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
+        /// <param name="userAssertion">The user assertion (token) to use for token acquisition.</param>
+        /// <returns>It contains Access Token and the Access Token's expiration time.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientAssertion clientAssertion,
+            UserAssertion userAssertion)
+        {
+            return await AcquireTokenOnBehalfCommonAsync(resource, new ClientKey(clientAssertion), userAssertion)
+                .ConfigureAwait(false);
+        }
+
+
+        /// <summary>
+        /// Acquires security token from the authority.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="userAssertion">The assertion to use for token acquisition.</param>
+        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, string clientId,
+            UserAssertion userAssertion)
+        {
+            return await AcquireTokenCommonAsync(resource, clientId, userAssertion).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientCertificate">The client certificate to use for token acquisition.</param>
+        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource,
+            IClientAssertionCertificate clientCertificate)
+        {
+            return await AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCertificate, Authenticator))
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientAssertion">The client assertion to use for token acquisition.</param>
+        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")] 
+#endif
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientAssertion clientAssertion)
+        {
+            return await AcquireTokenForClientCommonAsync(resource, new ClientKey(clientAssertion))
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires security token from the authority.
+        /// </summary>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="clientCredential">The client credential to use for token acquisition.</param>
+        /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
+        public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientCredential clientCredential)
+        {
+            return await AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCredential))
+                .ConfigureAwait(false);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }
