@@ -299,15 +299,22 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
-                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            await context.TokenCache.StoreToCache(new AuthenticationResultEx
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
                 Result = new AuthenticationResult("Bearer", "existing-access-token", DateTimeOffset.UtcNow)
-            };
+                {
+                    UserInfo =
+                        new UserInfo()
+                        {
+                            DisplayableId = TestConstants.DefaultDisplayableId,
+                            UniqueId = TestConstants.DefaultUniqueId
+                        }
+                },
+            },
+            TestConstants.DefaultAuthorityCommonTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+            new CallState(new Guid()));
 
             // Call acquire token
             AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
@@ -320,7 +327,18 @@ namespace Test.ADAL.NET.Integration
             Assert.AreEqual(1, context.TokenCache.Count);
 
             // Cache entry updated with new access token
-            Assert.AreEqual("some-access-token", context.TokenCache.tokenCacheDictionary[key].Result.AccessToken);
+            var entry = await context.TokenCache.LoadFromCache(new CacheQueryData
+            {
+                Authority = TestConstants.DefaultAuthorityCommonTenant,
+                Resource = TestConstants.DefaultResource,
+                ClientId = TestConstants.DefaultClientId,
+                SubjectType = TokenSubjectType.User,
+                UniqueId = TestConstants.DefaultUniqueId,
+                DisplayableId = TestConstants.DefaultDisplayableId
+            },
+            new CallState(new Guid()));
+            Assert.AreEqual("some-access-token", entry.Result.AccessToken);
+
             Assert.IsNotNull(result.UserInfo);
             Assert.AreEqual(1, context.TokenCache.Count);
 

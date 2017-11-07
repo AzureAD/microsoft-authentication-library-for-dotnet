@@ -133,15 +133,22 @@ namespace Test.ADAL.NET.Integration
 
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            await context.TokenCache.StoreToCache(new AuthenticationResultEx
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
                 Result = new AuthenticationResult("Bearer", "existing-access-token", DateTimeOffset.UtcNow)
-            };
+                {
+                    UserInfo =
+                        new UserInfo()
+                        {
+                            DisplayableId = TestConstants.DefaultDisplayableId,
+                            UniqueId = TestConstants.DefaultUniqueId
+                        }
+                },
+            },
+            TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+            new CallState(new Guid()));
 
             AuthenticationResult result =
                 await
@@ -175,15 +182,22 @@ namespace Test.ADAL.NET.Integration
 
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            await context.TokenCache.StoreToCache(new AuthenticationResultEx
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
                 Result = new AuthenticationResult("Bearer", "existing-access-token", DateTimeOffset.UtcNow)
-            };
+                {
+                    UserInfo =
+                        new UserInfo()
+                        {
+                            DisplayableId = TestConstants.DefaultDisplayableId,
+                            UniqueId = TestConstants.DefaultUniqueId
+                        }
+                },
+            },
+            TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+            new CallState(new Guid()));
 
             AuthenticationResult result =
                 await
@@ -218,16 +232,23 @@ namespace Test.ADAL.NET.Integration
 
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            await context.TokenCache.StoreToCache(new AuthenticationResultEx
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
                 Result = new AuthenticationResult("Bearer", "existing-access-token",
                     DateTimeOffset.UtcNow + TimeSpan.FromMinutes(100))
-            };
+                {
+                    UserInfo =
+                        new UserInfo()
+                        {
+                            DisplayableId = TestConstants.DefaultDisplayableId,
+                            UniqueId = TestConstants.DefaultUniqueId
+                        }
+                },
+            },
+            TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+            new CallState(new Guid()));
 
             AuthenticationResult result =
                 await
@@ -297,15 +318,22 @@ namespace Test.ADAL.NET.Integration
 
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            await context.TokenCache.StoreToCache(new AuthenticationResultEx
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
                 Result = new AuthenticationResult("Bearer", "existing-access-token", DateTimeOffset.UtcNow)
-            };
+                {
+                    UserInfo =
+                        new UserInfo()
+                        {
+                            DisplayableId = TestConstants.DefaultDisplayableId,
+                            UniqueId = TestConstants.DefaultUniqueId
+                        }
+                },
+            },
+            TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+            new CallState(new Guid()));
 
             AuthenticationResult result =
                 await
