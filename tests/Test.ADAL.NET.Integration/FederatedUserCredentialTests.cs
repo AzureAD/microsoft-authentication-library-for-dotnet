@@ -54,6 +54,11 @@ namespace Test.ADAL.NET.Integration
         public void Initialize()
         {
             HttpMessageHandlerFactory.ClearMockHandlers();
+            ResetInstanceDiscovery();
+        }
+
+        public void ResetInstanceDiscovery()
+        {
             InstanceDiscovery.InstanceCache.Clear();
             HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
         }
@@ -289,16 +294,6 @@ namespace Test.ADAL.NET.Integration
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             await context.Authenticator.UpdateFromTemplateAsync(null);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                PostData = new Dictionary<string, string>()
-                {
-                    {"grant_type", "refresh_token"}
-                }
-            });
-
             await context.TokenCache.StoreToCache(new AuthenticationResultEx
             {
                 RefreshToken = "some-rt",
@@ -315,6 +310,17 @@ namespace Test.ADAL.NET.Integration
             },
             TestConstants.DefaultAuthorityCommonTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
             new CallState(new Guid()));
+            ResetInstanceDiscovery();
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                PostData = new Dictionary<string, string>()
+                {
+                    {"grant_type", "refresh_token"}
+                }
+            });
 
             // Call acquire token
             AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,

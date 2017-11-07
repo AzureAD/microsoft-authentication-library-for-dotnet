@@ -50,6 +50,11 @@ namespace Test.ADAL.NET.Integration
         public void Initialize()
         {
             HttpMessageHandlerFactory.ClearMockHandlers();
+            ResetInstanceDiscovery();
+        }
+
+        public void ResetInstanceDiscovery()
+        {
             InstanceDiscovery.InstanceCache.Clear();
             HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
         }
@@ -121,16 +126,6 @@ namespace Test.ADAL.NET.Integration
             MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultRedirectUri + "?code=some-code"));
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                PostData = new Dictionary<string, string>()
-                {
-                    {"grant_type", "refresh_token"}
-                }
-            });
-
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
             await context.TokenCache.StoreToCache(new AuthenticationResultEx
@@ -149,6 +144,17 @@ namespace Test.ADAL.NET.Integration
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
             new CallState(new Guid()));
+            ResetInstanceDiscovery();
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                PostData = new Dictionary<string, string>()
+                {
+                    {"grant_type", "refresh_token"}
+                }
+            });
 
             AuthenticationResult result =
                 await
@@ -170,16 +176,6 @@ namespace Test.ADAL.NET.Integration
             MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultRedirectUri + "?code=some-code"));
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                PostData = new Dictionary<string, string>()
-                {
-                    {"grant_type", "authorization_code"}
-                }
-            });
-
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
             await context.TokenCache.StoreToCache(new AuthenticationResultEx
@@ -198,6 +194,17 @@ namespace Test.ADAL.NET.Integration
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
             new CallState(new Guid()));
+            ResetInstanceDiscovery();
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                PostData = new Dictionary<string, string>()
+                {
+                    {"grant_type", "authorization_code"}
+                }
+            });
 
             AuthenticationResult result =
                 await
@@ -220,16 +227,6 @@ namespace Test.ADAL.NET.Integration
                 // validate that authorizationUri passed to WebUi contains prompt=select_account query parameter
                 new Dictionary<string, string> { { "prompt", "select_account" } });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                PostData = new Dictionary<string, string>
-                {
-                    {"grant_type", "authorization_code"}
-                }
-            });
-
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
             await context.TokenCache.StoreToCache(new AuthenticationResultEx
@@ -249,6 +246,17 @@ namespace Test.ADAL.NET.Integration
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
             new CallState(new Guid()));
+            ResetInstanceDiscovery();
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                PostData = new Dictionary<string, string>
+                {
+                    {"grant_type", "authorization_code"}
+                }
+            });
 
             AuthenticationResult result =
                 await
@@ -306,16 +314,6 @@ namespace Test.ADAL.NET.Integration
                 // validate that authorizationUri passed to WebUi contains prompt=refresh_session query parameter
                 new Dictionary<string, string> { { "prompt", "refresh_session" } });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                PostData = new Dictionary<string, string>()
-                {
-                    {"grant_type", "authorization_code"}
-                }
-            });
-
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
             await context.TokenCache.StoreToCache(new AuthenticationResultEx
@@ -334,6 +332,17 @@ namespace Test.ADAL.NET.Integration
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
             new CallState(new Guid()));
+            ResetInstanceDiscovery();
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                PostData = new Dictionary<string, string>()
+                {
+                    {"grant_type", "authorization_code"}
+                }
+            });
 
             AuthenticationResult result =
                 await

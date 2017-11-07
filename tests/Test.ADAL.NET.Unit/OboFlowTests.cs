@@ -61,6 +61,11 @@ namespace Test.ADAL.NET.Unit
         public void TestInitialize()
         {
             HttpMessageHandlerFactory.ClearMockHandlers();
+            ResetInstanceDiscovery();
+        }
+
+        public void ResetInstanceDiscovery()
+        {
             InstanceDiscovery.InstanceCache.Clear();
             HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
         }
@@ -92,6 +97,7 @@ namespace Test.ADAL.NET.Unit
                 TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 new CallState(new Guid()));
             }
+            ResetInstanceDiscovery();
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
                 TestConstants.DefaultClientSecret);
@@ -152,6 +158,7 @@ namespace Test.ADAL.NET.Unit
                 TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 new CallState(new Guid()));
             }
+            ResetInstanceDiscovery();
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
                 TestConstants.DefaultClientSecret);
@@ -335,6 +342,7 @@ namespace Test.ADAL.NET.Unit
                 TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 new CallState(new Guid()));
             }
+            ResetInstanceDiscovery();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
@@ -448,6 +456,7 @@ namespace Test.ADAL.NET.Unit
                 TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 new CallState(new Guid()));
             }
+            ResetInstanceDiscovery();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
@@ -502,6 +511,7 @@ namespace Test.ADAL.NET.Unit
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
             new CallState(new Guid()));
+            ResetInstanceDiscovery();
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
                 TestConstants.DefaultClientSecret);
@@ -558,6 +568,7 @@ namespace Test.ADAL.NET.Unit
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
             new CallState(new Guid()));
+            ResetInstanceDiscovery();
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
                 TestConstants.DefaultClientSecret);
@@ -733,6 +744,7 @@ namespace Test.ADAL.NET.Unit
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
             new CallState(new Guid()));
+            ResetInstanceDiscovery();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
@@ -843,6 +855,7 @@ namespace Test.ADAL.NET.Unit
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
             new CallState(new Guid()));
+            ResetInstanceDiscovery();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {

@@ -50,6 +50,11 @@ namespace Test.ADAL.NET.Integration
         public void Initialize()
         {
             HttpMessageHandlerFactory.ClearMockHandlers();
+            ResetInstanceDiscovery();
+        }
+
+        public void ResetInstanceDiscovery()
+        {
             InstanceDiscovery.InstanceCache.Clear();
             HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
         }
@@ -211,17 +216,6 @@ namespace Test.ADAL.NET.Integration
         [Description("Test case with expired access token and valid refresh token in cache. This should result in refresh token being used to get new AT instead of user creds")]
         public async Task AcquireTokenWithExpiredAccessTokenAndValidRefreshToken_GetsATUsingRT()
         {
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                PostData = new Dictionary<string, string>()
-                {
-                    {"client_id", TestConstants.DefaultClientId},
-                    {"grant_type", "refresh_token"}
-                }
-            });
-
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
             await context.TokenCache.StoreToCache(new AuthenticationResultEx
@@ -240,6 +234,18 @@ namespace Test.ADAL.NET.Integration
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
             new CallState(new Guid()));
+            ResetInstanceDiscovery();
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                PostData = new Dictionary<string, string>()
+                {
+                    {"client_id", TestConstants.DefaultClientId},
+                    {"grant_type", "refresh_token"}
+                }
+            });
 
             var result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
                                                          new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword));
