@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
