@@ -45,4 +45,4 @@ using System.Runtime.InteropServices;
 
 // Allow this assembly to be serviced when run on desktop CLR
 [assembly: AssemblyMetadata("Serviceable", "True")]
-[assembly: AssemblyFileVersion("3.17.2.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
