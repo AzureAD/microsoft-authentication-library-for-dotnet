@@ -87,13 +87,14 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("InstanceDiscoveryTests")]
         public async Task TestInstanceDiscovery_WhenAuthorityIsValidButNoMetadataIsReturned_ShouldCacheTheProvidedAuthority()
         {
+            string host = "login.windows.net";  // A whitelisted host
+            CallState callState = new CallState(Guid.NewGuid());
             for (int i = 0; i < 2; i++) // Prepare 2 mock responses
             {
-                HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler("https://login.windows.net/common/discovery/instance"));
+                HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(
+                    $"https://{host}/common/discovery/instance",
+                    @"{""tenant_discovery_endpoint"":""https://login.microsoftonline.com/tenant/.well-known/openid-configuration""}"));
             }
-
-            CallState callState = new CallState(Guid.NewGuid());
-            string host = "login.windows.net";
 
             // ADAL still behaves correctly using developer provided authority
             var entry = await InstanceDiscovery.GetMetadataEntry(new Uri($"https://{host}/tenant"), true, callState).ConfigureAwait(false);

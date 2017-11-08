@@ -50,6 +50,11 @@ namespace Test.ADAL.NET.Integration
         public void Initialize()
         {
             HttpMessageHandlerFactory.ClearMockHandlers();
+            ResetInstanceDiscovery();
+        }
+
+        public void ResetInstanceDiscovery()
+        {
             InstanceDiscovery.InstanceCache.Clear();
             HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
         }
@@ -211,6 +216,26 @@ namespace Test.ADAL.NET.Integration
         [Description("Test case with expired access token and valid refresh token in cache. This should result in refresh token being used to get new AT instead of user creds")]
         public async Task AcquireTokenWithExpiredAccessTokenAndValidRefreshToken_GetsATUsingRT()
         {
+            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
+
+            await context.TokenCache.StoreToCache(new AuthenticationResultEx
+            {
+                RefreshToken = "some-rt",
+                ResourceInResponse = TestConstants.DefaultResource,
+                Result = new AuthenticationResult("Bearer", "existing-access-token", DateTimeOffset.UtcNow)
+                {
+                    UserInfo =
+                        new UserInfo()
+                        {
+                            DisplayableId = TestConstants.DefaultDisplayableId,
+                            UniqueId = TestConstants.DefaultUniqueId
+                        }
+                },
+            },
+            TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+            new CallState(new Guid()));
+            ResetInstanceDiscovery();
+
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
                 Method = HttpMethod.Post,
@@ -222,19 +247,6 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
-
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
-            {
-                RefreshToken = "some-rt",
-                ResourceInResponse = TestConstants.DefaultResource,
-                Result = new AuthenticationResult("Bearer", "existing-access-token",
-                    DateTimeOffset.UtcNow)
-            };
-
             var result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
                                                          new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword));
 
@@ -244,7 +256,17 @@ namespace Test.ADAL.NET.Integration
             Assert.IsNotNull(result.UserInfo);
 
             // Cache entry updated with new access token
-            Assert.AreEqual("some-access-token", context.TokenCache.tokenCacheDictionary[key].Result.AccessToken);
+            var entry = await context.TokenCache.LoadFromCache(new CacheQueryData
+            {
+                Authority = TestConstants.DefaultAuthorityHomeTenant,
+                Resource = TestConstants.DefaultResource,
+                ClientId = TestConstants.DefaultClientId,
+                SubjectType = TokenSubjectType.User,
+                UniqueId = TestConstants.DefaultUniqueId,
+                DisplayableId = TestConstants.DefaultDisplayableId
+            },
+            new CallState(new Guid()));
+            Assert.AreEqual("some-access-token", entry.Result.AccessToken);
 
             // There should be one cached entry.
             Assert.AreEqual(1, context.TokenCache.Count);

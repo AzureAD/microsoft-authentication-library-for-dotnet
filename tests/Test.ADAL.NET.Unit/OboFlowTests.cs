@@ -61,6 +61,11 @@ namespace Test.ADAL.NET.Unit
         public void TestInitialize()
         {
             HttpMessageHandlerFactory.ClearMockHandlers();
+            ResetInstanceDiscovery();
+        }
+
+        public void ResetInstanceDiscovery()
+        {
             InstanceDiscovery.InstanceCache.Clear();
             HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
         }
@@ -74,11 +79,8 @@ namespace Test.ADAL.NET.Unit
 
             foreach (var cachenoise in _cacheNoise)
             {
-                TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                    TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                    cachenoise + TestConstants.DefaultUniqueId, cachenoise + TestConstants.DefaultDisplayableId);
                 //cache entry has no user assertion hash
-                context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+                await context.TokenCache.StoreToCache(new AuthenticationResultEx
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
@@ -91,8 +93,11 @@ namespace Test.ADAL.NET.Unit
                                 UniqueId = cachenoise + TestConstants.DefaultUniqueId
                             }
                     },
-                };
+                },
+                TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+                new CallState(new Guid()));
             }
+            ResetInstanceDiscovery();
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
                 TestConstants.DefaultClientSecret);
@@ -135,11 +140,8 @@ namespace Test.ADAL.NET.Unit
 
             foreach (var cachenoise in _cacheNoise)
             {
-                TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                    TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                    cachenoise + TestConstants.DefaultUniqueId, cachenoise + TestConstants.DefaultDisplayableId);
                 //cache entry has no user assertion hash
-                context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+                await context.TokenCache.StoreToCache(new AuthenticationResultEx
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
@@ -152,8 +154,11 @@ namespace Test.ADAL.NET.Unit
                                 UniqueId = cachenoise + TestConstants.DefaultUniqueId
                             }
                     },
-                };
+                },
+                TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+                new CallState(new Guid()));
             }
+            ResetInstanceDiscovery();
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
                 TestConstants.DefaultClientSecret);
@@ -318,10 +323,7 @@ namespace Test.ADAL.NET.Unit
 
             foreach (var cachenoise in _cacheNoise)
             {
-                TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                    TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                    cachenoise + TestConstants.DefaultUniqueId, cachenoise + TestConstants.DefaultDisplayableId);
-                context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+                await context.TokenCache.StoreToCache(new AuthenticationResultEx
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
@@ -336,8 +338,11 @@ namespace Test.ADAL.NET.Unit
                                 }
                         },
                     UserAssertionHash = CryptographyHelper.CreateSha256Hash(cachenoise + accessToken)
-                };
+                },
+                TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+                new CallState(new Guid()));
             }
+            ResetInstanceDiscovery();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
@@ -432,11 +437,7 @@ namespace Test.ADAL.NET.Unit
             string tokenInCache = "obo-access-token";
             foreach (var cachenoise in _cacheNoise)
             {
-                TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                    TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                    cachenoise + TestConstants.DefaultUniqueId, cachenoise + TestConstants.DefaultDisplayableId);
-
-                context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+                await context.TokenCache.StoreToCache(new AuthenticationResultEx
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
@@ -451,8 +452,11 @@ namespace Test.ADAL.NET.Unit
                                 }
                         },
                     UserAssertionHash = CryptographyHelper.CreateSha256Hash(cachenoise + accessToken)
-                };
+                },
+                TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+                new CallState(new Guid()));
             }
+            ResetInstanceDiscovery();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
@@ -490,11 +494,7 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
-            //cache entry has no user assertion hash
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            await context.TokenCache.StoreToCache(new AuthenticationResultEx
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
@@ -507,7 +507,11 @@ namespace Test.ADAL.NET.Unit
                             UniqueId = TestConstants.DefaultUniqueId
                         }
                 },
-            };
+                //cache entry has no user assertion hash
+            },
+            TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+            new CallState(new Guid()));
+            ResetInstanceDiscovery();
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
                 TestConstants.DefaultClientSecret);
@@ -547,11 +551,7 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
-            //cache entry has no user assertion hash
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            await context.TokenCache.StoreToCache(new AuthenticationResultEx
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
@@ -564,7 +564,11 @@ namespace Test.ADAL.NET.Unit
                             UniqueId = TestConstants.DefaultUniqueId
                         }
                 },
-            };
+                //cache entry has no user assertion hash
+            },
+            TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+            new CallState(new Guid()));
+            ResetInstanceDiscovery();
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
                 TestConstants.DefaultClientSecret);
@@ -721,13 +725,8 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
-
-            //cache entry has user assertion hash
             string tokenInCache = "obo-access-token";
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            await context.TokenCache.StoreToCache(new AuthenticationResultEx
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
@@ -742,7 +741,10 @@ namespace Test.ADAL.NET.Unit
                             }
                     },
                 UserAssertionHash = CryptographyHelper.CreateSha256Hash(accessToken + "different")
-            };
+            },
+            TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+            new CallState(new Guid()));
+            ResetInstanceDiscovery();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
@@ -834,13 +836,8 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
-
-            //cache entry has user assertion hash
             string tokenInCache = "obo-access-token";
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            await context.TokenCache.StoreToCache(new AuthenticationResultEx
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
@@ -855,7 +852,10 @@ namespace Test.ADAL.NET.Unit
                             }
                     },
                 UserAssertionHash = CryptographyHelper.CreateSha256Hash(accessToken + "different")
-            };
+            },
+            TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
+            new CallState(new Guid()));
+            ResetInstanceDiscovery();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
             {
