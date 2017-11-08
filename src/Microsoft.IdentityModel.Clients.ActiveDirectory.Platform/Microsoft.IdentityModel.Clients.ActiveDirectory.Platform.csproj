@@ -29,7 +29,7 @@
 
 </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
-    <DefineConstants>$(DefineConstants);WINRT</DefineConstants>
+    <DefineConstants>$(DefineConstants);WINDOWS_APP</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
     <DefineConstants>$(DefineConstants);ANDROID</DefineConstants>
@@ -46,31 +46,21 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
-    <None Include="Properties\**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
+    <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.6" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System" />
-    <Compile Include="net45\**\*.cs" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
-    <Compile Include="winrt\**\*.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3' ">
-    <Compile Include="netstandard1.3\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
     <Reference Include="System" />
-    <Reference Include="System.Runtime" />
     <Reference Include="Xamarin.iOS" />
-    <Compile Include="iOS\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid7' ">
     <Reference Include="Mono.Android" />
     <Reference Include="System" />
-    <Compile Include="android\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.IdentityModel.Clients.ActiveDirectory\Microsoft.IdentityModel.Clients.ActiveDirectory.csproj" />
