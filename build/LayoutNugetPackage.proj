@@ -115,13 +115,13 @@
 	
 	<!-- Apply the same for Platform specific dll -->
     
-    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\MonoAndroid7\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform\bin\$(Configuration)\MonoAndroid7\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
       <TargetFolder>MonoAndroid7</TargetFolder>
     </SourceFile>
-    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\MonoAndroid7\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb">
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform\bin\$(Configuration)\MonoAndroid7\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
       <TargetFolder>MonoAndroid7</TargetFolder>
     </SourceFile>
-    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\MonoAndroid7\Microsoft.IdentityModel.Clients.ActiveDirectory.xml"
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform\bin\$(Configuration)\MonoAndroid7\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
                 Condition="$(CopyXmlDocFiles)=='true'">
       <TargetFolder>MonoAndroid7</TargetFolder>
     </SourceFile>
