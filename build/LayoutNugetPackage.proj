@@ -136,6 +136,17 @@
                 Condition="$(CopyXmlDocFiles)=='true'">
       <TargetFolder>netstandard1.3</TargetFolder>
     </SourceFile>
+	
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform\bin\$(Configuration)\netstandard1.1\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+      <TargetFolder>netstandard1.1</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform\bin\$(Configuration)\netstandard1.1\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb">
+      <TargetFolder>netstandard1.1</TargetFolder>
+    </SourceFile>
+    <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform\bin\$(Configuration)\netstandard1.1\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml"
+                Condition="$(CopyXmlDocFiles)=='true'">
+      <TargetFolder>netstandard1.1</TargetFolder>
+    </SourceFile>
 
     <SourceFile Include="..\src\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform\bin\$(Configuration)\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
       <TargetFolder>net45</TargetFolder>
