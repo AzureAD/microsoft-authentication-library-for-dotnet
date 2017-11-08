@@ -27,7 +27,7 @@
     <Configuration Condition="$(Configuration)==''" >Debug</Configuration>
     
     <NuspecFilePath Condition="$(NuspecFilePath)==''">$(MSBuildThisFileDirectory)Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec</NuspecFilePath>
-    <AdalBinaryFolder Condition="$(AdalBinaryFolder)==''">..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\$(Configuration)\netstandard1.1\</AdalBinaryFolder>
+    <AdalBinaryFolder Condition="$(AdalBinaryFolder)==''">..\src\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform\bin\$(Configuration)\netstandard1.1\</AdalBinaryFolder>
 
     <!-- Calculate the root folder the files will be laid out in -->
     <!-- If the supplied root folder is a relative path, treat it as relative to the repo root directory.
@@ -204,6 +204,9 @@
     <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" />
     <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" />
     <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.xml" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" Condition="$(CopyXmlDocFiles)=='true'" />
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" />
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" />
+    <Copy SourceFiles="$(AdalBinaryFolder)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml" DestinationFolder="$(_PackToFolder)\lib\portable-net45+win" Condition="$(CopyXmlDocFiles)=='true'" />
 
 
     <!-- Copy the platform-specifc ADAL.Net binaries to the appropriate target platform folder -->
