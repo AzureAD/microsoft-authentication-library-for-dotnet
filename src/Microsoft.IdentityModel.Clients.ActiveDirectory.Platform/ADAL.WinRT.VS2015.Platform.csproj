@@ -106,6 +106,9 @@
   <ItemGroup>
     <Compile Include="*.cs" />
     <Compile Include="Properties\**\*.cs" />
+	<Compile Include="..\Microsoft.IdentityModel.Clients.ActiveDirectory\Properties\AssemblyInfo.cs">
+      <Link>AssemblyInfo.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.IdentityModel.Clients.ActiveDirectory\ADAL.WinRT.VS2015.csproj">
