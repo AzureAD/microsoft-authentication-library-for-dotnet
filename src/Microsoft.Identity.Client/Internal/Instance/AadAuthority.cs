@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.OAuth2;
@@ -39,11 +38,12 @@ namespace Microsoft.Identity.Client.Internal.Instance
         private const string AadInstanceDiscoveryEndpoint = "https://login.microsoftonline.com/common/discovery/instance";
         private static readonly HashSet<string> TrustedHostList = new HashSet<string>()
         {
-            "login.windows.net",
-            "login.chinacloudapi.cn",
-            "login.cloudgovapi.us",
-            "login.microsoftonline.com",
-            "login.microsoftonline.de"
+            "login.windows.net", // Microsoft Azure Worldwide
+            "login.chinacloudapi.cn", // Microsoft Azure China
+            "login.cloudgovapi.us", // Microsoft Azure US Government
+            "login.microsoftonline.us", // Microsoft Azure US Government
+            "login.microsoftonline.com", // Microsoft Azure Worldwide
+            "login.microsoftonline.de" // Microsoft Azure Blackforest
         };
 
         public AadAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
