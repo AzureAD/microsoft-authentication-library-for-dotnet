@@ -63,11 +63,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             TokenCache = authenticationRequestParameters.TokenCache;
             
-            authenticationRequestParameters.RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
+            // Log contains Pii 
+            authenticationRequestParameters.RequestContext.Logger.InfoPii(string.Format(CultureInfo.InvariantCulture,
                 "=== Token Acquisition ({4}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCache Provided: {3}",
                 authenticationRequestParameters?.Authority?.CanonicalAuthority,
                 authenticationRequestParameters.Scope.AsSingleString(),
                 authenticationRequestParameters.ClientId,
+                TokenCache != null, this.GetType().Name));
+
+            // Log does not contain Pii
+            authenticationRequestParameters.RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
+                "=== Token Acquisition ({1}) started:\n\tCache Provided: {0}",
                 TokenCache != null, this.GetType().Name));
 
             AuthenticationRequestParameters = authenticationRequestParameters;
@@ -187,6 +193,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         fromServer.UniqueIdentifier, fromServer.UniqueTenantIdentifier,
                         AuthenticationRequestParameters.ClientInfo.UniqueIdentifier,
                         AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier));
+
+                    AuthenticationRequestParameters.RequestContext.Logger.Error("Returned user identifiers do not match the sent user" +
+                                                                                "identifier");
+
                     throw new MsalServiceException("user_mismatch", "Returned user identifier does not match the sent user identifier");
                 }
             }
