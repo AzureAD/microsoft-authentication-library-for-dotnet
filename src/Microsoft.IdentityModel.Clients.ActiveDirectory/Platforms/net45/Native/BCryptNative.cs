@@ -37,9 +37,10 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Native;
 using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Native
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Native
 {
    //
     // Public facing enumerations

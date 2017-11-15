@@ -29,8 +29,9 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
     /// <summary>
     /// The browser dialog used for user authentication

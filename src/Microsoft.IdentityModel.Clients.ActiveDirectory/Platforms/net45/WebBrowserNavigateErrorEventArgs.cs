@@ -27,7 +27,7 @@
 
 using System.ComponentModel;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
     /// <summary>
     /// Represents the event agruments received when web browser navigation fails.

@@ -33,8 +33,9 @@ using System.Drawing;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
     /// <summary>
     /// Base class for web form
