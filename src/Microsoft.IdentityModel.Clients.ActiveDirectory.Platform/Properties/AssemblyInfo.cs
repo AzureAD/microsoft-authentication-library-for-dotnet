@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,26 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
+using System.Resources;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyProduct("Active Directory Authentication Library")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCulture("")]
-[assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
-[assembly: AssemblyTrademark("")]
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("Microsoft.IdentityModel.Clients.ActiveDirectory.Platform")]
+
+// Allow this assembly to be serviced when run on desktop CLR
 [assembly: AssemblyMetadata("Serviceable", "True")]
-
-[assembly: AssemblyFileVersion("3.17.3.0")]
-
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
-[assembly: ComVisible(false)]
-[assembly: CLSCompliant(true)]
-// The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("ff47962a-d498-4c63-b7e9-4db3653ad7db")]

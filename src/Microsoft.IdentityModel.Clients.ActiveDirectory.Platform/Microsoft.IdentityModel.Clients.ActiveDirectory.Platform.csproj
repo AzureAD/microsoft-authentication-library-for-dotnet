@@ -1,0 +1,78 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Exclude the analysis of this framework type: workaround for https://jira.sonarsource.com/browse/SONARMSBRU-317 -->
+  <!-- NB this property has no effect on the assemblies that are built - it is only to tell the VSTS SonarQube analysis tasks
+       which assembly to analyse. -->
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net45' ">
+    <SonarQubeExclude>true</SonarQubeExclude>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;MonoAndroid7;Xamarin.iOS10</TargetFrameworks>        
+    <Product>Microsoft.IdentityModel.Clients.ActiveDirectory.Platform ($(TargetFramework))</Product>
+    <GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+	<DelaySign>true</DelaySign>
+    <!-- Workaround until Xamarin supports PPDB -->
+    <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
+    <DebugType>full</DebugType>
+    <RootNamespace>Microsoft.IdentityModel.Clients.ActiveDirectory</RootNamespace>
+	<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+
+</PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
+    <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
+    <DefineConstants>$(DefineConstants);WINDOWS_APP</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
+    <DefineConstants>$(DefineConstants);ANDROID</DefineConstants>
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS10'">
+    <DefineConstants>$(DefineConstants);iOS</DefineConstants>
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
+    <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
+    <Compile Include="..\Microsoft.IdentityModel.Clients.ActiveDirectory\Properties\AssemblyInfo.cs">
+      <Link>AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="TypeForwardToDeclarations.cs"/>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.6" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
+    <Reference Include="System" />
+    <Reference Include="Xamarin.iOS" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid7' ">
+    <Reference Include="Mono.Android" />
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.IdentityModel.Clients.ActiveDirectory\Microsoft.IdentityModel.Clients.ActiveDirectory.csproj" />
+  </ItemGroup>
+  
+  <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
+  
+</Project>

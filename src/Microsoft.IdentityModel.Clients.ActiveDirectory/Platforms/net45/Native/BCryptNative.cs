@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Native
     /// </summary>
     [SuppressMessage("Microsoft.Design", "CA1027:MarkEnumsWithFlags", Justification = "Public use of the enum is not as flags")]
     [SuppressMessage("Microsoft.Design", "CA1008:EnumsShouldHaveZeroValue", Justification = "The native BCRYPT_PAD_NONE value is 1, not 0, and this is for interop.")]
-    internal enum AsymmetricPaddingMode
+    public enum AsymmetricPaddingMode
     {
         /// <summary>
         ///     No padding

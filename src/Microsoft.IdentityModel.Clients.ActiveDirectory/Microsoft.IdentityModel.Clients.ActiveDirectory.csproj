@@ -31,7 +31,7 @@
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
-    <DefineConstants>$(DefineConstants);WINRT</DefineConstants>
+    <DefineConstants>$(DefineConstants);WINDOWS_APP</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
     <DefineConstants>$(DefineConstants);ANDROID</DefineConstants>
