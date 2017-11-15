@@ -97,7 +97,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                 Authority.SelfSignedJwtAudience);
                             ClientCredential.Assertion = jwtToken.Sign(ClientCredential.Certificate);
                             ClientCredential.ValidTo = jwtToken.Payload.ValidTo;
-                        } else 
+                        }
+                        else
                         {
                             RequestContext.Logger.Info("Reusing the unexpired Client Assertion...");
                         }
@@ -114,48 +115,49 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public void LogState()
         {
             // Create Pii enabled string builder
-            if (Logger.PiiLoggingEnabled)
-            {
-                StringBuilder builder = new StringBuilder(Environment.NewLine + "=== Request Data ===" +
+            StringBuilder builder = new StringBuilder(Environment.NewLine + "=== Request Data ===" +
                                                           Environment.NewLine +
                                                           "Authority Provided? - " + (Authority != null) +
                                                           Environment.NewLine);
-                builder.AppendLine("Client Id - " + ClientId);
-                builder.AppendLine("Scopes - " + Scope?.AsSingleString());
-                builder.AppendLine("Redirect Uri - " + RedirectUri?.OriginalString);
-                builder.AppendLine("Validate Authority? - " + ValidateAuthority);
-                builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
-                builder.AppendLine("User provided? - " + (User != null));
-                var dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
-                builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
-                dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
-                builder.AppendLine("Slice Parameters Keys(space separated) - " + dict.Keys.AsSingleString());
+            builder.AppendLine("Client Id - " + ClientId);
+            builder.AppendLine("Scopes - " + Scope?.AsSingleString());
+            builder.AppendLine("Redirect Uri - " + RedirectUri?.OriginalString);
+            builder.AppendLine("Validate Authority? - " + ValidateAuthority);
+            builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
+            builder.AppendLine("User provided? - " + (User != null));
+            var dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
+            builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
+            dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
+            builder.AppendLine("Slice Parameters Keys(space separated) - " + dict.Keys.AsSingleString());
 #if DESKTOP || NETSTANDARD1_3
-                builder.AppendLine("Confidential Client? - " + (ClientCredential != null));
-                builder.AppendLine("Client Credential Request? - " + IsClientCredentialRequest);
-                if (IsClientCredentialRequest)
-                {
-                    builder.AppendLine("Client Certificate Provided? - " + (ClientCredential.Certificate != null));
-                }
-#endif
-                RequestContext.Logger.InfoPii(builder.ToString());
-            }
-            // Create no Pii enabled string builder
-            else
+            builder.AppendLine("Confidential Client? - " + (ClientCredential != null));
+            builder.AppendLine("Client Credential Request? - " + IsClientCredentialRequest);
+            if (IsClientCredentialRequest)
             {
-                StringBuilder builder = new StringBuilder(Environment.NewLine + "=== Request Data ===" +
-                                                          Environment.NewLine);
-                builder.AppendLine("Scopes - " + Scope?.AsSingleString());
-                builder.AppendLine("Validate Authority? - " + ValidateAuthority);
-                var dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
-                builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
-                dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
-                builder.AppendLine("Slice Parameters Keys(space separated) - " + dict.Keys.AsSingleString());
-#if DESKTOP || NETSTANDARD1_3
-                builder.AppendLine("Client Credential Request? - " + IsClientCredentialRequest);
-#endif
-                RequestContext.Logger.Info(builder.ToString());
+                builder.AppendLine("Client Certificate Provided? - " + (ClientCredential.Certificate != null));
             }
+#endif
+            RequestContext.Logger.InfoPii(builder.ToString());
+
+            // Create no Pii enabled string builder
+            builder = new StringBuilder(Environment.NewLine + "=== Request Data ===" +
+                                                      Environment.NewLine);
+            builder.AppendLine("Scopes - " + Scope?.AsSingleString());
+            builder.AppendLine("Validate Authority? - " + ValidateAuthority);
+            builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
+            dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
+            builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
+            dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
+            builder.AppendLine("Slice Parameters Keys(space separated) - " + dict.Keys.AsSingleString());
+#if DESKTOP || NETSTANDARD1_3
+            builder.AppendLine("Confidential Client? - " + (ClientCredential != null));
+            builder.AppendLine("Client Credential Request? - " + IsClientCredentialRequest);
+            if (IsClientCredentialRequest)
+            {
+                builder.AppendLine("Client Certificate Provided? - " + (ClientCredential.Certificate != null));
+            }
+#endif
+            RequestContext.Logger.Info(builder.ToString());
         }
     }
 }
