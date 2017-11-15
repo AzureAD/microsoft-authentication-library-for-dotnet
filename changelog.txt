@@ -1,3 +1,7 @@
+Version 3.17.2
+==============
+- Re-enable binary compatibility by re-adding the platform specific assemblies containing public types and adding TypeForwardedTo attributes (#887)
+
 Version 3.17.1
 ==============
 This hotfix release includes the following changes to rollback breaking changes
