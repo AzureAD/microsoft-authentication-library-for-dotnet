@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
 
             return new TokenResponse
             {
-                //Authority = responseDictionary.ContainsKey("authority") ? EncodingHelper.UrlDecode(responseDictionary["authority"]) : null,
+                Authority = responseDictionary.ContainsKey("authority") ? EncodingHelper.UrlDecode(responseDictionary["authority"]) : null,
                 AccessToken = responseDictionary["access_token"],
                 RefreshToken = responseDictionary["refresh_token"],
                 IdTokenString = responseDictionary["id_token"],

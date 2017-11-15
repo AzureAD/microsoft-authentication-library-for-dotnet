@@ -40,6 +40,7 @@ namespace Test.ADAL.NET.Common
         public static readonly string TenantSpecificAuthority = "https://login.microsoftonline.com/SomeTenantId/";
         public static readonly string DefaultAuthorityGuestTenant = "https://login.microsoftonline.com/guest/";
         public static readonly string DefaultAuthorityCommonTenant = "https://login.microsoftonline.com/common/";
+        public static readonly string DefaultAuthorityBlackforestTenant = "https://login.microsoftonline.de/common/";
         public static readonly string DefaultClientId = "client_id";
         public static readonly string DefaultUniqueId = "unique_id";
         public static readonly string DefaultThumbprint = "some_thumbprint";

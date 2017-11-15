@@ -47,7 +47,7 @@ namespace Test.ADAL.NET.Integration
         [TestInitialize]
         public void Initialize()
         {
-            HttpMessageHandlerFactory.ClearMockHandlers();
+            HttpMessageHandlerFactory.InitializeMockProvider();
             InstanceDiscovery.InstanceCache.Clear();
             HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
         }
@@ -84,6 +84,9 @@ namespace Test.ADAL.NET.Integration
             Assert.IsNotNull(ex.InnerException);
             Assert.IsTrue(ex.InnerException is AdalException);
             Assert.AreEqual(((AdalException)ex.InnerException).ErrorCode, "invalid_grant");
+
+            // There should be one cached entry.
+            Assert.AreEqual(1, context.TokenCache.Count);
         }
 
         [TestMethod]
@@ -110,6 +113,9 @@ namespace Test.ADAL.NET.Integration
 
             Assert.IsNotNull(result);
             Assert.AreEqual("existing-access-token", result.AccessToken);
+
+            // There should be one cached entry.
+            Assert.AreEqual(1, context.TokenCache.Count);
         }
 
         [TestMethod]
@@ -146,7 +152,7 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
 

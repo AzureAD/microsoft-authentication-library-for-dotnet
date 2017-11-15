@@ -116,6 +116,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             brokerHelper.PlatformParameters = authorizationParameters;
         }
 
+        private static string ReplaceHost(string original, string newHost)
+        {
+            return new UriBuilder(original) { Host = newHost }.Uri.ToString();
+        }
+
         protected override async Task PreTokenRequest()
         {
             await base.PreTokenRequest().ConfigureAwait(false);
@@ -123,6 +128,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             // We do not have async interactive API in .NET, so we call this synchronous method instead.
             await this.AcquireAuthorizationAsync().ConfigureAwait(false);
             this.VerifyAuthorizationResult();
+
+            if(!string.IsNullOrEmpty(authorizationResult.CloudInstanceHost))
+            {
+                var updatedAuthority = ReplaceHost(Authenticator.Authority, authorizationResult.CloudInstanceHost);
+
+                await UpdateAuthority(updatedAuthority).ConfigureAwait(false);
+            }
         }
 
         internal async Task AcquireAuthorizationAsync()
@@ -144,9 +156,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             requestParameters[OAuthParameter.RedirectUri] = this.redirectUriRequestParameter;
         }
 
-        protected override void PostTokenRequest(AuthenticationResultEx resultEx)
+        protected override async Task PostTokenRequest(AuthenticationResultEx resultEx)
         {
-            base.PostTokenRequest(resultEx);
+            await base.PostTokenRequest(resultEx).ConfigureAwait(false);
             if ((this.DisplayableId == null && this.UniqueId == null) || this.UserIdentifierType == UserIdentifierType.OptionalDisplayableId)
             {
                 return;

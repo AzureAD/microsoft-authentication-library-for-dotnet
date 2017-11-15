@@ -30,6 +30,9 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.Common.Unit;
+using Test.ADAL.NET.Common;
+using Test.ADAL.NET.Common.Mocks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 
 namespace Test.ADAL.NET.Unit
 {
@@ -37,6 +40,14 @@ namespace Test.ADAL.NET.Unit
     [DeploymentItem("oldcache.serialized")]
     public class TokenCacheUnitTests
     {
+        [TestInitialize]
+        public void Initialize()
+        {
+            HttpMessageHandlerFactory.InitializeMockProvider();
+            InstanceDiscovery.InstanceCache.Clear();
+            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
+        }
+
         [TestMethod]
         [Description("Test to store in default token cache")]
         [TestCategory("AdalDotNetUnit")]

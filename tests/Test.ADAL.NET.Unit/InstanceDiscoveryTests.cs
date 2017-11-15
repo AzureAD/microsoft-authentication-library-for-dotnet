@@ -51,7 +51,7 @@ namespace Test.ADAL.NET.Unit
         [TestInitialize]
         public void TestInitialize()
         {
-            HttpMessageHandlerFactory.ClearMockHandlers();
+            HttpMessageHandlerFactory.InitializeMockProvider();
             InstanceDiscovery.InstanceCache.Clear();
         }
 

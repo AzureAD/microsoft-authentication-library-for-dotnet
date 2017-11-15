@@ -25,15 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
@@ -71,9 +67,9 @@ namespace Test.ADAL.NET.Common.Mocks
             return stream;
         }
 
-        public static HttpMessageHandler CreateInstanceDiscoveryMockHandler(string Url)
+        public static HttpMessageHandler CreateInstanceDiscoveryMockHandler(string url)
         {
-            return CreateInstanceDiscoveryMockHandler(Url,
+            return CreateInstanceDiscoveryMockHandler(url,
                 @"{
                         ""tenant_discovery_endpoint"":""https://login.microsoftonline.com/tenant/.well-known/openid-configuration"",
                         ""api-version"":""1.1"",
@@ -112,9 +108,9 @@ namespace Test.ADAL.NET.Common.Mocks
                 }");
         }
 
-        public static HttpMessageHandler CreateInstanceDiscoveryMockHandler(string Url, string content)
+        public static HttpMessageHandler CreateInstanceDiscoveryMockHandler(string url, string content)
         {
-            return new MockHttpMessageHandler(Url)
+            return new MockHttpMessageHandler(url)
             {
                 //Url = "",
                 Method = HttpMethod.Get,
@@ -140,7 +136,7 @@ namespace Test.ADAL.NET.Common.Mocks
                 extendedExpiresIn = "\"ext_expires_in\":\"7200\",";
             }
 
-            HttpContent content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3600\","+ extendedExpiresIn + "\"resource\":\"resource1\",\"access_token\":\"some-access-token\",\"refresh_token\":\"something-encrypted\",\"id_token\":\"" +
+            HttpContent content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3600\"," + extendedExpiresIn + "\"resource\":\"resource1\",\"access_token\":\"some-access-token\",\"refresh_token\":\"something-encrypted\",\"id_token\":\"" +
                                   CreateIdToken(TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId) +
                                   "\"}");
             responseMessage.Content = content;
@@ -221,7 +217,7 @@ namespace Test.ADAL.NET.Common.Mocks
             if (responseMessage != null)
             {
                 responseMessage.Content = content;
-            }            
+            }
             return responseMessage;
         }
 
@@ -251,8 +247,8 @@ namespace Test.ADAL.NET.Common.Mocks
 
         private static string CreateIdToken(string uniqueId, string displayableId)
         {
-            string header = "{alg: \"none\","+
-                             "typ:\"JWT\""+
+            string header = "{alg: \"none\"," +
+                             "typ:\"JWT\"" +
                              "}";
             string payload = "{\"aud\": \"e854a4a7-6c34-449c-b237-fc7a28093d84\"," +
                         "\"iss\": \"https://login.microsoftonline.com/6c3d51dd-f0e5-4959-b4ea-a80c4e36fe5e/\"," +
@@ -264,7 +260,7 @@ namespace Test.ADAL.NET.Common.Mocks
                         "\"oid\": \"" + uniqueId + "\"," +
                         "\"upn\": \"" + displayableId + "\"," +
                         "\"sub\": \"werwerewrewrew-Qd80ehIEdFus\"," +
-                        "\"tid\": \"" +  TestConstants.SomeTenantId + "\"," +
+                        "\"tid\": \"" + TestConstants.SomeTenantId + "\"," +
                         "\"ver\": \"2.0\"}";
 
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.signature", Base64UrlEncoder.Encode(header), Base64UrlEncoder.Encode(payload));
