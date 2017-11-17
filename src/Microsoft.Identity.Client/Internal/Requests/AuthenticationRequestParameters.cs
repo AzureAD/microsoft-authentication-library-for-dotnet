@@ -127,6 +127,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("User provided? - " + (User != null));
             var dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
+            builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
+            dict = MsalHelpers.ParseKeyValueList(SliceParameters, '&', true, RequestContext);
             builder.AppendLine("Slice Parameters Keys(space separated) - " + dict.Keys.AsSingleString());
 #if DESKTOP || NETSTANDARD1_3
             builder.AppendLine("Confidential Client? - " + (ClientCredential != null));
@@ -146,6 +148,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("User provided? - " + (User != null));
             dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
+            builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
+            dict = MsalHelpers.ParseKeyValueList(SliceParameters, '&', true, RequestContext);
             builder.AppendLine("Slice Parameters Keys(space separated) - " + dict.Keys.AsSingleString());
 #if DESKTOP || NETSTANDARD1_3
             builder.AppendLine("Confidential Client? - " + (ClientCredential != null));
