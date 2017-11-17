@@ -124,6 +124,7 @@ namespace Microsoft.Identity.Client
             catch (Exception ex)
             {
                 RequestContext.Logger.Warning(ex.Message);
+                RequestContext.Logger.WarningPii(ex.Message);
                 // ignore the exception as the result is already set to false;
             }
 

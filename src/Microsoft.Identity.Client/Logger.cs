@@ -204,14 +204,16 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Method for error exception logging
+        /// Removes Pii from exception
         /// </summary>
         internal void Error(Exception ex)
         {
-            Error(ex.ToString());
+            Error(ex.GetPiiScrubbedDetails());
         }
 
         /// <summary>
         /// Method for error exception logging for Pii
+        /// Contains Pii passed from exception
         /// </summary>
         internal void ErrorPii(Exception ex)
         {
